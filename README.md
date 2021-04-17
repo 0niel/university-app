@@ -1,4 +1,4 @@
-# rtu_mirea_app
+# rtu-mirea-app
 
 A new Flutter project.
 
