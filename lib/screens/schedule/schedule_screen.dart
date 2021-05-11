@@ -12,35 +12,41 @@ class ScheduleScreen extends StatelessWidget {
     );
   }
 
-  AppBar buildAppBar() {
-    return AppBar(
-      elevation: 0,
-      centerTitle: false,
-      title: Text('Расписание'),
-      actions: <Widget>[
-        ButtonTheme(
-          padding: new EdgeInsets.all(0.0),
-          child: new ButtonBar(children: <Widget>[
-            TextButton(
-              child: Text(
-                '12 неделя',
-                style: TextStyle(color: Color(0xFFE0E2FF)),
-              ),
-              style: ButtonStyle(
-                shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                  RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+  buildAppBar() {
+    return PreferredSize(
+      preferredSize: Size.fromHeight(80),
+      child: SafeArea(
+        child: AppBar(
+          toolbarHeight: 80,
+          elevation: 0,
+          centerTitle: false,
+          title: Text('Расписание'),
+          actions: <Widget>[
+            ButtonTheme(
+              padding: new EdgeInsets.all(0.0),
+              child: new ButtonBar(children: <Widget>[
+                TextButton(
+                  child: Text(
+                    '12 неделя',
+                    style: TextStyle(color: Color(0xFFE0E2FF)),
                   ),
-                ),
-                minimumSize: MaterialStateProperty.all<Size>(Size(116, 45)),
-                backgroundColor: MaterialStateProperty.all<Color>(
-                    Colors.black.withOpacity(0.1)),
-              ),
-              onPressed: () {},
-            )
-          ]),
+                  style: ButtonStyle(
+                    shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                      RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    minimumSize: MaterialStateProperty.all<Size>(Size(116, 45)),
+                    backgroundColor: MaterialStateProperty.all<Color>(
+                        Colors.black.withOpacity(0.1)),
+                  ),
+                  onPressed: () {},
+                )
+              ]),
+            ),
+          ],
         ),
-      ],
+      ),
     );
   }
 }
