@@ -12,20 +12,25 @@ class ScheduleContainer extends StatelessWidget {
       color: Colors.white,
       child: Padding(
         padding: EdgeInsets.all(kDefaultPadding),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Text(
-              "Сегодня",
-              style: TextStyle(
-                fontSize: 28,
-                color: kTextColor,
-                fontWeight: FontWeight.bold,
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Text(
+                "Сегодня",
+                style: TextStyle(
+                  fontSize: 28,
+                  color: kTextColor,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
-            SizedBox(height: 30),
-            Lessons()
-          ],
+              SizedBox(height: 30),
+              Lessons(),
+              Lessons(),
+              Lessons(),
+              Lessons(),
+            ],
+          ),
         ),
       ),
     );
