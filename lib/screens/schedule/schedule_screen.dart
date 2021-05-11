@@ -1,18 +1,56 @@
+import 'package:assorted_layout_widgets/assorted_layout_widgets.dart';
 import 'package:flutter/material.dart';
 import 'components/body.dart';
 import '../../constants.dart';
 
 class ScheduleScreen extends StatelessWidget {
+  Future<void> _showWeeksDialog(BuildContext context) async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Выберите неделю'),
+          content: SingleChildScrollView(
+            child: ButtonBarSuper(
+              wrapType: WrapType.fit,
+              children: <Widget>[
+                for (int i = 1; i <= 17; i++)
+                  TextButton(
+                    child: new Text(i.toString()),
+                    onPressed: () {},
+                    style: ButtonStyle(
+                      backgroundColor: MaterialStateProperty.all<Color>(
+                        Colors.indigo[50],
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Выбрать'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: buildAppBar(),
+      appBar: buildAppBar(context),
       backgroundColor: kPrimaryColor,
       body: Body(),
     );
   }
 
-  buildAppBar() {
+  buildAppBar(BuildContext context) {
     return PreferredSize(
       preferredSize: Size.fromHeight(80),
       child: SafeArea(
@@ -40,7 +78,9 @@ class ScheduleScreen extends StatelessWidget {
                     backgroundColor: MaterialStateProperty.all<Color>(
                         Colors.black.withOpacity(0.1)),
                   ),
-                  onPressed: () {},
+                  onPressed: () {
+                    _showWeeksDialog(context);
+                  },
                 )
               ]),
             ),
