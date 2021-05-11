@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-class Lessons extends StatelessWidget {
+class LessonsWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(children: [
@@ -35,17 +35,17 @@ class Lessons extends StatelessWidget {
         text: TextSpan(
           children: [
             TextSpan(
-              text: "Практика в А-249\n",
+              text: "Математический анализ\n",
               style: TextStyle(
-                color: Colors.black.withOpacity(0.5),
+                fontWeight: FontWeight.w600,
+                color: Colors.black,
                 fontSize: 18,
               ),
             ),
             TextSpan(
-              text: "Математический анализ",
+              text: "Практика в А-249",
               style: TextStyle(
-                fontWeight: FontWeight.w600,
-                color: Colors.black,
+                color: Colors.black.withOpacity(0.5),
                 height: 1.5,
               ),
             ),
