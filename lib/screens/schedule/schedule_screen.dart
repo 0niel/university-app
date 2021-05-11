@@ -16,20 +16,30 @@ class ScheduleScreen extends StatelessWidget {
     return AppBar(
       elevation: 0,
       centerTitle: false,
-      title: Text('Dashboard'),
+      title: Text('Расписание'),
       actions: <Widget>[
-        TextButton(
-          child: Text(
-            '12 неделя',
-            style: TextStyle(color: Colors.white),
-          ),
-          style: ButtonStyle(
-              backgroundColor:
-                  MaterialStateProperty.all(Colors.black.withOpacity(0.1)),
-              padding:
-                  MaterialStateProperty.all(EdgeInsets.fromLTRB(30, 0, 30, 0))),
-          onPressed: () => {},
-        )
+        ButtonTheme(
+          padding: new EdgeInsets.all(0.0),
+          child: new ButtonBar(children: <Widget>[
+            TextButton(
+              child: Text(
+                '12 неделя',
+                style: TextStyle(color: Color(0xFFE0E2FF)),
+              ),
+              style: ButtonStyle(
+                shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                  RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                minimumSize: MaterialStateProperty.all<Size>(Size(116, 45)),
+                backgroundColor: MaterialStateProperty.all<Color>(
+                    Colors.black.withOpacity(0.1)),
+              ),
+              onPressed: () {},
+            )
+          ]),
+        ),
       ],
     );
   }
