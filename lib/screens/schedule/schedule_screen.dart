@@ -13,6 +13,8 @@ class ScheduleScreen extends StatelessWidget {
           title: Text('Выберите неделю'),
           content: SingleChildScrollView(
             child: ButtonBarSuper(
+              spacing: 3,
+              lineSpacing: 5,
               wrapType: WrapType.fit,
               children: <Widget>[
                 for (int i = 1; i <= 17; i++)
