@@ -7,8 +7,9 @@ class DaySelectorTabBar extends StatelessWidget {
     return Row(
       children: [
         Container(
-          margin: EdgeInsets.symmetric(
-              horizontal: kDefaultPadding, vertical: kDefaultPadding / 2),
+          height: 0,
+          margin:
+              EdgeInsets.symmetric(horizontal: kDefaultPadding, vertical: 0),
           child: RichText(
             textAlign: TextAlign.center,
             text: TextSpan(

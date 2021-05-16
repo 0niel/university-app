@@ -12,15 +12,9 @@ class SchedulePageView extends StatelessWidget {
       scrollDirection: Axis.horizontal,
       controller: controller,
       children: <Widget>[
-        Center(
-          child: ScheduleContainer(),
-        ),
-        Center(
-          child: ScheduleContainer(),
-        ),
-        Center(
-          child: ScheduleContainer(),
-        )
+        ScheduleContainer(),
+        ScheduleContainer(),
+        ScheduleContainer(),
       ],
     );
   }
@@ -31,6 +25,7 @@ class Body extends StatelessWidget {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Expanded(
             child: Stack(

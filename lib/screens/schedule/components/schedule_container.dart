@@ -17,7 +17,7 @@ class ScheduleContainer extends StatelessWidget {
     return Container(
       margin: EdgeInsets.symmetric(
           horizontal: kDefaultPadding, vertical: kDefaultPadding / 2),
-      color: Colors.white,
+      color: Colors.transparent,
       child: Padding(
         padding: EdgeInsets.all(kDefaultPadding),
         child: SingleChildScrollView(
