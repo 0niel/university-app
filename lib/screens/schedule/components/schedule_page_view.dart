@@ -28,10 +28,14 @@ class _SchedulePageViewState extends State<SchedulePageView> {
   AnimatedContainer buildDot({int index}) {
     return AnimatedContainer(
       duration: Duration(milliseconds: 250),
-      margin: EdgeInsets.all(15),
-      padding: EdgeInsets.symmetric(vertical: 4),
+      margin: EdgeInsets.symmetric(
+        vertical: 12,
+        // horizontal: MediaQuery.of(context).size.width / 20,
+      ),
+      padding: EdgeInsets.symmetric(vertical: 8),
       height: 55,
       width: 47.5,
+      curve: Curves.fastOutSlowIn,
       decoration: BoxDecoration(
         color: currentPage == index ? kPrimaryColor : Colors.transparent,
         borderRadius: BorderRadius.all(Radius.circular(10)),
@@ -63,36 +67,32 @@ class _SchedulePageViewState extends State<SchedulePageView> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: SizedBox(
-        width: double.infinity,
-        child: Column(
-          children: <Widget>[
-            Expanded(
-              flex: 1,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: List.generate(
-                  daysData.length,
-                  (index) => buildDot(index: index),
-                ),
-              ),
+    return Column(
+      children: <Widget>[
+        Container(
+          height: 120,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: List.generate(
+              daysData.length,
+              (index) => buildDot(index: index),
             ),
-            Expanded(
-              flex: 9,
-              child: PageView.builder(
-                onPageChanged: (value) {
-                  setState(() {
-                    currentPage = value;
-                  });
-                },
-                itemCount: daysData.length,
-                itemBuilder: (context, index) => ScheduleContainer(),
-              ),
-            ),
-          ],
+          ),
         ),
-      ),
+        Expanded(
+          child: Container(
+            child: PageView.builder(
+              onPageChanged: (value) {
+                setState(() {
+                  currentPage = value;
+                });
+              },
+              itemCount: daysData.length,
+              itemBuilder: (context, index) => ScheduleContainer(),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
