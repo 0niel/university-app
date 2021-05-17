@@ -3,30 +3,30 @@ import 'package:rtu_mirea_app/constants.dart';
 import 'package:rtu_mirea_app/screens/schedule/schedule_screen.dart';
 import 'package:rtu_mirea_app/screens/settings/settings_screen.dart';
 
-class ButtonNavBar extends StatefulWidget {
+class ButtomNavBar extends StatefulWidget {
   final int currentIndex;
 
-  const ButtonNavBar({Key key, this.currentIndex}) : super(key: key);
+  const ButtomNavBar({Key key, this.currentIndex}) : super(key: key);
 
   @override
-  _ButtonNavBarState createState() => _ButtonNavBarState(currentIndex);
+  _ButtomNavBarState createState() => _ButtomNavBarState(currentIndex);
 }
 
-class _ButtonNavBarState extends State<ButtonNavBar> {
+class _ButtomNavBarState extends State<ButtomNavBar> {
   // current navigation index
   int _currentIndex;
 
-  _ButtonNavBarState(this._currentIndex);
+  _ButtomNavBarState(this._currentIndex);
 
   // navigation bar click listener
   void _onItemTapped(int index) {
     if (index != this._currentIndex) {
       switch (index) {
         case 0:
-          Navigator.pushNamed(context, ScheduleScreen.routeName);
+          Navigator.popAndPushNamed(context, ScheduleScreen.routeName);
           break;
         case 1:
-          Navigator.pushNamed(context, SettingsScreen.routeName);
+          Navigator.popAndPushNamed(context, SettingsScreen.routeName);
           break;
         default:
           return;
