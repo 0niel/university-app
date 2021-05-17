@@ -129,7 +129,7 @@ class SettingsScreen extends StatelessWidget {
                         textColor: kTextLightColor,
                         size: Size(MediaQuery.of(context).size.width, 48),
                         onPress: () {},
-                        backgroupColor: Color(0xFFFF8181),
+                        backgroupColor: kSecondaryColor,
                       ),
                     ],
                   ),
