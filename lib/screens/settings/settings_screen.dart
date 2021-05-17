@@ -51,7 +51,6 @@ class SettingsScreen extends StatelessWidget {
                     child: SearchBar(),
                   ),
                   Expanded(
-                    flex: 2,
                     child: OverflowBox(
                       minHeight: 100,
                       maxWidth: MediaQuery.of(context).size.width,
@@ -114,16 +113,11 @@ class SettingsScreen extends StatelessWidget {
                       ),
                     ),
                   ),
-                  SizedBox(height: 20),
+                  SizedBox(
+                    height: 20,
+                  ),
                   Column(
                     children: [
-                      Text(
-                        "Добавить группу",
-                        style: Theme.of(context)
-                            .textTheme
-                            .headline6
-                            .copyWith(fontWeight: FontWeight.bold),
-                      ),
                       ButtonPrimary(
                         text: 'Скачать группу',
                         textColor: kTextLightColor,
