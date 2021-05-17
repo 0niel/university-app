@@ -57,19 +57,25 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
       appBar: buildAppBar(context),
       backgroundColor: kPrimaryColor,
       body: Body(),
-      bottomNavigationBar: ButtonNavBar(currentIndex: 0),
+      bottomNavigationBar: ButtomNavBar(currentIndex: 0),
     );
   }
 
   buildAppBar(BuildContext context) {
     return PreferredSize(
-      preferredSize: Size.fromHeight(80),
+      preferredSize: Size.fromHeight(120),
       child: SafeArea(
         child: AppBar(
-          toolbarHeight: 80,
+          toolbarHeight: 120,
           elevation: 0,
           centerTitle: false,
-          title: Text('Расписание'),
+          title: Text(
+            'Расписание',
+            style: Theme.of(context)
+                .textTheme
+                .headline4
+                .copyWith(fontWeight: FontWeight.w900, color: kTextLightColor),
+          ),
           actions: <Widget>[
             ButtonTheme(
               padding: new EdgeInsets.all(0.0),
