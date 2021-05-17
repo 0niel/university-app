@@ -8,5 +8,5 @@ const kPrimaryColor = Color(0xFF6360FF);
 const kSecondaryColor = Color(0xFF4DC591);
 const kTextColor = Color(0xFF161719);
 const kTextLightColor = Color(0xFFFFFFFF);
-
+const kShadowColor = Color(0xFFE6E6E6);
 const kDefaultPadding = 20.0;
