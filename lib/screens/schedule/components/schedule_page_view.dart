@@ -1,6 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/physics.dart';
 import 'package:rtu_mirea_app/screens/schedule/components/schedule_container.dart';
 import '../../../constants.dart';
+
+class SchedulePageViewScrollPhysics extends ScrollPhysics {
+  const SchedulePageViewScrollPhysics({ScrollPhysics parent})
+      : super(parent: parent);
+
+  @override
+  SchedulePageViewScrollPhysics applyTo(ScrollPhysics ancestor) {
+    return SchedulePageViewScrollPhysics(parent: buildParent(ancestor));
+  }
+
+  @override
+  SpringDescription get spring => const SpringDescription(
+        mass: 85,
+        stiffness: 80,
+        damping: 1,
+      );
+}
 
 class SchedulePageView extends StatefulWidget {
   @override
@@ -9,7 +27,7 @@ class SchedulePageView extends StatefulWidget {
 
 class _SchedulePageViewState extends State<SchedulePageView> {
   int currentPage = 0;
-
+  PageController controller;
   List<Map<String, String>> daysData = [
     {'day_of_week': 'ПН', 'num': '12'},
     {'day_of_week': 'ВТ', 'num': '13'},
@@ -27,7 +45,7 @@ class _SchedulePageViewState extends State<SchedulePageView> {
 
   AnimatedContainer buildDot({int index}) {
     return AnimatedContainer(
-      duration: Duration(milliseconds: 250),
+      duration: Duration(milliseconds: 100),
       margin: EdgeInsets.symmetric(
         vertical: 12,
         // horizontal: MediaQuery.of(context).size.width / 20,
@@ -82,6 +100,7 @@ class _SchedulePageViewState extends State<SchedulePageView> {
         Expanded(
           child: Container(
             child: PageView.builder(
+              physics: SchedulePageViewScrollPhysics(),
               onPageChanged: (value) {
                 setState(() {
                   currentPage = value;
