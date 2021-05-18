@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:rtu_mirea_app/routes.dart';
 import 'package:rtu_mirea_app/screens/schedule/schedule_screen.dart';
 import 'constants.dart';
@@ -10,6 +11,11 @@ void main() {
 class App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitDown,
+      DeviceOrientation.portraitUp,
+    ]);
+
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Приложение РТУ МИРЭА',
