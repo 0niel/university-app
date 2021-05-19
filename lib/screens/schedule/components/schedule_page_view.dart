@@ -43,7 +43,7 @@ class _SchedulePageViewState extends State<SchedulePageView> {
     ScheduleContainer(),
   ];
 
-  AnimatedContainer buildDot({int index}) {
+  AnimatedContainer dayOfWeekButton({int index}) {
     return AnimatedContainer(
       duration: Duration(milliseconds: 100),
       margin: EdgeInsets.symmetric(
@@ -93,7 +93,7 @@ class _SchedulePageViewState extends State<SchedulePageView> {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: List.generate(
               daysData.length,
-              (index) => buildDot(index: index),
+              (index) => dayOfWeekButton(index: index),
             ),
           ),
         ),
