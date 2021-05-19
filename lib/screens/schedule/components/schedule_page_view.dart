@@ -46,10 +46,6 @@ class _SchedulePageViewState extends State<SchedulePageView> {
   AnimatedContainer dayOfWeekButton({int index}) {
     return AnimatedContainer(
       duration: Duration(milliseconds: 100),
-      margin: EdgeInsets.symmetric(
-        vertical: 12,
-        // horizontal: MediaQuery.of(context).size.width / 20,
-      ),
       padding: EdgeInsets.symmetric(vertical: 8),
       height: 55,
       width: 47.5,
@@ -88,7 +84,7 @@ class _SchedulePageViewState extends State<SchedulePageView> {
     return Column(
       children: <Widget>[
         Container(
-          height: 120,
+          height: 80,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: List.generate(
