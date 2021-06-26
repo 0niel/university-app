@@ -1,16 +1,16 @@
 # rtu-mirea-app
 
-A new Flutter project.
+Это мобильное приложение с полностью открытым исходным кодом для студентов и преподавателей РТУ МИРЭА.
 
-## Getting Started
+# Примите участие
+Это приложение и все относящиеся к нему сервисы являются **100% бесплатными** и **Open Source** продуктами. Мы с огромным удовольствием примем любые ваши предложения и сообщения, а также мы рады любому вашему участию в проекте! Перед тем как принять участие в развитии проекта:
+1. Ознакомьтесь с нашим [CONTRIBUTING.MD](https://github.com/Ninja-Official/rtu-mirea-mobile/blob/master/CONTRIBUTING.md), в котором описано то, как должны вести себя участники проекта.
+2. Уважайте других участников, обсуждайте идеи, а не личности, ознакомьтесь с [кодексом поведения](https://github.com/Ninja-Official/rtu-mirea-mobile/blob/master/CODE_OF_CONDUCT.md).
+3. Не знаете, над чем вы хотите работать? Ознакомьтесь с нашей дорожной картой.
 
-This project is a starting point for a Flutter application.
+# Установка
+Следить за актуальностью приложения и скачать готовый билд вы можете на [странице релизов](https://github.com/Ninja-Official/rtu-mirea-mobile/releases) этого репозитория.
 
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
-
-For help getting started with Flutter, view our
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+# Скриншоты
+![photo_2021-06-26_11-56-39 (2)](https://user-images.githubusercontent.com/51058739/123508094-ea93bb00-d675-11eb-9955-3b6a5fe9486b.jpg)
+![photo_2021-06-26_11-56-39](https://user-images.githubusercontent.com/51058739/123508096-ebc4e800-d675-11eb-9001-79f34e5b7996.jpg)
