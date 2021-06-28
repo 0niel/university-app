@@ -24,9 +24,7 @@ class Body extends StatelessWidget {
           ),
           Padding(
             padding: EdgeInsets.only(top: 120),
-            child: Expanded(
-              child: SchedulePageView(),
-            ),
+            child: SchedulePageView(),
           ),
         ],
       ),
