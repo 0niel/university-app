@@ -11,6 +11,8 @@ void main() {
 class App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    // блокируем ориентацию приложения на
+    // только вертикальной
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitDown,
       DeviceOrientation.portraitUp,
