@@ -1,8 +1,9 @@
+import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:rtu_mirea_app/routes.dart';
 import 'package:rtu_mirea_app/screens/schedule/schedule_screen.dart';
-import 'constants.dart';
+import 'package:rtu_mirea_app/theme.dart';
 
 void main() {
   runApp(App());
@@ -18,16 +19,16 @@ class App extends StatelessWidget {
       DeviceOrientation.portraitUp,
     ]);
 
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Приложение РТУ МИРЭА',
-      theme: ThemeData(
-        primaryColor: kPrimaryColor,
-        accentColor: kPrimaryColor,
-        visualDensity: VisualDensity.adaptivePlatformDensity,
+    return AdaptiveTheme(
+      light: lightTheme,
+      dark: darkTheme,
+      initial: AdaptiveThemeMode.light,
+      builder: (light, dark) => MaterialApp(
+        debugShowCheckedModeBanner: false,
+        title: 'Приложение РТУ МИРЭА',
+        initialRoute: ScheduleScreen.routeName,
+        routes: routes,
       ),
-      initialRoute: ScheduleScreen.routeName,
-      routes: routes,
     );
   }
 }

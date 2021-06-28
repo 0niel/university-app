@@ -48,7 +48,7 @@ class _ButtomNavBarState extends State<ButtomNavBar> {
         ),
       ],
       currentIndex: _currentIndex,
-      selectedItemColor: kPrimaryColor,
+      selectedItemColor: Theme.of(context).primaryColor,
       onTap: _onItemTapped,
     );
   }

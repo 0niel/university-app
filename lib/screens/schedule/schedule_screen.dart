@@ -55,7 +55,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: buildAppBar(context),
-      backgroundColor: kPrimaryColor,
+      backgroundColor: Theme.of(context).primaryColor,
       body: Body(),
       bottomNavigationBar: ButtomNavBar(currentIndex: 0),
     );
@@ -71,10 +71,9 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
           centerTitle: false,
           title: Text(
             'Расписание',
-            style: Theme.of(context)
-                .textTheme
-                .headline4
-                .copyWith(fontWeight: FontWeight.w900, color: kTextLightColor),
+            style: Theme.of(context).textTheme.headline4.copyWith(
+                fontWeight: FontWeight.w900,
+                color: Theme.of(context).textTheme.bodyText2.color),
           ),
           actions: <Widget>[
             ButtonTheme(

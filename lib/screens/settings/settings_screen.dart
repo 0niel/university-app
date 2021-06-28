@@ -19,7 +19,7 @@ class SettingsScreen extends StatelessWidget {
           Container(
             height: size.height * .45,
             decoration: BoxDecoration(
-              color: kPrimaryColor,
+              color: Theme.of(context).primaryColor,
               borderRadius: BorderRadius.only(
                 bottomLeft: Radius.circular(30),
                 bottomRight: Radius.circular(30),
@@ -38,12 +38,14 @@ class SettingsScreen extends StatelessWidget {
                   Text(
                     "Группы",
                     style: Theme.of(context).textTheme.headline4.copyWith(
-                        fontWeight: FontWeight.w900, color: kTextLightColor),
+                        fontWeight: FontWeight.w900,
+                        color: Theme.of(context).textTheme.bodyText1.color),
                   ),
                   SizedBox(height: 10),
                   Text(
                     "Просмотр и управление скачанными группами",
-                    style: TextStyle(color: kTextLightColor),
+                    style: TextStyle(
+                        color: Theme.of(context).textTheme.bodyText2.color),
                   ),
                   SizedBox(height: 10),
                   SizedBox(
@@ -120,10 +122,10 @@ class SettingsScreen extends StatelessWidget {
                     children: [
                       ButtonPrimary(
                         text: 'Скачать группу',
-                        textColor: kTextLightColor,
+                        textColor: Theme.of(context).textTheme.bodyText1.color,
                         size: Size(MediaQuery.of(context).size.width, 48),
                         onPress: () {},
-                        backgroupColor: kSecondaryColor,
+                        backgroupColor: Theme.of(context).accentColor,
                       ),
                     ],
                   ),
@@ -163,7 +165,7 @@ class GroupCard extends StatelessWidget {
                 offset: Offset(0, 17),
                 blurRadius: 23,
                 spreadRadius: -13,
-                color: kShadowColor,
+                color: Theme.of(context).shadowColor,
               ),
             ],
           ),

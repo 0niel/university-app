@@ -27,11 +27,10 @@ class ScheduleContainer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.symmetric(
-          horizontal: kDefaultPadding, vertical: kDefaultPadding / 2),
+      margin: EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
       color: Colors.transparent,
       child: Padding(
-        padding: EdgeInsets.all(kDefaultPadding),
+        padding: EdgeInsets.all(20.0),
         child: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -40,7 +39,7 @@ class ScheduleContainer extends StatelessWidget {
                 "Сегодня",
                 style: TextStyle(
                   fontSize: 28,
-                  color: kTextColor,
+                  color: Theme.of(context).textTheme.bodyText1.color,
                   fontWeight: FontWeight.bold,
                 ),
               ),

@@ -55,7 +55,9 @@ class _SchedulePageViewState extends State<SchedulePageView> {
       width: 47.5,
       curve: Curves.fastOutSlowIn,
       decoration: BoxDecoration(
-        color: currentPage == index ? kPrimaryColor : Colors.transparent,
+        color: currentPage == index
+            ? Theme.of(context).primaryColor
+            : Colors.transparent,
         borderRadius: BorderRadius.all(Radius.circular(10)),
       ),
       child: RichText(
@@ -105,7 +107,6 @@ class _SchedulePageViewState extends State<SchedulePageView> {
   void buildScheduleContainers(String groupName) {
     Schedule schedule = Schedule();
     schedule.request(groupName).then((_) {
-      print('true');
       print(schedule.scheduleData);
       List<Widget> containers = [];
       var scheduleWeekLessons = schedule.getWeekLessons(currentWeek);
