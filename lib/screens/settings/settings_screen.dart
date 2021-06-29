@@ -8,6 +8,7 @@ class SettingsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     var size = MediaQuery.of(context).size;
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         automaticallyImplyLeading: false,
         title: Text(
@@ -54,6 +55,44 @@ class SettingsScreen extends StatelessWidget {
                 color: LightThemeColors.grey400,
                 thickness: 0.5,
                 height: 42,
+              ),
+              Card(
+                shadowColor: Colors.transparent,
+                child: ListTile(
+                  title: Row(
+                    children: [
+                      Padding(
+                        child: Icon(Icons.group_add),
+                        padding: EdgeInsets.only(right: 20),
+                      ),
+                      Text('Выбор группы'),
+                    ],
+                  ),
+                  trailing: Icon(Icons.arrow_forward_ios),
+                ),
+              ),
+              Divider(
+                color: LightThemeColors.grey400,
+                thickness: 0.5,
+              ),
+              Card(
+                shadowColor: Colors.transparent,
+                child: ListTile(
+                  title: Row(
+                    children: [
+                      Padding(
+                        child: Icon(Icons.notifications),
+                        padding: EdgeInsets.only(right: 20),
+                      ),
+                      Text('Уведомления'),
+                    ],
+                  ),
+                  trailing: Icon(Icons.arrow_forward_ios),
+                ),
+              ),
+              Divider(
+                color: LightThemeColors.grey400,
+                thickness: 0.5,
               ),
             ],
           ),
