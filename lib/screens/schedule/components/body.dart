@@ -6,11 +6,15 @@ class Body extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SafeArea(
+      // stack нужен для скруглённых углов у блока с контентом,
+      // который находится ниже appbar
       child: Stack(
         children: [
           ScheduleAppBar(),
           Padding(
             padding: EdgeInsets.only(top: 120),
+            // контейнер, в котором расположены кнопки переключения
+            // для недели и само расписание
             child: Container(
               height: 100,
               decoration: BoxDecoration(

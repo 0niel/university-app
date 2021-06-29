@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:rtu_mirea_app/constants.dart';
 import 'package:rtu_mirea_app/screens/schedule/schedule_screen.dart';
 import 'package:rtu_mirea_app/screens/settings/settings_screen.dart';
 

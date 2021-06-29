@@ -23,9 +23,12 @@ class App extends StatelessWidget {
       light: lightTheme,
       dark: darkTheme,
       initial: AdaptiveThemeMode.light,
-      builder: (light, dark) => MaterialApp(
+      builder: (theme, darkTheme) => MaterialApp(
         debugShowCheckedModeBanner: false,
         title: 'Приложение РТУ МИРЭА',
+        theme: theme,
+        darkTheme: darkTheme,
+        home: ScheduleScreen(),
         initialRoute: ScheduleScreen.routeName,
         routes: routes,
       ),

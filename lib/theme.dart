@@ -1,9 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:rtu_mirea_app/constants.dart';
 
 final lightTheme = ThemeData.light().copyWith(
-  primaryColorDark: Color(0xFF093269),
-  primaryColor: Color(0xFF1264D1),
-  primaryColorLight: Color(0xFF2F80ED),
+  primaryColorDark: LightThemeColors.primary801,
+  primaryColor: LightThemeColors.primary601,
+  primaryColorLight: LightThemeColors.primary501,
+  appBarTheme: ThemeData.light().appBarTheme.copyWith(
+        backgroundColor: Colors.transparent,
+        shadowColor: Colors.transparent,
+        titleTextStyle: ThemeData.light().textTheme.headline6,
+      ),
 );
 
-final darkTheme = ThemeData.dark().copyWith();
+// todo: сделать тёмную тему
+final darkTheme = lightTheme;
