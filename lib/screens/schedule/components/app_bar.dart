@@ -36,7 +36,7 @@ class ScheduleAppBar extends StatelessWidget {
                 TextButton(
                   child: Text(
                     '12 неделя',
-                    style: TextStyle(color: Theme.of(context).primaryColor),
+                    style: TextStyle(color: Colors.white),
                   ),
                   style: ButtonStyle(
                     shape: MaterialStateProperty.all<RoundedRectangleBorder>(

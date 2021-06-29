@@ -14,7 +14,7 @@ class Body extends StatelessWidget {
           Padding(
             padding: EdgeInsets.only(top: 120),
             // контейнер, в котором расположены кнопки переключения
-            // для недели и само расписание
+            // дня недели и page view расписания
             child: Container(
               height: 100,
               decoration: BoxDecoration(
