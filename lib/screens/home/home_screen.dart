@@ -12,6 +12,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedPageIndex = 0;
 
+  /// список виджетов экранов, которые доступны из нижней навигации
   static final List<Widget> _screensWidgets = <Widget>[
     ScheduleScreen(),
     SettingsScreen(),

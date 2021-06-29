@@ -52,6 +52,7 @@ class SettingsScreen extends StatelessWidget {
               ),
               Divider(
                 color: LightThemeColors.grey400,
+                thickness: 0.5,
                 height: 42,
               ),
             ],
