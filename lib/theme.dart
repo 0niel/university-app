@@ -33,7 +33,6 @@ final lightTheme = ThemeData.light().copyWith(
         backgroundColor: Colors.transparent,
         shadowColor: Colors.transparent,
         titleTextStyle: lightTextTheme.headline6,
-        titleSpacing: -40,
         centerTitle: false,
       ),
 );

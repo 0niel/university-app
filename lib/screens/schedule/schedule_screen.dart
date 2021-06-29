@@ -1,21 +1,37 @@
 import 'package:flutter/material.dart';
-import 'package:rtu_mirea_app/components/buttom_navbar.dart';
-import 'components/body.dart';
+import 'package:rtu_mirea_app/screens/schedule/components/app_bar.dart';
+import 'components/schedule_page_view.dart';
 
-class ScheduleScreen extends StatefulWidget {
-  static const String routeName = '/schedule';
-
-  @override
-  _ScheduleScreenState createState() => _ScheduleScreenState();
-}
-
-class _ScheduleScreenState extends State<ScheduleScreen> {
+class ScheduleScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: Body(),
-      bottomNavigationBar: ButtomNavBar(currentIndex: 0),
+    return SafeArea(
+      // stack нужен для скруглённых углов у блока с контентом,
+      // который находится ниже appbar
+      child: Stack(
+        children: [
+          ScheduleAppBar(),
+          Padding(
+            padding: EdgeInsets.only(top: 120),
+            // контейнер, в котором расположены кнопки переключения
+            // дня недели и page view расписания
+            child: Container(
+              height: 100,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(40),
+                  topRight: Radius.circular(40),
+                ),
+              ),
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.only(top: 120),
+            child: SchedulePageView(),
+          ),
+        ],
+      ),
     );
   }
 }

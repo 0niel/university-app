@@ -1,8 +1,7 @@
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:rtu_mirea_app/routes.dart';
-import 'package:rtu_mirea_app/screens/schedule/schedule_screen.dart';
+import 'package:rtu_mirea_app/screens/home/home_screen.dart';
 import 'package:rtu_mirea_app/theme.dart';
 
 void main() {
@@ -28,9 +27,7 @@ class App extends StatelessWidget {
         title: 'Приложение РТУ МИРЭА',
         theme: theme,
         darkTheme: darkTheme,
-        home: ScheduleScreen(),
-        initialRoute: ScheduleScreen.routeName,
-        routes: routes,
+        home: HomeScreen(), // виджет с нижней навигацией
       ),
     );
   }
