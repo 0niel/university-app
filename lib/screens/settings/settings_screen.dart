@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:rtu_mirea_app/components/settings_button.dart';
 import 'package:rtu_mirea_app/constants.dart';
 
 class SettingsScreen extends StatelessWidget {
@@ -51,49 +52,9 @@ class SettingsScreen extends StatelessWidget {
                   )
                 ],
               ),
-              Divider(
-                color: LightThemeColors.grey400,
-                thickness: 0.5,
-                height: 42,
-              ),
-              Card(
-                shadowColor: Colors.transparent,
-                child: ListTile(
-                  title: Row(
-                    children: [
-                      Padding(
-                        child: Icon(Icons.group_add),
-                        padding: EdgeInsets.only(right: 20),
-                      ),
-                      Text('Выбор группы'),
-                    ],
-                  ),
-                  trailing: Icon(Icons.arrow_forward_ios),
-                ),
-              ),
-              Divider(
-                color: LightThemeColors.grey400,
-                thickness: 0.5,
-              ),
-              Card(
-                shadowColor: Colors.transparent,
-                child: ListTile(
-                  title: Row(
-                    children: [
-                      Padding(
-                        child: Icon(Icons.notifications),
-                        padding: EdgeInsets.only(right: 20),
-                      ),
-                      Text('Уведомления'),
-                    ],
-                  ),
-                  trailing: Icon(Icons.arrow_forward_ios),
-                ),
-              ),
-              Divider(
-                color: LightThemeColors.grey400,
-                thickness: 0.5,
-              ),
+              Divider(height: 42, thickness: 0.5),
+              SettingsButton('Выбор группы', Icons.group_add, () {}),
+              SettingsButton('Уведомления', Icons.notifications, () {}),
             ],
           ),
         ),
