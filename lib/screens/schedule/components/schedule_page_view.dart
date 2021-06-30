@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:rtu_mirea_app/constants.dart';
 import 'package:rtu_mirea_app/utils/calendar.dart';
 
 class SchedulePageView extends StatefulWidget {
@@ -68,33 +69,127 @@ class _SchedulePageViewState extends State<SchedulePageView> {
     ];
   }
 
-  List _buildPageView() {
+  List<Widget> _getOneScheduleLine() {
     return [
-      Container(
-        height: 80,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: List.generate(
-            _daysData.length,
-            (index) => dayOfWeekButton(index: index),
+      Expanded(
+        flex: 18,
+        child: RichText(
+          text: TextSpan(
+            children: [
+              TextSpan(
+                text: "11:35\n",
+                style: TextStyle(
+                  color: Color(0xFF212525),
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              TextSpan(
+                text: "13:00",
+                style: TextStyle(color: Color(0xFFBCC1CD), fontSize: 16),
+              ),
+            ],
           ),
         ),
       ),
-      Divider(height: 1, color: Colors.black.withOpacity(0.1)),
-      Container(
-        child: PageView.builder(
-          onPageChanged: (value) {
-            setState(() {
-              _currentPage = value;
-            });
-          },
-          itemCount: 6, // пн-пт
-          itemBuilder: (context, index) => Center(
-            child: Text('$index hello!'),
+      Expanded(
+        flex: 6,
+        child: Align(
+          alignment: Alignment.centerLeft,
+          child: Container(
+            width: 1,
+            height: 130,
+            color: LightThemeColors.grey100,
+          ),
+        ),
+      ),
+      Expanded(
+        flex: 76,
+        child: Card(
+          color: Color(0xFFF6F6F5),
+          shadowColor: Colors.transparent,
+          child: Padding(
+            padding: EdgeInsets.all(10),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "Математический анализ",
+                  style: Theme.of(context)
+                      .textTheme
+                      .headline1
+                      .copyWith(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+                Text(
+                  "Только чётные недели",
+                  style: Theme.of(context).textTheme.bodyText1,
+                ),
+                Padding(padding: EdgeInsets.only(bottom: 15)),
+                Row(
+                  children: [
+                    Icon(Icons.location_on),
+                    Padding(padding: EdgeInsets.only(right: 10)),
+                    Text('А-419')
+                  ],
+                ),
+                Row(
+                  children: [
+                    Icon(Icons.face),
+                    Padding(padding: EdgeInsets.only(right: 10)),
+                    Text('Зуев А. С.')
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),
     ];
+  }
+
+  Widget _getPageViewContent(BuildContext context) {
+    return Column(children: [
+      Padding(
+        padding: EdgeInsets.all(20),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "Время",
+              style: Theme.of(context)
+                  .textTheme
+                  .bodyText1
+                  .copyWith(color: LightThemeColors.grey400),
+            ),
+            Padding(padding: EdgeInsets.only(right: 40)),
+            Text(
+              "Предмет",
+              style: Theme.of(context)
+                  .textTheme
+                  .bodyText1
+                  .copyWith(color: LightThemeColors.grey400),
+            )
+          ],
+        ),
+      ),
+      Padding(
+        padding: EdgeInsets.all(20),
+        child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: _getOneScheduleLine(),
+              ),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: _getOneScheduleLine(),
+              ),
+            ]),
+      ),
+    ]);
   }
 
   @override
@@ -120,9 +215,7 @@ class _SchedulePageViewState extends State<SchedulePageView> {
               });
             },
             itemCount: 6, // пн-пт
-            itemBuilder: (context, index) => Center(
-              child: Text('$index hello!'),
-            ),
+            itemBuilder: (context, index) => _getPageViewContent(context),
           ),
         )
       ],
