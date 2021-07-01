@@ -7,11 +7,11 @@ import 'package:rtu_mirea_app/theme.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/services.dart';
 
-int initScreen;
+var initScreen;
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   SharedPreferences prefs = await SharedPreferences.getInstance();
-  initScreen = await prefs.getInt("initScreen");
+  initScreen = prefs.getInt("initScreen")!;
   await prefs.setInt("initScreen", 1);
   print('initScreen ${initScreen}');
   runApp(App());
