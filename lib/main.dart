@@ -2,9 +2,18 @@ import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:rtu_mirea_app/screens/home/home_screen.dart';
+import 'package:rtu_mirea_app/screens/onBoard/screenBoard.dart';
 import 'package:rtu_mirea_app/theme.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter/services.dart';
 
-void main() {
+int initScreen;
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  initScreen = await prefs.getInt("initScreen");
+  await prefs.setInt("initScreen", 1);
+  print('initScreen ${initScreen}');
   runApp(App());
 }
 
@@ -27,7 +36,12 @@ class App extends StatelessWidget {
         title: 'Приложение РТУ МИРЭА',
         theme: theme,
         darkTheme: darkTheme,
-        home: HomeScreen(), // виджет с нижней навигацией
+        initialRoute: initScreen == 0 || initScreen == null ? "first" : "/",
+        routes: {
+          '/': (context) => HomeScreen(),
+          "first": (context) => OnboardingScreen(),
+        },
+        // виджет с нижней навигацией
       ),
     );
   }
