@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:rtu_mirea_app/components/settings_button.dart';
 import 'package:rtu_mirea_app/constants.dart';
+import 'package:rtu_mirea_app/screens/settings/group_selection_screet.dart';
 
 class SettingsScreen extends StatelessWidget {
   static const String routeName = "/settings";
@@ -44,56 +46,24 @@ class SettingsScreen extends StatelessWidget {
                           style: Theme.of(context)
                               .textTheme
                               .button
-                              .copyWith(color: Colors.blueAccent),
+                              ?.copyWith(color: Colors.blueAccent),
                         ),
                       ],
                     ),
                   )
                 ],
               ),
-              Divider(
-                color: LightThemeColors.grey400,
-                thickness: 0.5,
-                height: 42,
-              ),
-              Card(
-                shadowColor: Colors.transparent,
-                child: ListTile(
-                  title: Row(
-                    children: [
-                      Padding(
-                        child: Icon(Icons.group_add),
-                        padding: EdgeInsets.only(right: 20),
-                      ),
-                      Text('Выбор группы'),
-                    ],
-                  ),
-                  trailing: Icon(Icons.arrow_forward_ios),
+              Divider(height: 42, thickness: 0.5),
+              SettingsButton(
+                'Выбор группы',
+                Icons.group_add,
+                () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => GroupSelectionScreen()),
                 ),
               ),
-              Divider(
-                color: LightThemeColors.grey400,
-                thickness: 0.5,
-              ),
-              Card(
-                shadowColor: Colors.transparent,
-                child: ListTile(
-                  title: Row(
-                    children: [
-                      Padding(
-                        child: Icon(Icons.notifications),
-                        padding: EdgeInsets.only(right: 20),
-                      ),
-                      Text('Уведомления'),
-                    ],
-                  ),
-                  trailing: Icon(Icons.arrow_forward_ios),
-                ),
-              ),
-              Divider(
-                color: LightThemeColors.grey400,
-                thickness: 0.5,
-              ),
+              SettingsButton('Уведомления', Icons.notifications, () {}),
             ],
           ),
         ),

@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:rtu_mirea_app/constants.dart';
+import 'package:rtu_mirea_app/models/lesson.dart';
+import 'package:rtu_mirea_app/screens/schedule/components/lesson_card.dart';
 import 'package:rtu_mirea_app/utils/calendar.dart';
 
 class SchedulePageView extends StatefulWidget {
@@ -7,13 +10,13 @@ class SchedulePageView extends StatefulWidget {
 }
 
 class _SchedulePageViewState extends State<SchedulePageView> {
-  int _currentWeek;
-  List<int> _currentWeekDays;
+  late int _currentWeek;
+  late List<int> _currentWeekDays;
   int _currentPage = 0;
 
-  List<Map<String, String>> _daysData;
+  late List<Map<String, String>> _daysData;
 
-  AnimatedContainer dayOfWeekButton({int index}) {
+  AnimatedContainer dayOfWeekButton(int index) {
     return AnimatedContainer(
       duration: Duration(milliseconds: 80),
       padding: EdgeInsets.symmetric(vertical: 8),
@@ -31,7 +34,7 @@ class _SchedulePageViewState extends State<SchedulePageView> {
         text: TextSpan(
           children: [
             TextSpan(
-              text: _daysData[index]['day_of_week'] + "\n",
+              text: (_daysData[index]['day_of_week'] ?? "") + "\n",
               style: TextStyle(
                 fontWeight: FontWeight.normal,
                 color: _currentPage == index ? Colors.white : Color(0xFFBCC1CD),
@@ -68,33 +71,51 @@ class _SchedulePageViewState extends State<SchedulePageView> {
     ];
   }
 
-  List _buildPageView() {
-    return [
-      Container(
-        height: 80,
+  Widget _getPageViewContent(BuildContext context) {
+    return Column(children: [
+      Padding(
+        padding: EdgeInsets.all(20),
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: List.generate(
-            _daysData.length,
-            (index) => dayOfWeekButton(index: index),
-          ),
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "Время",
+              style: Theme.of(context)
+                  .textTheme
+                  .bodyText1
+                  ?.copyWith(color: LightThemeColors.grey400),
+            ),
+            Padding(padding: EdgeInsets.only(right: 40)),
+            Text(
+              "Предмет",
+              style: Theme.of(context)
+                  .textTheme
+                  .bodyText1
+                  ?.copyWith(color: LightThemeColors.grey400),
+            )
+          ],
         ),
       ),
-      Divider(height: 1, color: Colors.black.withOpacity(0.1)),
-      Container(
-        child: PageView.builder(
-          onPageChanged: (value) {
-            setState(() {
-              _currentPage = value;
-            });
-          },
-          itemCount: 6, // пн-пт
-          itemBuilder: (context, index) => Center(
-            child: Text('$index hello!'),
-          ),
+      Padding(
+        padding: EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            LessonCard(
+              Lesson(
+                  timeStart: '09.00',
+                  timeEnd: '10:30',
+                  name: 'Математический анализ',
+                  teacher: 'Зуев А.С.',
+                  room: 'А-419',
+                  type: 'Практика'),
+            )
+          ],
         ),
       ),
-    ];
+    ]);
   }
 
   @override
@@ -107,7 +128,7 @@ class _SchedulePageViewState extends State<SchedulePageView> {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: List.generate(
               _daysData.length,
-              (index) => dayOfWeekButton(index: index),
+              (index) => dayOfWeekButton(index),
             ),
           ),
         ),
@@ -120,9 +141,7 @@ class _SchedulePageViewState extends State<SchedulePageView> {
               });
             },
             itemCount: 6, // пн-пт
-            itemBuilder: (context, index) => Center(
-              child: Text('$index hello!'),
-            ),
+            itemBuilder: (context, index) => _getPageViewContent(context),
           ),
         )
       ],
