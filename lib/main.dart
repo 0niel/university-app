@@ -2,22 +2,25 @@ import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:rtu_mirea_app/screens/home/home_screen.dart';
-import 'package:rtu_mirea_app/screens/onBoard/screenBoard.dart';
+import 'package:rtu_mirea_app/screens/onboarding/onboarding_screen.dart';
 import 'package:rtu_mirea_app/theme.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:flutter/services.dart';
 
-int initScreen;
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   SharedPreferences prefs = await SharedPreferences.getInstance();
-  initScreen = await prefs.getInt("initScreen");
-  await prefs.setInt("initScreen", 1);
-  print('initScreen ${initScreen}');
-  runApp(App());
+  bool isFirstTime = prefs.getBool('is_first_time') ?? false;
+  await prefs.setBool("is_first_time", true);
+  runApp(App(isFirstTime));
 }
 
 class App extends StatelessWidget {
+  late final bool _showOnboarding;
+
+  /// bool переменная [_showOnboarding] определяет, показывать ли
+  /// intro (onboarding) экран при запуске приложения
+  App(this._showOnboarding);
+
   @override
   Widget build(BuildContext context) {
     // блокируем ориентацию приложения на
@@ -36,12 +39,7 @@ class App extends StatelessWidget {
         title: 'Приложение РТУ МИРЭА',
         theme: theme,
         darkTheme: darkTheme,
-        initialRoute: initScreen == 0 || initScreen == null ? "first" : "/",
-        routes: {
-          '/': (context) => HomeScreen(),
-          "first": (context) => OnboardingScreen(),
-        },
-        // виджет с нижней навигацией
+        home: _showOnboarding ? OnboardingScreen() : HomeScreen(),
       ),
     );
   }

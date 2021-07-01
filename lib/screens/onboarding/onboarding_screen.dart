@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get_storage/get_storage.dart';
-import 'package:rtu_mirea_app/constants.dart';
 import 'package:rtu_mirea_app/screens/home/home_screen.dart';
 
 class OnboardingScreen extends StatefulWidget {
@@ -253,7 +252,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   ),
                 ),
                 onTap: () {
-                  Navigator.push(
+                  Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(builder: (context) => HomeScreen()),
                   );
