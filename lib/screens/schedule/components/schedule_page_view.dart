@@ -98,48 +98,59 @@ class _SchedulePageViewState extends State<SchedulePageView> {
           alignment: Alignment.centerLeft,
           child: Container(
             width: 1,
-            height: 130,
+            height: 165,
             color: LightThemeColors.grey100,
           ),
         ),
       ),
       Expanded(
         flex: 76,
-        child: Card(
-          color: Color(0xFFF6F6F5),
-          shadowColor: Colors.transparent,
-          child: Padding(
-            padding: EdgeInsets.all(10),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  "Математический анализ",
-                  style: Theme.of(context)
-                      .textTheme
-                      .headline1
-                      .copyWith(fontSize: 16, fontWeight: FontWeight.bold),
-                ),
-                Text(
-                  "Только чётные недели",
-                  style: Theme.of(context).textTheme.bodyText1,
-                ),
-                Padding(padding: EdgeInsets.only(bottom: 15)),
-                Row(
-                  children: [
-                    Icon(Icons.location_on),
-                    Padding(padding: EdgeInsets.only(right: 10)),
-                    Text('А-419')
-                  ],
-                ),
-                Row(
-                  children: [
-                    Icon(Icons.face),
-                    Padding(padding: EdgeInsets.only(right: 10)),
-                    Text('Зуев А. С.')
-                  ],
-                ),
-              ],
+        child: Padding(
+          padding: EdgeInsets.all(10),
+          child: Container(
+            decoration: BoxDecoration(
+              border: Border.all(color: LightThemeColors.grey800),
+              borderRadius: BorderRadius.all(
+                Radius.circular(
+                    16.0), //                 <--- border radius here
+              ),
+            ),
+            child: Padding(
+              padding: EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "Практика".toUpperCase(),
+                    style: Theme.of(context)
+                        .textTheme
+                        .headline1
+                        .copyWith(fontSize: 12, fontWeight: FontWeight.bold),
+                  ),
+                  Text(
+                    "Математический анализ",
+                    style: Theme.of(context)
+                        .textTheme
+                        .headline1
+                        .copyWith(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
+                  Padding(padding: EdgeInsets.only(bottom: 15)),
+                  Row(
+                    children: [
+                      Icon(Icons.location_on),
+                      Padding(padding: EdgeInsets.only(right: 10)),
+                      Text('в аудитории А-419')
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      Icon(Icons.face),
+                      Padding(padding: EdgeInsets.only(right: 10)),
+                      Text('преподаватель Зуев А. С.')
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
         ),
