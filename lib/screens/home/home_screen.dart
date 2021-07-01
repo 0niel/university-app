@@ -3,7 +3,7 @@ import 'package:rtu_mirea_app/screens/schedule/schedule_screen.dart';
 import 'package:rtu_mirea_app/screens/settings/settings_screen.dart';
 
 class HomeScreen extends StatefulWidget {
-  HomeScreen({Key key}) : super(key: key);
+  HomeScreen({Key? key}) : super(key: key);
 
   @override
   _HomeScreenState createState() => _HomeScreenState();

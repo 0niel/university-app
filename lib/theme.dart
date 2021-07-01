@@ -5,24 +5,24 @@ final lightTextTheme = ThemeData.light().textTheme.copyWith(
       headline1: ThemeData.light()
           .textTheme
           .headline1
-          .copyWith(fontFamily: 'Oswald', color: LightThemeColors.grey800),
+          ?.copyWith(fontFamily: 'Oswald', color: LightThemeColors.grey800),
       headline2: ThemeData.light()
           .textTheme
           .headline2
-          .copyWith(fontFamily: 'Oswald', color: LightThemeColors.grey800),
+          ?.copyWith(fontFamily: 'Oswald', color: LightThemeColors.grey800),
       headline3: ThemeData.light()
           .textTheme
           .headline3
-          .copyWith(fontFamily: 'Oswald', color: LightThemeColors.grey800),
+          ?.copyWith(fontFamily: 'Oswald', color: LightThemeColors.grey800),
       headline4: ThemeData.light()
           .textTheme
           .headline4
-          .copyWith(fontFamily: 'Oswald', color: LightThemeColors.grey800),
+          ?.copyWith(fontFamily: 'Oswald', color: LightThemeColors.grey800),
       headline5: ThemeData.light()
           .textTheme
           .headline5
-          .copyWith(fontFamily: 'Oswald', color: LightThemeColors.grey800),
-      headline6: ThemeData.light().textTheme.headline6.copyWith(
+          ?.copyWith(fontFamily: 'Oswald', color: LightThemeColors.grey800),
+      headline6: ThemeData.light().textTheme.headline6?.copyWith(
             fontFamily: 'Oswald',
             color: LightThemeColors.grey800,
             fontSize: 32,
@@ -30,11 +30,11 @@ final lightTextTheme = ThemeData.light().textTheme.copyWith(
       bodyText1: ThemeData.light()
           .textTheme
           .bodyText1
-          .copyWith(fontFamily: 'Roboto', color: LightThemeColors.grey800),
+          ?.copyWith(fontFamily: 'Roboto', color: LightThemeColors.grey800),
       bodyText2: ThemeData.light()
           .textTheme
           .bodyText2
-          .copyWith(fontFamily: 'Roboto', color: LightThemeColors.grey800),
+          ?.copyWith(fontFamily: 'Roboto', color: LightThemeColors.grey800),
     );
 
 final lightTheme = ThemeData.light().copyWith(

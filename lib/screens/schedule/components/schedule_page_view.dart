@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:rtu_mirea_app/constants.dart';
+import 'package:rtu_mirea_app/models/lesson.dart';
+import 'package:rtu_mirea_app/screens/schedule/components/lesson_card.dart';
 import 'package:rtu_mirea_app/utils/calendar.dart';
 
 class SchedulePageView extends StatefulWidget {
@@ -8,13 +10,13 @@ class SchedulePageView extends StatefulWidget {
 }
 
 class _SchedulePageViewState extends State<SchedulePageView> {
-  int _currentWeek;
-  List<int> _currentWeekDays;
+  late int _currentWeek;
+  late List<int> _currentWeekDays;
   int _currentPage = 0;
 
-  List<Map<String, String>> _daysData;
+  late List<Map<String, String>> _daysData;
 
-  AnimatedContainer dayOfWeekButton({int index}) {
+  AnimatedContainer dayOfWeekButton(int index) {
     return AnimatedContainer(
       duration: Duration(milliseconds: 80),
       padding: EdgeInsets.symmetric(vertical: 8),
@@ -32,7 +34,7 @@ class _SchedulePageViewState extends State<SchedulePageView> {
         text: TextSpan(
           children: [
             TextSpan(
-              text: _daysData[index]['day_of_week'] + "\n",
+              text: (_daysData[index]['day_of_week'] ?? "") + "\n",
               style: TextStyle(
                 fontWeight: FontWeight.normal,
                 color: _currentPage == index ? Colors.white : Color(0xFFBCC1CD),
@@ -69,95 +71,6 @@ class _SchedulePageViewState extends State<SchedulePageView> {
     ];
   }
 
-  List<Widget> _getOneScheduleLine() {
-    return [
-      Expanded(
-        flex: 18,
-        child: RichText(
-          text: TextSpan(
-            children: [
-              TextSpan(
-                text: "11:35\n",
-                style: TextStyle(
-                  color: Color(0xFF212525),
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              TextSpan(
-                text: "13:00",
-                style: TextStyle(color: Color(0xFFBCC1CD), fontSize: 16),
-              ),
-            ],
-          ),
-        ),
-      ),
-      Expanded(
-        flex: 6,
-        child: Align(
-          alignment: Alignment.centerLeft,
-          child: Container(
-            width: 1,
-            height: 165,
-            color: LightThemeColors.grey100,
-          ),
-        ),
-      ),
-      Expanded(
-        flex: 76,
-        child: Padding(
-          padding: EdgeInsets.all(10),
-          child: Container(
-            decoration: BoxDecoration(
-              border: Border.all(color: LightThemeColors.grey800),
-              borderRadius: BorderRadius.all(
-                Radius.circular(
-                    16.0), //                 <--- border radius here
-              ),
-            ),
-            child: Padding(
-              padding: EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    "Практика".toUpperCase(),
-                    style: Theme.of(context)
-                        .textTheme
-                        .headline1
-                        .copyWith(fontSize: 12, fontWeight: FontWeight.bold),
-                  ),
-                  Text(
-                    "Математический анализ",
-                    style: Theme.of(context)
-                        .textTheme
-                        .headline1
-                        .copyWith(fontSize: 20, fontWeight: FontWeight.bold),
-                  ),
-                  Padding(padding: EdgeInsets.only(bottom: 15)),
-                  Row(
-                    children: [
-                      Icon(Icons.location_on),
-                      Padding(padding: EdgeInsets.only(right: 10)),
-                      Text('в аудитории А-419')
-                    ],
-                  ),
-                  Row(
-                    children: [
-                      Icon(Icons.face),
-                      Padding(padding: EdgeInsets.only(right: 10)),
-                      Text('преподаватель Зуев А. С.')
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    ];
-  }
-
   Widget _getPageViewContent(BuildContext context) {
     return Column(children: [
       Padding(
@@ -171,7 +84,7 @@ class _SchedulePageViewState extends State<SchedulePageView> {
               style: Theme.of(context)
                   .textTheme
                   .bodyText1
-                  .copyWith(color: LightThemeColors.grey400),
+                  ?.copyWith(color: LightThemeColors.grey400),
             ),
             Padding(padding: EdgeInsets.only(right: 40)),
             Text(
@@ -179,7 +92,7 @@ class _SchedulePageViewState extends State<SchedulePageView> {
               style: Theme.of(context)
                   .textTheme
                   .bodyText1
-                  .copyWith(color: LightThemeColors.grey400),
+                  ?.copyWith(color: LightThemeColors.grey400),
             )
           ],
         ),
@@ -187,18 +100,20 @@ class _SchedulePageViewState extends State<SchedulePageView> {
       Padding(
         padding: EdgeInsets.all(20),
         child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: _getOneScheduleLine(),
-              ),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: _getOneScheduleLine(),
-              ),
-            ]),
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            LessonCard(
+              Lesson(
+                  timeStart: '09.00',
+                  timeEnd: '10:30',
+                  name: 'Математический анализ',
+                  teacher: 'Зуев А.С.',
+                  room: 'А-419',
+                  type: 'Практика'),
+            )
+          ],
+        ),
       ),
     ]);
   }
@@ -213,7 +128,7 @@ class _SchedulePageViewState extends State<SchedulePageView> {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: List.generate(
               _daysData.length,
-              (index) => dayOfWeekButton(index: index),
+              (index) => dayOfWeekButton(index),
             ),
           ),
         ),

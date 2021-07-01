@@ -14,7 +14,7 @@ class SettingsButton extends StatelessWidget {
         child: ListTile(
           leading: Icon(
             icon,
-            color: Theme.of(context).textTheme.bodyText1.color,
+            color: Theme.of(context).textTheme.bodyText1?.color,
           ),
           title: Text(text),
           trailing: Icon(Icons.arrow_forward_ios),

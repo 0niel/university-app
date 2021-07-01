@@ -46,7 +46,7 @@ class SettingsScreen extends StatelessWidget {
                           style: Theme.of(context)
                               .textTheme
                               .button
-                              .copyWith(color: Colors.blueAccent),
+                              ?.copyWith(color: Colors.blueAccent),
                         ),
                       ],
                     ),
