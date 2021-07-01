@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:rtu_mirea_app/constants.dart';
 import 'package:rtu_mirea_app/screens/home/home_screen.dart';
 
 class OnboardingScreen extends StatefulWidget {
@@ -32,7 +33,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       height: 8.0,
       width: isActive ? 24.0 : 16.0,
       decoration: BoxDecoration(
-        color: isActive ? Colors.white : Color(0xFF7B8794),
+        color: isActive ? Colors.white : LightThemeColors.grey200,
         borderRadius: BorderRadius.all(Radius.circular(12.0)),
       ),
     );
@@ -54,13 +55,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     0.1,
                     0.4,
                     0.7,
-                    0.9
                   ],
                       colors: [
-                    Color(0xFF1A6234),
-                    Color(0xFF34C369),
-                    Color(0xFF97E3B3),
-                    Color(0xFFCBF1D9),
+                    Theme.of(context).primaryColorDark,
+                    Theme.of(context).primaryColor,
+                    Theme.of(context).primaryColorLight,
                   ])),
               child: Padding(
                   padding: EdgeInsets.symmetric(vertical: 40.0),
@@ -78,7 +77,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                                 );
                               },
                               child: Text(
-                                'Skip',
+                                'Пропустить',
                                 style: TextStyle(
                                   color: Colors.white,
                                   fontSize: 20.0,
@@ -215,7 +214,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                                     mainAxisSize: MainAxisSize.min,
                                     children: <Widget>[
                                       Text(
-                                        'Next',
+                                        'Далее',
                                         style: TextStyle(
                                             color: Colors.white,
                                             fontSize: 22.0),
@@ -236,15 +235,15 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           ? Container(
               height: 100.0,
               width: double.infinity,
-              color: Color(0xFFCBF1D9),
+              color: Theme.of(context).primaryColorLight,
               child: GestureDetector(
                 child: Center(
                   child: Padding(
                     padding: EdgeInsets.only(bottom: 30.0),
                     child: Text(
-                      'Get Started',
+                      'Начать',
                       style: TextStyle(
-                        color: Color(0xFF2F80ED),
+                        color: LightThemeColors.white,
                         fontSize: 20.0,
                         fontWeight: FontWeight.bold,
                       ),
