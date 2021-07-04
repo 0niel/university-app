@@ -219,7 +219,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             Positioned(
               left: 0,
               right: 0,
-              top: MediaQuery.of(context).size.height * 0.53,
+              top: MediaQuery.of(context).size.height * 0.52,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
