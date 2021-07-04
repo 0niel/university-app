@@ -244,18 +244,15 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 children: [
                   _containersText[index]['title_text_widget'],
                   SizedBox(height: 8.0),
-                  Align(
-                    alignment: Alignment.topCenter,
-                    child: Text(
-                      _containersText[index]['content'],
-                      style: TextStyle(
-                        fontFamily: 'Montserrat',
-                        fontWeight: FontWeight.w500,
-                        fontSize: 24.0,
-                        color: Colors.black,
-                      ),
+                  Text(
+                    _containersText[index]['content'],
+                    style: TextStyle(
+                      fontFamily: 'Montserrat',
+                      fontWeight: FontWeight.w500,
+                      fontSize: 24.0,
+                      color: Colors.black,
                     ),
-                  )
+                  ),
                 ],
               ),
             ),
