@@ -83,6 +83,24 @@ flutter:
           weight: 600
         - asset: assets/fonts/Oswald/Oswald-Bold.ttf
           weight: 700
+    - family: Ubuntu
+      fonts:
+        - asset: assets/fonts/Ubuntu/Ubuntu-Light.ttf
+          weight: 300
+        - asset: assets/fonts/Ubuntu/Ubuntu-LightItalic.ttf
+          weight: 300
+        - asset: assets/fonts/Ubuntu/Ubuntu-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Ubuntu/Ubuntu-Italic.ttf
+          weight: 400
+        - asset: assets/fonts/Ubuntu/Ubuntu-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Ubuntu/Ubuntu-MediumItalic.ttf
+          weight: 500
+        - asset: assets/fonts/Ubuntu/Ubuntu-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/Ubuntu/Ubuntu-BoldItalic.ttf
+          weight: 700
     - family: Roboto
       fonts:
         - asset: assets/fonts/Roboto/Roboto-Regular.ttf

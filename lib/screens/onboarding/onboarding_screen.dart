@@ -12,10 +12,9 @@ class OnboardingScreen extends StatefulWidget {
 
 class _OnboardingScreenState extends State<OnboardingScreen> {
   final introdate = GetStorage();
-
-  final int _numPages = 3;
-  PageController _pageController = PageController(initialPage: 0);
+  final int _numPages = 5;
   int _currentPage = 0;
+  PageController _pageController = PageController(initialPage: 0);
 
   List<Widget> _buildPageIndicator() {
     List<Widget> list = [];
@@ -26,17 +25,225 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   Widget _indicator(bool isActive) {
-    //индикатор номера страницы
+    // индикатор номера страницы
     return AnimatedContainer(
       duration: Duration(milliseconds: 150),
-      margin: EdgeInsets.symmetric(horizontal: 8.0),
-      height: 8.0,
-      width: isActive ? 24.0 : 16.0,
+      margin: EdgeInsets.symmetric(horizontal: 3.75),
+      height: isActive ? 15.0 : 11.0,
+      width: isActive ? 15.0 : 11.0,
       decoration: BoxDecoration(
-        color: isActive ? Colors.white : LightThemeColors.grey200,
+        color: isActive ? Colors.white : LightThemeColors.grey100,
         borderRadius: BorderRadius.all(Radius.circular(12.0)),
+        boxShadow: <BoxShadow>[
+          isActive
+              ? BoxShadow(
+                  color: Colors.black.withOpacity(0.25),
+                  offset: Offset(0.0, 2.0),
+                  blurRadius: 4.0,
+                )
+              : BoxShadow(color: Colors.transparent),
+        ],
       ),
     );
+  }
+
+  Widget _buildNextButton(bool isLastPage) {
+    return AnimatedContainer(
+      duration: Duration(milliseconds: 250),
+      margin: EdgeInsets.symmetric(horizontal: 3.75),
+      child: ElevatedButton(
+        onPressed: () {
+          if (_currentPage == _numPages - 1) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => HomeScreen()),
+            );
+          } else {
+            _pageController.nextPage(
+                duration: Duration(milliseconds: 300), curve: Curves.ease);
+          }
+        },
+        child: AnimatedContainer(
+          duration: Duration(milliseconds: 150),
+          padding: isLastPage
+              ? EdgeInsets.symmetric(vertical: 20.0, horizontal: 55.0)
+              : EdgeInsets.symmetric(vertical: 20.0, horizontal: 5),
+          child: isLastPage
+              ? Text(
+                  "Начать!",
+                  style: TextStyle(
+                      fontFamily: 'Ubuntu',
+                      fontWeight: FontWeight.w500,
+                      color: Colors.black,
+                      fontSize: 24.0),
+                )
+              : Icon(Icons.arrow_forward_ios, color: Colors.black),
+        ),
+        style: ElevatedButton.styleFrom(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20.0),
+          ),
+          onPrimary: Colors.black.withOpacity(0.25),
+          shadowColor: Colors.black,
+          primary: Colors.white,
+          elevation: 4.0,
+        ),
+      ),
+    );
+  }
+
+  final List<Color> _containersColors = [
+    Color.fromRGBO(30, 144, 255, 0.5),
+    Color.fromRGBO(255, 155, 112, 0.5),
+    Color.fromRGBO(255, 165, 2, 0.5),
+    Color.fromRGBO(55, 66, 250, 0.5),
+    Color.fromRGBO(255, 127, 80, 1.0),
+  ];
+
+  final List<Image> _containersImages = [
+    Image(image: AssetImage('assets/images/Saly-1.png')),
+    Image(image: AssetImage('assets/images/Saly-2.png')),
+    Image(image: AssetImage('assets/images/Saly-3.png')),
+    Image(image: AssetImage('assets/images/Saly-4.png')),
+    Image(image: AssetImage('assets/images/Saly-5.png')),
+  ];
+
+  final List _containersText = [
+    {
+      'title_text_widget': Text(
+        'Добро пожаловать!',
+        style: TextStyle(
+            fontFamily: 'Ubuntu',
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+            fontSize: 30.0),
+        overflow: TextOverflow.ellipsis,
+        maxLines: 3,
+      ),
+      'content': 'Это приложение было создано студентами для студентов'
+    },
+    {
+      'title_text_widget': Text(
+        'Смотри расписание!',
+        style: TextStyle(
+            fontFamily: 'Ubuntu',
+            fontWeight: FontWeight.bold,
+            color: Color(0xFFF28080),
+            fontSize: 30.0),
+        overflow: TextOverflow.ellipsis,
+        maxLines: 3,
+      ),
+      'content':
+          'Как же легко оказывается можно смотреть расписание, а главное быстро'
+    },
+    {
+      'title_text_widget': Text(
+        'Будь вкурсе не надевая штаны!',
+        style: TextStyle(
+            fontFamily: 'Ubuntu',
+            fontWeight: FontWeight.bold,
+            color: Color(0xFFE26B96),
+            fontSize: 30.0),
+        overflow: TextOverflow.ellipsis,
+        maxLines: 3,
+      ),
+      'content':
+          'Иногда так лень заходить на сайт и искать нужную тебе информацию, мы это исправили'
+    },
+    {
+      'title_text_widget': Text(
+        'Ставь цели!',
+        style: TextStyle(
+            fontFamily: 'Ubuntu',
+            fontWeight: FontWeight.bold,
+            color: Color(0xFFFFB059),
+            fontSize: 30.0),
+        overflow: TextOverflow.ellipsis,
+        maxLines: 3,
+      ),
+      'content':
+          'Как же много дедлайнов!? Создавать дедлайны теперь как никогда просто и удобно'
+    },
+    {
+      'title_text_widget': Text(
+        'Коммуницируй!',
+        style: TextStyle(
+            fontFamily: 'Ubuntu',
+            fontWeight: FontWeight.bold,
+            color: Color(0xFF384CFF),
+            fontSize: 30.0),
+        overflow: TextOverflow.ellipsis,
+        maxLines: 3,
+      ),
+      'content':
+          'Слово сложное, но все легко. Общайся и делись материалами с другими группами мгновенно'
+    },
+  ];
+
+  double _getImageTopPadding(int page) {
+    switch (page) {
+      case 0:
+        return 18.0;
+      case 1:
+        return 70.0;
+      case 2:
+        return 73.0;
+      case 3:
+        return 0.0;
+      case 4:
+        return 91.0;
+      default:
+        return 0.0;
+    }
+  }
+
+  List<Widget> _buildPageView() {
+    return List.generate(_numPages, (index) {
+      return Padding(
+        padding: EdgeInsets.symmetric(horizontal: 20.0),
+        child: Stack(
+          alignment: AlignmentDirectional.center,
+          textDirection: TextDirection.ltr,
+          fit: StackFit.expand,
+          children: <Widget>[
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              child: Center(
+                child: Padding(
+                    padding: EdgeInsets.only(top: _getImageTopPadding(index)),
+                    child: _containersImages[index]),
+              ),
+            ),
+            Positioned(
+              left: 0,
+              right: 0,
+              top: MediaQuery.of(context).size.height * 0.53,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _containersText[index]['title_text_widget'],
+                  SizedBox(height: 8.0),
+                  Align(
+                    alignment: Alignment.topCenter,
+                    child: Text(
+                      _containersText[index]['content'],
+                      style: TextStyle(
+                        fontFamily: 'Ubuntu',
+                        fontWeight: FontWeight.w500,
+                        fontSize: 24.0,
+                        color: Colors.black,
+                      ),
+                    ),
+                  )
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+    });
   }
 
   @override
@@ -44,222 +251,64 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     return Scaffold(
       //Все 3 экрана + скип + выхода из приветствия
       body: AnnotatedRegion<SystemUiOverlayStyle>(
-          value: SystemUiOverlayStyle.light,
-          child: Container(
-              decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      stops: [
-                    // Основной цвет экранов в градиенте
-                    0.1,
-                    0.4,
-                    0.7,
-                  ],
-                      colors: [
-                    Theme.of(context).primaryColorDark,
-                    Theme.of(context).primaryColor,
-                    Theme.of(context).primaryColorLight,
-                  ])),
-              child: Padding(
-                  padding: EdgeInsets.symmetric(vertical: 40.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: <Widget>[
-                      Container(
-                          alignment: Alignment.centerRight,
-                          child: TextButton(
-                              onPressed: () {
-                                Navigator.push(
+        value: SystemUiOverlayStyle.light,
+        child: Container(
+          color: _containersColors[_currentPage],
+          child: SafeArea(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                Expanded(
+                  child: PageView(
+                    physics: ClampingScrollPhysics(),
+                    controller: _pageController,
+                    onPageChanged: (int page) {
+                      //Индикатор страницы
+                      setState(() {
+                        _currentPage = page;
+                      });
+                    },
+                    children: _buildPageView(),
+                  ),
+                ),
+                Padding(
+                  padding:
+                      EdgeInsets.symmetric(vertical: 65.0, horizontal: 20.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      _currentPage == _numPages - 1
+                          ? Container()
+                          : InkWell(
+                              onTap: () {
+                                Navigator.pushReplacement(
                                   context,
                                   MaterialPageRoute(
                                       builder: (context) => HomeScreen()),
                                 );
                               },
                               child: Text(
-                                'Пропустить',
+                                "Пропустить",
                                 style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 20.0,
-                                ),
-                              ))), //Пропуск обучения
-                      Expanded(
-                        child: PageView(
-                          physics: ClampingScrollPhysics(),
-                          controller: _pageController,
-                          onPageChanged: (int page) {
-                            //Индикатор страницы
-                            setState(() {
-                              _currentPage = page;
-                            });
-                          },
-                          children: <Widget>[
-                            //Одинаковые слои, меняются картинки/текст
-                            Padding(
-                                padding: EdgeInsets.all(40.0),
-                                child: Column(
-                                  children: <Widget>[
-                                    Center(
-                                        child: Image(
-                                      image: AssetImage(
-                                        'assets/images/Book1.png',
-                                      ),
-                                      height: 300.0,
-                                      width: 300.0,
-                                    )),
-                                    SizedBox(
-                                        height: 30.0,
-                                        child: Center(
-                                          child: Text(
-                                            'Расписание',
-                                            style: TextStyle(
-                                                fontFamily: 'Roboto',
-                                                color: Colors.white,
-                                                fontSize: 25.0),
-                                          ),
-                                        )),
-                                    SizedBox(height: 15.0),
-                                    Align(
-                                        alignment: Alignment.topCenter,
-                                        child: Text(
-                                            'Здесь вы можете увидеть актуальное расписание для своей группы',
-                                            style: TextStyle(
-                                              fontSize: 18.0,
-                                              color: Colors.white,
-                                            )))
-                                  ],
-                                )),
-                            Padding(
-                                padding: EdgeInsets.all(40.0),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: <Widget>[
-                                    Center(
-                                        child: Image(
-                                      image: AssetImage(
-                                        'assets/images/TeachSchedule.png',
-                                      ),
-                                      height: 300.0,
-                                      width: 300.0,
-                                    )),
-                                    SizedBox(
-                                        height: 38.0,
-                                        child: Center(
-                                          child: Text(
-                                            'Поиск преподавателей',
-                                            style: TextStyle(
-                                                color: Colors.white,
-                                                fontSize: 25.0),
-                                          ),
-                                        )),
-                                    SizedBox(height: 15.0),
-                                    Text(
-                                        'Расписание преподователей для поиска в университете',
-                                        style: TextStyle(
-                                          fontSize: 20.0,
-                                          color: Colors.white,
-                                        ))
-                                  ],
-                                )),
-                            Padding(
-                                padding: EdgeInsets.all(40.0),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: <Widget>[
-                                    Center(
-                                        child: Image(
-                                      image: AssetImage(
-                                        'assets/images/Doge.png',
-                                      ),
-                                      height: 300.0,
-                                      width: 300.0,
-                                    )),
-                                    SizedBox(
-                                        height: 30.0,
-                                        child: Center(
-                                          child: Text(
-                                            'Карта вуза',
-                                            style: TextStyle(
-                                                color: Colors.white,
-                                                fontSize: 25.0),
-                                          ),
-                                        )),
-                                    SizedBox(height: 15.0),
-                                    Text('Ну тут и так все понятно',
-                                        style: TextStyle(
-                                          fontSize: 15.0,
-                                          color: Colors.white,
-                                        ))
-                                  ],
-                                ))
-                          ],
-                        ),
-                      ),
+                                    fontFamily: 'Ubuntu',
+                                    fontWeight: FontWeight.w500,
+                                    color: Color(0xFFE5E5E5),
+                                    fontSize: 12.0),
+                              ),
+                            ),
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: _buildPageIndicator(),
+                        children: [..._buildPageIndicator()],
                       ),
-                      _currentPage != _numPages - 1
-                          ? Container(
-                              child: Align(
-                              alignment: FractionalOffset.bottomRight,
-                              child: TextButton(
-                                  onPressed: () {
-                                    _pageController.nextPage(
-                                        duration: Duration(milliseconds: 300),
-                                        curve: Curves.ease);
-                                  },
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: <Widget>[
-                                      Text(
-                                        'Далее',
-                                        style: TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 22.0),
-                                      ),
-                                      SizedBox(height: 10.0, width: 10.0),
-                                      Icon(
-                                        Icons.arrow_forward,
-                                        color: Colors.white,
-                                        size: 30.0,
-                                      )
-                                    ],
-                                  )),
-                            ))
-                          : Text('')
+                      _buildNextButton(_currentPage == _numPages - 1),
                     ],
-                  )))),
-      bottomSheet: _currentPage == _numPages - 1
-          ? Container(
-              height: 100.0,
-              width: double.infinity,
-              color: Theme.of(context).primaryColorLight,
-              child: GestureDetector(
-                child: Center(
-                  child: Padding(
-                    padding: EdgeInsets.only(bottom: 30.0),
-                    child: Text(
-                      'Начать',
-                      style: TextStyle(
-                        color: LightThemeColors.white,
-                        fontSize: 20.0,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
                   ),
                 ),
-                onTap: () {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (context) => HomeScreen()),
-                  );
-                  introdate.write("displayed", true);
-                },
-              ),
-            )
-          : Text(''),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
