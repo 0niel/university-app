@@ -9,9 +9,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   SharedPreferences prefs = await SharedPreferences.getInstance();
-  bool isFirstTime = prefs.getBool('is_first_time') ?? false;
-  await prefs.setBool("is_first_time", true);
-  runApp(App(isFirstTime));
+  bool showOnboarding = prefs.getBool('show_onboarding') ?? true;
+  await prefs.setBool("show_onboarding", false);
+  runApp(App(showOnboarding));
 }
 
 class App extends StatelessWidget {
