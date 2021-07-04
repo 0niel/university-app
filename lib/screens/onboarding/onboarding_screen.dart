@@ -118,7 +118,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     ),
     Image(
       image: AssetImage('assets/images/Saly-4.png'),
-      height: 560.0,
+      height: 375.0,
       width: 315.0,
     ),
     Image(
@@ -190,7 +190,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         style: TextStyle(
             fontFamily: 'Montserrat',
             fontWeight: FontWeight.bold,
-            color: Color(0xFF384CFF),
+            color: Color(0xFF4356FF),
             fontSize: 30.0),
         overflow: TextOverflow.ellipsis,
         maxLines: 3,
@@ -209,7 +209,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       case 2:
         return 73.0;
       case 3:
-        return 0.0;
+        return 30.0;
       case 4:
         return 91.0;
       default:
@@ -238,7 +238,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             Positioned(
               left: 0,
               right: 0,
-              top: MediaQuery.of(context).size.height * 0.52,
+              top: MediaQuery.of(context).size.height * 0.48,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -293,7 +293,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 ),
                 Padding(
                   padding:
-                      EdgeInsets.only(bottom: 65.0, left: 20.0, right: 20.0),
+                      EdgeInsets.only(bottom: 35.0, left: 20.0, right: 20.0),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     crossAxisAlignment: CrossAxisAlignment.center,
