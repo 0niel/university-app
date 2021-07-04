@@ -7,14 +7,18 @@ class Schedule {
   dynamic scheduleData;
 
   Future<void> request(String groupName) async {
-    final response =
-        await http.get(Uri.parse(kScheduleApiUrl + '$groupName/full_schedule'));
+    try {
+      final response = await http
+          .get(Uri.parse(scheduleApiUrl + '$groupName/full_schedule'));
 
-    if (response.statusCode == 200) {
-      scheduleData = json.decode(response.body)['schedule'];
-      print(scheduleData);
-    } else {
-      print(response.statusCode);
+      if (response.statusCode == 200) {
+        scheduleData = json.decode(response.body)['schedule'];
+        print(scheduleData);
+      } else {
+        print(response.statusCode);
+      }
+    } catch (e) {
+      print(e.toString());
     }
   }
 

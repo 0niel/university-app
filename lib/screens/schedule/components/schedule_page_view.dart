@@ -1,30 +1,8 @@
-import 'dart:convert';
-import 'dart:io';
-
 import 'package:flutter/material.dart';
-import 'package:flutter/physics.dart';
+import 'package:rtu_mirea_app/constants.dart';
 import 'package:rtu_mirea_app/models/lesson.dart';
-import 'package:rtu_mirea_app/screens/schedule/components/schedule_container.dart';
+import 'package:rtu_mirea_app/screens/schedule/components/lesson_card.dart';
 import 'package:rtu_mirea_app/utils/calendar.dart';
-import 'package:rtu_mirea_app/utils/schedule.dart';
-import '../../../constants.dart';
-
-class SchedulePageViewScrollPhysics extends ScrollPhysics {
-  const SchedulePageViewScrollPhysics({ScrollPhysics parent})
-      : super(parent: parent);
-
-  @override
-  SchedulePageViewScrollPhysics applyTo(ScrollPhysics ancestor) {
-    return SchedulePageViewScrollPhysics(parent: buildParent(ancestor));
-  }
-
-  @override
-  SpringDescription get spring => const SpringDescription(
-        mass: 85,
-        stiffness: 80,
-        damping: 1,
-      );
-}
 
 class SchedulePageView extends StatefulWidget {
   @override
@@ -32,22 +10,13 @@ class SchedulePageView extends StatefulWidget {
 }
 
 class _SchedulePageViewState extends State<SchedulePageView> {
-  int currentWeek;
-  List<int> currentWeekDays;
-  int currentPage = 0;
+  late int _currentWeek;
+  late List<int> _currentWeekDays;
+  int _currentPage = 0;
 
-  List<Map<String, String>> daysData;
+  late List<Map<String, String>> _daysData;
 
-  List<Widget> scheduleContainers = [
-    Container(),
-    Container(),
-    Container(),
-    Container(),
-    Container(),
-    Container(),
-  ];
-
-  AnimatedContainer dayOfWeekButton({int index}) {
+  AnimatedContainer dayOfWeekButton(int index) {
     return AnimatedContainer(
       duration: Duration(milliseconds: 80),
       padding: EdgeInsets.symmetric(vertical: 8),
@@ -55,7 +24,9 @@ class _SchedulePageViewState extends State<SchedulePageView> {
       width: 47.5,
       curve: Curves.fastOutSlowIn,
       decoration: BoxDecoration(
-        color: currentPage == index ? kPrimaryColor : Colors.transparent,
+        color: _currentPage == index
+            ? Theme.of(context).primaryColor
+            : Colors.transparent,
         borderRadius: BorderRadius.all(Radius.circular(10)),
       ),
       child: RichText(
@@ -63,17 +34,17 @@ class _SchedulePageViewState extends State<SchedulePageView> {
         text: TextSpan(
           children: [
             TextSpan(
-              text: daysData[index]['day_of_week'] + "\n",
+              text: (_daysData[index]['day_of_week'] ?? "") + "\n",
               style: TextStyle(
                 fontWeight: FontWeight.normal,
-                color: currentPage == index ? Colors.white : Color(0xFFBCC1CD),
+                color: _currentPage == index ? Colors.white : Color(0xFFBCC1CD),
                 fontSize: 16,
               ),
             ),
             TextSpan(
-              text: daysData[index]['num'],
+              text: _daysData[index]['num'],
               style: TextStyle(
-                  color: currentPage == index ? Colors.white : Colors.black,
+                  color: _currentPage == index ? Colors.white : Colors.black,
                   fontSize: 19,
                   fontWeight: FontWeight.bold),
             ),
@@ -88,69 +59,91 @@ class _SchedulePageViewState extends State<SchedulePageView> {
     super.initState();
 
     // initialize data
-    currentWeek = Calendar.getCurrentWeek();
-    currentWeekDays = Calendar.getDaysInWeek(currentWeek);
-    daysData = [
-      {'day_of_week': 'ПН', 'num': currentWeekDays[0].toString()},
-      {'day_of_week': 'ВТ', 'num': currentWeekDays[1].toString()},
-      {'day_of_week': 'СР', 'num': currentWeekDays[2].toString()},
-      {'day_of_week': 'ЧТ', 'num': currentWeekDays[3].toString()},
-      {'day_of_week': 'ПТ', 'num': currentWeekDays[4].toString()},
-      {'day_of_week': 'СБ', 'num': currentWeekDays[5].toString()},
+    _currentWeek = Calendar.getCurrentWeek();
+    _currentWeekDays = Calendar.getDaysInWeek(_currentWeek);
+    _daysData = [
+      {'day_of_week': 'ПН', 'num': _currentWeekDays[0].toString()},
+      {'day_of_week': 'ВТ', 'num': _currentWeekDays[1].toString()},
+      {'day_of_week': 'СР', 'num': _currentWeekDays[2].toString()},
+      {'day_of_week': 'ЧТ', 'num': _currentWeekDays[3].toString()},
+      {'day_of_week': 'ПТ', 'num': _currentWeekDays[4].toString()},
+      {'day_of_week': 'СБ', 'num': _currentWeekDays[5].toString()},
     ];
-
-    buildScheduleContainers('ИКБО-25-20');
   }
 
-  void buildScheduleContainers(String groupName) {
-    Schedule schedule = Schedule();
-    schedule.request(groupName).then((_) {
-      print('true');
-      print(schedule.scheduleData);
-      List<Widget> containers = [];
-      var scheduleWeekLessons = schedule.getWeekLessons(currentWeek);
-      for (int i = 0; i < scheduleWeekLessons.length; i++) {
-        List<Lesson> lessons = [];
-        for (var lesson in scheduleWeekLessons[i]) {
-          lessons.add(lesson);
-        }
-        containers.add(ScheduleContainer(lessons));
-      }
-
-      setState(() {
-        scheduleContainers = containers;
-      });
-    });
+  Widget _getPageViewContent(BuildContext context) {
+    return Column(children: [
+      Padding(
+        padding: EdgeInsets.all(20),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "Время",
+              style: Theme.of(context)
+                  .textTheme
+                  .bodyText1
+                  ?.copyWith(color: LightThemeColors.grey400),
+            ),
+            Padding(padding: EdgeInsets.only(right: 40)),
+            Text(
+              "Предмет",
+              style: Theme.of(context)
+                  .textTheme
+                  .bodyText1
+                  ?.copyWith(color: LightThemeColors.grey400),
+            )
+          ],
+        ),
+      ),
+      Padding(
+        padding: EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            LessonCard(
+              Lesson(
+                  timeStart: '09.00',
+                  timeEnd: '10:30',
+                  name: 'Математический анализ',
+                  teacher: 'Зуев А.С.',
+                  room: 'А-419',
+                  type: 'Практика'),
+            )
+          ],
+        ),
+      ),
+    ]);
   }
 
   @override
   Widget build(BuildContext context) {
     return Column(
-      children: <Widget>[
+      children: [
         Container(
           height: 80,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: List.generate(
-              daysData.length,
-              (index) => dayOfWeekButton(index: index),
+              _daysData.length,
+              (index) => dayOfWeekButton(index),
             ),
           ),
         ),
+        Divider(height: 1, color: Colors.black.withOpacity(0.1)),
         Expanded(
-          child: Container(
-            child: PageView.builder(
-              physics: SchedulePageViewScrollPhysics(),
-              onPageChanged: (value) {
-                setState(() {
-                  currentPage = value;
-                });
-              },
-              itemCount: 6, // пн-пт
-              itemBuilder: (context, index) => scheduleContainers[index],
-            ),
+          child: PageView.builder(
+            onPageChanged: (value) {
+              setState(() {
+                _currentPage = value;
+              });
+            },
+            itemCount: 6, // пн-пт
+            itemBuilder: (context, index) => _getPageViewContent(context),
           ),
-        ),
+        )
       ],
     );
   }

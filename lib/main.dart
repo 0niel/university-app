@@ -1,14 +1,26 @@
+import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:rtu_mirea_app/routes.dart';
-import 'package:rtu_mirea_app/screens/schedule/schedule_screen.dart';
-import 'constants.dart';
+import 'package:rtu_mirea_app/screens/home/home_screen.dart';
+import 'package:rtu_mirea_app/screens/onboarding/onboarding_screen.dart';
+import 'package:rtu_mirea_app/theme.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-void main() {
-  runApp(App());
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  bool showOnboarding = prefs.getBool('show_onboarding') ?? true;
+  await prefs.setBool("show_onboarding", false);
+  runApp(App(showOnboarding));
 }
 
 class App extends StatelessWidget {
+  late final bool _showOnboarding;
+
+  /// bool переменная [_showOnboarding] определяет, показывать ли
+  /// intro (onboarding) экран при запуске приложения
+  App(this._showOnboarding);
+
   @override
   Widget build(BuildContext context) {
     // блокируем ориентацию приложения на
@@ -18,16 +30,17 @@ class App extends StatelessWidget {
       DeviceOrientation.portraitUp,
     ]);
 
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Приложение РТУ МИРЭА',
-      theme: ThemeData(
-        primaryColor: kPrimaryColor,
-        accentColor: kPrimaryColor,
-        visualDensity: VisualDensity.adaptivePlatformDensity,
+    return AdaptiveTheme(
+      light: lightTheme,
+      dark: darkTheme,
+      initial: AdaptiveThemeMode.light,
+      builder: (theme, darkTheme) => MaterialApp(
+        debugShowCheckedModeBanner: false,
+        title: 'Приложение РТУ МИРЭА',
+        theme: theme,
+        darkTheme: darkTheme,
+        home: _showOnboarding ? OnboardingScreen() : HomeScreen(),
       ),
-      initialRoute: ScheduleScreen.routeName,
-      routes: routes,
     );
   }
 }

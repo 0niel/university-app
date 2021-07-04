@@ -18,20 +18,25 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 version: 1.0.0+1
 
 environment:
-  sdk: ">=2.7.0 <3.0.0"
+  sdk: ">=2.12.0 <3.0.0"
 
 dependencies:
   flutter:
     sdk: flutter
-  http: ^0.13.0
-  shared_preferences: ^2.0.5
-  assorted_layout_widgets: ^4.0.8
+  http: ^0.13.3
+  shared_preferences: ^2.0.6
+  assorted_layout_widgets: ^5.0.1
   flutter_svg: ^0.22.0
+  adaptive_theme: ^2.2.0
 
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.2
+  after_layout: ^1.1.0
+  get:
+  get_storage:
+
 
 dev_dependencies:
   flutter_test:
@@ -63,18 +68,59 @@ flutter:
   # in this "flutter" section. Each entry in this list should have a
   # "family" key with the font family name, and a "fonts" key with a
   # list giving the asset and other descriptors for the font. For
-  # example:
-  # fonts:
-  #   - family: Schyler
-  #     fonts:
-  #       - asset: fonts/Schyler-Regular.ttf
-  #       - asset: fonts/Schyler-Italic.ttf
-  #         style: italic
-  #   - family: Trajan Pro
-  #     fonts:
-  #       - asset: fonts/TrajanPro.ttf
-  #       - asset: fonts/TrajanPro_Bold.ttf
-  #         weight: 700
+  fonts:
+    - family: Oswald
+      fonts:
+        - asset: assets/fonts/Oswald/Oswald-ExtraLight.ttf
+          weight: 200
+        - asset: assets/fonts/Oswald/Oswald-Light.ttf
+          weight: 300
+        - asset: assets/fonts/Oswald/Oswald-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Oswald/Oswald-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Oswald/Oswald-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/Oswald/Oswald-Bold.ttf
+          weight: 700
+    - family: Ubuntu
+      fonts:
+        - asset: assets/fonts/Ubuntu/Ubuntu-Light.ttf
+          weight: 300
+        - asset: assets/fonts/Ubuntu/Ubuntu-LightItalic.ttf
+          weight: 300
+        - asset: assets/fonts/Ubuntu/Ubuntu-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Ubuntu/Ubuntu-Italic.ttf
+          weight: 400
+        - asset: assets/fonts/Ubuntu/Ubuntu-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Ubuntu/Ubuntu-MediumItalic.ttf
+          weight: 500
+        - asset: assets/fonts/Ubuntu/Ubuntu-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/Ubuntu/Ubuntu-BoldItalic.ttf
+          weight: 700
+    - family: Montserrat
+      fonts:
+        - asset: assets/fonts/Montserrat/Montserrat-Light.ttf
+          weight: 300
+        - asset: assets/fonts/Montserrat/Montserrat-LightItalic.ttf
+          weight: 300
+        - asset: assets/fonts/Montserrat/Montserrat-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Montserrat/Montserrat-Italic.ttf
+          weight: 400
+        - asset: assets/fonts/Montserrat/Montserrat-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Montserrat/Montserrat-MediumItalic.ttf
+          weight: 500
+        - asset: assets/fonts/Montserrat/Montserrat-Bold.ttf
+          weight: 700
+    - family: Roboto
+      fonts:
+        - asset: assets/fonts/Roboto/Roboto-Regular.ttf
+          weight: 400
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages

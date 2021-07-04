@@ -3,10 +3,10 @@ class Lesson {
   final String name, teacher, room, type;
 
   Lesson(
-      {this.timeStart,
-      this.timeEnd,
-      this.name,
-      this.teacher,
-      this.room,
-      this.type});
+      {required this.timeStart,
+      required this.timeEnd,
+      required this.name,
+      required this.teacher,
+      required this.room,
+      required this.type});
 }
