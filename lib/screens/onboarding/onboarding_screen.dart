@@ -72,7 +72,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               ? Text(
                   "Начать!",
                   style: TextStyle(
-                      fontFamily: 'Ubuntu',
+                      fontFamily: 'Montserrat',
                       fontWeight: FontWeight.w500,
                       color: Colors.black,
                       fontSize: 24.0),
@@ -101,11 +101,31 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   ];
 
   final List<Image> _containersImages = [
-    Image(image: AssetImage('assets/images/Saly-1.png')),
-    Image(image: AssetImage('assets/images/Saly-2.png')),
-    Image(image: AssetImage('assets/images/Saly-3.png')),
-    Image(image: AssetImage('assets/images/Saly-4.png')),
-    Image(image: AssetImage('assets/images/Saly-5.png')),
+    Image(
+      image: AssetImage('assets/images/Saly-1.png'),
+      height: 375.0,
+      width: 375.0,
+    ),
+    Image(
+      image: AssetImage('assets/images/Saly-2.png'),
+      height: 324.0,
+      width: 328.0,
+    ),
+    Image(
+      image: AssetImage('assets/images/Saly-3.png'),
+      height: 315.0,
+      width: 315.0,
+    ),
+    Image(
+      image: AssetImage('assets/images/Saly-4.png'),
+      height: 560.0,
+      width: 315.0,
+    ),
+    Image(
+      image: AssetImage('assets/images/Saly-5.png'),
+      height: 315.0,
+      width: 315.0,
+    ),
   ];
 
   final List _containersText = [
@@ -113,7 +133,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       'title_text_widget': Text(
         'Добро пожаловать!',
         style: TextStyle(
-            fontFamily: 'Ubuntu',
+            fontFamily: 'Montserrat',
             fontWeight: FontWeight.bold,
             color: Colors.white,
             fontSize: 30.0),
@@ -126,7 +146,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       'title_text_widget': Text(
         'Смотри расписание!',
         style: TextStyle(
-            fontFamily: 'Ubuntu',
+            fontFamily: 'Montserrat',
             fontWeight: FontWeight.bold,
             color: Color(0xFFF28080),
             fontSize: 30.0),
@@ -140,7 +160,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       'title_text_widget': Text(
         'Будь вкурсе не надевая штаны!',
         style: TextStyle(
-            fontFamily: 'Ubuntu',
+            fontFamily: 'Montserrat',
             fontWeight: FontWeight.bold,
             color: Color(0xFFE26B96),
             fontSize: 30.0),
@@ -148,13 +168,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         maxLines: 3,
       ),
       'content':
-          'Иногда так лень заходить на сайт и искать нужную тебе информацию, мы это исправили'
+          'Иногда так лень заходить на сайт и искать нужную тебе информацию, мы это исправил'
     },
     {
       'title_text_widget': Text(
         'Ставь цели!',
         style: TextStyle(
-            fontFamily: 'Ubuntu',
+            fontFamily: 'Montserrat',
             fontWeight: FontWeight.bold,
             color: Color(0xFFFFB059),
             fontSize: 30.0),
@@ -168,7 +188,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       'title_text_widget': Text(
         'Коммуницируй!',
         style: TextStyle(
-            fontFamily: 'Ubuntu',
+            fontFamily: 'Montserrat',
             fontWeight: FontWeight.bold,
             color: Color(0xFF384CFF),
             fontSize: 30.0),
@@ -204,7 +224,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         child: Stack(
           alignment: AlignmentDirectional.center,
           textDirection: TextDirection.ltr,
-          fit: StackFit.expand,
           children: <Widget>[
             Positioned(
               top: 0,
@@ -230,7 +249,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     child: Text(
                       _containersText[index]['content'],
                       style: TextStyle(
-                        fontFamily: 'Ubuntu',
+                        fontFamily: 'Montserrat',
                         fontWeight: FontWeight.w500,
                         fontSize: 24.0,
                         color: Colors.black,
@@ -252,7 +271,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       //Все 3 экрана + скип + выхода из приветствия
       body: AnnotatedRegion<SystemUiOverlayStyle>(
         value: SystemUiOverlayStyle.light,
-        child: Container(
+        child: AnimatedContainer(
+          duration: Duration(milliseconds: 200),
           color: _containersColors[_currentPage],
           child: SafeArea(
             child: Column(
@@ -273,7 +293,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 ),
                 Padding(
                   padding:
-                      EdgeInsets.symmetric(vertical: 65.0, horizontal: 20.0),
+                      EdgeInsets.only(bottom: 65.0, left: 20.0, right: 20.0),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     crossAxisAlignment: CrossAxisAlignment.center,
@@ -291,7 +311,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                               child: Text(
                                 "Пропустить",
                                 style: TextStyle(
-                                    fontFamily: 'Ubuntu',
+                                    fontFamily: 'Montserrat',
                                     fontWeight: FontWeight.w500,
                                     color: Color(0xFFE5E5E5),
                                     fontSize: 12.0),
