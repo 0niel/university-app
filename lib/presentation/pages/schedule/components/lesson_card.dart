@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:rtu_mirea_app/constants.dart';
-import 'package:rtu_mirea_app/models/lesson.dart';
+import 'package:rtu_mirea_app/domain/entities/lesson.dart';
 
 class LessonCard extends StatelessWidget {
   final Lesson _lesson;

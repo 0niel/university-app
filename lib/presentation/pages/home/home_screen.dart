@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:rtu_mirea_app/screens/schedule/schedule_screen.dart';
-import 'package:rtu_mirea_app/screens/settings/settings_screen.dart';
+import 'package:rtu_mirea_app/presentation/pages/schedule/schedule_screen.dart';
+import 'package:rtu_mirea_app/presentation/pages/settings/settings_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   HomeScreen({Key? key}) : super(key: key);
-  static const routeName = '/HomeScreen';
 
   @override
   _HomeScreenState createState() => _HomeScreenState();

@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:rtu_mirea_app/components/settings_button.dart';
+import 'package:rtu_mirea_app/presentation/widgets/settings_button.dart';
 import 'package:rtu_mirea_app/constants.dart';
-import 'package:rtu_mirea_app/screens/settings/group_selection_screet.dart';
+
+import 'group_selection_screet.dart';
 
 class SettingsScreen extends StatelessWidget {
   static const String routeName = "/settings";

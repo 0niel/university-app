@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:rtu_mirea_app/screens/schedule/components/app_bar.dart';
+import 'components/app_bar.dart';
 import 'components/schedule_page_view.dart';
 
 class ScheduleScreen extends StatelessWidget {

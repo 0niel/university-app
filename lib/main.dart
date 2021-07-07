@@ -1,9 +1,10 @@
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:rtu_mirea_app/screens/home/home_screen.dart';
-import 'package:rtu_mirea_app/screens/onboarding/onboarding_screen.dart';
-import 'package:rtu_mirea_app/theme.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:rtu_mirea_app/presentation/pages/onboarding/onboarding_screen.dart';
+import 'package:rtu_mirea_app/presentation/pages/schedule/schedule_screen.dart';
+import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 Future<void> main() async {
@@ -30,16 +31,19 @@ class App extends StatelessWidget {
       DeviceOrientation.portraitUp,
     ]);
 
-    return AdaptiveTheme(
-      light: lightTheme,
-      dark: darkTheme,
-      initial: AdaptiveThemeMode.light,
-      builder: (theme, darkTheme) => MaterialApp(
-        debugShowCheckedModeBanner: false,
-        title: 'Приложение РТУ МИРЭА',
-        theme: theme,
-        darkTheme: darkTheme,
-        home: _showOnboarding ? OnboardingScreen() : HomeScreen(),
+    return MultiBlocProvider(
+      providers: [],
+      child: AdaptiveTheme(
+        light: lightTheme,
+        dark: darkTheme,
+        initial: AdaptiveThemeMode.light,
+        builder: (theme, darkTheme) => MaterialApp(
+          debugShowCheckedModeBanner: false,
+          title: 'Приложение РТУ МИРЭА',
+          theme: theme,
+          darkTheme: darkTheme,
+          home: _showOnboarding ? OnboardingScreen() : ScheduleScreen(),
+        ),
       ),
     );
   }

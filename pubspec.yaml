@@ -23,11 +23,13 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  http: ^0.13.3
+  dio: ^4.0.0
   shared_preferences: ^2.0.6
-  assorted_layout_widgets: ^5.0.1
+  bloc: ^7.0.0
+  flutter_bloc: ^7.0.1
   flutter_svg: ^0.22.0
   adaptive_theme: ^2.2.0
+  equatable: ^2.0.3
 
 
   # The following adds the Cupertino Icons font to your application.
