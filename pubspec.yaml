@@ -30,6 +30,7 @@ dependencies:
   flutter_svg: ^0.22.0
   adaptive_theme: ^2.2.0
   equatable: ^2.0.3
+  hive: ^2.0.4
 
 
   # The following adds the Cupertino Icons font to your application.
