@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:rtu_mirea_app/common/errors/exceptions.dart';
 import 'package:rtu_mirea_app/data/models/schedule_model.dart';
 
 abstract class ScheduleRemoteData {
@@ -15,14 +16,32 @@ class ScheduleRemoteDataApi implements ScheduleRemoteData {
 
   @override
   Future<List<String>> getGroups() async {
-    final response = await _dio.get('/schedule/groups');
-    List<String> groups = response.data['groups'];
-    return groups;
+    try {
+      final response = await _dio.get('/schedule/groups');
+      if (response.statusCode == 200) {
+        List<String> groups = response.data['groups'];
+        return groups;
+      } else {
+        throw RemoteDataException(
+            'Response status code is $response.statusCode');
+      }
+    } catch (e) {
+      throw RemoteDataException(e.toString());
+    }
   }
 
   @override
   Future<ScheduleModel> getScheduleByGroup(String group) async {
-    final response = await _dio.get('/schedule/$group/full_schedule');
-    return ScheduleModel.fromJson(response.data);
+    try {
+      final response = await _dio.get('/schedule/$group/full_schedule');
+      if (response.statusCode == 200) {
+        return ScheduleModel.fromJson(response.data);
+      } else {
+        throw RemoteDataException(
+            'Response status code is $response.statusCode');
+      }
+    } catch (e) {
+      throw RemoteDataException(e.toString());
+    }
   }
 }
