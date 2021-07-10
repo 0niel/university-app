@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get_storage/get_storage.dart';
-import 'package:rtu_mirea_app/constants.dart';
-import 'package:rtu_mirea_app/screens/home/home_screen.dart';
+import 'package:rtu_mirea_app/presentation/colors.dart';
+import 'package:rtu_mirea_app/presentation/pages/home/home_navigator_screen.dart';
 
 class OnboardingScreen extends StatefulWidget {
+  static const String routeName = '/onboarding';
+
   @override
   _OnboardingScreenState createState() => _OnboardingScreenState();
 }
@@ -56,7 +58,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           if (_currentPage == _numPages - 1) {
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (context) => HomeScreen()),
+              MaterialPageRoute(builder: (context) => HomeNavigatorScreen()),
             );
           } else {
             _pageController.nextPage(
@@ -302,7 +304,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                                 Navigator.pushReplacement(
                                   context,
                                   MaterialPageRoute(
-                                      builder: (context) => HomeScreen()),
+                                      builder: (context) =>
+                                          HomeNavigatorScreen()),
                                 );
                               },
                               child: Text(

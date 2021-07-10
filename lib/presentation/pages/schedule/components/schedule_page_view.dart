@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:rtu_mirea_app/constants.dart';
-import 'package:rtu_mirea_app/models/lesson.dart';
-import 'package:rtu_mirea_app/screens/schedule/components/lesson_card.dart';
-import 'package:rtu_mirea_app/utils/calendar.dart';
+import 'package:rtu_mirea_app/common/calendar.dart';
+import 'package:rtu_mirea_app/presentation/colors.dart';
+import 'package:rtu_mirea_app/domain/entities/lesson.dart';
+
+import 'lesson_card.dart';
 
 class SchedulePageView extends StatefulWidget {
   @override
@@ -11,7 +12,7 @@ class SchedulePageView extends StatefulWidget {
 
 class _SchedulePageViewState extends State<SchedulePageView> {
   late int _currentWeek;
-  late List<int> _currentWeekDays;
+  late List<DateTime> _currentWeekDays;
   int _currentPage = 0;
 
   late List<Map<String, String>> _daysData;
@@ -62,12 +63,12 @@ class _SchedulePageViewState extends State<SchedulePageView> {
     _currentWeek = Calendar.getCurrentWeek();
     _currentWeekDays = Calendar.getDaysInWeek(_currentWeek);
     _daysData = [
-      {'day_of_week': 'ПН', 'num': _currentWeekDays[0].toString()},
-      {'day_of_week': 'ВТ', 'num': _currentWeekDays[1].toString()},
-      {'day_of_week': 'СР', 'num': _currentWeekDays[2].toString()},
-      {'day_of_week': 'ЧТ', 'num': _currentWeekDays[3].toString()},
-      {'day_of_week': 'ПТ', 'num': _currentWeekDays[4].toString()},
-      {'day_of_week': 'СБ', 'num': _currentWeekDays[5].toString()},
+      {'day_of_week': 'ПН', 'num': _currentWeekDays[0].day.toString()},
+      {'day_of_week': 'ВТ', 'num': _currentWeekDays[1].day.toString()},
+      {'day_of_week': 'СР', 'num': _currentWeekDays[2].day.toString()},
+      {'day_of_week': 'ЧТ', 'num': _currentWeekDays[3].day.toString()},
+      {'day_of_week': 'ПТ', 'num': _currentWeekDays[4].day.toString()},
+      {'day_of_week': 'СБ', 'num': _currentWeekDays[5].day.toString()},
     ];
   }
 
@@ -110,7 +111,8 @@ class _SchedulePageViewState extends State<SchedulePageView> {
                   name: 'Математический анализ',
                   teacher: 'Зуев А.С.',
                   room: 'А-419',
-                  type: 'Практика'),
+                  type: 'Практика',
+                  weeks: [1, 2, 3]),
             )
           ],
         ),

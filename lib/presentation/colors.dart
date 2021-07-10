@@ -1,7 +1,5 @@
 import 'dart:ui';
 
-const scheduleApiUrl = 'http://localhost:5000/api/schedule/';
-
 class LightThemeColors {
   // Primary actions, emphasizing navigation elements,
   // backgrounds, text, etc.
