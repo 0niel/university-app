@@ -36,30 +36,22 @@ class Calendar {
   }
 
   /// Возвращает список дат по номеру недели [week]
-  static List<int> getDaysInWeek(int week) {
-    List<int> daysInWeek = [];
+  static List<DateTime> getDaysInWeek(int week, [DateTime? mCurrentDate]) {
+    List<DateTime> daysInWeek = [];
 
-    int currentDay = kStartDay;
-    int currentMonth = kStartMonth;
-    int currentYear = kStartYear;
+    DateTime semStart = getSemesterStart(mCurrentDate);
 
-    for (int i = 1; i <= week; i++) {
-      for (int j = 0; j < 7; j++) {
-        if (i == week) {
-          daysInWeek.add(currentDay);
-        }
-        currentDay += 1;
+    // Понедельник недели начала семестра
+    var firstDayOfWeek =
+        semStart.subtract(Duration(days: semStart.weekday - 1));
 
-        if (currentDay > DateTime(currentYear, currentMonth + 1, 0).day) {
-          if (currentMonth > 12) {
-            currentMonth = 1;
-            currentYear++;
-          } else {
-            currentMonth++;
-          }
-          currentDay = 1;
-        }
-      }
+    // Прибавляем сколько дней прошло с начала семестра
+    var firstDayOfChosenWeek = firstDayOfWeek.add(Duration(days: (week-1) * 7));
+
+    // Добавляем дни в массив, увеличивая счётчик на 1 день
+    for (int i = 0; i < 6; ++i) {
+      daysInWeek.add(firstDayOfChosenWeek);
+      firstDayOfChosenWeek = firstDayOfChosenWeek.add(Duration(days: 1));
     }
     return daysInWeek;
   }

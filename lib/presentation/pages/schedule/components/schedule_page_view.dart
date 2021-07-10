@@ -12,7 +12,7 @@ class SchedulePageView extends StatefulWidget {
 
 class _SchedulePageViewState extends State<SchedulePageView> {
   late int _currentWeek;
-  late List<int> _currentWeekDays;
+  late List<DateTime> _currentWeekDays;
   int _currentPage = 0;
 
   late List<Map<String, String>> _daysData;
@@ -63,12 +63,12 @@ class _SchedulePageViewState extends State<SchedulePageView> {
     _currentWeek = Calendar.getCurrentWeek();
     _currentWeekDays = Calendar.getDaysInWeek(_currentWeek);
     _daysData = [
-      {'day_of_week': 'ПН', 'num': _currentWeekDays[0].toString()},
-      {'day_of_week': 'ВТ', 'num': _currentWeekDays[1].toString()},
-      {'day_of_week': 'СР', 'num': _currentWeekDays[2].toString()},
-      {'day_of_week': 'ЧТ', 'num': _currentWeekDays[3].toString()},
-      {'day_of_week': 'ПТ', 'num': _currentWeekDays[4].toString()},
-      {'day_of_week': 'СБ', 'num': _currentWeekDays[5].toString()},
+      {'day_of_week': 'ПН', 'num': _currentWeekDays[0].day.toString()},
+      {'day_of_week': 'ВТ', 'num': _currentWeekDays[1].day.toString()},
+      {'day_of_week': 'СР', 'num': _currentWeekDays[2].day.toString()},
+      {'day_of_week': 'ЧТ', 'num': _currentWeekDays[3].day.toString()},
+      {'day_of_week': 'ПТ', 'num': _currentWeekDays[4].day.toString()},
+      {'day_of_week': 'СБ', 'num': _currentWeekDays[5].day.toString()},
     ];
   }
 
