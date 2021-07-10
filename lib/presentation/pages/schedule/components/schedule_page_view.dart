@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:rtu_mirea_app/constants.dart';
-import 'package:rtu_mirea_app/models/lesson.dart';
-import 'package:rtu_mirea_app/screens/schedule/components/lesson_card.dart';
-import 'package:rtu_mirea_app/utils/calendar.dart';
+import 'package:rtu_mirea_app/common/calendar.dart';
+import 'package:rtu_mirea_app/presentation/colors.dart';
+import 'package:rtu_mirea_app/domain/entities/lesson.dart';
+
+import 'lesson_card.dart';
 
 class SchedulePageView extends StatefulWidget {
   @override
@@ -110,7 +111,8 @@ class _SchedulePageViewState extends State<SchedulePageView> {
                   name: 'Математический анализ',
                   teacher: 'Зуев А.С.',
                   room: 'А-419',
-                  type: 'Практика'),
+                  type: 'Практика',
+                  weeks: [1, 2, 3]),
             )
           ],
         ),
