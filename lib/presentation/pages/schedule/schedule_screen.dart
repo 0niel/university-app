@@ -3,6 +3,8 @@ import 'components/app_bar.dart';
 import 'components/schedule_page_view.dart';
 
 class ScheduleScreen extends StatelessWidget {
+  static const String routeName = '/schedule';
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
