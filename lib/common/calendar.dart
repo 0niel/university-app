@@ -2,15 +2,6 @@ class Calendar {
   /// Максимальное количество учебных недель в семестре
   static const int kMaxWeekInSemester = 16;
 
-  /// Номер понедельника первой учебной недели
-  static const int kStartDay = 8;
-
-  /// номер месяца, с которого начинается семестр. Например 2 = Февраль
-  static const int kStartMonth = 2;
-
-  /// Год, в котором начинается семестр
-  static const int kStartYear = 2021;
-
   /// Возвращает текущий день недели, где 1 - ПН, 7 - ВС
   static int getCurrentDayOfWeek() {
     return DateTime.now().weekday;
