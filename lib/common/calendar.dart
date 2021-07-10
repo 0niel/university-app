@@ -17,13 +17,13 @@ class Calendar {
   }
 
   /// Возвращает номер текущей недели, импользуя текущую дату
-  static int getCurrentWeek() {
-    DateTime currentDate = DateTime.now();
+  static int getCurrentWeek([DateTime? mCurrentDate]) {
+    DateTime currentDate = mCurrentDate ?? DateTime.now();
     int currentYear = currentDate.year;
 
     DateTime startDate;
 
-    if (currentDate.month > 9) {
+    if (currentDate.month >= DateTime.september) {
       startDate = DateTime.utc(currentYear, 9, 1);
     } else {
       startDate = DateTime.utc(currentYear, 2, 8);
