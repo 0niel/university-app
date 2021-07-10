@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:rtu_mirea_app/common/calendar.dart';
-import 'package:rtu_mirea_app/constants.dart';
+import 'package:rtu_mirea_app/presentation/colors.dart';
 import 'package:rtu_mirea_app/domain/entities/lesson.dart';
 
 import 'lesson_card.dart';

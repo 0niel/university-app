@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:rtu_mirea_app/constants.dart';
+import 'package:rtu_mirea_app/presentation/colors.dart';
 import 'package:rtu_mirea_app/domain/entities/lesson.dart';
 
 class LessonCard extends StatelessWidget {
