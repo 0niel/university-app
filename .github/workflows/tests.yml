@@ -19,7 +19,7 @@ jobs:
       with:
         channel: 'stable' # or: 'beta', 'dev' or 'master'
     - run: flutter pub get
-    - run: flutter test .\test\mirea_test.dart
+    - run: flutter test /test/mirea_test.dart
 
 
  
