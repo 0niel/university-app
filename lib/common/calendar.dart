@@ -63,4 +63,57 @@ class Calendar {
     }
     return daysInWeek;
   }
+
+  /// Получить дату начала семестра
+  ///
+  /// [mCurrentDate] отвечает за дату,
+  /// для которой будет рассчитано начало семестра.
+  /// 
+  /// Если оставить null, функция вернёт начало семестра для текущей даты.
+  static DateTime getSemesterStart([DateTime? mCurrentDate]) {
+    return _CurrentSemesterStart.getCurrentSemesterStart(mCurrentDate);
+  }
+}
+
+
+/// Получение даты с которой начинается семестр
+class _CurrentSemesterStart {
+  /// Получить первый понедельник месяца с которого начинается текущий семестр
+  static DateTime _getFirstMondayOfMonth(int year, int month) {
+    var firstOfMonth = DateTime(year, month, 1);
+    var firstMonday = firstOfMonth.add(
+        Duration(days: (7 - (firstOfMonth.weekday - DateTime.monday)) % 7));
+    return firstMonday;
+  }
+
+  /// Скоректировать дату начала семестра
+  /// Если выбранный день выходной, то взять первый понедельник месяца,
+  /// иначе выбранный день и так выбран правильно
+  static DateTime _getCorrectedDate(DateTime date) {
+    if (date.weekday == DateTime.saturday || date.weekday == DateTime.sunday) {
+      return _getFirstMondayOfMonth(date.year, date.month);
+    } else {
+      return date;
+    }
+  }
+
+  /// Получить ожидаемую дату начала семестра.
+  /// Для первого полугодия это 1-е сентября
+  /// Для второго полугодия это 8-е февраля
+  static DateTime _getExpectedSemesterStart(DateTime currentDate) {
+    if (currentDate.month >= DateTime.september) {
+      return DateTime(currentDate.year, DateTime.september, 1);
+    } else {
+      return DateTime(currentDate.year, DateTime.february, 8);
+    }
+  }
+
+  /// Получить дату начала текущего семестра
+  static DateTime getCurrentSemesterStart([DateTime? mCurrentDate]) {
+    DateTime currentDate = mCurrentDate ?? DateTime.now();
+    // ожидаемая дата начала семестра
+    DateTime expectedStart = _getExpectedSemesterStart(currentDate);
+    // скорректировать на случай, если она попала на выходной день
+    return _getCorrectedDate(expectedStart);
+  }
 }
