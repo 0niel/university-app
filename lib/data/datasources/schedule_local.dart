@@ -1,4 +1,3 @@
-import 'package:hive/hive.dart';
 import 'package:rtu_mirea_app/data/models/schedule_model.dart';
 
 abstract class ScheduleLocalData {
@@ -9,12 +8,10 @@ abstract class ScheduleLocalData {
   Future<void> addGroupsToCache(List<String> groups);
 }
 
-class ScheduleLocalDataHive implements ScheduleLocalData {
-  late final _box;
+class ScheduleLocalDataImpl implements ScheduleLocalData {
+  final sharedPreferences;
 
-  ScheduleLocalDataHive() {
-    _box = Hive.box('schedule');
-  }
+  ScheduleLocalDataImpl({this.sharedPreferences});
 
   @override
   Future<void> addGroupsToCache(List<String> groups) async {
