@@ -9,10 +9,13 @@ import 'package:rtu_mirea_app/presentation/pages/schedule/schedule_screen.dart';
 import 'package:rtu_mirea_app/presentation/pages/settings/settings_screen.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:rtu_mirea_app/service_locator.dart' as dependencyInjection;
+import 'service_locator.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  SharedPreferences prefs = await SharedPreferences.getInstance();
+  await dependencyInjection.setup();
+  var prefs = getIt<SharedPreferences>();
   bool showOnboarding = prefs.getBool('show_onboarding') ?? true;
   await prefs.setBool("show_onboarding", false);
   runApp(App(showOnboarding));
@@ -37,7 +40,7 @@ class App extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider<HomeNavigatorBloc>(
-            create: (context) => HomeNavigatorBloc()),
+            create: (context) => getIt<HomeNavigatorBloc>()),
       ],
       child: AdaptiveTheme(
         light: lightTheme,

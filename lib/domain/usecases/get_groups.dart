@@ -7,7 +7,7 @@ class GetGroups extends UseCase<List<String>, void> {
   GetGroups(this.scheduleRepository);
 
   @override
-  Future<List<String>> call(_) async {
+  Future<List<String>> call([_]) async {
     return await scheduleRepository.getAllGroups();
   }
 }
