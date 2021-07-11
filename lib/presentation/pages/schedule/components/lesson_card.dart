@@ -80,14 +80,14 @@ class LessonCard extends StatelessWidget {
                       children: [
                         Icon(Icons.location_on),
                         Padding(padding: EdgeInsets.only(right: 10)),
-                        Text('в аудитории А-419')
+                        Text('А-419')
                       ],
                     ),
                     Row(
                       children: [
                         Icon(Icons.face),
                         Padding(padding: EdgeInsets.only(right: 10)),
-                        Text('преподаватель Зуев А. С.')
+                        Text('Зуев А. С.')
                       ],
                     ),
                   ],
