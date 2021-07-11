@@ -19,47 +19,35 @@ class HomeNavigatorScreen extends StatelessWidget {
     ),
   ];
 
-  /// List of main screens
-  static final _bodyItems = [
-    ScheduleScreen(),
-    SettingsScreen(),
-  ];
-
-  int _selectedPageIndex = 0;
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
       body: BlocBuilder<HomeNavigatorBloc, HomeNavigatorState>(
-        builder: (context, state) {
-          if (state is SchedulePage) {
-            _selectedPageIndex = 0;
-          } else if (state is SettingsPage) {
-            _selectedPageIndex = 1;
-          }
-          return _bodyItems.elementAt(_selectedPageIndex);
-        },
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        items: _navBarItems,
-        currentIndex: _selectedPageIndex,
-        selectedItemColor: Theme.of(context).primaryColor,
-        onTap: (int page) {
-          switch (page) {
-            case 0:
-              BlocProvider.of<HomeNavigatorBloc>(context)
-                  .add(ChangeScreen(ScheduleScreen.routeName));
-              break;
-            case 1:
-              BlocProvider.of<HomeNavigatorBloc>(context)
-                  .add(ChangeScreen(SettingsScreen.routeName));
-              break;
-            default:
-              break;
-          }
-        },
-      ),
+          builder: (context, state) => state.screen),
+      bottomNavigationBar: BlocBuilder<HomeNavigatorBloc, HomeNavigatorState>(
+          builder: (context, state) {
+        return BottomNavigationBar(
+          items: _navBarItems,
+          currentIndex: context
+              .select((HomeNavigatorBloc bloc) => bloc.selectedPageIndex),
+          selectedItemColor: Theme.of(context).primaryColor,
+          onTap: (int page) {
+            switch (page) {
+              case 0:
+                BlocProvider.of<HomeNavigatorBloc>(context).add(ChangeScreen(
+                    routeName: ScheduleScreen.routeName, pageIndex: page));
+                break;
+              case 1:
+                BlocProvider.of<HomeNavigatorBloc>(context).add(ChangeScreen(
+                    routeName: SettingsScreen.routeName, pageIndex: page));
+                break;
+              default:
+                break;
+            }
+          },
+        );
+      }),
     );
   }
 }
