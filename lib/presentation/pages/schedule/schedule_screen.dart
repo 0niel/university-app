@@ -15,18 +15,20 @@ class ScheduleScreen extends StatelessWidget {
           'Расписание',
           style: Theme.of(context).textTheme.headline6,
         ),
-        leading: Builder(
-          builder: (BuildContext context) {
-            return IconButton(
-              icon: SvgPicture.asset('assets/icons/menu.svg'),
-              onPressed: () {
-                Scaffold.of(context).openDrawer();
-              },
-            );
-          },
-        ),
+        actions: <Widget>[
+          Builder(
+            builder: (BuildContext context) {
+              return IconButton(
+                icon: SvgPicture.asset('assets/icons/menu.svg'),
+                onPressed: () {
+                  Scaffold.of(context).openEndDrawer();
+                },
+              );
+            },
+          ),
+        ],
       ),
-      drawer: Drawer(
+      endDrawer: Drawer(
         child: SafeArea(
           child: Container(
             child: Column(
