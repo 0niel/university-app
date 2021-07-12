@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'components/app_bar.dart';
-import 'components/schedule_page_view.dart';
+import 'widgets/app_bar.dart';
+import 'widgets/schedule_page_view.dart';
 
 class ScheduleScreen extends StatelessWidget {
   static const String routeName = '/schedule';
