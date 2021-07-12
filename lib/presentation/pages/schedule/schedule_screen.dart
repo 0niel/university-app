@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'widgets/app_bar.dart';
 import 'widgets/schedule_page_view.dart';
 
@@ -7,32 +8,38 @@ class ScheduleScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      // stack нужен для скруглённых углов у блока с контентом,
-      // который находится ниже appbar
-      child: Stack(
-        children: [
-          ScheduleAppBar(),
-          Padding(
-            padding: EdgeInsets.only(top: 120),
-            // контейнер, в котором расположены кнопки переключения
-            // дня недели и page view расписания
-            child: Container(
-              height: 100,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(40),
-                  topRight: Radius.circular(40),
-                ),
-              ),
+    return Scaffold(
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        title: Text(
+          'Расписание',
+          style: Theme.of(context).textTheme.headline6,
+        ),
+        leading: Builder(
+          builder: (BuildContext context) {
+            return IconButton(
+              icon: SvgPicture.asset('assets/icons/menu.svg'),
+              onPressed: () {
+                Scaffold.of(context).openDrawer();
+              },
+            );
+          },
+        ),
+      ),
+      drawer: Drawer(
+        child: SafeArea(
+          child: Container(
+            child: Column(
+              children: [],
             ),
           ),
-          Padding(
-            padding: EdgeInsets.only(top: 120),
-            child: SchedulePageView(),
-          ),
-        ],
+        ),
+      ),
+      body: SafeArea(
+        child: Padding(
+          padding: EdgeInsets.all(20),
+          child: SchedulePageView(),
+        ),
       ),
     );
   }
