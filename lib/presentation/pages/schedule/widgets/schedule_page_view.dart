@@ -73,10 +73,9 @@ class _SchedulePageViewState extends State<SchedulePageView> {
   }
 
   Widget _getPageViewContent(BuildContext context) {
-    return Column(children: [
-      Padding(
-        padding: EdgeInsets.all(20),
-        child: Row(
+    return Container(
+      child: Column(children: [
+        Row(
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -97,10 +96,7 @@ class _SchedulePageViewState extends State<SchedulePageView> {
             )
           ],
         ),
-      ),
-      Padding(
-        padding: EdgeInsets.all(20),
-        child: Column(
+        Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
@@ -116,8 +112,8 @@ class _SchedulePageViewState extends State<SchedulePageView> {
             )
           ],
         ),
-      ),
-    ]);
+      ]),
+    );
   }
 
   @override
@@ -125,7 +121,13 @@ class _SchedulePageViewState extends State<SchedulePageView> {
     return Column(
       children: [
         Container(
-          height: 80,
+          height: 100,
+          decoration: BoxDecoration(
+            color: LightThemeColors.grey100.withOpacity(0.4),
+            borderRadius: BorderRadius.all(
+              Radius.circular(20),
+            ),
+          ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: List.generate(
@@ -134,7 +136,7 @@ class _SchedulePageViewState extends State<SchedulePageView> {
             ),
           ),
         ),
-        Divider(height: 1, color: Colors.black.withOpacity(0.1)),
+        Divider(height: 25, color: Colors.transparent),
         Expanded(
           child: PageView.builder(
             onPageChanged: (value) {
