@@ -120,6 +120,17 @@ class _SchedulePageViewState extends State<SchedulePageView> {
   Widget build(BuildContext context) {
     return Column(
       children: [
+        Row(
+          children: [
+            Padding(
+              padding: EdgeInsets.only(bottom: 6),
+              child: Text(
+                "Октябрь 2021",
+                style: Theme.of(context).textTheme.headline6,
+              ),
+            ),
+          ],
+        ),
         Container(
           height: 100,
           decoration: BoxDecoration(
