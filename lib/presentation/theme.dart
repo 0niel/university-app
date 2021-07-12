@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:rtu_mirea_app/presentation/colors.dart';
 
@@ -23,9 +24,9 @@ final lightTextTheme = ThemeData.light().textTheme.copyWith(
           .headline5
           ?.copyWith(fontFamily: 'Montserrat', color: LightThemeColors.grey800),
       headline6: ThemeData.light().textTheme.headline6?.copyWith(
-            fontFamily: 'Oswald',
+            fontFamily: 'Montserrat',
             color: LightThemeColors.grey800,
-            fontSize: 32,
+            fontWeight: FontWeight.bold,
           ),
       bodyText1: ThemeData.light()
           .textTheme
