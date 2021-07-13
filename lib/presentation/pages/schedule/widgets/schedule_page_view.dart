@@ -125,20 +125,53 @@ class _SchedulePageViewState extends State<SchedulePageView> {
     return Column(
       children: [
         Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Padding(
               padding: EdgeInsets.only(bottom: 6),
               child: Text(
-                "Октябрь 2021",
+                "12 неделя",
                 style: Theme.of(context).textTheme.headline5,
               ),
             ),
+            Row(
+              children: [
+                ElevatedButton(
+                  onPressed: () {},
+                  child: Icon(Icons.arrow_left_outlined, color: Colors.black),
+                  style: ElevatedButton.styleFrom(
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10.0),
+                        side: BorderSide(color: LightThemeColors.grey200)),
+                    onPrimary: Colors.black.withOpacity(0.25),
+                    shadowColor: Colors.transparent,
+                    primary: Colors.white,
+                  ),
+                ),
+                Container(
+                  width: 10,
+                ),
+                ElevatedButton(
+                  onPressed: () {},
+                  child: Icon(Icons.arrow_right_outlined, color: Colors.black),
+                  style: ElevatedButton.styleFrom(
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10.0),
+                        side: BorderSide(color: LightThemeColors.grey200)),
+                    onPrimary: Colors.black.withOpacity(0.25),
+                    shadowColor: Colors.transparent,
+                    primary: Colors.white, // <-- Splash color
+                  ),
+                )
+              ],
+            )
           ],
         ),
         Container(
           height: 100,
           decoration: BoxDecoration(
-            color: LightThemeColors.grey100.withOpacity(0.4),
+            color: LightThemeColors.grey100.withOpacity(0.3),
             borderRadius: BorderRadius.all(
               Radius.circular(20),
             ),
