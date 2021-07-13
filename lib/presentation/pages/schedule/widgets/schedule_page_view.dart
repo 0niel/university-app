@@ -30,33 +30,31 @@ class _SchedulePageViewState extends State<SchedulePageView> {
             : Colors.transparent,
         borderRadius: BorderRadius.all(Radius.circular(10)),
       ),
-      child: RichText(
-        textAlign: TextAlign.center,
-        text: TextSpan(
-          children: [
-            TextSpan(
-              text: (_daysData[index]['day_of_week'] ?? "") + "\n",
-              style: TextStyle(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            _daysData[index]['day_of_week'] ?? "",
+            style: TextStyle(
+              fontFamily: 'Montserrat',
+              fontWeight: FontWeight.normal,
+              color: _currentPage == index
+                  ? Colors.white
+                  : LightThemeColors.grey400,
+              fontSize: 14.5,
+            ),
+          ),
+          Text(
+            _daysData[index]['num'] ?? "",
+            style: TextStyle(
                 fontFamily: 'Montserrat',
-                fontWeight: FontWeight.normal,
                 color: _currentPage == index
                     ? Colors.white
-                    : LightThemeColors.grey400,
-                fontSize: 14.5,
-              ),
-            ),
-            TextSpan(
-              text: _daysData[index]['num'],
-              style: TextStyle(
-                  fontFamily: 'Montserrat',
-                  color: _currentPage == index
-                      ? Colors.white
-                      : LightThemeColors.grey800,
-                  fontSize: 19,
-                  fontWeight: FontWeight.bold),
-            ),
-          ],
-        ),
+                    : LightThemeColors.grey800,
+                fontSize: 19,
+                fontWeight: FontWeight.bold),
+          ),
+        ],
       ),
     );
   }
