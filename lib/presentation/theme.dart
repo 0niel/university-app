@@ -27,6 +27,7 @@ final lightTextTheme = ThemeData.light().textTheme.copyWith(
             fontFamily: 'Montserrat',
             color: LightThemeColors.grey800,
             fontWeight: FontWeight.bold,
+            fontSize: 28,
           ),
       bodyText1: ThemeData.light()
           .textTheme
@@ -49,6 +50,7 @@ final lightTheme = ThemeData.light().copyWith(
         shadowColor: Colors.transparent,
         titleTextStyle: lightTextTheme.headline6,
         centerTitle: false,
+        toolbarHeight: 70,
         iconTheme: IconThemeData(color: LightThemeColors.grey800),
       ),
 );
