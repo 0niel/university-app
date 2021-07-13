@@ -21,7 +21,7 @@ class _SchedulePageViewState extends State<SchedulePageView> {
     return AnimatedContainer(
       duration: Duration(milliseconds: 80),
       padding: EdgeInsets.symmetric(vertical: 8),
-      height: 55,
+      height: 65,
       width: 47.5,
       curve: Curves.fastOutSlowIn,
       decoration: BoxDecoration(
@@ -37,15 +37,21 @@ class _SchedulePageViewState extends State<SchedulePageView> {
             TextSpan(
               text: (_daysData[index]['day_of_week'] ?? "") + "\n",
               style: TextStyle(
+                fontFamily: 'Montserrat',
                 fontWeight: FontWeight.normal,
-                color: _currentPage == index ? Colors.white : Color(0xFFBCC1CD),
-                fontSize: 16,
+                color: _currentPage == index
+                    ? Colors.white
+                    : LightThemeColors.grey400,
+                fontSize: 14.5,
               ),
             ),
             TextSpan(
               text: _daysData[index]['num'],
               style: TextStyle(
-                  color: _currentPage == index ? Colors.white : Colors.black,
+                  fontFamily: 'Montserrat',
+                  color: _currentPage == index
+                      ? Colors.white
+                      : LightThemeColors.grey800,
                   fontSize: 19,
                   fontWeight: FontWeight.bold),
             ),
@@ -126,7 +132,7 @@ class _SchedulePageViewState extends State<SchedulePageView> {
               padding: EdgeInsets.only(bottom: 6),
               child: Text(
                 "Октябрь 2021",
-                style: Theme.of(context).textTheme.headline6,
+                style: Theme.of(context).textTheme.headline5,
               ),
             ),
           ],
