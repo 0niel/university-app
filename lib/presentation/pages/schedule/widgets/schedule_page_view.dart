@@ -79,27 +79,6 @@ class _SchedulePageViewState extends State<SchedulePageView> {
   Widget _getPageViewContent(BuildContext context) {
     return Container(
       child: Column(children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              "Время",
-              style: Theme.of(context)
-                  .textTheme
-                  .bodyText1
-                  ?.copyWith(color: LightThemeColors.grey400),
-            ),
-            Padding(padding: EdgeInsets.only(right: 40)),
-            Text(
-              "Предмет",
-              style: Theme.of(context)
-                  .textTheme
-                  .bodyText1
-                  ?.copyWith(color: LightThemeColors.grey400),
-            )
-          ],
-        ),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.start,

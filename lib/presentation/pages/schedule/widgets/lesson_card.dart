@@ -9,94 +9,93 @@ class LessonCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Expanded(
-          flex: 18,
-          child: RichText(
-            text: TextSpan(
+    return Container(
+      padding: EdgeInsets.all(5),
+      decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(10),
+          color: LightThemeColors.grey100.withOpacity(0.3)),
+      width: MediaQuery.of(context).size.width,
+      child: Row(
+        children: [
+          Container(
+            width: 50,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                TextSpan(
-                  text: "11:35\n",
-                  style: TextStyle(
-                    color: Color(0xFF212525),
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
+                Text(
+                  "9:00",
+                  style: Theme.of(context).textTheme.bodyText1,
+                ),
+                Padding(
+                  padding: EdgeInsets.only(bottom: 7),
+                ),
+                Text(
+                  "10:30",
+                  style: Theme.of(context).textTheme.bodyText2,
+                )
+              ],
+            ),
+          ),
+          Container(
+            height: 100,
+            alignment: Alignment.center,
+            child: VerticalDivider(),
+          ),
+          Expanded(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        child: Text(
+                          "Структуры и алгоритмы обработки данных",
+                          style: Theme.of(context).textTheme.subtitle1,
+                        ),
+                        padding: EdgeInsets.only(bottom: 5),
+                      ),
+                      Row(
+                        children: [
+                          Icon(Icons.location_on),
+                          Padding(padding: EdgeInsets.only(right: 10)),
+                          Text(
+                            'А-419',
+                            style: Theme.of(context).textTheme.bodyText2,
+                          )
+                        ],
+                      ),
+                      Row(
+                        children: [
+                          Icon(Icons.face),
+                          Padding(padding: EdgeInsets.only(right: 10)),
+                          Text(
+                            'Зуев А. С.',
+                            style: Theme.of(context).textTheme.bodyText2,
+                          )
+                        ],
+                      ),
+                    ],
                   ),
                 ),
-                TextSpan(
-                  text: "13:00",
-                  style: TextStyle(color: Color(0xFFBCC1CD), fontSize: 16),
+                Container(
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(6),
+                      color: LightThemeColors.primary201),
+                  height: 25,
+                  width: 40,
+                  child:
+                      Text("пр", style: Theme.of(context).textTheme.bodyText2),
                 ),
               ],
             ),
           ),
-        ),
-        Expanded(
-          flex: 6,
-          child: Align(
-            alignment: Alignment.centerLeft,
-            child: Container(
-              width: 1,
-              height: 165,
-              color: LightThemeColors.grey100,
-            ),
-          ),
-        ),
-        Expanded(
-          flex: 76,
-          child: Padding(
-            padding: EdgeInsets.all(10),
-            child: Container(
-              decoration: BoxDecoration(
-                border: Border.all(color: LightThemeColors.grey800),
-                borderRadius: BorderRadius.all(
-                  Radius.circular(
-                      16.0), //                 <--- border radius here
-                ),
-              ),
-              child: Padding(
-                padding: EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "Практика".toUpperCase(),
-                      style: Theme.of(context)
-                          .textTheme
-                          .headline1
-                          ?.copyWith(fontSize: 12, fontWeight: FontWeight.bold),
-                    ),
-                    Text(
-                      "Математический анализ",
-                      style: Theme.of(context)
-                          .textTheme
-                          .headline1
-                          ?.copyWith(fontSize: 20, fontWeight: FontWeight.bold),
-                    ),
-                    Padding(padding: EdgeInsets.only(bottom: 15)),
-                    Row(
-                      children: [
-                        Icon(Icons.location_on),
-                        Padding(padding: EdgeInsets.only(right: 10)),
-                        Text('А-419')
-                      ],
-                    ),
-                    Row(
-                      children: [
-                        Icon(Icons.face),
-                        Padding(padding: EdgeInsets.only(right: 10)),
-                        Text('Зуев А. С.')
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
