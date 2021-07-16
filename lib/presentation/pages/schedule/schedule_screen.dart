@@ -10,12 +10,6 @@ class ScheduleScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        bottom: PreferredSize(
-            child: Container(
-              color: LightThemeColors.grey100,
-              height: 1.0,
-            ),
-            preferredSize: Size.fromHeight(1.0)),
         automaticallyImplyLeading: false,
         title: Text(
           'Расписание',
@@ -45,7 +39,7 @@ class ScheduleScreen extends StatelessWidget {
       ),
       body: SafeArea(
         child: Padding(
-          padding: EdgeInsets.all(20),
+          padding: EdgeInsets.all(10),
           child: SchedulePageView(),
         ),
       ),
