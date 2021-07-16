@@ -1,38 +1,47 @@
 import 'package:flutter/material.dart';
-import 'components/app_bar.dart';
-import 'components/schedule_page_view.dart';
+import 'package:flutter_svg/svg.dart';
+import '../../colors.dart';
+import 'widgets/schedule_page_view.dart';
 
 class ScheduleScreen extends StatelessWidget {
   static const String routeName = '/schedule';
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      // stack нужен для скруглённых углов у блока с контентом,
-      // который находится ниже appbar
-      child: Stack(
-        children: [
-          ScheduleAppBar(),
-          Padding(
-            padding: EdgeInsets.only(top: 120),
-            // контейнер, в котором расположены кнопки переключения
-            // дня недели и page view расписания
-            child: Container(
-              height: 100,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(40),
-                  topRight: Radius.circular(40),
-                ),
-              ),
-            ),
-          ),
-          Padding(
-            padding: EdgeInsets.only(top: 120),
-            child: SchedulePageView(),
+    return Scaffold(
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        title: Text(
+          'Расписание',
+          style: Theme.of(context).textTheme.headline6,
+        ),
+        actions: <Widget>[
+          Builder(
+            builder: (BuildContext context) {
+              return IconButton(
+                icon: SvgPicture.asset('assets/icons/menu.svg'),
+                onPressed: () {
+                  Scaffold.of(context).openEndDrawer();
+                },
+              );
+            },
           ),
         ],
+      ),
+      endDrawer: Drawer(
+        child: SafeArea(
+          child: Container(
+            child: Column(
+              children: [],
+            ),
+          ),
+        ),
+      ),
+      body: SafeArea(
+        child: Padding(
+          padding: EdgeInsets.all(10),
+          child: SchedulePageView(),
+        ),
       ),
     );
   }

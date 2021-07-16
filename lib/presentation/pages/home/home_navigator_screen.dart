@@ -22,7 +22,7 @@ class HomeNavigatorScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      // backgroundColor: Colors.white,
       body: BlocBuilder<HomeNavigatorBloc, HomeNavigatorState>(
           builder: (context, state) => state.screen),
       bottomNavigationBar: BlocBuilder<HomeNavigatorBloc, HomeNavigatorState>(
