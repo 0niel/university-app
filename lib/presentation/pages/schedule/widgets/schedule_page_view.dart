@@ -36,7 +36,6 @@ class _SchedulePageViewState extends State<SchedulePageView> {
           Text(
             _daysData[index]['day_of_week'] ?? "",
             style: TextStyle(
-              fontFamily: 'Montserrat',
               fontWeight: FontWeight.normal,
               color: _currentPage == index
                   ? Colors.white
@@ -47,7 +46,6 @@ class _SchedulePageViewState extends State<SchedulePageView> {
           Text(
             _daysData[index]['num'] ?? "",
             style: TextStyle(
-                fontFamily: 'Montserrat',
                 color: _currentPage == index
                     ? Colors.white
                     : LightThemeColors.grey800,
@@ -78,24 +76,17 @@ class _SchedulePageViewState extends State<SchedulePageView> {
 
   Widget _getPageViewContent(BuildContext context) {
     return Container(
-      child: Column(children: [
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            LessonCard(
-              Lesson(
-                  timeStart: '09.00',
-                  timeEnd: '10:30',
-                  name: 'Математический анализ',
-                  teacher: 'Зуев А.С.',
-                  room: 'А-419',
-                  type: 'Практика',
-                  weeks: [1, 2, 3]),
-            )
-          ],
-        ),
-      ]),
+      child: Column(
+        children: [
+          LessonCard(),
+          Divider(),
+          LessonCard(),
+          Divider(),
+          LessonCard(),
+          Divider(),
+          LessonCard(),
+        ],
+      ),
     );
   }
 
@@ -103,67 +94,89 @@ class _SchedulePageViewState extends State<SchedulePageView> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Padding(
-              padding: EdgeInsets.only(bottom: 6),
-              child: Text(
-                "12 неделя",
-                style: Theme.of(context).textTheme.headline5,
-              ),
-            ),
-            Row(
-              children: [
-                ElevatedButton(
-                  onPressed: () {},
-                  child: Icon(Icons.arrow_left_outlined, color: Colors.black),
-                  style: ElevatedButton.styleFrom(
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10.0),
-                        side: BorderSide(color: LightThemeColors.grey200)),
-                    onPrimary: Colors.black.withOpacity(0.25),
-                    shadowColor: Colors.transparent,
-                    primary: Colors.white,
-                  ),
-                ),
-                Container(
-                  width: 10,
-                ),
-                ElevatedButton(
-                  onPressed: () {},
-                  child: Icon(Icons.arrow_right_outlined, color: Colors.black),
-                  style: ElevatedButton.styleFrom(
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10.0),
-                        side: BorderSide(color: LightThemeColors.grey200)),
-                    onPrimary: Colors.black.withOpacity(0.25),
-                    shadowColor: Colors.transparent,
-                    primary: Colors.white, // <-- Splash color
-                  ),
-                )
-              ],
-            )
-          ],
-        ),
         Container(
-          height: 100,
+          padding: EdgeInsets.symmetric(vertical: 5),
           decoration: BoxDecoration(
-            color: LightThemeColors.grey100.withOpacity(0.3),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.14),
+                spreadRadius: 0,
+                blurRadius: 1,
+                offset: Offset(0, 1),
+              ),
+            ],
+            color: Colors.white,
             borderRadius: BorderRadius.all(
               Radius.circular(20),
             ),
           ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: List.generate(
-              _daysData.length,
-              (index) => dayOfWeekButton(index),
-            ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding:
+                    EdgeInsets.symmetric(horizontal: 15).copyWith(bottom: 5),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text("12 неделя",
+                            style: Theme.of(context).textTheme.subtitle1),
+                        Text("Понедельник, 19 июня",
+                            style: Theme.of(context).textTheme.caption),
+                      ],
+                    ),
+                    Row(
+                      children: [
+                        ElevatedButton(
+                          onPressed: () {},
+                          child: Icon(Icons.arrow_left_outlined,
+                              color: Colors.black),
+                          style: ElevatedButton.styleFrom(
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10.0),
+                                side: BorderSide(
+                                    color: LightThemeColors.grey200)),
+                            onPrimary: Colors.black.withOpacity(0.25),
+                            shadowColor: Colors.transparent,
+                            primary: Colors.white,
+                          ),
+                        ),
+                        Container(
+                          width: 10,
+                        ),
+                        ElevatedButton(
+                          onPressed: () {},
+                          child: Icon(Icons.arrow_right_outlined,
+                              color: Colors.black),
+                          style: ElevatedButton.styleFrom(
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10.0),
+                                side: BorderSide(
+                                    color: LightThemeColors.grey200)),
+                            onPrimary: Colors.black.withOpacity(0.25),
+                            shadowColor: Colors.transparent,
+                            primary: Colors.white, // <-- Splash color
+                          ),
+                        )
+                      ],
+                    )
+                  ],
+                ),
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: List.generate(
+                  _daysData.length,
+                  (index) => dayOfWeekButton(index),
+                ),
+              ),
+            ],
           ),
         ),
-        Divider(height: 25, color: Colors.transparent),
+        SizedBox(height: 25),
         Expanded(
           child: PageView.builder(
             onPageChanged: (value) {
