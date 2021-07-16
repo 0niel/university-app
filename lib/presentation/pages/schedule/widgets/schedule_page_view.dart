@@ -3,7 +3,7 @@ import 'package:rtu_mirea_app/common/calendar.dart';
 import 'package:rtu_mirea_app/presentation/colors.dart';
 import 'package:rtu_mirea_app/domain/entities/lesson.dart';
 
-import 'lesson_card.dart';
+import 'lesson_list_tile.dart';
 
 class SchedulePageView extends StatefulWidget {
   @override
@@ -78,13 +78,13 @@ class _SchedulePageViewState extends State<SchedulePageView> {
     return Container(
       child: Column(
         children: [
-          LessonCard(),
+          LessonListTile(),
           Divider(),
-          LessonCard(),
+          LessonListTile(),
           Divider(),
-          LessonCard(),
+          LessonListTile(),
           Divider(),
-          LessonCard(),
+          LessonListTile(),
         ],
       ),
     );
