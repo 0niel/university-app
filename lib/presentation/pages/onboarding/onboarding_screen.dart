@@ -3,6 +3,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:rtu_mirea_app/data/repositories/onboarding_repository.dart';
+import 'package:rtu_mirea_app/domain/entities/onboarding_page.dart';
+import 'package:rtu_mirea_app/domain/repositories/onboarding_repository.dart';
 import 'package:rtu_mirea_app/presentation/bloc/onboarding_cubit.dart';
 import 'package:rtu_mirea_app/presentation/colors.dart';
 import 'package:rtu_mirea_app/presentation/pages/home/home_navigator_screen.dart';
@@ -20,10 +23,9 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
   final introdate = GetStorage();
   final int _numPages = 5;
 
-  int _currentPage = initialPageNum;
   PageController _pageController = PageController(initialPage: initialPageNum);
 
-  List<Widget> _buildPageIndicator() {
+  List<Widget> _buildPageIndicator(int _currentPage) {
     List<Widget> list = [];
     for (int i = 0; i < _numPages; i++) {
       list.add(i == _currentPage ? _indicator(true) : _indicator(false));
@@ -60,7 +62,7 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
       margin: EdgeInsets.symmetric(horizontal: 3.75),
       child: ElevatedButton(
         onPressed: () {
-          if (_currentPage == _numPages - 1) {
+          if (isLastPage) {
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(builder: (context) => HomeNavigatorScreen()),
@@ -99,133 +101,10 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
     );
   }
 
-  final List<Color> _containersColors = [
-    Color.fromRGBO(30, 144, 255, 0.5),
-    Color.fromRGBO(255, 155, 112, 0.5),
-    Color.fromRGBO(255, 165, 2, 0.5),
-    Color.fromRGBO(55, 66, 250, 0.5),
-    Color.fromRGBO(255, 127, 80, 1.0),
-  ];
-
-  final List<Image> _containersImages = [
-    Image(
-      image: AssetImage('assets/images/Saly-1.png'),
-      height: 375.0,
-      width: 375.0,
-    ),
-    Image(
-      image: AssetImage('assets/images/Saly-2.png'),
-      height: 324.0,
-      width: 328.0,
-    ),
-    Image(
-      image: AssetImage('assets/images/Saly-3.png'),
-      height: 315.0,
-      width: 315.0,
-    ),
-    Image(
-      image: AssetImage('assets/images/Saly-4.png'),
-      height: 375.0,
-      width: 315.0,
-    ),
-    Image(
-      image: AssetImage('assets/images/Saly-5.png'),
-      height: 315.0,
-      width: 315.0,
-    ),
-  ];
-
-  final List _containersText = [
-    {
-      'title_text_widget': Text(
-        'Добро пожаловать!',
-        style: TextStyle(
-            fontFamily: 'Montserrat',
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-            fontSize: 30.0),
-        overflow: TextOverflow.ellipsis,
-        maxLines: 3,
-      ),
-      'content': 'Это приложение было создано студентами для студентов'
-    },
-    {
-      'title_text_widget': Text(
-        'Смотри расписание!',
-        style: TextStyle(
-            fontFamily: 'Montserrat',
-            fontWeight: FontWeight.bold,
-            color: Color(0xFFF28080),
-            fontSize: 30.0),
-        overflow: TextOverflow.ellipsis,
-        maxLines: 3,
-      ),
-      'content':
-          'Как же легко оказывается можно смотреть расписание, а главное быстро'
-    },
-    {
-      'title_text_widget': Text(
-        'Будь вкурсе не надевая штаны!',
-        style: TextStyle(
-            fontFamily: 'Montserrat',
-            fontWeight: FontWeight.bold,
-            color: Color(0xFFE26B96),
-            fontSize: 30.0),
-        overflow: TextOverflow.ellipsis,
-        maxLines: 3,
-      ),
-      'content':
-          'Иногда так лень заходить на сайт и искать нужную тебе информацию, мы это исправил'
-    },
-    {
-      'title_text_widget': Text(
-        'Ставь цели!',
-        style: TextStyle(
-            fontFamily: 'Montserrat',
-            fontWeight: FontWeight.bold,
-            color: Color(0xFFFFB059),
-            fontSize: 30.0),
-        overflow: TextOverflow.ellipsis,
-        maxLines: 3,
-      ),
-      'content':
-          'Как же много дедлайнов!? Создавать дедлайны теперь как никогда просто и удобно'
-    },
-    {
-      'title_text_widget': Text(
-        'Коммуницируй!',
-        style: TextStyle(
-            fontFamily: 'Montserrat',
-            fontWeight: FontWeight.bold,
-            color: Color(0xFF4356FF),
-            fontSize: 30.0),
-        overflow: TextOverflow.ellipsis,
-        maxLines: 3,
-      ),
-      'content':
-          'Слово сложное, но все легко. Общайся и делись материалами с другими группами мгновенно'
-    },
-  ];
-
-  double _getImageTopPadding(int page) {
-    switch (page) {
-      case 0:
-        return 18.0;
-      case 1:
-        return 70.0;
-      case 2:
-        return 73.0;
-      case 3:
-        return 30.0;
-      case 4:
-        return 91.0;
-      default:
-        return 0.0;
-    }
-  }
-
   List<Widget> _buildPageView() {
+    OnBoardingRepository repository = OnBoardingRepositoryImpl();
     return List.generate(_numPages, (index) {
+      OnBoardingPage pageInfo = repository.getPage(index);
       return Padding(
         padding: EdgeInsets.symmetric(horizontal: 20.0),
         child: Stack(
@@ -238,8 +117,8 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
               right: 0,
               child: Center(
                 child: Padding(
-                    padding: EdgeInsets.only(top: _getImageTopPadding(index)),
-                    child: _containersImages[index]),
+                    padding: EdgeInsets.only(top: pageInfo.imageTopPadding),
+                    child: pageInfo.image),
               ),
             ),
             Positioned(
@@ -249,10 +128,10 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _containersText[index]['title_text_widget'],
+                  pageInfo.textWidget,
                   SizedBox(height: 8.0),
                   Text(
-                    _containersText[index]['content'],
+                    pageInfo.contentText,
                     style: TextStyle(
                       fontFamily: 'Montserrat',
                       fontWeight: FontWeight.w500,
@@ -270,15 +149,17 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
   }
 
   Widget _onBoardingScreen() {
-    return BlocBuilder<OnBoardingPageCounter, int>(builder: (context, pageNum) {
-      _currentPage = pageNum;
+    return BlocBuilder<OnBoardingCubit, OnBoardingPage>(
+        builder: (context, pageInfo) {
+      // _currentPage = pageNum;
+      bool isLastPage = pageInfo.pageNum == _numPages - 1;
       return Scaffold(
         //Все 3 экрана + скип + выхода из приветствия
         body: AnnotatedRegion<SystemUiOverlayStyle>(
           value: SystemUiOverlayStyle.light,
           child: AnimatedContainer(
             duration: Duration(milliseconds: 200),
-            color: _containersColors[_currentPage],
+            color: pageInfo.backgroundColor,
             child: SafeArea(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -289,7 +170,7 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
                       controller: _pageController,
                       onPageChanged: (int page) {
                         //Индикатор страницы
-                        context.read<OnBoardingPageCounter>().swipe(page);
+                        context.read<OnBoardingCubit>().swipe(page);
                       },
                       children: _buildPageView(),
                     ),
@@ -301,7 +182,7 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        _currentPage == _numPages - 1
+                        isLastPage
                             ? Container()
                             : InkWell(
                                 onTap: () {
@@ -322,9 +203,9 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
                                 ),
                               ),
                         Row(
-                          children: [..._buildPageIndicator()],
+                          children: [..._buildPageIndicator(pageInfo.pageNum)],
                         ),
-                        _buildNextButton(_currentPage == _numPages - 1),
+                        _buildNextButton(isLastPage),
                       ],
                     ),
                   ),
@@ -343,7 +224,7 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => OnBoardingPageCounter(initialPageNum),
+      create: (_) => OnBoardingCubit(initialPageNum),
       child: _onBoardingScreen(),
     );
   }
