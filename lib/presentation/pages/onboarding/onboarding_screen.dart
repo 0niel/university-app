@@ -1,22 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:rtu_mirea_app/presentation/bloc/onboarding_cubit.dart';
 import 'package:rtu_mirea_app/presentation/colors.dart';
 import 'package:rtu_mirea_app/presentation/pages/home/home_navigator_screen.dart';
 
-class OnboardingScreen extends StatefulWidget {
+class OnBoardingScreen extends StatefulWidget {
   static const String routeName = '/onboarding';
 
   @override
-  _OnboardingScreenState createState() => _OnboardingScreenState();
+  _OnBoardingScreenState createState() => _OnBoardingScreenState();
 }
 
-class _OnboardingScreenState extends State<OnboardingScreen> {
+class _OnBoardingScreenState extends State<OnBoardingScreen> {
+  static const int initialPageNum = 0;
+
   final introdate = GetStorage();
   final int _numPages = 5;
-  int _currentPage = 0;
-  PageController _pageController = PageController(initialPage: 0);
+
+  int _currentPage = initialPageNum;
+  PageController _pageController = PageController(initialPage: initialPageNum);
 
   List<Widget> _buildPageIndicator() {
     List<Widget> list = [];
@@ -264,71 +269,82 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     });
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      //Все 3 экрана + скип + выхода из приветствия
-      body: AnnotatedRegion<SystemUiOverlayStyle>(
-        value: SystemUiOverlayStyle.light,
-        child: AnimatedContainer(
-          duration: Duration(milliseconds: 200),
-          color: _containersColors[_currentPage],
-          child: SafeArea(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: <Widget>[
-                Expanded(
-                  child: PageView(
-                    physics: ClampingScrollPhysics(),
-                    controller: _pageController,
-                    onPageChanged: (int page) {
-                      //Индикатор страницы
-                      setState(() {
-                        _currentPage = page;
-                      });
-                    },
-                    children: _buildPageView(),
+  Widget _onBoardingScreen() {
+    return BlocBuilder<OnBoardingPageCounter, int>(builder: (context, pageNum) {
+      _currentPage = pageNum;
+      return Scaffold(
+        //Все 3 экрана + скип + выхода из приветствия
+        body: AnnotatedRegion<SystemUiOverlayStyle>(
+          value: SystemUiOverlayStyle.light,
+          child: AnimatedContainer(
+            duration: Duration(milliseconds: 200),
+            color: _containersColors[_currentPage],
+            child: SafeArea(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: <Widget>[
+                  Expanded(
+                    child: PageView(
+                      physics: ClampingScrollPhysics(),
+                      controller: _pageController,
+                      onPageChanged: (int page) {
+                        //Индикатор страницы
+                        context.read<OnBoardingPageCounter>().swipe(page);
+                      },
+                      children: _buildPageView(),
+                    ),
                   ),
-                ),
-                Padding(
-                  padding:
-                      EdgeInsets.only(bottom: 35.0, left: 20.0, right: 20.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      _currentPage == _numPages - 1
-                          ? Container()
-                          : InkWell(
-                              onTap: () {
-                                Navigator.pushReplacement(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) =>
-                                          HomeNavigatorScreen()),
-                                );
-                              },
-                              child: Text(
-                                "Пропустить",
-                                style: TextStyle(
-                                    fontFamily: 'Montserrat',
-                                    fontWeight: FontWeight.w500,
-                                    color: Color(0xFFE5E5E5),
-                                    fontSize: 12.0),
+                  Padding(
+                    padding:
+                        EdgeInsets.only(bottom: 35.0, left: 20.0, right: 20.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        _currentPage == _numPages - 1
+                            ? Container()
+                            : InkWell(
+                                onTap: () {
+                                  Navigator.pushReplacement(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) =>
+                                            HomeNavigatorScreen()),
+                                  );
+                                },
+                                child: Text(
+                                  "Пропустить",
+                                  style: TextStyle(
+                                      fontFamily: 'Montserrat',
+                                      fontWeight: FontWeight.w500,
+                                      color: Color(0xFFE5E5E5),
+                                      fontSize: 12.0),
+                                ),
                               ),
-                            ),
-                      Row(
-                        children: [..._buildPageIndicator()],
-                      ),
-                      _buildNextButton(_currentPage == _numPages - 1),
-                    ],
+                        Row(
+                          children: [..._buildPageIndicator()],
+                        ),
+                        _buildNextButton(_currentPage == _numPages - 1),
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
-      ),
+      );
+    });
+    // builder: (context, pageNum){
+  }
+
+  // BlocBuilder<OnBoardingPageCounter,int>(
+  // builder: (context, pageNum){
+  @override
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (_) => OnBoardingPageCounter(initialPageNum),
+      child: _onBoardingScreen(),
     );
   }
 }
