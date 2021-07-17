@@ -11,6 +11,12 @@ class ScheduleScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
+        bottom: PreferredSize(
+            child: Container(
+              color: LightThemeColors.grey100,
+              height: 1.0,
+            ),
+            preferredSize: Size.fromHeight(1.0)),
         title: Text(
           'Расписание',
           style: Theme.of(context).textTheme.headline6,

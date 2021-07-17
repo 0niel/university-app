@@ -5,8 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:rtu_mirea_app/presentation/colors.dart';
 
 final lightTextTheme = ThemeData.light().textTheme.copyWith(
-      headline6:
-          ThemeData.light().textTheme.headline6?.copyWith(color: Colors.white),
+    // headline6:
+    //     ThemeData.light().textTheme.headline6?.copyWith(color: Colors.white),
     );
 
 final lightTheme = ThemeData.light().copyWith(
@@ -15,8 +15,9 @@ final lightTheme = ThemeData.light().copyWith(
   primaryColorLight: LightThemeColors.primary501,
   textTheme: lightTextTheme,
   appBarTheme: ThemeData.light().appBarTheme.copyWith(
+        backgroundColor: Colors.transparent,
+        shadowColor: Colors.transparent,
         centerTitle: false,
-        iconTheme: IconThemeData(color: LightThemeColors.white),
       ),
 );
 

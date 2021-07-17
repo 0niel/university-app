@@ -14,6 +14,12 @@ class SettingsScreen extends StatelessWidget {
       // backgroundColor: Colors.white,
       appBar: AppBar(
         automaticallyImplyLeading: false,
+        bottom: PreferredSize(
+            child: Container(
+              color: LightThemeColors.grey100,
+              height: 1.0,
+            ),
+            preferredSize: Size.fromHeight(1.0)),
         title: Text(
           'Настройки',
           style: Theme.of(context).textTheme.headline6,
