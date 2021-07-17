@@ -2,14 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:get_storage/get_storage.dart';
+import 'package:rtu_mirea_app/common/constants.dart';
 import 'package:rtu_mirea_app/data/repositories/onboarding_repository.dart';
 import 'package:rtu_mirea_app/domain/entities/onboarding_page.dart';
 import 'package:rtu_mirea_app/domain/repositories/onboarding_repository.dart';
 import 'package:rtu_mirea_app/presentation/bloc/onboarding_cubit.dart';
 import 'package:rtu_mirea_app/presentation/colors.dart';
 import 'package:rtu_mirea_app/presentation/pages/home/home_navigator_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
+/// OnBoarding screen, that greets new users
 class OnBoardingScreen extends StatefulWidget {
   static const String routeName = '/onboarding';
 
@@ -17,14 +19,39 @@ class OnBoardingScreen extends StatefulWidget {
   _OnBoardingScreenState createState() => _OnBoardingScreenState();
 }
 
+/// State, that uses cubit to set inidcators and buttons
+/// in the bottom of the screen
 class _OnBoardingScreenState extends State<OnBoardingScreen> {
-  static const int initialPageNum = 0;
+  /// Total number of pages
+  final int _numPages = OnBoardingRepositoryImpl.pagesNumber;
 
-  final introdate = GetStorage();
-  final int _numPages = 5;
+  // We can initialize pages just once, cause they are static
+  List<Widget> _pages = [];
 
-  PageController _pageController = PageController(initialPage: initialPageNum);
+  /// Page controller, that will execute Cubit method
+  PageController _pageController = PageController(initialPage: 0);
 
+  /// Disable next [OnBoardingScreen] openings
+  @override
+  void initState() {
+    super.initState();
+    _disableOnBoardingInFuture();
+  }
+
+  /// Initialize pages once before first build
+  @override
+  void didChangeDependencies() {
+    _pages = _buildPageView();
+    super.didChangeDependencies();
+  }
+
+  /// Make pref for onboarding false
+  Future<void> _disableOnBoardingInFuture() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setBool(PrefsKeys.onBoardingKey, false);
+  }
+
+  /// Build indicators depending on current opened page
   List<Widget> _buildPageIndicator(int _currentPage) {
     List<Widget> list = [];
     for (int i = 0; i < _numPages; i++) {
@@ -33,8 +60,8 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
     return list;
   }
 
+  /// Get number page indicator
   Widget _indicator(bool isActive) {
-    // индикатор номера страницы
     return AnimatedContainer(
       duration: Duration(milliseconds: 150),
       margin: EdgeInsets.symmetric(horizontal: 3.75),
@@ -56,6 +83,8 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
     );
   }
 
+  /// Get next button to open next page
+  /// or to close onboarding and start main app
   Widget _buildNextButton(bool isLastPage) {
     return AnimatedContainer(
       duration: Duration(milliseconds: 250),
@@ -101,6 +130,7 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
     );
   }
 
+  /// Build block with image and texts
   List<Widget> _buildPageView() {
     OnBoardingRepository repository = OnBoardingRepositoryImpl();
     return List.generate(_numPages, (index) {
@@ -148,13 +178,12 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
     });
   }
 
+  /// Main build screen function
   Widget _onBoardingScreen() {
     return BlocBuilder<OnBoardingCubit, OnBoardingPage>(
         builder: (context, pageInfo) {
-      // _currentPage = pageNum;
       bool isLastPage = pageInfo.pageNum == _numPages - 1;
       return Scaffold(
-        //Все 3 экрана + скип + выхода из приветствия
         body: AnnotatedRegion<SystemUiOverlayStyle>(
           value: SystemUiOverlayStyle.light,
           child: AnimatedContainer(
@@ -168,11 +197,9 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
                     child: PageView(
                       physics: ClampingScrollPhysics(),
                       controller: _pageController,
-                      onPageChanged: (int page) {
-                        //Индикатор страницы
-                        context.read<OnBoardingCubit>().swipe(page);
-                      },
-                      children: _buildPageView(),
+                      onPageChanged: (page) =>
+                          context.read<OnBoardingCubit>().swipe(page),
+                      children: _pages,
                     ),
                   ),
                   Padding(
@@ -216,15 +243,13 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
         ),
       );
     });
-    // builder: (context, pageNum){
   }
 
-  // BlocBuilder<OnBoardingPageCounter,int>(
-  // builder: (context, pageNum){
+  /// Use cubit
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => OnBoardingCubit(initialPageNum),
+      create: (_) => OnBoardingCubit(),
       child: _onBoardingScreen(),
     );
   }

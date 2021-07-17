@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+/// Static information for onboarding screen
 class OnBoardingData {
   static List<Color> backgroundColors = [
     Color.fromRGBO(30, 144, 255, 0.5),

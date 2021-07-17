@@ -2,6 +2,7 @@ import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:rtu_mirea_app/common/constants.dart';
 import 'package:rtu_mirea_app/presentation/bloc/home_navigator_bloc/home_navigator_bloc.dart';
 import 'package:rtu_mirea_app/presentation/pages/home/home_navigator_screen.dart';
 import 'package:rtu_mirea_app/presentation/pages/onboarding/onboarding_screen.dart';
@@ -13,8 +14,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   SharedPreferences prefs = await SharedPreferences.getInstance();
-  bool showOnboarding = prefs.getBool('show_onboarding') ?? true;
-  await prefs.setBool("show_onboarding", false);
+  bool showOnboarding = prefs.getBool(PrefsKeys.onBoardingKey) ?? true;
   runApp(App(showOnboarding));
 }
 
@@ -49,13 +49,13 @@ class App extends StatelessWidget {
           theme: theme,
           darkTheme: darkTheme,
           initialRoute: _showOnboarding
-              ? OnboardingScreen.routeName
+              ? OnBoardingScreen.routeName
               : HomeNavigatorScreen.routeName,
           routes: {
             '/': (context) => HomeNavigatorScreen(),
             ScheduleScreen.routeName: (context) => ScheduleScreen(),
             SettingsScreen.routeName: (context) => SettingsScreen(),
-            OnboardingScreen.routeName: (context) => OnboardingScreen()
+            OnBoardingScreen.routeName: (context) => OnBoardingScreen()
           },
         ),
       ),

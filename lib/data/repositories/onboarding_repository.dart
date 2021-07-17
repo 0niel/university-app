@@ -3,6 +3,7 @@ import 'package:rtu_mirea_app/data/datasources/onboarding_data.dart';
 import 'package:rtu_mirea_app/domain/entities/onboarding_page.dart';
 import 'package:rtu_mirea_app/domain/repositories/onboarding_repository.dart';
 
+/// Repository to get onboarding page info
 class OnBoardingRepositoryImpl implements OnBoardingRepository {
   @override
   OnBoardingPage getPage(int index) {
@@ -16,6 +17,7 @@ class OnBoardingRepositoryImpl implements OnBoardingRepository {
     );
   }
 
+  /// First onboard page
   static const firstPage = const OnBoardingPage(
     pageNum: 0,
     textWidget: Text(
@@ -37,4 +39,6 @@ class OnBoardingRepositoryImpl implements OnBoardingRepository {
       width: 375.0,
     ),
   );
+
+  static const pagesNumber = 5;
 }
