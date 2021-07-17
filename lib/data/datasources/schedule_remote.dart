@@ -7,17 +7,17 @@ abstract class ScheduleRemoteData {
   Future<List<String>> getGroups();
 }
 
-class ScheduleRemoteDataApi implements ScheduleRemoteData {
+class ScheduleRemoteDataImpl implements ScheduleRemoteData {
   static const _API_BASE_URL = 'http://127.0.0.1:5000/api/';
 
-  final Dio _dio = Dio(
-    BaseOptions(baseUrl: _API_BASE_URL),
-  );
+  final Dio httpClient;
+
+  ScheduleRemoteDataImpl({required this.httpClient});
 
   @override
   Future<List<String>> getGroups() async {
     try {
-      final response = await _dio.get('/schedule/groups');
+      final response = await httpClient.get(_API_BASE_URL + '/schedule/groups');
       if (response.statusCode == 200) {
         List<String> groups = response.data['groups'];
         return groups;
@@ -33,7 +33,8 @@ class ScheduleRemoteDataApi implements ScheduleRemoteData {
   @override
   Future<ScheduleModel> getScheduleByGroup(String group) async {
     try {
-      final response = await _dio.get('/schedule/$group/full_schedule');
+      final response = await httpClient
+          .get(_API_BASE_URL + '/schedule/$group/full_schedule');
       if (response.statusCode == 200) {
         return ScheduleModel.fromJson(response.data);
       } else {
