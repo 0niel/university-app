@@ -44,10 +44,7 @@ class ScheduleScreen extends StatelessWidget {
         ),
       ),
       body: SafeArea(
-        child: Padding(
-          padding: EdgeInsets.all(10),
-          child: SchedulePageView(),
-        ),
+        child: SchedulePageView(),
       ),
     );
   }

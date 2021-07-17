@@ -95,6 +95,7 @@ class _SchedulePageViewState extends State<SchedulePageView> {
     return Column(
       children: [
         Container(
+          margin: EdgeInsets.all(10),
           padding: EdgeInsets.symmetric(vertical: 5),
           decoration: BoxDecoration(
             boxShadow: [
