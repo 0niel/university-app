@@ -37,6 +37,10 @@ class App extends StatelessWidget {
       DeviceOrientation.portraitUp,
     ]);
 
+    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+    ));
+
     return MultiBlocProvider(
       providers: [
         BlocProvider<HomeNavigatorBloc>(
