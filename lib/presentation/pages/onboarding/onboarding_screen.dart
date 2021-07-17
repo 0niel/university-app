@@ -90,6 +90,7 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
       duration: Duration(milliseconds: 250),
       margin: EdgeInsets.symmetric(horizontal: 3.75),
       child: ElevatedButton(
+        key: Key('ElevatedButtonOnBoarding'),
         onPressed: () {
           if (isLastPage) {
             Navigator.pushReplacement(

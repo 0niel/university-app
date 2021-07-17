@@ -18,6 +18,7 @@ class CalendarTest {
       DateTime startFirstSemester = DateTime(2020, DateTime.september, 2);
       DateTime startSecondSemester = DateTime(2021, DateTime.february, 9);
 
+      // TODO Протестить последние недели
       test('First week in September', () {
         expect(mCal.Calendar.getCurrentWeek(startFirstSemester), 1);
       });
