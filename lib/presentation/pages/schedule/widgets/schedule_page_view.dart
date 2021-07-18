@@ -79,11 +79,11 @@ class _SchedulePageViewState extends State<SchedulePageView> {
       child: Column(
         children: [
           LessonListTile(),
-          Divider(),
+          Divider(indent: 15, endIndent: 15),
           LessonListTile(),
-          Divider(),
+          Divider(indent: 15, endIndent: 15),
           LessonListTile(),
-          Divider(),
+          Divider(indent: 15, endIndent: 15),
           LessonListTile(),
         ],
       ),
