@@ -47,6 +47,9 @@ dependencies:
   # Simple direct Service Locator for Dependency Injection.
   # See https://pub.dev/packages/get_it
   get_it: ^7.1.3
+  # Internet connection checker.
+  # See https://pub.dev/packages/internet_connection_checker
+  internet_connection_checker: ^0.0.1+2
 
 
   # The following adds the Cupertino Icons font to your application.

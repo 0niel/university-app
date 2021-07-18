@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
+import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:rtu_mirea_app/data/datasources/schedule_local.dart';
 import 'package:rtu_mirea_app/data/datasources/schedule_remote.dart';
 import 'package:rtu_mirea_app/domain/repositories/schedule_repository.dart';
@@ -24,7 +25,10 @@ Future<void> setup() async {
 
   // Repositories
   getIt.registerLazySingleton<ScheduleRepository>(() => ScheduleRepositoryImpl(
-      remoteDataSource: getIt(), localDataSource: getIt()));
+        remoteDataSource: getIt(),
+        localDataSource: getIt(),
+        connectionChecker: getIt(),
+      ));
 
   getIt.registerLazySingleton<ScheduleRemoteData>(
       () => ScheduleRemoteDataImpl(httpClient: getIt()));
@@ -37,4 +41,5 @@ Future<void> setup() async {
   getIt.registerLazySingleton(() => Dio());
   final sharedPreferences = await SharedPreferences.getInstance();
   getIt.registerLazySingleton(() => sharedPreferences);
+  getIt.registerLazySingleton(() => InternetConnectionChecker());
 }
