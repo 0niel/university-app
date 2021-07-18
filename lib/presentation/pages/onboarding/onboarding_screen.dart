@@ -23,7 +23,7 @@ class OnBoardingScreen extends StatefulWidget {
 /// in the bottom of the screen
 class _OnBoardingScreenState extends State<OnBoardingScreen> {
   /// Total number of pages
-  final int _numPages = OnBoardingRepositoryImpl.pagesNumber;
+  final int _numPages = OnBoardingRepository.pagesNum;
 
   // We can initialize pages just once, cause they are static
   List<Widget> _pages = [];

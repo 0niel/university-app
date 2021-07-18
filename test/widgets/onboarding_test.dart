@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:rtu_mirea_app/data/repositories/onboarding_repository.dart';
+import 'package:rtu_mirea_app/domain/usecases/onboarding/get_page.dart';
 import 'package:rtu_mirea_app/main.dart';
 
 class OnBoardingTest {
@@ -18,9 +19,9 @@ class OnBoardingTest {
 
       // Create the Finders.
       final mainText =
-          find.text(OnBoardingRepositoryImpl.firstPage.textWidget.data!);
+          find.text(GetOnBoardingPages.firstPage.textWidget.data!);
       final contentText =
-          find.text(OnBoardingRepositoryImpl.firstPage.contentText);
+          find.text(GetOnBoardingPages.firstPage.contentText);
 
       // Use the `findsOneWidget` matcher provided by flutter_test to
       // verify that the Text widgets appear exactly once in the widget tree.
