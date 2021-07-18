@@ -1,4 +1,6 @@
+import 'package:dartz/dartz.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
+import 'package:rtu_mirea_app/common/errors/failures.dart';
 import 'package:rtu_mirea_app/data/datasources/schedule_local.dart';
 import 'package:rtu_mirea_app/data/datasources/schedule_remote.dart';
 import 'package:rtu_mirea_app/domain/entities/schedule.dart';
@@ -15,19 +17,19 @@ class ScheduleRepositoryImpl implements ScheduleRepository {
       required this.connectionChecker});
 
   @override
-  Future<List<String>> getAllGroups() {
+  Future<Either<Failure, List<String>>> getAllGroups() {
     // TODO: implement getAllGroups
     throw UnimplementedError();
   }
 
   @override
-  Future<Schedule> getSchedule(String group) {
+  Future<Either<Failure, Schedule>> getSchedule(String group) {
     // TODO: implement getSchedule
     throw UnimplementedError();
   }
 
   @override
-  Future<bool> isGroupExist() {
+  Future<Either<Failure, bool>> isGroupExist() {
     // TODO: implement isGroupExist
     throw UnimplementedError();
   }
