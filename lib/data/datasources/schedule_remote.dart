@@ -22,11 +22,10 @@ class ScheduleRemoteDataImpl implements ScheduleRemoteData {
         List<String> groups = response.data['groups'];
         return groups;
       } else {
-        throw RemoteDataException(
-            'Response status code is $response.statusCode');
+        throw ServerException('Response status code is $response.statusCode');
       }
     } catch (e) {
-      throw RemoteDataException(e.toString());
+      throw ServerException(e.toString());
     }
   }
 
@@ -38,11 +37,10 @@ class ScheduleRemoteDataImpl implements ScheduleRemoteData {
       if (response.statusCode == 200) {
         return ScheduleModel.fromJson(response.data);
       } else {
-        throw RemoteDataException(
-            'Response status code is $response.statusCode');
+        throw ServerException('Response status code is $response.statusCode');
       }
     } catch (e) {
-      throw RemoteDataException(e.toString());
+      throw ServerException(e.toString());
     }
   }
 }
