@@ -4,9 +4,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:rtu_mirea_app/common/constants.dart';
-import 'package:rtu_mirea_app/data/repositories/onboarding_repository.dart';
 import 'package:rtu_mirea_app/domain/entities/onboarding_page.dart';
-import 'package:rtu_mirea_app/domain/repositories/onboarding_repository.dart';
 import 'package:rtu_mirea_app/domain/usecases/onboarding/get_page.dart';
 import 'package:rtu_mirea_app/presentation/bloc/onboarding_cubit.dart';
 import 'package:rtu_mirea_app/presentation/colors.dart';
@@ -16,22 +14,27 @@ import 'package:shared_preferences/shared_preferences.dart';
 /// OnBoarding screen, that greets new users
 class OnBoardingScreen extends StatefulWidget {
   static const String routeName = '/onboarding';
+  final getIt = GetIt.instance;
 
   @override
-  _OnBoardingScreenState createState() => _OnBoardingScreenState();
+  _OnBoardingScreenState createState() =>
+      _OnBoardingScreenState(getOnBoardingPages: getIt<GetOnBoardingPages>());
 }
 
 /// State, that uses cubit to set inidcators and buttons
 /// in the bottom of the screen
 class _OnBoardingScreenState extends State<OnBoardingScreen> {
-  /// Total number of pages
   final getIt = GetIt.instance;
 
   /// Pages count
-  late final int _numPages = getIt<GetOnBoardingPages>().getPagesCount();
+  late final int _numPages = getOnBoardingPages.getPagesCount();
 
   // We can initialize pages just once, cause they are static
   List<Widget> _pages = [];
+
+  final GetOnBoardingPages getOnBoardingPages;
+
+  _OnBoardingScreenState({required this.getOnBoardingPages});
 
   /// Page controller, that will execute Cubit method
   PageController _pageController = PageController(initialPage: 0);
@@ -139,8 +142,7 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
 
   /// Build block with image and texts
   List<Widget> _buildPageView() {
-    List<OnBoardingPage> pages =
-        getIt<GetOnBoardingPages>().getPagesInfo(_numPages);
+    List<OnBoardingPage> pages = getOnBoardingPages.getPagesInfo(_numPages);
     return List.generate(_numPages, (index) {
       OnBoardingPage pageInfo = pages[index];
       return Padding(
