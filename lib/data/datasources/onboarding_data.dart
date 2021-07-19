@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 /// Static information for onboarding screen
 class OnBoardingData {
+
+  /// Background colors
   static List<Color> backgroundColors = [
     Color.fromRGBO(30, 144, 255, 0.5),
     Color.fromRGBO(255, 155, 112, 0.5),
@@ -10,6 +12,7 @@ class OnBoardingData {
     Color.fromRGBO(255, 127, 80, 1.0),
   ];
 
+  /// Main images
   static List<Image> containersImages = [
     Image(
       image: AssetImage('assets/images/Saly-1.png'),
@@ -38,7 +41,8 @@ class OnBoardingData {
     ),
   ];
 
-  static List textWidgets = [
+  /// Main text widgets
+  static List<Text> textWidgets = [
     Text(
       'Добро пожаловать!',
       style: TextStyle(
@@ -91,6 +95,7 @@ class OnBoardingData {
     ),
   ];
 
+  /// Bottom text strings
   static List contentTexts = [
     'Это приложение было создано студентами для студентов',
     'Как же легко оказывается можно смотреть расписание, а главное быстро',
@@ -99,6 +104,7 @@ class OnBoardingData {
     'Слово сложное, но все легко. Общайся и делись материалами с другими группами мгновенно',
   ];
 
+  /// Top padding for every image
   static double getImageTopPadding(int page) {
     switch (page) {
       case 0:

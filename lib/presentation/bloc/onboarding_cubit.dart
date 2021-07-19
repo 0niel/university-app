@@ -11,10 +11,12 @@ class OnBoardingCubit extends Cubit<OnBoardingPage> {
   final GetOnBoardingPages getPages = GetOnBoardingPages();
   final List<OnBoardingPage> _pages = [];
 
+  /// Initizalize first page and get info about all pages
   OnBoardingCubit() : super(GetOnBoardingPages.firstPage) {
     _fillPages();
   }
 
+  /// Fill pages array
   Future<void> _fillPages() async {
     var params = GetOnBoardingPagesParams(pagesCount: getPages.getPagesCount());
     _pages.addAll(await getPages.call(params));

@@ -10,6 +10,7 @@ class GetOnBoardingPages
   /// Repository for pages
   final OnBoardingRepository _repository = OnBoardingRepositoryImpl();
 
+  /// Returns array of onboarding pages info
   @override
   Future<List<OnBoardingPage>> call(GetOnBoardingPagesParams params) async {
     List<OnBoardingPage> res = [];
@@ -19,6 +20,7 @@ class GetOnBoardingPages
     return res;
   }
 
+  /// Get pages count
   int getPagesCount() {
     return OnBoardingRepository.pagesNum;
   }
@@ -47,6 +49,7 @@ class GetOnBoardingPages
   );
 }
 
+/// Params for [GetOnBoardingPages] usecase
 class GetOnBoardingPagesParams extends Equatable {
   final int pagesCount;
 
