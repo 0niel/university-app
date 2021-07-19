@@ -8,7 +8,7 @@ import 'package:rtu_mirea_app/domain/usecases/onboarding/get_page.dart';
 /// [OnBoardingScreen] state management
 /// Depends on page number
 class OnBoardingCubit extends Cubit<OnBoardingPage> {
-  final GetOnBoardingPages getPages; // = GetOnBoardingPages();
+  final GetOnBoardingPages getPages;
   final List<OnBoardingPage> _pages = [];
 
   /// Initizalize first page and get info about all pages

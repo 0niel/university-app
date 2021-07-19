@@ -14,11 +14,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 /// OnBoarding screen, that greets new users
 class OnBoardingScreen extends StatefulWidget {
   static const String routeName = '/onboarding';
-  final getIt = GetIt.instance;
 
   @override
   _OnBoardingScreenState createState() =>
-      _OnBoardingScreenState(getOnBoardingPages: getIt<GetOnBoardingPages>());
+      _OnBoardingScreenState();
 }
 
 /// State, that uses cubit to set inidcators and buttons
@@ -26,15 +25,16 @@ class OnBoardingScreen extends StatefulWidget {
 class _OnBoardingScreenState extends State<OnBoardingScreen> {
   final getIt = GetIt.instance;
 
+  late final OnBoardingCubit cubitInstance = getIt<OnBoardingCubit>();
+
+  /// UseCase to get access to dataSource
+  late final GetOnBoardingPages getOnBoardingPages = cubitInstance.getPages;
+
   /// Pages count
   late final int _numPages = getOnBoardingPages.getPagesCount();
 
   // We can initialize pages just once, cause they are static
   List<Widget> _pages = [];
-
-  final GetOnBoardingPages getOnBoardingPages;
-
-  _OnBoardingScreenState({required this.getOnBoardingPages});
 
   /// Page controller, that will execute Cubit method
   PageController _pageController = PageController(initialPage: 0);
@@ -263,7 +263,7 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => getIt<OnBoardingCubit>(),
+      create: (_) => cubitInstance,
       child: _onBoardingScreen(),
     );
   }
