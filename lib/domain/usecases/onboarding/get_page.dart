@@ -8,21 +8,28 @@ import 'package:rtu_mirea_app/data/repositories/onboarding_repository.dart';
 class GetOnBoardingPages
     extends UseCase<List<OnBoardingPage>, GetOnBoardingPagesParams> {
   /// Repository for pages
-  final OnBoardingRepository _repository = OnBoardingRepositoryImpl();
+  final OnBoardingRepository repoOnBoarding; // = OnBoardingRepositoryImpl();
+
+  GetOnBoardingPages(this.repoOnBoarding);
 
   /// Returns array of onboarding pages info
   @override
   Future<List<OnBoardingPage>> call(GetOnBoardingPagesParams params) async {
+    return getPagesInfo(params.pagesCount);
+  }
+
+  /// Get all info about all pages
+  List<OnBoardingPage> getPagesInfo(int pagesCount) {
     List<OnBoardingPage> res = [];
-    for (int i = 0; i < params.pagesCount; ++i) {
-      res.add(_repository.getPage(i));
+    for (int i = 0; i < pagesCount; ++i) {
+      res.add(repoOnBoarding.getPage(i));
     }
     return res;
   }
 
   /// Get pages count
   int getPagesCount() {
-    return OnBoardingRepository.pagesNum;
+    return repoOnBoarding.getPagesNum();
   }
 
   /// First onboard page

@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get_it/get_it.dart';
 import 'package:rtu_mirea_app/common/constants.dart';
 import 'package:rtu_mirea_app/data/repositories/onboarding_repository.dart';
 import 'package:rtu_mirea_app/domain/entities/onboarding_page.dart';
 import 'package:rtu_mirea_app/domain/repositories/onboarding_repository.dart';
+import 'package:rtu_mirea_app/domain/usecases/onboarding/get_page.dart';
 import 'package:rtu_mirea_app/presentation/bloc/onboarding_cubit.dart';
 import 'package:rtu_mirea_app/presentation/colors.dart';
 import 'package:rtu_mirea_app/presentation/pages/home/home_navigator_screen.dart';
@@ -23,7 +25,10 @@ class OnBoardingScreen extends StatefulWidget {
 /// in the bottom of the screen
 class _OnBoardingScreenState extends State<OnBoardingScreen> {
   /// Total number of pages
-  final int _numPages = OnBoardingRepository.pagesNum;
+  final getIt = GetIt.instance;
+
+  /// Pages count
+  late final int _numPages = getIt<GetOnBoardingPages>().getPagesCount();
 
   // We can initialize pages just once, cause they are static
   List<Widget> _pages = [];
@@ -35,6 +40,7 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
   @override
   void initState() {
     super.initState();
+
     _disableOnBoardingInFuture();
   }
 
@@ -133,9 +139,10 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
 
   /// Build block with image and texts
   List<Widget> _buildPageView() {
-    OnBoardingRepository repository = OnBoardingRepositoryImpl();
+    List<OnBoardingPage> pages =
+        getIt<GetOnBoardingPages>().getPagesInfo(_numPages);
     return List.generate(_numPages, (index) {
-      OnBoardingPage pageInfo = repository.getPage(index);
+      OnBoardingPage pageInfo = pages[index];
       return Padding(
         padding: EdgeInsets.symmetric(horizontal: 20.0),
         child: Stack(
@@ -231,7 +238,11 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
                                 ),
                               ),
                         Row(
-                          children: [..._buildPageIndicator(pageInfo.pageNum)],
+                          children: [
+                            ..._buildPageIndicator(
+                              pageInfo.pageNum,
+                            )
+                          ],
                         ),
                         _buildNextButton(isLastPage),
                       ],
@@ -250,7 +261,7 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => OnBoardingCubit(),
+      create: (_) => getIt<OnBoardingCubit>(),
       child: _onBoardingScreen(),
     );
   }

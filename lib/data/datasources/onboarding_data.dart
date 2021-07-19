@@ -1,8 +1,16 @@
 import 'package:flutter/material.dart';
 
-/// Static information for onboarding screen
-class OnBoardingData {
+abstract class OnBoardingDataSource {
+  Color getbackgroundColor(int index);
+  Image getMainImage(int index);
+  Text getMainText(int index);
+  String getBottomText(int index);
+  double getImageTopPadding(int index);
+  int getPagesNum();
+}
 
+/// Static information for onboarding screen
+class OnBoardingDataImpl extends OnBoardingDataSource {
   /// Background colors
   static List<Color> backgroundColors = [
     Color.fromRGBO(30, 144, 255, 0.5),
@@ -105,7 +113,7 @@ class OnBoardingData {
   ];
 
   /// Top padding for every image
-  static double getImageTopPadding(int page) {
+  double getImageTopPadding(int page) {
     switch (page) {
       case 0:
         return 18.0;
@@ -120,5 +128,31 @@ class OnBoardingData {
       default:
         return 0.0;
     }
+  }
+
+  @override
+  String getBottomText(int index) {
+    return contentTexts[index];
+  }
+
+  @override
+  Image getMainImage(int index) {
+    return containersImages[index];
+  }
+
+  @override
+  Text getMainText(int index) {
+    return textWidgets[index];
+  }
+
+  @override
+  Color getbackgroundColor(int index) {
+    return backgroundColors[index];
+  }
+
+  /// OnBoarding has 5 pages
+  @override
+  int getPagesNum() {
+    return 5;
   }
 }

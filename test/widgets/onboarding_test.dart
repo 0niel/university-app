@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:rtu_mirea_app/data/datasources/onboarding_data.dart';
 import 'package:rtu_mirea_app/data/repositories/onboarding_repository.dart';
 import 'package:rtu_mirea_app/domain/usecases/onboarding/get_page.dart';
 import 'package:rtu_mirea_app/main.dart';
@@ -29,7 +30,7 @@ class OnBoardingTest {
       expect(contentText, findsOneWidget);
     });
 
-    OnBoardingRepositoryImpl repo = OnBoardingRepositoryImpl();
+    OnBoardingRepositoryImpl repo = OnBoardingRepositoryImpl(dataSource: OnBoardingDataImpl());
 
 
     testWidgets('OnBoarding | Test swipe',

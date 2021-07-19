@@ -8,11 +8,12 @@ import 'package:rtu_mirea_app/domain/usecases/onboarding/get_page.dart';
 /// [OnBoardingScreen] state management
 /// Depends on page number
 class OnBoardingCubit extends Cubit<OnBoardingPage> {
-  final GetOnBoardingPages getPages = GetOnBoardingPages();
+  final GetOnBoardingPages getPages; // = GetOnBoardingPages();
   final List<OnBoardingPage> _pages = [];
 
   /// Initizalize first page and get info about all pages
-  OnBoardingCubit() : super(GetOnBoardingPages.firstPage) {
+  OnBoardingCubit({required this.getPages})
+      : super(GetOnBoardingPages.firstPage) {
     _fillPages();
   }
 
@@ -20,6 +21,11 @@ class OnBoardingCubit extends Cubit<OnBoardingPage> {
   Future<void> _fillPages() async {
     var params = GetOnBoardingPagesParams(pagesCount: getPages.getPagesCount());
     _pages.addAll(await getPages.call(params));
+  }
+
+  /// Returns number of onboarding pages
+  int getPagesCount() {
+    return getPages.getPagesCount();
   }
 
   /// Get another page when swipe
