@@ -28,3 +28,13 @@ class SettingsPage extends HomeNavigatorState {
   @override
   List<Object> get props => [_screen];
 }
+
+class NewsPage extends HomeNavigatorState {
+  final _screen = SettingsNews();
+
+  @override
+  Widget get screen => _screen;
+
+  @override
+  List<Object> get props => [_screen];
+}

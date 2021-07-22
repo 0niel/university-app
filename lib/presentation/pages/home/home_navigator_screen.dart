@@ -46,7 +46,7 @@ class HomeNavigatorScreen extends StatelessWidget {
                 break;
               case 1:
                 BlocProvider.of<HomeNavigatorBloc>(context).add(ChangeScreen(
-                    routeName: SettingsNews.routeName, pageIndex: page));
+                    routeName: HomePage.routeName, pageIndex: page));
                 break;
               case 2:
                 BlocProvider.of<HomeNavigatorBloc>(context).add(ChangeScreen(

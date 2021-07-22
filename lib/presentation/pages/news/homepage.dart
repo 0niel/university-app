@@ -6,6 +6,8 @@ import 'package:rtu_mirea_app/presentation/pages/news/widgets.dart';
 import 'package:rtu_mirea_app/data/models/categorie_model.dart';
 import 'package:rtu_mirea_app/presentation/pages/news/categorie_news.dart';
 import 'package:rtu_mirea_app/data/news_helper/news_parse.dart';
+import 'package:rtu_mirea_app/presentation/colors.dart';
+import 'package:flutter_svg/svg.dart';
 
 class SettingsNews extends StatelessWidget {
   static const String routeName = '/news';
@@ -13,15 +15,24 @@ class SettingsNews extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: SafeArea(
-      child: HomePage(),
-    ));
+      endDrawer: Drawer(
+        child: SafeArea(
+          child: Container(
+            child: Column(
+              children: [],
+            ),
+          ),
+        ),
+      ),
+      body: SafeArea(
+        child: HomePage(),
+      ),
+    );
   }
 }
 
 class HomePage extends StatefulWidget {
-  const HomePage({Key? key}) : super(key: key);
-
+  static const String routeName = '/news';
   @override
   _HomePageState createState() => _HomePageState();
 }
@@ -35,6 +46,7 @@ class _HomePageState extends State<HomePage> {
   void getNews() async {
     News news = News();
     await news.parse();
+
     newslist = news.list_news;
     setState(() {
       _loading = false;
@@ -43,10 +55,8 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void initState() {
-    _loading = true;
-
     super.initState();
-
+    _loading = true;
     categories = getCategories();
     getNews();
   }
@@ -54,7 +64,31 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: myAppBar(),
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        bottom: PreferredSize(
+            child: Container(
+              color: LightThemeColors.grey100,
+              height: 1.0,
+            ),
+            preferredSize: Size.fromHeight(1.0)),
+        title: Text(
+          'Новости',
+          style: Theme.of(context).textTheme.headline6,
+        ),
+        actions: <Widget>[
+          Builder(
+            builder: (BuildContext context) {
+              return IconButton(
+                icon: SvgPicture.asset('assets/icons/menu.svg'),
+                onPressed: () {
+                  Scaffold.of(context).openEndDrawer();
+                },
+              );
+            },
+          ),
+        ],
+      ),
       body: SafeArea(
         child: _loading
             ? Center(
@@ -127,7 +161,7 @@ class CategoryCard extends StatelessWidget {
                     )));
       },
       child: Container(
-        margin: EdgeInsets.only(right: 14),
+        margin: EdgeInsets.only(right: 14, top: 8),
         child: Stack(
           children: <Widget>[
             Container(

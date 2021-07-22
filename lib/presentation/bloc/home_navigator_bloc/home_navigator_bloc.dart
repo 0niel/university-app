@@ -5,6 +5,7 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:rtu_mirea_app/presentation/pages/schedule/schedule_screen.dart';
 import 'package:rtu_mirea_app/presentation/pages/settings/settings_screen.dart';
+import 'package:rtu_mirea_app/presentation/pages/news/homepage.dart';
 
 part 'home_navigator_event.dart';
 part 'home_navigator_state.dart';
@@ -27,6 +28,9 @@ class HomeNavigatorBloc extends Bloc<HomeNavigatorEvent, HomeNavigatorState> {
             break;
           case SettingsScreen.routeName:
             yield SettingsPage();
+            break;
+          case HomePage.routeName:
+            yield NewsPage();
             break;
           default:
             break;
