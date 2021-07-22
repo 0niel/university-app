@@ -3,15 +3,21 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/home_navigator_bloc/home_navigator_bloc.dart';
 import 'package:rtu_mirea_app/presentation/pages/schedule/schedule_screen.dart';
 import 'package:rtu_mirea_app/presentation/pages/settings/settings_screen.dart';
+import 'package:rtu_mirea_app/presentation/pages/news/homepage.dart';
 
 class HomeNavigatorScreen extends StatelessWidget {
   static const String routeName = '/';
+
   HomeNavigatorScreen({Key? key}) : super(key: key);
 
   static const _navBarItems = const <BottomNavigationBarItem>[
     BottomNavigationBarItem(
       icon: Icon(Icons.calendar_today),
       label: 'Расписание',
+    ),
+    BottomNavigationBarItem(
+      icon: Icon(Icons.favorite),
+      label: 'Новости',
     ),
     BottomNavigationBarItem(
       icon: Icon(Icons.settings_applications_rounded),
@@ -39,6 +45,10 @@ class HomeNavigatorScreen extends StatelessWidget {
                     routeName: ScheduleScreen.routeName, pageIndex: page));
                 break;
               case 1:
+                BlocProvider.of<HomeNavigatorBloc>(context).add(ChangeScreen(
+                    routeName: SettingsNews.routeName, pageIndex: page));
+                break;
+              case 2:
                 BlocProvider.of<HomeNavigatorBloc>(context).add(ChangeScreen(
                     routeName: SettingsScreen.routeName, pageIndex: page));
                 break;
