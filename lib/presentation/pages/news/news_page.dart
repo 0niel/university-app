@@ -1,13 +1,13 @@
-//import 'package:cached_network_image/cached_network_image.dart';
+//Cтраница отоброжения новостей
 
 import 'package:flutter/material.dart';
-import 'package:rtu_mirea_app/data/news_helper/data.dart';
-import 'package:rtu_mirea_app/presentation/pages/news/widgets.dart';
-import 'package:rtu_mirea_app/data/models/categorie_model.dart';
-import 'package:rtu_mirea_app/presentation/pages/news/categorie_news.dart';
+import 'package:rtu_mirea_app/data/news_helper/data_tags.dart';
+import 'package:rtu_mirea_app/presentation/pages/news/widget_NewsTile.dart';
+import 'package:rtu_mirea_app/data/models/news_categorie_model.dart';
 import 'package:rtu_mirea_app/data/news_helper/news_parse.dart';
 import 'package:rtu_mirea_app/presentation/colors.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:rtu_mirea_app/presentation/pages/news/widget_CategoryCard.dart';
 
 class SettingsNews extends StatelessWidget {
   static const String routeName = '/news';
@@ -99,6 +99,7 @@ class _HomePageState extends State<HomePage> {
                   child: Column(
                     children: <Widget>[
                       /// Categories
+                      /// Tags
                       Container(
                         padding: EdgeInsets.symmetric(horizontal: 32),
                         height: 40,
@@ -137,50 +138,6 @@ class _HomePageState extends State<HomePage> {
                   ),
                 ),
               ),
-      ),
-    );
-  }
-}
-
-class CategoryCard extends StatelessWidget {
-  final String imageAssetUrl, categoryName;
-
-  const CategoryCard(
-      {Key? key, required this.imageAssetUrl, required this.categoryName})
-      : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) => CategoryNews(
-                      newsCategory: categoryName.toLowerCase(),
-                    )));
-      },
-      child: Container(
-        margin: EdgeInsets.only(right: 14, top: 8),
-        child: Stack(
-          children: <Widget>[
-            Container(
-              alignment: Alignment.center,
-              height: 35,
-              width: 100,
-              decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10), color: Colors.blue),
-              child: Text(
-                categoryName,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500),
-              ),
-            )
-          ],
-        ),
       ),
     );
   }

@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/home_navigator_bloc/home_navigator_bloc.dart';
 import 'package:rtu_mirea_app/presentation/pages/schedule/schedule_screen.dart';
 import 'package:rtu_mirea_app/presentation/pages/settings/settings_screen.dart';
-import 'package:rtu_mirea_app/presentation/pages/news/homepage.dart';
+import 'package:rtu_mirea_app/presentation/pages/news/news_page.dart';
 
 class HomeNavigatorScreen extends StatelessWidget {
   static const String routeName = '/';

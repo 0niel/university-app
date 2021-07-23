@@ -1,3 +1,5 @@
+//Страница после клика на новость
+
 import 'dart:async';
 
 import 'package:flutter/material.dart';

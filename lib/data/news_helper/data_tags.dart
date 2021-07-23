@@ -1,4 +1,4 @@
-import 'package:rtu_mirea_app/data/models/categorie_model.dart';
+import 'package:rtu_mirea_app/data/models/news_categorie_model.dart';
 
 List<CategorieModel> getCategories() {
   List<CategorieModel> myCategories = <CategorieModel>[];

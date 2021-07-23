@@ -5,7 +5,7 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:rtu_mirea_app/presentation/pages/schedule/schedule_screen.dart';
 import 'package:rtu_mirea_app/presentation/pages/settings/settings_screen.dart';
-import 'package:rtu_mirea_app/presentation/pages/news/homepage.dart';
+import 'package:rtu_mirea_app/presentation/pages/news/news_page.dart';
 
 part 'home_navigator_event.dart';
 part 'home_navigator_state.dart';

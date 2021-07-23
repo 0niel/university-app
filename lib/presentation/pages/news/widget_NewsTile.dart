@@ -1,19 +1,7 @@
-import 'package:flutter/material.dart';
-import 'package:rtu_mirea_app/presentation/pages/news/article_view.dart';
+//Виджет одной новости
 
-PreferredSize myAppBar() {
-  return PreferredSize(
-    preferredSize: Size.fromHeight(10),
-    child: AppBar(
-      title: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisAlignment: MainAxisAlignment.center,
-      ),
-      backgroundColor: Colors.transparent,
-      elevation: 0.0,
-    ),
-  );
-}
+import 'package:flutter/material.dart';
+import 'package:rtu_mirea_app/presentation/pages/news/one_news_page.dart';
 
 class NewsTile extends StatelessWidget {
   final String imgUrl, title, desc, content, posturl, date, tags;
