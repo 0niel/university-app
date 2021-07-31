@@ -1,17 +1,13 @@
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
-import 'package:rtu_mirea_app/data/datasources/onboarding_data.dart';
 import 'package:rtu_mirea_app/data/datasources/schedule_local.dart';
 import 'package:rtu_mirea_app/data/datasources/schedule_remote.dart';
-import 'package:rtu_mirea_app/data/repositories/onboarding_repository.dart';
-import 'package:rtu_mirea_app/domain/repositories/onboarding_repository.dart';
 import 'package:rtu_mirea_app/domain/repositories/schedule_repository.dart';
 import 'package:rtu_mirea_app/domain/usecases/get_groups.dart';
 import 'package:rtu_mirea_app/domain/usecases/get_schedule.dart';
 import 'package:rtu_mirea_app/domain/usecases/is_group_exist.dart';
-import 'package:rtu_mirea_app/domain/usecases/onboarding/get_page.dart';
 import 'package:rtu_mirea_app/presentation/bloc/home_navigator_bloc/home_navigator_bloc.dart';
-import 'package:rtu_mirea_app/presentation/bloc/onboarding_cubit.dart';
+import 'package:rtu_mirea_app/presentation/bloc/onboarding_cubit/onboarding_cubit.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'data/repositories/schedule_repository_impl.dart';
@@ -21,15 +17,12 @@ final getIt = GetIt.instance;
 Future<void> setup() async {
   // BloC / Cubit
   getIt.registerFactory(() => HomeNavigatorBloc());
-  getIt.registerFactory(
-    () => OnBoardingCubit(getPages: getIt()),
-  );
+  getIt.registerFactory(() => OnboardingCubit());
 
   // Usecases
   getIt.registerLazySingleton(() => GetGroups(getIt()));
   getIt.registerLazySingleton(() => GetSchedule(getIt()));
   getIt.registerLazySingleton(() => IsGroupExist(getIt()));
-  getIt.registerLazySingleton(() => GetOnBoardingPages(getIt()));
 
   // Repositories
   getIt.registerLazySingleton<ScheduleRepository>(() => ScheduleRepositoryImpl(
@@ -39,15 +32,6 @@ Future<void> setup() async {
       () => ScheduleRemoteDataImpl(httpClient: getIt()));
   getIt.registerLazySingleton<ScheduleLocalData>(
       () => ScheduleLocalDataImpl(sharedPreferences: getIt()));
-  
-  getIt.registerLazySingleton<OnBoardingRepository>(
-    () => OnBoardingRepositoryImpl(
-      dataSource: getIt()
-    ),
-  );
-  getIt.registerLazySingleton<OnBoardingDataSource>(
-    () => OnBoardingDataImpl(),
-  );
 
   // Common / Core
 

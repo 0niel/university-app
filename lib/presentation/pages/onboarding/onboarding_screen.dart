@@ -1,150 +1,106 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:get_it/get_it.dart';
-import 'package:rtu_mirea_app/common/constants.dart';
-import 'package:rtu_mirea_app/domain/entities/onboarding_page.dart';
-import 'package:rtu_mirea_app/domain/usecases/onboarding/get_page.dart';
-import 'package:rtu_mirea_app/presentation/bloc/onboarding_cubit.dart';
+import 'package:rtu_mirea_app/presentation/bloc/onboarding_cubit/onboarding_cubit.dart';
 import 'package:rtu_mirea_app/presentation/colors.dart';
 import 'package:rtu_mirea_app/presentation/pages/home/home_navigator_screen.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+
+import 'widgets/indicator.dart';
+import 'widgets/next_button.dart';
 
 /// OnBoarding screen, that greets new users
 class OnBoardingScreen extends StatefulWidget {
   static const String routeName = '/onboarding';
-
   @override
-  _OnBoardingScreenState createState() =>
-      _OnBoardingScreenState();
+  _OnBoardingScreenState createState() => _OnBoardingScreenState();
 }
 
-/// State, that uses cubit to set inidcators and buttons
-/// in the bottom of the screen
 class _OnBoardingScreenState extends State<OnBoardingScreen> {
-  final getIt = GetIt.instance;
+  final int _numPages = 5;
 
-  late final OnBoardingCubit cubitInstance = getIt<OnBoardingCubit>();
+  /// Main images
+  static const List<Image> containersImages = [
+    Image(
+      image: AssetImage('assets/images/Saly-1.png'),
+      height: 375.0,
+      width: 375.0,
+    ),
+    Image(
+      image: AssetImage('assets/images/Saly-2.png'),
+      height: 324.0,
+      width: 328.0,
+    ),
+    Image(
+      image: AssetImage('assets/images/Saly-3.png'),
+      height: 315.0,
+      width: 315.0,
+    ),
+    Image(
+      image: AssetImage('assets/images/Saly-4.png'),
+      height: 375.0,
+      width: 315.0,
+    ),
+    Image(
+      image: AssetImage('assets/images/Saly-5.png'),
+      height: 315.0,
+      width: 315.0,
+    ),
+  ];
 
-  /// UseCase to get access to dataSource
-  late final GetOnBoardingPages getOnBoardingPages = cubitInstance.getPages;
+  static const List titlesTexts = [
+    'Добро пожаловать!',
+    'Смотри расписание!',
+    'Будь вкурсе не надевая штаны!',
+    'Ставь цели!',
+    'Коммуницируй!',
+  ];
 
-  /// Pages count
-  late final int _numPages = getOnBoardingPages.getPagesCount();
+  /// Bottom text strings
+  static const List contentTexts = [
+    'Это приложение было создано студентами для студентов',
+    'Как же легко оказывается можно смотреть расписание, а главное быстро',
+    'Иногда так лень заходить на сайт и искать нужную тебе информацию, мы это исправили',
+    'Как же много дедлайнов!? Создавать дедлайны теперь как никогда просто и удобно',
+    'Слово сложное, но все легко. Общайся и делись материалами с другими группами мгновенно',
+  ];
 
-  // We can initialize pages just once, cause they are static
-  List<Widget> _pages = [];
+  /// Top padding for every image
+  double getImageTopPadding(int page) {
+    switch (page) {
+      case 0:
+        return 18.0;
+      case 1:
+        return 70.0;
+      case 2:
+        return 73.0;
+      case 3:
+        return 30.0;
+      case 4:
+        return 91.0;
+      default:
+        return 0.0;
+    }
+  }
 
   /// Page controller, that will execute Cubit method
-  PageController _pageController = PageController(initialPage: 0);
-
-  /// Disable next [OnBoardingScreen] openings
-  @override
-  void initState() {
-    super.initState();
-
-    _disableOnBoardingInFuture();
-  }
-
-  /// Initialize pages once before first build
-  @override
-  void didChangeDependencies() {
-    _pages = _buildPageView();
-    super.didChangeDependencies();
-  }
-
-  /// Make pref for onboarding false
-  Future<void> _disableOnBoardingInFuture() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.setBool(PrefsKeys.onBoardingKey, false);
-  }
+  final PageController _pageController = PageController(initialPage: 0);
 
   /// Build indicators depending on current opened page
-  List<Widget> _buildPageIndicator(int _currentPage) {
+  List<Widget> _buildPageIndicators(int _currentPage) {
     List<Widget> list = [];
     for (int i = 0; i < _numPages; i++) {
-      list.add(i == _currentPage ? _indicator(true) : _indicator(false));
+      list.add(i == _currentPage
+          ? IndicatorPageView(isActive: true)
+          : IndicatorPageView(isActive: false));
     }
     return list;
   }
 
-  /// Get number page indicator
-  Widget _indicator(bool isActive) {
-    return AnimatedContainer(
-      duration: Duration(milliseconds: 150),
-      margin: EdgeInsets.symmetric(horizontal: 3.75),
-      height: isActive ? 15.0 : 11.0,
-      width: isActive ? 15.0 : 11.0,
-      decoration: BoxDecoration(
-        color: isActive ? Colors.white : LightThemeColors.grey100,
-        borderRadius: BorderRadius.all(Radius.circular(12.0)),
-        boxShadow: <BoxShadow>[
-          isActive
-              ? BoxShadow(
-                  color: Colors.black.withOpacity(0.25),
-                  offset: Offset(0.0, 2.0),
-                  blurRadius: 4.0,
-                )
-              : BoxShadow(color: Colors.transparent),
-        ],
-      ),
-    );
-  }
-
-  /// Get next button to open next page
-  /// or to close onboarding and start main app
-  Widget _buildNextButton(bool isLastPage) {
-    return AnimatedContainer(
-      duration: Duration(milliseconds: 250),
-      margin: EdgeInsets.symmetric(horizontal: 3.75),
-      child: ElevatedButton(
-        key: Key('ElevatedButtonOnBoarding'),
-        onPressed: () {
-          if (isLastPage) {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => HomeNavigatorScreen()),
-            );
-          } else {
-            _pageController.nextPage(
-                duration: Duration(milliseconds: 300), curve: Curves.ease);
-          }
-        },
-        child: AnimatedContainer(
-          duration: Duration(milliseconds: 150),
-          padding: isLastPage
-              ? EdgeInsets.symmetric(vertical: 20.0, horizontal: 55.0)
-              : EdgeInsets.symmetric(vertical: 20.0, horizontal: 5),
-          child: isLastPage
-              ? Text(
-                  "Начать!",
-                  style: TextStyle(
-                      fontFamily: 'Montserrat',
-                      fontWeight: FontWeight.w500,
-                      color: Colors.black,
-                      fontSize: 24.0),
-                )
-              : Icon(Icons.arrow_forward_ios, color: Colors.black),
-        ),
-        style: ElevatedButton.styleFrom(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20.0),
-          ),
-          onPrimary: Colors.black.withOpacity(0.25),
-          shadowColor: Colors.black,
-          primary: Colors.white,
-          elevation: 4.0,
-        ),
-      ),
-    );
-  }
-
   /// Build block with image and texts
   List<Widget> _buildPageView() {
-    List<OnBoardingPage> pages = getOnBoardingPages.getPagesInfo(_numPages);
     return List.generate(_numPages, (index) {
-      OnBoardingPage pageInfo = pages[index];
       return Padding(
         padding: EdgeInsets.symmetric(horizontal: 20.0),
         child: Stack(
@@ -157,8 +113,8 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
               right: 0,
               child: Center(
                 child: Padding(
-                    padding: EdgeInsets.only(top: pageInfo.imageTopPadding),
-                    child: pageInfo.image),
+                    padding: EdgeInsets.only(top: getImageTopPadding(index)),
+                    child: containersImages[index]),
               ),
             ),
             Positioned(
@@ -168,17 +124,9 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  pageInfo.textWidget,
+                  Text(titlesTexts[index]),
                   SizedBox(height: 8.0),
-                  Text(
-                    pageInfo.contentText,
-                    style: TextStyle(
-                      fontFamily: 'Montserrat',
-                      fontWeight: FontWeight.w500,
-                      fontSize: 24.0,
-                      color: Colors.black,
-                    ),
-                  ),
+                  Text(contentTexts[index]),
                 ],
               ),
             ),
@@ -188,83 +136,69 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
     });
   }
 
-  /// Main build screen function
-  Widget _onBoardingScreen() {
-    return BlocBuilder<OnBoardingCubit, OnBoardingPage>(
-        builder: (context, pageInfo) {
-      bool isLastPage = pageInfo.pageNum == _numPages - 1;
-      return Scaffold(
-        body: AnnotatedRegion<SystemUiOverlayStyle>(
-          value: SystemUiOverlayStyle.light,
-          child: AnimatedContainer(
-            duration: Duration(milliseconds: 200),
-            color: pageInfo.backgroundColor,
-            child: SafeArea(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: <Widget>[
-                  Expanded(
-                    child: PageView(
-                      physics: ClampingScrollPhysics(),
-                      controller: _pageController,
-                      onPageChanged: (page) =>
-                          context.read<OnBoardingCubit>().swipe(page),
-                      children: _pages,
-                    ),
-                  ),
-                  Padding(
-                    padding:
-                        EdgeInsets.only(bottom: 35.0, left: 20.0, right: 20.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        isLastPage
-                            ? Container()
-                            : InkWell(
-                                onTap: () {
-                                  Navigator.pushReplacement(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) =>
-                                            HomeNavigatorScreen()),
-                                  );
-                                },
-                                child: Text(
-                                  "Пропустить",
-                                  style: TextStyle(
-                                      fontFamily: 'Montserrat',
-                                      fontWeight: FontWeight.w500,
-                                      color: Color(0xFFE5E5E5),
-                                      fontSize: 12.0),
-                                ),
-                              ),
-                        Row(
-                          children: [
-                            ..._buildPageIndicator(
-                              pageInfo.pageNum,
-                            )
-                          ],
-                        ),
-                        _buildNextButton(isLastPage),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      );
-    });
-  }
-
-  /// Use cubit
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => cubitInstance,
-      child: _onBoardingScreen(),
+    OnboardingCubit cubit = BlocProvider.of<OnboardingCubit>(context);
+
+    return Scaffold(
+      body: AnimatedContainer(
+        duration: Duration(milliseconds: 200),
+        color: DarkThemeColors.background01,
+        child: SafeArea(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              Expanded(
+                child: PageView(
+                  allowImplicitScrolling: true,
+                  physics: ClampingScrollPhysics(),
+                  controller: _pageController,
+                  onPageChanged: (int page) => cubit.swipe(page),
+                  children: _buildPageView(),
+                ),
+              ),
+              BlocBuilder<OnboardingCubit, int>(builder: (context, state) {
+                bool isLastPage = cubit.state == _numPages - 1;
+                return Padding(
+                  padding:
+                      EdgeInsets.only(bottom: 35.0, left: 20.0, right: 20.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      isLastPage
+                          ? Container()
+                          : InkWell(
+                              onTap: () {
+                                Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) =>
+                                          HomeNavigatorScreen()),
+                                );
+                              },
+                              child: Text(
+                                "Пропустить",
+                              ),
+                            ),
+                      Row(
+                        children: _buildPageIndicators(state),
+                      ),
+                      NextPageViewButton(
+                        isLastPage: isLastPage,
+                        onClick: () => _pageController.nextPage(
+                          duration: Duration(milliseconds: 300),
+                          curve: Curves.ease,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

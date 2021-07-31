@@ -2,8 +2,8 @@ import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:rtu_mirea_app/common/constants.dart';
 import 'package:rtu_mirea_app/presentation/bloc/home_navigator_bloc/home_navigator_bloc.dart';
+import 'package:rtu_mirea_app/presentation/bloc/onboarding_cubit/onboarding_cubit.dart';
 import 'package:rtu_mirea_app/presentation/pages/home/home_navigator_screen.dart';
 import 'package:rtu_mirea_app/presentation/pages/onboarding/onboarding_screen.dart';
 import 'package:rtu_mirea_app/presentation/pages/schedule/schedule_screen.dart';
@@ -17,26 +17,30 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dependencyInjection.setup();
   var prefs = getIt<SharedPreferences>();
-  bool showOnboarding = prefs.getBool(PrefsKeys.onBoardingKey) ?? true;
-  runApp(App(showOnboarding));
+  const String onboardingKey = 'show_onboarding';
+  bool showOnboarding = prefs.getBool(onboardingKey) ?? true;
+  if (showOnboarding) prefs.setBool(onboardingKey, false);
+
+  runApp(App(showOnboarding: showOnboarding));
 }
 
 class App extends StatelessWidget {
-  late final bool _showOnboarding;
+  final bool showOnboarding;
 
-  /// bool переменная [_showOnboarding] определяет, показывать ли
-  /// intro (onboarding) экран при запуске приложения
-  App(this._showOnboarding);
+  /// if [showOnboarding] is true, when start the application,
+  /// the intro screen will be displayed
+  App({required this.showOnboarding});
 
   @override
   Widget build(BuildContext context) {
-    // блокируем ориентацию приложения на
-    // только вертикальной
+    // blocking the orientation of the application to
+    // vertical only
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitDown,
       DeviceOrientation.portraitUp,
     ]);
 
+    // deleting the system status bar color
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
     ));
@@ -45,17 +49,18 @@ class App extends StatelessWidget {
       providers: [
         BlocProvider<HomeNavigatorBloc>(
             create: (context) => getIt<HomeNavigatorBloc>()),
+        BlocProvider<OnboardingCubit>(
+            create: (context) => getIt<OnboardingCubit>()),
       ],
       child: AdaptiveTheme(
         light: lightTheme,
         dark: darkTheme,
-        initial: AdaptiveThemeMode.light,
+        initial: AdaptiveThemeMode.dark,
         builder: (theme, darkTheme) => MaterialApp(
           debugShowCheckedModeBanner: false,
           title: 'Приложение РТУ МИРЭА',
           theme: theme,
-          darkTheme: darkTheme,
-          initialRoute: _showOnboarding
+          initialRoute: showOnboarding
               ? OnBoardingScreen.routeName
               : HomeNavigatorScreen.routeName,
           routes: {
