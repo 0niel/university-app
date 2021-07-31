@@ -89,58 +89,21 @@ flutter:
   # "family" key with the font family name, and a "fonts" key with a
   # list giving the asset and other descriptors for the font. For
   fonts:
-    - family: Oswald
-      fonts:
-        - asset: assets/fonts/Oswald/Oswald-ExtraLight.ttf
-          weight: 200
-        - asset: assets/fonts/Oswald/Oswald-Light.ttf
-          weight: 300
-        - asset: assets/fonts/Oswald/Oswald-Regular.ttf
-          weight: 400
-        - asset: assets/fonts/Oswald/Oswald-Medium.ttf
-          weight: 500
-        - asset: assets/fonts/Oswald/Oswald-SemiBold.ttf
-          weight: 600
-        - asset: assets/fonts/Oswald/Oswald-Bold.ttf
-          weight: 700
-    - family: Ubuntu
-      fonts:
-        - asset: assets/fonts/Ubuntu/Ubuntu-Light.ttf
-          weight: 300
-        - asset: assets/fonts/Ubuntu/Ubuntu-LightItalic.ttf
-          weight: 300
-        - asset: assets/fonts/Ubuntu/Ubuntu-Regular.ttf
-          weight: 400
-        - asset: assets/fonts/Ubuntu/Ubuntu-Italic.ttf
-          weight: 400
-        - asset: assets/fonts/Ubuntu/Ubuntu-Medium.ttf
-          weight: 500
-        - asset: assets/fonts/Ubuntu/Ubuntu-MediumItalic.ttf
-          weight: 500
-        - asset: assets/fonts/Ubuntu/Ubuntu-Bold.ttf
-          weight: 700
-        - asset: assets/fonts/Ubuntu/Ubuntu-BoldItalic.ttf
-          weight: 700
     - family: Montserrat
       fonts:
-        - asset: assets/fonts/Montserrat/Montserrat-Light.ttf
-          weight: 300
-        - asset: assets/fonts/Montserrat/Montserrat-LightItalic.ttf
-          weight: 300
-        - asset: assets/fonts/Montserrat/Montserrat-Regular.ttf
-          weight: 400
-        - asset: assets/fonts/Montserrat/Montserrat-Italic.ttf
-          weight: 400
-        - asset: assets/fonts/Montserrat/Montserrat-Medium.ttf
-          weight: 500
-        - asset: assets/fonts/Montserrat/Montserrat-MediumItalic.ttf
-          weight: 500
-        - asset: assets/fonts/Montserrat/Montserrat-Bold.ttf
-          weight: 700
-    - family: Roboto
+        - asset: assets/fonts/Montserrat/Montserrat-SemiBold.ttf
+          weight: 600
+    - family: Inter
       fonts:
-        - asset: assets/fonts/Roboto/Roboto-Regular.ttf
+        - asset: assets/fonts/Inter/Inter-Regular.ttf
           weight: 400
+        - asset: assets/fonts/Inter/Inter-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Inter/Inter-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/Inter/Inter-Bold.ttf
+          weight: 700
+
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages
