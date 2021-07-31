@@ -1,5 +1,38 @@
 import 'dart:ui';
 
+import 'package:flutter/material.dart';
+import 'package:flutter/painting.dart';
+
+class DarkThemeColors {
+  // Primary actions, emphasizing navigation elements,
+  // backgrounds, text, etc.
+  static const primary = Color(0xFF246BFD);
+  static const secondary = Color(0xFFC25FFF);
+
+  // Backgrounds
+  static const background01 = Color(0xFF181A20);
+  static const background02 = Color(0xFF262A34);
+
+  static const white = Color(0xFFFFFFFF);
+
+  static const gradient01 = RadialGradient(
+    colors: [
+      Color(0xFFFFB8E0),
+      Color(0xFFBE9EFF),
+      Color(0xFF88C0FC),
+      Color(0xFF86FF99),
+    ],
+    center: Alignment.bottomRight,
+  );
+
+  static const gradient02 = LinearGradient(
+    colors: [
+      Color(0xFFC393FF),
+      Color(0xFFE42A6C),
+    ],
+  );
+}
+
 class LightThemeColors {
   // Primary actions, emphasizing navigation elements,
   // backgrounds, text, etc.
