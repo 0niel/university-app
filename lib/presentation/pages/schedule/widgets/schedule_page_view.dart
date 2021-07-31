@@ -39,7 +39,7 @@ class _SchedulePageViewState extends State<SchedulePageView> {
               fontWeight: FontWeight.normal,
               color: _currentPage == index
                   ? Colors.white
-                  : LightThemeColors.grey400,
+                  : DarkThemeColors.deactive,
               fontSize: 14.5,
             ),
           ),
@@ -48,7 +48,7 @@ class _SchedulePageViewState extends State<SchedulePageView> {
             style: TextStyle(
                 color: _currentPage == index
                     ? Colors.white
-                    : LightThemeColors.grey800,
+                    : DarkThemeColors.deactive,
                 fontSize: 19,
                 fontWeight: FontWeight.bold),
           ),
@@ -138,8 +138,8 @@ class _SchedulePageViewState extends State<SchedulePageView> {
                           style: ElevatedButton.styleFrom(
                             shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(10.0),
-                                side: BorderSide(
-                                    color: LightThemeColors.grey200)),
+                                side:
+                                    BorderSide(color: DarkThemeColors.active)),
                             onPrimary: Colors.black.withOpacity(0.25),
                             shadowColor: Colors.transparent,
                             primary: Colors.white,
@@ -155,8 +155,8 @@ class _SchedulePageViewState extends State<SchedulePageView> {
                           style: ElevatedButton.styleFrom(
                             shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(10.0),
-                                side: BorderSide(
-                                    color: LightThemeColors.grey200)),
+                                side:
+                                    BorderSide(color: DarkThemeColors.active)),
                             onPrimary: Colors.black.withOpacity(0.25),
                             shadowColor: Colors.transparent,
                             primary: Colors.white, // <-- Splash color

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:rtu_mirea_app/presentation/widgets/settings_button.dart';
 import 'package:rtu_mirea_app/presentation/colors.dart';
 
@@ -11,20 +12,11 @@ class SettingsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     var size = MediaQuery.of(context).size;
     return Scaffold(
-      // backgroundColor: Colors.white,
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        bottom: PreferredSize(
-            child: Container(
-              color: LightThemeColors.grey100,
-              height: 1.0,
-            ),
-            preferredSize: Size.fromHeight(1.0)),
         title: Text(
           'Настройки',
-          style: Theme.of(context).textTheme.headline6,
         ),
-        //shadowColor: Colors.transparent,
       ),
       body: SafeArea(
         child: Padding(

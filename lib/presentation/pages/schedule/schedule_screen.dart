@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:rtu_mirea_app/presentation/theme.dart';
 import '../../colors.dart';
 import 'widgets/schedule_page_view.dart';
 
@@ -11,15 +12,8 @@ class ScheduleScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        bottom: PreferredSize(
-            child: Container(
-              color: LightThemeColors.grey100,
-              height: 1.0,
-            ),
-            preferredSize: Size.fromHeight(1.0)),
         title: Text(
           'Расписание',
-          style: Theme.of(context).textTheme.headline6,
         ),
         actions: <Widget>[
           Builder(

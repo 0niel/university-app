@@ -1,11 +1,11 @@
 import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/onboarding_cubit/onboarding_cubit.dart';
 import 'package:rtu_mirea_app/presentation/colors.dart';
 import 'package:rtu_mirea_app/presentation/pages/home/home_navigator_screen.dart';
+import 'package:rtu_mirea_app/presentation/theme.dart';
 
 import 'widgets/indicator.dart';
 import 'widgets/next_button.dart';
@@ -124,9 +124,12 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(titlesTexts[index]),
+                  Text(
+                    titlesTexts[index],
+                    style: DarkTextTheme.h4,
+                  ),
                   SizedBox(height: 8.0),
-                  Text(contentTexts[index]),
+                  Text(contentTexts[index], style: DarkTextTheme.bodyL),
                 ],
               ),
             ),
@@ -179,6 +182,7 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
                               },
                               child: Text(
                                 "Пропустить",
+                                style: DarkTextTheme.buttonS,
                               ),
                             ),
                       Row(

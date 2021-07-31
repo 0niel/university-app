@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:rtu_mirea_app/presentation/colors.dart';
-import 'package:rtu_mirea_app/domain/entities/lesson.dart';
 
 class LessonListTile extends StatelessWidget {
   @override
@@ -33,7 +32,7 @@ class LessonListTile extends StatelessWidget {
             alignment: Alignment.center,
             decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(6),
-                color: LightThemeColors.primary101),
+                color: DarkThemeColors.primary),
             height: 25,
             width: 10 * 7,
             child: Text("пр", style: Theme.of(context).textTheme.bodyText2),
@@ -44,7 +43,7 @@ class LessonListTile extends StatelessWidget {
             alignment: Alignment.center,
             decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(6),
-                color: LightThemeColors.primary101),
+                color: DarkThemeColors.primary),
             height: 25,
             width: 10 * 7,
             child:
