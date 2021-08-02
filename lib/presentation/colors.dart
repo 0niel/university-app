@@ -12,9 +12,10 @@ class DarkThemeColors {
   // Backgrounds
   static const background01 = Color(0xFF181A20);
   static const background02 = Color(0xFF262A34);
+  static const background03 = Color(0xFF1F222A);
 
   // Colorful
-  final colorful01 = Color(0xFFA06AF9);
+  static const colorful01 = Color(0xFFA06AF9);
   static const colorful02 = Color(0xFFFBA3FF);
   static const colorful03 = Color(0xFF8E96FF);
   static const colorful04 = Color(0xFF94F0F0);
@@ -29,4 +30,7 @@ class DarkThemeColors {
   static const deactive = Color(0xFF5E6272);
   static const activeLightMode = Color(0xFF200745);
   static const deactiveDarker = Color(0xFF3A3D46);
+
+  static final gradient07 =
+      LinearGradient(colors: [Color(0xFFBBFFE7), Color(0xFF86FFCA)]);
 }
