@@ -3,8 +3,8 @@ import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
+import 'package:rtu_mirea_app/presentation/pages/profile/profile_screen.dart';
 import 'package:rtu_mirea_app/presentation/pages/schedule/schedule_screen.dart';
-import 'package:rtu_mirea_app/presentation/pages/settings/settings_screen.dart';
 
 part 'home_navigator_event.dart';
 part 'home_navigator_state.dart';
@@ -25,8 +25,8 @@ class HomeNavigatorBloc extends Bloc<HomeNavigatorEvent, HomeNavigatorState> {
           case ScheduleScreen.routeName:
             yield SchedulePage();
             break;
-          case SettingsScreen.routeName:
-            yield SettingsPage();
+          case ProfileScreen.routeName:
+            yield ProfilePage();
             break;
           default:
             break;

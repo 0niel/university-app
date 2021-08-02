@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:rtu_mirea_app/presentation/colors.dart';
 import 'package:rtu_mirea_app/presentation/pages/home/home_navigator_screen.dart';
+import 'package:rtu_mirea_app/presentation/theme.dart';
 
 /// Get next button to open next page
 /// or to close onboarding and start main app
@@ -13,45 +15,35 @@ class NextPageViewButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedContainer(
-      duration: Duration(milliseconds: 250),
-      margin: EdgeInsets.symmetric(horizontal: 3.75),
-      child: ElevatedButton(
-        onPressed: () {
-          if (isLastPage) {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => HomeNavigatorScreen()),
-            );
-          } else {
-            onClick();
-          }
-        },
-        child: AnimatedContainer(
-          duration: Duration(milliseconds: 150),
-          padding: isLastPage
-              ? EdgeInsets.symmetric(vertical: 20.0, horizontal: 55.0)
-              : EdgeInsets.symmetric(vertical: 20.0, horizontal: 5),
-          child: isLastPage
-              ? Text(
-                  "Начать!",
-                  style: TextStyle(
-                      fontFamily: 'Montserrat',
-                      fontWeight: FontWeight.w500,
-                      color: Colors.black,
-                      fontSize: 24.0),
-                )
-              : Icon(Icons.arrow_forward_ios, color: Colors.black),
-        ),
-        style: ElevatedButton.styleFrom(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20.0),
-          ),
-          onPrimary: Colors.black.withOpacity(0.25),
-          shadowColor: Colors.black,
-          primary: Colors.white,
-          elevation: 4.0,
-        ),
+    return ElevatedButton(
+      onPressed: () {
+        if (isLastPage) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => HomeNavigatorScreen()),
+          );
+        } else {
+          onClick();
+        }
+      },
+      child: AnimatedContainer(
+        duration: Duration(milliseconds: 200),
+        padding: isLastPage
+            ? const EdgeInsets.symmetric(vertical: 12.0, horizontal: 32.0)
+            : const EdgeInsets.symmetric(vertical: 12.0, horizontal: 5),
+        child: isLastPage
+            ? Text(
+                "Начать!",
+                style: DarkTextTheme.buttonS,
+              )
+            : Icon(Icons.arrow_forward_ios, color: DarkThemeColors.white),
+      ),
+      style: ElevatedButton.styleFrom(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        onPrimary: DarkThemeColors.primary.withOpacity(0.25),
+        shadowColor: Color(0x7f000000),
+        primary: DarkThemeColors.primary,
+        elevation: 8.0,
       ),
     );
   }
