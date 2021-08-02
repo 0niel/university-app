@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/home_navigator_bloc/home_navigator_bloc.dart';
+import 'package:rtu_mirea_app/presentation/pages/profile/profile_screen.dart';
 import 'package:rtu_mirea_app/presentation/pages/schedule/schedule_screen.dart';
-import 'package:rtu_mirea_app/presentation/pages/settings/settings_screen.dart';
 
 class HomeNavigatorScreen extends StatelessWidget {
   static const String routeName = '/';
@@ -49,7 +49,7 @@ class HomeNavigatorScreen extends StatelessWidget {
                   case 1:
                     BlocProvider.of<HomeNavigatorBloc>(context).add(
                         ChangeScreen(
-                            routeName: SettingsScreen.routeName,
+                            routeName: ProfileScreen.routeName,
                             pageIndex: page));
                     break;
                   default:
