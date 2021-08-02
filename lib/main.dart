@@ -7,7 +7,7 @@ import 'package:rtu_mirea_app/presentation/bloc/onboarding_cubit/onboarding_cubi
 import 'package:rtu_mirea_app/presentation/pages/home/home_navigator_screen.dart';
 import 'package:rtu_mirea_app/presentation/pages/onboarding/onboarding_screen.dart';
 import 'package:rtu_mirea_app/presentation/pages/schedule/schedule_screen.dart';
-import 'package:rtu_mirea_app/presentation/pages/settings/settings_screen.dart';
+import 'package:rtu_mirea_app/presentation/pages/profile/profile_screen.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:rtu_mirea_app/service_locator.dart' as dependencyInjection;
@@ -66,7 +66,7 @@ class App extends StatelessWidget {
           routes: {
             '/': (context) => HomeNavigatorScreen(),
             ScheduleScreen.routeName: (context) => ScheduleScreen(),
-            SettingsScreen.routeName: (context) => SettingsScreen(),
+            ProfileScreen.routeName: (context) => ProfileScreen(),
             OnBoardingScreen.routeName: (context) => OnBoardingScreen()
           },
         ),
