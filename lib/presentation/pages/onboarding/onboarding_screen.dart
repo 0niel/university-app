@@ -142,65 +142,60 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
   @override
   Widget build(BuildContext context) {
     OnboardingCubit cubit = BlocProvider.of<OnboardingCubit>(context);
-
     return Scaffold(
-      body: AnimatedContainer(
-        duration: Duration(milliseconds: 200),
-        color: DarkThemeColors.background01,
-        child: SafeArea(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              Expanded(
-                child: PageView(
-                  allowImplicitScrolling: true,
-                  physics: ClampingScrollPhysics(),
-                  controller: _pageController,
-                  onPageChanged: (int page) => cubit.swipe(page),
-                  children: _buildPageView(),
-                ),
+      backgroundColor: DarkThemeColors.background01,
+      body: SafeArea(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            Expanded(
+              child: PageView(
+                allowImplicitScrolling: true,
+                physics: ClampingScrollPhysics(),
+                controller: _pageController,
+                onPageChanged: (int page) => cubit.swipe(page),
+                children: _buildPageView(),
               ),
-              BlocBuilder<OnboardingCubit, int>(builder: (context, state) {
-                bool isLastPage = cubit.state == _numPages - 1;
-                return Padding(
-                  padding:
-                      EdgeInsets.only(bottom: 35.0, left: 20.0, right: 20.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      isLastPage
-                          ? Container()
-                          : InkWell(
-                              onTap: () {
-                                Navigator.pushReplacement(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) =>
-                                          HomeNavigatorScreen()),
-                                );
-                              },
-                              child: Text(
-                                "Пропустить",
-                                style: DarkTextTheme.buttonS,
-                              ),
+            ),
+            BlocBuilder<OnboardingCubit, int>(builder: (context, state) {
+              bool isLastPage = cubit.state == _numPages - 1;
+              return Padding(
+                padding: EdgeInsets.only(bottom: 35.0, left: 20.0, right: 20.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    isLastPage
+                        ? Container()
+                        : InkWell(
+                            onTap: () {
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) =>
+                                        HomeNavigatorScreen()),
+                              );
+                            },
+                            child: Text(
+                              "Пропустить",
+                              style: DarkTextTheme.buttonS,
                             ),
-                      Row(
-                        children: _buildPageIndicators(state),
+                          ),
+                    Row(
+                      children: _buildPageIndicators(state),
+                    ),
+                    NextPageViewButton(
+                      isLastPage: isLastPage,
+                      onClick: () => _pageController.nextPage(
+                        duration: Duration(milliseconds: 300),
+                        curve: Curves.ease,
                       ),
-                      NextPageViewButton(
-                        isLastPage: isLastPage,
-                        onClick: () => _pageController.nextPage(
-                          duration: Duration(milliseconds: 300),
-                          curve: Curves.ease,
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              }),
-            ],
-          ),
+                    ),
+                  ],
+                ),
+              );
+            }),
+          ],
         ),
       ),
     );
