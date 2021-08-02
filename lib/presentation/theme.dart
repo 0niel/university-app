@@ -51,9 +51,18 @@ final darkTheme = ThemeData.dark().copyWith(
   scaffoldBackgroundColor: DarkThemeColors.background01,
   backgroundColor: DarkThemeColors.background01,
   appBarTheme: AppBarTheme(
-      backgroundColor: Colors.transparent,
-      shadowColor: Colors.transparent,
-      titleTextStyle: DarkTextTheme.title),
+    titleSpacing: 24,
+    backgroundColor: Colors.transparent,
+    shadowColor: Colors.transparent,
+    titleTextStyle: DarkTextTheme.title,
+  ),
+  bottomNavigationBarTheme: ThemeData.dark().bottomNavigationBarTheme.copyWith(
+        backgroundColor: DarkThemeColors.background03,
+        selectedItemColor: DarkThemeColors.active,
+        unselectedItemColor: DarkThemeColors.deactive,
+        selectedLabelStyle: DarkTextTheme.captionL,
+        unselectedLabelStyle: DarkTextTheme.captionS,
+      ),
 );
 
 final lightTheme = darkTheme;
