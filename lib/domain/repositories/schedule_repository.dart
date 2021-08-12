@@ -5,5 +5,6 @@ import 'package:rtu_mirea_app/domain/entities/schedule.dart';
 abstract class ScheduleRepository {
   Future<Either<Failure, Schedule>> getSchedule(String group);
   Future<Either<Failure, List<String>>> getAllGroups();
-  Future<Either<Failure, bool>> isGroupExist();
+  Future<Either<Failure, String>> getActiveGroup();
+  Future<void> setActiveGroup(String group);
 }
