@@ -1,66 +1,88 @@
+import 'dart:convert';
+
+import 'package:rtu_mirea_app/common/errors/exceptions.dart';
 import 'package:rtu_mirea_app/data/models/schedule_model.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 abstract class ScheduleLocalData {
-  /// Gets the cached [List<ScheduleModel>] all saved schedules
-  /// which were added using [addScheduleToCache].
-  ///
-  /// Throws [CacheException] if no cached data is present.
-  Future<List<ScheduleModel>> getScheduleFromCache();
-
   /// Gets the cached [List<String>] names of all available groups for
   /// which the server has a schedule.
   ///
   /// Throws [CacheException] if no cached data is present.
   Future<List<String>> getGroupsFromCache();
 
-  /// Adds a [ScheduleModel] to the list of the all cached schedule.
-  /// If the schedule with this [schedule.group] is already in the cache,
-  /// it will be overwritten
-  Future<void> addScheduleToCache(ScheduleModel schedule);
-
-  /// Delete the schedule from cache by [group] name.
+  /// Gets the cached [List<ScheduleModel>] all saved schedules
+  /// which were added using [setScheduleInCache].
   ///
-  /// Throws [CacheException] if the schedule with this [group] name
-  /// is not in the cache.
-  Future<void> deleteScheduleFromCache(String group);
+  /// Throws [CacheException] if no cached data is present.
+  Future<List<ScheduleModel>> getScheduleFromCache();
+
+  /// Update the schedule in cache. If there is no schedule in the cache
+  /// it will create it, otherwise it will update it.
+  Future<void> setScheduleToCache(List<ScheduleModel> schedules);
 
   /// Adds a [List<String>] of [groups] to the cache. If the groups list
   /// is already in the cache, it will be overwritten by [groups] data.
-  Future<void> addGroupsToCache(List<String> groups);
+  Future<void> setGroupsToCache(List<String> groups);
+
+  /// Gets the name of the currently active group from the cache or Null
+  /// if the active group has not yet been installed.
+  ///
+  /// Throws [CacheException] if active group is not in the cache.
+  Future<String> getActiveGroupFromCache();
+
+  /// Set the active group for which the schedule will be taken. If the
+  /// group is already installed, the name of the active group will be
+  /// overwritten with [group].
+  Future<void> setActiveGroupToCache(String group);
 }
 
 class ScheduleLocalDataImpl implements ScheduleLocalData {
-  final sharedPreferences;
+  final SharedPreferences sharedPreferences;
 
-  ScheduleLocalDataImpl({this.sharedPreferences});
+  ScheduleLocalDataImpl({required this.sharedPreferences});
 
   @override
-  Future<void> addGroupsToCache(List<String> groups) async {
-    // TODO: implement addGroupsToCache
-    throw UnimplementedError();
+  Future<bool> setGroupsToCache(List<String> groups) {
+    return sharedPreferences.setStringList('groups', groups);
   }
 
   @override
-  Future<void> addScheduleToCache(ScheduleModel schedule) async {
-    // TODO: implement addScheduleToCache
-    throw UnimplementedError();
+  Future<void> setScheduleToCache(List<ScheduleModel> schedules) {
+    final List<String> scheduleJsonList =
+        schedules.map((schedule) => json.encode(schedule.toRawJson())).toList();
+    return sharedPreferences.setStringList('schedule', scheduleJsonList);
   }
 
   @override
   Future<List<String>> getGroupsFromCache() async {
-    // TODO: implement getGroupsFromCache
-    throw UnimplementedError();
+    final groups = sharedPreferences.getStringList('groups');
+    if (groups != null) return groups;
+    throw CacheException('The list of groups is not set');
   }
 
   @override
   Future<List<ScheduleModel>> getScheduleFromCache() async {
-    // TODO: implement getScheduleFromCache
-    throw UnimplementedError();
+    final jsonScheduleList = sharedPreferences.getStringList('schedule');
+    if (jsonScheduleList != null) {
+      return Future.value(jsonScheduleList
+          .map((scheduleJson) =>
+              ScheduleModel.fromJson(json.decode(scheduleJson)))
+          .toList());
+    } else {
+      throw CacheException('The list of schedule is not set');
+    }
   }
 
   @override
-  Future<void> deleteScheduleFromCache(String group) {
-    // TODO: implement deleteScheduleFromCache
-    throw UnimplementedError();
+  Future<String> getActiveGroupFromCache() async {
+    String? activeGroup = sharedPreferences.getString('active_group');
+    if (activeGroup == null) throw CacheException('Active groups are not set');
+    return activeGroup;
+  }
+
+  @override
+  Future<void> setActiveGroupToCache(String group) {
+    return sharedPreferences.setString('active_group', group);
   }
 }
