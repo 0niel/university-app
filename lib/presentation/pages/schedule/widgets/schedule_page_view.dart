@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:rtu_mirea_app/common/calendar.dart';
 import 'package:rtu_mirea_app/presentation/colors.dart';
-import 'package:rtu_mirea_app/domain/entities/lesson.dart';
+import 'package:rtu_mirea_app/presentation/theme.dart';
 
-import 'lesson_list_tile.dart';
+import 'lesson_card.dart';
 
 class SchedulePageView extends StatefulWidget {
   @override
@@ -17,43 +17,39 @@ class _SchedulePageViewState extends State<SchedulePageView> {
 
   late List<Map<String, String>> _daysData;
 
-  AnimatedContainer dayOfWeekButton(int index) {
-    return AnimatedContainer(
-      duration: Duration(milliseconds: 80),
-      padding: EdgeInsets.symmetric(vertical: 8),
-      height: 65,
-      width: 47.5,
-      curve: Curves.fastOutSlowIn,
-      decoration: BoxDecoration(
-        color: _currentPage == index
-            ? Theme.of(context).primaryColor
-            : Colors.transparent,
-        borderRadius: BorderRadius.all(Radius.circular(10)),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            _daysData[index]['day_of_week'] ?? "",
-            style: TextStyle(
-              fontWeight: FontWeight.normal,
+  Widget dayOfWeekButton(int index) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(_daysData[index]['day_of_week'] ?? "",
+            style: DarkTextTheme.titleS.copyWith(
               color: _currentPage == index
-                  ? Colors.white
-                  : LightThemeColors.grey400,
-              fontSize: 14.5,
+                  ? DarkThemeColors.white
+                  : DarkThemeColors.deactive,
+            )),
+        SizedBox(
+          height: 5,
+        ),
+        Container(
+          height: 22.5,
+          width: 22.5,
+          decoration: BoxDecoration(
+            color: _currentPage == index
+                ? DarkThemeColors.primary
+                : Colors.transparent,
+            borderRadius: BorderRadius.all(Radius.circular(20)),
+          ),
+          child: Text(
+            _daysData[index]['num'] ?? "",
+            textAlign: TextAlign.center,
+            style: DarkTextTheme.buttonL.copyWith(
+              color: _currentPage == index
+                  ? DarkThemeColors.white
+                  : DarkThemeColors.deactive,
             ),
           ),
-          Text(
-            _daysData[index]['num'] ?? "",
-            style: TextStyle(
-                color: _currentPage == index
-                    ? Colors.white
-                    : LightThemeColors.grey800,
-                fontSize: 19,
-                fontWeight: FontWeight.bold),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -76,15 +72,44 @@ class _SchedulePageViewState extends State<SchedulePageView> {
 
   Widget _getPageViewContent(BuildContext context) {
     return Container(
+      padding: EdgeInsets.symmetric(horizontal: 24),
       child: Column(
         children: [
-          LessonListTile(),
-          Divider(indent: 15, endIndent: 15),
-          LessonListTile(),
-          Divider(indent: 15, endIndent: 15),
-          LessonListTile(),
-          Divider(indent: 15, endIndent: 15),
-          LessonListTile(),
+          LessonCard(
+            name: 'Математический анализ',
+            timeStart: '9:00',
+            timeEnd: '10:30',
+            room: 'А-319',
+            type: 'пр',
+            teacher: 'Зуев А. С.',
+          ),
+          SizedBox(height: 8),
+          LessonCard(
+            name: 'Физика',
+            timeStart: '9:00',
+            timeEnd: '10:30',
+            room: 'А-319',
+            type: 'пр',
+            teacher: 'Зуев А. С.',
+          ),
+          SizedBox(height: 8),
+          LessonCard(
+            name: 'Физика',
+            timeStart: '9:00',
+            timeEnd: '10:30',
+            room: 'А-319',
+            type: 'пр',
+            teacher: 'Зуев А. С.',
+          ),
+          SizedBox(height: 8),
+          LessonCard(
+            name: 'Физика',
+            timeStart: '9:00',
+            timeEnd: '10:30',
+            room: 'А-319',
+            type: 'пр',
+            teacher: 'Зуев А. С.',
+          ),
         ],
       ),
     );
@@ -95,18 +120,11 @@ class _SchedulePageViewState extends State<SchedulePageView> {
     return Column(
       children: [
         Container(
-          margin: EdgeInsets.all(10),
+          height: 110,
+          margin: EdgeInsets.symmetric(horizontal: 18, vertical: 10),
           padding: EdgeInsets.symmetric(vertical: 5),
           decoration: BoxDecoration(
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.14),
-                spreadRadius: 0,
-                blurRadius: 1,
-                offset: Offset(0, 1),
-              ),
-            ],
-            color: Colors.white,
+            color: DarkThemeColors.background02,
             borderRadius: BorderRadius.all(
               Radius.circular(20),
             ),
@@ -115,55 +133,20 @@ class _SchedulePageViewState extends State<SchedulePageView> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Padding(
-                padding:
-                    EdgeInsets.symmetric(horizontal: 15).copyWith(bottom: 5),
+                padding: EdgeInsets.symmetric(horizontal: 30)
+                    .copyWith(bottom: 10, top: 5),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text("12 неделя",
-                            style: Theme.of(context).textTheme.subtitle1),
+                        Text("12 неделя", style: DarkTextTheme.titleM),
                         Text("Понедельник, 19 июня",
-                            style: Theme.of(context).textTheme.caption),
+                            style: DarkTextTheme.captionL
+                                .copyWith(color: DarkThemeColors.deactive)),
                       ],
                     ),
-                    Row(
-                      children: [
-                        ElevatedButton(
-                          onPressed: () {},
-                          child: Icon(Icons.arrow_left_outlined,
-                              color: Colors.black),
-                          style: ElevatedButton.styleFrom(
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10.0),
-                                side: BorderSide(
-                                    color: LightThemeColors.grey200)),
-                            onPrimary: Colors.black.withOpacity(0.25),
-                            shadowColor: Colors.transparent,
-                            primary: Colors.white,
-                          ),
-                        ),
-                        Container(
-                          width: 10,
-                        ),
-                        ElevatedButton(
-                          onPressed: () {},
-                          child: Icon(Icons.arrow_right_outlined,
-                              color: Colors.black),
-                          style: ElevatedButton.styleFrom(
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10.0),
-                                side: BorderSide(
-                                    color: LightThemeColors.grey200)),
-                            onPrimary: Colors.black.withOpacity(0.25),
-                            shadowColor: Colors.transparent,
-                            primary: Colors.white, // <-- Splash color
-                          ),
-                        )
-                      ],
-                    )
                   ],
                 ),
               ),
