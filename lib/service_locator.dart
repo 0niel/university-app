@@ -4,11 +4,14 @@ import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:rtu_mirea_app/data/datasources/schedule_local.dart';
 import 'package:rtu_mirea_app/data/datasources/schedule_remote.dart';
 import 'package:rtu_mirea_app/domain/repositories/schedule_repository.dart';
+import 'package:rtu_mirea_app/domain/usecases/get_active_group.dart';
 import 'package:rtu_mirea_app/domain/usecases/get_groups.dart';
 import 'package:rtu_mirea_app/domain/usecases/get_schedule.dart';
 import 'package:rtu_mirea_app/domain/usecases/is_group_exist.dart';
+import 'package:rtu_mirea_app/domain/usecases/set_active_group.dart';
 import 'package:rtu_mirea_app/presentation/bloc/home_navigator_bloc/home_navigator_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/onboarding_cubit/onboarding_cubit.dart';
+import 'package:rtu_mirea_app/presentation/bloc/schedule_bloc/schedule_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'data/repositories/schedule_repository_impl.dart';
@@ -17,6 +20,12 @@ final getIt = GetIt.instance;
 
 Future<void> setup() async {
   // BloC / Cubit
+  getIt.registerFactory(() => ScheduleBloc(
+        getSchedule: getIt(),
+        getActiveGroup: getIt(),
+        getGroups: getIt(),
+        setActiveGroup: getIt(),
+      ));
   getIt.registerFactory(() => HomeNavigatorBloc());
   getIt.registerFactory(() => OnboardingCubit());
 
@@ -24,6 +33,8 @@ Future<void> setup() async {
   getIt.registerLazySingleton(() => GetGroups(getIt()));
   getIt.registerLazySingleton(() => GetSchedule(getIt()));
   getIt.registerLazySingleton(() => IsGroupExist(getIt()));
+  getIt.registerLazySingleton(() => SetActiveGroup(getIt()));
+  getIt.registerLazySingleton(() => GetActiveGroup(getIt()));
 
   // Repositories
   getIt.registerLazySingleton<ScheduleRepository>(() => ScheduleRepositoryImpl(
