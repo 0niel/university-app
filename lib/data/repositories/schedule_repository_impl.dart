@@ -96,4 +96,14 @@ class ScheduleRepositoryImpl implements ScheduleRepository {
   Future<void> setActiveGroup(String group) async {
     localDataSource.setActiveGroupToCache(group);
   }
+
+  @override
+  Future<Either<Failure, List<Schedule>>> getDownloadedSchedules() async {
+    try {
+      final localSchedule = await localDataSource.getScheduleFromCache();
+      return Right(localSchedule);
+    } on CacheException {
+      return Left(CacheFailure());
+    }
+  }
 }

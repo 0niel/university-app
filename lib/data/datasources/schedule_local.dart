@@ -50,7 +50,7 @@ class ScheduleLocalDataImpl implements ScheduleLocalData {
   @override
   Future<void> setScheduleToCache(List<ScheduleModel> schedules) {
     final List<String> scheduleJsonList =
-        schedules.map((schedule) => json.encode(schedule.toRawJson())).toList();
+        schedules.map((schedule) => schedule.toRawJson()).toList();
     return sharedPreferences.setStringList('schedule', scheduleJsonList);
   }
 
@@ -66,8 +66,7 @@ class ScheduleLocalDataImpl implements ScheduleLocalData {
     final jsonScheduleList = sharedPreferences.getStringList('schedule');
     if (jsonScheduleList != null) {
       return Future.value(jsonScheduleList
-          .map((scheduleJson) =>
-              ScheduleModel.fromJson(json.decode(scheduleJson)))
+          .map((scheduleJson) => ScheduleModel.fromRawJson(scheduleJson))
           .toList());
     } else {
       throw CacheException('The list of schedule is not set');
