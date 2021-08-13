@@ -5,6 +5,7 @@ import 'package:equatable/equatable.dart';
 import 'package:rtu_mirea_app/common/errors/failures.dart';
 import 'package:rtu_mirea_app/domain/entities/schedule.dart';
 import 'package:rtu_mirea_app/domain/usecases/get_active_group.dart';
+import 'package:rtu_mirea_app/domain/usecases/get_downloaded_schedules.dart';
 import 'package:rtu_mirea_app/domain/usecases/get_groups.dart';
 import 'package:rtu_mirea_app/domain/usecases/get_schedule.dart';
 import 'package:rtu_mirea_app/domain/usecases/set_active_group.dart';
@@ -18,12 +19,14 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
     required this.getGroups,
     required this.getActiveGroup,
     required this.setActiveGroup,
+    required this.getDownloadedSchedules,
   }) : super(ScheduleInitial());
 
   final GetActiveGroup getActiveGroup;
   final GetSchedule getSchedule;
   final GetGroups getGroups;
   final SetActiveGroup setActiveGroup;
+  final GetDownloadedSchedules getDownloadedSchedules;
 
   late final List<String> groupsList;
 
@@ -56,12 +59,14 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
       if (activeGroupName != null) {
         final schedule =
             await getSchedule(GetScheduleParams(group: activeGroupName!));
-
+        final downloadedScheduleGroups = await _getDownloadedScheduleGroups();
         schedule.fold(
-          (failure) => ScheduleLoadError(
-              errorMessage:
-                  'Произошла ошибка при попытке получить расписание. Проверьте ваше интернет-соединение.'),
-          (schedule) => ScheduleLoaded(schedule: schedule),
+          (failure) =>
+              ScheduleLoadError(errorMessage: _mapFailureToMessage(failure)),
+          (schedule) => ScheduleLoaded(
+              schedule: schedule,
+              activeGroup: activeGroupName!,
+              downloadedScheduleGroups: downloadedScheduleGroups),
         );
       }
     } else if (event is ScheduleUpdateGroupSuggestionEvent) {
@@ -71,17 +76,38 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
         yield ScheduleLoading();
 
         await setActiveGroup(SetActiveGroupParams(groupSuggestion));
+
         final schedule =
             await getSchedule(GetScheduleParams(group: groupSuggestion));
+
+        final downloadedScheduleGroups = await _getDownloadedScheduleGroups();
 
         yield schedule.fold(
             (failure) =>
                 ScheduleLoadError(errorMessage: _mapFailureToMessage(failure)),
-            (schedule) => ScheduleLoaded(schedule: schedule));
+            (schedule) => ScheduleLoaded(
+                  schedule: schedule,
+                  activeGroup: groupSuggestion,
+                  downloadedScheduleGroups: downloadedScheduleGroups,
+                ));
       } else {
         yield ScheduleGroupNotFound();
       }
     }
+  }
+
+  /// Returns list of cached schedules or empty list
+  Future<List<String>> _getDownloadedScheduleGroups() async {
+    late List<String> downloadedScheduleGroups;
+    final downloadedSchedules = await getDownloadedSchedules();
+    downloadedSchedules.fold((failure) {
+      downloadedScheduleGroups = [];
+    }, (schedules) {
+      downloadedScheduleGroups =
+          schedules.map((schedule) => schedule.group).toList();
+    });
+
+    return downloadedScheduleGroups;
   }
 
   String _mapFailureToMessage(Failure failure) {

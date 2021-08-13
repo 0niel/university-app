@@ -24,8 +24,14 @@ class ScheduleLoading extends ScheduleState {}
 
 class ScheduleLoaded extends ScheduleState {
   final Schedule schedule;
+  final String activeGroup;
+  final List<String> downloadedScheduleGroups;
 
-  ScheduleLoaded({required this.schedule});
+  ScheduleLoaded({
+    required this.schedule,
+    required this.activeGroup,
+    required this.downloadedScheduleGroups,
+  });
 
   @override
   List<Object> get props => [schedule];
