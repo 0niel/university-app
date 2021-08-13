@@ -57,9 +57,24 @@ class ScheduleScreen extends StatelessWidget {
               );
             } else if (state is ScheduleLoaded) {
               return SchedulePageView();
-            } else {
+            } else if (state is ScheduleLoadError) {
+              return Column(
+                children: [
+                  Text(
+                    'Упс!',
+                    style: DarkTextTheme.h3,
+                  ),
+                  SizedBox(
+                    height: 24,
+                  ),
+                  Text(
+                    state.errorMessage,
+                    style: DarkTextTheme.bodyBold,
+                  )
+                ],
+              );
+            } else
               return Container();
-            }
           },
         ),
       ),
