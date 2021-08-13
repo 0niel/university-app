@@ -1,6 +1,6 @@
 class Calendar {
   /// Максимальное количество учебных недель в семестре
-  static const int kMaxWeekInSemester = 16;
+  static const int kMaxWeekInSemester = 17;
 
   /// Возвращает текущий день недели, где 1 - ПН, 7 - ВС
   static int getCurrentDayOfWeek() {
@@ -21,7 +21,7 @@ class Calendar {
     }
 
     int milliseconds = currentDate.difference(startDate).inMilliseconds;
-    int week = (milliseconds ~/ (24 * 60 * 60 * 1000) / 7).round() + 1;
+    int week = (milliseconds ~/ (24 * 60 * 60 * 1000) / 7).round();
 
     return week;
   }
@@ -37,7 +37,8 @@ class Calendar {
         semStart.subtract(Duration(days: semStart.weekday - 1));
 
     // Прибавляем сколько дней прошло с начала семестра
-    var firstDayOfChosenWeek = firstDayOfWeek.add(Duration(days: (week-1) * 7));
+    var firstDayOfChosenWeek =
+        firstDayOfWeek.add(Duration(days: (week - 1) * 7));
 
     // Добавляем дни в массив, увеличивая счётчик на 1 день
     for (int i = 0; i < 6; ++i) {
@@ -51,13 +52,12 @@ class Calendar {
   ///
   /// [mCurrentDate] отвечает за дату,
   /// для которой будет рассчитано начало семестра.
-  /// 
+  ///
   /// Если оставить null, функция вернёт начало семестра для текущей даты.
   static DateTime getSemesterStart([DateTime? mCurrentDate]) {
     return _CurrentSemesterStart.getCurrentSemesterStart(mCurrentDate);
   }
 }
-
 
 /// Получение даты с которой начинается семестр
 class _CurrentSemesterStart {
