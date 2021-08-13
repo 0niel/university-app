@@ -19,7 +19,7 @@ class GetSchedule extends UseCase<Schedule, GetScheduleParams> {
 class GetScheduleParams extends Equatable {
   final String group;
 
-  GetScheduleParams(this.group);
+  GetScheduleParams({required this.group});
 
   @override
   List<Object?> get props => [group];
