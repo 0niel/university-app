@@ -11,6 +11,7 @@ import 'package:rtu_mirea_app/presentation/pages/schedule/schedule_screen.dart';
 import 'package:rtu_mirea_app/presentation/pages/profile/profile_screen.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:rtu_mirea_app/service_locator.dart' as dependencyInjection;
 import 'service_locator.dart';
 
@@ -22,6 +23,10 @@ Future<void> main() async {
   bool showOnboarding = prefs.getBool(onboardingKey) ?? true;
   if (showOnboarding) prefs.setBool(onboardingKey, false);
 
+  // to debug:
+  //await prefs.clear();
+
+  initializeDateFormatting();
   runApp(App(showOnboarding: showOnboarding));
 }
 

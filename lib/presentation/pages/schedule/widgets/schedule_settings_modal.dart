@@ -6,10 +6,12 @@ import 'package:rtu_mirea_app/presentation/pages/schedule/widgets/autocomplete_g
 import 'package:rtu_mirea_app/presentation/theme.dart';
 
 class ScheduleSettingsModal extends StatelessWidget {
-  const ScheduleSettingsModal({Key? key, required this.groups})
+  const ScheduleSettingsModal(
+      {Key? key, required this.groups, required this.isFirstRun})
       : super(key: key);
 
   final List<String> groups;
+  final bool isFirstRun;
 
   @override
   Widget build(BuildContext context) {
@@ -34,7 +36,9 @@ class ScheduleSettingsModal extends StatelessWidget {
               ),
               SizedBox(height: 8),
               Text(
-                "Кажется, что это ваш первый запуск. Установите вашу учебную группу, чтобы начать пользоваться расписанием",
+                isFirstRun
+                    ? "Кажется, что это ваш первый запуск. Установите вашу учебную группу, чтобы начать пользоваться расписанием"
+                    : "Введите название группы, для которой вы хотите скачать расписание",
                 style: DarkTextTheme.captionL
                     .copyWith(color: DarkThemeColors.deactive),
                 textAlign: TextAlign.center,

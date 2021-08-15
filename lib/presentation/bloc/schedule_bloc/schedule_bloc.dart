@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:rtu_mirea_app/common/errors/failures.dart';
+import 'package:rtu_mirea_app/domain/entities/lesson.dart';
 import 'package:rtu_mirea_app/domain/entities/schedule.dart';
 import 'package:rtu_mirea_app/domain/usecases/get_active_group.dart';
 import 'package:rtu_mirea_app/domain/usecases/get_downloaded_schedules.dart';
@@ -93,7 +94,7 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
       } else {
         yield ScheduleGroupNotFound();
       }
-    }
+    } else if (event is ScheduleUpdateLessonsEvent) {}
   }
 
   /// Returns list of cached schedules or empty list

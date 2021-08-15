@@ -31,3 +31,12 @@ class ScheduleGroupsLoadEvent extends ScheduleEvent {}
 /// time the input is updated using the event
 /// [ScheduleUpdateGroupSuggestionEvent].
 class ScheduleSetActiveGroupEvent extends ScheduleEvent {}
+
+class ScheduleUpdateLessonsEvent extends ScheduleEvent {
+  const ScheduleUpdateLessonsEvent({required this.week});
+
+  final int week;
+
+  @override
+  List<Object> get props => [week];
+}
