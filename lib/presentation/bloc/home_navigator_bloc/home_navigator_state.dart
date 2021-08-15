@@ -19,6 +19,17 @@ class SchedulePage extends HomeNavigatorState {
   List<Object> get props => [_screen];
 }
 
+
+class MapPage extends HomeNavigatorState {
+  final _screen = MapScreen();
+
+  @override
+  Widget get screen => _screen;
+
+  @override
+  List<Object> get props => [_screen];
+}
+
 class ProfilePage extends HomeNavigatorState {
   final _screen = ProfileScreen();
 

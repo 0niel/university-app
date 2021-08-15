@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/home_navigator_bloc/home_navigator_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/onboarding_cubit/onboarding_cubit.dart';
 import 'package:rtu_mirea_app/presentation/pages/home/home_navigator_screen.dart';
+import 'package:rtu_mirea_app/presentation/pages/map/map_screen.dart';
 import 'package:rtu_mirea_app/presentation/pages/onboarding/onboarding_screen.dart';
 import 'package:rtu_mirea_app/presentation/pages/schedule/schedule_screen.dart';
 import 'package:rtu_mirea_app/presentation/pages/profile/profile_screen.dart';
@@ -66,6 +67,7 @@ class App extends StatelessWidget {
           routes: {
             '/': (context) => HomeNavigatorScreen(),
             ScheduleScreen.routeName: (context) => ScheduleScreen(),
+            MapScreen.routeName: (context) => MapScreen(),
             ProfileScreen.routeName: (context) => ProfileScreen(),
             OnBoardingScreen.routeName: (context) => OnBoardingScreen()
           },

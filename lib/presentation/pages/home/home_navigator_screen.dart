@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/home_navigator_bloc/home_navigator_bloc.dart';
+import 'package:rtu_mirea_app/presentation/pages/map/map_screen.dart';
 import 'package:rtu_mirea_app/presentation/pages/profile/profile_screen.dart';
 import 'package:rtu_mirea_app/presentation/pages/schedule/schedule_screen.dart';
 
@@ -12,6 +13,10 @@ class HomeNavigatorScreen extends StatelessWidget {
     BottomNavigationBarItem(
       icon: Icon(Icons.calendar_today),
       label: 'Расписание',
+    ),
+    BottomNavigationBarItem(
+      icon: Icon(Icons.map_outlined),
+      label: 'Карта',
     ),
     BottomNavigationBarItem(
       icon: Icon(Icons.account_circle_rounded),
@@ -47,6 +52,12 @@ class HomeNavigatorScreen extends StatelessWidget {
                             pageIndex: page));
                     break;
                   case 1:
+                    BlocProvider.of<HomeNavigatorBloc>(context).add(
+                        ChangeScreen(
+                            routeName: MapScreen.routeName,
+                            pageIndex: page));
+                    break;
+                  case 2:
                     BlocProvider.of<HomeNavigatorBloc>(context).add(
                         ChangeScreen(
                             routeName: ProfileScreen.routeName,
