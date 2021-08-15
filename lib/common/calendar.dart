@@ -50,7 +50,7 @@ class Calendar {
         firstDayOfWeek.add(Duration(days: (week - 1) * 7));
 
     // Добавляем дни в массив, увеличивая счётчик на 1 день
-    for (int i = 0; i < 6; ++i) {
+    for (int i = 0; i < 7; ++i) {
       daysInWeek.add(firstDayOfChosenWeek);
       firstDayOfChosenWeek = firstDayOfChosenWeek.add(Duration(days: 1));
     }
