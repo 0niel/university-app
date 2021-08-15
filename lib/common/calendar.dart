@@ -20,8 +20,17 @@ class Calendar {
       startDate = DateTime.utc(currentYear, 2, 8);
     }
 
-    int milliseconds = currentDate.difference(startDate).inMilliseconds;
-    int week = (milliseconds ~/ (24 * 60 * 60 * 1000) / 7).round();
+    int week = 1;
+    int prevWeekday = startDate.weekday;
+    while (currentDate.difference(startDate).inDays != 0) {
+      if (startDate.weekday == 7 && startDate.weekday != prevWeekday) {
+        week += 1;
+      }
+      prevWeekday = startDate.weekday;
+      startDate = startDate.add(Duration(days: 1));
+    }
+
+    // int week = ((milliseconds / (24 * 60 * 60 * 1000) / 7) + 1).round();
 
     return week;
   }
