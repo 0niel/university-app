@@ -61,7 +61,7 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
         final schedule =
             await getSchedule(GetScheduleParams(group: activeGroupName!));
         final downloadedScheduleGroups = await _getDownloadedScheduleGroups();
-        schedule.fold(
+        yield schedule.fold(
           (failure) =>
               ScheduleLoadError(errorMessage: _mapFailureToMessage(failure)),
           (schedule) => ScheduleLoaded(
