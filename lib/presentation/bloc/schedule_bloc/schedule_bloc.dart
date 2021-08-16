@@ -111,7 +111,8 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
 
       final schedule = await getSchedule(GetScheduleParams(group: event.group));
 
-      if (event.group == event.activeGroup)
+      if (event.group == event.activeGroup) {
+        downloadedGroups = await _getDownloadedScheduleGroups();
         yield schedule.fold(
           (failure) =>
               ScheduleLoadError(errorMessage: _mapFailureToMessage(failure)),
@@ -122,6 +123,7 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
             groups: groupsList,
           ),
         );
+      }
     } else if (event is ScheduleDeleteEvent) {
       await deleteSchedule(DeleteScheduleParams(group: event.group));
       downloadedGroups = await _getDownloadedScheduleGroups();
@@ -145,7 +147,6 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
       downloadedScheduleGroups =
           schedules.map((schedule) => schedule.group).toList();
     });
-
     return downloadedScheduleGroups;
   }
 

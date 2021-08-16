@@ -21,14 +21,11 @@ class ScheduleScreen extends StatefulWidget {
 class _ScheduleScreenState extends State<ScheduleScreen> {
   bool _modalShown = false;
 
-  GlobalKey<SliderMenuContainerState> _key =
-      new GlobalKey<SliderMenuContainerState>();
-
   void initState() {
     super.initState();
   }
 
-  ValueNotifier<bool> _switchValueNotifier = ValueNotifier(false);
+  // ValueNotifier<bool> _switchValueNotifier = ValueNotifier(false);
 
   Widget _buildGroupButton(String group, String activeGroup, bool isActive,
       [Schedule? schedule]) {
@@ -120,7 +117,6 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
   Widget build(BuildContext context) {
     return SafeArea(
       child: SliderMenuContainer(
-        key: _key,
         appBarColor: DarkThemeColors.background01,
         isDraggable: false,
         drawerIconColor: DarkThemeColors.white,
@@ -257,7 +253,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                           state.activeGroup, state.activeGroup, true),
                       Expanded(
                         child: ListView.builder(
-                          itemCount: state.downloadedScheduleGroups.length - 1,
+                          itemCount: state.downloadedScheduleGroups.length,
                           itemBuilder: (context, index) {
                             if (state.downloadedScheduleGroups[index] !=
                                 state.activeGroup)
