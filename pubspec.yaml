@@ -37,7 +37,7 @@ dependencies:
   bloc: ^7.0.0
   # Widgets that make it easy to implement the BLoC. 
   # See https://pub.dev/packages/flutter_bloc
-  flutter_bloc: ^7.0.1
+  flutter_bloc: ^7.1.0
   # SVG rendering widget for Flutter. 
   # See https://pub.dev/packages/flutter_svg
   flutter_svg: ^0.22.0
@@ -60,11 +60,12 @@ dependencies:
 
   flutter_typeahead: ^3.2.0
 
-  flutter_slider_drawer: ^2.0.0
-
-  flutter_slidable: ^1.0.0-dev.9
-
   table_calendar: ^3.0.2
+
+  flutter_inner_drawer:
+    git:
+      url: https://github.com/0niel/flutter_inner_drawer.git
+      ref: bugfix/type-casting
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
