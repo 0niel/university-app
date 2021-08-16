@@ -6,24 +6,27 @@ import 'package:rtu_mirea_app/presentation/colors.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 
-class CaseFormatting extends TextInputFormatter {
+class GroupTextFormatter extends TextInputFormatter {
   @override
   TextEditingValue formatEditUpdate(
       TextEditingValue oldValue, TextEditingValue newValue) {
-    return TextEditingValue(text: newValue.text, selection: newValue.selection);
-  }
-}
+    String newText = newValue.text.toUpperCase();
+    // if (oldValue.text.length == 3 && newValue.text.length == 4) {
+    //   newValue.text += '-';
+    // } else if (oldValue.text.length == 6 && newValue.text.length == 7) {
+    //   newText += '-';
+    // }
 
-class UpperCaseTextFormatter extends TextInputFormatter {
-  @override
-  TextEditingValue formatEditUpdate(
-      TextEditingValue oldValue, TextEditingValue newValue) {
     return TextEditingValue(
-      text: newValue.text.toUpperCase(),
-      selection: newValue.selection,
+      text: newText,
+      selection: newText.length != newValue.text.length
+          ? TextSelection.collapsed(offset: newText.length)
+          : newValue.selection,
     );
   }
 }
+
+TextEditingController inputController = TextEditingController();
 
 class AutocompleteGroupSelector extends StatelessWidget {
   const AutocompleteGroupSelector({Key? key, required this.groupsList})
@@ -37,12 +40,13 @@ class AutocompleteGroupSelector extends StatelessWidget {
       builder: (context, state) => TypeAheadField(
         hideOnError: false,
         textFieldConfiguration: TextFieldConfiguration(
+          controller: inputController,
           autofocus: false,
           style: DarkTextTheme.titleM,
           autocorrect: false,
+          keyboardType: TextInputType.text,
           inputFormatters: [
-            CaseFormatting(),
-            UpperCaseTextFormatter(),
+            GroupTextFormatter(),
           ],
           decoration: InputDecoration(
             errorText: state is ScheduleGroupNotFound
@@ -77,6 +81,7 @@ class AutocompleteGroupSelector extends StatelessWidget {
               .toList();
         },
         onSuggestionSelected: (String suggestion) {
+          inputController.text = suggestion;
           context
               .read<ScheduleBloc>()
               .add(ScheduleUpdateGroupSuggestionEvent(suggestion: suggestion));
