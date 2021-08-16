@@ -142,48 +142,48 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                 style: DarkTextTheme.h6,
               ),
             ),
-            Column(
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Row(
-                      children: [
-                        SvgPicture.asset(
-                          'assets/icons/lessons.svg',
-                          height: 16,
-                          width: 16,
-                        ),
-                        SizedBox(width: 20),
-                        Text("Пустые пары", style: DarkTextTheme.buttonL),
-                      ],
-                    ),
-                    Padding(
-                      padding: EdgeInsets.only(right: 8),
-                      child: ValueListenableBuilder(
-                        valueListenable: _switchValueNotifier,
-                        builder: (context, hasError, child) => CupertinoSwitch(
-                          activeColor: DarkThemeColors.primary,
-                          value: _switchValueNotifier.value,
-                          onChanged: (value) {
-                            _switchValueNotifier.value = value;
-                          },
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: 20),
-                Opacity(
-                  opacity: 0.05,
-                  child: Container(
-                    width: double.infinity,
-                    height: 1,
-                    color: Colors.white,
-                  ),
-                ),
-              ],
-            ),
+            // Column(
+            //   children: [
+            //     Row(
+            //       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            //       children: [
+            //         Row(
+            //           children: [
+            //             SvgPicture.asset(
+            //               'assets/icons/lessons.svg',
+            //               height: 16,
+            //               width: 16,
+            //             ),
+            //             SizedBox(width: 20),
+            //             Text("Пустые пары", style: DarkTextTheme.buttonL),
+            //           ],
+            //         ),
+            //         Padding(
+            //           padding: EdgeInsets.only(right: 8),
+            //           child: ValueListenableBuilder(
+            //             valueListenable: _switchValueNotifier,
+            //             builder: (context, hasError, child) => CupertinoSwitch(
+            //               activeColor: DarkThemeColors.primary,
+            //               value: _switchValueNotifier.value,
+            //               onChanged: (value) {
+            //                 _switchValueNotifier.value = value;
+            //               },
+            //             ),
+            //           ),
+            //         ),
+            //       ],
+            //     ),
+            //     SizedBox(height: 20),
+            //     Opacity(
+            //       opacity: 0.05,
+            //       child: Container(
+            //         width: double.infinity,
+            //         height: 1,
+            //         color: Colors.white,
+            //       ),
+            //     ),
+            //   ],
+            // ),
             BlocBuilder<ScheduleBloc, ScheduleState>(
                 buildWhen: (prevState, currentState) {
               if (currentState is ScheduleLoaded &&
