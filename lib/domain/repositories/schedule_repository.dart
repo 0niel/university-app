@@ -8,4 +8,5 @@ abstract class ScheduleRepository {
   Future<Either<Failure, List<String>>> getAllGroups();
   Future<Either<Failure, String>> getActiveGroup();
   Future<void> setActiveGroup(String group);
+  Future<void> deleteSchedule(String group);
 }

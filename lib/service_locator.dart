@@ -4,6 +4,7 @@ import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:rtu_mirea_app/data/datasources/schedule_local.dart';
 import 'package:rtu_mirea_app/data/datasources/schedule_remote.dart';
 import 'package:rtu_mirea_app/domain/repositories/schedule_repository.dart';
+import 'package:rtu_mirea_app/domain/usecases/delete_schedule.dart';
 import 'package:rtu_mirea_app/domain/usecases/get_active_group.dart';
 import 'package:rtu_mirea_app/domain/usecases/get_downloaded_schedules.dart';
 import 'package:rtu_mirea_app/domain/usecases/get_groups.dart';
@@ -27,6 +28,7 @@ Future<void> setup() async {
       getGroups: getIt(),
       setActiveGroup: getIt(),
       getDownloadedSchedules: getIt(),
+      deleteSchedule: getIt(),
     ),
   );
   getIt.registerFactory(() => HomeNavigatorBloc());
@@ -38,6 +40,7 @@ Future<void> setup() async {
   getIt.registerLazySingleton(() => SetActiveGroup(getIt()));
   getIt.registerLazySingleton(() => GetActiveGroup(getIt()));
   getIt.registerLazySingleton(() => GetDownloadedSchedules(getIt()));
+  getIt.registerLazySingleton(() => DeleteSchedule(getIt()));
 
   // Repositories
   getIt.registerLazySingleton<ScheduleRepository>(() => ScheduleRepositoryImpl(

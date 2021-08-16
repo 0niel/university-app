@@ -31,7 +31,7 @@ class ScheduleSettingsModal extends StatelessWidget {
                 ),
               ),
               Text(
-                "Настройте расписание",
+                isFirstRun ? "Настройте расписание" : "Выберите группу",
                 style: DarkTextTheme.h5,
               ),
               SizedBox(height: 8),

@@ -30,7 +30,11 @@ class ScheduleGroupsLoadEvent extends ScheduleEvent {}
 /// field in [ScheduleBloc]. [groupSuggestion] should be set every
 /// time the input is updated using the event
 /// [ScheduleUpdateGroupSuggestionEvent].
-class ScheduleSetActiveGroupEvent extends ScheduleEvent {}
+class ScheduleSetActiveGroupEvent extends ScheduleEvent {
+  const ScheduleSetActiveGroupEvent([this.group]);
+
+  final String? group;
+}
 
 class ScheduleUpdateLessonsEvent extends ScheduleEvent {
   const ScheduleUpdateLessonsEvent({required this.week});
@@ -39,4 +43,24 @@ class ScheduleUpdateLessonsEvent extends ScheduleEvent {
 
   @override
   List<Object> get props => [week];
+}
+
+class ScheduleUpdateEvent extends ScheduleEvent {
+  const ScheduleUpdateEvent({required this.group, required this.activeGroup});
+
+  final String group;
+  final String activeGroup;
+
+  @override
+  List<Object> get props => [group, activeGroup];
+}
+
+class ScheduleDeleteEvent extends ScheduleEvent {
+  const ScheduleDeleteEvent({required this.group, required this.schedule});
+
+  final String group;
+  final Schedule schedule;
+
+  @override
+  List<Object> get props => [group, schedule];
 }

@@ -3,8 +3,8 @@ import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:rtu_mirea_app/common/errors/failures.dart';
-import 'package:rtu_mirea_app/domain/entities/lesson.dart';
 import 'package:rtu_mirea_app/domain/entities/schedule.dart';
+import 'package:rtu_mirea_app/domain/usecases/delete_schedule.dart';
 import 'package:rtu_mirea_app/domain/usecases/get_active_group.dart';
 import 'package:rtu_mirea_app/domain/usecases/get_downloaded_schedules.dart';
 import 'package:rtu_mirea_app/domain/usecases/get_groups.dart';
@@ -21,6 +21,7 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
     required this.getActiveGroup,
     required this.setActiveGroup,
     required this.getDownloadedSchedules,
+    required this.deleteSchedule,
   }) : super(ScheduleInitial());
 
   final GetActiveGroup getActiveGroup;
@@ -28,8 +29,10 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
   final GetGroups getGroups;
   final SetActiveGroup setActiveGroup;
   final GetDownloadedSchedules getDownloadedSchedules;
+  final DeleteSchedule deleteSchedule;
 
-  late final List<String> groupsList;
+  late List<String> groupsList;
+  late List<String> downloadedGroups;
 
   /// [groupSuggestion] is used when selecting a group in [AutocompleteGroupSelector]
   String groupSuggestion = '';
@@ -65,15 +68,20 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
           (failure) =>
               ScheduleLoadError(errorMessage: _mapFailureToMessage(failure)),
           (schedule) => ScheduleLoaded(
-              schedule: schedule,
-              activeGroup: activeGroupName!,
-              downloadedScheduleGroups: downloadedScheduleGroups),
+            schedule: schedule,
+            activeGroup: activeGroupName!,
+            downloadedScheduleGroups: downloadedScheduleGroups,
+            groups: groupsList,
+          ),
         );
       }
     } else if (event is ScheduleUpdateGroupSuggestionEvent) {
       groupSuggestion = event.suggestion;
     } else if (event is ScheduleSetActiveGroupEvent) {
-      if (groupsList.contains(groupSuggestion)) {
+      if (groupsList.contains(groupSuggestion) || event.group != null) {
+        // on update active group from drawer group list
+        if (event.group != null) groupSuggestion = event.group!;
+
         yield ScheduleLoading();
 
         await setActiveGroup(SetActiveGroupParams(groupSuggestion));
@@ -81,7 +89,7 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
         final schedule =
             await getSchedule(GetScheduleParams(group: groupSuggestion));
 
-        final downloadedScheduleGroups = await _getDownloadedScheduleGroups();
+        downloadedGroups = await _getDownloadedScheduleGroups();
 
         yield schedule.fold(
             (failure) =>
@@ -89,12 +97,42 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
             (schedule) => ScheduleLoaded(
                   schedule: schedule,
                   activeGroup: groupSuggestion,
-                  downloadedScheduleGroups: downloadedScheduleGroups,
+                  downloadedScheduleGroups: downloadedGroups,
+                  groups: groupsList,
                 ));
       } else {
         yield ScheduleGroupNotFound();
       }
-    } else if (event is ScheduleUpdateLessonsEvent) {}
+    } else if (event is ScheduleUpdateEvent) {
+      // To not cause schedule updates, but simply update
+      // the schedule in the cache
+
+      if (event.group == event.activeGroup) yield ScheduleLoading();
+
+      final schedule = await getSchedule(GetScheduleParams(group: event.group));
+
+      if (event.group == event.activeGroup)
+        yield schedule.fold(
+          (failure) =>
+              ScheduleLoadError(errorMessage: _mapFailureToMessage(failure)),
+          (schedule) => ScheduleLoaded(
+            schedule: schedule,
+            activeGroup: event.activeGroup,
+            downloadedScheduleGroups: downloadedGroups,
+            groups: groupsList,
+          ),
+        );
+    } else if (event is ScheduleDeleteEvent) {
+      await deleteSchedule(DeleteScheduleParams(group: event.group));
+      downloadedGroups = await _getDownloadedScheduleGroups();
+
+      yield ScheduleLoaded(
+        schedule: event.schedule,
+        activeGroup: event.schedule.group,
+        downloadedScheduleGroups: downloadedGroups,
+        groups: groupsList,
+      );
+    }
   }
 
   /// Returns list of cached schedules or empty list

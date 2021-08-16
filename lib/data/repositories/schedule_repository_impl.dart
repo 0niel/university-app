@@ -106,4 +106,21 @@ class ScheduleRepositoryImpl implements ScheduleRepository {
       return Left(CacheFailure());
     }
   }
+
+  @override
+  Future<void> deleteSchedule(String group) async {
+    try {
+      final localSchedule = await localDataSource.getScheduleFromCache();
+      for (int i = 0; i < localSchedule.length; i++) {
+        // update schedule
+        if (localSchedule[i].group == group) {
+          localSchedule.removeAt(i);
+          break;
+        }
+      }
+      localDataSource.setScheduleToCache(localSchedule);
+    } on CacheException {
+      return;
+    }
+  }
 }

@@ -36,6 +36,7 @@ class ScheduleRemoteDataImpl implements ScheduleRemoteData {
   @override
   Future<ScheduleModel> getScheduleByGroup(String group) async {
     try {
+      print(group);
       final response =
           await httpClient.get(_API_BASE_URL + 'schedule/$group/full_schedule');
       if (response.statusCode == 200) {
