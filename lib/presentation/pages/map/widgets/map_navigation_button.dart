@@ -13,14 +13,15 @@ class MapNavigationButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<MapCubit, int>(
-      buildWhen: (prevFloor, currentFloor) => prevFloor != currentFloor,
+    return BlocBuilder<MapCubit, MapState>(
+      buildWhen: (prevState, currentState) =>
+          prevState.floor != currentState.floor,
       builder: (context, state) => ConstrainedBox(
         constraints: const BoxConstraints.tightFor(width: 48, height: 48),
         child: ElevatedButton(
           style: ButtonStyle(
               backgroundColor: MaterialStateProperty.all<Color>(
-                state == floor
+                state.floor == floor
                     ? DarkThemeColors.background03
                     : DarkThemeColors.background02,
               ),

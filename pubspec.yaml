@@ -68,6 +68,8 @@ dependencies:
 
   table_calendar: ^3.0.2
 
+  implicitly_animated_reorderable_list: ^0.4.0
+
   flutter_inner_drawer:
     git:
       url: https://github.com/0niel/flutter_inner_drawer.git

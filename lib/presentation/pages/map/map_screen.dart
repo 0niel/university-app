@@ -7,8 +7,11 @@ import 'package:photo_view/photo_view.dart';
 import 'package:rtu_mirea_app/presentation/bloc/map_cubit/map_cubit.dart';
 import 'package:rtu_mirea_app/presentation/colors.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
+import 'package:implicitly_animated_reorderable_list/implicitly_animated_reorderable_list.dart';
+import 'package:implicitly_animated_reorderable_list/transitions.dart';
 
 import 'widgets/map_navigation_button.dart';
+import 'widgets/search_item_button.dart';
 
 class MapScreen extends StatefulWidget {
   static const String routeName = '/map';
@@ -18,6 +21,12 @@ class MapScreen extends StatefulWidget {
 }
 
 class _MapScreenState extends State<MapScreen> {
+  void initState() {
+    super.initState();
+  }
+
+  var _controller = PhotoViewController();
+
   final floors = [
     SvgPicture.asset('assets/map/floor_0.svg'),
     SvgPicture.asset('assets/map/floor_1.svg'),
@@ -37,7 +46,8 @@ class _MapScreenState extends State<MapScreen> {
             color: DarkThemeColors.background01,
           ),
           _buildMap(),
-          _buildSearchBar(),
+          // uncomment when this is completed
+          //_buildSearchBar(),
           Align(
             alignment: Alignment.bottomLeft,
             child: Padding(
@@ -58,17 +68,66 @@ class _MapScreenState extends State<MapScreen> {
       hint: 'Что будем искать, Милорд?',
       hintStyle: DarkTextTheme.titleS.copyWith(color: DarkThemeColors.deactive),
       borderRadius: BorderRadius.all(Radius.circular(12)),
+      onQueryChanged: (query) {
+        context.read<MapCubit>().setSearchQuery(query);
+      },
       builder: (context, transition) {
-        return Container();
+        return Padding(
+          padding: const EdgeInsets.only(top: 16.0),
+          child: Material(
+            color: DarkThemeColors.background03,
+            elevation: 4.0,
+            borderRadius: BorderRadius.circular(8),
+            child: BlocBuilder<MapCubit, MapState>(
+              buildWhen: (prevState, currentState) =>
+                  currentState is MapSearchFoundUpdated,
+              builder: (context, state) {
+                if (state is MapFloorLoaded) return Container();
+                return ImplicitlyAnimatedList<Map<String, dynamic>>(
+                  shrinkWrap: true,
+                  items: (state as MapSearchFoundUpdated)
+                      .foundRooms
+                      .take(6)
+                      .toList(),
+                  physics: const NeverScrollableScrollPhysics(),
+                  areItemsTheSame: (a, b) => a == b,
+                  itemBuilder: (context, animation, room, i) {
+                    return SizeFadeTransition(
+                      animation: animation,
+                      child: SearchItemButton(
+                          room: room,
+                          onClick: () {
+                            // todo: change position
+                            context.read<MapCubit>().goToFloor(room['floor']);
+                          }),
+                    );
+                  },
+                  updateItemBuilder: (context, animation, room) {
+                    return FadeTransition(
+                      opacity: animation,
+                      child: SearchItemButton(
+                          room: room,
+                          onClick: () {
+                            // todo: change position
+                            context.read<MapCubit>().goToFloor(room['floor']);
+                          }),
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        );
       },
     );
   }
 
   Widget _buildMap() {
-    return BlocBuilder<MapCubit, int>(
+    return BlocBuilder<MapCubit, MapState>(
       builder: (context, state) => PhotoView.customChild(
+        controller: _controller,
         initialScale: 2.0,
-        child: floors[state],
+        child: floors[state.floor],
         backgroundDecoration:
             BoxDecoration(color: DarkThemeColors.background01),
       ),
