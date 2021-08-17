@@ -37,9 +37,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
       return Padding(
         padding: EdgeInsets.only(bottom: 10),
         child: Container(
-          padding: EdgeInsets.only(
-            left: 10,
-          ),
+          padding: EdgeInsets.only(left: 10),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -50,12 +48,15 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
               ),
               Row(
                 children: [
-                  IconButton(
+                  RawMaterialButton(
                     onPressed: () {
                       context.read<ScheduleBloc>().add(ScheduleUpdateEvent(
                           group: group, activeGroup: activeGroup));
                     },
-                    icon: const Icon(Icons.refresh),
+                    child: const Icon(Icons.refresh_rounded),
+                    shape: CircleBorder(),
+                    constraints:
+                        const BoxConstraints(minWidth: 36.0, minHeight: 36.0),
                   ),
                 ],
               ),
@@ -84,27 +85,36 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
               ),
               Row(
                 children: [
-                  IconButton(
+                  RawMaterialButton(
                     onPressed: () {
                       context
                           .read<ScheduleBloc>()
                           .add(ScheduleSetActiveGroupEvent(group));
                     },
-                    icon: const Icon(Icons.check_rounded),
+                    child: const Icon(Icons.check_rounded),
+                    shape: CircleBorder(),
+                    constraints:
+                        const BoxConstraints(minWidth: 36.0, minHeight: 36.0),
                   ),
-                  IconButton(
+                  RawMaterialButton(
                     onPressed: () {
                       context.read<ScheduleBloc>().add(ScheduleUpdateEvent(
                           group: group, activeGroup: activeGroup));
                     },
-                    icon: const Icon(Icons.refresh_rounded),
+                    child: const Icon(Icons.refresh_rounded),
+                    shape: CircleBorder(),
+                    constraints:
+                        const BoxConstraints(minWidth: 36.0, minHeight: 36.0),
                   ),
-                  IconButton(
+                  RawMaterialButton(
                     onPressed: () {
                       context.read<ScheduleBloc>().add(ScheduleDeleteEvent(
                           group: group, schedule: schedule!));
                     },
-                    icon: const Icon(Icons.delete_rounded),
+                    child: const Icon(Icons.delete_rounded),
+                    shape: CircleBorder(),
+                    constraints:
+                        const BoxConstraints(minWidth: 36.0, minHeight: 36.0),
                   ),
                 ],
               ),
@@ -137,49 +147,49 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                   style: DarkTextTheme.h6,
                 ),
               ),
-              Column(
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        children: [
-                          SvgPicture.asset(
-                            'assets/icons/lessons.svg',
-                            height: 16,
-                            width: 16,
-                          ),
-                          SizedBox(width: 20),
-                          Text("Пустые пары", style: DarkTextTheme.buttonL),
-                        ],
-                      ),
-                      Padding(
-                        padding: EdgeInsets.only(right: 8),
-                        child: ValueListenableBuilder(
-                          valueListenable: _switchValueNotifier,
-                          builder: (context, hasError, child) =>
-                              CupertinoSwitch(
-                            activeColor: DarkThemeColors.primary,
-                            value: _switchValueNotifier.value,
-                            onChanged: (value) {
-                              _switchValueNotifier.value = value;
-                            },
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 20),
-                  Opacity(
-                    opacity: 0.05,
-                    child: Container(
-                      width: double.infinity,
-                      height: 1,
-                      color: Colors.white,
-                    ),
-                  ),
-                ],
-              ),
+              // Column(
+              //   children: [
+              //     Row(
+              //       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              //       children: [
+              //         Row(
+              //           children: [
+              //             SvgPicture.asset(
+              //               'assets/icons/lessons.svg',
+              //               height: 16,
+              //               width: 16,
+              //             ),
+              //             SizedBox(width: 20),
+              //             Text("Пустые пары", style: DarkTextTheme.buttonL),
+              //           ],
+              //         ),
+              //         Padding(
+              //           padding: EdgeInsets.only(right: 8),
+              //           child: ValueListenableBuilder(
+              //             valueListenable: _switchValueNotifier,
+              //             builder: (context, hasError, child) =>
+              //                 CupertinoSwitch(
+              //               activeColor: DarkThemeColors.primary,
+              //               value: _switchValueNotifier.value,
+              //               onChanged: (value) {
+              //                 _switchValueNotifier.value = value;
+              //               },
+              //             ),
+              //           ),
+              //         ),
+              //       ],
+              //     ),
+              //     SizedBox(height: 20),
+              //     Opacity(
+              //       opacity: 0.05,
+              //       child: Container(
+              //         width: double.infinity,
+              //         height: 1,
+              //         color: Colors.white,
+              //       ),
+              //     ),
+              //   ],
+              // ),
               BlocBuilder<ScheduleBloc, ScheduleState>(
                   buildWhen: (prevState, currentState) {
                 if (currentState is ScheduleLoaded &&
@@ -197,47 +207,50 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        InkWell(
-                          child: Column(
-                            children: [
-                              Padding(
-                                padding: EdgeInsets.symmetric(vertical: 20),
-                                child: Row(
-                                  children: [
-                                    SvgPicture.asset(
-                                      'assets/icons/add_group.svg',
-                                      height: 16,
-                                      width: 16,
-                                    ),
-                                    SizedBox(width: 20),
-                                    Text("Добавить группу",
-                                        style: DarkTextTheme.buttonL),
-                                  ],
+                        Material(
+                          color: Colors.transparent,
+                          child: InkWell(
+                            child: Column(
+                              children: [
+                                Padding(
+                                  padding: EdgeInsets.symmetric(vertical: 20),
+                                  child: Row(
+                                    children: [
+                                      SvgPicture.asset(
+                                        'assets/icons/add_group.svg',
+                                        height: 16,
+                                        width: 16,
+                                      ),
+                                      SizedBox(width: 20),
+                                      Text("Добавить группу",
+                                          style: DarkTextTheme.buttonL),
+                                    ],
+                                  ),
                                 ),
-                              ),
-                              Opacity(
-                                opacity: 0.05,
-                                child: Container(
-                                  width: double.infinity,
-                                  height: 1,
-                                  color: Colors.white,
+                                Opacity(
+                                  opacity: 0.05,
+                                  child: Container(
+                                    width: double.infinity,
+                                    height: 1,
+                                    color: Colors.white,
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
+                            onTap: () {
+                              if (!_modalShown)
+                                showModalBottomSheet(
+                                  context: context,
+                                  isScrollControlled: true,
+                                  backgroundColor: Colors.transparent,
+                                  builder: (context) => ScheduleSettingsModal(
+                                      groups: state.groups, isFirstRun: false),
+                                ).whenComplete(() {
+                                  this._modalShown = false;
+                                });
+                              this._modalShown = true;
+                            },
                           ),
-                          onTap: () {
-                            if (!_modalShown)
-                              showModalBottomSheet(
-                                context: context,
-                                isScrollControlled: true,
-                                backgroundColor: Colors.transparent,
-                                builder: (context) => ScheduleSettingsModal(
-                                    groups: state.groups, isFirstRun: false),
-                              ).whenComplete(() {
-                                this._modalShown = false;
-                              });
-                            this._modalShown = true;
-                          },
                         ),
                         SizedBox(height: 20),
                         Text(
