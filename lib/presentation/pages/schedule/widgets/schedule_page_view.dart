@@ -61,13 +61,9 @@ class _SchedulePageViewState extends State<SchedulePageView> {
       children: [
         Image(
           image: AssetImage('assets/images/Saly-18.png'),
-          height: 125.0,
+          height: 225.0,
         ),
-        SizedBox(height: 24),
-        Text(
-          'Пар нет!',
-          style: DarkTextTheme.h3,
-        ),
+        Text('Пар нет!', style: DarkTextTheme.title),
       ],
     );
   }
