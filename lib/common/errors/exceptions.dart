@@ -1,6 +1,6 @@
-class RemoteDataException implements Exception {
+class ServerException implements Exception {
   final String cause;
-  RemoteDataException(this.cause);
+  ServerException(this.cause);
 }
 
 class CacheException implements Exception {

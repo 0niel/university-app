@@ -3,13 +3,13 @@ import 'package:rtu_mirea_app/common/errors/failures.dart';
 import 'package:rtu_mirea_app/domain/repositories/schedule_repository.dart';
 import 'package:rtu_mirea_app/domain/usecases/usecase.dart';
 
-class GetGroups extends UseCase<List<String>, void> {
+class GetActiveGroup extends UseCase<String, void> {
   final ScheduleRepository scheduleRepository;
 
-  GetGroups(this.scheduleRepository);
+  GetActiveGroup(this.scheduleRepository);
 
   @override
-  Future<Either<Failure, List<String>>> call([_]) async {
-    return await scheduleRepository.getAllGroups();
+  Future<Either<Failure, String>> call([_]) async {
+    return await scheduleRepository.getActiveGroup();
   }
 }

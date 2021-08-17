@@ -1,31 +1,48 @@
+import 'dart:convert';
+
 import 'package:rtu_mirea_app/domain/entities/lesson.dart';
 
 class LessonModel extends Lesson {
   LessonModel({
     required name,
-    required room,
-    required teacher,
+    required weeks,
     required timeStart,
     required timeEnd,
-    required type,
-    required weeks,
+    required types,
+    required teachers,
+    required rooms,
   }) : super(
           name: name,
-          room: room,
-          teacher: teacher,
+          weeks: weeks,
           timeStart: timeStart,
           timeEnd: timeEnd,
-          type: type,
-          weeks: weeks,
+          types: types,
+          teachers: teachers,
+          rooms: rooms,
         );
+
+  factory LessonModel.fromRawJson(String str) =>
+      LessonModel.fromJson(json.decode(str));
+
+  String toRawJson() => json.encode(toJson());
 
   factory LessonModel.fromJson(Map<String, dynamic> json) => LessonModel(
         name: json["name"],
-        room: json["room"],
-        teacher: json["teacher"],
+        weeks: List<int>.from(json["weeks"].map((x) => x)),
         timeStart: json["time_start"],
         timeEnd: json["time_end"],
-        type: json["type"],
-        weeks: List<int>.from(json["weeks"].map((x) => x)),
+        types: json["types"],
+        teachers: List<String>.from(json["teachers"].map((x) => x)),
+        rooms: List<String>.from(json["rooms"].map((x) => x)),
       );
+
+  Map<String, dynamic> toJson() => {
+        "name": name,
+        "weeks": List<dynamic>.from(weeks.map((x) => x)),
+        "time_start": timeStart,
+        "time_end": timeEnd,
+        "types": types,
+        "teachers": List<dynamic>.from(teachers.map((x) => x)),
+        "rooms": List<dynamic>.from(rooms.map((x) => x)),
+      };
 }

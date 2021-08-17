@@ -4,12 +4,14 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/home_navigator_bloc/home_navigator_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/onboarding_cubit/onboarding_cubit.dart';
+import 'package:rtu_mirea_app/presentation/bloc/schedule_bloc/schedule_bloc.dart';
 import 'package:rtu_mirea_app/presentation/pages/home/home_navigator_screen.dart';
 import 'package:rtu_mirea_app/presentation/pages/onboarding/onboarding_screen.dart';
 import 'package:rtu_mirea_app/presentation/pages/schedule/schedule_screen.dart';
 import 'package:rtu_mirea_app/presentation/pages/profile/profile_screen.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:rtu_mirea_app/service_locator.dart' as dependencyInjection;
 import 'service_locator.dart';
 
@@ -21,6 +23,10 @@ Future<void> main() async {
   bool showOnboarding = prefs.getBool(onboardingKey) ?? true;
   if (showOnboarding) prefs.setBool(onboardingKey, false);
 
+  // to debug:
+  //await prefs.clear();
+
+  initializeDateFormatting();
   runApp(App(showOnboarding: showOnboarding));
 }
 
@@ -47,6 +53,7 @@ class App extends StatelessWidget {
 
     return MultiBlocProvider(
       providers: [
+        BlocProvider<ScheduleBloc>(create: (context) => getIt<ScheduleBloc>()),
         BlocProvider<HomeNavigatorBloc>(
             create: (context) => getIt<HomeNavigatorBloc>()),
         BlocProvider<OnboardingCubit>(
@@ -64,7 +71,8 @@ class App extends StatelessWidget {
               ? OnBoardingScreen.routeName
               : HomeNavigatorScreen.routeName,
           routes: {
-            '/': (context) => HomeNavigatorScreen(),
+            '/': (context) =>
+                showOnboarding ? OnBoardingScreen() : HomeNavigatorScreen(),
             ScheduleScreen.routeName: (context) => ScheduleScreen(),
             ProfileScreen.routeName: (context) => ProfileScreen(),
             OnBoardingScreen.routeName: (context) => OnBoardingScreen()

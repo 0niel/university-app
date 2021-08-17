@@ -22,42 +22,38 @@ class HomeNavigatorScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // backgroundColor: Colors.white,
       body: BlocBuilder<HomeNavigatorBloc, HomeNavigatorState>(
           builder: (context, state) => state.screen),
       bottomNavigationBar: BlocBuilder<HomeNavigatorBloc, HomeNavigatorState>(
           builder: (context, state) {
         return SizedBox(
           height: 70,
-          child: ClipRRect(
-            borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(20),
-              topRight: Radius.circular(20),
-            ),
-            child: BottomNavigationBar(
-              items: _navBarItems,
-              currentIndex: context
-                  .select((HomeNavigatorBloc bloc) => bloc.selectedPageIndex),
-              onTap: (int page) {
-                switch (page) {
-                  case 0:
-                    BlocProvider.of<HomeNavigatorBloc>(context).add(
-                        ChangeScreen(
-                            routeName: ScheduleScreen.routeName,
-                            pageIndex: page));
-                    break;
-                  case 1:
-                    BlocProvider.of<HomeNavigatorBloc>(context).add(
-                        ChangeScreen(
-                            routeName: ProfileScreen.routeName,
-                            pageIndex: page));
-                    break;
-                  default:
-                    break;
-                }
-              },
-            ),
+          // TODO: make BottomNavigationBar rounded
+          // child: ClipRRect(
+          //   borderRadius: BorderRadius.only(
+          //     topLeft: Radius.circular(20),
+          //     topRight: Radius.circular(20),
+          //   ),
+          child: BottomNavigationBar(
+            items: _navBarItems,
+            currentIndex: context
+                .select((HomeNavigatorBloc bloc) => bloc.selectedPageIndex),
+            onTap: (int page) {
+              switch (page) {
+                case 0:
+                  BlocProvider.of<HomeNavigatorBloc>(context).add(ChangeScreen(
+                      routeName: ScheduleScreen.routeName, pageIndex: page));
+                  break;
+                case 1:
+                  BlocProvider.of<HomeNavigatorBloc>(context).add(ChangeScreen(
+                      routeName: ProfileScreen.routeName, pageIndex: page));
+                  break;
+                default:
+                  break;
+              }
+            },
           ),
+          // ),
         );
       }),
     );
