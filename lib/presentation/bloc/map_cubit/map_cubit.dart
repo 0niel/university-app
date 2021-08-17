@@ -4,7 +4,8 @@ import 'package:bloc/bloc.dart';
 /// [int] is the floor number map shows
 class MapCubit extends Cubit<int> {
   /// Number of the floor we show when screen opens
-  static int initialFloor = 1;
+  static int initialFloor = 2;
+
   /// Number of the last floor we are able to show
   static int maxFloor = 4;
 
@@ -28,4 +29,7 @@ class MapCubit extends Cubit<int> {
       emit(state);
     }
   }
+
+  /// Open the floor by [index]
+  void goToFloor(int index) => emit(index);
 }

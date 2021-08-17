@@ -6,6 +6,9 @@ import 'package:material_floating_search_bar/material_floating_search_bar.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:rtu_mirea_app/presentation/bloc/map_cubit/map_cubit.dart';
 import 'package:rtu_mirea_app/presentation/colors.dart';
+import 'package:rtu_mirea_app/presentation/theme.dart';
+
+import 'widgets/map_navigation_button.dart';
 
 class MapScreen extends StatefulWidget {
   static const String routeName = '/map';
@@ -28,29 +31,32 @@ class _MapScreenState extends State<MapScreen> {
     return Scaffold(
       body: Stack(
         children: [
-          map(),
-          searchBar(),
+          Container(
+            height: double.infinity,
+            width: double.infinity,
+            color: DarkThemeColors.background01,
+          ),
+          _buildMap(),
+          _buildSearchBar(),
           Align(
-            alignment: Alignment.centerRight,
-            child: navigation(),
+            alignment: Alignment.bottomLeft,
+            child: Padding(
+              padding: EdgeInsets.only(left: 10, bottom: 16),
+              child: _buildNavigation(),
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget searchBar() {
+  Widget _buildSearchBar() {
     return FloatingSearchBar(
       accentColor: DarkThemeColors.primary,
       iconColor: DarkThemeColors.white,
       backgroundColor: DarkThemeColors.background02,
       hint: 'Что будем искать, Милорд?',
-      hintStyle: TextStyle(
-        fontFamily: 'Inter',
-        fontWeight: FontWeight.w600,
-        fontSize: 14,
-        color: DarkThemeColors.deactive,
-      ),
+      hintStyle: DarkTextTheme.titleS.copyWith(color: DarkThemeColors.deactive),
       borderRadius: BorderRadius.all(Radius.circular(12)),
       builder: (context, transition) {
         return Container();
@@ -58,44 +64,39 @@ class _MapScreenState extends State<MapScreen> {
     );
   }
 
-  Widget map() {
+  Widget _buildMap() {
     return BlocBuilder<MapCubit, int>(
-      builder: (context, state) => PhotoView.customChild(child: floors[state]),
+      builder: (context, state) => PhotoView.customChild(
+        initialScale: 2.0,
+        child: floors[state],
+        backgroundDecoration:
+            BoxDecoration(color: DarkThemeColors.background01),
+      ),
     );
   }
 
-  Widget navigation() {
-    MapCubit cubit = BlocProvider.of<MapCubit>(context);
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: [
-        getNavigationButton(Icons.arrow_upward_outlined, cubit.goUp),
-        getNavigationButton(Icons.arrow_downward_outlined, cubit.goDown),
-      ],
-    );
-  }
-
-  Widget getNavigationButton(IconData iconData, Function onPressed) {
-    return IconButton(
-      padding: EdgeInsets.all(0),
-      onPressed: () {
-        onPressed();
-      },
-      icon: Container(
-        child: Icon(
-          iconData,
-          size: 35,
-          color: DarkThemeColors.white,
-        ),
-        decoration: BoxDecoration(
-          color: DarkThemeColors.background02,
-          //border: Border.all(color: DarkThemeColors.background02, width: 2),
-          borderRadius: BorderRadius.all(
-            Radius.circular(2),
-          ),
-        ),
+  Widget _buildNavigation() {
+    return Container(
+      decoration: BoxDecoration(
+        color: DarkThemeColors.background02,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          MapNavigationButton(
+              floor: 4, onClick: () => context.read<MapCubit>().goToFloor(4)),
+          MapNavigationButton(
+              floor: 3, onClick: () => context.read<MapCubit>().goToFloor(3)),
+          MapNavigationButton(
+              floor: 2, onClick: () => context.read<MapCubit>().goToFloor(2)),
+          MapNavigationButton(
+              floor: 1, onClick: () => context.read<MapCubit>().goToFloor(1)),
+          MapNavigationButton(
+              floor: 0, onClick: () => context.read<MapCubit>().goToFloor(0)),
+        ],
       ),
     );
   }
