@@ -7,6 +7,7 @@ import 'package:rtu_mirea_app/domain/usecases/get_groups.dart';
 import 'package:rtu_mirea_app/domain/usecases/get_schedule.dart';
 import 'package:rtu_mirea_app/domain/usecases/is_group_exist.dart';
 import 'package:rtu_mirea_app/presentation/bloc/home_navigator_bloc/home_navigator_bloc.dart';
+import 'package:rtu_mirea_app/presentation/bloc/map_cubit/map_cubit.dart';
 import 'package:rtu_mirea_app/presentation/bloc/onboarding_cubit/onboarding_cubit.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -18,6 +19,7 @@ Future<void> setup() async {
   // BloC / Cubit
   getIt.registerFactory(() => HomeNavigatorBloc());
   getIt.registerFactory(() => OnboardingCubit());
+  getIt.registerFactory(() => MapCubit());
 
   // Usecases
   getIt.registerLazySingleton(() => GetGroups(getIt()));
