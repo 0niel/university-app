@@ -23,6 +23,10 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+
+  flutter_localizations:
+    sdk: flutter
+  
   # Http client. See https://pub.dev/packages/dio
   dio: ^4.0.0
   # Simple no-sql local database. 
@@ -33,7 +37,7 @@ dependencies:
   bloc: ^7.0.0
   # Widgets that make it easy to implement the BLoC. 
   # See https://pub.dev/packages/flutter_bloc
-  flutter_bloc: ^7.0.1
+  flutter_bloc: ^7.1.0
   # SVG rendering widget for Flutter. 
   # See https://pub.dev/packages/flutter_svg
   flutter_svg: ^0.22.0
@@ -53,7 +57,21 @@ dependencies:
   # search bar
   # See https://pub.dev/packages/material_floating_search_bar
   material_floating_search_bar: ^0.3.4
+  # Internet connection checker.
+  # See https://pub.dev/packages/internet_connection_checker
+  internet_connection_checker: ^0.0.1+2
+  # Functional Programming in Dart
+  # See https://pub.dev/packages/dartz/versions/0.10.0-nullsafety.2
+  dartz: ^0.10.0-nullsafety.2
 
+  flutter_typeahead: ^3.2.0
+
+  table_calendar: ^3.0.2
+
+  flutter_inner_drawer:
+    git:
+      url: https://github.com/0niel/flutter_inner_drawer.git
+      ref: bugfix/type-casting
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.

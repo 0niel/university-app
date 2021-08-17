@@ -1,5 +1,7 @@
+
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.rtu_mirea_app">
+   <uses-permission android:name="android.permission.INTERNET"/>
    <application
         android:label="rtu_mirea_app"
         android:usesCleartextTraffic="true"
