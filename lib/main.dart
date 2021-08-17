@@ -60,8 +60,7 @@ class App extends StatelessWidget {
             create: (context) => getIt<HomeNavigatorBloc>()),
         BlocProvider<OnboardingCubit>(
             create: (context) => getIt<OnboardingCubit>()),
-        BlocProvider<MapCubit>(
-            create: (context) => getIt<MapCubit>()),
+        BlocProvider<MapCubit>(create: (context) => getIt<MapCubit>()),
       ],
       child: AdaptiveTheme(
         light: lightTheme,
