@@ -27,6 +27,8 @@ class HomeNavigatorScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    Navigator.of(context).popUntil((route) => route.isFirst);
+
     return Scaffold(
       body: BlocBuilder<HomeNavigatorBloc, HomeNavigatorState>(
           builder: (context, state) {
@@ -79,7 +81,6 @@ class HomeNavigatorScreen extends StatelessWidget {
               }
             },
           ),
-          // ),
         );
       }),
     );
