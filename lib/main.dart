@@ -70,12 +70,8 @@ class App extends StatelessWidget {
           debugShowCheckedModeBanner: false,
           title: 'Приложение РТУ МИРЭА',
           theme: theme,
-          initialRoute: showOnboarding
-              ? OnBoardingScreen.routeName
-              : HomeNavigatorScreen.routeName,
+          home: showOnboarding ? OnBoardingScreen() : HomeNavigatorScreen(),
           routes: {
-            '/': (context) =>
-                showOnboarding ? OnBoardingScreen() : HomeNavigatorScreen(),
             ScheduleScreen.routeName: (context) => ScheduleScreen(),
             MapScreen.routeName: (context) => MapScreen(),
             ProfileScreen.routeName: (context) => ProfileScreen(),
