@@ -15,10 +15,10 @@ import 'package:rtu_mirea_app/domain/usecases/get_downloaded_schedules.dart';
 import 'package:rtu_mirea_app/domain/usecases/get_groups.dart';
 import 'package:rtu_mirea_app/domain/usecases/get_schedule.dart';
 import 'package:rtu_mirea_app/domain/usecases/set_active_group.dart';
+import 'package:rtu_mirea_app/presentation/bloc/about_app_bloc/about_app_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/home_navigator_bloc/home_navigator_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/map_cubit/map_cubit.dart';
 import 'package:rtu_mirea_app/presentation/bloc/onboarding_cubit/onboarding_cubit.dart';
-import 'package:rtu_mirea_app/presentation/bloc/profile_bloc/profile_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/schedule_bloc/schedule_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -38,7 +38,7 @@ Future<void> setup() async {
       deleteSchedule: getIt(),
     ),
   );
-  getIt.registerFactory(() => ProfileBloc(getContributors: getIt()));
+  getIt.registerFactory(() => AboutAppBloc(getContributors: getIt()));
   getIt.registerFactory(() => HomeNavigatorBloc());
   getIt.registerFactory(() => OnboardingCubit());
   getIt.registerFactory(() => MapCubit());
