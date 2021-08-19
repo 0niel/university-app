@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:news_page/presentation/colors.dart';
+import 'package:rtu_mirea_app/presentation/colors.dart';
 
 class DarkTextTheme {
   static const headline = TextStyle(

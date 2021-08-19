@@ -1,6 +1,6 @@
-import 'package:news_page/domain/models/news.dart';
+import 'package:rtu_mirea_app/domain/entities/news.dart';
 import 'package:http/http.dart' as http;
-import 'package:news_page/domain/models/tag.dart';
+import 'package:rtu_mirea_app/domain/entities/tag.dart';
 import 'dart:convert';
 
 class NewsService {

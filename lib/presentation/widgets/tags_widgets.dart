@@ -1,10 +1,10 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:news_page/domain/models/tag.dart';
+import 'package:rtu_mirea_app/domain/entities/tag.dart';
 import 'package:flutter/material.dart';
-import 'package:news_page/domain/usecases/news_usecase.dart';
-import 'package:news_page/presentation/bloc/news_bloc.dart';
-import 'package:news_page/presentation/bloc/news_bloc_event.dart';
+import 'package:rtu_mirea_app/domain/usecases/news_usecase.dart';
+import 'package:rtu_mirea_app/presentation/bloc/news_bloc/news_bloc.dart';
+import 'package:rtu_mirea_app/presentation/bloc/news_bloc/news_bloc_event.dart';
 
 class TagsWidget extends StatelessWidget {
   final List<Tag> tags;
@@ -16,7 +16,7 @@ class TagsWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(crossAxisAlignment: CrossAxisAlignment.center, children: [
       isPhoto
-          ? SvgPicture.asset("assets/tag.svg", height: 50)
+          ? SvgPicture.asset("assets/icons/tag.svg", height: 50)
           : SizedBox(width: 0, height: 0),
       isPhoto
           ? Padding(padding: EdgeInsets.only(left: 12))

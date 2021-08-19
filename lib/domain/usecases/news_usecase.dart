@@ -1,5 +1,5 @@
-import 'package:news_page/data/repository/news_data_repository.dart';
-import 'package:news_page/data/datasources/news_service.dart';
+import 'package:rtu_mirea_app/data/repositories/news_data_repository.dart';
+import 'package:rtu_mirea_app/data/datasources/news_service.dart';
 
 class NewsUsecase {
   static late NewsDataRepository _newsdata;

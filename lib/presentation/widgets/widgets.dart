@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:news_page/domain/models/news.dart';
+import 'package:rtu_mirea_app/domain/entities/news.dart';
 import 'package:intl/intl.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:news_page/presentation/pages/news_detail_page.dart';
-import 'package:news_page/presentation/widgets/tags_widgets.dart';
+import 'package:rtu_mirea_app/presentation/pages/news/news_detail_page.dart';
+import 'package:rtu_mirea_app/presentation/widgets/tags_widgets.dart';
 
 class NewsWidget extends StatelessWidget {
   final NewsModel news;
