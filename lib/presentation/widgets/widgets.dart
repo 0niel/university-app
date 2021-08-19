@@ -6,7 +6,7 @@ import 'package:news_page/presentation/pages/news_detail_page.dart';
 import 'package:news_page/presentation/widgets/tags_widgets.dart';
 
 class NewsWidget extends StatelessWidget {
-  final News_model news;
+  final NewsModel news;
 
   NewsWidget(this.news);
 

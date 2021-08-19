@@ -7,12 +7,12 @@ class NewsService {
   static const _URL = "http://192.168.1.87:8000/news";
   static const _tagURI = "http://192.168.1.87:8000/tags";
 
-  Future<List<News_model>> getNews(offset, limit, tag) async {
+  Future<List<NewsModel>> getNews(offset, limit, tag) async {
     var response = await http
         .get(Uri.parse(_URL + '?tag=${tag}&limit=${limit}&offset=${offset}'));
     var body = json.decode(utf8.decode(response.bodyBytes));
     return body["news"]
-        .map<News_model>((news) => News_model.from_json(news))
+        .map<NewsModel>((news) => NewsModel.from_json(news))
         .toList();
   }
 

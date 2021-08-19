@@ -9,7 +9,7 @@ class NewsDataRepository extends NewsRepository {
   NewsDataRepository(this.news_service);
 
   @override
-  Future<List<News_model>> getNews(int offset, int limit, String tag) async {
+  Future<List<NewsModel>> getNews(int offset, int limit, String tag) async {
     return news_service.getNews(offset, limit, tag);
   }
 

@@ -3,7 +3,7 @@ import 'package:news_page/domain/models/news.dart';
 import 'package:news_page/domain/models/tag.dart';
 
 class NewsState extends Equatable {
-  final List<News_model> news;
+  final List<NewsModel> news;
   final List<Tag> tags;
   final int offset;
   NewsState({
@@ -17,7 +17,7 @@ class NewsState extends Equatable {
 }
 
 class NewsSearch extends NewsState {
-  final List<News_model> news;
+  final List<NewsModel> news;
   final List<Tag> tags;
   final int offset;
 

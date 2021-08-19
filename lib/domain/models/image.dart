@@ -1,12 +1,12 @@
 import 'package:equatable/equatable.dart';
 
-class Image_model extends Equatable {
+class ImageModel extends Equatable {
   final String url;
 
-  Image_model({required this.url});
+  ImageModel({required this.url});
 
-  factory Image_model.from_json(Map<String, dynamic> json) {
-    return Image_model(
+  factory ImageModel.from_json(Map<String, dynamic> json) {
+    return ImageModel(
       url: json['name'],
     );
   }

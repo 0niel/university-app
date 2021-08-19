@@ -8,7 +8,7 @@ import 'package:intl/intl.dart';
 import 'package:news_page/presentation/widgets/tags_widgets.dart';
 
 class NewsCard extends StatelessWidget {
-  final News_model news;
+  final NewsModel news;
   const NewsCard({required this.news, Key? key}) : super(key: key);
 
   @override
