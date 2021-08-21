@@ -5,13 +5,13 @@ import 'package:rtu_mirea_app/presentation/bloc/about_app_bloc/about_app_bloc.da
 import 'package:rtu_mirea_app/presentation/colors.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 
+import 'member_info.dart';
+
 class AboutAppPage extends StatelessWidget {
   static const String routeName = '/profile/about_app';
 
   @override
   Widget build(BuildContext context) {
-    context.read<AboutAppBloc>().add(AboutAppGetContributors());
-    context.read<AboutAppBloc>().add(AboutAppGetPatrons());
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -35,41 +35,38 @@ class AboutAppPage extends StatelessWidget {
             SizedBox(height: 16),
             BlocBuilder<AboutAppBloc, AboutAppState>(
               buildWhen: (prevState, currentState) {
-                return currentState is AboutAppContributorsLoading ||
-                    currentState is AboutAppContributorsLoaded ||
-                    currentState is AboutAppContributorsLoadError;
+                if (prevState is AboutAppMembersLoadError) {
+                  if (prevState.contributorsLoadError) return false;
+                }
+                return true;
               },
               builder: (context, state) {
-                if (state is AboutAppContributorsLoading) {
+                if (state is AboutAppMembersLoading) {
                   return Center(
                     child: CircularProgressIndicator(
                       backgroundColor: DarkThemeColors.primary,
                       strokeWidth: 5,
                     ),
                   );
-                } else if (state is AboutAppContributorsLoaded) {
+                } else if (state is AboutAppMembersLoaded) {
+                  print('true');
                   return Wrap(
                     spacing: 16.0,
                     runSpacing: 8.0,
                     children: List.generate(state.contributors.length, (index) {
-                      return Column(children: [
-                        CachedNetworkImage(
-                          imageUrl: state.contributors[index].avatarUrl,
-                          errorWidget: (context, url, error) =>
-                              Icon(Icons.error),
-                          imageBuilder: (context, imageProvider) =>
-                              CircleAvatar(
-                            radius: 30,
-                            backgroundImage: imageProvider,
-                          ),
-                        ),
-                        SizedBox(height: 8),
-                        Text(
-                          state.contributors[index].login,
-                          style: DarkTextTheme.bodyBold,
-                        ),
-                      ]);
+                      return MemberInfo(
+                        username: state.contributors[index].login,
+                        avatarUrl: state.contributors[index].avatarUrl,
+                        profileUrl: state.contributors[index].htmlUrl,
+                      );
                     }),
+                  );
+                } else if (state is AboutAppMembersLoadError) {
+                  return Center(
+                    child: Text(
+                      'Произошла ошибка при загрузке разработчиков. Проверьте ваше интернет-соединение.',
+                      style: DarkTextTheme.title,
+                    ),
                   );
                 }
                 return Container();
@@ -80,43 +77,40 @@ class AboutAppPage extends StatelessWidget {
             SizedBox(height: 16),
             BlocBuilder<AboutAppBloc, AboutAppState>(
               buildWhen: (prevState, currentState) {
-                return currentState is AboutAppPatronsLoading ||
-                    currentState is AboutAppPatronsLoaded ||
-                    currentState is AboutAppPatronsLoadError;
+                if (prevState is AboutAppMembersLoadError) {
+                  if (prevState.patronsLoadError) return false;
+                }
+                return true;
               },
               builder: (context, state) {
-                if (state is AboutAppPatronsLoading) {
+                if (state is AboutAppMembersLoading) {
                   return Center(
                     child: CircularProgressIndicator(
                       backgroundColor: DarkThemeColors.primary,
                       strokeWidth: 5,
                     ),
                   );
-                } else if (state is AboutAppPatronsLoaded) {
+                } else if (state is AboutAppMembersLoaded) {
                   return Wrap(
                     spacing: 16.0,
                     runSpacing: 8.0,
                     children: List.generate(state.patrons.length, (index) {
-                      return Column(children: [
-                        CachedNetworkImage(
-                          imageUrl: 'https://mirea.ninja/' +
-                              state.patrons[index].avatarTemplate
-                                  .replaceAll('{size}', '120'),
-                          errorWidget: (context, url, error) =>
-                              Icon(Icons.error),
-                          imageBuilder: (context, imageProvider) =>
-                              CircleAvatar(
-                            radius: 30,
-                            backgroundImage: imageProvider,
-                          ),
-                        ),
-                        SizedBox(height: 8),
-                        Text(
-                          state.patrons[index].username,
-                          style: DarkTextTheme.bodyBold,
-                        ),
-                      ]);
+                      return MemberInfo(
+                        username: state.patrons[index].username,
+                        avatarUrl: 'https://mirea.ninja/' +
+                            state.patrons[index].avatarTemplate
+                                .replaceAll('{size}', '120'),
+                        profileUrl: 'https://mirea.ninja/u/' +
+                            state.patrons[index].username,
+                      );
                     }),
+                  );
+                } else if (state is AboutAppMembersLoadError) {
+                  return Center(
+                    child: Text(
+                      'Произошла ошибка при загрузке патронов.',
+                      style: DarkTextTheme.title,
+                    ),
                   );
                 }
                 return Container();

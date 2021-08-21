@@ -9,28 +9,24 @@ abstract class AboutAppState extends Equatable {
 
 class AboutAppInitial extends AboutAppState {}
 
-class AboutAppContributorsLoading extends AboutAppState {}
+class AboutAppMembersLoading extends AboutAppState {}
 
-class AboutAppContributorsLoaded extends AboutAppState {
+class AboutAppMembersLoaded extends AboutAppState {
+  final List<ForumMember> patrons;
   final List<Contributor> contributors;
 
-  AboutAppContributorsLoaded({required this.contributors});
+  AboutAppMembersLoaded({required this.patrons, required this.contributors});
 
   @override
-  List<Object> get props => [contributors];
+  List<Object> get props => [patrons, contributors];
 }
 
-class AboutAppContributorsLoadError extends AboutAppState {}
+class AboutAppMembersLoadError extends AboutAppState {
+  final bool contributorsLoadError;
+  final bool patronsLoadError;
 
-class AboutAppPatronsLoading extends AboutAppState {}
-
-class AboutAppPatronsLoaded extends AboutAppState {
-  final List<ForumMember> patrons;
-
-  AboutAppPatronsLoaded({required this.patrons});
-
+  AboutAppMembersLoadError(
+      {required this.contributorsLoadError, required this.patronsLoadError});
   @override
-  List<Object> get props => [patrons];
+  List<Object> get props => [contributorsLoadError, patronsLoadError];
 }
-
-class AboutAppPatronsLoadError extends AboutAppState {}

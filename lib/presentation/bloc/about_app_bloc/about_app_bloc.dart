@@ -21,22 +21,38 @@ class AboutAppBloc extends Bloc<AboutAppEvent, AboutAppState> {
   Stream<AboutAppState> mapEventToState(
     AboutAppEvent event,
   ) async* {
-    if (event is AboutAppGetContributors) {
-      yield AboutAppContributorsLoading();
+    if (event is AboutAppGetMembers) {
+      bool contributorsLoadError = false;
+      bool patronsLoadError = false;
+
+      List<Contributor> contributorsList = [];
+      List<ForumMember> patronsList = [];
+
+      yield AboutAppMembersLoading();
       final contributors = await getContributors();
-      yield contributors.fold((failure) => AboutAppContributorsLoadError(),
-          (r) => AboutAppContributorsLoaded(contributors: r));
-    } else if (event is AboutAppGetPatrons) {
-      print('true');
-      yield AboutAppPatronsLoading();
-      final patrons = await getForumPatrons();
-      yield patrons.fold((failure) {
-        print('failure');
-        return AboutAppPatronsLoadError();
+      contributors.fold((failure) {
+        contributorsLoadError = true;
       }, (r) {
-        print(r);
-        return AboutAppPatronsLoaded(patrons: r);
+        contributorsList = r;
       });
+
+      final patrons = await getForumPatrons();
+      patrons.fold((failure) {
+        patronsLoadError = true;
+      }, (r) {
+        patronsList = r;
+      });
+
+      if (contributorsLoadError && patronsLoadError)
+        yield AboutAppMembersLoadError(
+            contributorsLoadError: true, patronsLoadError: true);
+      else {
+        yield AboutAppMembersLoadError(
+            contributorsLoadError: contributorsLoadError,
+            patronsLoadError: patronsLoadError);
+        yield AboutAppMembersLoaded(
+            patrons: patronsList, contributors: contributorsList);
+      }
     }
   }
 }

@@ -65,7 +65,9 @@ class App extends StatelessWidget {
             create: (context) => getIt<OnboardingCubit>()),
         BlocProvider<MapCubit>(create: (context) => getIt<MapCubit>()),
         BlocProvider<NewsBloc>(create: (context) => getIt<NewsBloc>()),
-        BlocProvider<AboutAppBloc>(create: (context) => getIt<AboutAppBloc>()),
+        BlocProvider<AboutAppBloc>(
+            create: (context) =>
+                getIt<AboutAppBloc>()..add(AboutAppGetMembers())),
       ],
       child: AdaptiveTheme(
         light: lightTheme,
