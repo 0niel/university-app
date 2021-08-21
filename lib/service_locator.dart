@@ -69,14 +69,6 @@ Future<void> setup() async {
   getIt.registerLazySingleton(() => GetContributors(getIt()));
 
   // Repositories
-  getIt.registerLazySingleton<ScheduleRepository>(
-    () => ScheduleRepositoryImpl(
-      remoteDataSource: getIt(),
-      localDataSource: getIt(),
-      connectionChecker: getIt(),
-    ),
-  );
-  
   getIt.registerLazySingleton<NewsRepository>(
     () => NewsRepositoryImpl(
       remoteDataSource: getIt(),
