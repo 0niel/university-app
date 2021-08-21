@@ -1,7 +1,9 @@
-import 'package:rtu_mirea_app/domain/entities/news.dart';
-import 'package:rtu_mirea_app/domain/entities/tag.dart';
+import 'package:dartz/dartz.dart';
+import 'package:rtu_mirea_app/common/errors/failures.dart';
+import 'package:rtu_mirea_app/domain/entities/news_item.dart';
 
 abstract class NewsRepository {
-  Future<List<NewsModel>> getNews(int offset, int limit, String tag);
-  Future<List<Tag>> getTags();
+  Future<Either<Failure, List<NewsItem>>> getNews(
+      int offset, int limit, String tag);
+  Future<Either<Failure, List<String>>> getTags();
 }

@@ -5,12 +5,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/home_navigator_bloc/home_navigator_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/map_cubit/map_cubit.dart';
 import 'package:rtu_mirea_app/presentation/bloc/news_bloc/news_bloc.dart';
-import 'package:rtu_mirea_app/presentation/bloc/news_bloc/news_bloc_event.dart';
 import 'package:rtu_mirea_app/presentation/bloc/onboarding_cubit/onboarding_cubit.dart';
 import 'package:rtu_mirea_app/presentation/bloc/schedule_bloc/schedule_bloc.dart';
 import 'package:rtu_mirea_app/presentation/pages/home/home_navigator_screen.dart';
 import 'package:rtu_mirea_app/presentation/pages/map/map_screen.dart';
-import 'package:rtu_mirea_app/presentation/pages/news/news_page.dart';
+import 'package:rtu_mirea_app/presentation/pages/news/news_screen.dart';
 import 'package:rtu_mirea_app/presentation/pages/onboarding/onboarding_screen.dart';
 import 'package:rtu_mirea_app/presentation/pages/schedule/schedule_screen.dart';
 import 'package:rtu_mirea_app/presentation/pages/profile/profile_screen.dart';
@@ -80,7 +79,7 @@ class App extends StatelessWidget {
             MapScreen.routeName: (context) => MapScreen(),
             ProfileScreen.routeName: (context) => ProfileScreen(),
             OnBoardingScreen.routeName: (context) => OnBoardingScreen(),
-            NewsScreen.routeName: (context) => NewsScreen(),
+            NewsScreen.routeName: (context) => NewsScreen()
           },
         ),
       ),

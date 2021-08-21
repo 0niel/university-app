@@ -4,7 +4,7 @@ import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:rtu_mirea_app/presentation/pages/map/map_screen.dart';
-import 'package:rtu_mirea_app/presentation/pages/news/news_page.dart';
+import 'package:rtu_mirea_app/presentation/pages/news/news_screen.dart';
 import 'package:rtu_mirea_app/presentation/pages/profile/profile_screen.dart';
 import 'package:rtu_mirea_app/presentation/pages/schedule/schedule_screen.dart';
 
