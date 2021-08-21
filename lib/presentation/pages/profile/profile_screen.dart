@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:rtu_mirea_app/presentation/pages/profile/widgets/about_app_page.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:rtu_mirea_app/presentation/widgets/settings_button.dart';
 import 'package:rtu_mirea_app/presentation/colors.dart';
 
 class ProfileScreen extends StatelessWidget {
-  static const String routeName = '/settings';
+  static const String routeName = '/profile';
 
   @override
   Widget build(BuildContext context) {
@@ -86,6 +87,12 @@ class ProfileScreen extends StatelessWidget {
               SettingsButton('Мой профиль', Icons.manage_accounts, () {}),
               SettingsButton('Создать учебную группу', Icons.group_add, () {}),
               SettingsButton('Поделиться профилем', Icons.ios_share, () {}),
+              SettingsButton('О приложении', Icons.apps_rounded, () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => AboutAppPage()),
+                );
+              }),
             ],
           ),
         ),

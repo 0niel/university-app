@@ -2,6 +2,7 @@ import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:rtu_mirea_app/presentation/bloc/about_app_bloc/about_app_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/home_navigator_bloc/home_navigator_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/map_cubit/map_cubit.dart';
 import 'package:rtu_mirea_app/presentation/bloc/news_bloc/news_bloc.dart';
@@ -64,6 +65,7 @@ class App extends StatelessWidget {
             create: (context) => getIt<OnboardingCubit>()),
         BlocProvider<MapCubit>(create: (context) => getIt<MapCubit>()),
         BlocProvider<NewsBloc>(create: (context) => getIt<NewsBloc>()),
+        BlocProvider<AboutAppBloc>(create: (context) => getIt<AboutAppBloc>()),
       ],
       child: AdaptiveTheme(
         light: lightTheme,
