@@ -11,6 +11,7 @@ class AboutAppPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     context.read<AboutAppBloc>().add(AboutAppGetContributors());
+    context.read<AboutAppBloc>().add(AboutAppGetPatrons());
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -33,6 +34,11 @@ class AboutAppPage extends StatelessWidget {
             Text('Разработчики', style: DarkTextTheme.h4),
             SizedBox(height: 16),
             BlocBuilder<AboutAppBloc, AboutAppState>(
+              buildWhen: (prevState, currentState) {
+                return currentState is AboutAppContributorsLoading ||
+                    currentState is AboutAppContributorsLoaded ||
+                    currentState is AboutAppContributorsLoadError;
+              },
               builder: (context, state) {
                 if (state is AboutAppContributorsLoading) {
                   return Center(
@@ -42,36 +48,75 @@ class AboutAppPage extends StatelessWidget {
                     ),
                   );
                 } else if (state is AboutAppContributorsLoaded) {
-                  return Expanded(
-                    child: GridView.builder(
-                      gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-                        maxCrossAxisExtent: 100,
-                        crossAxisSpacing: 16,
-                        mainAxisSpacing: 10,
-                      ),
-                      itemCount: state.contributors.length,
-                      itemBuilder: (context, index) {
-                        return Column(
-                          children: [
-                            CachedNetworkImage(
-                              imageUrl: state.contributors[index].avatarUrl,
-                              errorWidget: (context, url, error) =>
-                                  Icon(Icons.error),
-                              imageBuilder: (context, imageProvider) =>
-                                  CircleAvatar(
-                                radius: 30,
-                                backgroundImage: imageProvider,
-                              ),
-                            ),
-                            SizedBox(height: 8),
-                            Text(
-                              state.contributors[index].login,
-                              style: DarkTextTheme.bodyBold,
-                            ),
-                          ],
-                        );
-                      },
+                  return Wrap(
+                    spacing: 16.0,
+                    runSpacing: 8.0,
+                    children: List.generate(state.contributors.length, (index) {
+                      return Column(children: [
+                        CachedNetworkImage(
+                          imageUrl: state.contributors[index].avatarUrl,
+                          errorWidget: (context, url, error) =>
+                              Icon(Icons.error),
+                          imageBuilder: (context, imageProvider) =>
+                              CircleAvatar(
+                            radius: 30,
+                            backgroundImage: imageProvider,
+                          ),
+                        ),
+                        SizedBox(height: 8),
+                        Text(
+                          state.contributors[index].login,
+                          style: DarkTextTheme.bodyBold,
+                        ),
+                      ]);
+                    }),
+                  );
+                }
+                return Container();
+              },
+            ),
+            SizedBox(height: 24),
+            Text('Патроны', style: DarkTextTheme.h4),
+            SizedBox(height: 16),
+            BlocBuilder<AboutAppBloc, AboutAppState>(
+              buildWhen: (prevState, currentState) {
+                return currentState is AboutAppPatronsLoading ||
+                    currentState is AboutAppPatronsLoaded ||
+                    currentState is AboutAppPatronsLoadError;
+              },
+              builder: (context, state) {
+                if (state is AboutAppPatronsLoading) {
+                  return Center(
+                    child: CircularProgressIndicator(
+                      backgroundColor: DarkThemeColors.primary,
+                      strokeWidth: 5,
                     ),
+                  );
+                } else if (state is AboutAppPatronsLoaded) {
+                  return Wrap(
+                    spacing: 16.0,
+                    runSpacing: 8.0,
+                    children: List.generate(state.patrons.length, (index) {
+                      return Column(children: [
+                        CachedNetworkImage(
+                          imageUrl: 'https://mirea.ninja/' +
+                              state.patrons[index].avatarTemplate
+                                  .replaceAll('{size}', '120'),
+                          errorWidget: (context, url, error) =>
+                              Icon(Icons.error),
+                          imageBuilder: (context, imageProvider) =>
+                              CircleAvatar(
+                            radius: 30,
+                            backgroundImage: imageProvider,
+                          ),
+                        ),
+                        SizedBox(height: 8),
+                        Text(
+                          state.patrons[index].username,
+                          style: DarkTextTheme.bodyBold,
+                        ),
+                      ]);
+                    }),
                   );
                 }
                 return Container();

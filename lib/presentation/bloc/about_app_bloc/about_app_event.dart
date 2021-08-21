@@ -8,3 +8,5 @@ abstract class AboutAppEvent extends Equatable {
 }
 
 class AboutAppGetContributors extends AboutAppEvent {}
+
+class AboutAppGetPatrons extends AboutAppEvent {}

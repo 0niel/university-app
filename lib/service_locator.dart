@@ -1,10 +1,14 @@
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
+import 'package:rtu_mirea_app/data/datasources/forum_local.dart';
+import 'package:rtu_mirea_app/data/datasources/forum_remote.dart';
 import 'package:rtu_mirea_app/data/datasources/news_remote.dart';
 import 'package:rtu_mirea_app/data/datasources/schedule_local.dart';
 import 'package:rtu_mirea_app/data/datasources/schedule_remote.dart';
+import 'package:rtu_mirea_app/data/repositories/forum_repository_impl.dart';
 import 'package:rtu_mirea_app/data/repositories/news_repository_impl.dart';
+import 'package:rtu_mirea_app/domain/repositories/forum_repository.dart';
 import 'package:rtu_mirea_app/domain/repositories/news_repository.dart';
 import 'package:rtu_mirea_app/data/datasources/github_local.dart';
 import 'package:rtu_mirea_app/data/datasources/github_remote.dart';
@@ -18,6 +22,7 @@ import 'package:rtu_mirea_app/domain/usecases/get_downloaded_schedules.dart';
 import 'package:rtu_mirea_app/domain/usecases/get_groups.dart';
 import 'package:rtu_mirea_app/domain/usecases/get_news.dart';
 import 'package:rtu_mirea_app/domain/usecases/get_news_tags.dart';
+import 'package:rtu_mirea_app/domain/usecases/get_patrons.dart';
 import 'package:rtu_mirea_app/domain/usecases/get_schedule.dart';
 import 'package:rtu_mirea_app/domain/usecases/set_active_group.dart';
 import 'package:rtu_mirea_app/presentation/bloc/about_app_bloc/about_app_bloc.dart';
@@ -52,7 +57,8 @@ Future<void> setup() async {
     ),
   );
 
-  getIt.registerFactory(() => AboutAppBloc(getContributors: getIt()));
+  getIt.registerFactory(
+      () => AboutAppBloc(getContributors: getIt(), getForumPatrons: getIt()));
   getIt.registerFactory(() => HomeNavigatorBloc());
   getIt.registerFactory(() => OnboardingCubit());
   getIt.registerFactory(() => MapCubit());
@@ -67,6 +73,7 @@ Future<void> setup() async {
   getIt.registerLazySingleton(() => GetNews(getIt()));
   getIt.registerLazySingleton(() => GetNewsTags(getIt()));
   getIt.registerLazySingleton(() => GetContributors(getIt()));
+  getIt.registerLazySingleton(() => GetForumPatrons(getIt()));
 
   // Repositories
   getIt.registerLazySingleton<NewsRepository>(
@@ -88,6 +95,12 @@ Future<void> setup() async {
         connectionChecker: getIt(),
       ));
 
+  getIt.registerLazySingleton<ForumRepository>(() => ForumRepositoryImpl(
+        remoteDataSource: getIt(),
+        localDataSource: getIt(),
+        connectionChecker: getIt(),
+      ));
+
   getIt.registerLazySingleton<ScheduleRemoteData>(
       () => ScheduleRemoteDataImpl(httpClient: getIt()));
   getIt.registerLazySingleton<ScheduleLocalData>(
@@ -98,6 +111,10 @@ Future<void> setup() async {
       () => GithubRemoteDataImpl(httpClient: getIt()));
   getIt.registerLazySingleton<GithubLocalData>(
       () => GithubLocalDataImpl(sharedPreferences: getIt()));
+  getIt.registerLazySingleton<ForumRemoteData>(
+      () => ForumRemoteDataImpl(httpClient: getIt()));
+  getIt.registerLazySingleton<ForumLocalData>(
+      () => ForumLocalDataImpl(sharedPreferences: getIt()));
 
   // Common / Core
 

@@ -21,3 +21,16 @@ class AboutAppContributorsLoaded extends AboutAppState {
 }
 
 class AboutAppContributorsLoadError extends AboutAppState {}
+
+class AboutAppPatronsLoading extends AboutAppState {}
+
+class AboutAppPatronsLoaded extends AboutAppState {
+  final List<ForumMember> patrons;
+
+  AboutAppPatronsLoaded({required this.patrons});
+
+  @override
+  List<Object> get props => [patrons];
+}
+
+class AboutAppPatronsLoadError extends AboutAppState {}
