@@ -65,16 +65,26 @@ dependencies:
   dartz: ^0.10.0-nullsafety.2
 
   flutter_typeahead: ^3.2.0
-
+  
+  # Table calendar for schedule
   table_calendar: ^3.0.2
 
   implicitly_animated_reorderable_list: ^0.4.0
 
+  # Inner drawer for schedule screen.
   flutter_inner_drawer:
     git:
       url: https://github.com/0niel/flutter_inner_drawer.git
       ref: bugfix/type-casting
+  
+  url_launcher: ^6.0.9
 
+  flutter_markdown: ^0.6.4
+  
+  carousel_slider: ^4.0.0
+
+  cached_network_image: ^3.1.0
+  
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.2

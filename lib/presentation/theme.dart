@@ -57,6 +57,7 @@ final darkTheme = ThemeData.dark().copyWith(
     titleTextStyle: DarkTextTheme.title,
   ),
   bottomNavigationBarTheme: ThemeData.dark().bottomNavigationBarTheme.copyWith(
+        type: BottomNavigationBarType.shifting,
         backgroundColor: DarkThemeColors.background03,
         selectedItemColor: DarkThemeColors.active,
         unselectedItemColor: DarkThemeColors.deactive,
