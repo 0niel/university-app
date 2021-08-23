@@ -1,61 +1,92 @@
+import 'dart:io';
+
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:rtu_mirea_app/presentation/bloc/about_app_bloc/about_app_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/home_navigator_bloc/home_navigator_bloc.dart';
+import 'package:rtu_mirea_app/presentation/bloc/map_cubit/map_cubit.dart';
+import 'package:rtu_mirea_app/presentation/bloc/news_bloc/news_bloc.dart';
+import 'package:rtu_mirea_app/presentation/bloc/onboarding_cubit/onboarding_cubit.dart';
+import 'package:rtu_mirea_app/presentation/bloc/schedule_bloc/schedule_bloc.dart';
 import 'package:rtu_mirea_app/presentation/pages/home/home_navigator_screen.dart';
+import 'package:rtu_mirea_app/presentation/pages/map/map_screen.dart';
+import 'package:rtu_mirea_app/presentation/pages/news/news_screen.dart';
 import 'package:rtu_mirea_app/presentation/pages/onboarding/onboarding_screen.dart';
 import 'package:rtu_mirea_app/presentation/pages/schedule/schedule_screen.dart';
-import 'package:rtu_mirea_app/presentation/pages/settings/settings_screen.dart';
+import 'package:rtu_mirea_app/presentation/pages/profile/profile_screen.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:intl/date_symbol_data_local.dart';
+import 'package:rtu_mirea_app/service_locator.dart' as dependencyInjection;
+import 'service_locator.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  SharedPreferences prefs = await SharedPreferences.getInstance();
-  bool showOnboarding = prefs.getBool('show_onboarding') ?? true;
-  await prefs.setBool("show_onboarding", false);
-  runApp(App(showOnboarding));
+  await dependencyInjection.setup();
+  var prefs = getIt<SharedPreferences>();
+  const String onboardingKey = 'show_onboarding';
+  bool showOnboarding = prefs.getBool(onboardingKey) ?? true;
+  if (showOnboarding) prefs.setBool(onboardingKey, false);
+
+  // to debug:
+  //await prefs.clear();
+
+  initializeDateFormatting();
+  runApp(App(showOnboarding: showOnboarding));
 }
 
 class App extends StatelessWidget {
-  late final bool _showOnboarding;
+  final bool showOnboarding;
 
-  /// bool переменная [_showOnboarding] определяет, показывать ли
-  /// intro (onboarding) экран при запуске приложения
-  App(this._showOnboarding);
+  /// if [showOnboarding] is true, when start the application,
+  /// the intro screen will be displayed
+  App({required this.showOnboarding});
 
   @override
   Widget build(BuildContext context) {
-    // блокируем ориентацию приложения на
-    // только вертикальной
+    // blocking the orientation of the application to
+    // vertical only
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitDown,
       DeviceOrientation.portraitUp,
     ]);
 
+    // deleting the system status bar color
+    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+    ));
+
     return MultiBlocProvider(
       providers: [
+        BlocProvider<ScheduleBloc>(create: (context) => getIt<ScheduleBloc>()),
         BlocProvider<HomeNavigatorBloc>(
-            create: (context) => HomeNavigatorBloc()),
+            create: (context) => getIt<HomeNavigatorBloc>()),
+        BlocProvider<OnboardingCubit>(
+            create: (context) => getIt<OnboardingCubit>()),
+        BlocProvider<MapCubit>(create: (context) => getIt<MapCubit>()),
+        BlocProvider<NewsBloc>(create: (context) => getIt<NewsBloc>()),
+        BlocProvider<AboutAppBloc>(
+            create: (context) =>
+                getIt<AboutAppBloc>()..add(AboutAppGetMembers())),
       ],
       child: AdaptiveTheme(
         light: lightTheme,
         dark: darkTheme,
-        initial: AdaptiveThemeMode.light,
+        initial: AdaptiveThemeMode.dark,
         builder: (theme, darkTheme) => MaterialApp(
           debugShowCheckedModeBanner: false,
           title: 'Приложение РТУ МИРЭА',
           theme: theme,
-          darkTheme: darkTheme,
-          initialRoute: _showOnboarding
-              ? OnboardingScreen.routeName
-              : HomeNavigatorScreen.routeName,
+          home: showOnboarding ? OnBoardingScreen() : HomeNavigatorScreen(),
           routes: {
-            '/': (context) => HomeNavigatorScreen(),
             ScheduleScreen.routeName: (context) => ScheduleScreen(),
-            SettingsScreen.routeName: (context) => SettingsScreen(),
-            OnboardingScreen.routeName: (context) => OnboardingScreen()
+            MapScreen.routeName: (context) => MapScreen(),
+            ProfileScreen.routeName: (context) => ProfileScreen(),
+            OnBoardingScreen.routeName: (context) => OnBoardingScreen(),
+            NewsScreen.routeName: (context) => NewsScreen()
           },
         ),
       ),
