@@ -14,7 +14,7 @@ part 'home_navigator_state.dart';
 class HomeNavigatorBloc extends Bloc<HomeNavigatorEvent, HomeNavigatorState> {
   HomeNavigatorBloc() : super(SchedulePage());
 
-  int selectedPageIndex = 0;
+  int selectedPageIndex = 1;
 
   @override
   Stream<HomeNavigatorState> mapEventToState(

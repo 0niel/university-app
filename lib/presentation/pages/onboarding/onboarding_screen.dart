@@ -173,7 +173,7 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
                                 context,
                                 MaterialPageRoute(
                                     builder: (context) =>
-                                        HomeNavigatorScreen()),
+                                        HomeNavigatorScreen(isFirstRun: true)),
                               );
                             },
                             child: Text(
