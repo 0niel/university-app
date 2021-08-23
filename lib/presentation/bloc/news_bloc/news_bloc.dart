@@ -55,8 +55,8 @@ class NewsBloc extends Bloc<NewsEvent, NewsState> {
 
       final news = await getNews(GetNewsParams(offset: _offset, limit: 10));
       yield news.fold((failure) => NewsLoadError(), (r) {
-        _offset += r.length - 1;
         List<NewsItem> newNews = List.from(oldNews)..addAll(r);
+        _offset += r.length;
         return NewsLoaded(news: newNews, tags: tagsList);
       });
     }
