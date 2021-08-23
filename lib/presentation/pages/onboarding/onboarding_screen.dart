@@ -18,7 +18,7 @@ class OnBoardingScreen extends StatefulWidget {
 }
 
 class _OnBoardingScreenState extends State<OnBoardingScreen> {
-  final int _numPages = 5;
+  final int _numPages = 4;
 
   /// Main images
   static const List<Image> containersImages = [
@@ -37,11 +37,11 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
       height: 315.0,
       width: 315.0,
     ),
-    Image(
-      image: AssetImage('assets/images/Saly-4.png'),
-      height: 375.0,
-      width: 315.0,
-    ),
+    // Image(
+    //   image: AssetImage('assets/images/Saly-4.png'),
+    //   height: 375.0,
+    //   width: 315.0,
+    // ),
     Image(
       image: AssetImage('assets/images/Saly-5.png'),
       height: 315.0,
@@ -52,8 +52,8 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
   static const List titlesTexts = [
     'Добро пожаловать!',
     'Смотри расписание!',
-    'Будь вкурсе не надевая штаны!',
-    'Ставь цели!',
+    'Будь в курсе, не надевая штаны!',
+    // 'Ставь цели!',
     'Коммуницируй!',
   ];
 
@@ -62,7 +62,7 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
     'Это приложение было создано студентами для студентов',
     'Как же легко оказывается можно смотреть расписание, а главное быстро',
     'Иногда так лень заходить на сайт и искать нужную тебе информацию, мы это исправили',
-    'Как же много дедлайнов!? Создавать дедлайны теперь как никогда просто и удобно',
+    // 'Как же много дедлайнов!? Создавать дедлайны теперь как никогда просто и удобно',
     'Слово сложное, но все легко. Общайся и делись материалами с другими группами мгновенно',
   ];
 
