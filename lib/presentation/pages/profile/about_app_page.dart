@@ -8,7 +8,7 @@ import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:rtu_mirea_app/presentation/widgets/icon_button.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import 'member_info.dart';
+import 'widgets/member_info.dart';
 
 class AboutAppPage extends StatelessWidget {
   static const String routeName = '/profile/about_app';
@@ -49,6 +49,26 @@ class AboutAppPage extends StatelessWidget {
                       recognizer: TapGestureRecognizer()
                         ..onTap = () {
                           launch('https://ischemes.ru/');
+                        },
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(height: 8),
+              RichText(
+                text: TextSpan(
+                  children: [
+                    TextSpan(
+                      text: 'Powered by ',
+                      style: DarkTextTheme.bodyRegular,
+                    ),
+                    TextSpan(
+                      text: 'Mirea Ninja',
+                      style: DarkTextTheme.bodyRegular
+                          .copyWith(color: DarkThemeColors.primary),
+                      recognizer: TapGestureRecognizer()
+                        ..onTap = () {
+                          launch('https://mirea.ninja/');
                         },
                     ),
                   ],
