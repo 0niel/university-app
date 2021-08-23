@@ -9,8 +9,10 @@ import 'package:rtu_mirea_app/presentation/pages/profile/profile_screen.dart';
 import 'package:rtu_mirea_app/presentation/pages/schedule/schedule_screen.dart';
 
 class HomeNavigatorScreen extends StatelessWidget {
+  final bool? isFirstRun;
+
   static const String routeName = '/';
-  HomeNavigatorScreen({Key? key}) : super(key: key);
+  HomeNavigatorScreen({Key? key, this.isFirstRun}) : super(key: key);
 
   static const _navBarItems = const <BottomNavigationBarItem>[
     BottomNavigationBarItem(
@@ -37,7 +39,10 @@ class HomeNavigatorScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    //Navigator.of(context).popUntil((route) => route.isFirst);
+    bool popToFirst = isFirstRun ?? false;
+    if (popToFirst) {
+      Navigator.of(context).popUntil((route) => route.isFirst);
+    }
 
     return Scaffold(
       body: BlocBuilder<HomeNavigatorBloc, HomeNavigatorState>(
