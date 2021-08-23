@@ -63,9 +63,7 @@ class App extends StatelessWidget {
       providers: [
         BlocProvider<ScheduleBloc>(create: (context) => getIt<ScheduleBloc>()),
         BlocProvider<HomeNavigatorBloc>(
-            create: (context) => getIt<HomeNavigatorBloc>()
-              ..add(ChangeScreen(
-                  routeName: ScheduleScreen.routeName, pageIndex: 1))),
+            create: (context) => getIt<HomeNavigatorBloc>()),
         BlocProvider<OnboardingCubit>(
             create: (context) => getIt<OnboardingCubit>()),
         BlocProvider<MapCubit>(create: (context) => getIt<MapCubit>()),
