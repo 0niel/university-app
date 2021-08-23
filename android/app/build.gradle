@@ -33,8 +33,7 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId "com.example.rtu_mirea_app"
+        applicationId "ninja.mirea.mireaapp"
         minSdkVersion 17
         targetSdkVersion 30
         versionCode flutterVersionCode.toInteger()

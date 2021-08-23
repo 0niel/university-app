@@ -1,4 +1,4 @@
-package com.example.rtu_mirea_app
+package ninja.mirea.mireaapp
 
 import io.flutter.embedding.android.FlutterActivity
 
