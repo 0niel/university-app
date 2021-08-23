@@ -1,7 +1,3 @@
-// To parse this JSON data, do
-//
-//     final welcome = welcomeFromJson(jsonString);
-
 import 'package:equatable/equatable.dart';
 
 class Contributor extends Equatable {
