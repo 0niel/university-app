@@ -59,6 +59,31 @@ class AboutAppPage extends StatelessWidget {
                 text: TextSpan(
                   children: [
                     TextSpan(
+                      text: 'Все новости берутся из официального сайта ',
+                      style: DarkTextTheme.bodyRegular,
+                    ),
+                    TextSpan(
+                      text: 'mirea.ru/news',
+                      style: DarkTextTheme.bodyRegular
+                          .copyWith(color: DarkThemeColors.primary),
+                      recognizer: TapGestureRecognizer()
+                        ..onTap = () {
+                          launch('https://mirea.ru/news/');
+                        },
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(height: 8),
+              Text(
+                'Связаться с нами вы можете с помощью email: contact@mirea.ninja',
+                style: DarkTextTheme.bodyRegular,
+              ),
+              SizedBox(height: 8),
+              RichText(
+                text: TextSpan(
+                  children: [
+                    TextSpan(
                       text: 'Powered by ',
                       style: DarkTextTheme.bodyRegular,
                     ),
