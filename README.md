@@ -1,6 +1,9 @@
 # rtu-mirea-app
 
 Это мобильное приложение с полностью открытым исходным кодом для студентов и преподавателей РТУ МИРЭА.
+<p float="left">
+  <a href="https://play.google.com/store/apps/details?id=ninja.mirea.mireaapp"><img src="https://user-images.githubusercontent.com/51058739/130847046-edf8906f-02dc-4c13-87e5-9872651d606f.png" width="128" /></a>
+</p>
 
 # Скриншоты
 <p float="left">
