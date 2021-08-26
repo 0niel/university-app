@@ -107,7 +107,8 @@ class _SchedulePageViewState extends State<SchedulePageView> {
           weekendDays: const [DateTime.sunday],
           calendarFormat: _calendarFormat,
           firstDay: Calendar.getSemesterStart(),
-          lastDay: DateTime.utc(2030, 3, 14),
+          lastDay:
+              DateTime.utc(2021, 12, 19), // todo: create method in Calendar
           sixWeekMonthsEnforced: true,
           startingDayOfWeek: StartingDayOfWeek.monday,
           headerStyle: HeaderStyle(
