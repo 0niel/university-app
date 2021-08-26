@@ -105,6 +105,26 @@ class _SchedulePageViewState extends State<SchedulePageView> {
         TableCalendar(
           // pageJumpingEnabled: true,
           weekendDays: const [DateTime.sunday],
+          calendarBuilders: CalendarBuilders(
+            markerBuilder: (context, day, events) {
+              return Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: List.generate(
+                  events.length,
+                  (index) => Container(
+                    width: 6,
+                    height: 6,
+                    margin: const EdgeInsets.symmetric(horizontal: 0.3),
+                    decoration: new BoxDecoration(
+                      color: LessonCard.getColorByType(
+                          (events[index] as Lesson).types),
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
           calendarFormat: _calendarFormat,
           firstDay: Calendar.getSemesterStart(),
           lastDay:

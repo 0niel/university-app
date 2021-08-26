@@ -20,7 +20,7 @@ class LessonCard extends StatelessWidget {
     required this.timeEnd,
   }) : super(key: key);
 
-  Color _getColorByType(String lessonType) {
+  static Color getColorByType(String lessonType) {
     if (lessonType.contains('лк') || lessonType.contains('лек'))
       return DarkThemeColors.colorful01;
     else if (lessonType.contains('лб') || lessonType.contains('лаб'))
@@ -96,7 +96,7 @@ class LessonCard extends StatelessWidget {
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(100),
-                    color: _getColorByType(type)),
+                    color: getColorByType(type)),
                 height: 24,
                 // width: 10 * 7,
                 child: Text(type, style: DarkTextTheme.chip),
