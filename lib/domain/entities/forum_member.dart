@@ -25,7 +25,7 @@ class ForumMember extends Equatable {
   final String flairUrl;
   final int trustLevel;
   final String title;
-  final DateTime lastPostedAt;
+  final DateTime? lastPostedAt;
   final DateTime lastSeenAt;
   final DateTime addedAt;
 
