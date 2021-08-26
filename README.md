@@ -3,6 +3,7 @@
 Это мобильное приложение с полностью открытым исходным кодом для студентов и преподавателей РТУ МИРЭА.
 <p float="left">
   <a href="https://play.google.com/store/apps/details?id=ninja.mirea.mireaapp"><img src="https://user-images.githubusercontent.com/51058739/130847046-edf8906f-02dc-4c13-87e5-9872651d606f.png" width="128" /></a>
+   <a href="https://apps.apple.com/ru/app/ninja-mirea/id1582508025" width="128" /><img src="https://user-images.githubusercontent.com/51058739/130931786-3e21e740-358d-4708-8cab-3a0108bc619b.png" width="128" /></a>
 </p>
 
 # Скриншоты
