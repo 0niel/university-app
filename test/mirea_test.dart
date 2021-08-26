@@ -1,20 +1,16 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:rtu_mirea_app/service_locator.dart' as service_locator;
+import 'package:shared_preferences/shared_preferences.dart';
 
-import 'utils/calendar_test.dart';
-import 'widgets/onboarding_test.dart';
+import 'utils/calendar_test.dart' as cal_utils;
 
-/// Основная функция запуска тестирования
+/// Test all
 void main() {
-  print('Unit-testing:');
+  group('calendar utils', cal_utils.main);
 
-  // Test calendar util
-  CalendarTest.testEverything();
-
-  setUpAll(() {
-    service_locator.setup();
+  // Prepare to widget-testing
+  setUpAll(() async {
+    SharedPreferences.setMockInitialValues({});
+    await service_locator.setup();
   });
-
-  // Test OnBoarding screen
-  OnBoardingTest.testEverythg();
 }
