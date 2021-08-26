@@ -1,6 +1,6 @@
 class Calendar {
   /// Максимальное количество учебных недель в семестре
-  static const int kMaxWeekInSemester = 17;
+  static const int kMaxWeekInSemester = 16;
 
   /// Возвращает текущий день недели, где 1 - ПН, 7 - ВС
   static int getCurrentDayOfWeek() {
@@ -22,12 +22,13 @@ class Calendar {
 
     int week = 1;
     int prevWeekday = startDate.weekday;
+
     while (currentDate.difference(startDate).inDays != 0) {
       if (startDate.weekday == 7 && startDate.weekday != prevWeekday) {
         week += 1;
       }
       prevWeekday = startDate.weekday;
-      startDate = startDate.add(Duration(days: 1));
+      startDate = startDate.add(const Duration(days: 1));
     }
 
     // int week = ((milliseconds / (24 * 60 * 60 * 1000) / 7) + 1).round();
@@ -65,6 +66,12 @@ class Calendar {
   /// Если оставить null, функция вернёт начало семестра для текущей даты.
   static DateTime getSemesterStart([DateTime? mCurrentDate]) {
     return _CurrentSemesterStart.getCurrentSemesterStart(mCurrentDate);
+  }
+
+  static DateTime getSemesterLastDay([DateTime? mCurrentDate]) {
+    return getDaysInWeek(kMaxWeekInSemester,
+            _CurrentSemesterStart.getCurrentSemesterStart(mCurrentDate))
+        .last;
   }
 }
 
