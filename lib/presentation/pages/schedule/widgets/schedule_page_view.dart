@@ -161,7 +161,7 @@ class _SchedulePageViewState extends State<SchedulePageView> {
             CalendarFormat.week: 'Неделя'
           },
           eventLoader: (day) {
-            final int week = Calendar.getCurrentWeek(day);
+            final int week = Calendar.getCurrentWeek(mCurrentDate: day);
             final int weekday = day.weekday - 1;
 
             var lessons = _getLessonsByWeek(week, widget.schedule);
@@ -181,7 +181,8 @@ class _SchedulePageViewState extends State<SchedulePageView> {
           },
           onDaySelected: (selectedDay, focusedDay) {
             if (!isSameDay(_selectedDay, selectedDay)) {
-              final int currentNewWeek = Calendar.getCurrentWeek(selectedDay);
+              final int currentNewWeek =
+                  Calendar.getCurrentWeek(mCurrentDate: selectedDay);
 
               // Call `setState()` when updating the selected day
               setState(() {
@@ -276,7 +277,8 @@ class _SchedulePageViewState extends State<SchedulePageView> {
                   _selectedPage = value;
                 });
               },
-              itemCount: 7, // пн-пт
+              itemCount: 7,
+              // пн-пт
               itemBuilder: (context, index) {
                 return _buildPageViewContent(context, index);
               }),

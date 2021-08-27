@@ -1,15 +1,18 @@
+import 'package:clock/clock.dart';
+
 class Calendar {
-  /// Максимальное количество учебных недель в семестре
+  /// Maximum number of academic weeks per semester
   static const int kMaxWeekInSemester = 16;
 
-  /// Возвращает текущий день недели, где 1 - ПН, 7 - ВС
-  static int getCurrentDayOfWeek() {
-    return DateTime.now().weekday;
+  /// Returns the current day of the week, where 1 is Mon, 7 is Sun
+  static int getCurrentDayOfWeek({final Clock clock = const Clock()}) {
+    return clock.now().weekday;
   }
 
-  /// Возвращает номер текущей недели, импользуя текущую дату
-  static int getCurrentWeek([DateTime? mCurrentDate]) {
-    DateTime currentDate = mCurrentDate ?? DateTime.now();
+  /// Returns the number of the current week using the current date
+  static int getCurrentWeek(
+      {DateTime? mCurrentDate, final Clock clock = const Clock()}) {
+    DateTime currentDate = mCurrentDate ?? clock.now();
     int currentYear = currentDate.year;
 
     DateTime startDate;
@@ -36,11 +39,11 @@ class Calendar {
     return week;
   }
 
-  /// Возвращает список дат по номеру недели [week]
+  /// Returns the list of dates by [week] number
   static List<DateTime> getDaysInWeek(int week, [DateTime? mCurrentDate]) {
     List<DateTime> daysInWeek = [];
 
-    DateTime semStart = getSemesterStart(mCurrentDate);
+    DateTime semStart = getSemesterStart(mCurrentDate: mCurrentDate);
 
     // Понедельник недели начала семестра
     var firstDayOfWeek =
@@ -58,26 +61,30 @@ class Calendar {
     return daysInWeek;
   }
 
-  /// Получить дату начала семестра
+  /// Get the start date of the semester
   ///
-  /// [mCurrentDate] отвечает за дату,
-  /// для которой будет рассчитано начало семестра.
-  ///
-  /// Если оставить null, функция вернёт начало семестра для текущей даты.
-  static DateTime getSemesterStart([DateTime? mCurrentDate]) {
-    return _CurrentSemesterStart.getCurrentSemesterStart(mCurrentDate);
+  /// [mCurrentDate] is the date for which
+  /// the beginning of the semester will be calculated.
+  static DateTime getSemesterStart(
+      {DateTime? mCurrentDate, final Clock clock = const Clock()}) {
+    return _CurrentSemesterStart.getCurrentSemesterStart(
+        mCurrentDate: mCurrentDate, clock: clock);
   }
 
-  static DateTime getSemesterLastDay([DateTime? mCurrentDate]) {
-    return getDaysInWeek(kMaxWeekInSemester,
-            _CurrentSemesterStart.getCurrentSemesterStart(mCurrentDate))
+  /// Get the last date of the semester
+  static DateTime getSemesterLastDay(
+      {DateTime? mCurrentDate, final Clock clock = const Clock()}) {
+    return getDaysInWeek(
+            kMaxWeekInSemester,
+            _CurrentSemesterStart.getCurrentSemesterStart(
+                mCurrentDate: mCurrentDate, clock: clock))
         .last;
   }
 }
 
-/// Получение даты с которой начинается семестр
+/// Get the date when the semester begins
 class _CurrentSemesterStart {
-  /// Получить первый понедельник месяца с которого начинается текущий семестр
+  /// Get the first Monday of the month from which the current semester begins
   static DateTime _getFirstMondayOfMonth(int year, int month) {
     var firstOfMonth = DateTime(year, month, 1);
     var firstMonday = firstOfMonth.add(
@@ -85,9 +92,9 @@ class _CurrentSemesterStart {
     return firstMonday;
   }
 
-  /// Скоректировать дату начала семестра
-  /// Если выбранный день выходной, то взять первый понедельник месяца,
-  /// иначе выбранный день и так выбран правильно
+  /// Adjust the start date of the semester
+  /// If the selected day is a day off, take the first Monday of the month,
+  /// Otherwise the selected day is chosen correctly already
   static DateTime _getCorrectedDate(DateTime date) {
     if (date.weekday == DateTime.saturday || date.weekday == DateTime.sunday) {
       return _getFirstMondayOfMonth(date.year, date.month);
@@ -96,9 +103,9 @@ class _CurrentSemesterStart {
     }
   }
 
-  /// Получить ожидаемую дату начала семестра.
-  /// Для первого полугодия это 1-е сентября
-  /// Для второго полугодия это 8-е февраля
+  /// Get the expected start date of the semester.
+  /// For the first semester it is September 1
+  /// For the second semester it is February 8th
   static DateTime _getExpectedSemesterStart(DateTime currentDate) {
     if (currentDate.month >= DateTime.september) {
       return DateTime(currentDate.year, DateTime.september, 1);
@@ -107,12 +114,13 @@ class _CurrentSemesterStart {
     }
   }
 
-  /// Получить дату начала текущего семестра
-  static DateTime getCurrentSemesterStart([DateTime? mCurrentDate]) {
-    DateTime currentDate = mCurrentDate ?? DateTime.now();
-    // ожидаемая дата начала семестра
+  /// Get the start date of the current semester
+  static DateTime getCurrentSemesterStart(
+      {DateTime? mCurrentDate, final Clock clock = const Clock()}) {
+    DateTime currentDate = mCurrentDate ?? clock.now();
+    // Expected start date of the semester
     DateTime expectedStart = _getExpectedSemesterStart(currentDate);
-    // скорректировать на случай, если она попала на выходной день
+    // Adjust in case it falls on a day off
     return _getCorrectedDate(expectedStart);
   }
 }

@@ -87,6 +87,10 @@ dependencies:
   rsa_encrypt: ^2.0.0
 
   cached_network_image: ^3.1.0
+
+  # Encapsulates the notion of the "current time". Very useful for testing
+  # See https://pub.dev/packages/clock
+  clock: ^1.1.0
   
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
