@@ -26,6 +26,10 @@ class _SchedulePageViewState extends State<SchedulePageView> {
   CalendarFormat _calendarFormat = CalendarFormat.week;
   DateTime _focusedDay = DateTime.now();
 
+  final DateTime _firstCalendarDay = Calendar.getSemesterStart();
+  final DateTime _lastCalendarDay =
+      DateTime.utc(2021, 12, 19); // TODO: create method for it
+
   late List<List<Lesson>> _allLessonsInWeek;
 
   @override
@@ -33,7 +37,7 @@ class _SchedulePageViewState extends State<SchedulePageView> {
     super.initState();
 
     // initialize data
-    _selectedPage = DateTime.now().weekday - 1;
+    _selectedPage = DateTime.now().difference(_firstCalendarDay).inDays;
     _controller = PageController(initialPage: _selectedPage);
     _selectedDay = DateTime.now();
     _selectedWeek = Calendar.getCurrentWeek();
@@ -98,6 +102,13 @@ class _SchedulePageViewState extends State<SchedulePageView> {
     }
   }
 
+  void _setLessonsByWeek(int week) {
+    if (week != _selectedWeek) {
+      _selectedWeek = week;
+      _allLessonsInWeek = _getLessonsByWeek(week, widget.schedule);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -126,9 +137,8 @@ class _SchedulePageViewState extends State<SchedulePageView> {
             },
           ),
           calendarFormat: _calendarFormat,
-          firstDay: Calendar.getSemesterStart(),
-          lastDay:
-              DateTime.utc(2021, 12, 19), // todo: create method in Calendar
+          firstDay: _firstCalendarDay,
+          lastDay: _lastCalendarDay,
           sixWeekMonthsEnforced: true,
           startingDayOfWeek: StartingDayOfWeek.monday,
           headerStyle: HeaderStyle(
@@ -183,18 +193,15 @@ class _SchedulePageViewState extends State<SchedulePageView> {
             if (!isSameDay(_selectedDay, selectedDay)) {
               final int currentNewWeek =
                   Calendar.getCurrentWeek(mCurrentDate: selectedDay);
-
               // Call `setState()` when updating the selected day
               setState(() {
-                if (currentNewWeek != _selectedWeek) {
-                  _allLessonsInWeek =
-                      _getLessonsByWeek(currentNewWeek, widget.schedule);
-                }
-                _selectedPage = selectedDay.weekday - 1;
-                _controller.jumpToPage(_selectedPage);
+                _setLessonsByWeek(currentNewWeek);
+                _selectedPage =
+                    selectedDay.difference(_firstCalendarDay).inDays;
                 _selectedDay = selectedDay;
                 _focusedDay = focusedDay;
                 _selectedWeek = currentNewWeek;
+                _controller.jumpToPage(_selectedPage);
               });
             }
           },
@@ -215,7 +222,7 @@ class _SchedulePageViewState extends State<SchedulePageView> {
             setState(() {
               _focusedDay = currentDate;
               _selectedDay = currentDate;
-              _selectedPage = _selectedDay.weekday - 1;
+              _selectedPage = _selectedDay.difference(_firstCalendarDay).inDays;
               _controller.jumpToPage(_selectedPage);
             });
           },
@@ -245,7 +252,9 @@ class _SchedulePageViewState extends State<SchedulePageView> {
                             _selectedDay =
                                 Calendar.getDaysInWeek(_selectedWeek)[0];
                             _focusedDay = _selectedDay;
-                            _selectedPage = 0;
+                            _selectedPage = _selectedDay
+                                .difference(_firstCalendarDay)
+                                .inDays;
                             _allLessonsInWeek = _getLessonsByWeek(
                                 _selectedWeek, widget.schedule);
                             _controller.jumpToPage(_selectedPage);
@@ -274,13 +283,24 @@ class _SchedulePageViewState extends State<SchedulePageView> {
                     _selectedDay = _selectedDay.add(Duration(days: 1));
                   else if (value < _selectedPage)
                     _selectedDay = _selectedDay.subtract(Duration(days: 1));
+                  final int currentNewWeek =
+                      Calendar.getCurrentWeek(mCurrentDate: _selectedDay);
+                  _focusedDay = _selectedDay;
+                  _setLessonsByWeek(currentNewWeek);
                   _selectedPage = value;
                 });
               },
-              itemCount: 7,
-              // пн-пт
+              itemCount: _lastCalendarDay.difference(_firstCalendarDay).inDays,
               itemBuilder: (context, index) {
-                return _buildPageViewContent(context, index);
+                final DateTime lessonDay =
+                    _firstCalendarDay.add(Duration(days: index));
+                final int week =
+                    Calendar.getCurrentWeek(mCurrentDate: lessonDay);
+                final int lessonIndex =
+                    week >= 1 && week <= Calendar.kMaxWeekInSemester
+                        ? lessonDay.weekday - 1
+                        : 6;
+                return _buildPageViewContent(context, lessonIndex);
               }),
         )
       ],
