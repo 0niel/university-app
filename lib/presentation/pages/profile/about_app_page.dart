@@ -1,4 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -53,6 +52,31 @@ class AboutAppPage extends StatelessWidget {
                     ),
                   ],
                 ),
+              ),
+              SizedBox(height: 8),
+              RichText(
+                text: TextSpan(
+                  children: [
+                    TextSpan(
+                      text: 'Все новости берутся из официального сайта ',
+                      style: DarkTextTheme.bodyRegular,
+                    ),
+                    TextSpan(
+                      text: 'mirea.ru/news',
+                      style: DarkTextTheme.bodyRegular
+                          .copyWith(color: DarkThemeColors.primary),
+                      recognizer: TapGestureRecognizer()
+                        ..onTap = () {
+                          launch('https://mirea.ru/news/');
+                        },
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(height: 8),
+              Text(
+                'Связаться с нами вы можете с помощью email: contact@mirea.ninja',
+                style: DarkTextTheme.bodyRegular,
               ),
               SizedBox(height: 8),
               RichText(

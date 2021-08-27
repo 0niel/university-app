@@ -19,6 +19,8 @@ class MemberInfo extends StatelessWidget {
     return GestureDetector(
       child: Column(children: [
         CachedNetworkImage(
+          progressIndicatorBuilder: (context, url, progress) =>
+              Container(width: 60, height: 60),
           imageUrl: avatarUrl,
           errorWidget: (context, url, error) => Icon(Icons.error),
           imageBuilder: (context, imageProvider) => CircleAvatar(

@@ -2,7 +2,7 @@ import 'package:clock/clock.dart';
 
 class Calendar {
   /// Maximum number of academic weeks per semester
-  static const int kMaxWeekInSemester = 17;
+  static const int kMaxWeekInSemester = 16;
 
   /// Returns the current day of the week, where 1 is Mon, 7 is Sun
   static int getCurrentDayOfWeek({final Clock clock = const Clock()}) {
@@ -25,12 +25,13 @@ class Calendar {
 
     int week = 1;
     int prevWeekday = startDate.weekday;
+
     while (currentDate.difference(startDate).inDays != 0) {
       if (startDate.weekday == 7 && startDate.weekday != prevWeekday) {
         week += 1;
       }
       prevWeekday = startDate.weekday;
-      startDate = startDate.add(Duration(days: 1));
+      startDate = startDate.add(const Duration(days: 1));
     }
 
     // int week = ((milliseconds / (24 * 60 * 60 * 1000) / 7) + 1).round();
@@ -68,6 +69,16 @@ class Calendar {
       {DateTime? mCurrentDate, final Clock clock = const Clock()}) {
     return _CurrentSemesterStart.getCurrentSemesterStart(
         mCurrentDate: mCurrentDate, clock: clock);
+  }
+
+  /// Get the last date of the semester
+  static DateTime getSemesterLastDay(
+      {DateTime? mCurrentDate, final Clock clock = const Clock()}) {
+    return getDaysInWeek(
+            kMaxWeekInSemester,
+            _CurrentSemesterStart.getCurrentSemesterStart(
+                mCurrentDate: mCurrentDate, clock: clock))
+        .last;
   }
 }
 
