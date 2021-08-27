@@ -21,74 +21,82 @@ class NewsScreen extends StatelessWidget {
         title: Text("Новости"),
       ),
       backgroundColor: DarkThemeColors.background01,
-      body: Column(children: [
-        // TODO: Add cliclable tags header!!!
-        // BlocBuilder<NewsBloc, NewsState>(buildWhen: (prevState, currentState) {
-        //   if (currentState is NewsLoaded && prevState is NewsLoaded)
-        //     return currentState.tags != prevState.tags;
-        //   else if (currentState is NewsLoaded &&
-        //       prevState.runtimeType != NewsLoaded)
-        //     return true;
-        //   else
-        //     return false;
-        // }, builder: (context, state) {
-        //   if (state is NewsLoaded)
-        //     return Padding(
-        //       padding: EdgeInsets.only(top: 4, bottom: 16, left: 24, right: 24),
-        //       child: Tags(
-        //         isClickable: true,
-        //         withIcon: true,
-        //         tags: state.tags,
-        //       ),
-        //     );
-        //   else
-        //     return Container();
-        // }),
-        Expanded(
-          child: BlocBuilder<NewsBloc, NewsState>(
-            builder: (context, state) {
-              List<NewsItem> news = [];
-              bool isLoading = false;
+      body: RefreshIndicator(
+        onRefresh: () async {
+          context.read<NewsBloc>().add(NewsLoadEvent(refresh: true));
+        },
+        child: Column(children: [
+          // TODO: Add cliclable tags header!!!
+          // BlocBuilder<NewsBloc, NewsState>(buildWhen: (prevState, currentState) {
+          //   if (currentState is NewsLoaded && prevState is NewsLoaded)
+          //     return currentState.tags != prevState.tags;
+          //   else if (currentState is NewsLoaded &&
+          //       prevState.runtimeType != NewsLoaded)
+          //     return true;
+          //   else
+          //     return false;
+          // }, builder: (context, state) {
+          //   if (state is NewsLoaded)
+          //     return Padding(
+          //       padding: EdgeInsets.only(top: 4, bottom: 16, left: 24, right: 24),
+          //       child: Tags(
+          //         isClickable: true,
+          //         withIcon: true,
+          //         tags: state.tags,
+          //       ),
+          //     );
+          //   else
+          //     return Container();
+          // }),
+          Expanded(
+            child: BlocBuilder<NewsBloc, NewsState>(
+              builder: (context, state) {
+                List<NewsItem> news = [];
+                bool isLoading = false;
 
-              if (state is NewsInitial) {
-                context.read<NewsBloc>().add(NewsLoadEvent());
-              } else if (state is NewsLoaded) {
-                news = state.news;
-              } else if (state is NewsLoading && state.isFirstFetch) {
-                return Center(
-                  child: CircularProgressIndicator(),
+                if (state is NewsInitial) {
+                  context.read<NewsBloc>().add(NewsLoadEvent());
+                } else if (state is NewsLoaded) {
+                  news = state.news;
+                } else if (state is NewsLoading && state.isFirstFetch) {
+                  return Center(
+                    child: CircularProgressIndicator(),
+                  );
+                } else if (state is NewsLoading) {
+                  news = state.oldNews;
+                  isLoading = true;
+                } else if (state is NewsLoadError) {
+                  return SingleChildScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    child: Center(
+                      child: Text(
+                        'Произошла ошибка при загрузке новостей.',
+                        textAlign: TextAlign.center,
+                        style: DarkTextTheme.title,
+                      ),
+                    ),
+                  );
+                }
+                return ListView.builder(
+                  physics: AlwaysScrollableScrollPhysics(),
+                  itemBuilder: (context, index) {
+                    if (index < news.length) {
+                      return NewsItemWidget(newsItem: news[index]);
+                    } else {
+                      Timer(Duration(milliseconds: 30), () {
+                        _scrollController
+                            .jumpTo(_scrollController.position.maxScrollExtent);
+                      });
+                      return Center(child: CircularProgressIndicator());
+                    }
+                  },
+                  itemCount: news.length + (isLoading ? 1 : 0),
                 );
-              } else if (state is NewsLoading) {
-                news = state.oldNews;
-                isLoading = true;
-              } else if (state is NewsLoadError) {
-                return Center(
-                  child: Text(
-                    'Произошла ошибка при загрузке новостей.',
-                    style: DarkTextTheme.title,
-                  ),
-                );
-              }
-
-              return ListView.builder(
-                controller: _scrollController,
-                itemBuilder: (context, index) {
-                  if (index < news.length) {
-                    return NewsItemWidget(newsItem: news[index]);
-                  } else {
-                    Timer(Duration(milliseconds: 30), () {
-                      _scrollController
-                          .jumpTo(_scrollController.position.maxScrollExtent);
-                    });
-                    return Center(child: CircularProgressIndicator());
-                  }
-                },
-                itemCount: news.length + (isLoading ? 1 : 0),
-              );
-            },
+              },
+            ),
           ),
-        ),
-      ]),
+        ]),
+      ),
     );
   }
 
