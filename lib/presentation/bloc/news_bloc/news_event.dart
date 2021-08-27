@@ -9,4 +9,8 @@ abstract class NewsEvent extends Equatable {
 
 class NewsLoadTagsEvent extends NewsEvent {}
 
-class NewsLoadEvent extends NewsEvent {}
+class NewsLoadEvent extends NewsEvent {
+  final bool? refresh;
+
+  NewsLoadEvent({this.refresh});
+}

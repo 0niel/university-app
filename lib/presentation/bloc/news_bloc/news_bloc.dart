@@ -26,6 +26,12 @@ class NewsBloc extends Bloc<NewsEvent, NewsState> {
     NewsEvent event,
   ) async* {
     if (event is NewsLoadEvent) {
+      final bool refresh = event.refresh ?? false;
+      if (refresh) {
+        _isFirstFetch = true;
+        _offset = 0;
+      }
+
       List<String> tagsList = [];
       List<NewsItem> oldNews = [];
 
