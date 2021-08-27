@@ -1,15 +1,18 @@
+import 'package:clock/clock.dart';
+
 class Calendar {
   /// Максимальное количество учебных недель в семестре
   static const int kMaxWeekInSemester = 17;
 
   /// Возвращает текущий день недели, где 1 - ПН, 7 - ВС
-  static int getCurrentDayOfWeek() {
-    return DateTime.now().weekday;
+  static int getCurrentDayOfWeek({final Clock clock = const Clock()}) {
+    return clock.now().weekday;
   }
 
   /// Возвращает номер текущей недели, импользуя текущую дату
-  static int getCurrentWeek([DateTime? mCurrentDate]) {
-    DateTime currentDate = mCurrentDate ?? DateTime.now();
+  static int getCurrentWeek(
+      {DateTime? mCurrentDate, final Clock clock = const Clock()}) {
+    DateTime currentDate = mCurrentDate ?? clock.now();
     int currentYear = currentDate.year;
 
     DateTime startDate;
@@ -39,7 +42,7 @@ class Calendar {
   static List<DateTime> getDaysInWeek(int week, [DateTime? mCurrentDate]) {
     List<DateTime> daysInWeek = [];
 
-    DateTime semStart = getSemesterStart(mCurrentDate);
+    DateTime semStart = getSemesterStart(mCurrentDate: mCurrentDate);
 
     // Понедельник недели начала семестра
     var firstDayOfWeek =
@@ -63,8 +66,10 @@ class Calendar {
   /// для которой будет рассчитано начало семестра.
   ///
   /// Если оставить null, функция вернёт начало семестра для текущей даты.
-  static DateTime getSemesterStart([DateTime? mCurrentDate]) {
-    return _CurrentSemesterStart.getCurrentSemesterStart(mCurrentDate);
+  static DateTime getSemesterStart(
+      {DateTime? mCurrentDate, final Clock clock = const Clock()}) {
+    return _CurrentSemesterStart.getCurrentSemesterStart(
+        mCurrentDate: mCurrentDate, clock: clock);
   }
 }
 
@@ -101,8 +106,9 @@ class _CurrentSemesterStart {
   }
 
   /// Получить дату начала текущего семестра
-  static DateTime getCurrentSemesterStart([DateTime? mCurrentDate]) {
-    DateTime currentDate = mCurrentDate ?? DateTime.now();
+  static DateTime getCurrentSemesterStart(
+      {DateTime? mCurrentDate, final Clock clock = const Clock()}) {
+    DateTime currentDate = mCurrentDate ?? clock.now();
     // ожидаемая дата начала семестра
     DateTime expectedStart = _getExpectedSemesterStart(currentDate);
     // скорректировать на случай, если она попала на выходной день
