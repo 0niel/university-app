@@ -7,86 +7,109 @@ import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 
 class GroupTextFormatter extends TextInputFormatter {
+  GroupTextFormatter();
+
   @override
   TextEditingValue formatEditUpdate(
       TextEditingValue oldValue, TextEditingValue newValue) {
-    String newText = newValue.text.toUpperCase();
-    // if (oldValue.text.length == 3 && newValue.text.length == 4) {
-    //   newValue.text += '-';
-    // } else if (oldValue.text.length == 6 && newValue.text.length == 7) {
-    //   newText += '-';
-    // }
+    String newText = newValue.text;
 
-    return TextEditingValue(
+    if (oldValue.text.length == 3 && newValue.text.length == 4) {
+      newText += '-';
+    } else if (oldValue.text.length == 6 && newValue.text.length == 7) {
+      newText += '-';
+    }
+
+    return newValue.copyWith(
       text: newText,
-      selection: newText.length != newValue.text.length
-          ? TextSelection.collapsed(offset: newText.length)
-          : newValue.selection,
+      selection: TextSelection.collapsed(offset: newText.length),
     );
   }
 }
 
-TextEditingController inputController = TextEditingController();
-
-class AutocompleteGroupSelector extends StatelessWidget {
-  const AutocompleteGroupSelector({Key? key, required this.groupsList})
+class AutocompleteGroupSelector extends StatefulWidget {
+  AutocompleteGroupSelector({Key? key, required this.groupsList})
       : super(key: key);
 
   final List<String> groupsList;
+  @override
+  _AutocompleteGroupSelectorState createState() =>
+      _AutocompleteGroupSelectorState();
+}
+
+class _AutocompleteGroupSelectorState extends State<AutocompleteGroupSelector> {
+  final TextInputType _keyboardType = TextInputType.text;
+  late TextEditingController _inputController;
+
+  @override
+  void initState() {
+    _inputController = TextEditingController();
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _inputController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<ScheduleBloc, ScheduleState>(
-      builder: (context, state) => TypeAheadField(
-        hideOnError: false,
-        textFieldConfiguration: TextFieldConfiguration(
-          controller: inputController,
-          autofocus: false,
-          style: DarkTextTheme.titleM,
-          autocorrect: false,
-          keyboardType: TextInputType.text,
-          inputFormatters: [
-            GroupTextFormatter(),
-          ],
-          decoration: InputDecoration(
-            errorText: state is ScheduleGroupNotFound
-                ? 'заданная группа не найдена'
-                : null,
-            hintText: 'АБВГ-12-34',
-            hintStyle:
-                DarkTextTheme.titleM.copyWith(color: DarkThemeColors.deactive),
-            focusedBorder: UnderlineInputBorder(
-              borderSide: BorderSide(color: DarkThemeColors.colorful05),
+        buildWhen: (prevState, currentState) => prevState != currentState,
+        builder: (context, state) {
+          return TypeAheadField(
+            hideOnError: false,
+            textFieldConfiguration: TextFieldConfiguration(
+              focusNode: FocusNode(),
+              controller: _inputController,
+              autofocus: false,
+              style: DarkTextTheme.titleM,
+              keyboardType: _keyboardType,
+              autocorrect: false,
+              textCapitalization: TextCapitalization.characters,
+              inputFormatters: [
+                GroupTextFormatter(),
+              ],
+              decoration: InputDecoration(
+                errorText: state is ScheduleGroupNotFound
+                    ? 'заданная группа не найдена'
+                    : null,
+                hintText: 'АБВГ-12-34',
+                hintStyle: DarkTextTheme.titleM
+                    .copyWith(color: DarkThemeColors.deactive),
+                focusedBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(color: DarkThemeColors.colorful05),
+                ),
+              ),
             ),
-          ),
-        ),
-        itemBuilder: (context, suggestion) => Container(
-          color: DarkThemeColors.background03,
-          child: Padding(
-            padding: EdgeInsets.all(4.0),
-            child: Text(suggestion.toString()),
-          ),
-        ),
-        noItemsFoundBuilder: (context) => Container(
-          alignment: Alignment.center,
-          color: DarkThemeColors.background03,
-          child: Text('Группы не найдены', style: DarkTextTheme.titleM),
-        ),
-        suggestionsCallback: (search) async {
-          context.read<ScheduleBloc>().add(ScheduleUpdateGroupSuggestionEvent(
-              suggestion: search.toUpperCase()));
-          return groupsList
-              .where(
-                  (group) => group.toUpperCase().contains(search.toUpperCase()))
-              .toList();
-        },
-        onSuggestionSelected: (String suggestion) {
-          inputController.text = suggestion;
-          context
-              .read<ScheduleBloc>()
-              .add(ScheduleUpdateGroupSuggestionEvent(suggestion: suggestion));
-        },
-      ),
-    );
+            itemBuilder: (context, suggestion) => Container(
+              color: DarkThemeColors.background03,
+              child: Padding(
+                padding: EdgeInsets.all(4.0),
+                child: Text(suggestion.toString()),
+              ),
+            ),
+            noItemsFoundBuilder: (context) => Container(
+              alignment: Alignment.center,
+              color: DarkThemeColors.background03,
+              child: Text('Группы не найдены', style: DarkTextTheme.titleM),
+            ),
+            suggestionsCallback: (search) async {
+              context.read<ScheduleBloc>().add(
+                  ScheduleUpdateGroupSuggestionEvent(
+                      suggestion: search.toUpperCase()));
+              return widget.groupsList
+                  .where((group) =>
+                      group.toUpperCase().contains(search.toUpperCase()))
+                  .toList();
+            },
+            onSuggestionSelected: (String suggestion) {
+              _inputController.text = suggestion;
+              context.read<ScheduleBloc>().add(
+                  ScheduleUpdateGroupSuggestionEvent(suggestion: suggestion));
+            },
+          );
+        });
   }
 }
