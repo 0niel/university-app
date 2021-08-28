@@ -39,6 +39,21 @@ class ScheduleRepositoryImpl implements ScheduleRepository {
     }
   }
 
+  Future<Either<Failure, Schedule>> _tryGetLocalSchedule(String group) async {
+    try {
+      final localSchedule = await localDataSource.getScheduleFromCache();
+      for (var schedule in localSchedule) {
+        if (schedule.group == group) {
+          return Right(schedule);
+        }
+      }
+      // If the group is not downloaded
+      return Left(CacheFailure());
+    } on CacheException {
+      return Left(CacheFailure());
+    }
+  }
+
   @override
   Future<Either<Failure, Schedule>> getSchedule(String group) async {
     if (await connectionChecker.hasConnection) {
@@ -65,21 +80,14 @@ class ScheduleRepositoryImpl implements ScheduleRepository {
         }
         return Right(schedule);
       } on ServerException {
+        // If we have a ServerException, but we have an internet connection,
+        // we can try to get the schedule from the local storage
+        final localSchedule = await _tryGetLocalSchedule(group);
+        if (localSchedule.isRight()) return localSchedule;
         return Left(ServerFailure());
       }
     } else {
-      try {
-        final localSchedule = await localDataSource.getScheduleFromCache();
-        for (var schedule in localSchedule) {
-          if (schedule.group == group) {
-            return Right(schedule);
-          }
-        }
-        // If the group is not downloaded
-        return Left(CacheFailure());
-      } on CacheException {
-        return Left(CacheFailure());
-      }
+      return await _tryGetLocalSchedule(group);
     }
   }
 
