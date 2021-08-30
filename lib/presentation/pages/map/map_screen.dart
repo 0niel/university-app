@@ -6,6 +6,7 @@ import 'package:material_floating_search_bar/material_floating_search_bar.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:rtu_mirea_app/presentation/bloc/map_cubit/map_cubit.dart';
 import 'package:rtu_mirea_app/presentation/colors.dart';
+import 'package:rtu_mirea_app/presentation/pages/map/widgets/map_scaling_button.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:implicitly_animated_reorderable_list/implicitly_animated_reorderable_list.dart';
 import 'package:implicitly_animated_reorderable_list/transitions.dart';
@@ -23,9 +24,16 @@ class MapScreen extends StatefulWidget {
 class _MapScreenState extends State<MapScreen> {
   void initState() {
     super.initState();
+    _controller.outputStateStream
+        .listen((value) => context.read<MapCubit>().setMapScale(value.scale ?? maxScale));
   }
 
   var _controller = PhotoViewController();
+  var _scaleController = PhotoViewScaleStateController();
+
+  final maxScale = 20.0;
+  final defaultScale = 3.0;
+  final minScale = 1.0;
 
   final floors = [
     SvgPicture.asset('assets/map/floor_0.svg'),
@@ -46,6 +54,13 @@ class _MapScreenState extends State<MapScreen> {
             color: DarkThemeColors.background01,
           ),
           _buildMap(),
+          Align(
+            alignment: Alignment.bottomLeft,
+            child: Padding(
+              padding: EdgeInsets.only(left: 70, bottom: 16),
+              child: _buildScalingButton(),
+            )
+          ),
           // uncomment when this is completed
           //_buildSearchBar(),
           Align(
@@ -126,10 +141,31 @@ class _MapScreenState extends State<MapScreen> {
     return BlocBuilder<MapCubit, MapState>(
       builder: (context, state) => PhotoView.customChild(
         controller: _controller,
-        initialScale: 2.0,
+        scaleStateController: _scaleController,
+        initialScale: defaultScale,
+        maxScale: maxScale,
+        minScale: minScale,
         child: floors[state.floor],
         backgroundDecoration:
             BoxDecoration(color: DarkThemeColors.background01),
+      ),
+    );
+  }
+
+  Widget _buildScalingButton() {
+    return Container(
+      decoration: BoxDecoration(
+        color: DarkThemeColors.background02,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: MapScalingButton(
+        onClick: () => {
+          _scaleController.scaleState = PhotoViewScaleState.originalSize,
+          context.read<MapCubit>().setMapScale(_controller.scale ?? minScale)
+        },
+        minScale: minScale,
+        maxScale: maxScale,
+        controller: _controller,
       ),
     );
   }
