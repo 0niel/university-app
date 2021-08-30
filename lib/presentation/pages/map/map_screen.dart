@@ -166,7 +166,7 @@ class _MapScreenState extends State<MapScreen> {
       ),
       child: MapScalingButton(
         onClick: () => {
-          _scaleController.scaleState = PhotoViewScaleState.originalSize,
+          _scaleController.scaleState = PhotoViewScaleState.initial,
           context.read<MapCubit>().setMapScale(_controller.scale ?? minScale)
         },
         minScale: minScale,
