@@ -24,6 +24,12 @@ class MapScreen extends StatefulWidget {
 class _MapScreenState extends State<MapScreen> {
   void initState() {
     super.initState();
+    _controller.initial = PhotoViewControllerValue(
+        position: _controller.position,
+        rotation: _controller.rotation,
+        rotationFocusPoint: _controller.rotationFocusPoint,
+        scale: defaultScale,
+    );
     _controller.outputStateStream
         .listen((value) => context.read<MapCubit>().setMapScale(value.scale ?? maxScale));
   }
@@ -165,6 +171,7 @@ class _MapScreenState extends State<MapScreen> {
         },
         minScale: minScale,
         maxScale: maxScale,
+        defaultScale: defaultScale,
         controller: _controller,
       ),
     );
