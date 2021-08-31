@@ -7,6 +7,7 @@ import 'package:rtu_mirea_app/domain/entities/schedule.dart';
 import 'package:rtu_mirea_app/presentation/bloc/schedule_bloc/schedule_bloc.dart';
 import 'package:rtu_mirea_app/presentation/colors.dart';
 import 'package:rtu_mirea_app/presentation/pages/schedule/widgets/schedule_settings_modal.dart';
+import 'package:rtu_mirea_app/presentation/widgets/settings_switch_button.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'widgets/schedule_page_view.dart';
 
@@ -28,8 +29,6 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
   void initState() {
     super.initState();
   }
-
-  ValueNotifier<bool> _switchValueNotifier = ValueNotifier(false);
 
   Widget _buildGroupButton(String group, String activeGroup, bool isActive,
       [Schedule? schedule]) {
@@ -147,49 +146,6 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                   style: DarkTextTheme.h6,
                 ),
               ),
-              // Column(
-              //   children: [
-              //     Row(
-              //       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              //       children: [
-              //         Row(
-              //           children: [
-              //             SvgPicture.asset(
-              //               'assets/icons/lessons.svg',
-              //               height: 16,
-              //               width: 16,
-              //             ),
-              //             SizedBox(width: 20),
-              //             Text("Пустые пары", style: DarkTextTheme.buttonL),
-              //           ],
-              //         ),
-              //         Padding(
-              //           padding: EdgeInsets.only(right: 8),
-              //           child: ValueListenableBuilder(
-              //             valueListenable: _switchValueNotifier,
-              //             builder: (context, hasError, child) =>
-              //                 CupertinoSwitch(
-              //               activeColor: DarkThemeColors.primary,
-              //               value: _switchValueNotifier.value,
-              //               onChanged: (value) {
-              //                 _switchValueNotifier.value = value;
-              //               },
-              //             ),
-              //           ),
-              //         ),
-              //       ],
-              //     ),
-              //     SizedBox(height: 20),
-              //     Opacity(
-              //       opacity: 0.05,
-              //       child: Container(
-              //         width: double.infinity,
-              //         height: 1,
-              //         color: Colors.white,
-              //       ),
-              //     ),
-              //   ],
-              // ),
               BlocBuilder<ScheduleBloc, ScheduleState>(
                   buildWhen: (prevState, currentState) {
                 if (currentState is ScheduleLoaded &&
@@ -207,6 +163,36 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        SettingsSwitchButton(
+                          initialValue: state.scheduleSettings.showEmptyLessons,
+                          svgPicture: SvgPicture.asset(
+                            'assets/icons/lessons.svg',
+                            height: 16,
+                            width: 16,
+                          ),
+                          text: "Пустые пары",
+                          onChanged: (value) {
+                            context.read<ScheduleBloc>().add(
+                                ScheduleUpdateSettingsEvent(
+                                    showEmptyLessons: value));
+                          },
+                        ),
+                        SizedBox(height: 10),
+                        SettingsSwitchButton(
+                          initialValue:
+                              state.scheduleSettings.showLessonsNumbers,
+                          svgPicture: SvgPicture.asset(
+                            'assets/icons/number.svg',
+                            height: 16,
+                            width: 16,
+                          ),
+                          text: "Номера пар",
+                          onChanged: (value) {
+                            context.read<ScheduleBloc>().add(
+                                ScheduleUpdateSettingsEvent(
+                                    showLesonsNums: value));
+                          },
+                        ),
                         Material(
                           color: Colors.transparent,
                           child: InkWell(
@@ -306,9 +292,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
           child: BlocBuilder<ScheduleBloc, ScheduleState>(
             buildWhen: (prevState, currentState) {
               if (prevState is ScheduleLoaded && currentState is ScheduleLoaded)
-                return prevState.schedule != currentState.schedule
-                    ? true
-                    : false;
+                return prevState != currentState;
               return true;
             },
             builder: (context, state) {
@@ -331,7 +315,6 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                     this._modalShown = true;
                   },
                 );
-
                 return Container();
               } else if (state is ScheduleLoading) {
                 if (_modalShown) {

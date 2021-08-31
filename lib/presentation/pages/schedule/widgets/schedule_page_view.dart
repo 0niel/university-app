@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:rtu_mirea_app/common/calendar.dart';
 import 'package:rtu_mirea_app/domain/entities/lesson.dart';
 import 'package:rtu_mirea_app/domain/entities/schedule.dart';
+import 'package:rtu_mirea_app/domain/entities/schedule_settings.dart';
+import 'package:rtu_mirea_app/presentation/bloc/schedule_bloc/schedule_bloc.dart';
 import 'package:rtu_mirea_app/presentation/colors.dart';
+import 'package:rtu_mirea_app/presentation/pages/schedule/widgets/empty_lesson_card.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/intl.dart';
@@ -72,26 +76,93 @@ class _SchedulePageViewState extends State<SchedulePageView> {
     );
   }
 
+  List<Lesson> _getLessonsWithEmpty(List<Lesson> lessons, String group) {
+    List<Lesson> formattedLessons = [];
+    if (ScheduleBloc.isCollegeGroup(group)) {
+      ScheduleBloc.collegeTimesStart.forEach((key, value) {
+        bool notEmpty = false;
+        for (final lesson in lessons) {
+          if (lesson.timeStart == key) {
+            formattedLessons.add(lesson);
+            notEmpty = true;
+          }
+        }
+        if (notEmpty == false) {
+          formattedLessons.add(
+            Lesson(
+              name: '',
+              rooms: [],
+              timeStart: key,
+              timeEnd: ScheduleBloc.collegeTimesEnd.keys.toList()[value - 1],
+              weeks: [],
+              types: '',
+              teachers: [],
+            ),
+          );
+        }
+      });
+    } else {
+      ScheduleBloc.universityTimesStart.forEach((key, value) {
+        bool notEmpty = false;
+        for (final lesson in lessons) {
+          if (lesson.timeStart == key) {
+            formattedLessons.add(lesson);
+            notEmpty = true;
+          }
+        }
+        if (notEmpty == false) {
+          formattedLessons.add(
+            Lesson(
+              name: '',
+              rooms: [],
+              timeStart: key,
+              timeEnd: ScheduleBloc.universityTimesEnd.keys.toList()[value - 1],
+              weeks: [],
+              types: '',
+              teachers: [],
+            ),
+          );
+        }
+      });
+    }
+    lessons = formattedLessons;
+    return lessons;
+  }
+
   Widget _buildPageViewContent(BuildContext context, int index) {
     if (index == 6) {
       return _buildEmptyLessons();
     } else {
-      final lessons = _allLessonsInWeek[index];
+      var lessons = _allLessonsInWeek[index];
+
       if (lessons.length == 0) return _buildEmptyLessons();
+
+      final state =
+          (BlocProvider.of<ScheduleBloc>(context).state as ScheduleLoaded);
+      final ScheduleSettings settings = state.scheduleSettings;
+      if (settings.showEmptyLessons) {
+        lessons = _getLessonsWithEmpty(lessons, state.activeGroup);
+      }
+
       return Container(
         child: ListView.separated(
           itemCount: lessons.length,
           itemBuilder: (context, i) {
             return Padding(
               padding: EdgeInsets.symmetric(horizontal: 24),
-              child: LessonCard(
-                name: lessons[i].name,
-                timeStart: lessons[i].timeStart,
-                timeEnd: lessons[i].timeEnd,
-                room: '${lessons[i].rooms.join(', ')}',
-                type: lessons[i].types,
-                teacher: '${lessons[i].teachers.join(', ')}',
-              ),
+              child: lessons[i].name.replaceAll(' ', '') != ''
+                  ? LessonCard(
+                      name: lessons[i].name,
+                      timeStart: lessons[i].timeStart,
+                      timeEnd: lessons[i].timeEnd,
+                      room: '${lessons[i].rooms.join(', ')}',
+                      type: lessons[i].types,
+                      teacher: '${lessons[i].teachers.join(', ')}',
+                    )
+                  : EmptyLessonCard(
+                      timeStart: lessons[i].timeStart,
+                      timeEnd: lessons[i].timeEnd,
+                    ),
             );
           },
           separatorBuilder: (context, index) {

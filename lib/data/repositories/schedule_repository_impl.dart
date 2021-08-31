@@ -5,7 +5,9 @@ import 'package:rtu_mirea_app/common/errors/failures.dart';
 import 'package:rtu_mirea_app/data/datasources/schedule_local.dart';
 import 'package:rtu_mirea_app/data/datasources/schedule_remote.dart';
 import 'package:rtu_mirea_app/data/models/schedule_model.dart';
+import 'package:rtu_mirea_app/data/models/schedule_settings_model.dart';
 import 'package:rtu_mirea_app/domain/entities/schedule.dart';
+import 'package:rtu_mirea_app/domain/entities/schedule_settings.dart';
 import 'package:rtu_mirea_app/domain/repositories/schedule_repository.dart';
 
 class ScheduleRepositoryImpl implements ScheduleRepository {
@@ -130,5 +132,25 @@ class ScheduleRepositoryImpl implements ScheduleRepository {
     } on CacheException {
       return;
     }
+  }
+
+  @override
+  Future<ScheduleSettings> getSettings() async {
+    try {
+      final localSettings = await localDataSource.getSettingsFromCache();
+      return localSettings;
+    } on CacheException {
+      final newLocalSettings = ScheduleSettingsModel(
+          showEmptyLessons: false, showLessonsNumbers: false);
+      await localDataSource.setSettingsToCache(newLocalSettings);
+      return newLocalSettings;
+    }
+  }
+
+  @override
+  Future<void> setSettings(ScheduleSettings settings) async {
+    localDataSource.setSettingsToCache(ScheduleSettingsModel(
+        showEmptyLessons: settings.showEmptyLessons,
+        showLessonsNumbers: settings.showLessonsNumbers));
   }
 }
