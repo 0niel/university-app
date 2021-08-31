@@ -177,22 +177,22 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                                     showEmptyLessons: value));
                           },
                         ),
-                        SizedBox(height: 10),
-                        SettingsSwitchButton(
-                          initialValue:
-                              state.scheduleSettings.showLessonsNumbers,
-                          svgPicture: SvgPicture.asset(
-                            'assets/icons/number.svg',
-                            height: 16,
-                            width: 16,
-                          ),
-                          text: "Номера пар",
-                          onChanged: (value) {
-                            context.read<ScheduleBloc>().add(
-                                ScheduleUpdateSettingsEvent(
-                                    showLesonsNums: value));
-                          },
-                        ),
+                        // SizedBox(height: 10),
+                        // SettingsSwitchButton(
+                        //   initialValue:
+                        //       state.scheduleSettings.showLessonsNumbers,
+                        //   svgPicture: SvgPicture.asset(
+                        //     'assets/icons/number.svg',
+                        //     height: 16,
+                        //     width: 16,
+                        //   ),
+                        //   text: "Номера пар",
+                        //   onChanged: (value) {
+                        //     context.read<ScheduleBloc>().add(
+                        //         ScheduleUpdateSettingsEvent(
+                        //             showLesonsNums: value));
+                        //   },
+                        // ),
                         Material(
                           color: Colors.transparent,
                           child: InkWell(
