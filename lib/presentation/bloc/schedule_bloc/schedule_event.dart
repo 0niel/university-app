@@ -64,3 +64,11 @@ class ScheduleDeleteEvent extends ScheduleEvent {
   @override
   List<Object> get props => [group, schedule];
 }
+
+class ScheduleUpdateSettingsEvent extends ScheduleEvent {
+  const ScheduleUpdateSettingsEvent(
+      {this.showEmptyLessons, this.showLesonsNums});
+
+  final bool? showEmptyLessons;
+  final bool? showLesonsNums;
+}
