@@ -74,7 +74,7 @@ class LessonCard extends StatelessWidget {
                   Text(
                     room != '' ? '$name, $room' : '$name',
                     style: DarkTextTheme.titleM,
-                    maxLines: 5,
+                    maxLines: 8,
                     overflow: TextOverflow.ellipsis,
                   ),
                   SizedBox(
