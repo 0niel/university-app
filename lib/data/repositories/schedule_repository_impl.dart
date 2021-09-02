@@ -141,7 +141,10 @@ class ScheduleRepositoryImpl implements ScheduleRepository {
       return localSettings;
     } on CacheException {
       final newLocalSettings = ScheduleSettingsModel(
-          showEmptyLessons: false, showLessonsNumbers: false);
+        showEmptyLessons: false,
+        showLessonsNumbers: false,
+        calendarFormat: 2,
+      );
       await localDataSource.setSettingsToCache(newLocalSettings);
       return newLocalSettings;
     }
@@ -150,7 +153,9 @@ class ScheduleRepositoryImpl implements ScheduleRepository {
   @override
   Future<void> setSettings(ScheduleSettings settings) async {
     localDataSource.setSettingsToCache(ScheduleSettingsModel(
-        showEmptyLessons: settings.showEmptyLessons,
-        showLessonsNumbers: settings.showLessonsNumbers));
+      showEmptyLessons: settings.showEmptyLessons,
+      showLessonsNumbers: settings.showLessonsNumbers,
+      calendarFormat: settings.calendarFormat,
+    ));
   }
 }

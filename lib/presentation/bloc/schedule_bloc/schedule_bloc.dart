@@ -154,6 +154,7 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
             event.showEmptyLessons ?? oldSettings.showEmptyLessons,
         showLessonsNumbers:
             event.showEmptyLessons ?? oldSettings.showLessonsNumbers,
+        calendarFormat: event.calendarFormat ?? oldSettings.calendarFormat,
       );
 
       await setScheduleSettings(SetScheduleSettingsParams(newSettings));
