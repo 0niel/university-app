@@ -27,7 +27,7 @@ class _SchedulePageViewState extends State<SchedulePageView> {
   late DateTime _selectedDay;
   late final PageController _controller;
 
-  CalendarFormat _calendarFormat = CalendarFormat.week;
+  late CalendarFormat _calendarFormat;
   DateTime _focusedDay = DateTime.now();
 
   final DateTime _firstCalendarDay = Calendar.getSemesterStart();
@@ -46,6 +46,10 @@ class _SchedulePageViewState extends State<SchedulePageView> {
     _selectedDay = DateTime.now();
     _selectedWeek = Calendar.getCurrentWeek();
     _allLessonsInWeek = _getLessonsByWeek(_selectedWeek, widget.schedule);
+    _calendarFormat = CalendarFormat.values[
+        (BlocProvider.of<ScheduleBloc>(context).state as ScheduleLoaded)
+            .scheduleSettings
+            .calendarFormat];
   }
 
   List<List<Lesson>> _getLessonsByWeek(int week, Schedule schedule) {
@@ -278,6 +282,10 @@ class _SchedulePageViewState extends State<SchedulePageView> {
           },
           onFormatChanged: (format) {
             if (_calendarFormat != format) {
+              // update settings in local data
+              BlocProvider.of<ScheduleBloc>(context).add(
+                  ScheduleUpdateSettingsEvent(calendarFormat: format.index));
+
               // Call `setState()` when updating calendar format
               setState(() {
                 _calendarFormat = format;
