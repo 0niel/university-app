@@ -78,7 +78,7 @@ class NewsScreen extends StatelessWidget {
                   );
                 }
                 return ListView.builder(
-                  physics: AlwaysScrollableScrollPhysics(),
+                  controller: _scrollController,
                   itemBuilder: (context, index) {
                     if (index < news.length) {
                       return NewsItemWidget(newsItem: news[index]);
