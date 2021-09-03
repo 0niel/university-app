@@ -4,9 +4,11 @@ import 'package:rtu_mirea_app/data/models/lesson_model.dart';
 import 'package:rtu_mirea_app/domain/entities/schedule.dart';
 
 class ScheduleModel extends Schedule {
-  ScheduleModel({required this.group, required this.schedule})
-      : super(group: group, schedule: schedule);
+  ScheduleModel(
+      {required this.isRemote, required this.group, required this.schedule})
+      : super(isRemote: isRemote, group: group, schedule: schedule);
 
+  final bool isRemote;
   final String group;
   final Map<String, ScheduleWeekdayValueModel> schedule;
 
@@ -16,6 +18,7 @@ class ScheduleModel extends Schedule {
   String toRawJson() => json.encode(toJson());
 
   factory ScheduleModel.fromJson(Map<String, dynamic> json) => ScheduleModel(
+        isRemote: json.containsKey("remote") ? json["remote"] : false,
         group: json["group"],
         schedule: Map.from(json["schedule"]).map((k, v) =>
             MapEntry<String, ScheduleWeekdayValueModel>(

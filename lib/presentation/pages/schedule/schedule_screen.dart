@@ -31,8 +31,8 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
 
   ValueNotifier<bool> _switchValueNotifier = ValueNotifier(false);
 
-  Widget _buildGroupButton(String group, String activeGroup, bool isActive,
-      [Schedule? schedule]) {
+  Widget _buildGroupButton(
+      String group, String activeGroup, bool isActive, Schedule schedule) {
     if (isActive) {
       return Padding(
         padding: EdgeInsets.only(bottom: 10),
@@ -53,7 +53,10 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                       context.read<ScheduleBloc>().add(ScheduleUpdateEvent(
                           group: group, activeGroup: activeGroup));
                     },
-                    child: const Icon(Icons.refresh_rounded),
+                    child: Icon(Icons.refresh_rounded,
+                        color: schedule.isRemote
+                            ? DarkThemeColors.colorful05
+                            : DarkThemeColors.colorful07),
                     shape: CircleBorder(),
                     constraints:
                         const BoxConstraints(minWidth: 36.0, minHeight: 36.0),
@@ -109,7 +112,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                   RawMaterialButton(
                     onPressed: () {
                       context.read<ScheduleBloc>().add(ScheduleDeleteEvent(
-                          group: group, schedule: schedule!));
+                          group: group, schedule: schedule));
                     },
                     child: const Icon(Icons.delete_rounded),
                     shape: CircleBorder(),
@@ -196,7 +199,9 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                     prevState is ScheduleLoaded) {
                   if (prevState.activeGroup != currentState.activeGroup ||
                       prevState.downloadedScheduleGroups !=
-                          currentState.downloadedScheduleGroups) return true;
+                          currentState.downloadedScheduleGroups ||
+                      prevState.schedule.isRemote !=
+                          currentState.schedule.isRemote) return true;
                 }
                 if (currentState is ScheduleLoaded &&
                     prevState.runtimeType != ScheduleLoaded) return true;
@@ -261,7 +266,11 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                         ),
                         SizedBox(height: 10),
                         _buildGroupButton(
-                            state.activeGroup, state.activeGroup, true),
+                          state.activeGroup,
+                          state.activeGroup,
+                          true,
+                          state.schedule,
+                        ),
                         Expanded(
                           child: ListView.builder(
                             itemCount: state.downloadedScheduleGroups.length,
@@ -269,10 +278,11 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                               if (state.downloadedScheduleGroups[index] !=
                                   state.activeGroup)
                                 return _buildGroupButton(
-                                    state.downloadedScheduleGroups[index],
-                                    state.activeGroup,
-                                    false,
-                                    state.schedule);
+                                  state.downloadedScheduleGroups[index],
+                                  state.activeGroup,
+                                  false,
+                                  state.schedule,
+                                );
                               return Container();
                             },
                           ),
