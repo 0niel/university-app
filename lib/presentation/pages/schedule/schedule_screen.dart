@@ -56,7 +56,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                     child: Icon(Icons.refresh_rounded,
                         color: schedule.isRemote
                             ? DarkThemeColors.colorful05
-                            : DarkThemeColors.colorful07),
+                            : DarkThemeColors.colorful06),
                     shape: CircleBorder(),
                     constraints:
                         const BoxConstraints(minWidth: 36.0, minHeight: 36.0),
@@ -68,7 +68,10 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: DarkThemeColors.colorful05,
+              width: 1.5,
+              color: schedule.isRemote
+                  ? DarkThemeColors.colorful05
+                  : DarkThemeColors.colorful06,
             ),
           ),
         ),
