@@ -102,11 +102,14 @@ class AboutAppPage extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  SocialIconButton(AssetImage('assets/icons/github.png'), () {
+                  SocialIconButton(const AssetImage('assets/icons/github.png'),
+                      () {
                     launch(
                         'https://github.com/Ninja-Official/rtu-mirea-mobile');
                   }),
-                  SocialIconButton(AssetImage('assets/icons/telegram.png'), () {
+                  const SizedBox(width: 12),
+                  SocialIconButton(
+                      const AssetImage('assets/icons/telegram.png'), () {
                     launch('https://t.me/joinchat/LyM7jcoRXUhmOGM6');
                   }),
                 ],
