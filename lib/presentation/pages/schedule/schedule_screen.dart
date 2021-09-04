@@ -29,8 +29,6 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
     super.initState();
   }
 
-  ValueNotifier<bool> _switchValueNotifier = ValueNotifier(false);
-
   Widget _buildGroupButton(
       String group, String activeGroup, bool isActive, Schedule schedule) {
     if (isActive) {
