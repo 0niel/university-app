@@ -29,8 +29,8 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
     super.initState();
   }
 
-  Widget _buildGroupButton(
-      String group, String activeGroup, bool isActive, Schedule schedule) {
+  Widget _buildGroupButton(String group, String activeGroup, bool isActive,
+      [Schedule? schedule]) {
     if (isActive) {
       return Padding(
         padding: EdgeInsets.only(bottom: 10),
@@ -52,7 +52,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                           group: group, activeGroup: activeGroup));
                     },
                     child: Icon(Icons.refresh_rounded,
-                        color: schedule.isRemote
+                        color: schedule!.isRemote
                             ? DarkThemeColors.colorful05
                             : DarkThemeColors.colorful06),
                     shape: CircleBorder(),
@@ -113,7 +113,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                   RawMaterialButton(
                     onPressed: () {
                       context.read<ScheduleBloc>().add(ScheduleDeleteEvent(
-                          group: group, schedule: schedule));
+                          group: group, schedule: schedule!));
                     },
                     child: const Icon(Icons.delete_rounded),
                     shape: CircleBorder(),
