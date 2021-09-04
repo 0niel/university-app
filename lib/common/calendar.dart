@@ -1,6 +1,6 @@
 import 'package:clock/clock.dart';
 
-class Calendar {
+abstract class Calendar {
   /// Maximum number of academic weeks per semester
   static const int kMaxWeekInSemester = 16;
 
@@ -83,7 +83,7 @@ class Calendar {
 }
 
 /// Get the date when the semester begins
-class _CurrentSemesterStart {
+abstract class _CurrentSemesterStart {
   /// Get the first Monday of the month from which the current semester begins
   static DateTime _getFirstMondayOfMonth(int year, int month) {
     var firstOfMonth = DateTime(year, month, 1);

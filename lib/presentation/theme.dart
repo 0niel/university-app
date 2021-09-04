@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:rtu_mirea_app/presentation/colors.dart';
 
-class DarkTextTheme {
+abstract class DarkTextTheme {
   static const headline = TextStyle(
     color: Colors.white,
     fontFamily: "Montserrat",

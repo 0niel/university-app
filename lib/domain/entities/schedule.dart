@@ -4,15 +4,17 @@ import 'lesson.dart';
 
 class Schedule extends Equatable {
   const Schedule({
+    required this.isRemote,
     required this.group,
     required this.schedule,
   });
 
+  final bool isRemote;
   final String group;
   final Map<String, ScheduleWeekdayValue> schedule;
 
   @override
-  List<Object?> get props => [group, schedule];
+  List<Object?> get props => [isRemote, group, schedule];
 }
 
 class ScheduleWeekdayValue extends Equatable {

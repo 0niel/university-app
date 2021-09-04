@@ -39,7 +39,9 @@ class ScheduleRemoteDataImpl implements ScheduleRemoteData {
       final response =
           await httpClient.get(_API_BASE_URL + 'schedule/$group/full_schedule');
       if (response.statusCode == 200) {
-        return ScheduleModel.fromJson(response.data);
+        final data = response.data as Map<String, dynamic>;
+        data["remote"] = true;
+        return ScheduleModel.fromJson(data);
       } else {
         throw ServerException('Response status code is $response.statusCode');
       }
