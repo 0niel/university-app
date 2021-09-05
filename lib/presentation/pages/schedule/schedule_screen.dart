@@ -46,7 +46,23 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                 style: DarkTextTheme.buttonL,
               ),
               Row(
+                mainAxisSize: MainAxisSize.min,
                 children: [
+                  if (!schedule.isRemote)
+                    Container(
+                      alignment: Alignment.topRight,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(100),
+                            color: DarkThemeColors.colorful06),
+                        height: 24,
+                        child: Text('кэш',
+                            style: DarkTextTheme.chip
+                                .copyWith(color: DarkThemeColors.background03)),
+                      ),
+                    ),
                   RawMaterialButton(
                     onPressed: () {
                       context.read<ScheduleBloc>().add(ScheduleUpdateEvent(
