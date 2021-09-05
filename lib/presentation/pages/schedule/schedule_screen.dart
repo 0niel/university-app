@@ -49,20 +49,9 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   if (!schedule.isRemote)
-                    Container(
-                      alignment: Alignment.topRight,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12),
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(100),
-                            color: DarkThemeColors.colorful06),
-                        height: 24,
-                        child: Text('кэш',
-                            style: DarkTextTheme.chip
-                                .copyWith(color: DarkThemeColors.background03)),
-                      ),
-                    ),
+                    Text('кэш',
+                        style: DarkTextTheme.buttonS
+                            .copyWith(color: DarkThemeColors.colorful06)),
                   RawMaterialButton(
                     onPressed: () {
                       context.read<ScheduleBloc>().add(ScheduleUpdateEvent(
@@ -93,9 +82,9 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
       );
     } else {
       return Padding(
-        padding: EdgeInsets.only(bottom: 10),
+        padding: const EdgeInsets.only(bottom: 10),
         child: Container(
-          padding: EdgeInsets.only(left: 10),
+          padding: const EdgeInsets.only(left: 10),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -113,7 +102,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                           .add(ScheduleSetActiveGroupEvent(group));
                     },
                     child: const Icon(Icons.check_rounded),
-                    shape: CircleBorder(),
+                    shape: const CircleBorder(),
                     constraints:
                         const BoxConstraints(minWidth: 36.0, minHeight: 36.0),
                   ),
@@ -123,7 +112,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                           group: group, activeGroup: activeGroup));
                     },
                     child: const Icon(Icons.refresh_rounded),
-                    shape: CircleBorder(),
+                    shape: const CircleBorder(),
                     constraints:
                         const BoxConstraints(minWidth: 36.0, minHeight: 36.0),
                   ),
@@ -133,7 +122,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                           group: group, schedule: schedule));
                     },
                     child: const Icon(Icons.delete_rounded),
-                    shape: CircleBorder(),
+                    shape: const CircleBorder(),
                     constraints:
                         const BoxConstraints(minWidth: 36.0, minHeight: 36.0),
                   ),
