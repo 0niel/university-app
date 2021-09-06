@@ -7,11 +7,9 @@ import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:rtu_mirea_app/presentation/widgets/keyboard_positioned.dart';
 
 class ScheduleSettingsModal extends StatelessWidget {
-  const ScheduleSettingsModal(
-      {Key? key, required this.groups, required this.isFirstRun})
+  const ScheduleSettingsModal({Key? key, required this.isFirstRun})
       : super(key: key);
 
-  final List<String> groups;
   final bool isFirstRun;
 
   @override
@@ -57,13 +55,11 @@ class ScheduleSettingsModal extends StatelessWidget {
                   ],
                 ),
                 SizedBox(height: 8),
-                AutocompleteGroupSelector(
-                  groupsList: groups,
-                ),
+                AutocompleteGroupSelector(),
                 SizedBox(height: 32),
                 ConstrainedBox(
-                  constraints:
-                      BoxConstraints.tightFor(width: double.infinity, height: 48),
+                  constraints: BoxConstraints.tightFor(
+                      width: double.infinity, height: 48),
                   child: ElevatedButton(
                     style: ButtonStyle(
                       backgroundColor:

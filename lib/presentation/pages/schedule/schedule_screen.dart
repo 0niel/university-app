@@ -242,8 +242,8 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                                   context: context,
                                   isScrollControlled: true,
                                   backgroundColor: Colors.transparent,
-                                  builder: (context) => ScheduleSettingsModal(
-                                      groups: state.groups, isFirstRun: false),
+                                  builder: (context) =>
+                                      ScheduleSettingsModal(isFirstRun: false),
                                 ).whenComplete(() {
                                   this._modalShown = false;
                                 });
@@ -325,8 +325,8 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                         context: context,
                         isScrollControlled: true,
                         backgroundColor: Colors.transparent,
-                        builder: (context) => ScheduleSettingsModal(
-                            groups: state.groups, isFirstRun: true),
+                        builder: (context) =>
+                            ScheduleSettingsModal(isFirstRun: true),
                       ).whenComplete(() {
                         this._modalShown = false;
                       });
