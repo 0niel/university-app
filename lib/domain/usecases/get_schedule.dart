@@ -12,15 +12,17 @@ class GetSchedule extends UseCase<Schedule, GetScheduleParams> {
 
   @override
   Future<Either<Failure, Schedule>> call(GetScheduleParams params) async {
-    return await scheduleRepository.getSchedule(params.group);
+    return await scheduleRepository.getSchedule(
+        params.group, params.fromRemote);
   }
 }
 
 class GetScheduleParams extends Equatable {
   final String group;
+  final bool fromRemote;
 
-  GetScheduleParams({required this.group});
+  GetScheduleParams({required this.group, required this.fromRemote});
 
   @override
-  List<Object?> get props => [group];
+  List<Object?> get props => [group, fromRemote];
 }
