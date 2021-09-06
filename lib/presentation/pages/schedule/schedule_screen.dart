@@ -30,13 +30,13 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
     super.initState();
   }
 
-  Widget _buildGroupButton(String group, String activeGroup, bool isActive,
-      [Schedule? schedule]) {
+  Widget _buildGroupButton(
+      String group, String activeGroup, bool isActive, Schedule schedule) {
     if (isActive) {
       return Padding(
-        padding: EdgeInsets.only(bottom: 10),
+        padding: const EdgeInsets.only(bottom: 10),
         child: Container(
-          padding: EdgeInsets.only(left: 10),
+          padding: const EdgeInsets.only(left: 10),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -46,17 +46,22 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                 style: DarkTextTheme.buttonL,
               ),
               Row(
+                mainAxisSize: MainAxisSize.min,
                 children: [
+                  if (!schedule.isRemote)
+                    Text('кэш',
+                        style: DarkTextTheme.buttonS
+                            .copyWith(color: DarkThemeColors.colorful06)),
                   RawMaterialButton(
                     onPressed: () {
                       context.read<ScheduleBloc>().add(ScheduleUpdateEvent(
                           group: group, activeGroup: activeGroup));
                     },
                     child: Icon(Icons.refresh_rounded,
-                        color: schedule!.isRemote
+                        color: schedule.isRemote
                             ? DarkThemeColors.colorful05
                             : DarkThemeColors.colorful06),
-                    shape: CircleBorder(),
+                    shape: const CircleBorder(),
                     constraints:
                         const BoxConstraints(minWidth: 36.0, minHeight: 36.0),
                   ),
@@ -77,9 +82,9 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
       );
     } else {
       return Padding(
-        padding: EdgeInsets.only(bottom: 10),
+        padding: const EdgeInsets.only(bottom: 10),
         child: Container(
-          padding: EdgeInsets.only(left: 10),
+          padding: const EdgeInsets.only(left: 10),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -97,7 +102,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                           .add(ScheduleSetActiveGroupEvent(group));
                     },
                     child: const Icon(Icons.check_rounded),
-                    shape: CircleBorder(),
+                    shape: const CircleBorder(),
                     constraints:
                         const BoxConstraints(minWidth: 36.0, minHeight: 36.0),
                   ),
@@ -107,17 +112,17 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                           group: group, activeGroup: activeGroup));
                     },
                     child: const Icon(Icons.refresh_rounded),
-                    shape: CircleBorder(),
+                    shape: const CircleBorder(),
                     constraints:
                         const BoxConstraints(minWidth: 36.0, minHeight: 36.0),
                   ),
                   RawMaterialButton(
                     onPressed: () {
                       context.read<ScheduleBloc>().add(ScheduleDeleteEvent(
-                          group: group, schedule: schedule!));
+                          group: group, schedule: schedule));
                     },
                     child: const Icon(Icons.delete_rounded),
-                    shape: CircleBorder(),
+                    shape: const CircleBorder(),
                     constraints:
                         const BoxConstraints(minWidth: 36.0, minHeight: 36.0),
                   ),
