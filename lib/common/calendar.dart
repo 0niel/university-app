@@ -13,7 +13,7 @@ abstract class Calendar {
   static int getCurrentWeek(
       {DateTime? mCurrentDate, final Clock clock = const Clock()}) {
     DateTime currentDate = mCurrentDate ?? clock.now();
-    DateTime startDate = getSemesterStart();
+    DateTime startDate = getSemesterStart(mCurrentDate: currentDate);
 
     int week = 1;
     int prevWeekday = startDate.weekday;
