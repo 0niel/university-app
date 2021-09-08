@@ -309,8 +309,10 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
         body: SafeArea(
           child: BlocBuilder<ScheduleBloc, ScheduleState>(
             buildWhen: (prevState, currentState) {
-              if (prevState is ScheduleLoaded && currentState is ScheduleLoaded)
+              if (prevState is ScheduleLoaded &&
+                  currentState is ScheduleLoaded) {
                 return prevState != currentState;
+              }
               return true;
             },
             builder: (context, state) {
