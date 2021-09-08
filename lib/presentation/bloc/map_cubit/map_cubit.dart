@@ -13,6 +13,9 @@ class MapCubit extends Cubit<MapState> {
   /// Number of the floor we show when screen opens
   static int initialFloor = 2;
 
+  /// Current floor on the map
+  static int currentFloor = 2;
+
   /// Number of the last floor we are able to show
   static int maxFloor = 4;
 
@@ -50,6 +53,9 @@ class MapCubit extends Cubit<MapState> {
     foundRooms = newFound;
     emit(MapSearchFoundUpdated(floor: state.floor, foundRooms: foundRooms));
   }
+
+  /// Set map scale to value
+  void setMapScale (double scale) => emit(MapScaleSet(floor: currentFloor, scale: scale));
 
   /// Open the floor by [index]
   void goToFloor(int index) => emit(MapFloorLoaded(floor: index));

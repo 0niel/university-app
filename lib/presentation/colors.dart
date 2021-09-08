@@ -3,7 +3,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 
-class DarkThemeColors {
+abstract class DarkThemeColors {
   // Primary actions, emphasizing navigation elements,
   // backgrounds, text, etc.
   static const primary = const Color(0xFF246BFD);

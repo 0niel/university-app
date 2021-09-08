@@ -5,7 +5,9 @@ import 'package:rtu_mirea_app/common/errors/failures.dart';
 import 'package:rtu_mirea_app/data/datasources/schedule_local.dart';
 import 'package:rtu_mirea_app/data/datasources/schedule_remote.dart';
 import 'package:rtu_mirea_app/data/models/schedule_model.dart';
+import 'package:rtu_mirea_app/data/models/schedule_settings_model.dart';
 import 'package:rtu_mirea_app/domain/entities/schedule.dart';
+import 'package:rtu_mirea_app/domain/entities/schedule_settings.dart';
 import 'package:rtu_mirea_app/domain/repositories/schedule_repository.dart';
 
 class ScheduleRepositoryImpl implements ScheduleRepository {
@@ -21,6 +23,7 @@ class ScheduleRepositoryImpl implements ScheduleRepository {
 
   @override
   Future<Either<Failure, List<String>>> getAllGroups() async {
+    connectionChecker.checkInterval = Duration(seconds: 2);
     if (await connectionChecker.hasConnection) {
       try {
         final groupsList = await remoteDataSource.getGroups();
@@ -54,8 +57,7 @@ class ScheduleRepositoryImpl implements ScheduleRepository {
     }
   }
 
-  @override
-  Future<Either<Failure, Schedule>> getSchedule(String group) async {
+  Future<Either<Failure, Schedule>> _tryGetRemoteSchedule(String group) async {
     if (await connectionChecker.hasConnection) {
       try {
         final ScheduleModel schedule =
@@ -86,6 +88,16 @@ class ScheduleRepositoryImpl implements ScheduleRepository {
         if (localSchedule.isRight()) return localSchedule;
         return Left(ServerFailure());
       }
+    } else {
+      return await _tryGetLocalSchedule(group);
+    }
+  }
+
+  @override
+  Future<Either<Failure, Schedule>> getSchedule(
+      String group, bool fromRemote) async {
+    if (fromRemote) {
+      return await _tryGetRemoteSchedule(group);
     } else {
       return await _tryGetLocalSchedule(group);
     }
@@ -130,5 +142,30 @@ class ScheduleRepositoryImpl implements ScheduleRepository {
     } on CacheException {
       return;
     }
+  }
+
+  @override
+  Future<ScheduleSettings> getSettings() async {
+    try {
+      final localSettings = await localDataSource.getSettingsFromCache();
+      return localSettings;
+    } on CacheException {
+      final newLocalSettings = ScheduleSettingsModel(
+        showEmptyLessons: false,
+        showLessonsNumbers: false,
+        calendarFormat: 2,
+      );
+      await localDataSource.setSettingsToCache(newLocalSettings);
+      return newLocalSettings;
+    }
+  }
+
+  @override
+  Future<void> setSettings(ScheduleSettings settings) async {
+    localDataSource.setSettingsToCache(ScheduleSettingsModel(
+      showEmptyLessons: settings.showEmptyLessons,
+      showLessonsNumbers: settings.showLessonsNumbers,
+      calendarFormat: settings.calendarFormat,
+    ));
   }
 }

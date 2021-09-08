@@ -72,9 +72,9 @@ class LessonCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    '$name, $room',
+                    room != '' ? '$name, $room' : '$name',
                     style: DarkTextTheme.titleM,
-                    maxLines: 5,
+                    maxLines: 8,
                     overflow: TextOverflow.ellipsis,
                   ),
                   SizedBox(

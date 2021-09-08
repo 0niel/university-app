@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:rtu_mirea_app/common/calendar.dart';
 import 'package:rtu_mirea_app/domain/entities/lesson.dart';
 import 'package:rtu_mirea_app/domain/entities/schedule.dart';
+import 'package:rtu_mirea_app/domain/entities/schedule_settings.dart';
+import 'package:rtu_mirea_app/presentation/bloc/schedule_bloc/schedule_bloc.dart';
 import 'package:rtu_mirea_app/presentation/colors.dart';
+import 'package:rtu_mirea_app/presentation/pages/schedule/widgets/empty_lesson_card.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/intl.dart';
@@ -23,14 +27,12 @@ class _SchedulePageViewState extends State<SchedulePageView> {
   late DateTime _selectedDay;
   late final PageController _controller;
 
-  CalendarFormat _calendarFormat = CalendarFormat.week;
+  late CalendarFormat _calendarFormat;
   DateTime _focusedDay = DateTime.now();
 
   final DateTime _firstCalendarDay = Calendar.getSemesterStart();
   final DateTime _lastCalendarDay =
       DateTime.utc(2021, 12, 19); // TODO: create method for it
-
-  late List<List<Lesson>> _allLessonsInWeek;
 
   @override
   void initState() {
@@ -41,7 +43,10 @@ class _SchedulePageViewState extends State<SchedulePageView> {
     _controller = PageController(initialPage: _selectedPage);
     _selectedDay = DateTime.now();
     _selectedWeek = Calendar.getCurrentWeek();
-    _allLessonsInWeek = _getLessonsByWeek(_selectedWeek, widget.schedule);
+    _calendarFormat = CalendarFormat.values[
+        (BlocProvider.of<ScheduleBloc>(context).state as ScheduleLoaded)
+            .scheduleSettings
+            .calendarFormat];
   }
 
   List<List<Lesson>> _getLessonsByWeek(int week, Schedule schedule) {
@@ -72,26 +77,92 @@ class _SchedulePageViewState extends State<SchedulePageView> {
     );
   }
 
-  Widget _buildPageViewContent(BuildContext context, int index) {
+  List<Lesson> _getLessonsWithEmpty(List<Lesson> lessons, String group) {
+    List<Lesson> formattedLessons = [];
+    if (ScheduleBloc.isCollegeGroup(group)) {
+      ScheduleBloc.collegeTimesStart.forEach((key, value) {
+        bool notEmpty = false;
+        for (final lesson in lessons) {
+          if (lesson.timeStart == key) {
+            formattedLessons.add(lesson);
+            notEmpty = true;
+          }
+        }
+        if (notEmpty == false) {
+          formattedLessons.add(
+            Lesson(
+              name: '',
+              rooms: [],
+              timeStart: key,
+              timeEnd: ScheduleBloc.collegeTimesEnd.keys.toList()[value - 1],
+              weeks: [],
+              types: '',
+              teachers: [],
+            ),
+          );
+        }
+      });
+    } else {
+      ScheduleBloc.universityTimesStart.forEach((key, value) {
+        bool notEmpty = false;
+        for (final lesson in lessons) {
+          if (lesson.timeStart == key) {
+            formattedLessons.add(lesson);
+            notEmpty = true;
+          }
+        }
+        if (notEmpty == false) {
+          formattedLessons.add(
+            Lesson(
+              name: '',
+              rooms: [],
+              timeStart: key,
+              timeEnd: ScheduleBloc.universityTimesEnd.keys.toList()[value - 1],
+              weeks: [],
+              types: '',
+              teachers: [],
+            ),
+          );
+        }
+      });
+    }
+    lessons = formattedLessons;
+    return lessons;
+  }
+
+  Widget _buildPageViewContent(BuildContext context, int index, int week) {
     if (index == 6) {
       return _buildEmptyLessons();
     } else {
-      final lessons = _allLessonsInWeek[index];
+      var lessons = _getLessonsByWeek(week, widget.schedule)[index];
+
       if (lessons.length == 0) return _buildEmptyLessons();
+
+      final state = context.read<ScheduleBloc>().state as ScheduleLoaded;
+      final ScheduleSettings settings = state.scheduleSettings;
+      if (settings.showEmptyLessons) {
+        lessons = _getLessonsWithEmpty(lessons, state.activeGroup);
+      }
+
       return Container(
         child: ListView.separated(
           itemCount: lessons.length,
           itemBuilder: (context, i) {
             return Padding(
               padding: EdgeInsets.symmetric(horizontal: 24),
-              child: LessonCard(
-                name: lessons[i].name,
-                timeStart: lessons[i].timeStart,
-                timeEnd: lessons[i].timeEnd,
-                room: '${lessons[i].rooms.join(', ')}',
-                type: lessons[i].types,
-                teacher: '${lessons[i].teachers.join(', ')}',
-              ),
+              child: lessons[i].name.replaceAll(' ', '') != ''
+                  ? LessonCard(
+                      name: lessons[i].name,
+                      timeStart: lessons[i].timeStart,
+                      timeEnd: lessons[i].timeEnd,
+                      room: '${lessons[i].rooms.join(', ')}',
+                      type: lessons[i].types,
+                      teacher: '${lessons[i].teachers.join(', ')}',
+                    )
+                  : EmptyLessonCard(
+                      timeStart: lessons[i].timeStart,
+                      timeEnd: lessons[i].timeEnd,
+                    ),
             );
           },
           separatorBuilder: (context, index) {
@@ -99,13 +170,6 @@ class _SchedulePageViewState extends State<SchedulePageView> {
           },
         ),
       );
-    }
-  }
-
-  void _setLessonsByWeek(int week) {
-    if (week != _selectedWeek) {
-      _selectedWeek = week;
-      _allLessonsInWeek = _getLessonsByWeek(week, widget.schedule);
     }
   }
 
@@ -195,18 +259,21 @@ class _SchedulePageViewState extends State<SchedulePageView> {
                   Calendar.getCurrentWeek(mCurrentDate: selectedDay);
               // Call `setState()` when updating the selected day
               setState(() {
-                _setLessonsByWeek(currentNewWeek);
+                _selectedWeek = currentNewWeek;
                 _selectedPage =
                     selectedDay.difference(_firstCalendarDay).inDays;
                 _selectedDay = selectedDay;
                 _focusedDay = focusedDay;
-                _selectedWeek = currentNewWeek;
                 _controller.jumpToPage(_selectedPage);
               });
             }
           },
           onFormatChanged: (format) {
             if (_calendarFormat != format) {
+              // update settings in local data
+              BlocProvider.of<ScheduleBloc>(context).add(
+                  ScheduleUpdateSettingsEvent(calendarFormat: format.index));
+
               // Call `setState()` when updating calendar format
               setState(() {
                 _calendarFormat = format;
@@ -223,6 +290,8 @@ class _SchedulePageViewState extends State<SchedulePageView> {
               _focusedDay = currentDate;
               _selectedDay = currentDate;
               _selectedPage = _selectedDay.difference(_firstCalendarDay).inDays;
+              _selectedWeek =
+                  Calendar.getCurrentWeek(mCurrentDate: _selectedDay);
               _controller.jumpToPage(_selectedPage);
             });
           },
@@ -248,15 +317,19 @@ class _SchedulePageViewState extends State<SchedulePageView> {
                         ),
                         onPressed: () {
                           setState(() {
-                            _selectedWeek = i;
-                            _selectedDay =
-                                Calendar.getDaysInWeek(_selectedWeek)[0];
-                            _focusedDay = _selectedDay;
+                            if (i == 1) {
+                              _selectedDay = Calendar.getDaysInWeek(
+                                  i)[Calendar.getSemesterStart().weekday - 1];
+                            } else {
+                              _selectedDay = Calendar.getDaysInWeek(i)[0];
+                            }
+
+                            _selectedDay = _selectedDay;
                             _selectedPage = _selectedDay
                                 .difference(_firstCalendarDay)
                                 .inDays;
-                            _allLessonsInWeek = _getLessonsByWeek(
-                                _selectedWeek, widget.schedule);
+                            _selectedWeek = i;
+                            _focusedDay = _selectedDay;
                             _controller.jumpToPage(_selectedPage);
                           });
                         },
@@ -279,14 +352,17 @@ class _SchedulePageViewState extends State<SchedulePageView> {
               physics: ClampingScrollPhysics(),
               onPageChanged: (value) {
                 setState(() {
-                  if (value > _selectedPage)
-                    _selectedDay = _selectedDay.add(Duration(days: 1));
-                  else if (value < _selectedPage)
-                    _selectedDay = _selectedDay.subtract(Duration(days: 1));
-                  final int currentNewWeek =
-                      Calendar.getCurrentWeek(mCurrentDate: _selectedDay);
+                  // if the pages are moved by swipes
+                  if ((value - _selectedPage).abs() == 1) {
+                    if (value > _selectedPage)
+                      _selectedDay = _selectedDay.add(Duration(days: 1));
+                    else if (value < _selectedPage)
+                      _selectedDay = _selectedDay.subtract(Duration(days: 1));
+                    final int currentNewWeek =
+                        Calendar.getCurrentWeek(mCurrentDate: _selectedDay);
+                    _selectedWeek = currentNewWeek;
+                  }
                   _focusedDay = _selectedDay;
-                  _setLessonsByWeek(currentNewWeek);
                   _selectedPage = value;
                 });
               },
@@ -300,7 +376,7 @@ class _SchedulePageViewState extends State<SchedulePageView> {
                     week >= 1 && week <= Calendar.kMaxWeekInSemester
                         ? lessonDay.weekday - 1
                         : 6;
-                return _buildPageViewContent(context, lessonIndex);
+                return _buildPageViewContent(context, lessonIndex, week);
               }),
         )
       ],

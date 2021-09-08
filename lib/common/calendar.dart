@@ -1,6 +1,6 @@
 import 'package:clock/clock.dart';
 
-class Calendar {
+abstract class Calendar {
   /// Maximum number of academic weeks per semester
   static const int kMaxWeekInSemester = 16;
 
@@ -13,15 +13,7 @@ class Calendar {
   static int getCurrentWeek(
       {DateTime? mCurrentDate, final Clock clock = const Clock()}) {
     DateTime currentDate = mCurrentDate ?? clock.now();
-    int currentYear = currentDate.year;
-
-    DateTime startDate;
-
-    if (currentDate.month >= DateTime.september) {
-      startDate = DateTime.utc(currentYear, 9, 1);
-    } else {
-      startDate = DateTime.utc(currentYear, 2, 8);
-    }
+    DateTime startDate = getSemesterStart(mCurrentDate: currentDate);
 
     int week = 1;
     int prevWeekday = startDate.weekday;
@@ -83,7 +75,7 @@ class Calendar {
 }
 
 /// Get the date when the semester begins
-class _CurrentSemesterStart {
+abstract class _CurrentSemesterStart {
   /// Get the first Monday of the month from which the current semester begins
   static DateTime _getFirstMondayOfMonth(int year, int month) {
     var firstOfMonth = DateTime(year, month, 1);

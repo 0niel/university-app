@@ -24,7 +24,9 @@ import 'package:rtu_mirea_app/domain/usecases/get_news.dart';
 import 'package:rtu_mirea_app/domain/usecases/get_news_tags.dart';
 import 'package:rtu_mirea_app/domain/usecases/get_patrons.dart';
 import 'package:rtu_mirea_app/domain/usecases/get_schedule.dart';
+import 'package:rtu_mirea_app/domain/usecases/get_schedule_settings.dart';
 import 'package:rtu_mirea_app/domain/usecases/set_active_group.dart';
+import 'package:rtu_mirea_app/domain/usecases/set_schedule_settings.dart';
 import 'package:rtu_mirea_app/presentation/bloc/about_app_bloc/about_app_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/home_navigator_bloc/home_navigator_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/map_cubit/map_cubit.dart';
@@ -47,6 +49,8 @@ Future<void> setup() async {
       setActiveGroup: getIt(),
       getDownloadedSchedules: getIt(),
       deleteSchedule: getIt(),
+      getScheduleSettings: getIt(),
+      setScheduleSettings: getIt(),
     ),
   );
 
@@ -74,6 +78,8 @@ Future<void> setup() async {
   getIt.registerLazySingleton(() => GetNewsTags(getIt()));
   getIt.registerLazySingleton(() => GetContributors(getIt()));
   getIt.registerLazySingleton(() => GetForumPatrons(getIt()));
+  getIt.registerLazySingleton(() => GetScheduleSettings(getIt()));
+  getIt.registerLazySingleton(() => SetScheduleSettings(getIt()));
 
   // Repositories
   getIt.registerLazySingleton<NewsRepository>(
@@ -119,7 +125,8 @@ Future<void> setup() async {
   // Common / Core
 
   // External Dependency
-  getIt.registerLazySingleton(() => Dio());
+  getIt.registerLazySingleton(
+      () => Dio(BaseOptions(connectTimeout: 3000, receiveTimeout: 3000)));
   final sharedPreferences = await SharedPreferences.getInstance();
   getIt.registerLazySingleton(() => sharedPreferences);
   getIt.registerLazySingleton(() => InternetConnectionChecker());
