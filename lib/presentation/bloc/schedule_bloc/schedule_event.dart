@@ -26,8 +26,8 @@ class ScheduleUpdateGroupSuggestionEvent extends ScheduleEvent {
 class ScheduleGroupsLoadEvent extends ScheduleEvent {}
 
 /// The event should be called to set the active group for which
-/// the schedule will be taken. The group name is the [groupSuggestion]
-/// field in [ScheduleBloc]. [groupSuggestion] should be set every
+/// the schedule will be taken. The group name is the [_groupSuggestion]
+/// field in [ScheduleBloc]. [_groupSuggestion] should be set every
 /// time the input is updated using the event
 /// [ScheduleUpdateGroupSuggestionEvent].
 class ScheduleSetActiveGroupEvent extends ScheduleEvent {

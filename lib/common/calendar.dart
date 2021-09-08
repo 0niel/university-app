@@ -13,15 +13,7 @@ abstract class Calendar {
   static int getCurrentWeek(
       {DateTime? mCurrentDate, final Clock clock = const Clock()}) {
     DateTime currentDate = mCurrentDate ?? clock.now();
-    int currentYear = currentDate.year;
-
-    DateTime startDate;
-
-    if (currentDate.month >= DateTime.september) {
-      startDate = DateTime.utc(currentYear, 9, 1);
-    } else {
-      startDate = DateTime.utc(currentYear, 2, 8);
-    }
+    DateTime startDate = getSemesterStart();
 
     int week = 1;
     int prevWeekday = startDate.weekday;
