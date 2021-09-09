@@ -112,17 +112,20 @@ class _SchedulePageViewState extends State<SchedulePageView> {
           }
         }
         if (notEmpty == false) {
-          formattedLessons.add(
-            Lesson(
-              name: '',
-              rooms: [],
-              timeStart: key,
-              timeEnd: ScheduleBloc.universityTimesEnd.keys.toList()[value - 1],
-              weeks: [],
-              types: '',
-              teachers: [],
-            ),
-          );
+          if (value != 7 && value != 8) {
+            formattedLessons.add(
+              Lesson(
+                name: '',
+                rooms: [],
+                timeStart: key,
+                timeEnd:
+                    ScheduleBloc.universityTimesEnd.keys.toList()[value - 1],
+                weeks: [],
+                types: '',
+                teachers: [],
+              ),
+            );
+          }
         }
       });
     }
