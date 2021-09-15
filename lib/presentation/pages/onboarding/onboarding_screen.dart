@@ -10,7 +10,7 @@ import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'widgets/indicator.dart';
 import 'widgets/next_button.dart';
 
-/// OnBoarding screen, that greets new users
+/// OnBoarding screen that greets new users
 class OnBoardingScreen extends StatefulWidget {
   static const String routeName = '/onboarding';
   @override
@@ -60,10 +60,10 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
   /// Bottom text strings
   static const List contentTexts = [
     'Это приложение было создано студентами для студентов',
-    'Как же легко оказывается можно смотреть расписание, а главное быстро',
+    'Как же легко, оказывается, можно смотреть расписание, а главное – быстро',
     'Иногда так лень заходить на сайт и искать нужную тебе информацию, мы это исправили',
     // 'Как же много дедлайнов!? Создавать дедлайны теперь как никогда просто и удобно',
-    'Слово сложное, но все легко. Общайся и делись материалами с другими группами мгновенно',
+    'Слово сложное, но на деле всё легко. Общайся и делись материалами с другими группами мгновенно',
   ];
 
   /// Top padding for every image

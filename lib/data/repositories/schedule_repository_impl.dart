@@ -23,6 +23,7 @@ class ScheduleRepositoryImpl implements ScheduleRepository {
 
   @override
   Future<Either<Failure, List<String>>> getAllGroups() async {
+    connectionChecker.checkInterval = Duration(seconds: 2);
     if (await connectionChecker.hasConnection) {
       try {
         final groupsList = await remoteDataSource.getGroups();
@@ -56,8 +57,7 @@ class ScheduleRepositoryImpl implements ScheduleRepository {
     }
   }
 
-  @override
-  Future<Either<Failure, Schedule>> getSchedule(String group) async {
+  Future<Either<Failure, Schedule>> _tryGetRemoteSchedule(String group) async {
     if (await connectionChecker.hasConnection) {
       try {
         final ScheduleModel schedule =
@@ -88,6 +88,16 @@ class ScheduleRepositoryImpl implements ScheduleRepository {
         if (localSchedule.isRight()) return localSchedule;
         return Left(ServerFailure());
       }
+    } else {
+      return await _tryGetLocalSchedule(group);
+    }
+  }
+
+  @override
+  Future<Either<Failure, Schedule>> getSchedule(
+      String group, bool fromRemote) async {
+    if (fromRemote) {
+      return await _tryGetRemoteSchedule(group);
     } else {
       return await _tryGetLocalSchedule(group);
     }
