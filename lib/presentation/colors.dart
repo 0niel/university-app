@@ -22,6 +22,7 @@ abstract class DarkThemeColors {
   static const colorful05 = const Color(0xFFA5F59C);
   static const colorful06 = const Color(0xFFFFDD72);
   static const colorful07 = const Color(0xFFFF968E);
+  static const colorful08 = const Color(0xFF60F352);
 
   static const white = const Color(0xFFFFFFFF);
 

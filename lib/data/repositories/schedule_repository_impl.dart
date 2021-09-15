@@ -143,6 +143,7 @@ class ScheduleRepositoryImpl implements ScheduleRepository {
       final newLocalSettings = ScheduleSettingsModel(
         showEmptyLessons: false,
         showLessonsNumbers: false,
+        showLessonsWithNotesInDifferentColor: true,
         calendarFormat: 2,
       );
       await localDataSource.setSettingsToCache(newLocalSettings);
@@ -155,6 +156,7 @@ class ScheduleRepositoryImpl implements ScheduleRepository {
     localDataSource.setSettingsToCache(ScheduleSettingsModel(
       showEmptyLessons: settings.showEmptyLessons,
       showLessonsNumbers: settings.showLessonsNumbers,
+      showLessonsWithNotesInDifferentColor: settings.showLessonsWithNoteInDifferentColor,
       calendarFormat: settings.calendarFormat,
     ));
   }

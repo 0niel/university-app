@@ -1,12 +1,16 @@
+import 'dart:collection';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:rtu_mirea_app/common/calendar.dart';
 import 'package:rtu_mirea_app/domain/entities/lesson.dart';
+import 'package:rtu_mirea_app/domain/entities/lesson_app_info.dart';
 import 'package:rtu_mirea_app/domain/entities/schedule.dart';
 import 'package:rtu_mirea_app/domain/entities/schedule_settings.dart';
 import 'package:rtu_mirea_app/presentation/bloc/schedule_bloc/schedule_bloc.dart';
 import 'package:rtu_mirea_app/presentation/colors.dart';
 import 'package:rtu_mirea_app/presentation/pages/schedule/widgets/empty_lesson_card.dart';
+import 'package:rtu_mirea_app/presentation/pages/schedule/widgets/lesson_card_info_modal.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/intl.dart';
@@ -35,6 +39,7 @@ class _SchedulePageViewState extends State<SchedulePageView> {
       DateTime.utc(2021, 12, 19); // TODO: create method for it
 
   late List<List<Lesson>> _allLessonsInWeek;
+  late HashMap<Lesson, LessonAppInfo> _lessonToAppInfo;
 
   @override
   void initState() {
@@ -46,6 +51,7 @@ class _SchedulePageViewState extends State<SchedulePageView> {
     _selectedDay = DateTime.now();
     _selectedWeek = Calendar.getCurrentWeek();
     _allLessonsInWeek = _getLessonsByWeek(_selectedWeek, widget.schedule);
+    _lessonToAppInfo = _mapLessonsToAppInfo(_selectedWeek, widget.schedule);
     _calendarFormat = CalendarFormat.values[
         (BlocProvider.of<ScheduleBloc>(context).state as ScheduleLoaded)
             .scheduleSettings
@@ -64,6 +70,20 @@ class _SchedulePageViewState extends State<SchedulePageView> {
     }
 
     return lessonsInWeek;
+  }
+
+  HashMap<Lesson, LessonAppInfo> _mapLessonsToAppInfo(int week, Schedule schedule) {
+    var lessonToAppInfo = HashMap<Lesson, LessonAppInfo>();
+    for (int i = 0; i < _allLessonsInWeek[week].length; i++) {
+      lessonToAppInfo[_allLessonsInWeek[week][i]] = _getLessonAppInfo();
+    }
+    return lessonToAppInfo;
+  }
+
+  LessonAppInfo _getLessonAppInfo() {
+    LessonAppInfo aboba = LessonAppInfo(id: 1, lessonCode: "a", note: "aboba");
+    
+    return aboba;
   }
 
   Widget _buildEmptyLessons() {
@@ -162,6 +182,16 @@ class _SchedulePageViewState extends State<SchedulePageView> {
                       room: '${lessons[i].rooms.join(', ')}',
                       type: lessons[i].types,
                       teacher: '${lessons[i].teachers.join(', ')}',
+                      drawNoteIndicator: true,
+                      onClick: () => { showModalBottomSheet(
+                        context: context,
+                        isScrollControlled: true,
+                        backgroundColor: Colors.transparent,
+                        builder: (context) => LessonCardInfoModal(
+                          lesson: lessons[i],
+                          lessonAppInfo: LessonAppInfo(id: 1, lessonCode: "a", note: "aboba"),
+                        ),
+                      )},
                     )
                   : EmptyLessonCard(
                       timeStart: lessons[i].timeStart,

@@ -185,6 +185,20 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                                     showEmptyLessons: value));
                           },
                         ),
+                        SettingsSwitchButton(
+                          initialValue: state.scheduleSettings.showLessonsWithNoteInDifferentColor,
+                          svgPicture: SvgPicture.asset(
+                            'assets/icons/lessons.svg',
+                            height: 16,
+                            width: 16,
+                          ),
+                          text: "Отображать пары с заметками другим цветом",
+                          onChanged: (value) {
+                            context.read<ScheduleBloc>().add(
+                                ScheduleUpdateSettingsEvent(
+                                    showEmptyLessons: value));
+                          },
+                        ),
                         // SizedBox(height: 10),
                         // SettingsSwitchButton(
                         //   initialValue:

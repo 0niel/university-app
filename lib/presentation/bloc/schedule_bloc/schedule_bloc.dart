@@ -154,6 +154,8 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
             event.showEmptyLessons ?? oldSettings.showEmptyLessons,
         showLessonsNumbers:
             event.showEmptyLessons ?? oldSettings.showLessonsNumbers,
+        showLessonsWithNoteInDifferentColor:
+            event.showLessonsWithNotesInDifferentColor ?? oldSettings.showLessonsWithNoteInDifferentColor,
         calendarFormat: event.calendarFormat ?? oldSettings.calendarFormat,
       );
 

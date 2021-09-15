@@ -69,10 +69,12 @@ class ScheduleUpdateSettingsEvent extends ScheduleEvent {
   const ScheduleUpdateSettingsEvent({
     this.showEmptyLessons,
     this.showLesonsNums,
+    this.showLessonsWithNotesInDifferentColor,
     this.calendarFormat,
   });
 
   final bool? showEmptyLessons;
   final bool? showLesonsNums;
+  final bool? showLessonsWithNotesInDifferentColor;
   final int? calendarFormat;
 }

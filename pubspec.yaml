@@ -88,6 +88,11 @@ dependencies:
 
   cached_network_image: ^3.1.0
 
+  path_provider:
+
+  sqflite:
+
+  path:
   # Encapsulates the notion of the "current time". Very useful for testing
   # See https://pub.dev/packages/clock
   clock: ^1.1.0

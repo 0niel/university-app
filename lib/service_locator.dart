@@ -3,10 +3,14 @@ import 'package:get_it/get_it.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:rtu_mirea_app/data/datasources/forum_local.dart';
 import 'package:rtu_mirea_app/data/datasources/forum_remote.dart';
+import 'package:rtu_mirea_app/data/datasources/lessons_app_info_local.dart';
 import 'package:rtu_mirea_app/data/datasources/news_remote.dart';
 import 'package:rtu_mirea_app/data/datasources/schedule_local.dart';
 import 'package:rtu_mirea_app/data/datasources/schedule_remote.dart';
 import 'package:rtu_mirea_app/data/repositories/forum_repository_impl.dart';
+import 'package:rtu_mirea_app/data/repositories/lesson_app_info_repository_impl.dart';
+import 'package:rtu_mirea_app/domain/entities/lesson_app_info.dart';
+import 'package:rtu_mirea_app/domain/repositories/lesson_app_info_repository.dart';
 import 'package:rtu_mirea_app/data/repositories/news_repository_impl.dart';
 import 'package:rtu_mirea_app/domain/repositories/forum_repository.dart';
 import 'package:rtu_mirea_app/domain/repositories/news_repository.dart';
@@ -20,6 +24,7 @@ import 'package:rtu_mirea_app/domain/usecases/get_active_group.dart';
 import 'package:rtu_mirea_app/domain/usecases/get_contributors.dart';
 import 'package:rtu_mirea_app/domain/usecases/get_downloaded_schedules.dart';
 import 'package:rtu_mirea_app/domain/usecases/get_groups.dart';
+import 'package:rtu_mirea_app/domain/usecases/get_lessons_app_info.dart';
 import 'package:rtu_mirea_app/domain/usecases/get_news.dart';
 import 'package:rtu_mirea_app/domain/usecases/get_news_tags.dart';
 import 'package:rtu_mirea_app/domain/usecases/get_patrons.dart';
@@ -80,6 +85,7 @@ Future<void> setup() async {
   getIt.registerLazySingleton(() => GetForumPatrons(getIt()));
   getIt.registerLazySingleton(() => GetScheduleSettings(getIt()));
   getIt.registerLazySingleton(() => SetScheduleSettings(getIt()));
+  getIt.registerLazySingleton(() => GetLessonsAppInfo(getIt()));
 
   // Repositories
   getIt.registerLazySingleton<NewsRepository>(
@@ -94,6 +100,10 @@ Future<void> setup() async {
         localDataSource: getIt(),
         connectionChecker: getIt(),
       ));
+
+  getIt.registerLazySingleton<LessonAppInfoRepository>(() => LessonAppInfoRepositoryImpl(
+        localDataSource: getIt(),
+    ));
 
   getIt.registerLazySingleton<ScheduleRepository>(() => ScheduleRepositoryImpl(
         remoteDataSource: getIt(),
@@ -121,6 +131,8 @@ Future<void> setup() async {
       () => ForumRemoteDataImpl(httpClient: getIt()));
   getIt.registerLazySingleton<ForumLocalData>(
       () => ForumLocalDataImpl(sharedPreferences: getIt()));
+  getIt.registerLazySingleton<LessonsAppInfoLocalData>(
+      () => LessonsAppInfoLocalDataImpl());
 
   // Common / Core
 

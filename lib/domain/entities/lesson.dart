@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 
-class Lesson extends Equatable {
+class Lesson extends Equatable  {
   const Lesson({
     required this.name,
     required this.weeks,

@@ -76,18 +76,21 @@ class App extends StatelessWidget {
         light: lightTheme,
         dark: darkTheme,
         initial: AdaptiveThemeMode.dark,
-        builder: (theme, darkTheme) => MaterialApp(
-          debugShowCheckedModeBanner: false,
-          title: 'Приложение РТУ МИРЭА',
-          theme: theme,
-          home: showOnboarding ? OnBoardingScreen() : HomeNavigatorScreen(),
-          routes: {
-            ScheduleScreen.routeName: (context) => ScheduleScreen(),
-            MapScreen.routeName: (context) => MapScreen(),
-            ProfileScreen.routeName: (context) => ProfileScreen(),
-            OnBoardingScreen.routeName: (context) => OnBoardingScreen(),
-            NewsScreen.routeName: (context) => NewsScreen()
-          },
+        builder: (theme, darkTheme) => GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          child: MaterialApp(
+            debugShowCheckedModeBanner: false,
+            title: 'Приложение РТУ МИРЭА',
+            theme: theme,
+            home: showOnboarding ? OnBoardingScreen() : HomeNavigatorScreen(),
+            routes: {
+              ScheduleScreen.routeName: (context) => ScheduleScreen(),
+              MapScreen.routeName: (context) => MapScreen(),
+              ProfileScreen.routeName: (context) => ProfileScreen(),
+              OnBoardingScreen.routeName: (context) => OnBoardingScreen(),
+              NewsScreen.routeName: (context) => NewsScreen()
+            },
+          ),
         ),
       ),
     );
