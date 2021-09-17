@@ -4,13 +4,13 @@ class ScheduleSettings extends Equatable {
   const ScheduleSettings({
     required this.showEmptyLessons,
     required this.showLessonsNumbers,
-    required this.showLessonsWithNoteInDifferentColor,
+    //required this.showLessonsWithNoteInDifferentColor,
     required this.calendarFormat,
   });
 
   final bool showEmptyLessons;
   final bool showLessonsNumbers;
-  final bool showLessonsWithNoteInDifferentColor;
+  //final bool showLessonsWithNoteInDifferentColor;
   final int calendarFormat;
 
   @override

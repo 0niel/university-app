@@ -2,14 +2,14 @@ import 'package:equatable/equatable.dart';
 
 /// Class which provides additional info like specific lesson notes or tags
 class LessonAppInfo extends Equatable {
-  const LessonAppInfo({
-    required this.id,
+  LessonAppInfo({
+    this.id,
+    this.note = "",
     required this.lessonCode,
-    required this.note,
   });
 
-  final int id;
-  final String note;
+  String note;
+  final int? id;
   final String lessonCode;
 
   Map<String, dynamic> toMap() {
@@ -21,5 +21,5 @@ class LessonAppInfo extends Equatable {
   }
 
   @override
-  List<Object?> get props => throw UnimplementedError();
+  List<Object?> get props => [id, note, lessonCode];
 }

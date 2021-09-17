@@ -31,6 +31,7 @@ import 'package:rtu_mirea_app/domain/usecases/get_patrons.dart';
 import 'package:rtu_mirea_app/domain/usecases/get_schedule.dart';
 import 'package:rtu_mirea_app/domain/usecases/get_schedule_settings.dart';
 import 'package:rtu_mirea_app/domain/usecases/set_active_group.dart';
+import 'package:rtu_mirea_app/domain/usecases/set_lessons_app_info.dart';
 import 'package:rtu_mirea_app/domain/usecases/set_schedule_settings.dart';
 import 'package:rtu_mirea_app/presentation/bloc/about_app_bloc/about_app_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/home_navigator_bloc/home_navigator_bloc.dart';
@@ -56,6 +57,8 @@ Future<void> setup() async {
       deleteSchedule: getIt(),
       getScheduleSettings: getIt(),
       setScheduleSettings: getIt(),
+      getLessonsAppInfo: getIt(),
+      setLessonAppInfo: getIt()
     ),
   );
 
@@ -86,7 +89,8 @@ Future<void> setup() async {
   getIt.registerLazySingleton(() => GetScheduleSettings(getIt()));
   getIt.registerLazySingleton(() => SetScheduleSettings(getIt()));
   getIt.registerLazySingleton(() => GetLessonsAppInfo(getIt()));
-
+  getIt.registerLazySingleton(() => SetLessonsAppInfo(getIt()));
+  
   // Repositories
   getIt.registerLazySingleton<NewsRepository>(
     () => NewsRepositoryImpl(

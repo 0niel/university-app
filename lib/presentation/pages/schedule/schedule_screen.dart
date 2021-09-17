@@ -190,7 +190,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                                     showEmptyLessons: value));
                           },
                         ),
-                        SettingsSwitchButton(
+                        /*SettingsSwitchButton(
                           initialValue: state.scheduleSettings.showLessonsWithNoteInDifferentColor,
                           svgPicture: SvgPicture.asset(
                             'assets/icons/lessons.svg',
@@ -203,7 +203,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                                 ScheduleUpdateSettingsEvent(
                                     showEmptyLessons: value));
                           },
-                        ),
+                        ),*/
                         // SizedBox(height: 10),
                         // SettingsSwitchButton(
                         //   initialValue:

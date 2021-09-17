@@ -5,13 +5,13 @@ import 'package:rtu_mirea_app/domain/repositories/lesson_app_info_repository.dar
 import 'package:rtu_mirea_app/domain/repositories/schedule_repository.dart';
 import 'package:rtu_mirea_app/domain/usecases/usecase.dart';
 
-class GetLessonsAppInfo extends UseCase<List<LessonAppInfo>, void> {
+class GetLessonsAppInfo extends UseCaseRight<List<LessonAppInfo>, void> {
   final LessonAppInfoRepository lessonsAppInfoRepository;
 
   GetLessonsAppInfo(this.lessonsAppInfoRepository);
 
   @override
-  Future<Either<Failure, List<LessonAppInfo>>> call([_]) async {
-    return Right(await lessonsAppInfoRepository.getLessonsAppInfo());
+  Future<List<LessonAppInfo>> call([_]) async {
+    return await lessonsAppInfoRepository.getLessonsAppInfo();
   }
 }

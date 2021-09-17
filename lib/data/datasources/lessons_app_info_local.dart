@@ -21,9 +21,10 @@ class LessonsAppInfoLocalDataImpl extends LessonsAppInfoLocalData {
   Future<Database> _getDbConnection() async {
     final database = openDatabase(
       join(await getDatabasesPath(), 'ninja.db'),
+      version: 1,
       onCreate: (db, version) {
         return db.execute(
-          '''CREATE TABLE notes(id INTEGER PRIMARY KEY, lessonCode TEXT FOREIGN KEY, text TEXT)''',
+          '''CREATE TABLE IF NOT EXISTS notes(id INTEGER PRIMARY KEY, lessonCode TEXT, note TEXT);''',
         );
       },
     );

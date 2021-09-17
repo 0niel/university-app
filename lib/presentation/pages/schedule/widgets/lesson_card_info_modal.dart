@@ -1,8 +1,10 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:rtu_mirea_app/domain/entities/lesson.dart';
 import 'package:rtu_mirea_app/domain/entities/lesson_app_info.dart';
+import 'package:rtu_mirea_app/presentation/bloc/schedule_bloc/schedule_bloc.dart';
 import 'package:rtu_mirea_app/presentation/colors.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:rtu_mirea_app/presentation/widgets/keyboard_positioned.dart';
@@ -14,16 +16,20 @@ class LessonCardInfoModal extends StatelessWidget {
   final LessonAppInfo lessonAppInfo;
   final controller = TextEditingController();
 
-  void _saveNote(String note) {
-
-  }
-
   @override
   Widget build(BuildContext context) {
+    controller.text = lessonAppInfo.note;
+
     return GestureDetector(
       onTap: () {
+        lessonAppInfo.note = controller.text;
+        BlocProvider.of<ScheduleBloc>(context).add(
+            ScheduleUpdateLessonsInfoEvent(lessonAppInfo: LessonAppInfo(
+              id: lessonAppInfo.id,
+              note: controller.text,
+              lessonCode: lessonAppInfo.lessonCode
+            )));
         FocusScope.of(context).requestFocus(FocusNode());
-        _saveNote(controller.text);
       },
       child: KeyboardPositioned(
         child: Container(
@@ -63,6 +69,7 @@ class LessonCardInfoModal extends StatelessWidget {
                       onEditingComplete: () => print("on editing complete"),
                       onChanged: (changed) => print("on changed: $changed"),
                       onSubmitted: (complete) => print("on submitted $complete"),
+                      controller: controller,
                     ),
                   ),
                 ],

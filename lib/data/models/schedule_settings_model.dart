@@ -5,12 +5,12 @@ class ScheduleSettingsModel extends ScheduleSettings {
   ScheduleSettingsModel({
     required showEmptyLessons,
     required showLessonsNumbers,
-    required showLessonsWithNotesInDifferentColor,
+    //required showLessonsWithNotesInDifferentColor,
     required calendarFormat,
   }) : super(
           showEmptyLessons: showEmptyLessons,
           showLessonsNumbers: showLessonsNumbers,
-          showLessonsWithNoteInDifferentColor: showLessonsWithNotesInDifferentColor ?? true,
+          //showLessonsWithNoteInDifferentColor: showLessonsWithNotesInDifferentColor ?? true,
           calendarFormat: calendarFormat,
         );
 
@@ -23,14 +23,14 @@ class ScheduleSettingsModel extends ScheduleSettings {
       ScheduleSettingsModel(
         showEmptyLessons: json["show_empty_lessons"],
         showLessonsNumbers: json["show_lessons_numbers"],
-        showLessonsWithNotesInDifferentColor: json["show_lessons_with_notes_in_different_color"],
+        //showLessonsWithNotesInDifferentColor: json["show_lessons_with_notes_in_different_color"],
         calendarFormat: json["calendar_format"],
       );
 
   Map<String, dynamic> toJson() => {
         "show_empty_lessons": showEmptyLessons,
         "show_lessons_numbers": showLessonsNumbers,
-        "show_lessons_with_notes_in_different_color": showLessonsWithNoteInDifferentColor,
+        //"show_lessons_with_notes_in_different_color": showLessonsWithNoteInDifferentColor,
         "calendar_format": calendarFormat,
       };
 }

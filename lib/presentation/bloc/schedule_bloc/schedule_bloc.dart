@@ -3,15 +3,18 @@ import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:rtu_mirea_app/common/errors/failures.dart';
+import 'package:rtu_mirea_app/domain/entities/lesson_app_info.dart';
 import 'package:rtu_mirea_app/domain/entities/schedule.dart';
 import 'package:rtu_mirea_app/domain/entities/schedule_settings.dart';
 import 'package:rtu_mirea_app/domain/usecases/delete_schedule.dart';
 import 'package:rtu_mirea_app/domain/usecases/get_active_group.dart';
 import 'package:rtu_mirea_app/domain/usecases/get_downloaded_schedules.dart';
 import 'package:rtu_mirea_app/domain/usecases/get_groups.dart';
+import 'package:rtu_mirea_app/domain/usecases/get_lessons_app_info.dart';
 import 'package:rtu_mirea_app/domain/usecases/get_schedule.dart';
 import 'package:rtu_mirea_app/domain/usecases/get_schedule_settings.dart';
 import 'package:rtu_mirea_app/domain/usecases/set_active_group.dart';
+import 'package:rtu_mirea_app/domain/usecases/set_lessons_app_info.dart';
 import 'package:rtu_mirea_app/domain/usecases/set_schedule_settings.dart';
 
 part 'schedule_event.dart';
@@ -27,6 +30,8 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
     required this.deleteSchedule,
     required this.getScheduleSettings,
     required this.setScheduleSettings,
+    required this.getLessonsAppInfo,
+    required this.setLessonAppInfo
   }) : super(ScheduleInitial());
 
   final GetActiveGroup getActiveGroup;
@@ -37,6 +42,8 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
   final DeleteSchedule deleteSchedule;
   final GetScheduleSettings getScheduleSettings;
   final SetScheduleSettings setScheduleSettings;
+  final GetLessonsAppInfo getLessonsAppInfo;
+  final SetLessonsAppInfo setLessonAppInfo;
 
   /// List of all groups (1028+)
   static List<String> groupsList = [];
@@ -50,6 +57,8 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
   Stream<ScheduleState> mapEventToState(
     ScheduleEvent event,
   ) async* {
+    final lessonsAppInfo = await getLessonsAppInfo();
+
     if (event is ScheduleOpenEvent) {
       // Getting a list of all groups from a remote API
       _downloadGroups();
@@ -81,6 +90,7 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
                     activeGroup: activeGroupName,
                     downloadedScheduleGroups: downloadedScheduleGroups,
                     scheduleSettings: scheduleSettings,
+                    lessonsAppInfo: lessonsAppInfo
                   ));
         }, (localSchedule) async* {
           // display cached schedule
@@ -89,6 +99,7 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
             activeGroup: activeGroupName,
             downloadedScheduleGroups: downloadedScheduleGroups,
             scheduleSettings: scheduleSettings,
+            lessonsAppInfo: lessonsAppInfo
           );
 
           // We will update the schedule, but without the loading indicator
@@ -102,6 +113,7 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
                 activeGroup: activeGroupName,
                 downloadedScheduleGroups: downloadedScheduleGroups,
                 scheduleSettings: scheduleSettings,
+                lessonsAppInfo: lessonsAppInfo
               ),
             );
           }
@@ -131,6 +143,7 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
                   activeGroup: _groupSuggestion,
                   downloadedScheduleGroups: _downloadedGroups,
                   scheduleSettings: scheduleSettings,
+                  lessonsAppInfo: lessonsAppInfo
                 ));
       } else {
         yield ScheduleGroupNotFound();
@@ -155,6 +168,7 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
             activeGroup: event.activeGroup,
             downloadedScheduleGroups: _downloadedGroups,
             scheduleSettings: scheduleSettings,
+            lessonsAppInfo: lessonsAppInfo
           ),
         );
       }
@@ -167,6 +181,7 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
         activeGroup: event.schedule.group,
         downloadedScheduleGroups: _downloadedGroups,
         scheduleSettings: scheduleSettings,
+        lessonsAppInfo: lessonsAppInfo
       );
     } else if (event is ScheduleUpdateSettingsEvent) {
       final oldSettings = await getScheduleSettings();
@@ -175,8 +190,8 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
             event.showEmptyLessons ?? oldSettings.showEmptyLessons,
         showLessonsNumbers:
             event.showEmptyLessons ?? oldSettings.showLessonsNumbers,
-        showLessonsWithNoteInDifferentColor:
-            event.showLessonsWithNotesInDifferentColor ?? oldSettings.showLessonsWithNoteInDifferentColor,
+        //showLessonsWithNoteInDifferentColor:
+        //    event.showLessonsWithNotesInDifferentColor ?? oldSettings.showLessonsWithNoteInDifferentColor,
         calendarFormat: event.calendarFormat ?? oldSettings.calendarFormat,
       );
 
@@ -189,6 +204,22 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
           activeGroup: currentState.schedule.group,
           downloadedScheduleGroups: currentState.downloadedScheduleGroups,
           scheduleSettings: newSettings,
+          lessonsAppInfo: lessonsAppInfo
+        );
+      }
+    } else if (event is ScheduleUpdateLessonsInfoEvent){
+      if (state is ScheduleLoaded) {
+        await setLessonAppInfo(event.lessonAppInfo);
+        final lessonsAppInfo = await getLessonsAppInfo();
+        final currentState = state as ScheduleLoaded;
+        final scheduleSettings = await getScheduleSettings();
+        yield ScheduleLoaded(
+            schedule: currentState.schedule,
+            activeGroup: currentState.schedule.group,
+            downloadedScheduleGroups: currentState.downloadedScheduleGroups,
+            scheduleSettings: scheduleSettings,
+            lessonsAppInfo: lessonsAppInfo,
+            updatedLessonAppInfo: event.lessonAppInfo
         );
       }
     }

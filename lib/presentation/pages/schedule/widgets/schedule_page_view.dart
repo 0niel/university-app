@@ -39,7 +39,7 @@ class _SchedulePageViewState extends State<SchedulePageView> {
       DateTime.utc(2021, 12, 19); // TODO: create method for it
 
   late List<List<Lesson>> _allLessonsInWeek;
-  late HashMap<Lesson, LessonAppInfo> _lessonToAppInfo;
+  late Map<Lesson, LessonAppInfo> _lessonToAppInfo;
 
   @override
   void initState() {
@@ -51,7 +51,7 @@ class _SchedulePageViewState extends State<SchedulePageView> {
     _selectedDay = DateTime.now();
     _selectedWeek = Calendar.getCurrentWeek();
     _allLessonsInWeek = _getLessonsByWeek(_selectedWeek, widget.schedule);
-    _lessonToAppInfo = _mapLessonsToAppInfo(_selectedWeek, widget.schedule);
+    //_lessonToAppInfo = _mapLessonsToAppInfo(_selectedWeek, widget.schedule);
     _calendarFormat = CalendarFormat.values[
         (BlocProvider.of<ScheduleBloc>(context).state as ScheduleLoaded)
             .scheduleSettings
@@ -72,18 +72,31 @@ class _SchedulePageViewState extends State<SchedulePageView> {
     return lessonsInWeek;
   }
 
-  HashMap<Lesson, LessonAppInfo> _mapLessonsToAppInfo(int week, Schedule schedule) {
-    var lessonToAppInfo = HashMap<Lesson, LessonAppInfo>();
-    for (int i = 0; i < _allLessonsInWeek[week].length; i++) {
-      lessonToAppInfo[_allLessonsInWeek[week][i]] = _getLessonAppInfo();
+  Map<Lesson, LessonAppInfo> _mapLessonsToAppInfo(int week, List<Lesson> lessons) {
+    final lessonToAppInfo = Map<Lesson, LessonAppInfo>();
+    for (int i = 0; i < lessons.length; i++) {
+      lessonToAppInfo[lessons[i]] =
+          _getLessonAppInfo(lessons[i]);
     }
     return lessonToAppInfo;
   }
 
-  LessonAppInfo _getLessonAppInfo() {
-    LessonAppInfo aboba = LessonAppInfo(id: 1, lessonCode: "a", note: "aboba");
-    
-    return aboba;
+  LessonAppInfo _getLessonAppInfo(Lesson lesson) {
+    final lessonCode = _getLessonCode(lesson);
+    final info = BlocProvider.of<ScheduleBloc>(context).state as ScheduleLoaded;
+
+    /*if (!(info is ScheduleWithAppInfoLoaded))
+      return LessonAppInfo(lessonCode: lessonCode);*/
+
+    final appInfo = info.lessonsAppInfo.firstWhere(
+            (element) => element.lessonCode == lessonCode,
+            orElse: () => LessonAppInfo(lessonCode: lessonCode));
+
+    return appInfo;
+  }
+
+  String _getLessonCode(Lesson lesson) {
+    return (lesson.name.toString() + lesson.timeStart.toString() + _selectedDay.day.toString());
   }
 
   Widget _buildEmptyLessons() {
@@ -167,6 +180,8 @@ class _SchedulePageViewState extends State<SchedulePageView> {
         lessons = _getLessonsWithEmpty(lessons, state.activeGroup);
       }
 
+      _lessonToAppInfo = _mapLessonsToAppInfo(_selectedWeek, lessons);
+
       return Container(
         child: ListView.separated(
           itemCount: lessons.length,
@@ -181,14 +196,14 @@ class _SchedulePageViewState extends State<SchedulePageView> {
                       room: '${lessons[i].rooms.join(', ')}',
                       type: lessons[i].types,
                       teacher: '${lessons[i].teachers.join(', ')}',
-                      drawNoteIndicator: true,
+                      drawNoteIndicator: _lessonToAppInfo[lessons[i]]!.note.isNotEmpty,
                       onClick: () => { showModalBottomSheet(
                         context: context,
                         isScrollControlled: true,
                         backgroundColor: Colors.transparent,
                         builder: (context) => LessonCardInfoModal(
                           lesson: lessons[i],
-                          lessonAppInfo: LessonAppInfo(id: 1, lessonCode: "a", note: "aboba"),
+                          lessonAppInfo: _lessonToAppInfo[lessons[i]]!,
                         ),
                       )},
                     )

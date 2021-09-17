@@ -34,18 +34,45 @@ class ScheduleLoaded extends ScheduleState {
   final String activeGroup;
   final List<String> downloadedScheduleGroups;
   final ScheduleSettings scheduleSettings;
+  final List<LessonAppInfo> lessonsAppInfo;
+  final LessonAppInfo? updatedLessonAppInfo;
 
   ScheduleLoaded({
     required this.schedule,
     required this.activeGroup,
     required this.downloadedScheduleGroups,
     required this.scheduleSettings,
+    required this.lessonsAppInfo,
+    this.updatedLessonAppInfo
   });
 
   @override
   List<Object> get props =>
-      [schedule, activeGroup, downloadedScheduleGroups, scheduleSettings];
+      [schedule, activeGroup, downloadedScheduleGroups,
+        scheduleSettings, lessonsAppInfo, updatedLessonAppInfo ?? true];
 }
+
+/*
+class ScheduleWithAppInfoLoaded extends ScheduleLoaded {
+  ScheduleWithAppInfoLoaded({
+    required schedule,
+    required activeGroup,
+    required downloadedScheduleGroups,
+    required scheduleSettings,
+    required this.lessonsAppInfo
+  }) : super(
+      schedule: schedule,
+      activeGroup: activeGroup,
+      downloadedScheduleGroups: downloadedScheduleGroups,
+      scheduleSettings: scheduleSettings);
+
+  final List<LessonAppInfo> lessonsAppInfo;
+
+  @override
+  List<Object> get props =>
+      [schedule, activeGroup, downloadedScheduleGroups, scheduleSettings, lessonsAppInfo];
+}
+*/
 
 class ScheduleLoadError extends ScheduleState {
   final String errorMessage;
