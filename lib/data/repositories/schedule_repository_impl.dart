@@ -23,7 +23,7 @@ class ScheduleRepositoryImpl implements ScheduleRepository {
 
   @override
   Future<Either<Failure, List<String>>> getAllGroups() async {
-    connectionChecker.checkInterval = Duration(seconds: 2);
+    connectionChecker.checkInterval = const Duration(seconds: 2);
     if (await connectionChecker.hasConnection) {
       try {
         final groupsList = await remoteDataSource.getGroups();
@@ -150,7 +150,7 @@ class ScheduleRepositoryImpl implements ScheduleRepository {
       final localSettings = await localDataSource.getSettingsFromCache();
       return localSettings;
     } on CacheException {
-      final newLocalSettings = ScheduleSettingsModel(
+      const newLocalSettings = ScheduleSettingsModel(
         showEmptyLessons: false,
         showLessonsNumbers: false,
         calendarFormat: 2,

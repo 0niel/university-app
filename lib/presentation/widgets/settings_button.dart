@@ -3,7 +3,9 @@ import 'package:rtu_mirea_app/presentation/colors.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 
 class SettingsButton extends StatelessWidget {
-  const SettingsButton(this.text, this.icon, this.onClick);
+  const SettingsButton(
+      {Key? key, required this.text, required this.icon, required this.onClick})
+      : super(key: key);
   final String text;
   final IconData icon;
   final Function onClick;
@@ -22,7 +24,7 @@ class SettingsButton extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Padding(
-              padding: EdgeInsets.all(16),
+              padding: const EdgeInsets.all(16),
               child: Icon(
                 icon,
                 color: Theme.of(context).textTheme.bodyText1?.color,

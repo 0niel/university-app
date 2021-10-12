@@ -21,7 +21,8 @@ class MapFloorLoaded extends MapState {
 }
 
 class MapScaleSet extends MapState {
-  MapScaleSet({required this.floor, required this.scale}) : super (floor: floor);
+  const MapScaleSet({required this.floor, required this.scale})
+      : super(floor: floor);
 
   final int floor;
   final double scale;
@@ -31,7 +32,7 @@ class MapScaleSet extends MapState {
 }
 
 class MapSearchFoundUpdated extends MapState {
-  MapSearchFoundUpdated({required this.floor, required this.foundRooms})
+  const MapSearchFoundUpdated({required this.floor, required this.foundRooms})
       : super(floor: floor);
 
   final int floor;

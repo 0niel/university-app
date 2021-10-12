@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:rtu_mirea_app/common/errors/exceptions.dart';
 import 'package:rtu_mirea_app/data/models/schedule_model.dart';
 import 'package:rtu_mirea_app/data/models/schedule_settings_model.dart';

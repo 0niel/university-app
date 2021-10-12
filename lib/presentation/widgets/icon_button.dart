@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:rtu_mirea_app/presentation/colors.dart';
-import 'package:rtu_mirea_app/presentation/theme.dart';
 
 class SocialIconButton extends StatelessWidget {
-  const SocialIconButton(this.assetImage, this.onClick);
+  const SocialIconButton(
+      {Key? key, required this.assetImage, required this.onClick})
+      : super(key: key);
   final AssetImage assetImage;
   final Function onClick;
 

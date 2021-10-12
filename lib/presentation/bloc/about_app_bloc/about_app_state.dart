@@ -15,7 +15,8 @@ class AboutAppMembersLoaded extends AboutAppState {
   final List<ForumMember> patrons;
   final List<Contributor> contributors;
 
-  AboutAppMembersLoaded({required this.patrons, required this.contributors});
+  const AboutAppMembersLoaded(
+      {required this.patrons, required this.contributors});
 
   @override
   List<Object> get props => [patrons, contributors];
@@ -25,7 +26,7 @@ class AboutAppMembersLoadError extends AboutAppState {
   final bool contributorsLoadError;
   final bool patronsLoadError;
 
-  AboutAppMembersLoadError(
+  const AboutAppMembersLoadError(
       {required this.contributorsLoadError, required this.patronsLoadError});
   @override
   List<Object> get props => [contributorsLoadError, patronsLoadError];

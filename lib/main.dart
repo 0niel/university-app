@@ -1,10 +1,7 @@
-import 'dart:io';
-
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:rtu_mirea_app/presentation/bloc/about_app_bloc/about_app_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/home_navigator_bloc/home_navigator_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/map_cubit/map_cubit.dart';
@@ -55,7 +52,7 @@ class App extends StatelessWidget {
     ]);
 
     // deleting the system status bar color
-    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+    SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
     ));
 
@@ -80,12 +77,14 @@ class App extends StatelessWidget {
           debugShowCheckedModeBanner: false,
           title: 'Приложение РТУ МИРЭА',
           theme: theme,
-          home: showOnboarding ? OnBoardingScreen() : HomeNavigatorScreen(),
+          home: showOnboarding
+              ? const OnBoardingScreen()
+              : const HomeNavigatorScreen(),
           routes: {
-            ScheduleScreen.routeName: (context) => ScheduleScreen(),
-            MapScreen.routeName: (context) => MapScreen(),
-            ProfileScreen.routeName: (context) => ProfileScreen(),
-            OnBoardingScreen.routeName: (context) => OnBoardingScreen(),
+            ScheduleScreen.routeName: (context) => const ScheduleScreen(),
+            MapScreen.routeName: (context) => const MapScreen(),
+            ProfileScreen.routeName: (context) => const ProfileScreen(),
+            OnBoardingScreen.routeName: (context) => const OnBoardingScreen(),
             NewsScreen.routeName: (context) => NewsScreen()
           },
         ),

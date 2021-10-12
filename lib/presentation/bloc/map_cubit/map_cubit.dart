@@ -28,9 +28,8 @@ class MapCubit extends Cubit<MapState> {
 
   void _loadRoomsData() {
     Future.delayed(Duration.zero, () async {
-      if (roomsData == null)
-        roomsData =
-            json.decode(await rootBundle.loadString('assets/map/rooms.json'));
+      roomsData ??=
+          json.decode(await rootBundle.loadString('assets/map/rooms.json'));
     });
   }
 
@@ -55,7 +54,8 @@ class MapCubit extends Cubit<MapState> {
   }
 
   /// Set map scale to value
-  void setMapScale (double scale) => emit(MapScaleSet(floor: currentFloor, scale: scale));
+  void setMapScale(double scale) =>
+      emit(MapScaleSet(floor: currentFloor, scale: scale));
 
   /// Open the floor by [index]
   void goToFloor(int index) => emit(MapFloorLoaded(floor: index));

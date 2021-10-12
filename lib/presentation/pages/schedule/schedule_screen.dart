@@ -13,7 +13,7 @@ import 'widgets/schedule_page_view.dart';
 
 class ScheduleScreen extends StatefulWidget {
   static const String routeName = '/schedule';
-  ScheduleScreen({Key? key}) : super(key: key);
+  const ScheduleScreen({Key? key}) : super(key: key);
 
   @override
   _ScheduleScreenState createState() => _ScheduleScreenState();
@@ -26,6 +26,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
   final GlobalKey<InnerDrawerState> _innerDrawerKey =
       GlobalKey<InnerDrawerState>();
 
+  @override
   void initState() {
     super.initState();
   }
@@ -147,11 +148,11 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
       swipeChild: true,
       rightChild: SafeArea(
         child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 10),
+          padding: const EdgeInsets.symmetric(horizontal: 10),
           child: Column(
             children: [
               Padding(
-                padding: EdgeInsets.symmetric(vertical: 18),
+                padding: const EdgeInsets.symmetric(vertical: 18),
                 child: Text(
                   'Управление расписанием и группами',
                   style: DarkTextTheme.h6,
@@ -212,7 +213,8 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                             child: Column(
                               children: [
                                 Padding(
-                                  padding: EdgeInsets.symmetric(vertical: 20),
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 20),
                                   child: Row(
                                     children: [
                                       SvgPicture.asset(
@@ -220,7 +222,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                                         height: 16,
                                         width: 16,
                                       ),
-                                      SizedBox(width: 20),
+                                      const SizedBox(width: 20),
                                       Text("Добавить группу",
                                           style: DarkTextTheme.buttonL),
                                     ],
@@ -237,28 +239,30 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                               ],
                             ),
                             onTap: () {
-                              if (!_modalShown)
+                              if (!_modalShown) {
                                 showModalBottomSheet(
                                   context: context,
                                   isScrollControlled: true,
                                   backgroundColor: Colors.transparent,
                                   builder: (context) =>
-                                      ScheduleSettingsModal(isFirstRun: false),
+                                      const ScheduleSettingsModal(
+                                          isFirstRun: false),
                                 ).whenComplete(() {
-                                  this._modalShown = false;
+                                  _modalShown = false;
                                 });
-                              this._modalShown = true;
+                              }
+                              _modalShown = true;
                             },
                           ),
                         ),
-                        SizedBox(height: 20),
+                        const SizedBox(height: 20),
                         Text(
                           "Группы".toUpperCase(),
                           style: DarkTextTheme.chip
                               .copyWith(color: DarkThemeColors.deactiveDarker),
                           textAlign: TextAlign.left,
                         ),
-                        SizedBox(height: 10),
+                        const SizedBox(height: 10),
                         _buildGroupButton(
                           state.activeGroup,
                           state.activeGroup,
@@ -270,13 +274,14 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                             itemCount: state.downloadedScheduleGroups.length,
                             itemBuilder: (context, index) {
                               if (state.downloadedScheduleGroups[index] !=
-                                  state.activeGroup)
+                                  state.activeGroup) {
                                 return _buildGroupButton(
                                   state.downloadedScheduleGroups[index],
                                   state.activeGroup,
                                   false,
                                   state.schedule,
                                 );
+                              }
                               return Container();
                             },
                           ),
@@ -284,8 +289,9 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                       ],
                     ),
                   );
-                } else
+                } else {
                   return Container();
+                }
               }),
             ],
           ),
@@ -300,7 +306,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
           ),
           actions: [
             IconButton(
-                icon: Icon(Icons.dehaze),
+                icon: const Icon(Icons.dehaze),
                 onPressed: () {
                   _innerDrawerKey.currentState!.toggle();
                 }),
@@ -322,17 +328,18 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
               } else if (state is ScheduleActiveGroupEmpty) {
                 WidgetsBinding.instance!.addPostFrameCallback(
                   (_) {
-                    if (!_modalShown)
+                    if (!_modalShown) {
                       showModalBottomSheet(
                         context: context,
                         isScrollControlled: true,
                         backgroundColor: Colors.transparent,
                         builder: (context) =>
-                            ScheduleSettingsModal(isFirstRun: true),
+                            const ScheduleSettingsModal(isFirstRun: true),
                       ).whenComplete(() {
-                        this._modalShown = false;
+                        _modalShown = false;
                       });
-                    this._modalShown = true;
+                    }
+                    _modalShown = true;
                   },
                 );
                 return Container();
@@ -341,7 +348,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                   _modalShown = false;
                   Navigator.pop(context);
                 }
-                return Center(
+                return const Center(
                   child: CircularProgressIndicator(
                     backgroundColor: DarkThemeColors.primary,
                     strokeWidth: 5,
@@ -356,7 +363,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                       'Упс!',
                       style: DarkTextTheme.h3,
                     ),
-                    SizedBox(
+                    const SizedBox(
                       height: 24,
                     ),
                     Text(
@@ -365,8 +372,9 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                     )
                   ],
                 );
-              } else
+              } else {
                 return Container();
+              }
             },
           ),
         ),

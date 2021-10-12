@@ -22,7 +22,7 @@ class GetNewsParams extends Equatable {
   final int limit;
   final String? tag;
 
-  GetNewsParams({required this.offset, required this.limit, this.tag});
+  const GetNewsParams({required this.offset, required this.limit, this.tag});
 
   @override
   List<Object?> get props => [offset, limit, tag];

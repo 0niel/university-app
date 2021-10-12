@@ -33,7 +33,8 @@ class ScheduleModel extends Schedule {
 }
 
 class ScheduleWeekdayValueModel extends ScheduleWeekdayValue {
-  ScheduleWeekdayValueModel({required this.lessons}) : super(lessons: lessons);
+  const ScheduleWeekdayValueModel({required this.lessons})
+      : super(lessons: lessons);
 
   final List<List<LessonModel>> lessons;
 

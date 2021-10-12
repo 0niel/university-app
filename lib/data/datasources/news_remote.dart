@@ -1,7 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:rtu_mirea_app/common/errors/exceptions.dart';
 import 'package:rtu_mirea_app/data/models/news_item_model.dart';
-import 'dart:convert';
 
 abstract class NewsRemoteData {
   Future<List<NewsItemModel>> getNews(int offset, int limit, [String? tag]);
@@ -9,7 +8,7 @@ abstract class NewsRemoteData {
 }
 
 class NewsRemoteDataImpl extends NewsRemoteData {
-  static const _API_BASE_URL = "http://schedule.mirea.ninja:5050";
+  static const _apiUrl = "http://schedule.mirea.ninja:5050";
 
   final Dio httpClient;
 
@@ -19,8 +18,8 @@ class NewsRemoteDataImpl extends NewsRemoteData {
   Future<List<NewsItemModel>> getNews(int offset, int limit,
       [String? tag]) async {
     try {
-      final response = await httpClient.get(
-          _API_BASE_URL + '/news' + '?tag=$tag&limit=$limit&offset=$offset');
+      final response = await httpClient
+          .get(_apiUrl + '/news' + '?tag=$tag&limit=$limit&offset=$offset');
 
       if (response.statusCode == 200) {
         Map responseBody = response.data;
@@ -38,7 +37,7 @@ class NewsRemoteDataImpl extends NewsRemoteData {
   @override
   Future<List<String>> getTags() async {
     try {
-      final response = await httpClient.get(_API_BASE_URL + '/tags');
+      final response = await httpClient.get(_apiUrl + '/tags');
 
       if (response.statusCode == 200) {
         Map responseBody = response.data;

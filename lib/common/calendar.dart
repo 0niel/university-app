@@ -48,7 +48,7 @@ abstract class Calendar {
     // Добавляем дни в массив, увеличивая счётчик на 1 день
     for (int i = 0; i < 7; ++i) {
       daysInWeek.add(firstDayOfChosenWeek);
-      firstDayOfChosenWeek = firstDayOfChosenWeek.add(Duration(days: 1));
+      firstDayOfChosenWeek = firstDayOfChosenWeek.add(const Duration(days: 1));
     }
     return daysInWeek;
   }

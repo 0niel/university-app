@@ -21,13 +21,13 @@ class EmptyLessonCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(12.0),
       ),
       child: Container(
-        constraints: BoxConstraints(minHeight: 55),
-        padding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+        constraints: const BoxConstraints(minHeight: 55),
+        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Padding(
-              padding: EdgeInsets.only(right: 20, top: 3),
+              padding: const EdgeInsets.only(right: 20, top: 3),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
@@ -37,9 +37,7 @@ class EmptyLessonCard extends StatelessWidget {
                     style: DarkTextTheme.bodyBold.copyWith(
                         color: DarkThemeColors.deactive, fontSize: 12),
                   ),
-                  SizedBox(
-                    height: 5,
-                  ),
+                  const SizedBox(height: 5),
                   Text(
                     timeEnd,
                     style: DarkTextTheme.bodyBold.copyWith(
@@ -55,7 +53,7 @@ class EmptyLessonCard extends StatelessWidget {
                   height: 1,
                   color: DarkThemeColors.deactive,
                 ),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 Container(
                   width: 25,
                   height: 1,

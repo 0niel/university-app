@@ -10,7 +10,7 @@ abstract class HomeNavigatorState extends Equatable {
 }
 
 class SchedulePage extends HomeNavigatorState {
-  final _screen = ScheduleScreen();
+  final _screen = const ScheduleScreen();
 
   @override
   Widget get screen => _screen;
@@ -20,7 +20,7 @@ class SchedulePage extends HomeNavigatorState {
 }
 
 class MapPage extends HomeNavigatorState {
-  final _screen = MapScreen();
+  final _screen = const MapScreen();
 
   @override
   Widget get screen => _screen;
@@ -30,7 +30,7 @@ class MapPage extends HomeNavigatorState {
 }
 
 class ProfilePage extends HomeNavigatorState {
-  final _screen = ProfileScreen();
+  final _screen = const ProfileScreen();
 
   @override
   Widget get screen => _screen;
