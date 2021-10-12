@@ -21,7 +21,8 @@ class NextPageViewButton extends StatelessWidget {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
-                builder: (context) => HomeNavigatorScreen(isFirstRun: true)),
+                builder: (context) =>
+                    const HomeNavigatorScreen(isFirstRun: true)),
           );
         } else {
           onClick();

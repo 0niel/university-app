@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 
 class Contributor extends Equatable {
-  Contributor({
+  const Contributor({
     required this.login,
     required this.avatarUrl,
     required this.htmlUrl,

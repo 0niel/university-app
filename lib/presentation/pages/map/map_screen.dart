@@ -83,6 +83,7 @@ class _MapScreenState extends State<MapScreen> {
     );
   }
 
+  // ignore: unused_element
   Widget _buildSearchBar() {
     return FloatingSearchBar(
       accentColor: DarkThemeColors.primary,
