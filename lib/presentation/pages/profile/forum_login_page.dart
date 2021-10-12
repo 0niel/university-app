@@ -1,3 +1,5 @@
+// ignore_for_file: unused_element
+
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
@@ -62,6 +64,7 @@ class ForumLoginPage extends StatelessWidget {
                 if (url.toString().contains('discourse://auth_redirect')) {
                   var uri = Uri.parse(url.toString());
                   String payload = uri.queryParameters['payload']!;
+                  // ignore: unused_local_variable
                   String decryptedString = decrypt(
                       payload, _asymmetricKeyPair.privateKey as RSAPrivateKey);
                 }

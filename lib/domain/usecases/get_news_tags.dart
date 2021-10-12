@@ -9,7 +9,7 @@ class GetNewsTags extends UseCase<List<String>, void> {
   GetNewsTags(this.newsRepository);
 
   @override
-  Future<Either<Failure, List<String>>> call([_]) async {
+  Future<Either<Failure, List<String>>> call([params]) async {
     return await newsRepository.getTags();
   }
 }
