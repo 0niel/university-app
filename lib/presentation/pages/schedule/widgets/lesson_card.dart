@@ -21,14 +21,15 @@ class LessonCard extends StatelessWidget {
   }) : super(key: key);
 
   static Color getColorByType(String lessonType) {
-    if (lessonType.contains('лк') || lessonType.contains('лек'))
+    if (lessonType.contains('лк') || lessonType.contains('лек')) {
       return DarkThemeColors.colorful01;
-    else if (lessonType.contains('лб') || lessonType.contains('лаб'))
+    } else if (lessonType.contains('лб') || lessonType.contains('лаб')) {
       return DarkThemeColors.colorful07;
-    else if (lessonType.contains('с/р'))
+    } else if (lessonType.contains('с/р')) {
       return DarkThemeColors.colorful02;
-    else
+    } else {
       return DarkThemeColors.colorful03;
+    }
   }
 
   @override
@@ -40,13 +41,13 @@ class LessonCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(12.0),
       ),
       child: Container(
-        constraints: BoxConstraints(minHeight: 75),
-        padding: EdgeInsets.symmetric(vertical: 20, horizontal: 20),
+        constraints: const BoxConstraints(minHeight: 75),
+        padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Padding(
-              padding: EdgeInsets.only(right: 20, top: 3),
+              padding: const EdgeInsets.only(right: 20, top: 3),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
@@ -56,7 +57,7 @@ class LessonCard extends StatelessWidget {
                     style: DarkTextTheme.bodyBold.copyWith(
                         color: DarkThemeColors.deactive, fontSize: 12),
                   ),
-                  SizedBox(
+                  const SizedBox(
                     height: 5,
                   ),
                   Text(
@@ -72,12 +73,12 @@ class LessonCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    room != '' ? '$name, $room' : '$name',
+                    room != '' ? '$name, $room' : name,
                     style: DarkTextTheme.titleM,
                     maxLines: 8,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  SizedBox(
+                  const SizedBox(
                     height: 4,
                   ),
                   Text(
@@ -92,7 +93,7 @@ class LessonCard extends StatelessWidget {
             Container(
               alignment: Alignment.topRight,
               child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 12),
+                padding: const EdgeInsets.symmetric(horizontal: 12),
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(100),

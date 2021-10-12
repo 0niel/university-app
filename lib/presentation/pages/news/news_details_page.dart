@@ -22,7 +22,7 @@ class NewsDetailsPage extends StatelessWidget {
           return [
             SliverAppBar(
               expandedHeight: MediaQuery.of(context).size.height * 0.6,
-              actionsIconTheme: IconThemeData(opacity: 0.0),
+              actionsIconTheme: const IconThemeData(opacity: 0.0),
               flexibleSpace: Stack(
                 children: <Widget>[
                   Positioned.fill(
@@ -43,7 +43,8 @@ class NewsDetailsPage extends StatelessWidget {
               padding: EdgeInsets.zero,
               children: [
                 Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -51,7 +52,7 @@ class NewsDetailsPage extends StatelessWidget {
                         newsItem.title,
                         style: DarkTextTheme.h5,
                       ),
-                      SizedBox(height: 24),
+                      const SizedBox(height: 24),
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -69,7 +70,7 @@ class NewsDetailsPage extends StatelessWidget {
                               SvgPicture.asset("assets/icons/calendar.svg",
                                   height: 50),
                               Padding(
-                                padding: EdgeInsets.only(left: 8, top: 4),
+                                padding: const EdgeInsets.only(left: 8, top: 4),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
@@ -78,7 +79,7 @@ class NewsDetailsPage extends StatelessWidget {
                                       style: DarkTextTheme.body.copyWith(
                                           color: DarkThemeColors.deactive),
                                     ),
-                                    SizedBox(height: 4),
+                                    const SizedBox(height: 4),
                                     Text(
                                       DateFormat.MMMd('ru_RU')
                                           .format(newsItem.date)
@@ -94,7 +95,7 @@ class NewsDetailsPage extends StatelessWidget {
                         ],
                       ),
                       Padding(
-                        padding: EdgeInsets.symmetric(vertical: 16),
+                        padding: const EdgeInsets.symmetric(vertical: 16),
                         child: MarkdownBody(
                           styleSheet: MarkdownStyleSheet(
                             a: DarkTextTheme.body
@@ -116,7 +117,7 @@ class NewsDetailsPage extends StatelessWidget {
                     ],
                   ),
                 ),
-                Container(
+                SizedBox(
                   height: 112,
                   width: double.infinity,
                   child: ListView(
@@ -135,7 +136,7 @@ class NewsDetailsPage extends StatelessWidget {
                               }));
                             },
                             child: Padding(
-                              padding: EdgeInsets.only(left: 24),
+                              padding: const EdgeInsets.only(left: 24),
                               child: ClipRRect(
                                 borderRadius: BorderRadius.circular(12.0),
                                 child: Image.network(
@@ -147,13 +148,14 @@ class NewsDetailsPage extends StatelessWidget {
                               ),
                             ),
                           );
-                        } else
+                        } else {
                           return Container();
+                        }
                       },
                     ),
                   ),
                 ),
-                SizedBox(height: 24),
+                const SizedBox(height: 24),
               ],
             ),
           ),

@@ -5,7 +5,7 @@ import 'package:rtu_mirea_app/presentation/colors.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 
 class SettingsSwitchButton extends StatefulWidget {
-  SettingsSwitchButton({
+  const SettingsSwitchButton({
     Key? key,
     required this.svgPicture,
     required this.text,
@@ -25,6 +25,7 @@ class SettingsSwitchButton extends StatefulWidget {
 class _SettingsSwitchButtonState extends State<SettingsSwitchButton> {
   late ValueNotifier<bool> _switchValueNotifier;
 
+  @override
   void initState() {
     super.initState();
     _switchValueNotifier = ValueNotifier(widget.initialValue);
@@ -39,12 +40,12 @@ class _SettingsSwitchButtonState extends State<SettingsSwitchButton> {
             Row(
               children: [
                 widget.svgPicture,
-                SizedBox(width: 20),
+                const SizedBox(width: 20),
                 Text(widget.text, style: DarkTextTheme.buttonL),
               ],
             ),
             Padding(
-              padding: EdgeInsets.only(right: 8),
+              padding: const EdgeInsets.only(right: 8),
               child: ValueListenableBuilder(
                 valueListenable: _switchValueNotifier,
                 builder: (context, hasError, child) => CupertinoSwitch(

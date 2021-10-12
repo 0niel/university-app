@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:rtu_mirea_app/domain/entities/schedule_settings.dart';
 
 class ScheduleSettingsModel extends ScheduleSettings {
-  ScheduleSettingsModel({
+  const ScheduleSettingsModel({
     required showEmptyLessons,
     required showLessonsNumbers,
     required calendarFormat,

@@ -12,9 +12,9 @@ class HomeNavigatorScreen extends StatelessWidget {
   final bool? isFirstRun;
 
   static const String routeName = '/';
-  HomeNavigatorScreen({Key? key, this.isFirstRun}) : super(key: key);
+  const HomeNavigatorScreen({Key? key, this.isFirstRun}) : super(key: key);
 
-  static const _navBarItems = const <BottomNavigationBarItem>[
+  static const _navBarItems = <BottomNavigationBarItem>[
     BottomNavigationBarItem(
       icon: Icon(Icons.library_books_rounded),
       label: 'Новости',

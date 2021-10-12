@@ -23,14 +23,14 @@ class NewsItemWidget extends StatelessWidget {
         );
       },
       child: Container(
-        margin: EdgeInsets.only(bottom: 24, left: 16, right: 16),
+        margin: const EdgeInsets.only(bottom: 24, left: 16, right: 16),
         width: MediaQuery.of(context).size.width,
         decoration: BoxDecoration(
           color: DarkThemeColors.background02,
           borderRadius: BorderRadius.circular(16),
         ),
         child: Padding(
-          padding: EdgeInsets.all(16),
+          padding: const EdgeInsets.all(16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
@@ -49,22 +49,22 @@ class NewsItemWidget extends StatelessWidget {
                   ),
                 ),
                 placeholder: (context, url) {
-                  return Center(
+                  return const Center(
                     child: CircularProgressIndicator(),
                   );
                 },
               ),
               Padding(
-                padding: EdgeInsets.only(top: 16),
+                padding: const EdgeInsets.only(top: 16),
                 child: Text(newsItem.title,
                     textAlign: TextAlign.start, style: DarkTextTheme.titleM),
               ),
-              SizedBox(height: 2),
+              const SizedBox(height: 2),
               Text((DateFormat.yMMMd('ru_RU').format(newsItem.date).toString()),
                   textAlign: TextAlign.start,
                   style: DarkTextTheme.captionL
                       .copyWith(color: DarkThemeColors.secondary)),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
               Tags(
                 isClickable: false,
                 withIcon: false,

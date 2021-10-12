@@ -21,7 +21,7 @@ class GetScheduleParams extends Equatable {
   final String group;
   final bool fromRemote;
 
-  GetScheduleParams({required this.group, required this.fromRemote});
+  const GetScheduleParams({required this.group, required this.fromRemote});
 
   @override
   List<Object?> get props => [group, fromRemote];

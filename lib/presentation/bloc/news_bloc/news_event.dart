@@ -12,5 +12,5 @@ class NewsLoadTagsEvent extends NewsEvent {}
 class NewsLoadEvent extends NewsEvent {
   final bool? refresh;
 
-  NewsLoadEvent({this.refresh});
+  const NewsLoadEvent({this.refresh});
 }

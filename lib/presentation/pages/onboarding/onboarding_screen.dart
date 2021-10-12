@@ -13,6 +13,8 @@ import 'widgets/next_button.dart';
 /// OnBoarding screen that greets new users
 class OnBoardingScreen extends StatefulWidget {
   static const String routeName = '/onboarding';
+
+  const OnBoardingScreen({Key? key}) : super(key: key);
   @override
   _OnBoardingScreenState createState() => _OnBoardingScreenState();
 }
@@ -92,8 +94,8 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
     List<Widget> list = [];
     for (int i = 0; i < _numPages; i++) {
       list.add(i == _currentPage
-          ? IndicatorPageView(isActive: true)
-          : IndicatorPageView(isActive: false));
+          ? const IndicatorPageView(isActive: true)
+          : const IndicatorPageView(isActive: false));
     }
     return list;
   }
@@ -102,7 +104,7 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
   List<Widget> _buildPageView() {
     return List.generate(_numPages, (index) {
       return Padding(
-        padding: EdgeInsets.symmetric(horizontal: 20.0),
+        padding: const EdgeInsets.symmetric(horizontal: 20.0),
         child: Stack(
           alignment: AlignmentDirectional.center,
           textDirection: TextDirection.ltr,
@@ -128,7 +130,7 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
                     titlesTexts[index],
                     style: DarkTextTheme.h4,
                   ),
-                  SizedBox(height: 8.0),
+                  const SizedBox(height: 8.0),
                   Text(contentTexts[index], style: DarkTextTheme.bodyL),
                 ],
               ),
@@ -151,7 +153,7 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
             Expanded(
               child: PageView(
                 allowImplicitScrolling: true,
-                physics: ClampingScrollPhysics(),
+                physics: const ClampingScrollPhysics(),
                 controller: _pageController,
                 onPageChanged: (int page) => cubit.swipe(page),
                 children: _buildPageView(),
@@ -160,7 +162,8 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
             BlocBuilder<OnboardingCubit, int>(builder: (context, state) {
               bool isLastPage = cubit.state == _numPages - 1;
               return Padding(
-                padding: EdgeInsets.only(bottom: 35.0, left: 20.0, right: 20.0),
+                padding: const EdgeInsets.only(
+                    bottom: 35.0, left: 20.0, right: 20.0),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   crossAxisAlignment: CrossAxisAlignment.center,
@@ -173,7 +176,8 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
                                 context,
                                 MaterialPageRoute(
                                     builder: (context) =>
-                                        HomeNavigatorScreen(isFirstRun: true)),
+                                        const HomeNavigatorScreen(
+                                            isFirstRun: true)),
                               );
                             },
                             child: Text(
@@ -187,7 +191,7 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
                     NextPageViewButton(
                       isLastPage: isLastPage,
                       onClick: () => _pageController.nextPage(
-                        duration: Duration(milliseconds: 300),
+                        duration: const Duration(milliseconds: 300),
                         curve: Curves.ease,
                       ),
                     ),

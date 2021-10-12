@@ -19,7 +19,7 @@ class SetScheduleSettings extends UseCase<void, SetScheduleSettingsParams> {
 class SetScheduleSettingsParams extends Equatable {
   final ScheduleSettings settings;
 
-  SetScheduleSettingsParams(this.settings);
+  const SetScheduleSettingsParams(this.settings);
 
   @override
   List<Object?> get props => [settings];
