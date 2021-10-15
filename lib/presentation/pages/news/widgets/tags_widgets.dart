@@ -7,17 +7,22 @@ class Tags extends StatelessWidget {
   final bool isClickable;
   final bool withIcon;
   final List<String> tags;
-  Tags({required this.isClickable, required this.withIcon, required this.tags});
+  const Tags(
+      {Key? key,
+      required this.isClickable,
+      required this.withIcon,
+      required this.tags})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Row(crossAxisAlignment: CrossAxisAlignment.center, children: [
       withIcon
           ? SvgPicture.asset("assets/icons/tag.svg", height: 50)
-          : SizedBox(width: 0, height: 0),
+          : const SizedBox(width: 0, height: 0),
       withIcon
-          ? Padding(padding: EdgeInsets.only(left: 12))
-          : SizedBox(width: 0, height: 0),
+          ? const Padding(padding: EdgeInsets.only(left: 12))
+          : const SizedBox(width: 0, height: 0),
       Expanded(
           child: Wrap(
         spacing: 6,
@@ -36,7 +41,8 @@ class Tags extends StatelessWidget {
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: Padding(
-                    padding: EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+                    padding:
+                        const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
                     child: Text(
                       element,
                       style: DarkTextTheme.body

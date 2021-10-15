@@ -226,7 +226,7 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
   }
 
   Future<void> _downloadGroups() async {
-    if (groupsList.length == 0) {
+    if (groupsList.isEmpty) {
       final groups = await getGroups();
       groups.fold(
           (failure) => groupsList = [], (groups) => groupsList = groups);

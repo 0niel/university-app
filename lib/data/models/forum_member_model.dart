@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:rtu_mirea_app/domain/entities/forum_member.dart';
 
 class ForumMemberModel extends ForumMember {
-  ForumMemberModel({
+  const ForumMemberModel({
     required id,
     required username,
     required name,

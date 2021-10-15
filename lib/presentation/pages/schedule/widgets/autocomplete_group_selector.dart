@@ -28,7 +28,7 @@ class GroupTextFormatter extends TextInputFormatter {
 }
 
 class AutocompleteGroupSelector extends StatefulWidget {
-  AutocompleteGroupSelector({Key? key}) : super(key: key);
+  const AutocompleteGroupSelector({Key? key}) : super(key: key);
 
   @override
   _AutocompleteGroupSelectorState createState() =>
@@ -76,7 +76,7 @@ class _AutocompleteGroupSelectorState extends State<AutocompleteGroupSelector> {
               hintText: 'АБВГ-12-34',
               hintStyle: DarkTextTheme.titleM
                   .copyWith(color: DarkThemeColors.deactive),
-              focusedBorder: UnderlineInputBorder(
+              focusedBorder: const UnderlineInputBorder(
                 borderSide: BorderSide(color: DarkThemeColors.colorful05),
               ),
             ),
@@ -84,7 +84,7 @@ class _AutocompleteGroupSelectorState extends State<AutocompleteGroupSelector> {
           itemBuilder: (context, suggestion) => Container(
             color: DarkThemeColors.background03,
             child: Padding(
-              padding: EdgeInsets.all(4.0),
+              padding: const EdgeInsets.all(4.0),
               child: Text(suggestion.toString()),
             ),
           ),

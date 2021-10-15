@@ -11,7 +11,7 @@ class ChangeScreen extends HomeNavigatorEvent {
   final String routeName;
   final int pageIndex;
 
-  ChangeScreen({required this.routeName, required this.pageIndex});
+  const ChangeScreen({required this.routeName, required this.pageIndex});
 
   @override
   List<Object> get props => [routeName, pageIndex];

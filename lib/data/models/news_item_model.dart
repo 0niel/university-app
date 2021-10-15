@@ -1,7 +1,7 @@
 import 'package:rtu_mirea_app/domain/entities/news_item.dart';
 
 class NewsItemModel extends NewsItem {
-  NewsItemModel({
+  const NewsItemModel({
     required title,
     required text,
     required date,

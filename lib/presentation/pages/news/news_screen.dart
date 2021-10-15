@@ -18,12 +18,12 @@ class NewsScreen extends StatelessWidget {
     _setupScrollController(context);
     return Scaffold(
       appBar: AppBar(
-        title: Text("Новости"),
+        title: const Text("Новости"),
       ),
       backgroundColor: DarkThemeColors.background01,
       body: RefreshIndicator(
         onRefresh: () async {
-          context.read<NewsBloc>().add(NewsLoadEvent(refresh: true));
+          context.read<NewsBloc>().add(const NewsLoadEvent(refresh: true));
         },
         child: Column(children: [
           // TODO: Add cliclable tags header!!!
@@ -55,11 +55,11 @@ class NewsScreen extends StatelessWidget {
                 bool isLoading = false;
 
                 if (state is NewsInitial) {
-                  context.read<NewsBloc>().add(NewsLoadEvent());
+                  context.read<NewsBloc>().add(const NewsLoadEvent());
                 } else if (state is NewsLoaded) {
                   news = state.news;
                 } else if (state is NewsLoading && state.isFirstFetch) {
-                  return Center(
+                  return const Center(
                     child: CircularProgressIndicator(),
                   );
                 } else if (state is NewsLoading) {
@@ -83,11 +83,11 @@ class NewsScreen extends StatelessWidget {
                     if (index < news.length) {
                       return NewsItemWidget(newsItem: news[index]);
                     } else {
-                      Timer(Duration(milliseconds: 30), () {
+                      Timer(const Duration(milliseconds: 30), () {
                         _scrollController
                             .jumpTo(_scrollController.position.maxScrollExtent);
                       });
-                      return Center(child: CircularProgressIndicator());
+                      return const Center(child: CircularProgressIndicator());
                     }
                   },
                   itemCount: news.length + (isLoading ? 1 : 0),
@@ -104,7 +104,7 @@ class NewsScreen extends StatelessWidget {
     _scrollController.addListener(() {
       if (_scrollController.position.atEdge) {
         if (_scrollController.position.pixels != 0) {
-          context.read<NewsBloc>().add(NewsLoadEvent());
+          context.read<NewsBloc>().add(const NewsLoadEvent());
         }
       }
     });

@@ -43,10 +43,10 @@ class AboutAppBloc extends Bloc<AboutAppEvent, AboutAppState> {
         patronsList = r;
       });
 
-      if (contributorsLoadError && patronsLoadError)
-        yield AboutAppMembersLoadError(
+      if (contributorsLoadError && patronsLoadError) {
+        yield const AboutAppMembersLoadError(
             contributorsLoadError: true, patronsLoadError: true);
-      else {
+      } else {
         yield AboutAppMembersLoadError(
             contributorsLoadError: contributorsLoadError,
             patronsLoadError: patronsLoadError);

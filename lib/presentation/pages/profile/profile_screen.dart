@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_inappwebview/flutter_inappwebview.dart';
-import 'package:rtu_mirea_app/presentation/pages/profile/forum_login_page.dart';
 import 'package:rtu_mirea_app/presentation/pages/profile/about_app_page.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:rtu_mirea_app/presentation/widgets/settings_button.dart';
-import 'package:rtu_mirea_app/presentation/colors.dart';
 
 class ProfileScreen extends StatelessWidget {
   static const String routeName = '/profile';
+
+  const ProfileScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +20,7 @@ class ProfileScreen extends StatelessWidget {
       ),
       body: SafeArea(
         child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 24),
+          padding: const EdgeInsets.symmetric(horizontal: 24),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -93,13 +92,17 @@ class ProfileScreen extends StatelessWidget {
               // SettingsButton('Поделиться профилем', Icons.ios_share, () {}),
               Text('Тут скоро будет ваш профиль',
                   style: DarkTextTheme.bodyBold),
-              SizedBox(height: 8),
-              SettingsButton('О приложении', Icons.apps_rounded, () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => AboutAppPage()),
-                );
-              }),
+              const SizedBox(height: 8),
+              SettingsButton(
+                  text: 'О приложении',
+                  icon: Icons.apps_rounded,
+                  onClick: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const AboutAppPage()),
+                    );
+                  }),
             ],
           ),
         ),

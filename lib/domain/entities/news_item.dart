@@ -7,7 +7,7 @@ class NewsItem extends Equatable {
   final List<String> images;
   final List<String> tags;
 
-  NewsItem({
+  const NewsItem({
     required this.title,
     required this.text,
     required this.date,

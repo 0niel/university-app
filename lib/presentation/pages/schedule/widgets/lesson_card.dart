@@ -13,121 +13,124 @@ class LessonCard extends StatelessWidget {
   final bool drawNoteIndicator;
   final Function onClick;
 
-  const LessonCard({
-    Key? key,
-    required this.name,
-    required this.teacher,
-    required this.room,
-    required this.type,
-    required this.timeStart,
-    required this.timeEnd,
-    required this.drawNoteIndicator,
-    required this.onClick
-  }) : super(key: key);
+  const LessonCard(
+      {Key? key,
+      required this.name,
+      required this.teacher,
+      required this.room,
+      required this.type,
+      required this.timeStart,
+      required this.timeEnd,
+      required this.drawNoteIndicator,
+      required this.onClick})
+      : super(key: key);
 
   static Color getColorByType(String lessonType) {
-    if (lessonType.contains('лк') || lessonType.contains('лек'))
+    if (lessonType.contains('лк') || lessonType.contains('лек')) {
       return DarkThemeColors.colorful01;
-    else if (lessonType.contains('лб') || lessonType.contains('лаб'))
+    } else if (lessonType.contains('лб') || lessonType.contains('лаб')) {
       return DarkThemeColors.colorful07;
-    else if (lessonType.contains('с/р'))
+    } else if (lessonType.contains('с/р')) {
       return DarkThemeColors.colorful02;
-    else
+    } else {
       return DarkThemeColors.colorful03;
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-        onTap: () => onClick(),
-        child: Container(
-          decoration: drawNoteIndicator ? BoxDecoration(
-              borderRadius: BorderRadius.circular(12.5),
-              gradient: LinearGradient(
-                  colors: [
-                    DarkThemeColors.colorful02,
-                    DarkThemeColors.colorful01]
-              ),
-          ) : null,
-          child: Card(
-            margin: EdgeInsets.all(2.0),
-            shadowColor: Colors.transparent,
-            color: DarkThemeColors.background03,
-            shape: RoundedRectangleBorder(
+      onTap: () => onClick(),
+      child: Container(
+        decoration: drawNoteIndicator
+            ? BoxDecoration(
+                borderRadius: BorderRadius.circular(12.5),
+                gradient: const LinearGradient(colors: [
+                  DarkThemeColors.colorful02,
+                  DarkThemeColors.colorful01
+                ]),
+              )
+            : null,
+        child: Card(
+          margin: const EdgeInsets.all(2.0),
+          shadowColor: Colors.transparent,
+          color: DarkThemeColors.background03,
+          shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12.0),
           ),
           child: Container(
-            constraints: BoxConstraints(minHeight: 75),
-            padding: EdgeInsets.symmetric(vertical: 20, horizontal: 20),
+            constraints: const BoxConstraints(minHeight: 75),
+            padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
             child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(
-                padding: EdgeInsets.only(right: 20, top: 3),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Text(
-                      timeStart,
-                      style: DarkTextTheme.bodyBold.copyWith(
-                          color: DarkThemeColors.deactive, fontSize: 12),
-                    ),
-                    SizedBox(
-                      height: 5,
-                    ),
-                    Text(
-                      timeEnd,
-                      style: DarkTextTheme.bodyBold.copyWith(
-                          color: DarkThemeColors.deactive, fontSize: 12),
-                    ),
-                  ],
-                ),
-              ),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      room != '' ? '$name, $room' : '$name',
-                      style: DarkTextTheme.titleM,
-                      maxLines: 8,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    SizedBox(
-                      height: 4,
-                    ),
-                    Text(
-                      teacher,
-                      style: DarkTextTheme.body
-                          .copyWith(color: DarkThemeColors.deactive),
-                    ),
-                  ],
-                ),
-              ),
-              Container(),
-              Column(
-                children: [Container(
-                  alignment: Alignment.topRight,
-                  child: Container(
-                    padding: EdgeInsets.symmetric(horizontal: 12),
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(100),
-                        color: getColorByType(type)),
-                    height: 24,
-                    // width: 10 * 7,
-                    child: Text(type, style: DarkTextTheme.chip),
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(right: 20, top: 3),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text(
+                        timeStart,
+                        style: DarkTextTheme.bodyBold.copyWith(
+                            color: DarkThemeColors.deactive, fontSize: 12),
+                      ),
+                      const SizedBox(
+                        height: 5,
+                      ),
+                      Text(
+                        timeEnd,
+                        style: DarkTextTheme.bodyBold.copyWith(
+                            color: DarkThemeColors.deactive, fontSize: 12),
+                      ),
+                    ],
                   ),
                 ),
-                  SizedBox(height: 8),
-                ]
-              ),
-            ],
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        room != '' ? '$name, $room' : name,
+                        style: DarkTextTheme.titleM,
+                        maxLines: 8,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(
+                        height: 4,
+                      ),
+                      Text(
+                        teacher,
+                        style: DarkTextTheme.body
+                            .copyWith(color: DarkThemeColors.deactive),
+                      ),
+                    ],
+                  ),
+                ),
+                Container(),
+                Column(
+                  children: [
+                    Container(
+                      alignment: Alignment.topRight,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(100),
+                            color: getColorByType(type)),
+                        height: 24,
+                        // width: 10 * 7,
+                        child: Text(type, style: DarkTextTheme.chip),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                  ],
+                ),
+              ],
+            ),
           ),
-          ),
+        ),
       ),
-        )
     );
   }
 }

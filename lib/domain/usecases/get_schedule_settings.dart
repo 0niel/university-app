@@ -8,7 +8,7 @@ class GetScheduleSettings extends UseCaseRight<ScheduleSettings, void> {
   GetScheduleSettings(this.scheduleRepository);
 
   @override
-  Future<ScheduleSettings> call([_]) async {
+  Future<ScheduleSettings> call([params]) async {
     return await scheduleRepository.getSettings();
   }
 }

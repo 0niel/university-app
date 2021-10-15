@@ -10,20 +10,18 @@ abstract class MapState extends Equatable {
 }
 
 class MapFloorLoaded extends MapState {
-  MapFloorLoaded({required this.floor}) : super(floor: floor) {
+  MapFloorLoaded({required int floor}) : super(floor: floor) {
     MapCubit.currentFloor = floor;
   }
-
-  final int floor;
 
   @override
   List<Object> get props => [floor];
 }
 
 class MapScaleSet extends MapState {
-  MapScaleSet({required this.floor, required this.scale}) : super (floor: floor);
+  const MapScaleSet({required int floor, required this.scale})
+      : super(floor: floor);
 
-  final int floor;
   final double scale;
 
   @override
@@ -31,10 +29,9 @@ class MapScaleSet extends MapState {
 }
 
 class MapSearchFoundUpdated extends MapState {
-  MapSearchFoundUpdated({required this.floor, required this.foundRooms})
+  const MapSearchFoundUpdated({required int floor, required this.foundRooms})
       : super(floor: floor);
 
-  final int floor;
   final List<Map<String, dynamic>> foundRooms;
 
   @override

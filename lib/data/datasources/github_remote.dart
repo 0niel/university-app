@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:dio/dio.dart';
 import 'package:rtu_mirea_app/common/errors/exceptions.dart';
 import 'package:rtu_mirea_app/data/models/contributor_model.dart';
@@ -9,7 +7,7 @@ abstract class GithubRemoteData {
 }
 
 class GithubRemoteDataImpl implements GithubRemoteData {
-  static const _API_URL =
+  static const _apiUrl =
       'https://api.github.com/repos/Ninja-Official/rtu-mirea-mobile/contributors';
 
   final Dio httpClient;
@@ -19,7 +17,7 @@ class GithubRemoteDataImpl implements GithubRemoteData {
   @override
   Future<List<ContributorModel>> getContributors() async {
     try {
-      final response = await httpClient.get(_API_URL);
+      final response = await httpClient.get(_apiUrl);
       if (response.statusCode == 200) {
         final responseBody = response.data;
         List<ContributorModel> contributors = [];

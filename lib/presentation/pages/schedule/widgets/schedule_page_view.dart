@@ -62,21 +62,21 @@ class _SchedulePageViewState extends State<SchedulePageView> {
     List<List<Lesson>> lessonsInWeek = [];
     for (int i = 1; i <= 6; i++) {
       lessonsInWeek.add([]);
-      schedule.schedule[i.toString()]!.lessons.forEach((elements) {
-        elements.forEach((lesson) {
+      for (var elements in schedule.schedule[i.toString()]!.lessons) {
+        for (var lesson in elements) {
           if (lesson.weeks.contains(week)) lessonsInWeek[i - 1].add(lesson);
-        });
-      });
+        }
+      }
     }
 
     return lessonsInWeek;
   }
 
-  Map<Lesson, LessonAppInfo> _mapLessonsToAppInfo(int week, List<Lesson> lessons) {
+  Map<Lesson, LessonAppInfo> _mapLessonsToAppInfo(
+      int week, List<Lesson> lessons) {
     final lessonToAppInfo = Map<Lesson, LessonAppInfo>();
     for (int i = 0; i < lessons.length; i++) {
-      lessonToAppInfo[lessons[i]] =
-          _getLessonAppInfo(lessons[i]);
+      lessonToAppInfo[lessons[i]] = _getLessonAppInfo(lessons[i]);
     }
     return lessonToAppInfo;
   }
@@ -89,14 +89,16 @@ class _SchedulePageViewState extends State<SchedulePageView> {
       return LessonAppInfo(lessonCode: lessonCode);*/
 
     final appInfo = info.lessonsAppInfo.firstWhere(
-            (element) => element.lessonCode == lessonCode,
-            orElse: () => LessonAppInfo(lessonCode: lessonCode));
+        (element) => element.lessonCode == lessonCode,
+        orElse: () => LessonAppInfo(lessonCode: lessonCode));
 
     return appInfo;
   }
 
   String _getLessonCode(Lesson lesson) {
-    return (lesson.name.toString() + lesson.timeStart.toString() + _selectedDay.day.toString());
+    return (lesson.name.toString() +
+        lesson.timeStart.toString() +
+        _selectedDay.day.toString());
   }
 
   Widget _buildEmptyLessons() {
@@ -104,7 +106,7 @@ class _SchedulePageViewState extends State<SchedulePageView> {
       crossAxisAlignment: CrossAxisAlignment.center,
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Image(
+        const Image(
           image: AssetImage('assets/images/Saly-18.png'),
           height: 225.0,
         ),
@@ -128,12 +130,12 @@ class _SchedulePageViewState extends State<SchedulePageView> {
           formattedLessons.add(
             Lesson(
               name: '',
-              rooms: [],
+              rooms: const [],
               timeStart: key,
               timeEnd: ScheduleBloc.collegeTimesEnd.keys.toList()[value - 1],
-              weeks: [],
+              weeks: const [],
               types: '',
-              teachers: [],
+              teachers: const [],
             ),
           );
         }
@@ -151,12 +153,12 @@ class _SchedulePageViewState extends State<SchedulePageView> {
           formattedLessons.add(
             Lesson(
               name: '',
-              rooms: [],
+              rooms: const [],
               timeStart: key,
               timeEnd: ScheduleBloc.universityTimesEnd.keys.toList()[value - 1],
-              weeks: [],
+              weeks: const [],
               types: '',
-              teachers: [],
+              teachers: const [],
             ),
           );
         }
@@ -172,7 +174,7 @@ class _SchedulePageViewState extends State<SchedulePageView> {
     } else {
       var lessons = _getLessonsByWeek(week, widget.schedule)[index];
 
-      if (lessons.length == 0) return _buildEmptyLessons();
+      if (lessons.isEmpty) return _buildEmptyLessons();
 
       final state = context.read<ScheduleBloc>().state as ScheduleLoaded;
       final ScheduleSettings settings = state.scheduleSettings;
@@ -196,16 +198,19 @@ class _SchedulePageViewState extends State<SchedulePageView> {
                       room: '${lessons[i].rooms.join(', ')}',
                       type: lessons[i].types,
                       teacher: '${lessons[i].teachers.join(', ')}',
-                      drawNoteIndicator: _lessonToAppInfo[lessons[i]]!.note.isNotEmpty,
-                      onClick: () => { showModalBottomSheet(
-                        context: context,
-                        isScrollControlled: true,
-                        backgroundColor: Colors.transparent,
-                        builder: (context) => LessonCardInfoModal(
-                          lesson: lessons[i],
-                          lessonAppInfo: _lessonToAppInfo[lessons[i]]!,
-                        ),
-                      )},
+                      drawNoteIndicator:
+                          _lessonToAppInfo[lessons[i]]!.note.isNotEmpty,
+                      onClick: () => {
+                        showModalBottomSheet(
+                          context: context,
+                          isScrollControlled: true,
+                          backgroundColor: Colors.transparent,
+                          builder: (context) => LessonCardInfoModal(
+                            lesson: lessons[i],
+                            lessonAppInfo: _lessonToAppInfo[lessons[i]]!,
+                          ),
+                        )
+                      },
                     )
                   : EmptyLessonCard(
                       timeStart: lessons[i].timeStart,
@@ -238,7 +243,7 @@ class _SchedulePageViewState extends State<SchedulePageView> {
                     width: 6,
                     height: 6,
                     margin: const EdgeInsets.symmetric(horizontal: 0.3),
-                    decoration: new BoxDecoration(
+                    decoration: BoxDecoration(
                       color: LessonCard.getColorByType(
                           (events[index] as Lesson).types),
                       shape: BoxShape.circle,
@@ -263,11 +268,11 @@ class _SchedulePageViewState extends State<SchedulePageView> {
               return '$dateStr\nвыбрана $weekStr неделя';
             },
             formatButtonDecoration: const BoxDecoration(
-                border: const Border.fromBorderSide(
+                border: Border.fromBorderSide(
                     BorderSide(color: DarkThemeColors.deactive)),
-                borderRadius: const BorderRadius.all(Radius.circular(12.0))),
+                borderRadius: BorderRadius.all(Radius.circular(12.0))),
           ),
-          calendarStyle: CalendarStyle(
+          calendarStyle: const CalendarStyle(
             rangeHighlightColor: DarkThemeColors.secondary,
           ),
           daysOfWeekStyle: DaysOfWeekStyle(
@@ -287,10 +292,11 @@ class _SchedulePageViewState extends State<SchedulePageView> {
             final int weekday = day.weekday - 1;
 
             var lessons = _getLessonsByWeek(week, widget.schedule);
-            if (weekday == 6)
+            if (weekday == 6) {
               return [];
-            else
+            } else {
               return lessons[weekday];
+            }
           },
           locale: 'ru_RU',
           selectedDayPredicate: (day) {
@@ -348,7 +354,7 @@ class _SchedulePageViewState extends State<SchedulePageView> {
             AlertDialog alert = AlertDialog(
                 contentPadding: const EdgeInsets.fromLTRB(8.0, 20.0, 8.0, 8.0),
                 backgroundColor: DarkThemeColors.background02,
-                title: Text("Выберите неделю"),
+                title: const Text("Выберите неделю"),
                 content: Wrap(
                   spacing: 4.0,
                   alignment: WrapAlignment.center,
@@ -393,19 +399,21 @@ class _SchedulePageViewState extends State<SchedulePageView> {
                 });
           },
         ),
-        SizedBox(height: 25),
+        const SizedBox(height: 25),
         Expanded(
           child: PageView.builder(
               controller: _controller,
-              physics: ClampingScrollPhysics(),
+              physics: const ClampingScrollPhysics(),
               onPageChanged: (value) {
                 setState(() {
                   // if the pages are moved by swipes
                   if ((value - _selectedPage).abs() == 1) {
-                    if (value > _selectedPage)
-                      _selectedDay = _selectedDay.add(Duration(days: 1));
-                    else if (value < _selectedPage)
-                      _selectedDay = _selectedDay.subtract(Duration(days: 1));
+                    if (value > _selectedPage) {
+                      _selectedDay = _selectedDay.add(const Duration(days: 1));
+                    } else if (value < _selectedPage) {
+                      _selectedDay =
+                          _selectedDay.subtract(const Duration(days: 1));
+                    }
                     final int currentNewWeek =
                         Calendar.getCurrentWeek(mCurrentDate: _selectedDay);
                     _selectedWeek = currentNewWeek;

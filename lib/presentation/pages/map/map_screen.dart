@@ -17,25 +17,28 @@ import 'widgets/search_item_button.dart';
 class MapScreen extends StatefulWidget {
   static const String routeName = '/map';
 
+  const MapScreen({Key? key}) : super(key: key);
+
   @override
   State<StatefulWidget> createState() => _MapScreenState();
 }
 
 class _MapScreenState extends State<MapScreen> {
+  @override
   void initState() {
     super.initState();
     _controller.initial = PhotoViewControllerValue(
-        position: _controller.position,
-        rotation: _controller.rotation,
-        rotationFocusPoint: _controller.rotationFocusPoint,
-        scale: defaultScale,
+      position: _controller.position,
+      rotation: _controller.rotation,
+      rotationFocusPoint: _controller.rotationFocusPoint,
+      scale: defaultScale,
     );
-    _controller.outputStateStream
-        .listen((value) => context.read<MapCubit>().setMapScale(value.scale ?? maxScale));
+    _controller.outputStateStream.listen((value) =>
+        context.read<MapCubit>().setMapScale(value.scale ?? maxScale));
   }
 
-  var _controller = PhotoViewController();
-  var _scaleController = PhotoViewScaleStateController();
+  final _controller = PhotoViewController();
+  final _scaleController = PhotoViewScaleStateController();
 
   final maxScale = 20.0;
   final defaultScale = 3.0;
@@ -61,18 +64,17 @@ class _MapScreenState extends State<MapScreen> {
           ),
           _buildMap(),
           Align(
-            alignment: Alignment.bottomLeft,
-            child: Padding(
-              padding: EdgeInsets.only(left: 70, bottom: 16),
-              child: _buildScalingButton(),
-            )
-          ),
+              alignment: Alignment.bottomLeft,
+              child: Padding(
+                padding: const EdgeInsets.only(left: 70, bottom: 16),
+                child: _buildScalingButton(),
+              )),
           // uncomment when this is completed
           //_buildSearchBar(),
           Align(
             alignment: Alignment.bottomLeft,
             child: Padding(
-              padding: EdgeInsets.only(left: 10, bottom: 16),
+              padding: const EdgeInsets.only(left: 10, bottom: 16),
               child: _buildNavigation(),
             ),
           ),
@@ -81,6 +83,7 @@ class _MapScreenState extends State<MapScreen> {
     );
   }
 
+  // ignore: unused_element
   Widget _buildSearchBar() {
     return FloatingSearchBar(
       accentColor: DarkThemeColors.primary,
@@ -88,7 +91,7 @@ class _MapScreenState extends State<MapScreen> {
       backgroundColor: DarkThemeColors.background02,
       hint: 'Что будем искать, Милорд?',
       hintStyle: DarkTextTheme.titleS.copyWith(color: DarkThemeColors.deactive),
-      borderRadius: BorderRadius.all(Radius.circular(12)),
+      borderRadius: const BorderRadius.all(Radius.circular(12)),
       onQueryChanged: (query) {
         context.read<MapCubit>().setSearchQuery(query);
       },
@@ -153,7 +156,7 @@ class _MapScreenState extends State<MapScreen> {
         minScale: minScale,
         child: floors[state.floor],
         backgroundDecoration:
-            BoxDecoration(color: DarkThemeColors.background01),
+            const BoxDecoration(color: DarkThemeColors.background01),
       ),
     );
   }

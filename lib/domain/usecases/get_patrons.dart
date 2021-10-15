@@ -10,7 +10,7 @@ class GetForumPatrons extends UseCase<List<ForumMember>, void> {
   GetForumPatrons(this.forumRepository);
 
   @override
-  Future<Either<Failure, List<ForumMember>>> call([_]) async {
+  Future<Either<Failure, List<ForumMember>>> call([params]) async {
     return await forumRepository.getPatrons();
   }
 }

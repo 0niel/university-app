@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:rtu_mirea_app/domain/entities/contributor.dart';
 
 class ContributorModel extends Contributor {
-  ContributorModel({
+  const ContributorModel({
     required login,
     required avatarUrl,
     required htmlUrl,
