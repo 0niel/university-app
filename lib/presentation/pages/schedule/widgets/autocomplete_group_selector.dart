@@ -7,24 +7,36 @@ import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 
 class GroupTextFormatter extends TextInputFormatter {
-  GroupTextFormatter();
+  final groupMask = '0000-00-00';
 
   @override
   TextEditingValue formatEditUpdate(
       TextEditingValue oldValue, TextEditingValue newValue) {
-    String newText = newValue.text;
-
-    if (oldValue.text.length == 3 && newValue.text.length == 4) {
-      newText += '-';
-    } else if (oldValue.text.length == 6 && newValue.text.length == 7) {
-      newText += '-';
+    final result = StringBuffer();
+    var text =
+        newValue.text.replaceAll('-', '').replaceAll(' ', '').toUpperCase();
+    var readPosition = 0;
+    for (var i = 0; i < groupMask.length; i++) {
+      if (readPosition > text.length - 1) {
+        break;
+      }
+      var curSymbol = groupMask[i];
+      if (isZeroSymbol(curSymbol)) {
+        curSymbol = text[readPosition];
+        readPosition++;
+      }
+      result.write(curSymbol);
     }
-
-    return newValue.copyWith(
-      text: newText,
-      selection: TextSelection.collapsed(offset: newText.length),
+    final textResult = result.toString();
+    return TextEditingValue(
+      text: textResult,
+      selection: TextSelection.collapsed(
+        offset: textResult.length,
+      ),
     );
   }
+
+  bool isZeroSymbol(String symbol) => symbol == "0";
 }
 
 class AutocompleteGroupSelector extends StatefulWidget {
