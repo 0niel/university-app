@@ -6,8 +6,11 @@ import 'package:rtu_mirea_app/data/datasources/forum_remote.dart';
 import 'package:rtu_mirea_app/data/datasources/news_remote.dart';
 import 'package:rtu_mirea_app/data/datasources/schedule_local.dart';
 import 'package:rtu_mirea_app/data/datasources/schedule_remote.dart';
+import 'package:rtu_mirea_app/data/datasources/user_local.dart';
+import 'package:rtu_mirea_app/data/datasources/user_remote.dart';
 import 'package:rtu_mirea_app/data/repositories/forum_repository_impl.dart';
 import 'package:rtu_mirea_app/data/repositories/news_repository_impl.dart';
+import 'package:rtu_mirea_app/data/repositories/user_repository_impl.dart';
 import 'package:rtu_mirea_app/domain/repositories/forum_repository.dart';
 import 'package:rtu_mirea_app/domain/repositories/news_repository.dart';
 import 'package:rtu_mirea_app/data/datasources/github_local.dart';
@@ -15,6 +18,7 @@ import 'package:rtu_mirea_app/data/datasources/github_remote.dart';
 import 'package:rtu_mirea_app/data/repositories/github_repository_impl.dart';
 import 'package:rtu_mirea_app/domain/repositories/github_repository.dart';
 import 'package:rtu_mirea_app/domain/repositories/schedule_repository.dart';
+import 'package:rtu_mirea_app/domain/repositories/user_repository.dart';
 import 'package:rtu_mirea_app/domain/usecases/delete_schedule.dart';
 import 'package:rtu_mirea_app/domain/usecases/get_active_group.dart';
 import 'package:rtu_mirea_app/domain/usecases/get_contributors.dart';
@@ -25,13 +29,17 @@ import 'package:rtu_mirea_app/domain/usecases/get_news_tags.dart';
 import 'package:rtu_mirea_app/domain/usecases/get_patrons.dart';
 import 'package:rtu_mirea_app/domain/usecases/get_schedule.dart';
 import 'package:rtu_mirea_app/domain/usecases/get_schedule_settings.dart';
+import 'package:rtu_mirea_app/domain/usecases/get_user_data.dart';
+import 'package:rtu_mirea_app/domain/usecases/log_in.dart';
 import 'package:rtu_mirea_app/domain/usecases/set_active_group.dart';
 import 'package:rtu_mirea_app/domain/usecases/set_schedule_settings.dart';
 import 'package:rtu_mirea_app/presentation/bloc/about_app_bloc/about_app_bloc.dart';
+import 'package:rtu_mirea_app/presentation/bloc/auth_block/auth_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/home_navigator_bloc/home_navigator_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/map_cubit/map_cubit.dart';
 import 'package:rtu_mirea_app/presentation/bloc/news_bloc/news_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/onboarding_cubit/onboarding_cubit.dart';
+import 'package:rtu_mirea_app/presentation/bloc/profile_bloc/profile_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/schedule_bloc/schedule_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -43,31 +51,27 @@ Future<void> setup() async {
   // BloC / Cubit
   getIt.registerFactory(
     () => ScheduleBloc(
-      getSchedule: getIt(),
-      getActiveGroup: getIt(),
-      getGroups: getIt(),
-      setActiveGroup: getIt(),
-      getDownloadedSchedules: getIt(),
-      deleteSchedule: getIt(),
-      getScheduleSettings: getIt(),
-      setScheduleSettings: getIt(),
-    ),
+        getSchedule: getIt(),
+        getActiveGroup: getIt(),
+        getGroups: getIt(),
+        setActiveGroup: getIt(),
+        getDownloadedSchedules: getIt(),
+        deleteSchedule: getIt(),
+        getScheduleSettings: getIt(),
+        setScheduleSettings: getIt()),
   );
-
-  getIt.registerFactory(
-    () => NewsBloc(
-      getNews: getIt(),
-      getNewsTags: getIt(),
-    ),
-  );
-
+  getIt.registerFactory(() => NewsBloc(getNews: getIt(), getNewsTags: getIt()));
   getIt.registerFactory(
       () => AboutAppBloc(getContributors: getIt(), getForumPatrons: getIt()));
   getIt.registerFactory(() => HomeNavigatorBloc());
   getIt.registerFactory(() => OnboardingCubit());
   getIt.registerFactory(() => MapCubit());
+  getIt.registerFactory(() => AuthBloc(logIn: getIt(), getUserData: getIt()));
+  getIt.registerFactory(() => ProfileBloc(getUserData: getIt()));
 
   // Usecases
+  getIt.registerLazySingleton(() => GetUserData(getIt()));
+  getIt.registerLazySingleton(() => LogIn(getIt()));
   getIt.registerLazySingleton(() => GetGroups(getIt()));
   getIt.registerLazySingleton(() => GetSchedule(getIt()));
   getIt.registerLazySingleton(() => SetActiveGroup(getIt()));
@@ -107,6 +111,16 @@ Future<void> setup() async {
         connectionChecker: getIt(),
       ));
 
+  getIt.registerLazySingleton<UserRepository>(() => UserRepositoryImpl(
+        remoteDataSource: getIt(),
+        localDataSource: getIt(),
+        connectionChecker: getIt(),
+      ));
+
+  getIt.registerLazySingleton<UserLocalData>(
+      () => UserLocalDataImpl(sharedPreferences: getIt()));
+  getIt.registerLazySingleton<UserRemoteData>(
+      () => UserRemoteDataImpl(httpClient: getIt()));
   getIt.registerLazySingleton<ScheduleRemoteData>(
       () => ScheduleRemoteDataImpl(httpClient: getIt()));
   getIt.registerLazySingleton<ScheduleLocalData>(

@@ -3,10 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/about_app_bloc/about_app_bloc.dart';
+import 'package:rtu_mirea_app/presentation/bloc/auth_block/auth_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/home_navigator_bloc/home_navigator_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/map_cubit/map_cubit.dart';
 import 'package:rtu_mirea_app/presentation/bloc/news_bloc/news_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/onboarding_cubit/onboarding_cubit.dart';
+import 'package:rtu_mirea_app/presentation/bloc/profile_bloc/profile_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/schedule_bloc/schedule_bloc.dart';
 import 'package:rtu_mirea_app/presentation/pages/home/home_navigator_screen.dart';
 import 'package:rtu_mirea_app/presentation/pages/map/map_screen.dart';
@@ -68,6 +70,10 @@ class App extends StatelessWidget {
         BlocProvider<AboutAppBloc>(
             create: (context) =>
                 getIt<AboutAppBloc>()..add(AboutAppGetMembers())),
+        BlocProvider<AuthBloc>(create: (context) => getIt<AuthBloc>()),
+        BlocProvider<ProfileBloc>(
+            create: (context) =>
+                getIt<ProfileBloc>()..add(ProfileGetUserData())),
       ],
       child: AdaptiveTheme(
         light: lightTheme,
