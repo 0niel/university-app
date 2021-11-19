@@ -34,7 +34,7 @@ android {
 
     defaultConfig {
         applicationId "ninja.mirea.mireaapp"
-        minSdkVersion 17
+        minSdkVersion 19
         targetSdkVersion 30
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
