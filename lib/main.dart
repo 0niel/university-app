@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/about_app_bloc/about_app_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/announces/announces_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/auth_bloc/auth_bloc.dart';
+import 'package:rtu_mirea_app/presentation/bloc/employee_bloc/employee_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/home_navigator_bloc/home_navigator_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/map_cubit/map_cubit.dart';
 import 'package:rtu_mirea_app/presentation/bloc/news_bloc/news_bloc.dart';
@@ -76,6 +77,7 @@ class App extends StatelessWidget {
         BlocProvider<ProfileBloc>(create: (context) => getIt<ProfileBloc>()),
         BlocProvider<AnnouncesBloc>(
             create: (context) => getIt<AnnouncesBloc>()),
+        BlocProvider<EmployeeBloc>(create: (context) => getIt<EmployeeBloc>()),
       ],
       child: AdaptiveTheme(
         light: lightTheme,

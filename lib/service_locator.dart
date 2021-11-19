@@ -25,6 +25,7 @@ import 'package:rtu_mirea_app/domain/usecases/get_announces.dart';
 import 'package:rtu_mirea_app/domain/usecases/get_auth_token.dart';
 import 'package:rtu_mirea_app/domain/usecases/get_contributors.dart';
 import 'package:rtu_mirea_app/domain/usecases/get_downloaded_schedules.dart';
+import 'package:rtu_mirea_app/domain/usecases/get_employees.dart';
 import 'package:rtu_mirea_app/domain/usecases/get_groups.dart';
 import 'package:rtu_mirea_app/domain/usecases/get_news.dart';
 import 'package:rtu_mirea_app/domain/usecases/get_news_tags.dart';
@@ -38,6 +39,7 @@ import 'package:rtu_mirea_app/domain/usecases/set_schedule_settings.dart';
 import 'package:rtu_mirea_app/presentation/bloc/about_app_bloc/about_app_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/announces/announces_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/auth_bloc/auth_bloc.dart';
+import 'package:rtu_mirea_app/presentation/bloc/employee_bloc/employee_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/home_navigator_bloc/home_navigator_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/map_cubit/map_cubit.dart';
 import 'package:rtu_mirea_app/presentation/bloc/news_bloc/news_bloc.dart';
@@ -73,8 +75,10 @@ Future<void> setup() async {
       AuthBloc(getAuthToken: getIt(), logIn: getIt(), getUserData: getIt()));
   getIt.registerFactory(() => ProfileBloc(getUserData: getIt()));
   getIt.registerFactory(() => AnnouncesBloc(getAnnounces: getIt()));
+  getIt.registerFactory(() => EmployeeBloc(getEmployees: getIt()));
 
   // Usecases
+  getIt.registerLazySingleton(() => GetEmployees(getIt()));
   getIt.registerLazySingleton(() => GetAnnounces(getIt()));
   getIt.registerLazySingleton(() => GetAuthToken(getIt()));
   getIt.registerLazySingleton(() => GetUserData(getIt()));

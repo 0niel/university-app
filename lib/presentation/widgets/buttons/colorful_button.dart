@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:rtu_mirea_app/presentation/colors.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 
 class ColorfulButton extends StatelessWidget {

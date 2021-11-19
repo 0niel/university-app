@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:rtu_mirea_app/common/errors/exceptions.dart';
 import 'package:rtu_mirea_app/data/models/announce_model.dart';
+import 'package:rtu_mirea_app/data/models/employee_model.dart';
 import 'package:rtu_mirea_app/data/models/user_model.dart';
 import 'package:rtu_mirea_app/domain/entities/announce.dart';
 
@@ -10,6 +11,7 @@ abstract class UserRemoteData {
   Future<String> auth(String login, String password);
   Future<UserModel> getProfileData(String token);
   Future<List<AnnounceModel>> getAnnounces(String token);
+  Future<List<EmployeeModel>> getEmployees(String token, String name);
 }
 
 class UserRemoteDataImpl implements UserRemoteData {
@@ -73,6 +75,35 @@ class UserRemoteDataImpl implements UserRemoteData {
         announces.add(AnnounceModel.fromJson(announce));
       }
       return announces;
+    } else {
+      throw ServerException('Response status code is $response.statusCode');
+    }
+  }
+
+  @override
+  Future<List<EmployeeModel>> getEmployees(String token, String name) async {
+    final response = await httpClient.get(
+      _apiUrl +
+          '?action=getData&url=https://lk.mirea.ru/lectors/&page=undefined&findname=' +
+          name,
+      options: Options(
+        headers: {'Authorization': token},
+      ),
+    );
+
+    var jsonResponse = json.decode(response.data);
+    if (jsonResponse.containsKey('errors')) {
+      throw ServerException(jsonResponse['errors'][0]);
+    }
+
+    if (response.statusCode == 200) {
+      List<EmployeeModel> employees = [];
+      if (jsonResponse.containsKey('HUMAN') && jsonResponse["HUMAN"] != null) {
+        for (final employee in jsonResponse["HUMAN"].values) {
+          employees.add(EmployeeModel.fromJson(employee));
+        }
+      }
+      return employees;
     } else {
       throw ServerException('Response status code is $response.statusCode');
     }

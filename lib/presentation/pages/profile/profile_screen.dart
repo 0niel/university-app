@@ -8,6 +8,7 @@ import 'package:rtu_mirea_app/presentation/pages/auth/auth_screen.dart';
 import 'package:rtu_mirea_app/presentation/pages/profile/about_app_page.dart';
 import 'package:rtu_mirea_app/presentation/pages/profile/profile_announces_page.dart';
 import 'package:rtu_mirea_app/presentation/pages/profile/profile_detail_page.dart';
+import 'package:rtu_mirea_app/presentation/pages/profile/profile_lectors_page.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:rtu_mirea_app/presentation/widgets/buttons/colorful_button.dart';
 import 'package:rtu_mirea_app/presentation/widgets/buttons/settings_button.dart';
@@ -103,16 +104,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                         const ProfileAnnouncesPage()),
                               );
                             }),
-                        const SizedBox(height: 8),
-                        SettingsButton(
-                            text: 'Подразделения',
-                            icon: Icons.live_help_rounded,
-                            onClick: () {}),
+                        // const SizedBox(height: 8),
+                        // SettingsButton(
+                        //     text: 'Адреса',
+                        //     icon: Icons.map_rounded,
+                        //     onClick: () {}),
                         const SizedBox(height: 8),
                         SettingsButton(
                             text: 'Преподаватели',
                             icon: Icons.people_alt_rounded,
-                            onClick: () {}),
+                            onClick: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) =>
+                                        const ProfileLectrosPage()),
+                              );
+                            }),
                         const SizedBox(height: 8),
                         SettingsButton(
                             text: 'Посещения',

@@ -33,6 +33,7 @@ android {
     }
 
     defaultConfig {
+        multiDexEnabled true
         applicationId "ninja.mirea.mireaapp"
         minSdkVersion 19
         targetSdkVersion 30
@@ -55,4 +56,5 @@ flutter {
 
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    implementation 'com.android.support:multidex:2.0.1'
 }
