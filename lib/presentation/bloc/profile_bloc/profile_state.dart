@@ -9,10 +9,13 @@ abstract class ProfileState extends Equatable {
 
 class ProfileInitial extends ProfileState {}
 
-class ProfileUnauthenticated extends ProfileState {}
+class ProfileLoading extends ProfileState {}
 
-class ProfileAuthenticated extends ProfileState {
+class ProfileLoaded extends ProfileState {
   final User user;
 
-  const ProfileAuthenticated({required this.user});
+  const ProfileLoaded({required this.user});
+
+  @override
+  List<Object> get props => [user];
 }

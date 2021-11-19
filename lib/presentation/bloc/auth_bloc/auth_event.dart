@@ -12,4 +12,9 @@ class AuthLogInEvent extends AuthEvent {
   final String password;
 
   const AuthLogInEvent({required this.login, required this.password});
+
+  @override
+  List<Object> get props => [login, password];
 }
+
+class AuthLogInFromCache extends AuthEvent {}

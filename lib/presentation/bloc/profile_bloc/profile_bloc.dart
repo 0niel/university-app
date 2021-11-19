@@ -14,11 +14,15 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
   }
 
   void _onProfileGetUserData(
-    ProfileEvent event,
+    ProfileGetUserData event,
     Emitter<ProfileState> emit,
   ) async {
-    final user = await getUserData();
-    user.fold((failure) => emit(ProfileUnauthenticated()),
-        (r) => emit(ProfileAuthenticated(user: r)));
+    // To get profile data only once
+    if (state.runtimeType != ProfileLoaded) {
+      emit(ProfileLoading());
+      final user = await getUserData(GetUserDataParams(event.token));
+      user.fold((failure) => emit(ProfileInitial()),
+          (r) => emit(ProfileLoaded(user: r)));
+    }
   }
 }

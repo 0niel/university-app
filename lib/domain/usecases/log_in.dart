@@ -4,13 +4,13 @@ import 'package:rtu_mirea_app/common/errors/failures.dart';
 import 'package:rtu_mirea_app/domain/repositories/user_repository.dart';
 import 'package:rtu_mirea_app/domain/usecases/usecase.dart';
 
-class LogIn extends UseCase<void, LogInParams> {
+class LogIn extends UseCase<String, LogInParams> {
   final UserRepository userRepository;
 
   LogIn(this.userRepository);
 
   @override
-  Future<Either<Failure, void>> call(LogInParams params) async {
+  Future<Either<Failure, String>> call(LogInParams params) async {
     return userRepository.logIn(params.login, params.password);
   }
 }

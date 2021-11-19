@@ -17,12 +17,12 @@ class UserRepositoryImpl implements UserRepository {
       required this.localDataSource,
       required this.connectionChecker});
   @override
-  Future<Either<Failure, void>> logIn(String login, String password) async {
+  Future<Either<Failure, String>> logIn(String login, String password) async {
     if (await connectionChecker.hasConnection) {
       try {
         final authToken = await remoteDataSource.auth(login, password);
         localDataSource.setTokenToCache(authToken);
-        return const Right(null);
+        return Right(authToken);
       } catch (e) {
         if (e is ServerException) {
           return Left(ServerFailure(e.cause));
@@ -41,12 +41,22 @@ class UserRepositoryImpl implements UserRepository {
   }
 
   @override
-  Future<Either<Failure, User>> getUserData() async {
+  Future<Either<Failure, User>> getUserData(String token) async {
     try {
-      final token = await localDataSource.getTokenFromCache();
       final user = await remoteDataSource.getProfileData(token);
       print(user);
       return Future.value(Right(user));
+    } on CacheException {
+      return Future.value(const Left(CacheFailure()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, String>> getAuthToken() async {
+    try {
+      final token = await localDataSource.getTokenFromCache();
+      final _ = await remoteDataSource.getProfileData(token);
+      return Future.value(Right(token));
     } on CacheException {
       return Future.value(const Left(CacheFailure()));
     }

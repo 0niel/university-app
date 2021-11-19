@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:rtu_mirea_app/presentation/bloc/auth_block/auth_bloc.dart';
+import 'package:rtu_mirea_app/presentation/bloc/auth_bloc/auth_bloc.dart';
 import 'package:rtu_mirea_app/presentation/colors.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:rtu_mirea_app/presentation/widgets/buttons/primary_button.dart';

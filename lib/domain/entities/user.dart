@@ -12,6 +12,17 @@ class User extends Equatable {
   final String eduProgram;
   final String eduProgramCode;
   final String photoUrl;
+  final String authShortlink;
+  final String registerDate;
+  final String lastLoginDate;
+  final int course;
+  final String personalNumber;
+  final String educationStartDate;
+  final String educationEndDate;
+  final String academicGroup;
+  final String department;
+  final String prodDepartment;
+  final String type;
 
   const User({
     required this.id,
@@ -25,6 +36,17 @@ class User extends Equatable {
     required this.eduProgram,
     required this.eduProgramCode,
     required this.photoUrl,
+    required this.authShortlink,
+    required this.registerDate,
+    required this.lastLoginDate,
+    required this.course,
+    required this.personalNumber,
+    required this.educationStartDate,
+    required this.educationEndDate,
+    required this.academicGroup,
+    required this.department,
+    required this.prodDepartment,
+    required this.type,
   });
 
   @override
@@ -39,6 +61,17 @@ class User extends Equatable {
         birthday,
         eduProgram,
         eduProgramCode,
-        photoUrl
+        photoUrl,
+        authShortlink,
+        registerDate,
+        lastLoginDate,
+        course,
+        personalNumber,
+        educationStartDate,
+        educationEndDate,
+        academicGroup,
+        department,
+        prodDepartment,
+        type,
       ];
 }

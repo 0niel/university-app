@@ -7,7 +7,7 @@ abstract class AuthState extends Equatable {
   List<Object> get props => [];
 }
 
-class AuthInitial extends AuthState {}
+class AuthUnknown extends AuthState {}
 
 class LogInError extends AuthState {
   final String cause;
@@ -18,4 +18,11 @@ class LogInError extends AuthState {
   List<Object> get props => [cause];
 }
 
-class LogInSuccess extends AuthState {}
+class LogInSuccess extends AuthState {
+  final String token;
+
+  const LogInSuccess({required this.token});
+
+  @override
+  List<Object> get props => [token];
+}
