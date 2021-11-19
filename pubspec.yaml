@@ -65,6 +65,10 @@ dependencies:
   dartz: ^0.10.0-nullsafety.2
 
   flutter_typeahead: ^3.2.0
+
+  # A Flutter widget rendering static HTML and CSS as Flutter widgets.
+  # See https://pub.dev/packages/flutter_html
+  flutter_html: ^2.1.5
   
   # The Font Awesome Icon pack available as Flutter Icons. 
   # Provides 1600 additional icons to use in your apps.

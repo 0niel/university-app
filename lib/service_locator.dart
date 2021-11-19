@@ -21,6 +21,7 @@ import 'package:rtu_mirea_app/domain/repositories/schedule_repository.dart';
 import 'package:rtu_mirea_app/domain/repositories/user_repository.dart';
 import 'package:rtu_mirea_app/domain/usecases/delete_schedule.dart';
 import 'package:rtu_mirea_app/domain/usecases/get_active_group.dart';
+import 'package:rtu_mirea_app/domain/usecases/get_announces.dart';
 import 'package:rtu_mirea_app/domain/usecases/get_auth_token.dart';
 import 'package:rtu_mirea_app/domain/usecases/get_contributors.dart';
 import 'package:rtu_mirea_app/domain/usecases/get_downloaded_schedules.dart';
@@ -35,6 +36,7 @@ import 'package:rtu_mirea_app/domain/usecases/log_in.dart';
 import 'package:rtu_mirea_app/domain/usecases/set_active_group.dart';
 import 'package:rtu_mirea_app/domain/usecases/set_schedule_settings.dart';
 import 'package:rtu_mirea_app/presentation/bloc/about_app_bloc/about_app_bloc.dart';
+import 'package:rtu_mirea_app/presentation/bloc/announces/announces_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/auth_bloc/auth_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/home_navigator_bloc/home_navigator_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/map_cubit/map_cubit.dart';
@@ -67,10 +69,13 @@ Future<void> setup() async {
   getIt.registerFactory(() => HomeNavigatorBloc());
   getIt.registerFactory(() => OnboardingCubit());
   getIt.registerFactory(() => MapCubit());
-  getIt.registerFactory(() => AuthBloc(getAuthToken: getIt(), logIn: getIt(), getUserData: getIt()));
+  getIt.registerFactory(() =>
+      AuthBloc(getAuthToken: getIt(), logIn: getIt(), getUserData: getIt()));
   getIt.registerFactory(() => ProfileBloc(getUserData: getIt()));
+  getIt.registerFactory(() => AnnouncesBloc(getAnnounces: getIt()));
 
   // Usecases
+  getIt.registerLazySingleton(() => GetAnnounces(getIt()));
   getIt.registerLazySingleton(() => GetAuthToken(getIt()));
   getIt.registerLazySingleton(() => GetUserData(getIt()));
   getIt.registerLazySingleton(() => LogIn(getIt()));

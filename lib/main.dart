@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/about_app_bloc/about_app_bloc.dart';
+import 'package:rtu_mirea_app/presentation/bloc/announces/announces_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/auth_bloc/auth_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/home_navigator_bloc/home_navigator_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/map_cubit/map_cubit.dart';
@@ -73,6 +74,8 @@ class App extends StatelessWidget {
         BlocProvider<AuthBloc>(
             create: (context) => getIt<AuthBloc>()..add(AuthLogInFromCache())),
         BlocProvider<ProfileBloc>(create: (context) => getIt<ProfileBloc>()),
+        BlocProvider<AnnouncesBloc>(
+            create: (context) => getIt<AnnouncesBloc>()),
       ],
       child: AdaptiveTheme(
         light: lightTheme,

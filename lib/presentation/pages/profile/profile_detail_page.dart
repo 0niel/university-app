@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 
 import 'package:rtu_mirea_app/domain/entities/user.dart';
-import 'package:rtu_mirea_app/presentation/colors.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:rtu_mirea_app/presentation/widgets/badged_container.dart';
-import 'package:rtu_mirea_app/presentation/widgets/container_label.dart';
 import 'package:rtu_mirea_app/presentation/widgets/copy_text_block.dart';
 
 class ProfileDetailPage extends StatelessWidget {

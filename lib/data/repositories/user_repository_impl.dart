@@ -4,6 +4,7 @@ import 'package:rtu_mirea_app/common/errors/failures.dart';
 import 'package:dartz/dartz.dart';
 import 'package:rtu_mirea_app/data/datasources/user_local.dart';
 import 'package:rtu_mirea_app/data/datasources/user_remote.dart';
+import 'package:rtu_mirea_app/domain/entities/announce.dart';
 import 'package:rtu_mirea_app/domain/entities/user.dart';
 import 'package:rtu_mirea_app/domain/repositories/user_repository.dart';
 
@@ -44,7 +45,6 @@ class UserRepositoryImpl implements UserRepository {
   Future<Either<Failure, User>> getUserData(String token) async {
     try {
       final user = await remoteDataSource.getProfileData(token);
-      print(user);
       return Future.value(Right(user));
     } on CacheException {
       return Future.value(const Left(CacheFailure()));
@@ -57,6 +57,16 @@ class UserRepositoryImpl implements UserRepository {
       final token = await localDataSource.getTokenFromCache();
       final _ = await remoteDataSource.getProfileData(token);
       return Future.value(Right(token));
+    } on CacheException {
+      return Future.value(const Left(CacheFailure()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<Announce>>> getAnnounces(String token) async {
+    try {
+      final announces = await remoteDataSource.getAnnounces(token);
+      return Right(announces);
     } on CacheException {
       return Future.value(const Left(CacheFailure()));
     }

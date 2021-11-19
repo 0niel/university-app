@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:rtu_mirea_app/presentation/bloc/announces/announces_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/auth_bloc/auth_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/profile_bloc/profile_bloc.dart';
 import 'package:rtu_mirea_app/presentation/colors.dart';
 import 'package:rtu_mirea_app/presentation/pages/auth/auth_screen.dart';
 import 'package:rtu_mirea_app/presentation/pages/profile/about_app_page.dart';
+import 'package:rtu_mirea_app/presentation/pages/profile/profile_announces_page.dart';
 import 'package:rtu_mirea_app/presentation/pages/profile/profile_detail_page.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:rtu_mirea_app/presentation/widgets/buttons/colorful_button.dart';
@@ -88,9 +90,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         const ContainerLabel(label: "Информация"),
                         const SizedBox(height: 20),
                         SettingsButton(
-                            text: 'Уведомления',
+                            text: 'Объявления',
                             icon: Icons.message_rounded,
-                            onClick: () {}),
+                            onClick: () {
+                              context
+                                  .read<AnnouncesBloc>()
+                                  .add(LoadAnnounces(token: state.token));
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) =>
+                                        const ProfileAnnouncesPage()),
+                              );
+                            }),
                         const SizedBox(height: 8),
                         SettingsButton(
                             text: 'Подразделения',
