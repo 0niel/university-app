@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/about_app_bloc/about_app_bloc.dart';
-import 'package:rtu_mirea_app/presentation/bloc/announces/announces_bloc.dart';
+import 'package:rtu_mirea_app/presentation/bloc/announces_bloc/announces_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/auth_bloc/auth_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/employee_bloc/employee_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/home_navigator_bloc/home_navigator_bloc.dart';
@@ -12,6 +12,7 @@ import 'package:rtu_mirea_app/presentation/bloc/news_bloc/news_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/onboarding_cubit/onboarding_cubit.dart';
 import 'package:rtu_mirea_app/presentation/bloc/profile_bloc/profile_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/schedule_bloc/schedule_bloc.dart';
+import 'package:rtu_mirea_app/presentation/bloc/scores_bloc/scores_bloc.dart';
 import 'package:rtu_mirea_app/presentation/pages/home/home_navigator_screen.dart';
 import 'package:rtu_mirea_app/presentation/pages/map/map_screen.dart';
 import 'package:rtu_mirea_app/presentation/pages/news/news_screen.dart';
@@ -78,6 +79,7 @@ class App extends StatelessWidget {
         BlocProvider<AnnouncesBloc>(
             create: (context) => getIt<AnnouncesBloc>()),
         BlocProvider<EmployeeBloc>(create: (context) => getIt<EmployeeBloc>()),
+        BlocProvider<ScoresBloc>(create: (context) => getIt<ScoresBloc>()),
       ],
       child: AdaptiveTheme(
         light: lightTheme,

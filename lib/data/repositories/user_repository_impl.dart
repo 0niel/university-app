@@ -6,6 +6,7 @@ import 'package:rtu_mirea_app/data/datasources/user_local.dart';
 import 'package:rtu_mirea_app/data/datasources/user_remote.dart';
 import 'package:rtu_mirea_app/domain/entities/announce.dart';
 import 'package:rtu_mirea_app/domain/entities/employee.dart';
+import 'package:rtu_mirea_app/domain/entities/score.dart';
 import 'package:rtu_mirea_app/domain/entities/user.dart';
 import 'package:rtu_mirea_app/domain/repositories/user_repository.dart';
 
@@ -79,6 +80,17 @@ class UserRepositoryImpl implements UserRepository {
     try {
       final employees = await remoteDataSource.getEmployees(token, name);
       return Right(employees);
+    } on CacheException {
+      return Future.value(const Left(CacheFailure()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, Map<String, List<Score>>>> getScores(
+      String token) async {
+    try {
+      final scores = await remoteDataSource.getScores(token);
+      return Right(scores);
     } on CacheException {
       return Future.value(const Left(CacheFailure()));
     }

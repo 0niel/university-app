@@ -4,14 +4,15 @@ import 'package:dio/dio.dart';
 import 'package:rtu_mirea_app/common/errors/exceptions.dart';
 import 'package:rtu_mirea_app/data/models/announce_model.dart';
 import 'package:rtu_mirea_app/data/models/employee_model.dart';
+import 'package:rtu_mirea_app/data/models/score_model.dart';
 import 'package:rtu_mirea_app/data/models/user_model.dart';
-import 'package:rtu_mirea_app/domain/entities/announce.dart';
 
 abstract class UserRemoteData {
   Future<String> auth(String login, String password);
   Future<UserModel> getProfileData(String token);
   Future<List<AnnounceModel>> getAnnounces(String token);
   Future<List<EmployeeModel>> getEmployees(String token, String name);
+  Future<Map<String, List<ScoreModel>>> getScores(String token);
 }
 
 class UserRemoteDataImpl implements UserRemoteData {
@@ -104,6 +105,38 @@ class UserRemoteDataImpl implements UserRemoteData {
         }
       }
       return employees;
+    } else {
+      throw ServerException('Response status code is $response.statusCode');
+    }
+  }
+
+  @override
+  Future<Map<String, List<ScoreModel>>> getScores(String token) async {
+    final response = await httpClient.get(
+      _apiUrl + '?action=getData&url=https://lk.mirea.ru/learning/scores/',
+      options: Options(
+        headers: {'Authorization': token},
+      ),
+    );
+
+    var jsonResponse = json.decode(response.data);
+    if (jsonResponse.containsKey('errors')) {
+      throw ServerException(jsonResponse['errors'][0]);
+    }
+
+    if (response.statusCode == 200) {
+      Map<String, List<ScoreModel>> scores = {};
+      jsonResponse["SCORES"].values.first.forEach((key, value) {
+        if (scores.containsKey(key) == false) {
+          scores[key] = [];
+        }
+
+        for (final score in value.values) {
+          scores[key]!.add(ScoreModel.fromJson(score[0]));
+        }
+      });
+
+      return scores;
     } else {
       throw ServerException('Response status code is $response.statusCode');
     }

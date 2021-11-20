@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:rtu_mirea_app/presentation/bloc/announces/announces_bloc.dart';
+import 'package:rtu_mirea_app/presentation/bloc/announces_bloc/announces_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/auth_bloc/auth_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/profile_bloc/profile_bloc.dart';
 import 'package:rtu_mirea_app/presentation/colors.dart';
@@ -9,6 +9,7 @@ import 'package:rtu_mirea_app/presentation/pages/profile/about_app_page.dart';
 import 'package:rtu_mirea_app/presentation/pages/profile/profile_announces_page.dart';
 import 'package:rtu_mirea_app/presentation/pages/profile/profile_detail_page.dart';
 import 'package:rtu_mirea_app/presentation/pages/profile/profile_lectors_page.dart';
+import 'package:rtu_mirea_app/presentation/pages/profile/profile_scores_page.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:rtu_mirea_app/presentation/widgets/buttons/colorful_button.dart';
 import 'package:rtu_mirea_app/presentation/widgets/buttons/settings_button.dart';
@@ -126,6 +127,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             text: 'Посещения',
                             icon: Icons.access_time_rounded,
                             onClick: () {}),
+                        const SizedBox(height: 8),
+                        SettingsButton(
+                            text: 'Зачетная книжка',
+                            icon: Icons.menu_book_rounded,
+                            onClick: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) =>
+                                        const ProfileScoresPage()),
+                              );
+                            }),
                         const SizedBox(height: 8),
                         SettingsButton(
                           text: 'О приложении',
