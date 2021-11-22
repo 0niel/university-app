@@ -35,6 +35,25 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+
+        <receiver android:name="AbstractHomeWidgetProvider"
+            android:exported="true">
+          <intent-filter>
+              <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+          </intent-filter>
+          <meta-data android:name="android.appwidget.provider"
+              android:resource="@xml/timetable_widget" />
+        </receiver>
+
+       <!-- Used for Background Work -->
+       <receiver android:name="ninja.mirea.mireaapp.widget_channel.HomeWidgetBackgroundReceiver">
+           <intent-filter>
+               <action android:name="es.antonborri.home_widget.action.BACKGROUND" />
+           </intent-filter>
+       </receiver>
+       <service android:name="ninja.mirea.mireaapp.widget_channel.HomeWidgetBackgroundService"
+           android:permission="android.permission.BIND_JOB_SERVICE" android:exported="true"/>
+
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
         <meta-data
