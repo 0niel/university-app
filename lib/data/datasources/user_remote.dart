@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:rtu_mirea_app/common/errors/exceptions.dart';
 import 'package:rtu_mirea_app/data/models/announce_model.dart';
+import 'package:rtu_mirea_app/data/models/attendance_model.dart';
 import 'package:rtu_mirea_app/data/models/employee_model.dart';
 import 'package:rtu_mirea_app/data/models/score_model.dart';
 import 'package:rtu_mirea_app/data/models/user_model.dart';
@@ -12,6 +13,8 @@ abstract class UserRemoteData {
   Future<UserModel> getProfileData(String token);
   Future<List<AnnounceModel>> getAnnounces(String token);
   Future<List<EmployeeModel>> getEmployees(String token, String name);
+  Future<List<AttendanceModel>> getAttendance(
+      String token, String dateStart, String dateEnd);
   Future<Map<String, List<ScoreModel>>> getScores(String token);
 }
 
@@ -137,6 +140,43 @@ class UserRemoteDataImpl implements UserRemoteData {
       });
 
       return scores;
+    } else {
+      throw ServerException('Response status code is $response.statusCode');
+    }
+  }
+
+  @override
+  Future<List<AttendanceModel>> getAttendance(
+      String token, String dateStart, String dateEnd) async {
+    final response = await httpClient.get(
+      _apiUrl +
+          '?action=getData&url=https://lk.mirea.ru/schedule/attendance/&startDate=$dateStart&endDate=$dateEnd',
+      options: Options(
+        headers: {'Authorization': token},
+      ),
+    );
+
+    var jsonResponse = json.decode(response.data);
+    if (jsonResponse.containsKey('errors')) {
+      throw ServerException(jsonResponse['errors'][0]);
+    }
+
+    if (response.statusCode == 200) {
+      List<AttendanceModel> attendance = [];
+      if (jsonResponse["ROWS"] != null) {
+        Map<String, dynamic>.from(jsonResponse["ROWS"]).forEach((date, row) {
+          if (row.containsKey("START")) {
+            attendance.add(
+                AttendanceModel.fromJson(row["START"]).copyWith(date: date));
+          }
+          if (row.containsKey("END")) {
+            attendance
+                .add(AttendanceModel.fromJson(row["END"]).copyWith(date: date));
+          }
+        });
+      }
+      print(attendance);
+      return attendance;
     } else {
       throw ServerException('Response status code is $response.statusCode');
     }

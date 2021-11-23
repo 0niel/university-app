@@ -22,6 +22,7 @@ import 'package:rtu_mirea_app/domain/repositories/user_repository.dart';
 import 'package:rtu_mirea_app/domain/usecases/delete_schedule.dart';
 import 'package:rtu_mirea_app/domain/usecases/get_active_group.dart';
 import 'package:rtu_mirea_app/domain/usecases/get_announces.dart';
+import 'package:rtu_mirea_app/domain/usecases/get_attendance.dart';
 import 'package:rtu_mirea_app/domain/usecases/get_auth_token.dart';
 import 'package:rtu_mirea_app/domain/usecases/get_contributors.dart';
 import 'package:rtu_mirea_app/domain/usecases/get_downloaded_schedules.dart';
@@ -39,6 +40,7 @@ import 'package:rtu_mirea_app/domain/usecases/set_active_group.dart';
 import 'package:rtu_mirea_app/domain/usecases/set_schedule_settings.dart';
 import 'package:rtu_mirea_app/presentation/bloc/about_app_bloc/about_app_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/announces_bloc/announces_bloc.dart';
+import 'package:rtu_mirea_app/presentation/bloc/attendance_bloc/attendance_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/auth_bloc/auth_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/employee_bloc/employee_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/home_navigator_bloc/home_navigator_bloc.dart';
@@ -79,8 +81,10 @@ Future<void> setup() async {
   getIt.registerFactory(() => AnnouncesBloc(getAnnounces: getIt()));
   getIt.registerFactory(() => EmployeeBloc(getEmployees: getIt()));
   getIt.registerFactory(() => ScoresBloc(getScores: getIt()));
+  getIt.registerFactory(() => AttendanceBloc(getAttendance: getIt()));
 
   // Usecases
+  getIt.registerLazySingleton(() => GetAttendance(getIt()));
   getIt.registerLazySingleton(() => GetScores(getIt()));
   getIt.registerLazySingleton(() => GetEmployees(getIt()));
   getIt.registerLazySingleton(() => GetAnnounces(getIt()));
@@ -155,7 +159,7 @@ Future<void> setup() async {
 
   // External Dependency
   getIt.registerLazySingleton(
-      () => Dio(BaseOptions(connectTimeout: 3000, receiveTimeout: 3000)));
+      () => Dio(BaseOptions(connectTimeout: 5000, receiveTimeout: 7000)));
   final sharedPreferences = await SharedPreferences.getInstance();
   getIt.registerLazySingleton(() => sharedPreferences);
   getIt.registerLazySingleton(() => InternetConnectionChecker());

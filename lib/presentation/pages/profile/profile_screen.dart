@@ -7,6 +7,7 @@ import 'package:rtu_mirea_app/presentation/colors.dart';
 import 'package:rtu_mirea_app/presentation/pages/auth/auth_screen.dart';
 import 'package:rtu_mirea_app/presentation/pages/profile/about_app_page.dart';
 import 'package:rtu_mirea_app/presentation/pages/profile/profile_announces_page.dart';
+import 'package:rtu_mirea_app/presentation/pages/profile/profile_attendance_page.dart';
 import 'package:rtu_mirea_app/presentation/pages/profile/profile_detail_page.dart';
 import 'package:rtu_mirea_app/presentation/pages/profile/profile_lectors_page.dart';
 import 'package:rtu_mirea_app/presentation/pages/profile/profile_scores_page.dart';
@@ -126,7 +127,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         SettingsButton(
                             text: 'Посещения',
                             icon: Icons.access_time_rounded,
-                            onClick: () {}),
+                            onClick: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) =>
+                                        const ProfileAttendancePage()),
+                              );
+                            }),
                         const SizedBox(height: 8),
                         SettingsButton(
                             text: 'Зачетная книжка',

@@ -5,6 +5,7 @@ import 'package:dartz/dartz.dart';
 import 'package:rtu_mirea_app/data/datasources/user_local.dart';
 import 'package:rtu_mirea_app/data/datasources/user_remote.dart';
 import 'package:rtu_mirea_app/domain/entities/announce.dart';
+import 'package:rtu_mirea_app/domain/entities/attendance.dart';
 import 'package:rtu_mirea_app/domain/entities/employee.dart';
 import 'package:rtu_mirea_app/domain/entities/score.dart';
 import 'package:rtu_mirea_app/domain/entities/user.dart';
@@ -48,8 +49,8 @@ class UserRepositoryImpl implements UserRepository {
     try {
       final user = await remoteDataSource.getProfileData(token);
       return Future.value(Right(user));
-    } on CacheException {
-      return Future.value(const Left(CacheFailure()));
+    } on ServerException {
+      return Future.value(const Left(ServerFailure()));
     }
   }
 
@@ -61,6 +62,8 @@ class UserRepositoryImpl implements UserRepository {
       return Future.value(Right(token));
     } on CacheException {
       return Future.value(const Left(CacheFailure()));
+    } on ServerException {
+      return Future.value(const Left(ServerFailure()));
     }
   }
 
@@ -69,8 +72,8 @@ class UserRepositoryImpl implements UserRepository {
     try {
       final announces = await remoteDataSource.getAnnounces(token);
       return Right(announces);
-    } on CacheException {
-      return Future.value(const Left(CacheFailure()));
+    } on ServerException {
+      return Future.value(const Left(ServerFailure()));
     }
   }
 
@@ -80,8 +83,8 @@ class UserRepositoryImpl implements UserRepository {
     try {
       final employees = await remoteDataSource.getEmployees(token, name);
       return Right(employees);
-    } on CacheException {
-      return Future.value(const Left(CacheFailure()));
+    } on ServerException {
+      return Future.value(const Left(ServerFailure()));
     }
   }
 
@@ -91,8 +94,20 @@ class UserRepositoryImpl implements UserRepository {
     try {
       final scores = await remoteDataSource.getScores(token);
       return Right(scores);
-    } on CacheException {
-      return Future.value(const Left(CacheFailure()));
+    } on ServerException {
+      return Future.value(const Left(ServerFailure()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<Attendance>>> getAattendance(
+      String token, String dateStart, String dateEnd) async {
+    try {
+      final attendance =
+          await remoteDataSource.getAttendance(token, dateStart, dateEnd);
+      return Right(attendance);
+    } on ServerException {
+      return Future.value(const Left(ServerFailure()));
     }
   }
 }
