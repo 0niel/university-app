@@ -39,9 +39,12 @@ class UserRepositoryImpl implements UserRepository {
   }
 
   @override
-  Either<Failure, void> logOut() {
-    // TODO: implement logOut
-    throw UnimplementedError();
+  Future<Either<Failure, void>> logOut() async {
+    try {
+      return Right(await localDataSource.removeTokenFromCache());
+    } on CacheException {
+      return Future.value(const Left(CacheFailure()));
+    }
   }
 
   @override

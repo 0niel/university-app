@@ -36,6 +36,7 @@ import 'package:rtu_mirea_app/domain/usecases/get_schedule_settings.dart';
 import 'package:rtu_mirea_app/domain/usecases/get_scores.dart';
 import 'package:rtu_mirea_app/domain/usecases/get_user_data.dart';
 import 'package:rtu_mirea_app/domain/usecases/log_in.dart';
+import 'package:rtu_mirea_app/domain/usecases/log_out.dart';
 import 'package:rtu_mirea_app/domain/usecases/set_active_group.dart';
 import 'package:rtu_mirea_app/domain/usecases/set_schedule_settings.dart';
 import 'package:rtu_mirea_app/presentation/bloc/about_app_bloc/about_app_bloc.dart';
@@ -75,8 +76,11 @@ Future<void> setup() async {
   getIt.registerFactory(() => HomeNavigatorBloc());
   getIt.registerFactory(() => OnboardingCubit());
   getIt.registerFactory(() => MapCubit());
-  getIt.registerFactory(() =>
-      AuthBloc(getAuthToken: getIt(), logIn: getIt(), getUserData: getIt()));
+  getIt.registerFactory(() => AuthBloc(
+      logOut: getIt(),
+      getAuthToken: getIt(),
+      logIn: getIt(),
+      getUserData: getIt()));
   getIt.registerFactory(() => ProfileBloc(getUserData: getIt()));
   getIt.registerFactory(() => AnnouncesBloc(getAnnounces: getIt()));
   getIt.registerFactory(() => EmployeeBloc(getEmployees: getIt()));
@@ -90,6 +94,7 @@ Future<void> setup() async {
   getIt.registerLazySingleton(() => GetAnnounces(getIt()));
   getIt.registerLazySingleton(() => GetAuthToken(getIt()));
   getIt.registerLazySingleton(() => GetUserData(getIt()));
+  getIt.registerLazySingleton(() => LogOut(getIt()));
   getIt.registerLazySingleton(() => LogIn(getIt()));
   getIt.registerLazySingleton(() => GetGroups(getIt()));
   getIt.registerLazySingleton(() => GetSchedule(getIt()));

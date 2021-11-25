@@ -9,6 +9,8 @@ abstract class AuthState extends Equatable {
 
 class AuthUnknown extends AuthState {}
 
+class AuthUnauthorized extends AuthState {}
+
 class LogInError extends AuthState {
   final String cause;
 

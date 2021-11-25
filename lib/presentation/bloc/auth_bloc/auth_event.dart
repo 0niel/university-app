@@ -18,3 +18,5 @@ class AuthLogInEvent extends AuthEvent {
 }
 
 class AuthLogInFromCache extends AuthEvent {}
+
+class AuthLogOut extends AuthEvent {}

@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 abstract class UserLocalData {
   Future<void> setTokenToCache(String token);
   Future<String> getTokenFromCache();
+  Future<void> removeTokenFromCache();
 }
 
 class UserLocalDataImpl implements UserLocalData {
@@ -21,5 +22,10 @@ class UserLocalDataImpl implements UserLocalData {
     String? token = sharedPreferences.getString('auth_token');
     if (token == null) throw CacheException('Auth token are not set');
     return Future.value(token);
+  }
+
+  @override
+  Future<void> removeTokenFromCache() {
+    return sharedPreferences.remove('auth_token');
   }
 }

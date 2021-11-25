@@ -165,11 +165,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           ColorfulButton(
                               text: 'Выйти',
                               onClick: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => const AuthScreen()),
-                                );
+                                context.read<AuthBloc>().add(AuthLogOut());
                               },
                               backgroundColor: DarkThemeColors.colorful07),
                         ],
@@ -179,7 +175,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     }
                     return Container();
                   });
-                } else if (state is LogInError) {
+                } else if (state is LogInError || state is AuthUnauthorized) {
                   return Column(
                     children: [
                       ColorfulButton(
