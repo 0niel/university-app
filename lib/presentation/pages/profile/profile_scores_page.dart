@@ -28,12 +28,13 @@ class _ProfileScoresPageState extends State<ProfileScoresPage> {
         child: BlocBuilder<AuthBloc, AuthState>(
           builder: (context, authState) {
             if (authState is LogInSuccess) {
-              context
-                  .read<ScoresBloc>()
-                  .add(LoadScores(token: authState.token));
               return BlocBuilder<ScoresBloc, ScoresState>(
                 builder: (context, state) {
-                  if (state is ScoresLoaded) {
+                  if (state is ScoresInitial) {
+                    context
+                        .read<ScoresBloc>()
+                        .add(LoadScores(token: authState.token));
+                  } else if (state is ScoresLoaded) {
                     _tabValueNotifier.value = state.scores.keys
                         .toList()
                         .indexOf(state.selectedSemester);
@@ -44,6 +45,8 @@ class _ProfileScoresPageState extends State<ProfileScoresPage> {
                           height: 32,
                           width: double.infinity,
                           child: ListView.builder(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 12),
                               scrollDirection: Axis.horizontal,
                               itemBuilder: (context, index) {
                                 final String semester =
@@ -133,6 +136,12 @@ class _ProfileScoresPageState extends State<ProfileScoresPage> {
                     );
                   } else if (state is ScoresLoading) {
                     return const Center(child: CircularProgressIndicator());
+                  } else if (state is ScoresLoadError) {
+                    return Center(
+                      child: Text(
+                          "Произошла ошибка при попытке загрузить посещаемость. Повторите попытку позже",
+                          style: DarkTextTheme.body),
+                    );
                   }
                   return Container();
                 },

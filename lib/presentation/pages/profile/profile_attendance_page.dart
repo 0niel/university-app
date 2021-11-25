@@ -56,7 +56,11 @@ class _ProfileAttendancePageState extends State<ProfileAttendancePage> {
                         endDate:
                             _getTextDates(_getFirstAndLastWeekDaysText())[1]));
                   } else if (state is AttendanceLoadError) {
-                    return Container();
+                    return Center(
+                      child: Text(
+                          "Произошла ошибка при попытке загрузить посещаемость. Повторите попытку позже",
+                          style: DarkTextTheme.body),
+                    );
                   }
                   return Column(
                     children: [
