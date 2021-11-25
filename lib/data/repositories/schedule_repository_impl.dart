@@ -30,14 +30,14 @@ class ScheduleRepositoryImpl implements ScheduleRepository {
         localDataSource.setGroupsToCache(groupsList);
         return Right(groupsList);
       } on ServerException {
-        return Left(ServerFailure());
+        return const Left(ServerFailure());
       }
     } else {
       try {
         final localGroupsList = await localDataSource.getGroupsFromCache();
         return Right(localGroupsList);
       } on CacheException {
-        return Left(CacheFailure());
+        return const Left(CacheFailure());
       }
     }
   }
@@ -51,9 +51,9 @@ class ScheduleRepositoryImpl implements ScheduleRepository {
         }
       }
       // If the group is not downloaded
-      return Left(CacheFailure());
+      return const Left(CacheFailure());
     } on CacheException {
-      return Left(CacheFailure());
+      return const Left(CacheFailure());
     }
   }
 

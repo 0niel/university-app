@@ -4,7 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/about_app_bloc/about_app_bloc.dart';
 import 'package:rtu_mirea_app/presentation/colors.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
-import 'package:rtu_mirea_app/presentation/widgets/icon_button.dart';
+import 'package:rtu_mirea_app/presentation/widgets/buttons/icon_button.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'widgets/member_info.dart';

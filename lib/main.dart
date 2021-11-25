@@ -2,12 +2,19 @@ import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:rtu_mirea_app/presentation/bloc/about_app_bloc/about_app_bloc.dart';
+import 'package:rtu_mirea_app/presentation/bloc/announces_bloc/announces_bloc.dart';
+import 'package:rtu_mirea_app/presentation/bloc/attendance_bloc/attendance_bloc.dart';
+import 'package:rtu_mirea_app/presentation/bloc/auth_bloc/auth_bloc.dart';
+import 'package:rtu_mirea_app/presentation/bloc/employee_bloc/employee_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/home_navigator_bloc/home_navigator_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/map_cubit/map_cubit.dart';
 import 'package:rtu_mirea_app/presentation/bloc/news_bloc/news_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/onboarding_cubit/onboarding_cubit.dart';
+import 'package:rtu_mirea_app/presentation/bloc/profile_bloc/profile_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/schedule_bloc/schedule_bloc.dart';
+import 'package:rtu_mirea_app/presentation/bloc/scores_bloc/scores_bloc.dart';
 import 'package:rtu_mirea_app/presentation/pages/home/home_navigator_screen.dart';
 import 'package:rtu_mirea_app/presentation/pages/map/map_screen.dart';
 import 'package:rtu_mirea_app/presentation/pages/news/news_screen.dart';
@@ -16,6 +23,7 @@ import 'package:rtu_mirea_app/presentation/pages/schedule/schedule_screen.dart';
 import 'package:rtu_mirea_app/presentation/pages/profile/profile_screen.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:intl/intl_standalone.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:rtu_mirea_app/service_locator.dart' as dependency_injection;
 import 'service_locator.dart';
@@ -31,8 +39,7 @@ Future<void> main() async {
   // to debug:
   //await prefs.clear();
 
-  initializeDateFormatting();
-  runApp(App(showOnboarding: showOnboarding));
+  findSystemLocale().then((_) => runApp(App(showOnboarding: showOnboarding)));
 }
 
 class App extends StatelessWidget {
@@ -68,12 +75,31 @@ class App extends StatelessWidget {
         BlocProvider<AboutAppBloc>(
             create: (context) =>
                 getIt<AboutAppBloc>()..add(AboutAppGetMembers())),
+        BlocProvider<AuthBloc>(
+            create: (context) => getIt<AuthBloc>()..add(AuthLogInFromCache())),
+        BlocProvider<ProfileBloc>(create: (context) => getIt<ProfileBloc>()),
+        BlocProvider<AnnouncesBloc>(
+            create: (context) => getIt<AnnouncesBloc>()),
+        BlocProvider<EmployeeBloc>(create: (context) => getIt<EmployeeBloc>()),
+        BlocProvider<ScoresBloc>(create: (context) => getIt<ScoresBloc>()),
+        BlocProvider<AttendanceBloc>(
+            create: (context) => getIt<AttendanceBloc>()),
       ],
       child: AdaptiveTheme(
         light: lightTheme,
         dark: darkTheme,
         initial: AdaptiveThemeMode.dark,
         builder: (theme, darkTheme) => MaterialApp(
+          localizationsDelegates: const [
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: const [
+            Locale('en'),
+            Locale('ru'),
+          ],
+          locale: const Locale('ru'),
           debugShowCheckedModeBanner: false,
           title: 'Приложение РТУ МИРЭА',
           theme: theme,

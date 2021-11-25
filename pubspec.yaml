@@ -65,7 +65,22 @@ dependencies:
   dartz: ^0.10.0-nullsafety.2
 
   flutter_typeahead: ^3.2.0
+
+  # The Flutter Date Range Picker widget allows users to easily select 
+  # dates or a range of dates. It has four built-in views that allow quick 
+  # navigation to the desired date.
+  # See https://pub.dev/packages/syncfusion_flutter_datepicker
+  syncfusion_flutter_datepicker: ^19.3.54
+
+  # A Flutter widget rendering static HTML and CSS as Flutter widgets.
+  # See https://pub.dev/packages/flutter_html
+  flutter_html: ^2.1.5
   
+  # The Font Awesome Icon pack available as Flutter Icons. 
+  # Provides 1600 additional icons to use in your apps.
+  # See https://pub.dev/packages/font_awesome_flutter
+  font_awesome_flutter: ^9.2.0
+
   # Table calendar for schedule
   table_calendar: ^3.0.2
 
