@@ -38,177 +38,180 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
       ),
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: BlocBuilder<AuthBloc, AuthState>(
-            builder: (context, state) {
-              if (state is LogInSuccess) {
-                context
-                    .read<ProfileBloc>()
-                    .add(ProfileGetUserData(state.token));
-                return BlocBuilder<ProfileBloc, ProfileState>(
-                    builder: (context, profileState) {
-                  if (profileState is ProfileLoaded) {
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        CircleAvatar(
-                          radius: 68,
-                          backgroundImage: Image.network('https://lk.mirea.ru' +
-                                  profileState.user.photoUrl)
-                              .image,
-                        ),
-                        Padding(
-                          child: Text(
-                            profileState.user.name +
-                                ' ' +
-                                profileState.user.lastName,
-                            style: DarkTextTheme.h5,
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: BlocBuilder<AuthBloc, AuthState>(
+              builder: (context, state) {
+                if (state is LogInSuccess) {
+                  context
+                      .read<ProfileBloc>()
+                      .add(ProfileGetUserData(state.token));
+                  return BlocBuilder<ProfileBloc, ProfileState>(
+                      builder: (context, profileState) {
+                    if (profileState is ProfileLoaded) {
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          CircleAvatar(
+                            radius: 68,
+                            backgroundImage: Image.network(
+                                    'https://lk.mirea.ru' +
+                                        profileState.user.photoUrl)
+                                .image,
                           ),
-                          padding: const EdgeInsets.only(top: 13, bottom: 4),
-                        ),
-                        ShaderMask(
-                          shaderCallback: (bounds) =>
-                              DarkThemeColors.gradient07.createShader(
-                            Rect.fromLTWH(0, 0, bounds.width, bounds.height),
+                          Padding(
+                            child: Text(
+                              profileState.user.name +
+                                  ' ' +
+                                  profileState.user.lastName,
+                              style: DarkTextTheme.h5,
+                            ),
+                            padding: const EdgeInsets.only(top: 13, bottom: 4),
                           ),
-                          child: Text(
-                            profileState.user.login,
-                            style: DarkTextTheme.titleS,
+                          ShaderMask(
+                            shaderCallback: (bounds) =>
+                                DarkThemeColors.gradient07.createShader(
+                              Rect.fromLTWH(0, 0, bounds.width, bounds.height),
+                            ),
+                            child: Text(
+                              profileState.user.login,
+                              style: DarkTextTheme.titleS,
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 12),
-                        TextOutlinedButton(
-                            content: "Просмотр профиля",
-                            width: 200,
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => ProfileDetailPage(
-                                        user: profileState.user)),
-                              );
-                            }),
-                        const SizedBox(height: 40),
-                        const ContainerLabel(label: "Информация"),
-                        const SizedBox(height: 20),
-                        SettingsButton(
-                            text: 'Объявления',
-                            icon: Icons.message_rounded,
+                          const SizedBox(height: 12),
+                          TextOutlinedButton(
+                              content: "Просмотр профиля",
+                              width: 200,
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => ProfileDetailPage(
+                                          user: profileState.user)),
+                                );
+                              }),
+                          const SizedBox(height: 40),
+                          const ContainerLabel(label: "Информация"),
+                          const SizedBox(height: 20),
+                          SettingsButton(
+                              text: 'Объявления',
+                              icon: Icons.message_rounded,
+                              onClick: () {
+                                context
+                                    .read<AnnouncesBloc>()
+                                    .add(LoadAnnounces(token: state.token));
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) =>
+                                          const ProfileAnnouncesPage()),
+                                );
+                              }),
+                          // const SizedBox(height: 8),
+                          // SettingsButton(
+                          //     text: 'Адреса',
+                          //     icon: Icons.map_rounded,
+                          //     onClick: () {}),
+                          const SizedBox(height: 8),
+                          SettingsButton(
+                              text: 'Преподаватели',
+                              icon: Icons.people_alt_rounded,
+                              onClick: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) =>
+                                          const ProfileLectrosPage()),
+                                );
+                              }),
+                          const SizedBox(height: 8),
+                          SettingsButton(
+                              text: 'Посещения',
+                              icon: Icons.access_time_rounded,
+                              onClick: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) =>
+                                          const ProfileAttendancePage()),
+                                );
+                              }),
+                          const SizedBox(height: 8),
+                          SettingsButton(
+                              text: 'Зачетная книжка',
+                              icon: Icons.menu_book_rounded,
+                              onClick: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) =>
+                                          const ProfileScoresPage()),
+                                );
+                              }),
+                          const SizedBox(height: 8),
+                          SettingsButton(
+                            text: 'О приложении',
+                            icon: Icons.apps_rounded,
                             onClick: () {
-                              context
-                                  .read<AnnouncesBloc>()
-                                  .add(LoadAnnounces(token: state.token));
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                    builder: (context) =>
-                                        const ProfileAnnouncesPage()),
+                                    builder: (context) => const AboutAppPage()),
                               );
-                            }),
-                        // const SizedBox(height: 8),
-                        // SettingsButton(
-                        //     text: 'Адреса',
-                        //     icon: Icons.map_rounded,
-                        //     onClick: () {}),
-                        const SizedBox(height: 8),
-                        SettingsButton(
-                            text: 'Преподаватели',
-                            icon: Icons.people_alt_rounded,
-                            onClick: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) =>
-                                        const ProfileLectrosPage()),
-                              );
-                            }),
-                        const SizedBox(height: 8),
-                        SettingsButton(
-                            text: 'Посещения',
-                            icon: Icons.access_time_rounded,
-                            onClick: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) =>
-                                        const ProfileAttendancePage()),
-                              );
-                            }),
-                        const SizedBox(height: 8),
-                        SettingsButton(
-                            text: 'Зачетная книжка',
-                            icon: Icons.menu_book_rounded,
-                            onClick: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) =>
-                                        const ProfileScoresPage()),
-                              );
-                            }),
-                        const SizedBox(height: 8),
-                        SettingsButton(
-                          text: 'О приложении',
-                          icon: Icons.apps_rounded,
+                            },
+                          ),
+                          const SizedBox(height: 8),
+                          ColorfulButton(
+                              text: 'Выйти',
+                              onClick: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => const AuthScreen()),
+                                );
+                              },
+                              backgroundColor: DarkThemeColors.colorful07),
+                        ],
+                      );
+                    } else if (profileState is ProfileLoading) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+                    return Container();
+                  });
+                } else if (state is LogInError) {
+                  return Column(
+                    children: [
+                      ColorfulButton(
+                          text: 'Войти',
                           onClick: () {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) => const AboutAppPage()),
+                                  builder: (context) => const AuthScreen()),
                             );
                           },
-                        ),
-                        const SizedBox(height: 8),
-                        ColorfulButton(
-                            text: 'Выйти',
-                            onClick: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => const AuthScreen()),
-                              );
-                            },
-                            backgroundColor: DarkThemeColors.colorful07),
-                      ],
-                    );
-                  } else if (profileState is ProfileLoading) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
-                  return Container();
-                });
-              } else if (state is LogInError) {
-                return Column(
-                  children: [
-                    ColorfulButton(
-                        text: 'Войти',
+                          backgroundColor: DarkThemeColors.colorful03),
+                      const SizedBox(height: 8),
+                      SettingsButton(
+                        text: 'О приложении',
+                        icon: Icons.apps_rounded,
                         onClick: () {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => const AuthScreen()),
+                                builder: (context) => const AboutAppPage()),
                           );
                         },
-                        backgroundColor: DarkThemeColors.colorful03),
-                    const SizedBox(height: 8),
-                    SettingsButton(
-                      text: 'О приложении',
-                      icon: Icons.apps_rounded,
-                      onClick: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => const AboutAppPage()),
-                        );
-                      },
-                    ),
-                  ],
-                );
-              } else if (state is AuthUnknown) {
-                return const Center(child: CircularProgressIndicator());
-              }
-              return Container();
-            },
+                      ),
+                    ],
+                  );
+                } else if (state is AuthUnknown) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                return Container();
+              },
+            ),
           ),
         ),
       ),
