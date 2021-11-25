@@ -26,9 +26,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     Emitter<AuthState> emit,
   ) async {
     final res = await getAuthToken();
-    res.fold(
-        (failure) => emit(const LogInError(
-            cause: "Сессия устарела. Повторите попытку авторизации")),
+    res.fold((failure) => emit(const LogInError(cause: '')),
         (token) => emit(LogInSuccess(token: token)));
   }
 

@@ -28,8 +28,11 @@ class _AuthScreenState extends State<AuthScreen> {
         }
       },
       child: Scaffold(
+        appBar: AppBar(
+          automaticallyImplyLeading: true,
+        ),
         body: Padding(
-          padding: const EdgeInsets.all(20.0),
+          padding: const EdgeInsets.symmetric(horizontal: 24.0),
           child: SafeArea(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -67,7 +70,7 @@ class _AuthScreenState extends State<AuthScreen> {
                     obscureText: obscureText,
                     label: "Ваш пароль"),
                 BlocBuilder<AuthBloc, AuthState>(builder: (context, state) {
-                  if (state is LogInError) {
+                  if (state is LogInError && state.cause != '') {
                     return Padding(
                       padding: const EdgeInsets.only(top: 10),
                       child: Text(
