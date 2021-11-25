@@ -26,14 +26,16 @@ class SelectRangeDateButton extends StatefulWidget {
 
 class _SelectRangeDateButtonState extends State<SelectRangeDateButton> {
   late String _selectedTextDate;
+  late PickerDateRange? _initialRange;
 
   @override
   void initState() {
     _selectedTextDate = widget.text ?? 'Выберите даты';
+    _initialRange = widget.initialRange;
     super.initState();
   }
 
-  void _onSelectionChanged(DateRangePickerSelectionChangedArgs args) {
+  void _formatDatesRange(DateRangePickerSelectionChangedArgs args) {
     setState(() {
       final firstDate =
           DateFormat('dd.MM.yyyy').format(args.value.startDate).toString();
@@ -42,11 +44,14 @@ class _SelectRangeDateButtonState extends State<SelectRangeDateButton> {
           .toString();
 
       _selectedTextDate = "с $firstDate по $lastDate";
-
-      if (args.value.startDate != null && args.value.endDate != null) {
-        widget.onDateSelected([args.value.startDate, args.value.endDate]);
-      }
     });
+  }
+
+  void _onSelectionChanged(DateTime? startDate, DateTime? endDate) {
+    if (startDate != null && endDate != null) {
+      widget.onDateSelected([startDate, endDate]);
+      _initialRange = PickerDateRange(startDate, endDate);
+    }
   }
 
   @override
@@ -88,17 +93,39 @@ class _SelectRangeDateButtonState extends State<SelectRangeDateButton> {
             child: Container(
               constraints: const BoxConstraints(maxHeight: 360),
               child: SfDateRangePicker(
+                rangeSelectionColor:
+                    DarkThemeColors.colorful03.withOpacity(0.7),
+                headerStyle:
+                    DateRangePickerHeaderStyle(textStyle: DarkTextTheme.titleS),
+                monthCellStyle: DateRangePickerMonthCellStyle(
+                  textStyle: DarkTextTheme.body,
+                  todayTextStyle: DarkTextTheme.body
+                      .copyWith(color: DarkThemeColors.colorful03),
+                ),
+                selectionTextStyle: DarkTextTheme.bodyBold,
+                rangeTextStyle: DarkTextTheme.body,
+                todayHighlightColor: DarkThemeColors.colorful03,
+                startRangeSelectionColor: DarkThemeColors.colorful03,
+                endRangeSelectionColor: DarkThemeColors.colorful03,
+                selectionColor: DarkThemeColors.primary,
                 monthViewSettings:
                     const DateRangePickerMonthViewSettings(firstDayOfWeek: 1),
                 toggleDaySelection: true,
                 showActionButtons: true,
-                initialSelectedRange: widget.initialRange,
+                initialSelectedRange: _initialRange,
                 cancelText: 'ОТМЕНА',
-                //backgroundColor: DarkThemeColors.background02,
+                onCancel: () => Navigator.of(context).pop(),
+                onSubmit: (Object value) {
+                  if (value is PickerDateRange) {
+                    _onSelectionChanged(value.startDate, value.endDate);
+                    Navigator.of(context).pop();
+                  }
+                },
+                backgroundColor: DarkThemeColors.background02,
                 showNavigationArrow: true,
                 minDate: widget.firstDate,
                 maxDate: widget.lastDate,
-                onSelectionChanged: _onSelectionChanged,
+                onSelectionChanged: _formatDatesRange,
                 selectionMode: DateRangePickerSelectionMode.range,
               ),
             ),

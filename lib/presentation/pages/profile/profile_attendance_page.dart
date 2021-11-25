@@ -81,8 +81,10 @@ class _ProfileAttendancePageState extends State<ProfileAttendancePage> {
                       ),
                       const SizedBox(height: 24),
                       if (state is AttendanceLoading)
-                        const Center(child: CircularProgressIndicator())
-                      else if (state is AttendanceLoaded)
+                        const Expanded(
+                            child: Center(child: CircularProgressIndicator()))
+                      else if (state is AttendanceLoaded &&
+                          state.attendance.isNotEmpty)
                         Expanded(
                           child: ListView.builder(
                             itemCount: state.attendance.length,
@@ -91,13 +93,27 @@ class _ProfileAttendancePageState extends State<ProfileAttendancePage> {
                                 padding: const EdgeInsets.symmetric(
                                     vertical: 16, horizontal: 24),
                                 child: AttendanceCard(
-                                    type: state.attendance[index].eventType,
-                                    date: state.attendance[index].date,
-                                    time: state.attendance[index].time),
+                                  type: state.attendance[index].eventType,
+                                  date: state.attendance[index].date,
+                                  time: state.attendance[index].time,
+                                ),
                               );
                             },
                           ),
                         ),
+                      if (state is AttendanceLoaded && state.attendance.isEmpty)
+                        Expanded(
+                          child: Center(
+                            child: Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 24),
+                              child: Text(
+                                "Ничего не найдено. Выберите другой промежуток времени",
+                                style: DarkTextTheme.body,
+                              ),
+                            ),
+                          ),
+                        )
                     ],
                   );
                 },
