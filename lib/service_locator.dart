@@ -6,10 +6,12 @@ import 'package:rtu_mirea_app/data/datasources/forum_remote.dart';
 import 'package:rtu_mirea_app/data/datasources/news_remote.dart';
 import 'package:rtu_mirea_app/data/datasources/schedule_local.dart';
 import 'package:rtu_mirea_app/data/datasources/schedule_remote.dart';
+import 'package:rtu_mirea_app/data/datasources/strapi_remote.dart';
 import 'package:rtu_mirea_app/data/datasources/user_local.dart';
 import 'package:rtu_mirea_app/data/datasources/user_remote.dart';
 import 'package:rtu_mirea_app/data/repositories/forum_repository_impl.dart';
 import 'package:rtu_mirea_app/data/repositories/news_repository_impl.dart';
+import 'package:rtu_mirea_app/data/repositories/strapi_repository_impl.dart';
 import 'package:rtu_mirea_app/data/repositories/user_repository_impl.dart';
 import 'package:rtu_mirea_app/domain/repositories/forum_repository.dart';
 import 'package:rtu_mirea_app/domain/repositories/news_repository.dart';
@@ -18,6 +20,7 @@ import 'package:rtu_mirea_app/data/datasources/github_remote.dart';
 import 'package:rtu_mirea_app/data/repositories/github_repository_impl.dart';
 import 'package:rtu_mirea_app/domain/repositories/github_repository.dart';
 import 'package:rtu_mirea_app/domain/repositories/schedule_repository.dart';
+import 'package:rtu_mirea_app/domain/repositories/strapi_repository.dart';
 import 'package:rtu_mirea_app/domain/repositories/user_repository.dart';
 import 'package:rtu_mirea_app/domain/usecases/delete_schedule.dart';
 import 'package:rtu_mirea_app/domain/usecases/get_active_group.dart';
@@ -34,6 +37,7 @@ import 'package:rtu_mirea_app/domain/usecases/get_patrons.dart';
 import 'package:rtu_mirea_app/domain/usecases/get_schedule.dart';
 import 'package:rtu_mirea_app/domain/usecases/get_schedule_settings.dart';
 import 'package:rtu_mirea_app/domain/usecases/get_scores.dart';
+import 'package:rtu_mirea_app/domain/usecases/get_stories.dart';
 import 'package:rtu_mirea_app/domain/usecases/get_user_data.dart';
 import 'package:rtu_mirea_app/domain/usecases/log_in.dart';
 import 'package:rtu_mirea_app/domain/usecases/log_out.dart';
@@ -51,6 +55,7 @@ import 'package:rtu_mirea_app/presentation/bloc/onboarding_cubit/onboarding_cubi
 import 'package:rtu_mirea_app/presentation/bloc/profile_bloc/profile_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/schedule_bloc/schedule_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/scores_bloc/scores_bloc.dart';
+import 'package:rtu_mirea_app/presentation/bloc/stories_bloc/stories_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'data/repositories/schedule_repository_impl.dart';
@@ -86,8 +91,10 @@ Future<void> setup() async {
   getIt.registerFactory(() => EmployeeBloc(getEmployees: getIt()));
   getIt.registerFactory(() => ScoresBloc(getScores: getIt()));
   getIt.registerFactory(() => AttendanceBloc(getAttendance: getIt()));
+  getIt.registerFactory(() => StoriesBloc(getStories: getIt()));
 
   // Usecases
+  getIt.registerLazySingleton(() => GetStories(getIt()));
   getIt.registerLazySingleton(() => GetAttendance(getIt()));
   getIt.registerLazySingleton(() => GetScores(getIt()));
   getIt.registerLazySingleton(() => GetEmployees(getIt()));
@@ -141,6 +148,11 @@ Future<void> setup() async {
         connectionChecker: getIt(),
       ));
 
+  getIt.registerLazySingleton<StrapiRepository>(() => StrapiRepositoryImpl(
+        remoteDataSource: getIt(),
+        connectionChecker: getIt(),
+      ));
+
   getIt.registerLazySingleton<UserLocalData>(
       () => UserLocalDataImpl(sharedPreferences: getIt()));
   getIt.registerLazySingleton<UserRemoteData>(
@@ -159,6 +171,8 @@ Future<void> setup() async {
       () => ForumRemoteDataImpl(httpClient: getIt()));
   getIt.registerLazySingleton<ForumLocalData>(
       () => ForumLocalDataImpl(sharedPreferences: getIt()));
+  getIt.registerLazySingleton<StrapiRemoteData>(
+      () => StrapiRemoteDataImpl(httpClient: getIt()));
 
   // Common / Core
 

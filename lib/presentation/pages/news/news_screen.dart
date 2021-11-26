@@ -3,9 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:rtu_mirea_app/domain/entities/news_item.dart';
 import 'package:rtu_mirea_app/presentation/bloc/news_bloc/news_bloc.dart';
+import 'package:rtu_mirea_app/presentation/bloc/stories_bloc/stories_bloc.dart';
 import 'package:rtu_mirea_app/presentation/colors.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'widgets/news_item.dart';
+import 'widgets/story_item.dart';
 
 class NewsScreen extends StatelessWidget {
   NewsScreen({Key? key}) : super(key: key);
@@ -24,6 +26,7 @@ class NewsScreen extends StatelessWidget {
       body: RefreshIndicator(
         onRefresh: () async {
           context.read<NewsBloc>().add(const NewsLoadEvent(refresh: true));
+          context.read<StoriesBloc>().add(LoadStories());
         },
         child: Column(children: [
           // TODO: Add cliclable tags header!!!
@@ -48,6 +51,40 @@ class NewsScreen extends StatelessWidget {
           //   else
           //     return Container();
           // }),
+          BlocBuilder<StoriesBloc, StoriesState>(builder: (context, state) {
+            if (state is StoriesInitial) {
+              context.read<StoriesBloc>().add(LoadStories());
+            } else if (state is StoriesLoading) {
+              return const Center(child: CircularProgressIndicator());
+            } else if (state is StoriesLoaded) {
+              for (final story in state.stories) {
+                if (DateTime.now().compareTo(story.stopShowDate) == -1) {
+                  return SizedBox(
+                    height: 120,
+                    child: ListView.separated(
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        scrollDirection: Axis.horizontal,
+                        itemBuilder: (_, int i) {
+                          if (DateTime.now()
+                                  .compareTo(state.stories[i].stopShowDate) ==
+                              -1) {
+                            return StoryWidget(
+                              stories: state.stories,
+                              storyIndex: i,
+                            );
+                          }
+                          return Container();
+                        },
+                        separatorBuilder: (_, int i) =>
+                            const SizedBox(width: 10),
+                        itemCount: state.stories.length),
+                  );
+                }
+              }
+            }
+            return Container();
+          }),
+          const SizedBox(height: 20),
           Expanded(
             child: BlocBuilder<NewsBloc, NewsState>(
               builder: (context, state) {
