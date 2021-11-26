@@ -1,7 +1,14 @@
+import 'dart:convert';
+import 'dart:io';
+import 'dart:math';
+
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:rtu_mirea_app/common/calendar.dart';
+import 'package:rtu_mirea_app/data/datasources/schedule_local.dart';
+import 'package:rtu_mirea_app/data/models/schedule_model.dart';
 import 'package:rtu_mirea_app/presentation/bloc/about_app_bloc/about_app_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/home_navigator_bloc/home_navigator_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/map_cubit/map_cubit.dart';
@@ -19,6 +26,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:rtu_mirea_app/service_locator.dart' as dependency_injection;
 import 'service_locator.dart';
+import 'package:home_widget/home_widget.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -30,7 +38,7 @@ Future<void> main() async {
 
   // to debug:
   //await prefs.clear();
-
+  setDataForIOSHomeWidget();
   initializeDateFormatting();
   runApp(App(showOnboarding: showOnboarding));
 }
@@ -91,4 +99,51 @@ class App extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Update timetable for IOS
+/// // TODO Обновлять список недель с началом нового года
+void setDataForIOSHomeWidget() async {
+  HomeWidget.setAppGroupId('group.com.MireaNinja.rtuMireaApp');
+  HomeWidget.saveWidgetData(
+    'testString',
+    'Updated from Background',
+  );
+  var a = await getIt<ScheduleLocalData>().getScheduleFromCache();
+  var a2 = await getIt<ScheduleLocalData>().getActiveGroupFromCache();
+  for (ScheduleModel schedule in a) {
+    if (schedule.group == a2) {
+      HomeWidget.saveWidgetData(
+        'schedule',
+        schedule.toRawJson(),
+      );
+    }
+  }
+  Map<String, int> days = {};
+  DateTime now = DateTime.now();
+  DateTime firstDayOfYear = DateTime(now.year, 1, 1, 0, 0);
+  for (DateTime indexDay = DateTime(now.year, now.month, now.day);
+      indexDay.year == now.year;
+      indexDay = indexDay.add(const Duration(days: 1))) {
+    //  print(indexDay.toString());
+    days[indexDay.difference(firstDayOfYear).inDays.toString()] = min(
+        Calendar.getCurrentWeek(mCurrentDate: indexDay),
+        Calendar.kMaxWeekInSemester);
+  }
+  HomeWidget.saveWidgetData(
+    'daysStuff',
+    json.encode(days),
+  );
+  HomeWidget.updateWidget(
+    name: 'HomeWidgetExampleProvider',
+    androidName: 'HomeWidgetProvider',
+    iOSName: 'HomeWidget',
+  );
+  final b = 1 + 1;
+  // if (Platform.isIOS) {
+  //   print('save some data');
+  //   WidgetKit.setItem(
+  //       'testString', 'Hello World', 'group.com.MireaNinja.rtuMireaApp');
+  //   WidgetKit.reloadAllTimelines();
+  // }
 }

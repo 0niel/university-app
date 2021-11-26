@@ -10,7 +10,7 @@ import ninja.mirea.mireaapp.widget_channel.HomeWidgetBackgroundIntent
 import ninja.mirea.mireaapp.widget_channel.HomeWidgetLaunchIntent
 
 
-class AbstractHomeWidgetProvider : AbstractHomeWidgetProvider() {
+class HomeWidgetProvider : AbstractHomeWidgetProvider() {
 
     override fun onUpdate(
         context: Context,
@@ -26,7 +26,8 @@ class AbstractHomeWidgetProvider : AbstractHomeWidgetProvider() {
                     MainActivity::class.java
                 )
                 setOnClickPendingIntent(R.id.widget_container, pendingIntent)
-
+//                val prefs = context.getSharedPreferences(context.getString(R.string.prefs_str), Context.MODE_PRIVATE)
+//                val data = prefs.getString("testString", "Shit!")
                 // Swap Title Text by calling Dart Code in the Background
                 setTextViewText(
                     R.id.widget_title, widgetData.getString("title", null)
@@ -38,7 +39,7 @@ class AbstractHomeWidgetProvider : AbstractHomeWidgetProvider() {
                 )
                 setOnClickPendingIntent(R.id.widget_title, backgroundIntent)
 
-                val message = widgetData.getString("message", null)
+                val message = widgetData.getString("testString", null)
                 setTextViewText(
                     R.id.widget_message, message
                         ?: "No Message Set"
