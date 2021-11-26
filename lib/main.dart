@@ -15,6 +15,7 @@ import 'package:rtu_mirea_app/presentation/bloc/onboarding_cubit/onboarding_cubi
 import 'package:rtu_mirea_app/presentation/bloc/profile_bloc/profile_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/schedule_bloc/schedule_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/scores_bloc/scores_bloc.dart';
+import 'package:rtu_mirea_app/presentation/bloc/stories_bloc/stories_bloc.dart';
 import 'package:rtu_mirea_app/presentation/pages/home/home_navigator_screen.dart';
 import 'package:rtu_mirea_app/presentation/pages/map/map_screen.dart';
 import 'package:rtu_mirea_app/presentation/pages/news/news_screen.dart';
@@ -84,6 +85,7 @@ class App extends StatelessWidget {
         BlocProvider<ScoresBloc>(create: (context) => getIt<ScoresBloc>()),
         BlocProvider<AttendanceBloc>(
             create: (context) => getIt<AttendanceBloc>()),
+        BlocProvider<StoriesBloc>(create: (context) => getIt<StoriesBloc>()),
       ],
       child: AdaptiveTheme(
         light: lightTheme,
