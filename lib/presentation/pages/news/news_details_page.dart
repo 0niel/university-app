@@ -99,7 +99,7 @@ class NewsDetailsPage extends StatelessWidget {
                         child: MarkdownBody(
                           styleSheet: MarkdownStyleSheet(
                             a: DarkTextTheme.body
-                                .copyWith(color: DarkThemeColors.secondary),
+                                .copyWith(color: DarkThemeColors.primary),
                             p: DarkTextTheme.body,
                             h1: DarkTextTheme.h1,
                             h2: DarkTextTheme.h2,
