@@ -37,7 +37,9 @@ class StoriesWrapper extends StatelessWidget {
                   ),
                   Positioned.fill(
                     child: Image.network(
-                      page.media.formats.large.url,
+                      page.media.formats.large != null
+                          ? page.media.formats.large!.url
+                          : page.media.formats.medium!.url,
                       fit: BoxFit.cover,
                     ),
                   ),
@@ -50,8 +52,10 @@ class StoriesWrapper extends StatelessWidget {
                           width: 32,
                           decoration: BoxDecoration(
                             image: DecorationImage(
-                              image:
-                                  NetworkImage(author.logo.formats.small.url),
+                              image: NetworkImage(
+                                  author.logo.formats.small != null
+                                      ? author.logo.formats.small!.url
+                                      : author.logo.formats.thumbnail.url),
                               fit: BoxFit.cover,
                             ),
                             shape: BoxShape.circle,

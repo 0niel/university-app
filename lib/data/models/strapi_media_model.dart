@@ -61,10 +61,18 @@ class FormatsModel extends Formats {
         );
 
   factory FormatsModel.fromJson(Map<String, dynamic> json) => FormatsModel(
-        large: StrapiImageModel.fromJson(json["large"]),
-        small: StrapiImageModel.fromJson(json["small"]),
-        medium: StrapiImageModel.fromJson(json["medium"]),
-        thumbnail: StrapiImageModel.fromJson(json["thumbnail"]),
+        large: json["large"] != null
+            ? StrapiImageModel.fromJson(json["large"])
+            : null,
+        small: json["small"] != null
+            ? StrapiImageModel.fromJson(json["small"])
+            : null,
+        medium: json["medium"] != null
+            ? StrapiImageModel.fromJson(json["medium"])
+            : null,
+        thumbnail: json["thumbnail"] != null
+            ? StrapiImageModel.fromJson(json["thumbnail"])
+            : null,
       );
 
   Map<String, dynamic> toJson() => {
