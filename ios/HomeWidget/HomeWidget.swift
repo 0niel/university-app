@@ -11,6 +11,7 @@ import Intents
 
 private let widgetGroupId = "group.com.MireaNinja.rtuMireaApp"
 
+/// Comfortable way to get calendar properties from date
 extension Date {
     var dayOfYear: Int {
         return Calendar.current.ordinality(of: .day, in: .year, for: self)!
@@ -46,6 +47,7 @@ extension Date {
     }
 }
 
+/// Entity of lesson
 struct LessonInfo : Codable{
     let name:String ;
     let weeks: Array<Int> ;
@@ -57,33 +59,38 @@ struct LessonInfo : Codable{
     
 }
 
+/// Entity of possible lessons for every time slot for every day
 struct ScheduleWeekdayValue: Codable{
     let lessons:[[LessonInfo]];
     
 }
 
+/// Storage of schedule data
 struct ScheduleModel: Codable {
     let schedule: [String:ScheduleWeekdayValue];
     let group:String;
     
     init() {
         schedule = [:];
-        group = "IKBO-228-1337";
+        group = "IKBO-228-1337"; // Lmao group name
     }
 }
 
+/// Home widget provider
 struct Provider: TimelineProvider {
+    /// # I have no idea where this works
     func placeholder(in context: Context) -> ExampleEntry {
-        ExampleEntry(date: Date(), data: ScheduleModel(), week: 1)
+        ExampleEntry(date: Date(), data: ScheduleModel(), week: -1)
     }
     
+    /// The view for options menu
     func getSnapshot(in context: Context, completion: @escaping (ExampleEntry) -> ()) {
         let entry = getEntry()
         completion(entry)
     }
     
     
-    /// The date of update is every next class start
+    /// The date of update is every next class start and at midnight
     func getDateOfNextUpdate()->Date{
         return Calendar.current.date(byAdding: .minute, value: 5, to: Date())!
         let now = Date();
@@ -109,13 +116,13 @@ struct Provider: TimelineProvider {
         return midnight;
     }
     
+    /// Get main schedule data
     func getFlutterData(sharedDefaults: UserDefaults?)->ScheduleModel?{
         let sharedDefaults = UserDefaults.init(suiteName: widgetGroupId)
         var flutterData: ScheduleModel? = nil
         if(sharedDefaults != nil) {
             do {
                 let schedule = sharedDefaults?.string(forKey: "schedule")
-//                let daysStuff = sharedDefaults?.string(forKey: "daysStuff")
                 let decoder = JSONDecoder()
                 if(schedule != nil){
                     flutterData = try decoder.decode(ScheduleModel.self, from: schedule!.data(using: .utf8)!)
@@ -130,13 +137,11 @@ struct Provider: TimelineProvider {
         return flutterData;
     }
     
+    /// Get current academic week number
     func getWeek(sharedDefaults: UserDefaults?, date:Date)->Int{
         var week: Int = -1;
-        //        var msg:String? =  nil
-        //        print("sharedDefaults == nil", sharedDefaults == nil)
         if(sharedDefaults != nil) {
             do {
-//                let schedule = sharedDefaults?.string(forKey: "schedule")
                 let daysStuff = sharedDefaults?.string(forKey: "daysStuff")
                 let decoder = JSONDecoder()
                 
@@ -153,6 +158,7 @@ struct Provider: TimelineProvider {
         return week;
     }
     
+    /// Get data to build view
     func getEntry()->ExampleEntry{
         var date = Date();
         
@@ -176,6 +182,7 @@ struct Provider: TimelineProvider {
         return entry;
     }
     
+    /// Provides an array of timeline entries for the current time and future times to update a widget.
     func getTimeline(in context: Context, completion: @escaping (Timeline<Entry>) -> ()) {
         var entries: [ExampleEntry] = []
         
@@ -187,25 +194,27 @@ struct Provider: TimelineProvider {
     }
 }
 
+/// Entity to build a view of home widget
 struct ExampleEntry: TimelineEntry {
     let date: Date
     let data: ScheduleModel;
     let week: Int;
 }
 
+/// Class to build a view
 struct HomeWidgetExampleEntryView : View {
     var entry: Provider.Entry
     let data = UserDefaults.init(suiteName:widgetGroupId)
     
     let a = [UILabel()]
     
+    /// Return placeholder
     func getEmpty() -> some View{
         return VStack.init(alignment: .leading, spacing: /*@START_MENU_TOKEN@*/nil/*@END_MENU_TOKEN@*/, content:{
             Text("Ninja widget").bold().font(/*@START_MENU_TOKEN@*/.title/*@END_MENU_TOKEN@*/).foregroundColor(Color.white)
             Text("Тут будет расписание")
                 .font(.body)
                 .foregroundColor(Color.white)
-//                .widgetURL(URL(string: "homeWidgetExample://message?message=\(entry.data.group)&homeWidget"))
         }
         ).frame(
             minWidth: 0,
@@ -217,31 +226,31 @@ struct HomeWidgetExampleEntryView : View {
         .background(darkbg)
     }
     
-    func getSmall()-> some View{
-        VStack.init(alignment: .leading, spacing: /*@START_MENU_TOKEN@*/nil/*@END_MENU_TOKEN@*/, content:{
-            
-            Text("small").bold().font(/*@START_MENU_TOKEN@*/.title/*@END_MENU_TOKEN@*/)
-            
-            Text(entry.data.group)
-                .font(.body)
-                .widgetURL(URL(string: "homeWidgetExample://message?message=\(entry.data.group)&homeWidget"))
-        }
-        )
-    }
+//    func getSmall()-> some View{
+//        VStack.init(alignment: .leading, spacing: /*@START_MENU_TOKEN@*/nil/*@END_MENU_TOKEN@*/, content:{
+//
+//            Text("small").bold().font(/*@START_MENU_TOKEN@*/.title/*@END_MENU_TOKEN@*/)
+//
+//            Text(entry.data.group)
+//                .font(.body)
+//                .widgetURL(URL(string: "homeWidgetExample://message?message=\(entry.data.group)&homeWidget"))
+//        }
+//        )
+//    }
+//
+//    func getMedium() -> some View{
+//        VStack{
+//            getHeader()
+//        }
+//    }
     
-    func getMedium() -> some View{
-        VStack{
-            getHeader()
-        }
-    }
-    
-    func getTimeSlot(){
-        let now = entry.date
-        if (now.compare(makeDate(now: now, hr: 9, min: 0)).rawValue > 0){
-            
-        }
-    }
-    
+//    func getTimeSlot(){
+//        let now = entry.date
+//        if (now.compare(makeDate(now: now, hr: 9, min: 0)).rawValue > 0){
+//
+//        }
+//    }
+//
     
     func getStartTimeForLesson(i:Int)->String{
         switch i {
@@ -280,6 +289,7 @@ struct HomeWidgetExampleEntryView : View {
         }
     }
     
+    /// Lesson card in case there are no lessons at i time slot
     func noLesson(i:Int) -> some View{
         let num = String(i+1)+" ";
         return ZStack(alignment:.leading){
@@ -297,6 +307,7 @@ struct HomeWidgetExampleEntryView : View {
         }.padding(Edge.Set.horizontal,5)
     }
     
+    /// Main lesson card
     func lessonCard(lesson:LessonInfo, i:Int) -> some View{
         //        let text_time = lesson.time_start+"-"+lesson.time_end;
         var text_lesson = " "+lesson.name;
@@ -323,6 +334,7 @@ struct HomeWidgetExampleEntryView : View {
         }.padding(Edge.Set.horizontal,5)
     }
     
+    /// Get lesson info in case there is a lesson on this week in chosen time slot
     func getLessonInfoForTimeSlot(lessonInfos: Array<LessonInfo>) -> LessonInfo?{
         for info in lessonInfos{
             if (info.weeks.contains(entry.week)){
@@ -340,6 +352,7 @@ struct HomeWidgetExampleEntryView : View {
     //        let today = entry.data.schedule[String(weekday)]!
     //    }
     
+    /// Choose weekday to build
     func getCurrentDaySchedule() -> ScheduleWeekdayValue{
         var weekday = Calendar.current.component(.weekday, from: entry.date)-1
         if (weekday == 0){
@@ -348,8 +361,7 @@ struct HomeWidgetExampleEntryView : View {
         return entry.data.schedule[String(weekday)]!
     }
     
-    //    func needHighLight
-    
+    /// ## DEBUG function
     func getDateStr()->String{
         let dateFormatter = DateFormatter()
         
@@ -371,6 +383,7 @@ struct HomeWidgetExampleEntryView : View {
     //        return lbl;
     //    }
     
+    /// Build a header for widget
     func getHeader()-> some View{
         let header = "Группа: "+entry.data.group+" | Неделя: "+String(entry.week)
         return ZStack{
@@ -380,9 +393,10 @@ struct HomeWidgetExampleEntryView : View {
         }.padding(Edge.Set.horizontal, 10).padding(Edge.Set.top, 5)
     }
     
+    /// Build the large version of widget
     func getBig()-> some View{
         let today = getCurrentDaySchedule();
-        var weekday = Calendar.current.component(.weekday, from: entry.date)-1
+//        var weekday = Calendar.current.component(.weekday, from: entry.date)-1
 //        let str_date = getDateStr();
         
         return VStack(alignment: .center){
@@ -432,9 +446,11 @@ struct HomeWidgetExampleEntryView : View {
             }else{
                 switch family {
                 case .systemSmall:
-                    getSmall();
+//                    getSmall();
+                    getEmpty();
                 case .systemMedium:
-                    getMedium();
+//                    getMedium();
+                    getEmpty();
                 default:
                     getBig();
                 }
@@ -463,12 +479,14 @@ struct HomeWidgetExampleEntryView : View {
 //        }
 //    }
 
+/// Make date from components. Used to build dates for start and finish class times
 func makeDate(now:Date, hr: Int, min: Int) -> Date {
     let calendar = Calendar(identifier: .gregorian)
     let components = DateComponents(year: now.year, month: now.month, day: now.day, hour: hr, minute: min, second: 0);
     return calendar.date(from: components)!
 }
 
+//# Theme data
 let darkbg: Color = Color(red: 24/255, green: 26/255, blue: 32/255, opacity: 1)
 let midbg: Color = Color(red: 31/255, green:34/255, blue: 42/255, opacity: 1)
 
