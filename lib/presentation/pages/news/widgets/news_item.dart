@@ -1,16 +1,18 @@
+import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
 import 'package:rtu_mirea_app/domain/entities/news_item.dart';
 import 'package:intl/intl.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:rtu_mirea_app/presentation/colors.dart';
 import 'package:rtu_mirea_app/presentation/pages/news/news_details_page.dart';
 import 'package:rtu_mirea_app/presentation/pages/news/widgets/tags_widgets.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
+import 'package:shimmer/shimmer.dart';
 
 class NewsItemWidget extends StatelessWidget {
   final NewsItem newsItem;
 
   const NewsItemWidget({Key? key, required this.newsItem}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -35,23 +37,67 @@ class NewsItemWidget extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              CachedNetworkImage(
-                imageUrl: newsItem.images[0],
+              ExtendedImage.network(
+                newsItem.images[0],
                 height: 175,
                 width: MediaQuery.of(context).size.width,
-                imageBuilder: (context, imageProvider) => Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(16),
-                    image: DecorationImage(
-                      image: imageProvider,
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                ),
-                placeholder: (context, url) {
-                  return const Center(
-                    child: CircularProgressIndicator(),
-                  );
+                fit: BoxFit.cover,
+                cache: false,
+                borderRadius: BorderRadius.circular(16),
+                shape: BoxShape.rectangle,
+                loadStateChanged: (ExtendedImageState state) {
+                  switch (state.extendedImageLoadState) {
+                    case LoadState.loading:
+                      return Container(
+                        child: Shimmer.fromColors(
+                          baseColor: DarkThemeColors.background03,
+                          highlightColor:
+                              DarkThemeColors.background03.withOpacity(0.5),
+                          child: Container(
+                            height: double.infinity,
+                            width: double.infinity,
+                            color: DarkThemeColors.background03,
+                          ),
+                        ),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                      );
+
+                    case LoadState.completed:
+                      return Container(
+                        child: ExtendedRawImage(
+                          fit: BoxFit.cover,
+                          height: 175,
+                          width: double.infinity,
+                          image: state.extendedImageInfo?.image,
+                        ),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                      );
+
+                    case LoadState.failed:
+                      return GestureDetector(
+                        child: Stack(
+                          fit: StackFit.expand,
+                          children: const <Widget>[
+                            Positioned(
+                              bottom: 0.0,
+                              left: 0.0,
+                              right: 0.0,
+                              child: Text(
+                                "Ошибка при загрузке изображения. Нажмите, чтобы перезагрузить",
+                                textAlign: TextAlign.center,
+                              ),
+                            )
+                          ],
+                        ),
+                        onTap: () {
+                          state.reLoadImage();
+                        },
+                      );
+                  }
                 },
               ),
               Padding(
