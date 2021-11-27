@@ -85,10 +85,11 @@ class ProfileDetailPage extends StatelessWidget {
                       ]),
                 ),
                 const SizedBox(height: 20),
-                CopyTextBlockWithLabel(
-                    label: "Ссылка авторизации",
-                    text: 'https://lk.mirea.ru/auth/link/?url=' +
-                        user.authShortlink),
+                if (user.authShortlink != null)
+                  CopyTextBlockWithLabel(
+                      label: "Ссылка авторизации",
+                      text: 'https://lk.mirea.ru/auth/link/?url=' +
+                          user.authShortlink!),
                 const SizedBox(height: 23),
                 CopyTextBlockWithLabel(label: "Логин", text: user.login),
                 const SizedBox(height: 23),

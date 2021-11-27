@@ -12,7 +12,7 @@ class User extends Equatable {
   final String eduProgram;
   final String eduProgramCode;
   final String photoUrl;
-  final String authShortlink;
+  final String? authShortlink;
   final String registerDate;
   final String lastLoginDate;
   final int course;
