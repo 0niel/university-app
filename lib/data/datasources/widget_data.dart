@@ -6,8 +6,8 @@ import 'package:home_widget/home_widget.dart';
 abstract class WidgetData {
   Future<bool> needWeeksReload();
   Future<bool> isScheduleLoaded();
-  setWeeksData(Map<String, int> jsonToPut);
-  setSchedule(String jsonToPut);
+  Future<void> setWeeksData(Map<String, int> jsonToPut);
+  Future<void> setSchedule(String jsonToPut);
 }
 
 class WidgetDataImpl implements WidgetData {
@@ -25,20 +25,20 @@ class WidgetDataImpl implements WidgetData {
   }
 
   @override
-  setSchedule(String jsonToPut) {
-    HomeWidget.saveWidgetData(
+  setSchedule(String jsonToPut) async {
+    await HomeWidget.saveWidgetData(
       'schedule',
       jsonToPut,
     );
   }
 
   @override
-  setWeeksData(Map<String, int> days) {
-    HomeWidget.saveWidgetData(
+  setWeeksData(Map<String, int> days) async {
+    await HomeWidget.saveWidgetData(
       'daysStuff',
       json.encode(days),
     );
-    HomeWidget.saveWidgetData(
+    await HomeWidget.saveWidgetData(
       'daysYear',
       const Clock().now().year,
     );

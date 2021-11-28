@@ -10,16 +10,24 @@ import 'package:rtu_mirea_app/data/models/schedule_model.dart';
 import 'package:rtu_mirea_app/domain/entities/schedule.dart';
 import 'package:rtu_mirea_app/service_locator.dart';
 
+/// Sets data for home widgets
 class WidgetDataProvider {
   static void initData() {
     HomeWidget.setAppGroupId('group.com.MireaNinja.rtuMireaApp');
-
-    _checkWeeks();
-    _checkSchedule();
+    _init();
   }
 
+  /// initial settings
+  static _init() async {
+    await _checkWeeks();
+    await _checkSchedule();
+    _update();
+  }
+
+  /// Set weeks info. Has to be set on first start
   static _checkWeeks() async {
     final need = await getIt<WidgetData>().needWeeksReload();
+    // if (true) {
     if (need) {
       Map<String, int> days = {};
       DateTime now = DateTime.now();
@@ -33,10 +41,13 @@ class WidgetDataProvider {
             Calendar.kMaxWeekInSemester);
       }
       getIt<WidgetData>().setWeeksData(days);
+      // print('done weeks');
     }
   }
 
+  /// Set schedule info on first start
   static _checkSchedule() async {
+    // if (true) {
     if (!(await getIt<WidgetData>().isScheduleLoaded())) {
       try {
         var a = await getIt<ScheduleLocalData>().getScheduleFromCache();
@@ -45,6 +56,7 @@ class WidgetDataProvider {
         for (ScheduleModel schedule in a) {
           if (schedule.group == a2) {
             getIt<WidgetData>().setSchedule(schedule.toRawJson());
+            // print('done schedule');
           }
         }
       } on CacheException {
@@ -55,37 +67,20 @@ class WidgetDataProvider {
     }
   }
 
+  /// Update schedule when active group is changed
   static setSchedule(Schedule schedule) {
     final model = ScheduleModel(
         group: schedule.group, isRemote: false, schedule: schedule.schedule);
     getIt<WidgetData>().setSchedule(model.toRawJson());
+    _update();
   }
 
-  /// Update timetable for IOS
-  // void setDataForIOSHomeWidget() async {
-  //   // HomeWidget.setAppGroupId('group.com.MireaNinja.rtuMireaApp');
-  //   // HomeWidget.saveWidgetData(
-  //   //   'testString',
-  //   //   'Updated from Background',
-  //   // );
-
-  //   // var b2 = getIt<SharedPreferences>();
-  //   // b2.setString('test122', json.encode('lol'));
-  //   // HomeWidget.saveWidgetData(
-  //   //   'daysStuff',
-  //   //   json.encode(days),
-  //   // );
-  //   HomeWidget.updateWidget(
-  //     name: 'HomeWidgetExampleProvider',
-  //     androidName: 'HomeWidgetProvider',
-  //     iOSName: 'HomeWidget',
-  //   );
-  //   final b = 1 + 1;
-  //   // if (Platform.isIOS) {
-  //   //   print('save some data');
-  //   //   WidgetKit.setItem(
-  //   //       'testString', 'Hello World', 'group.com.MireaNinja.rtuMireaApp');
-  //   //   WidgetKit.reloadAllTimelines();
-  //   // }
-  // }
+  /// Refresh widgets
+  static _update() {
+    HomeWidget.updateWidget(
+      name: 'HomeWidgetExampleProvider',
+      androidName: 'HomeWidgetProvider',
+      iOSName: 'HomeWidget',
+    );
+  }
 }

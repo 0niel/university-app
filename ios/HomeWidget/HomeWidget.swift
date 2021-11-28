@@ -143,24 +143,24 @@ struct Provider: TimelineProvider {
         if(sharedDefaults != nil) {
             do {
                 let daysStuff = sharedDefaults?.string(forKey: "daysStuff")
-                let daysStuff2 = sharedDefaults?.string(forKey: "test122")
-                let daysStuff3 = sharedDefaults?.string(forKey: "schedule")
+//                let daysStuff2 = sharedDefaults?.string(forKey: "test122")
+//                let daysStuff3 = sharedDefaults?.string(forKey: "schedule")
                 
                 let decoder = JSONDecoder()
                 
-                if (daysStuff2 != nil){
-                    let weeks = try decoder.decode(String.self, from: daysStuff2!.data(using: .utf8)!)
-                    print("weeks ", weeks)
-                }else{
-                    print("null")
-                }
-                
-                if (daysStuff3 != nil){
-                    let weeks = try decoder.decode(Dictionary<String,String>.self, from: daysStuff3!.data(using: .utf8)!)
-                    print("group ", weeks)
-                }else{
-                    print("null g")
-                }
+//                if (daysStuff2 != nil){
+//                    let weeks = try decoder.decode(String.self, from: daysStuff2!.data(using: .utf8)!)
+//                    print("weeks ", weeks)
+//                }else{
+//                    print("null")
+//                }
+//                
+//                if (daysStuff3 != nil){
+//                    let weeks = try decoder.decode(Dictionary<String,String>.self, from: daysStuff3!.data(using: .utf8)!)
+//                    print("group ", weeks)
+//                }else{
+//                    print("null g")
+//                }
                 
                 if (daysStuff != nil){
                     let weeks = try decoder.decode(Dictionary<String, Int>.self, from: daysStuff!.data(using: .utf8)!)
