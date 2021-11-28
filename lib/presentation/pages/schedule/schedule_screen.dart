@@ -144,8 +144,11 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
   Widget build(BuildContext context) {
     return InnerDrawer(
       key: _innerDrawerKey,
-      offset: const IDOffset.horizontal(0.6),
+      offset: IDOffset.horizontal(
+          (100 / (MediaQuery.of(context).size.width / 250)) / 100),
       swipeChild: true,
+      onTapClose: true,
+      boxShadow: const [],
       rightChild: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 10),
