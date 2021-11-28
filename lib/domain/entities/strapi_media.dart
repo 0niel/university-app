@@ -44,13 +44,13 @@ class Formats extends Equatable {
     required this.thumbnail,
   });
 
-  final StrapiImage large;
-  final StrapiImage medium;
-  final StrapiImage small;
+  final StrapiImage? large;
+  final StrapiImage? medium;
+  final StrapiImage? small;
   final StrapiImage thumbnail;
 
   @override
-  List<Object> get props => [large, small, medium, thumbnail];
+  List<Object> get props => [thumbnail];
 }
 
 class StrapiImage extends Equatable {
