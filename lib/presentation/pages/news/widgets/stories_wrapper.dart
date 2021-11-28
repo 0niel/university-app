@@ -125,17 +125,20 @@ class StoriesWrapper extends StatelessWidget {
                     child: Column(
                       children: List.generate(
                         stories[pageIndex].pages[storyIndex].actions.length,
-                        (index) => PrimaryButton(
-                          text: stories[pageIndex]
-                              .pages[storyIndex]
-                              .actions[index]
-                              .title,
-                          onClick: () async {
-                            await launch(stories[pageIndex]
+                        (index) => Padding(
+                          padding: const EdgeInsets.only(bottom: 8),
+                          child: PrimaryButton(
+                            text: stories[pageIndex]
                                 .pages[storyIndex]
                                 .actions[index]
-                                .url);
-                          },
+                                .title,
+                            onClick: () async {
+                              await launch(stories[pageIndex]
+                                  .pages[storyIndex]
+                                  .actions[index]
+                                  .url);
+                            },
+                          ),
                         ),
                       ),
                     ),
