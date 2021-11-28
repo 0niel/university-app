@@ -56,19 +56,25 @@ class _AuthScreenState extends State<AuthScreen> {
                   ),
                 ),
                 const SizedBox(height: 30),
-                LabelledInput(
-                    placeholder: "Email",
-                    keyboardType: TextInputType.emailAddress,
-                    controller: _emailController,
-                    obscureText: obscureText,
-                    label: "Ваш Email"),
-                const SizedBox(height: 20),
-                LabelledInput(
-                    placeholder: "Пароль",
-                    keyboardType: TextInputType.text,
-                    controller: _passController,
-                    obscureText: obscureText,
-                    label: "Ваш пароль"),
+                AutofillGroup(
+                  child: Column(
+                    children: [
+                      LabelledInput(
+                          placeholder: "Email",
+                          keyboardType: TextInputType.emailAddress,
+                          controller: _emailController,
+                          obscureText: obscureText,
+                          label: "Ваш Email"),
+                      const SizedBox(height: 20),
+                      LabelledInput(
+                          placeholder: "Пароль",
+                          keyboardType: TextInputType.text,
+                          controller: _passController,
+                          obscureText: obscureText,
+                          label: "Ваш пароль"),
+                    ],
+                  ),
+                ),
                 BlocBuilder<AuthBloc, AuthState>(builder: (context, state) {
                   if (state is LogInError && state.cause != '') {
                     return Padding(
