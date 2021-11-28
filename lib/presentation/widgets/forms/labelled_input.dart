@@ -40,8 +40,14 @@ class _LabelledInputState extends State<LabelledInput> {
           style: DarkTextTheme.chip
               .copyWith(color: DarkThemeColors.deactiveDarker),
         ),
-        TextFormField(
+        TextField(
           controller: widget.controller,
+          autofillHints: [
+            if (widget.placeholder == "Пароль") ...[
+              AutofillHints.password
+            ] else if (widget.placeholder == "Email")
+              AutofillHints.email,
+          ],
           style: DarkTextTheme.title,
           onTap: () {},
           keyboardType: widget.keyboardType,
