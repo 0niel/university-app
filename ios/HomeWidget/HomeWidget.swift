@@ -143,8 +143,24 @@ struct Provider: TimelineProvider {
         if(sharedDefaults != nil) {
             do {
                 let daysStuff = sharedDefaults?.string(forKey: "daysStuff")
+                let daysStuff2 = sharedDefaults?.string(forKey: "test122")
+                let daysStuff3 = sharedDefaults?.string(forKey: "schedule")
+                
                 let decoder = JSONDecoder()
                 
+                if (daysStuff2 != nil){
+                    let weeks = try decoder.decode(String.self, from: daysStuff2!.data(using: .utf8)!)
+                    print("weeks ", weeks)
+                }else{
+                    print("null")
+                }
+                
+                if (daysStuff3 != nil){
+                    let weeks = try decoder.decode(Dictionary<String,String>.self, from: daysStuff3!.data(using: .utf8)!)
+                    print("group ", weeks)
+                }else{
+                    print("null g")
+                }
                 
                 if (daysStuff != nil){
                     let weeks = try decoder.decode(Dictionary<String, Int>.self, from: daysStuff!.data(using: .utf8)!)
@@ -210,47 +226,48 @@ struct HomeWidgetExampleEntryView : View {
     
     /// Return placeholder
     func getEmpty() -> some View{
-        return VStack.init(alignment: .leading, spacing: /*@START_MENU_TOKEN@*/nil/*@END_MENU_TOKEN@*/, content:{
+        return VStack.init(alignment: .center, spacing: /*@START_MENU_TOKEN@*/nil/*@END_MENU_TOKEN@*/, content:{
             Text("Ninja widget").bold().font(/*@START_MENU_TOKEN@*/.title/*@END_MENU_TOKEN@*/).foregroundColor(Color.white)
             Text("Тут будет расписание")
                 .font(.body)
                 .foregroundColor(Color.white)
         }
-        ).frame(
+        )
+        .frame(
             minWidth: 0,
             maxWidth: .infinity,
             minHeight: 0,
             maxHeight: .infinity,
-            alignment: .topLeading
+            alignment: .center
         )
         .background(darkbg)
     }
     
-//    func getSmall()-> some View{
-//        VStack.init(alignment: .leading, spacing: /*@START_MENU_TOKEN@*/nil/*@END_MENU_TOKEN@*/, content:{
-//
-//            Text("small").bold().font(/*@START_MENU_TOKEN@*/.title/*@END_MENU_TOKEN@*/)
-//
-//            Text(entry.data.group)
-//                .font(.body)
-//                .widgetURL(URL(string: "homeWidgetExample://message?message=\(entry.data.group)&homeWidget"))
-//        }
-//        )
-//    }
-//
-//    func getMedium() -> some View{
-//        VStack{
-//            getHeader()
-//        }
-//    }
+    //    func getSmall()-> some View{
+    //        VStack.init(alignment: .leading, spacing: /*@START_MENU_TOKEN@*/nil/*@END_MENU_TOKEN@*/, content:{
+    //
+    //            Text("small").bold().font(/*@START_MENU_TOKEN@*/.title/*@END_MENU_TOKEN@*/)
+    //
+    //            Text(entry.data.group)
+    //                .font(.body)
+    //                .widgetURL(URL(string: "homeWidgetExample://message?message=\(entry.data.group)&homeWidget"))
+    //        }
+    //        )
+    //    }
+    //
+    //    func getMedium() -> some View{
+    //        VStack{
+    //            getHeader()
+    //        }
+    //    }
     
-//    func getTimeSlot(){
-//        let now = entry.date
-//        if (now.compare(makeDate(now: now, hr: 9, min: 0)).rawValue > 0){
-//
-//        }
-//    }
-//
+    //    func getTimeSlot(){
+    //        let now = entry.date
+    //        if (now.compare(makeDate(now: now, hr: 9, min: 0)).rawValue > 0){
+    //
+    //        }
+    //    }
+    //
     
     func getStartTimeForLesson(i:Int)->String{
         switch i {
@@ -373,7 +390,7 @@ struct HomeWidgetExampleEntryView : View {
         return str_date;
     }
     
-
+    
     
     //    func mLabel(text:String, size:CGFloat)-> UILabel{
     //        let lbl = UILabel();
@@ -389,18 +406,18 @@ struct HomeWidgetExampleEntryView : View {
         return ZStack{
             RoundedRectangle(cornerRadius: 12, style: .continuous)
                 .fill(midbg).frame(height:30)//.padding(Edge.Set.top, 4)
-        Text(header).font(font14).foregroundColor(Color.white)//.padding(Edge.Set.top, 5)
+            Text(header).font(font14).foregroundColor(Color.white)//.padding(Edge.Set.top, 5)
         }.padding(Edge.Set.horizontal, 10).padding(Edge.Set.top, 5)
     }
     
     /// Build the large version of widget
     func getBig()-> some View{
         let today = getCurrentDaySchedule();
-//        var weekday = Calendar.current.component(.weekday, from: entry.date)-1
-//        let str_date = getDateStr();
+        //        var weekday = Calendar.current.component(.weekday, from: entry.date)-1
+        //        let str_date = getDateStr();
         
         return VStack(alignment: .center){
-//            Text(getDateStr()+String(weekday)).foregroundColor(Color.white)
+            //            Text(getDateStr()+String(weekday)).foregroundColor(Color.white)
             getHeader()
             VStack(
                 alignment: .leading,
@@ -436,42 +453,42 @@ struct HomeWidgetExampleEntryView : View {
             
         }
     }
-        
-        
-        @Environment(\.widgetFamily) var family
-        
-        var body: some View {
-            if (entry.data.schedule.isEmpty || entry.week == -1){
+    
+    
+    @Environment(\.widgetFamily) var family
+    
+    var body: some View {
+        if (entry.data.schedule.isEmpty || entry.week < 0){
+            getEmpty();
+        }else{
+            switch family {
+            case .systemSmall:
+                //                    getSmall();
                 getEmpty();
-            }else{
-                switch family {
-                case .systemSmall:
-//                    getSmall();
-                    getEmpty();
-                case .systemMedium:
-//                    getMedium();
-                    getEmpty();
-                default:
-                    getBig();
-                }
+            case .systemMedium:
+                //                    getMedium();
+                getEmpty();
+            default:
+                getBig();
             }
         }
     }
+}
+
+@main
+struct HomeWidget: Widget {
+    let kind: String = "HomeWidget"
     
-    @main
-    struct HomeWidget: Widget {
-        let kind: String = "HomeWidget"
-        
-        var body: some WidgetConfiguration {
-            StaticConfiguration(kind: kind, provider: Provider()) { entry in
-                HomeWidgetExampleEntryView(entry: entry).background(darkbg)
-            }
-            .configurationDisplayName("Ninja Widget")
-            .description("Это виджет расписания на день")
-            .supportedFamilies([.systemLarge])
+    var body: some WidgetConfiguration {
+        StaticConfiguration(kind: kind, provider: Provider()) { entry in
+            HomeWidgetExampleEntryView(entry: entry).background(darkbg)
         }
+        .configurationDisplayName("Ninja Widget")
+        .description("Это виджет расписания на день")
+        .supportedFamilies([.systemLarge])
     }
-    
+}
+
 //    struct HomeWidget_Previews: PreviewProvider {
 //        static var previews: some View {
 //            HomeWidgetExampleEntryView(entry: ExampleEntry(date: Date(), data: ScheduleModel(), week: 1))

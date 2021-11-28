@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:rtu_mirea_app/common/calendar.dart';
+import 'package:rtu_mirea_app/common/widget_data_init.dart';
 import 'package:rtu_mirea_app/data/datasources/schedule_local.dart';
 import 'package:rtu_mirea_app/data/models/schedule_model.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -45,9 +46,9 @@ Future<void> main() async {
   bool showOnboarding = prefs.getBool(onboardingKey) ?? true;
   if (showOnboarding) prefs.setBool(onboardingKey, false);
 
+  WidgetDataProvider.initData();
   // to debug:
   //await prefs.clear();
-  setDataForIOSHomeWidget();
 
   findSystemLocale().then((_) => runApp(App(showOnboarding: showOnboarding)));
 }
@@ -128,51 +129,4 @@ class App extends StatelessWidget {
       ),
     );
   }
-}
-
-/// Update timetable for IOS
-/// // TODO Обновлять список недель с началом нового года
-void setDataForIOSHomeWidget() async {
-  HomeWidget.setAppGroupId('group.com.MireaNinja.rtuMireaApp');
-  HomeWidget.saveWidgetData(
-    'testString',
-    'Updated from Background',
-  );
-  var a = await getIt<ScheduleLocalData>().getScheduleFromCache();
-  var a2 = await getIt<ScheduleLocalData>().getActiveGroupFromCache();
-  for (ScheduleModel schedule in a) {
-    if (schedule.group == a2) {
-      HomeWidget.saveWidgetData(
-        'schedule',
-        schedule.toRawJson(),
-      );
-    }
-  }
-  Map<String, int> days = {};
-  DateTime now = DateTime.now();
-  DateTime firstDayOfYear = DateTime(now.year, 1, 1, 0, 0);
-  for (DateTime indexDay = DateTime(now.year, now.month, now.day);
-      indexDay.year == now.year;
-      indexDay = indexDay.add(const Duration(days: 1))) {
-    //  print(indexDay.toString());
-    days[indexDay.difference(firstDayOfYear).inDays.toString()] = min(
-        Calendar.getCurrentWeek(mCurrentDate: indexDay),
-        Calendar.kMaxWeekInSemester);
-  }
-  HomeWidget.saveWidgetData(
-    'daysStuff',
-    json.encode(days),
-  );
-  HomeWidget.updateWidget(
-    name: 'HomeWidgetExampleProvider',
-    androidName: 'HomeWidgetProvider',
-    iOSName: 'HomeWidget',
-  );
-  final b = 1 + 1;
-  // if (Platform.isIOS) {
-  //   print('save some data');
-  //   WidgetKit.setItem(
-  //       'testString', 'Hello World', 'group.com.MireaNinja.rtuMireaApp');
-  //   WidgetKit.reloadAllTimelines();
-  // }
 }

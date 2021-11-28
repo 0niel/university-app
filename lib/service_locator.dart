@@ -9,6 +9,7 @@ import 'package:rtu_mirea_app/data/datasources/schedule_remote.dart';
 import 'package:rtu_mirea_app/data/datasources/strapi_remote.dart';
 import 'package:rtu_mirea_app/data/datasources/user_local.dart';
 import 'package:rtu_mirea_app/data/datasources/user_remote.dart';
+import 'package:rtu_mirea_app/data/datasources/widget_data.dart';
 import 'package:rtu_mirea_app/data/repositories/forum_repository_impl.dart';
 import 'package:rtu_mirea_app/data/repositories/news_repository_impl.dart';
 import 'package:rtu_mirea_app/data/repositories/strapi_repository_impl.dart';
@@ -173,6 +174,7 @@ Future<void> setup() async {
       () => ForumLocalDataImpl(sharedPreferences: getIt()));
   getIt.registerLazySingleton<StrapiRemoteData>(
       () => StrapiRemoteDataImpl(httpClient: getIt()));
+  getIt.registerLazySingleton<WidgetData>(() => WidgetDataImpl());
 
   // Common / Core
 

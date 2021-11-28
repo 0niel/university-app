@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:rtu_mirea_app/common/errors/failures.dart';
+import 'package:rtu_mirea_app/common/widget_data_init.dart';
 import 'package:rtu_mirea_app/domain/entities/schedule.dart';
 import 'package:rtu_mirea_app/domain/entities/schedule_settings.dart';
 import 'package:rtu_mirea_app/domain/usecases/delete_schedule.dart';
@@ -126,12 +127,18 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
         yield schedule.fold(
             (failure) =>
                 ScheduleLoadError(errorMessage: _mapFailureToMessage(failure)),
-            (schedule) => ScheduleLoaded(
-                  schedule: schedule,
-                  activeGroup: _groupSuggestion,
-                  downloadedScheduleGroups: _downloadedGroups,
-                  scheduleSettings: scheduleSettings,
-                ));
+            (schedule) {
+          // Set home widget info
+          WidgetDataProvider.setSchedule(schedule);
+
+          // Set app info
+          return ScheduleLoaded(
+            schedule: schedule,
+            activeGroup: _groupSuggestion,
+            downloadedScheduleGroups: _downloadedGroups,
+            scheduleSettings: scheduleSettings,
+          );
+        });
       } else {
         yield ScheduleGroupNotFound();
       }
