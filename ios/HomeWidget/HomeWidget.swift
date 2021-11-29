@@ -154,7 +154,7 @@ struct Provider: TimelineProvider {
 //                }else{
 //                    print("null")
 //                }
-//                
+//
 //                if (daysStuff3 != nil){
 //                    let weeks = try decoder.decode(Dictionary<String,String>.self, from: daysStuff3!.data(using: .utf8)!)
 //                    print("group ", weeks)
@@ -330,9 +330,9 @@ struct HomeWidgetExampleEntryView : View {
         var text_lesson = " "+lesson.name;
         let num = String(i+1)+" ";
         //        print(text_lesson, text_lesson.count);
-        
-        if (lesson.name.count > 22){
-            text_lesson = " "+lesson.name.prefix(19)+"..."
+        let max = 40
+        if (lesson.name.count > max){
+            text_lesson = " "+lesson.name.prefix(max-3)+"..."
         }
         
         let room_text = ", "+lesson.rooms[0]

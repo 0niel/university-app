@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:id="@+id/ti_container"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:background="@drawable/label_bg"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_marginStart="10dp"
+            android:id="@+id/ti_item"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:paddingHorizontal="2dp"
+            android:textAlignment="center"
+            android:textColor="@color/deactive"
+            android:textSize="14dp"
+            tools:text="1" />
+
+        <LinearLayout
+            android:paddingHorizontal="10dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/ti_start_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:textAlignment="center"
+                android:textColor="@color/deactive"
+                android:textSize="12dp"
+                tools:text="9:00" />
+
+            <TextView
+                android:id="@+id/ti_finish_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:textAlignment="center"
+                android:textColor="@color/deactive"
+                android:textSize="12dp"
+                tools:text="10:30" />
+        </LinearLayout>
+
+        <TextView
+            android:paddingEnd="10dp"
+            android:id="@+id/ti_main_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@android:color/white"
+            android:textSize="14dp"
+            android:maxLines="2"
+            tools:text="Технологические основы интернета вещей, Г-301-в" />
+
+    </LinearLayout>
+
+</LinearLayout>

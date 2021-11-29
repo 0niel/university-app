@@ -9,6 +9,9 @@ import ninja.mirea.mireaapp.widget_channel.AbstractHomeWidgetProvider
 import ninja.mirea.mireaapp.widget_channel.HomeWidgetBackgroundIntent
 import ninja.mirea.mireaapp.widget_channel.HomeWidgetLaunchIntent
 
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonElement
+import ninja.mirea.mireaapp.widget_channel.ScheduleModel
 
 class HomeWidgetProvider : AbstractHomeWidgetProvider() {
 
@@ -26,8 +29,13 @@ class HomeWidgetProvider : AbstractHomeWidgetProvider() {
                     MainActivity::class.java
                 )
                 setOnClickPendingIntent(R.id.widget_container, pendingIntent)
-//                val prefs = context.getSharedPreferences(context.getString(R.string.prefs_str), Context.MODE_PRIVATE)
-//                val data = prefs.getString("testString", "Shit!")
+                val scheduleData = widgetData.getString("schedule", "")
+                if (scheduleData!!.isNotEmpty()){
+                    val scheduleModel = Json.decodeFromString(ScheduleModel.serializer(),scheduleData);
+
+                }
+//                setRemoteAdapter()
+
                 // Swap Title Text by calling Dart Code in the Background
                 setTextViewText(
                     R.id.widget_title, widgetData.getString("title", null)
@@ -39,18 +47,18 @@ class HomeWidgetProvider : AbstractHomeWidgetProvider() {
                 )
                 setOnClickPendingIntent(R.id.widget_title, backgroundIntent)
 
-                val message = widgetData.getString("testString", null)
-                setTextViewText(
-                    R.id.widget_message, message
-                        ?: "No Message Set"
-                )
+//                val message = widgetData.getString("testString", null)
+//                setTextViewText(
+//                    R.id.widget_message, message
+//                        ?: "No Message Set"
+//                )
                 // Detect App opened via Click inside Flutter
-                val pendingIntentWithData = HomeWidgetLaunchIntent.getActivity(
-                    context,
-                    MainActivity::class.java,
-                    Uri.parse("homeWidgetExample://message?message=$message")
-                )
-                setOnClickPendingIntent(R.id.widget_message, pendingIntentWithData)
+//                val pendingIntentWithData = HomeWidgetLaunchIntent.getActivity(
+//                    context,
+//                    MainActivity::class.java,
+//                    Uri.parse("homeWidgetExample://message?message=$message")
+//                )
+//                setOnClickPendingIntent(R.id.widget_message, pendingIntentWithData)
             }
 
             appWidgetManager.updateAppWidget(widgetId, views)

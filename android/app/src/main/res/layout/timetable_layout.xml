@@ -4,24 +4,67 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_margin="8dp"
     android:orientation="vertical"
-    android:background="@android:color/background_light"
+    android:background="@color/background01"
     android:padding="8dp"
     android:id="@+id/widget_container">
 
-    <TextView
-        android:id="@+id/widget_title"
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textSize="36sp"
-        android:textStyle="bold"
-        tools:text="Title" />
+        android:layout_height="30dp">
 
-    <TextView
-        android:id="@+id/widget_message"
+        <TextView
+            android:id="@+id/widget_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentBottom="true"
+            android:background="@drawable/label_bg"
+            android:gravity="center"
+            android:paddingHorizontal="2dp"
+            android:paddingVertical="5dp"
+            android:textAlignment="center"
+            android:textColor="@android:color/white"
+            android:textSize="14sp"
+            tools:text="Группа ИКБО-13-37 | Неделя: 228" />
+    </RelativeLayout>
+    <ListView
+        android:id="@+id/lvList"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textSize="18sp"
-        tools:text="Message" />
+        android:layout_height="match_parent"
+        >
+    </ListView>
+
+
+
+<!--    <ScrollView android:layout_width="match_parent"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:fillViewport="true">-->
+
+<!--        <LinearLayout-->
+<!--            android:orientation="horizontal"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content">-->
+<!--            -->
+<!--&lt;!&ndash;            <TextView&ndash;&gt;-->
+<!--&lt;!&ndash;                android:layout_width="match_parent"&ndash;&gt;-->
+<!--&lt;!&ndash;                android:layout_height="wrap_content"&ndash;&gt;-->
+<!--&lt;!&ndash;                android:layout_alignParentStart="true"&ndash;&gt;-->
+<!--&lt;!&ndash;                android:layout_alignParentTop="true"&ndash;&gt;-->
+<!--&lt;!&ndash;                android:layout_alignParentEnd="true"&ndash;&gt;-->
+<!--&lt;!&ndash;                android:layout_alignParentBottom="true"&ndash;&gt;-->
+<!--&lt;!&ndash;                android:background="@drawable/label_bg"&ndash;&gt;-->
+<!--&lt;!&ndash;                android:gravity="center"&ndash;&gt;-->
+<!--&lt;!&ndash;                android:paddingHorizontal="2dp"&ndash;&gt;-->
+<!--&lt;!&ndash;                android:paddingVertical="5dp"&ndash;&gt;-->
+<!--&lt;!&ndash;                android:textAlignment="center"&ndash;&gt;-->
+<!--&lt;!&ndash;                android:textColor="@android:color/white"&ndash;&gt;-->
+<!--&lt;!&ndash;                android:textSize="16sp"&ndash;&gt;-->
+<!--&lt;!&ndash;                tools:text="1" />&ndash;&gt;-->
+<!--        </LinearLayout>-->
+<!--    </ScrollView>-->
 </LinearLayout>
