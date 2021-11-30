@@ -36,6 +36,10 @@
             </intent-filter>
         </activity>
 
+       <service
+           android:name=".widget_channel.UpdateWidgetService"
+           android:permission="android.permission.BIND_REMOTEVIEWS">
+       </service>
         <receiver android:name="HomeWidgetProvider"
             android:exported="true">
           <intent-filter>

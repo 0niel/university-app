@@ -8,13 +8,13 @@ data class Lesson(val name:String, val weeks:List<Int>, val time_start: String, 
 
 }
 
-@Serializable
-data class TimeSlot(val lessons:List<Lesson>){
+//@Serializable
+//data class TimeSlot(val lessons:List<Lesson>){
+//
+//}
 
-}
-
 @Serializable
-data class ScheduleWeekdayValue(val timeslots:List<TimeSlot>){
+data class ScheduleWeekdayValue(val lessons:List<List<Lesson>>){
 
 }
 

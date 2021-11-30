@@ -92,22 +92,22 @@ struct Provider: TimelineProvider {
     
     /// The date of update is every next class start and at midnight
     func getDateOfNextUpdate()->Date{
-        return Calendar.current.date(byAdding: .minute, value: 5, to: Date())!
-        let now = Date();
-        let dates:Array<Date> = [
-            makeDate(now: now, hr: 9, min: 0),
-            makeDate(now: now, hr: 10, min: 40),
-            makeDate(now: now, hr: 12, min: 40),
-            makeDate(now: now, hr: 14, min: 20),
-            makeDate(now: now, hr: 16, min: 20),
-            makeDate(now: now, hr: 18, min: 00),
-        ];
+        // return Calendar.current.date(byAdding: .minute, value: 5, to: Date())!
+         let now = Date();
+        // let dates:Array<Date> = [
+        //     makeDate(now: now, hr: 9, min: 0),
+        //     makeDate(now: now, hr: 10, min: 40),
+        //     makeDate(now: now, hr: 12, min: 40),
+        //     makeDate(now: now, hr: 14, min: 20),
+        //     makeDate(now: now, hr: 16, min: 20),
+        //     makeDate(now: now, hr: 18, min: 00),
+        // ];
         
-        for date in dates{
-            if (now.distance(to: date) > 0){
-                return date;
-            }
-        }
+        // for date in dates{
+        //     if (now.distance(to: date) > 0){
+        //         return date;
+        //     }
+        // }
         
         // if lessons finished, update at midnight
         let wangan = Calendar.current.startOfDay(for: now)
@@ -147,20 +147,6 @@ struct Provider: TimelineProvider {
 //                let daysStuff3 = sharedDefaults?.string(forKey: "schedule")
                 
                 let decoder = JSONDecoder()
-                
-//                if (daysStuff2 != nil){
-//                    let weeks = try decoder.decode(String.self, from: daysStuff2!.data(using: .utf8)!)
-//                    print("weeks ", weeks)
-//                }else{
-//                    print("null")
-//                }
-//
-//                if (daysStuff3 != nil){
-//                    let weeks = try decoder.decode(Dictionary<String,String>.self, from: daysStuff3!.data(using: .utf8)!)
-//                    print("group ", weeks)
-//                }else{
-//                    print("null g")
-//                }
                 
                 if (daysStuff != nil){
                     let weeks = try decoder.decode(Dictionary<String, Int>.self, from: daysStuff!.data(using: .utf8)!)
@@ -361,14 +347,6 @@ struct HomeWidgetExampleEntryView : View {
         return nil;
     }
     
-    //    func getScheduleForRightDay(){
-    //        var weekday = Calendar.current.component(.weekday, from: entry.date)-1
-    //        if (weekday == 1){
-    //            weekday = 7;
-    //        }
-    //        let today = entry.data.schedule[String(weekday)]!
-    //    }
-    
     /// Choose weekday to build
     func getCurrentDaySchedule() -> ScheduleWeekdayValue{
         var weekday = Calendar.current.component(.weekday, from: entry.date)-1
@@ -389,16 +367,6 @@ struct HomeWidgetExampleEntryView : View {
         let str_date = dateFormatter.string(from: entry.date)
         return str_date;
     }
-    
-    
-    
-    //    func mLabel(text:String, size:CGFloat)-> UILabel{
-    //        let lbl = UILabel();
-    //        lbl.text = text;
-    //        lbl.font = UIFont.systemFont(ofSize: size)
-    //        lbl.textColor = UIColor.white
-    //        return lbl;
-    //    }
     
     /// Build a header for widget
     func getHeader()-> some View{

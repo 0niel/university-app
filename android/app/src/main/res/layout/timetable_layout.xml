@@ -13,6 +13,7 @@
 
     <RelativeLayout
         android:layout_width="match_parent"
+        android:layout_marginBottom="10dp"
         android:layout_height="30dp">
 
         <TextView
@@ -23,7 +24,7 @@
             android:layout_alignParentTop="true"
             android:layout_alignParentEnd="true"
             android:layout_alignParentBottom="true"
-            android:background="@drawable/label_bg"
+            android:background="@drawable/label_bg_title"
             android:gravity="center"
             android:paddingHorizontal="2dp"
             android:paddingVertical="5dp"
