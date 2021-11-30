@@ -10,7 +10,11 @@ object HomeWidgetLaunchIntent {
 
     const val HOME_WIDGET_LAUNCH_ACTION = "ninja.mirea.mireaapp.action.LAUNCH"
 
-    fun <T> getActivity(context: Context, activityClass: Class<T>, uri: Uri? = null): PendingIntent where T : Activity {
+    fun <T> getActivity(
+        context: Context,
+        activityClass: Class<T>,
+        uri: Uri? = null
+    ): PendingIntent where T : Activity {
         val intent = Intent(context, activityClass)
         intent.data = uri
         intent.action = HOME_WIDGET_LAUNCH_ACTION

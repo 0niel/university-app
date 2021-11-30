@@ -40,24 +40,29 @@ class HomeWidgetBackgroundService : MethodChannel.MethodCallHandler, JobIntentSe
                 val callbackHandle = HomeWidgetPlugin.getDispatcherHandle(context)
 
                 if (callbackHandle == 0L) {
-                    Log.e(TAG, "No callbackHandle saved. Did you call HomeWidget.registerBackgroundCallback?")
+                    Log.e(
+                        TAG,
+                        "No callbackHandle saved. Did you call HomeWidget.registerBackgroundCallback?"
+                    )
                 }
 
-                val callbackInfo = FlutterCallbackInformation.lookupCallbackInformation(callbackHandle)
+                val callbackInfo =
+                    FlutterCallbackInformation.lookupCallbackInformation(callbackHandle)
 
                 engine = FlutterEngine(context)
 
                 val callback = DartExecutor.DartCallback(
-                        context.assets,
-                        FlutterInjector.instance().flutterLoader().findAppBundlePath(),
-                        callbackInfo
+                    context.assets,
+                    FlutterInjector.instance().flutterLoader().findAppBundlePath(),
+                    callbackInfo
                 )
                 engine?.dartExecutor?.executeDartCallback(callback)
             }
         }
         channel = MethodChannel(
-            engine!!.getDartExecutor().getBinaryMessenger(),
-                "home_widget/background")
+            engine!!.dartExecutor.binaryMessenger,
+            "home_widget/background"
+        )
         channel.setMethodCallHandler(this)
     }
 
@@ -76,7 +81,7 @@ class HomeWidgetBackgroundService : MethodChannel.MethodCallHandler, JobIntentSe
         val data = intent.data?.toString() ?: ""
         val args = listOf(
             HomeWidgetPlugin.getHandle(context),
-                data
+            data
         )
 
         synchronized(serviceStarted) {

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
     xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
     android:layout_height="match_parent">
 
     <LinearLayout
@@ -14,10 +14,10 @@
         android:orientation="horizontal">
 
         <TextView
-            android:layout_marginStart="10dp"
             android:id="@+id/ti_item"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
             android:gravity="center"
             android:paddingHorizontal="2dp"
             android:textAlignment="center"
@@ -26,10 +26,10 @@
             tools:text="1" />
 
         <LinearLayout
-            android:paddingHorizontal="10dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:paddingHorizontal="10dp">
 
             <TextView
                 android:id="@+id/ti_start_time"
@@ -53,13 +53,13 @@
         </LinearLayout>
 
         <TextView
-            android:paddingEnd="10dp"
             android:id="@+id/ti_main_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:maxLines="2"
+            android:paddingEnd="10dp"
             android:textColor="@android:color/white"
             android:textSize="14dp"
-            android:maxLines="2"
             tools:text="Технологические основы интернета вещей, Г-301-в" />
 
     </LinearLayout>

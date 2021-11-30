@@ -17,7 +17,7 @@ import io.flutter.plugin.common.PluginRegistry
 
 /** HomeWidgetPlugin */
 class HomeWidgetPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
-        EventChannel.StreamHandler, PluginRegistry.NewIntentListener {
+    EventChannel.StreamHandler, PluginRegistry.NewIntentListener {
     private lateinit var channel: MethodChannel
     private lateinit var eventChannel: EventChannel
     private lateinit var context: Context
@@ -40,22 +40,34 @@ class HomeWidgetPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                 if (call.hasArgument("id") && call.hasArgument("data")) {
                     val id = call.argument<String>("id")
                     val data = call.argument<Any>("data")
-                    val prefs = context.getSharedPreferences(PREFERENCES, Context.MODE_PRIVATE).edit()
-                    if(data != null) {
+                    val prefs =
+                        context.getSharedPreferences(PREFERENCES, Context.MODE_PRIVATE).edit()
+                    if (data != null) {
                         when (data) {
                             is Boolean -> prefs.putBoolean(id, data)
                             is Float -> prefs.putFloat(id, data)
                             is String -> prefs.putString(id, data)
-                            is Double -> prefs.putLong(id, java.lang.Double.doubleToRawLongBits(data))
+                            is Double -> prefs.putLong(
+                                id,
+                                java.lang.Double.doubleToRawLongBits(data)
+                            )
                             is Int -> prefs.putInt(id, data)
-                            else -> result.error("-10", "Invalid Type ${data!!::class.java.simpleName}. Supported types are Boolean, Float, String, Double, Long", IllegalArgumentException())
+                            else -> result.error(
+                                "-10",
+                                "Invalid Type ${data::class.java.simpleName}. Supported types are Boolean, Float, String, Double, Long",
+                                IllegalArgumentException()
+                            )
                         }
                     } else {
-                        prefs.remove(id);
+                        prefs.remove(id)
                     }
                     result.success(prefs.commit())
                 } else {
-                    result.error("-1", "InvalidArguments saveWidgetData must be called with id and data", IllegalArgumentException())
+                    result.error(
+                        "-1",
+                        "InvalidArguments saveWidgetData must be called with id and data",
+                        IllegalArgumentException()
+                    )
                 }
             }
             "getWidgetData" -> {
@@ -67,13 +79,17 @@ class HomeWidgetPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
 
                     val value = prefs.all[id] ?: defaultValue
 
-                    if(value is Long) {
+                    if (value is Long) {
                         result.success(java.lang.Double.longBitsToDouble(value))
                     } else {
                         result.success(value)
                     }
                 } else {
-                    result.error("-2", "InvalidArguments getWidgetData must be called with id", IllegalArgumentException())
+                    result.error(
+                        "-2",
+                        "InvalidArguments getWidgetData must be called with id",
+                        IllegalArgumentException()
+                    )
                 }
             }
             "updateWidget" -> {
@@ -82,12 +98,17 @@ class HomeWidgetPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                     val javaClass = Class.forName("${context.packageName}.${className}")
                     val intent = Intent(context, javaClass)
                     intent.action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
-                    val ids: IntArray = AppWidgetManager.getInstance(context.applicationContext).getAppWidgetIds(ComponentName(context, javaClass))
+                    val ids: IntArray = AppWidgetManager.getInstance(context.applicationContext)
+                        .getAppWidgetIds(ComponentName(context, javaClass))
                     intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids)
                     context.sendBroadcast(intent)
                     result.success(true)
                 } catch (classException: ClassNotFoundException) {
-                    result.error("-3", "No Widget found with Name $className. Argument 'name' must be the same as your AppWidgetProvider you wish to update", classException)
+                    result.error(
+                        "-3",
+                        "No Widget found with Name $className. Argument 'name' must be the same as your AppWidgetProvider you wish to update",
+                        classException
+                    )
                 }
             }
             "setAppGroupId" -> {
@@ -125,21 +146,24 @@ class HomeWidgetPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
 
         private fun saveCallbackHandle(context: Context, dispatcher: Long, handle: Long) {
             context.getSharedPreferences(INTERNAL_PREFERENCES, Context.MODE_PRIVATE)
-                    .edit()
-                    .putLong(CALLBACK_DISPATCHER_HANDLE, dispatcher)
-                    .putLong(CALLBACK_HANDLE, handle)
-                    .apply()
+                .edit()
+                .putLong(CALLBACK_DISPATCHER_HANDLE, dispatcher)
+                .putLong(CALLBACK_HANDLE, handle)
+                .apply()
         }
 
         fun getDispatcherHandle(context: Context): Long =
-                context.getSharedPreferences(INTERNAL_PREFERENCES, Context.MODE_PRIVATE).getLong(
-                    CALLBACK_DISPATCHER_HANDLE, 0)
+            context.getSharedPreferences(INTERNAL_PREFERENCES, Context.MODE_PRIVATE).getLong(
+                CALLBACK_DISPATCHER_HANDLE, 0
+            )
 
         fun getHandle(context: Context): Long =
-                context.getSharedPreferences(INTERNAL_PREFERENCES, Context.MODE_PRIVATE).getLong(
-                    CALLBACK_HANDLE, 0)
+            context.getSharedPreferences(INTERNAL_PREFERENCES, Context.MODE_PRIVATE).getLong(
+                CALLBACK_HANDLE, 0
+            )
 
-        fun getData(context: Context): SharedPreferences = context.getSharedPreferences(PREFERENCES, Context.MODE_PRIVATE)
+        fun getData(context: Context): SharedPreferences =
+            context.getSharedPreferences(PREFERENCES, Context.MODE_PRIVATE)
     }
 
     override fun onAttachedToActivity(binding: ActivityPluginBinding) {
