@@ -1,6 +1,9 @@
 package ninja.mirea.mireaapp
 
+import android.app.AlarmManager
+import android.app.PendingIntent
 import android.appwidget.AppWidgetManager
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
@@ -12,10 +15,33 @@ import ninja.mirea.mireaapp.widget_channel.AbstractHomeWidgetProvider
 import ninja.mirea.mireaapp.widget_channel.HomeWidgetLaunchIntent
 import ninja.mirea.mireaapp.widget_channel.ScheduleModel
 import ninja.mirea.mireaapp.widget_channel.UpdateWidgetService
+import java.text.SimpleDateFormat
 import java.util.*
 
 
 class HomeWidgetProvider : AbstractHomeWidgetProvider() {
+
+    val ACTION_AUTO_UPDATE_WIDGET = "ACTION_AUTO_UPDATE_WIDGET"
+
+    override fun onEnabled(context: Context) {
+        super.onEnabled(context)
+
+        val intent = Intent(context, HomeWidgetProvider::class.java)
+        intent.action = ACTION_AUTO_UPDATE_WIDGET
+        val pIntent = PendingIntent.getBroadcast(context, 0, intent, 0)
+        val alarmManager = context
+            .getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        val c = Calendar.getInstance()
+        c[Calendar.HOUR_OF_DAY] = 0
+        c[Calendar.MINUTE] = 1
+        c[Calendar.SECOND] = 0
+        c[Calendar.MILLISECOND] = 1
+        c.add(Calendar.MINUTE, 3)
+       alarmManager.setRepeating(
+           AlarmManager.RTC, c.timeInMillis,
+           AlarmManager.INTERVAL_DAY, pIntent
+       )
+    }
 
     override fun onUpdate(
         context: Context,
@@ -48,19 +74,19 @@ class HomeWidgetProvider : AbstractHomeWidgetProvider() {
                     val scheduleModel =
                         Json.decodeFromString(ScheduleModel.serializer(), scheduleData)
 
+                    val date: String = SimpleDateFormat("dd-MM HH:mm:ss").format(Date())
+
                     setTextViewText(
                         R.id.widget_title,
-                        "Группа: ${scheduleModel.group} | Неделя: $week"
+                        "$date Группа: ${scheduleModel.group} | Неделя: $week"
                     )
 
                     setViewVisibility(R.id.widget_main, View.VISIBLE)
                     setViewVisibility(R.id.widget_placeHolder, View.GONE)
                 } else {
-//                    setTextViewText(R.id.widget_title, "NUll data ")
                     setViewVisibility(R.id.widget_main, View.GONE)
                     setViewVisibility(R.id.widget_placeHolder, View.VISIBLE)
                 }
-
 
                 val b = 1 + 1
             }
@@ -73,7 +99,34 @@ class HomeWidgetProvider : AbstractHomeWidgetProvider() {
                 widgetId,
                 R.id.lvList
             )
+
+//            _scheduleNextUpdate(context)
         }
+    }
+
+    override fun onDisabled(context: Context) {
+        super.onDisabled(context)
+        val intent: Intent = Intent(ACTION_AUTO_UPDATE_WIDGET)
+        val alarmMgr = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        alarmMgr.cancel(PendingIntent.getBroadcast(context, 0, intent, 0))
+    }
+
+    override fun onReceive(context: Context?, intent: Intent) {
+        super.onReceive(context, intent)
+
+       if (intent.action.equals(ACTION_AUTO_UPDATE_WIDGET)) {
+           val thisAppWidget = ComponentName(
+               context!!.packageName, javaClass.name
+           )
+
+           val appWidgetManager = AppWidgetManager
+               .getInstance(context)
+           val ids = appWidgetManager.getAppWidgetIds(thisAppWidget)
+
+//            Toast.makeText(context, ACTION_AUTO_UPDATE_WIDGET, Toast.LENGTH_LONG).show()
+
+           onUpdate(context, AppWidgetManager.getInstance(context), ids)
+       }
     }
 
     private fun setList(
