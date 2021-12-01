@@ -74,11 +74,11 @@ class HomeWidgetProvider : AbstractHomeWidgetProvider() {
                     val scheduleModel =
                         Json.decodeFromString(ScheduleModel.serializer(), scheduleData)
 
-                    val date: String = SimpleDateFormat("dd-MM HH:mm:ss").format(Date())
+                    // val date: String = SimpleDateFormat("dd-MM HH:mm:ss").format(Date())
 
                     setTextViewText(
                         R.id.widget_title,
-                        "$date Группа: ${scheduleModel.group} | Неделя: $week"
+                        "Группа: ${scheduleModel.group} | Неделя: $week"
                     )
 
                     setViewVisibility(R.id.widget_main, View.VISIBLE)
