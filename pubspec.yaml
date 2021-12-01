@@ -142,6 +142,8 @@ dependencies:
   get:
   get_storage:
 
+  # https://pub.dev/packages/home_widget
+  home_widget: ^0.1.4
 
 dev_dependencies:
   # The "flutter_lints" package below contains a set of recommended lints to
