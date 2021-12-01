@@ -14,13 +14,15 @@
         android:id="@+id/widget_main"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/background01"
-        android:orientation="vertical">
+        android:background="@drawable/label_bg_01"
+        android:orientation="vertical"
+
+        android:padding="8dp">
 
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="30dp"
-            android:layout_marginBottom="10dp">
+            android:layout_marginBottom="5dp">
 
             <TextView
                 android:id="@+id/widget_title"
@@ -43,7 +45,7 @@
         <ListView
             android:id="@+id/lvList"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"/>
+            android:layout_height="match_parent" />
 
     </LinearLayout>
 
@@ -51,8 +53,8 @@
         android:id="@+id/widget_placeHolder"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:background="@drawable/label_bg_black"
         android:orientation="vertical"
-        android:background="@android:color/black"
         android:visibility="gone">
 
         <include

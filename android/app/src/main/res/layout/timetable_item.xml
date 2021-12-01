@@ -60,7 +60,7 @@
             android:paddingEnd="10dp"
             android:textColor="@android:color/white"
             android:textSize="14dp"
-            tools:text="Технологические основы интернета вещей, Г-301-в" />
+            tools:text="0123456789 0123456789 0123456789 0123456789 0123456789" />
 
     </LinearLayout>
 

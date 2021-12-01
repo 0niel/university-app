@@ -40,7 +40,16 @@ class HomeFactory2 internal constructor(val context: Context, val intent: Intent
             R.layout.timetable_item
         )
         if (data[position].name.isNotEmpty()) {
-            rView.setTextViewText(R.id.ti_main_text, data[position].name)
+            var main = data[position].name
+            if (main.length > 50)
+                main = main.substring(0, 47) + "..."
+            if (data[position].rooms.isNotEmpty()) {
+                main += if (main.length >= 50)
+                    " " + data[position].rooms[0]
+                else
+                    ", " + data[position].rooms[0]
+            }
+            rView.setTextViewText(R.id.ti_main_text, main)
             rView.setTextViewText(R.id.ti_item, (position + 1).toString())
             rView.setTextViewText(R.id.ti_start_time, data[position].time_start)
             rView.setTextViewText(R.id.ti_finish_time, data[position].time_end)
