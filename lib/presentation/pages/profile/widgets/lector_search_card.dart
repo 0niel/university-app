@@ -46,30 +46,9 @@ class LectorSearchCard extends StatelessWidget {
               ),
             ),
           ),
-          const SizedBox(height: 8),
-          Text(employee.post, style: DarkTextTheme.bodyRegular),
-          Text(employee.department, style: DarkTextTheme.bodyRegular),
-          const SizedBox(height: 8),
-          Text(
-            'Кол-во занимаемых ставок: ' + employee.rate,
-            style: DarkTextTheme.bodyRegular
-                .copyWith(color: DarkThemeColors.deactive),
-          ),
-          Text(
-            'Вид занятости: ' + employee.employmentKind,
-            style: DarkTextTheme.bodyRegular
-                .copyWith(color: DarkThemeColors.deactive),
-          ),
-          Text(
-            'Дата приема на работу: ' + employee.employmentDate,
-            style: DarkTextTheme.bodyRegular
-                .copyWith(color: DarkThemeColors.deactive),
-          ),
-          Text(
-            'Дата увольнения: ' + employee.fireDate,
-            style: DarkTextTheme.bodyRegular
-                .copyWith(color: DarkThemeColors.deactive),
-          ),
+          // const SizedBox(height: 8),
+          // Text(employee.post, style: DarkTextTheme.bodyRegular),
+          // Text(employee.department, style: DarkTextTheme.bodyRegular),
         ],
       ),
     );

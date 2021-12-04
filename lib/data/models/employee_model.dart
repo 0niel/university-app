@@ -8,10 +8,6 @@ class EmployeeModel extends Employee {
     required secondName,
     required lastName,
     required email,
-    required employmentKind,
-    required employmentDate,
-    required rate,
-    required fireDate,
     required post,
     required department,
   }) : super(
@@ -19,10 +15,6 @@ class EmployeeModel extends Employee {
           secondName: secondName,
           lastName: lastName,
           email: email,
-          employmentKind: employmentKind,
-          employmentDate: employmentDate,
-          rate: rate,
-          fireDate: fireDate,
           post: post,
           department: department,
         );
@@ -36,12 +28,6 @@ class EmployeeModel extends Employee {
       secondName: json["HUMAN"]["SECOND_NAME"],
       lastName: json["HUMAN"]["LAST_NAME"],
       email: json["HUMAN"]["EMAIL"],
-      employmentKind: json["EMPLOYEE"]["PROPERTIES"]["EMPLOYMENT_KIND"]
-          ["VALUE"],
-      employmentDate: json["EMPLOYEE"]["PROPERTIES"]["EMPLOYMENT_DATE"]
-          ["VALUE"],
-      rate: json["EMPLOYEE"]["PROPERTIES"]["RATE"]["VALUE"],
-      fireDate: json["EMPLOYEE"]["PROPERTIES"]["FIRE_DATE"]["VALUE"],
       post: json["EMPLOYEE"]["PROPERTIES"]["POST"]["VALUE"],
       department: json["EMPLOYEE"]["PROPERTIES"]["DEPARTMENT"]["VALUE"],
     );
