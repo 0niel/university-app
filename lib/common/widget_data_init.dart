@@ -27,6 +27,7 @@ class WidgetDataProvider {
   /// Set weeks info. Has to be set on first start
   static _checkWeeks() async {
     final need = await getIt<WidgetData>().needWeeksReload();
+    // print('isNeedWeek $need');
     // if (true) {
     if (need) {
       Map<String, int> days = {};
@@ -48,6 +49,8 @@ class WidgetDataProvider {
   /// Set schedule info on first start
   static _checkSchedule() async {
     // if (true) {
+    // print(
+    //     'isScheduleLoaded ${!(await getIt<WidgetData>().isScheduleLoaded())}');
     if (!(await getIt<WidgetData>().isScheduleLoaded())) {
       try {
         var a = await getIt<ScheduleLocalData>().getScheduleFromCache();
