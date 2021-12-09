@@ -34,6 +34,7 @@ class HomeFactory2 internal constructor(val context: Context, val intent: Intent
         return RemoteViews(context.packageName, R.layout.timetable_item)
     }
 
+    private  val maxLen = 50;
     override fun getViewAt(position: Int): RemoteViews {
         val rView = RemoteViews(
             context.packageName,
@@ -41,10 +42,10 @@ class HomeFactory2 internal constructor(val context: Context, val intent: Intent
         )
         if (data[position].name.isNotEmpty()) {
             var main = data[position].name
-            if (main.length > 50)
-                main = main.substring(0, 47) + "..."
+            if (main.length > maxLen)
+                main = main.substring(0, maxLen-3) + "..."
             if (data[position].rooms.isNotEmpty()) {
-                main += if (main.length >= 50)
+                main += if (main.length >= maxLen)
                     " " + data[position].rooms[0]
                 else
                     ", " + data[position].rooms[0]
@@ -100,6 +101,9 @@ class HomeFactory2 internal constructor(val context: Context, val intent: Intent
         val scheduleData =
             intent.getStringExtra("schedule")
         val weekData = intent.getStringExtra("week")
+
+        print(scheduleData);
+        print(weekData);
 
         if (scheduleData != null && scheduleData.isNotEmpty() && weekData != null && weekData.isNotEmpty()) {
             val scheduleModel = Json.decodeFromString(ScheduleModel.serializer(), scheduleData)

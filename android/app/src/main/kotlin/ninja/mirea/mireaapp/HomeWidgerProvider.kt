@@ -67,6 +67,7 @@ class HomeWidgetProvider : AbstractHomeWidgetProvider() {
                     MainActivity::class.java
                 )
                 setOnClickPendingIntent(R.id.widget_container, pendingIntent)
+                setOnClickPendingIntent(R.id.widget_placeHolder, pendingIntent)
 //                setOnClickPendingIntent(R.id.lvList, pendingIntent)
 
 
@@ -140,6 +141,9 @@ class HomeWidgetProvider : AbstractHomeWidgetProvider() {
         adapter.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
         adapter.putExtra("schedule", schedule)
         adapter.putExtra("week", week)
+        val random = Random()
+        adapter.type = (random.nextInt(2281337)).toString()
+
         rv.setRemoteAdapter(R.id.lvList, adapter)
     }
 }
