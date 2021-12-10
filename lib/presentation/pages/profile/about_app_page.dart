@@ -142,11 +142,12 @@ class AboutAppPage extends StatelessWidget {
                       runSpacing: 8.0,
                       children: [
                         for (var contributor in state.contributors)
-                          MemberInfo(
-                            username: contributor.login,
-                            avatarUrl: contributor.avatarUrl,
-                            profileUrl: contributor.htmlUrl,
-                          ),
+                          if (contributor.contributions > 5)
+                            MemberInfo(
+                              username: contributor.login,
+                              avatarUrl: contributor.avatarUrl,
+                              profileUrl: contributor.htmlUrl,
+                            ),
                       ],
                     );
                   } else if (state is AboutAppMembersLoadError) {
