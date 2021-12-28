@@ -68,8 +68,6 @@ class HomeWidgetProvider : AbstractHomeWidgetProvider() {
                 )
                 setOnClickPendingIntent(R.id.widget_container, pendingIntent)
                 setOnClickPendingIntent(R.id.widget_placeHolder, pendingIntent)
-//                setOnClickPendingIntent(R.id.lvList, pendingIntent)
-
 
                 if (scheduleData.isNotEmpty() && weekData.isNotEmpty()) {
                     val scheduleModel =
@@ -100,8 +98,6 @@ class HomeWidgetProvider : AbstractHomeWidgetProvider() {
                 widgetId,
                 R.id.lvList
             )
-
-//            _scheduleNextUpdate(context)
         }
     }
 

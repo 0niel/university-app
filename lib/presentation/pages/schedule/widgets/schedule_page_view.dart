@@ -37,7 +37,6 @@ class _SchedulePageViewState extends State<SchedulePageView> {
   static DateTime _validateFocusDay(DateTime newDate) {
     final DateTime _lastCalendarDay =
         DateTime.utc(2021, 12, 19); // TODO: create method for it
-    // print('CHECK!!! ' + isSameDay(newDate, _lastCalendarDay).toString());
     if (newDate.isAfter(_lastCalendarDay)) {
       return _lastCalendarDay;
     } else {

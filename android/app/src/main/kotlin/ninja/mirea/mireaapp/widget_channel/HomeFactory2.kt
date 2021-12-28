@@ -12,15 +12,7 @@ class HomeFactory2 internal constructor(val context: Context, val intent: Intent
     RemoteViewsService.RemoteViewsFactory {
     var data: ArrayList<Lesson> = ArrayList()
 
-    //    SimpleDateFormat sdf;
-//    var widgetID: Int = intent.getIntExtra(
-//        AppWidgetManager.EXTRA_APPWIDGET_ID,
-//        AppWidgetManager.INVALID_APPWIDGET_ID
-//    )
-
-    override fun onCreate() {
-//        data = ArrayList()
-    }
+    override fun onCreate() {}
 
     override fun getCount(): Int {
         return data.size
