@@ -28,11 +28,22 @@ class _SchedulePageViewState extends State<SchedulePageView> {
   late final PageController _controller;
 
   late CalendarFormat _calendarFormat;
-  DateTime _focusedDay = DateTime.now();
+  DateTime _focusedDay = _validateFocusDay(DateTime.now());
 
   final DateTime _firstCalendarDay = Calendar.getSemesterStart();
   final DateTime _lastCalendarDay =
       DateTime.utc(2021, 12, 19); // TODO: create method for it
+
+  static DateTime _validateFocusDay(DateTime newDate) {
+    final DateTime _lastCalendarDay =
+        DateTime.utc(2021, 12, 19); // TODO: create method for it
+    // print('CHECK!!! ' + isSameDay(newDate, _lastCalendarDay).toString());
+    if (newDate.isAfter(_lastCalendarDay)) {
+      return _lastCalendarDay;
+    } else {
+      return newDate;
+    }
+  }
 
   @override
   void initState() {
@@ -263,7 +274,7 @@ class _SchedulePageViewState extends State<SchedulePageView> {
                 _selectedPage =
                     selectedDay.difference(_firstCalendarDay).inDays;
                 _selectedDay = selectedDay;
-                _focusedDay = focusedDay;
+                _focusedDay = _validateFocusDay(focusedDay);
                 _controller.jumpToPage(_selectedPage);
               });
             }
@@ -282,12 +293,12 @@ class _SchedulePageViewState extends State<SchedulePageView> {
           },
           onPageChanged: (focusedDay) {
             // No need to call `setState()` here
-            _focusedDay = focusedDay;
+            _focusedDay = _validateFocusDay(focusedDay);
           },
           onHeaderTapped: (date) {
             final currentDate = DateTime.now();
             setState(() {
-              _focusedDay = currentDate;
+              _focusedDay = _validateFocusDay(currentDate);
               _selectedDay = currentDate;
               _selectedPage = _selectedDay.difference(_firstCalendarDay).inDays;
               _selectedWeek =
@@ -329,7 +340,7 @@ class _SchedulePageViewState extends State<SchedulePageView> {
                                 .difference(_firstCalendarDay)
                                 .inDays;
                             _selectedWeek = i;
-                            _focusedDay = _selectedDay;
+                            _focusedDay = _validateFocusDay(_selectedDay);
                             _controller.jumpToPage(_selectedPage);
                           });
                         },
@@ -364,7 +375,7 @@ class _SchedulePageViewState extends State<SchedulePageView> {
                         Calendar.getCurrentWeek(mCurrentDate: _selectedDay);
                     _selectedWeek = currentNewWeek;
                   }
-                  _focusedDay = _selectedDay;
+                  _focusedDay = _validateFocusDay(_selectedDay);
                   _selectedPage = value;
                 });
               },

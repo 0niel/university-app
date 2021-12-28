@@ -115,7 +115,7 @@ class _SelectRangeDateButtonState extends State<SelectRangeDateButton> {
                 initialSelectedRange: _initialRange,
                 cancelText: 'ОТМЕНА',
                 onCancel: () => Navigator.of(context).pop(),
-                onSubmit: (Object value) {
+                onSubmit: (Object? value) {
                   if (value is PickerDateRange) {
                     _onSelectionChanged(value.startDate, value.endDate);
                     Navigator.of(context).pop();
