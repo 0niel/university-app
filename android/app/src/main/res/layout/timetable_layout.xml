@@ -62,4 +62,18 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
     </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/widget_no_lessons"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/label_bg_black"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <include
+            layout="@layout/timetable_empty"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    </LinearLayout>
 </LinearLayout>

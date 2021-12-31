@@ -12,15 +12,7 @@ class HomeFactory2 internal constructor(val context: Context, val intent: Intent
     RemoteViewsService.RemoteViewsFactory {
     var data: ArrayList<Lesson> = ArrayList()
 
-    //    SimpleDateFormat sdf;
-//    var widgetID: Int = intent.getIntExtra(
-//        AppWidgetManager.EXTRA_APPWIDGET_ID,
-//        AppWidgetManager.INVALID_APPWIDGET_ID
-//    )
-
-    override fun onCreate() {
-//        data = ArrayList()
-    }
+    override fun onCreate() {}
 
     override fun getCount(): Int {
         return data.size
@@ -105,7 +97,13 @@ class HomeFactory2 internal constructor(val context: Context, val intent: Intent
 //        print(scheduleData);
 //        print(weekData);
 
-        if (scheduleData != null && scheduleData.isNotEmpty() && weekData != null && weekData.isNotEmpty()) {
+        if (scheduleData != null &&
+            scheduleData.isNotEmpty() &&
+            weekData != null &&
+            weekData.isNotEmpty() &&
+            scheduleData!="null" &&
+            weekData.matches("\\d+".toRegex())
+        ) {
             val scheduleModel = Json.decodeFromString(ScheduleModel.serializer(), scheduleData)
             var week = weekData.toInt()
 

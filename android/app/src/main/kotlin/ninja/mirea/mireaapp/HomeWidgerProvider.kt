@@ -26,6 +26,7 @@ class HomeWidgetProvider : AbstractHomeWidgetProvider() {
     override fun onEnabled(context: Context) {
         super.onEnabled(context)
 
+        // Reload widget every midnight
         val intent = Intent(context, HomeWidgetProvider::class.java)
         intent.action = ACTION_AUTO_UPDATE_WIDGET
         val pIntent = PendingIntent.getBroadcast(context, 0, intent, 0)
@@ -53,7 +54,8 @@ class HomeWidgetProvider : AbstractHomeWidgetProvider() {
             val scheduleData = widgetData.getString("schedule", "")!!
             val weekData = widgetData.getString("daysStuff", "")!!
 
-            var week = ""
+            // Get current week num or placeholder
+            var week = "-228"
             if (weekData.isNotEmpty()) {
                 val jsonObjWeek = Json.parseToJsonElement(weekData).jsonObject
                 week = jsonObjWeek[Calendar.getInstance().get(Calendar.DAY_OF_YEAR)
@@ -61,53 +63,66 @@ class HomeWidgetProvider : AbstractHomeWidgetProvider() {
             }
 
             val views = RemoteViews(context.packageName, R.layout.timetable_layout).apply {
-                // Open App on Widget Click
-                val pendingIntent = HomeWidgetLaunchIntent.getActivity(
-                    context,
-                    MainActivity::class.java
-                )
-                setOnClickPendingIntent(R.id.widget_container, pendingIntent)
-                setOnClickPendingIntent(R.id.widget_placeHolder, pendingIntent)
-//                setOnClickPendingIntent(R.id.lvList, pendingIntent)
-
-
-                if (scheduleData.isNotEmpty() && weekData.isNotEmpty()) {
-                    val scheduleModel =
-                        Json.decodeFromString(ScheduleModel.serializer(), scheduleData)
-
-                    // val date: String = SimpleDateFormat("dd-MM HH:mm:ss").format(Date())
-
-                    setTextViewText(
-                        R.id.widget_title,
-                        "Группа: ${scheduleModel.group} | Неделя: $week"
+                // if semester is going now
+                if (week.toInt() > 0) {
+                    // set onClick action
+                    val pendingIntent = HomeWidgetLaunchIntent.getActivity(
+                        context,
+                        MainActivity::class.java
                     )
+                    setOnClickPendingIntent(R.id.widget_container, pendingIntent)
+                    setOnClickPendingIntent(R.id.widget_placeHolder, pendingIntent)
 
-                    setViewVisibility(R.id.widget_main, View.VISIBLE)
-                    setViewVisibility(R.id.widget_placeHolder, View.GONE)
-                } else {
+                    // set Header
+                    if (scheduleData.isNotEmpty() && weekData.isNotEmpty()) {
+                        val scheduleModel =
+                            Json.decodeFromString(ScheduleModel.serializer(), scheduleData)
+
+                        // val date: String = SimpleDateFormat("dd-MM HH:mm:ss").format(Date())
+
+                        setTextViewText(
+                            R.id.widget_title,
+                            "Группа: ${scheduleModel.group} | Неделя: $week"
+                        )
+
+                        setViewVisibility(R.id.widget_main, View.VISIBLE)
+                        setViewVisibility(R.id.widget_no_lessons, View.GONE)
+                        setViewVisibility(R.id.widget_placeHolder, View.GONE)
+                    } else {
+                        // set loading placeholder
+                        setViewVisibility(R.id.widget_main, View.GONE)
+                        setViewVisibility(R.id.widget_no_lessons, View.GONE)
+                        setViewVisibility(R.id.widget_placeHolder, View.VISIBLE)
+                    }
+                }else{
+                    // set no lessons placeholder
+                    setViewVisibility(R.id.widget_no_lessons, View.VISIBLE)
                     setViewVisibility(R.id.widget_main, View.GONE)
-                    setViewVisibility(R.id.widget_placeHolder, View.VISIBLE)
+                    setViewVisibility(R.id.widget_placeHolder, View.GONE)
                 }
 
                 val b = 1 + 1
             }
 
-            setList(views, context, widgetId, scheduleData, week)
+            // set lessons list
+            if (week.toInt() > 0) {
+                setList(views, context, widgetId, scheduleData, week)
+            }
 
+            // update widget
             appWidgetManager.updateAppWidget(widgetId, views)
 
+            // update lessons list
             appWidgetManager.notifyAppWidgetViewDataChanged(
                 widgetId,
                 R.id.lvList
             )
-
-//            _scheduleNextUpdate(context)
         }
     }
 
     override fun onDisabled(context: Context) {
         super.onDisabled(context)
-        val intent: Intent = Intent(ACTION_AUTO_UPDATE_WIDGET)
+        val intent = Intent(ACTION_AUTO_UPDATE_WIDGET)
         val alarmMgr = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         alarmMgr.cancel(PendingIntent.getBroadcast(context, 0, intent, 0))
     }
@@ -123,8 +138,6 @@ class HomeWidgetProvider : AbstractHomeWidgetProvider() {
            val appWidgetManager = AppWidgetManager
                .getInstance(context)
            val ids = appWidgetManager.getAppWidgetIds(thisAppWidget)
-
-//            Toast.makeText(context, ACTION_AUTO_UPDATE_WIDGET, Toast.LENGTH_LONG).show()
 
            onUpdate(context, AppWidgetManager.getInstance(context), ids)
        }

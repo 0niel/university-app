@@ -13,26 +13,24 @@ import 'package:intl/intl.dart';
 import 'lesson_card.dart';
 
 class SchedulePageView extends StatefulWidget {
-  final Schedule schedule;
-
   const SchedulePageView({Key? key, required this.schedule}) : super(key: key);
+
+  final Schedule schedule;
 
   @override
   _SchedulePageViewState createState() => _SchedulePageViewState();
 }
 
 class _SchedulePageViewState extends State<SchedulePageView> {
-  late int _selectedWeek;
-  late int _selectedPage;
-  late DateTime _selectedDay;
-  late final PageController _controller;
-
   late CalendarFormat _calendarFormat;
-  DateTime _focusedDay = DateTime.now();
-
+  late final PageController _controller;
   final DateTime _firstCalendarDay = Calendar.getSemesterStart();
-  final DateTime _lastCalendarDay =
-      DateTime.utc(2021, 12, 19); // TODO: create method for it
+  DateTime _focusedDay = _validateFocusDay(DateTime.now());
+  final DateTime _lastCalendarDay = Calendar.getSemesterLastDay();
+
+  late DateTime _selectedDay;
+  late int _selectedPage;
+  late int _selectedWeek;
 
   @override
   void initState() {
@@ -47,6 +45,16 @@ class _SchedulePageViewState extends State<SchedulePageView> {
         (BlocProvider.of<ScheduleBloc>(context).state as ScheduleLoaded)
             .scheduleSettings
             .calendarFormat];
+  }
+
+  /// check if current date is before [_lastCalendarDay]
+  static DateTime _validateFocusDay(DateTime newDate) {
+    final DateTime _lastCalendarDay = Calendar.getSemesterLastDay();
+    if (newDate.isAfter(_lastCalendarDay)) {
+      return _lastCalendarDay;
+    } else {
+      return newDate;
+    }
   }
 
   List<List<Lesson>> _getLessonsByWeek(int week, Schedule schedule) {
@@ -263,7 +271,7 @@ class _SchedulePageViewState extends State<SchedulePageView> {
                 _selectedPage =
                     selectedDay.difference(_firstCalendarDay).inDays;
                 _selectedDay = selectedDay;
-                _focusedDay = focusedDay;
+                _focusedDay = _validateFocusDay(focusedDay);
                 _controller.jumpToPage(_selectedPage);
               });
             }
@@ -282,12 +290,12 @@ class _SchedulePageViewState extends State<SchedulePageView> {
           },
           onPageChanged: (focusedDay) {
             // No need to call `setState()` here
-            _focusedDay = focusedDay;
+            _focusedDay = _validateFocusDay(focusedDay);
           },
           onHeaderTapped: (date) {
             final currentDate = DateTime.now();
             setState(() {
-              _focusedDay = currentDate;
+              _focusedDay = _validateFocusDay(currentDate);
               _selectedDay = currentDate;
               _selectedPage = _selectedDay.difference(_firstCalendarDay).inDays;
               _selectedWeek =
@@ -329,7 +337,7 @@ class _SchedulePageViewState extends State<SchedulePageView> {
                                 .difference(_firstCalendarDay)
                                 .inDays;
                             _selectedWeek = i;
-                            _focusedDay = _selectedDay;
+                            _focusedDay = _validateFocusDay(_selectedDay);
                             _controller.jumpToPage(_selectedPage);
                           });
                         },
@@ -364,7 +372,7 @@ class _SchedulePageViewState extends State<SchedulePageView> {
                         Calendar.getCurrentWeek(mCurrentDate: _selectedDay);
                     _selectedWeek = currentNewWeek;
                   }
-                  _focusedDay = _selectedDay;
+                  _focusedDay = _validateFocusDay(_selectedDay);
                   _selectedPage = value;
                 });
               },

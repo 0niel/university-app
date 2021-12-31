@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:home_widget/home_widget.dart';
 import 'package:rtu_mirea_app/common/calendar.dart';
@@ -28,21 +26,32 @@ class WidgetDataProvider {
   static _checkWeeks() async {
     final need = await getIt<WidgetData>().needWeeksReload();
     // print('isNeedWeek $need');
-    // if (true) {
-    if (need) {
+    if (true) {
+      // if (need) {
+      // Map for day_of_year : schedule_week_number
       Map<String, int> days = {};
-      DateTime now = DateTime.now();
-      DateTime firstDayOfYear = DateTime(now.year, 1, 1, 0, 0);
+
+      final DateTime now = DateTime.now();
+      final DateTime firstDayOfYear =
+          DateTime(now.year, DateTime.january, 1, 0, 0);
+      final lastDay = Calendar.getSemesterLastDay();
+
       for (DateTime indexDay = DateTime(now.year, now.month, now.day);
           indexDay.year == now.year;
           indexDay = indexDay.add(const Duration(days: 1))) {
         //  print(indexDay.toString());
-        days[indexDay.difference(firstDayOfYear).inDays.toString()] = min(
-            Calendar.getCurrentWeek(mCurrentDate: indexDay),
-            Calendar.kMaxWeekInSemester);
+        final dayOfYear = indexDay.difference(firstDayOfYear).inDays.toString();
+        if (indexDay.isBefore(lastDay)) {
+          days[dayOfYear] = Calendar.getCurrentWeek(mCurrentDate: indexDay);
+        } else {
+          days[dayOfYear] = -228;
+        }
       }
+      // set stuff for last calendar day
+      days['365'] = -228;
+      days['366'] = -228; // for leap year case
+
       getIt<WidgetData>().setWeeksData(days);
-      // print('done weeks');
     }
   }
 
