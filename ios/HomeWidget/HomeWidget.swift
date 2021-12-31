@@ -93,7 +93,7 @@ struct Provider: TimelineProvider {
     /// The date of update is every next class start and at midnight
     func getDateOfNextUpdate()->Date{
         // return Calendar.current.date(byAdding: .minute, value: 5, to: Date())!
-         let now = Date();
+        let now = Date();
         // let dates:Array<Date> = [
         //     makeDate(now: now, hr: 9, min: 0),
         //     makeDate(now: now, hr: 10, min: 40),
@@ -143,8 +143,8 @@ struct Provider: TimelineProvider {
         if(sharedDefaults != nil) {
             do {
                 let daysStuff = sharedDefaults?.string(forKey: "daysStuff")
-//                let daysStuff2 = sharedDefaults?.string(forKey: "test122")
-//                let daysStuff3 = sharedDefaults?.string(forKey: "schedule")
+                //                let daysStuff2 = sharedDefaults?.string(forKey: "test122")
+                //                let daysStuff3 = sharedDefaults?.string(forKey: "schedule")
                 
                 let decoder = JSONDecoder()
                 
@@ -219,14 +219,14 @@ struct HomeWidgetExampleEntryView : View {
                 .foregroundColor(Color.white)
         }
         )
-        .frame(
-            minWidth: 0,
-            maxWidth: .infinity,
-            minHeight: 0,
-            maxHeight: .infinity,
-            alignment: .center
-        )
-        .background(darkbg)
+            .frame(
+                minWidth: 0,
+                maxWidth: .infinity,
+                minHeight: 0,
+                maxHeight: .infinity,
+                alignment: .center
+            )
+            .background(darkbg)
     }
     
     //    func getSmall()-> some View{
@@ -260,17 +260,17 @@ struct HomeWidgetExampleEntryView : View {
         case 0:
             return "9:00"
         case 1:
-            return  "10:40"
+            return "10:40"
         case 2:
-            return  "12:40"
+            return "12:40"
         case 3:
-            return  "14:20"
+            return "14:20"
         case 4:
-            return  "16:20"
+            return "16:20"
         case 5:
-            return   "18:00"
+            return "18:00"
         default:
-            return   "error"
+            return "error"
         }
     }
     func getFinishTimeForLesson(i:Int)->String{
@@ -282,13 +282,13 @@ struct HomeWidgetExampleEntryView : View {
         case 2:
             return "14:10"
         case 3:
-            return  "15:50"
+            return "15:50"
         case 4:
             return "17:50"
         case 5:
             return "19:30"
         default:
-            return   "error"
+            return "error"
         }
     }
     
@@ -381,11 +381,8 @@ struct HomeWidgetExampleEntryView : View {
     /// Build the large version of widget
     func getBig()-> some View{
         let today = getCurrentDaySchedule();
-        //        var weekday = Calendar.current.component(.weekday, from: entry.date)-1
-        //        let str_date = getDateStr();
         
         return VStack(alignment: .center){
-            //            Text(getDateStr()+String(weekday)).foregroundColor(Color.white)
             getHeader()
             VStack(
                 alignment: .leading,
@@ -393,10 +390,7 @@ struct HomeWidgetExampleEntryView : View {
             ) {
                 ForEach(
                     0..<today.lessons.count
-                    //                            id: \.self
                 ) { i in
-                    //                    let lesson: LessonInfo? = getLessonInfoForTimeSlot(lessonInfos: today.lessons[0]);
-                    //                    lessonCard(lesson: lesson!, i: i)
                     if (today.lessons[i].isEmpty){
                         noLesson(i: i)
                     }else{
@@ -422,12 +416,28 @@ struct HomeWidgetExampleEntryView : View {
         }
     }
     
+    func getNoLessonsPlaceholder()-> some View{
+        VStack.init(alignment: .center, spacing: /*@START_MENU_TOKEN@*/nil/*@END_MENU_TOKEN@*/, content:{
+            Text("Сессия...").bold().font(/*@START_MENU_TOKEN@*/.title/*@END_MENU_TOKEN@*/).foregroundColor(Color.white)
+        }
+        )
+            .frame(
+                minWidth: 0,
+                maxWidth: .infinity,
+                minHeight: 0,
+                maxHeight: .infinity,
+                alignment: .center
+            )
+            .background(darkbg)
+        
+    }
+    
     
     @Environment(\.widgetFamily) var family
     
     var body: some View {
-        if (entry.data.schedule.isEmpty || entry.week < 0){
-            getEmpty();
+        if (entry.data.schedule.isEmpty){
+            getNoLessonsPlaceholder();
         }else{
             switch family {
             case .systemSmall:
@@ -437,7 +447,11 @@ struct HomeWidgetExampleEntryView : View {
                 //                    getMedium();
                 getEmpty();
             default:
-                getBig();
+                if (entry.week < 0){
+                    getNoLessonsPlaceholder();
+                }else{
+                    getBig();
+                }
             }
         }
     }
