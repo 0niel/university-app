@@ -24,7 +24,6 @@ class SchedulePageView extends StatefulWidget {
 class _SchedulePageViewState extends State<SchedulePageView> {
   late CalendarFormat _calendarFormat;
   late final PageController _controller;
-
   final DateTime _firstCalendarDay = Calendar.getSemesterStart();
   DateTime _focusedDay = _validateFocusDay(DateTime.now());
   final DateTime _lastCalendarDay = Calendar.getSemesterLastDay();
@@ -32,16 +31,6 @@ class _SchedulePageViewState extends State<SchedulePageView> {
   late DateTime _selectedDay;
   late int _selectedPage;
   late int _selectedWeek;
-
-  static DateTime _validateFocusDay(DateTime newDate) {
-    final DateTime _lastCalendarDay =
-        DateTime.utc(2021, 12, 19); // TODO: create method for it
-    if (newDate.isAfter(_lastCalendarDay)) {
-      return _lastCalendarDay;
-    } else {
-      return newDate;
-    }
-  }
 
   @override
   void initState() {
