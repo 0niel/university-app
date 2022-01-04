@@ -15,6 +15,11 @@ abstract class Calendar {
     DateTime currentDate = mCurrentDate ?? clock.now();
     DateTime startDate = getSemesterStart(mCurrentDate: currentDate);
 
+    // If the semester has not begun, return the beginning
+    if (currentDate.isBefore(startDate)) {
+      return 1;
+    }
+
     int week = 1;
     int prevWeekday = startDate.weekday;
 
