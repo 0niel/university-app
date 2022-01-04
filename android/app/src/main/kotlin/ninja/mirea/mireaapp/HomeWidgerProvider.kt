@@ -64,7 +64,7 @@ class HomeWidgetProvider : AbstractHomeWidgetProvider() {
 
             val views = RemoteViews(context.packageName, R.layout.timetable_layout).apply {
                 // if semester is going now
-                if (week.toInt() > 0) {
+                if (weekData.matches("\\d+".toRegex()) && week.toInt() > 0) {
                     // set onClick action
                     val pendingIntent = HomeWidgetLaunchIntent.getActivity(
                         context,
@@ -105,7 +105,7 @@ class HomeWidgetProvider : AbstractHomeWidgetProvider() {
             }
 
             // set lessons list
-            if (week.toInt() > 0) {
+            if (weekData.matches("\\d+".toRegex()) && week.toInt() > 0) {
                 setList(views, context, widgetId, scheduleData, week)
             }
 
