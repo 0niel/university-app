@@ -27,12 +27,13 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   
-  # Http client. See https://pub.dev/packages/dio
-  dio: ^4.0.0
+  # Http client. 
+  # See https://pub.dev/packages/dio
+  dio: ^4.0.4
 
   # Simple no-sql local database. 
   # See https://pub.dev/packages/shared_preferences
-  shared_preferences: ^2.0.6
+  shared_preferences: ^2.0.11
 
   # State management library. 
   # See https://pub.dev/packages/bloc
@@ -44,11 +45,11 @@ dependencies:
 
   # SVG rendering widget for Flutter. 
   # See https://pub.dev/packages/flutter_svg
-  flutter_svg: ^0.22.0
+  flutter_svg: ^1.0.0
 
   # Allows dynamically change between light and dark theme. 
   # See https://pub.dev/packages/adaptive_theme
-  adaptive_theme: ^2.2.0
+  adaptive_theme: ^2.3.0
 
   # Helps to implement value based equality without explicitly 
   # override == and hashCode. 
@@ -57,25 +58,27 @@ dependencies:
 
   # Simple direct Service Locator for Dependency Injection.
   # See https://pub.dev/packages/get_it
-  get_it: ^7.1.3
+  get_it: ^7.2.0
 
   # Zoomable image content
   # See https://pub.dev/packages/photo_view
-  photo_view: ^0.12.0
+  photo_view: ^0.13.0
 
-  # search bar
+  # Animated floating search bar, also known as persistent search
   # See https://pub.dev/packages/material_floating_search_bar
-  material_floating_search_bar: ^0.3.4
+  material_floating_search_bar: ^0.3.6
 
   # Internet connection checker.
   # See https://pub.dev/packages/internet_connection_checker
-  internet_connection_checker: ^0.0.1+2
+  internet_connection_checker: ^0.0.1+3
 
   # Functional Programming in Dart
   # See https://pub.dev/packages/dartz/versions/0.10.0-nullsafety.2
   dartz: ^0.10.0-nullsafety.2
 
-  flutter_typeahead: ^3.2.0
+  # A highly customizable autocomplete text input field for Flutter
+  # See https://pub.dev/packages/flutter_typeahead
+  flutter_typeahead: ^3.2.4
 
   # The Flutter Date Range Picker widget allows users to easily select 
   # dates or a range of dates. It has four built-in views that allow quick 
@@ -85,7 +88,7 @@ dependencies:
 
   # A Flutter widget rendering static HTML and CSS as Flutter widgets.
   # See https://pub.dev/packages/flutter_html
-  flutter_html: ^2.1.5
+  flutter_html: ^3.0.0-alpha.2
   
   # The Font Awesome Icon pack available as Flutter Icons. 
   # Provides 1600 additional icons to use in your apps.
@@ -93,7 +96,8 @@ dependencies:
   font_awesome_flutter: ^9.2.0
 
   # Table calendar for schedule
-  table_calendar: ^3.0.2
+  # See https://pub.dev/packages/table_calendar
+  table_calendar: ^3.0.3
 
   # Creates page that is dismissed by swipe gestures, with Hero style
   # animations, Inspired by Facebook, Instagram stories.
@@ -107,29 +111,30 @@ dependencies:
   # Official extension image, support placeholder(loading)/ failed state,
   # cache network, zoom/pan, photo view, slide out page,
   # editor(crop,rotate,flip), painting etc.
-  extended_image: ^5.1.3
+  extended_image: ^6.0.1
 
   # A package provides an easy way to add shimmer effect in Flutter project
+  # See https://pub.dev/packages/shimmer
   shimmer: ^2.0.0
 
-  implicitly_animated_reorderable_list: ^0.4.0
+  # Load and cache network images with with placeholder and error widgets.
+  # See https://pub.dev/packages/cached_network_image
+  cached_network_image: ^3.2.0
+
+  # ListView that implicitly animates between the changes of two lists
+  # See https://pub.dev/packages/implicitly_animated_reorderable_list
+  implicitly_animated_reorderable_list: ^0.4.2
 
   flutter_inner_drawer:
     git:
       url: https://github.com/0niel/flutter_inner_drawer.git
       ref: bugfix/type-casting
   
-  url_launcher: ^6.0.9
+  url_launcher: ^6.0.17
 
-  flutter_markdown: ^0.6.4
+  flutter_markdown: ^0.6.9
   
   carousel_slider: ^4.0.0
-
-  flutter_inappwebview: ^5.3.2
-
-  rsa_encrypt: ^2.0.0
-
-  cached_network_image: ^3.1.0
 
   # Encapsulates the notion of the "current time". Very useful for testing
   # See https://pub.dev/packages/clock
@@ -143,7 +148,7 @@ dependencies:
   get_storage:
 
   # https://pub.dev/packages/home_widget
-  home_widget: ^0.1.4
+  home_widget: ^0.1.5
 
 dev_dependencies:
   # The "flutter_lints" package below contains a set of recommended lints to

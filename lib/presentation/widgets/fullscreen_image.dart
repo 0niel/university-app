@@ -1,4 +1,4 @@
-import 'package:cached_network_image/cached_network_image.dart';
+import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:rtu_mirea_app/presentation/colors.dart';
@@ -41,10 +41,11 @@ class _FullScreenImageState extends State<FullScreenImage>
       }),
       child: PhotoView.customChild(
         initialScale: 1.0,
-        child: CachedNetworkImage(
+        child: ExtendedImage.network(
+          widget.imageUrl,
           width: MediaQuery.of(context).size.width,
           fit: BoxFit.contain,
-          imageUrl: widget.imageUrl,
+          cache: false,
         ),
         backgroundDecoration:
             const BoxDecoration(color: DarkThemeColors.background01),
