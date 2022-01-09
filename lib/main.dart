@@ -1,15 +1,8 @@
-import 'dart:convert';
-import 'dart:io';
-import 'dart:math';
-
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:rtu_mirea_app/common/calendar.dart';
 import 'package:rtu_mirea_app/common/widget_data_init.dart';
-import 'package:rtu_mirea_app/data/datasources/schedule_local.dart';
-import 'package:rtu_mirea_app/data/models/schedule_model.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:rtu_mirea_app/presentation/bloc/about_app_bloc/about_app_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/announces_bloc/announces_bloc.dart';
@@ -33,10 +26,8 @@ import 'package:rtu_mirea_app/presentation/pages/profile/profile_screen.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl_standalone.dart';
-import 'package:intl/date_symbol_data_local.dart';
 import 'package:rtu_mirea_app/service_locator.dart' as dependency_injection;
 import 'service_locator.dart';
-import 'package:home_widget/home_widget.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();

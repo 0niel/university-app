@@ -175,7 +175,6 @@ class UserRemoteDataImpl implements UserRemoteData {
           }
         });
       }
-      print(attendance);
       return attendance;
     } else {
       throw ServerException('Response status code is $response.statusCode');
