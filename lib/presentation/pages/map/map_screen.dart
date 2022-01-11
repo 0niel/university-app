@@ -40,8 +40,8 @@ class _MapScreenState extends State<MapScreen> {
   final _controller = PhotoViewController();
   final _scaleController = PhotoViewScaleStateController();
 
-  final maxScale = 20.0;
-  final defaultScale = 3.0;
+  final maxScale = 21.0;
+  final defaultScale = 11.0;
   final minScale = 1.0;
 
   final floors = [
