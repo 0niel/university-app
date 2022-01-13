@@ -10,8 +10,10 @@ import 'package:shimmer/shimmer.dart';
 
 class NewsItemWidget extends StatelessWidget {
   final NewsItem newsItem;
+  final Function(String)? onClickNewsTag;
 
-  const NewsItemWidget({Key? key, required this.newsItem}) : super(key: key);
+  const NewsItemWidget({Key? key, required this.newsItem, this.onClickNewsTag})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -38,7 +40,7 @@ class NewsItemWidget extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               ExtendedImage.network(
-                newsItem.images[0],
+                newsItem.images[0].formats.thumbnail.url,
                 height: 175,
                 width: MediaQuery.of(context).size.width,
                 fit: BoxFit.cover,
@@ -105,16 +107,19 @@ class NewsItemWidget extends StatelessWidget {
                 child: Text(newsItem.title,
                     textAlign: TextAlign.start, style: DarkTextTheme.titleM),
               ),
-              const SizedBox(height: 2),
+              const SizedBox(height: 4),
               Text((DateFormat.yMMMd('ru_RU').format(newsItem.date).toString()),
                   textAlign: TextAlign.start,
                   style: DarkTextTheme.captionL
                       .copyWith(color: DarkThemeColors.secondary)),
-              const SizedBox(height: 16),
+              newsItem.tags.isNotEmpty
+                  ? const SizedBox(height: 16)
+                  : Container(),
               Tags(
-                isClickable: false,
+                isClickable: true,
                 withIcon: false,
                 tags: newsItem.tags,
+                onClick: onClickNewsTag,
               ),
             ],
           ),

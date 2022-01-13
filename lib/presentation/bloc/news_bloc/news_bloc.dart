@@ -20,6 +20,7 @@ class NewsBloc extends Bloc<NewsEvent, NewsState> {
 
   bool _isFirstFetch = true;
   int _offset = 0;
+  String? _selectedTag;
 
   @override
   Stream<NewsState> mapEventToState(
@@ -35,6 +36,7 @@ class NewsBloc extends Bloc<NewsEvent, NewsState> {
       List<String> tagsList = [];
       List<NewsItem> oldNews = [];
 
+      // True if the tag list failed to load
       bool hasFetchError = false;
 
       if (_isFirstFetch) {
@@ -59,7 +61,22 @@ class NewsBloc extends Bloc<NewsEvent, NewsState> {
         return;
       }
 
-      final news = await getNews(GetNewsParams(offset: _offset, limit: 10));
+      if (event.tag == "все") {
+        _selectedTag = null;
+      } else {
+        if ((event.tag != null)) {
+          if (_selectedTag == null ||
+              (_selectedTag != null && event.tag != _selectedTag)) {
+            _selectedTag = event.tag;
+          }
+        }
+      }
+
+      final news = await getNews(GetNewsParams(
+          offset: _offset,
+          limit: 10,
+          isImportant: event.isImportant,
+          tag: _selectedTag));
       yield news.fold((failure) => NewsLoadError(), (r) {
         List<NewsItem> newNews = List.from(oldNews)..addAll(r);
         _offset += r.length;

@@ -13,8 +13,8 @@ class StrapiMedia extends Equatable {
   });
 
   final String name;
-  final String alternativeText;
-  final String caption;
+  final String? alternativeText;
+  final String? caption;
   final int width;
   final int height;
   final Formats formats;
@@ -25,8 +25,6 @@ class StrapiMedia extends Equatable {
   List<Object> get props {
     return [
       name,
-      alternativeText,
-      caption,
       width,
       height,
       formats,

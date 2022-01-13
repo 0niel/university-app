@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:rtu_mirea_app/domain/entities/news_item.dart';
@@ -6,14 +7,101 @@ import 'package:rtu_mirea_app/presentation/bloc/news_bloc/news_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/stories_bloc/stories_bloc.dart';
 import 'package:rtu_mirea_app/presentation/colors.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
+import 'package:rtu_mirea_app/presentation/widgets/buttons/app_settings_button.dart';
+import 'package:rtu_mirea_app/presentation/widgets/buttons/primary_tab_button.dart';
 import 'widgets/news_item.dart';
 import 'widgets/story_item.dart';
+import 'widgets/tags_widgets.dart';
 
 class NewsScreen extends StatelessWidget {
   NewsScreen({Key? key}) : super(key: key);
 
   static const String routeName = '/news';
   final _scrollController = ScrollController();
+  final ValueNotifier<int> _tabValueNotifier = ValueNotifier(0);
+
+  void _filterNewsByTag(NewsBloc bloc, String tag) {
+    bloc.add(
+      NewsLoadEvent(
+        refresh: true,
+        isImportant: _tabValueNotifier.value == 1,
+        tag: tag,
+      ),
+    );
+  }
+
+  void _showTagsModalWindow(BuildContext context) {
+    showCupertinoModalPopup(
+      context: context,
+      builder: (ctx) => Material(
+        child: Container(
+          padding: const EdgeInsets.all(8),
+          color: DarkThemeColors.background03,
+          child: Padding(
+            padding:
+                const EdgeInsets.only(top: 4, bottom: 16, left: 24, right: 24),
+            child: BlocConsumer<NewsBloc, NewsState>(
+              listener: (context, state) => state.runtimeType != NewsLoaded
+                  ? Navigator.of(context).pop()
+                  : null,
+              buildWhen: (previous, current) => (current is NewsLoaded),
+              builder: (context, state) {
+                return Tags(
+                  isClickable: true,
+                  withIcon: false,
+                  tags: ["все", ...(state as NewsLoaded).tags],
+                  onClick: (tag) =>
+                      _filterNewsByTag(context.read<NewsBloc>(), tag),
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTabButtons(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              PrimaryTabButton(
+                text: 'Новости',
+                itemIndex: 0,
+                notifier: _tabValueNotifier,
+                onClick: () {
+                  context.read<NewsBloc>().add(NewsLoadEvent(
+                      refresh: true,
+                      isImportant: _tabValueNotifier.value == 1));
+                },
+              ),
+              PrimaryTabButton(
+                text: 'Важное',
+                itemIndex: 1,
+                notifier: _tabValueNotifier,
+                onClick: () {
+                  context.read<NewsBloc>().add(NewsLoadEvent(
+                      refresh: true,
+                      isImportant: _tabValueNotifier.value == 1,
+                      tag: "все"));
+                },
+              )
+            ],
+          ),
+          Padding(
+            padding: const EdgeInsets.only(right: 12),
+            child:
+                AppSettingsButton(onClick: () => _showTagsModalWindow(context)),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -25,37 +113,16 @@ class NewsScreen extends StatelessWidget {
       backgroundColor: DarkThemeColors.background01,
       body: RefreshIndicator(
         onRefresh: () async {
-          context.read<NewsBloc>().add(const NewsLoadEvent(refresh: true));
+          context.read<NewsBloc>().add(NewsLoadEvent(
+              refresh: true, isImportant: _tabValueNotifier.value == 1));
           context.read<StoriesBloc>().add(LoadStories());
         },
         child: Column(children: [
-          // TODO: Add cliclable tags header!!!
-          // BlocBuilder<NewsBloc, NewsState>(buildWhen: (prevState, currentState) {
-          //   if (currentState is NewsLoaded && prevState is NewsLoaded)
-          //     return currentState.tags != prevState.tags;
-          //   else if (currentState is NewsLoaded &&
-          //       prevState.runtimeType != NewsLoaded)
-          //     return true;
-          //   else
-          //     return false;
-          // }, builder: (context, state) {
-          //   if (state is NewsLoaded)
-          //     return Padding(
-          //       padding: EdgeInsets.only(top: 4, bottom: 16, left: 24, right: 24),
-          //       child: Tags(
-          //         isClickable: true,
-          //         withIcon: true,
-          //         tags: state.tags,
-          //       ),
-          //     );
-          //   else
-          //     return Container();
-          // }),
           BlocBuilder<StoriesBloc, StoriesState>(builder: (context, state) {
             if (state is StoriesInitial) {
               context.read<StoriesBloc>().add(LoadStories());
             } else if (state is StoriesLoading) {
-              return const Center(child: CircularProgressIndicator());
+              return Container();
             } else if (state is StoriesLoaded) {
               for (final story in state.stories) {
                 if (DateTime.now().compareTo(story.stopShowDate) == -1) {
@@ -84,7 +151,8 @@ class NewsScreen extends StatelessWidget {
             }
             return Container();
           }),
-          const SizedBox(height: 20),
+          const SizedBox(height: 16),
+          _buildTabButtons(context),
           Expanded(
             child: BlocBuilder<NewsBloc, NewsState>(
               builder: (context, state) {
@@ -92,7 +160,8 @@ class NewsScreen extends StatelessWidget {
                 bool isLoading = false;
 
                 if (state is NewsInitial) {
-                  context.read<NewsBloc>().add(const NewsLoadEvent());
+                  context.read<NewsBloc>().add(
+                      NewsLoadEvent(isImportant: _tabValueNotifier.value == 1));
                 } else if (state is NewsLoaded) {
                   news = state.news;
                 } else if (state is NewsLoading && state.isFirstFetch) {
@@ -114,20 +183,31 @@ class NewsScreen extends StatelessWidget {
                     ),
                   );
                 }
-                return ListView.builder(
-                  controller: _scrollController,
-                  itemBuilder: (context, index) {
-                    if (index < news.length) {
-                      return NewsItemWidget(newsItem: news[index]);
-                    } else {
-                      Timer(const Duration(milliseconds: 30), () {
-                        _scrollController
-                            .jumpTo(_scrollController.position.maxScrollExtent);
-                      });
-                      return const Center(child: CircularProgressIndicator());
-                    }
-                  },
-                  itemCount: news.length + (isLoading ? 1 : 0),
+                return Column(
+                  children: [
+                    const SizedBox(height: 12),
+                    Expanded(
+                      child: ListView.builder(
+                        controller: _scrollController,
+                        itemBuilder: (context, index) {
+                          if (index < news.length) {
+                            return NewsItemWidget(
+                                newsItem: news[index],
+                                onClickNewsTag: (tag) => _filterNewsByTag(
+                                    context.read<NewsBloc>(), tag));
+                          } else {
+                            Timer(const Duration(milliseconds: 30), () {
+                              _scrollController.jumpTo(
+                                  _scrollController.position.maxScrollExtent);
+                            });
+                            return const Center(
+                                child: CircularProgressIndicator());
+                          }
+                        },
+                        itemCount: news.length + (isLoading ? 1 : 0),
+                      ),
+                    ),
+                  ],
                 );
               },
             ),
@@ -141,7 +221,9 @@ class NewsScreen extends StatelessWidget {
     _scrollController.addListener(() {
       if (_scrollController.position.atEdge) {
         if (_scrollController.position.pixels != 0) {
-          context.read<NewsBloc>().add(const NewsLoadEvent());
+          context
+              .read<NewsBloc>()
+              .add(NewsLoadEvent(isImportant: _tabValueNotifier.value == 1));
         }
       }
     });

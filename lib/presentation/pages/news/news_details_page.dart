@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_markdown/flutter_markdown.dart';
+import 'package:flutter_html/flutter_html.dart';
+import 'package:flutter_html_iframe/flutter_html_iframe.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
 import 'package:rtu_mirea_app/domain/entities/news_item.dart';
 import 'package:rtu_mirea_app/presentation/colors.dart';
 import 'package:rtu_mirea_app/presentation/pages/news/widgets/tags_widgets.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
-import 'package:rtu_mirea_app/presentation/widgets/fullscreen_image.dart';
+import 'package:rtu_mirea_app/presentation/widgets/images_horizontal_slider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class NewsDetailsPage extends StatelessWidget {
@@ -27,7 +28,7 @@ class NewsDetailsPage extends StatelessWidget {
                 children: <Widget>[
                   Positioned.fill(
                     child: Image.network(
-                      newsItem.images[0],
+                      newsItem.images[0].formats.medium!.url,
                       fit: BoxFit.cover,
                     ),
                   ),
@@ -53,114 +54,90 @@ class NewsDetailsPage extends StatelessWidget {
                         style: DarkTextTheme.h5,
                       ),
                       const SizedBox(height: 24),
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Expanded(
-                              child: Tags(
-                            isClickable: false,
-                            withIcon: true,
-                            tags: newsItem.tags,
-                          )),
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              SvgPicture.asset("assets/icons/calendar.svg",
-                                  height: 50),
-                              Padding(
-                                padding: const EdgeInsets.only(left: 8, top: 4),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      "Дата",
-                                      style: DarkTextTheme.body.copyWith(
-                                          color: DarkThemeColors.deactive),
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      DateFormat.MMMd('ru_RU')
-                                          .format(newsItem.date)
-                                          .toString(),
-                                      style: DarkTextTheme.titleM.copyWith(
-                                          color: DarkThemeColors.colorful02),
-                                    ),
-                                  ],
-                                ),
-                              )
-                            ],
-                          )
-                        ],
-                      ),
+                      _NewsItemInfo(tags: newsItem.tags, date: newsItem.date),
                       Padding(
+                        // News text content
                         padding: const EdgeInsets.symmetric(vertical: 16),
-                        child: MarkdownBody(
-                          styleSheet: MarkdownStyleSheet(
-                            a: DarkTextTheme.body
-                                .copyWith(color: DarkThemeColors.primary),
-                            p: DarkTextTheme.body,
-                            h1: DarkTextTheme.h1,
-                            h2: DarkTextTheme.h2,
-                            h3: DarkTextTheme.h3,
-                            h4: DarkTextTheme.h4,
-                            h5: DarkTextTheme.h5,
-                            h6: DarkTextTheme.h6,
-                          ),
-                          onTapLink: (text, url, title) {
-                            if (url != null) launch(url);
-                          },
+                        child: Html(
                           data: newsItem.text,
+                          style: {
+                            "body": Style(
+                                fontStyle: DarkTextTheme.bodyRegular.fontStyle),
+                          },
+                          customRenders: {
+                            // iframeRenderer to display the YouTube video player
+                            iframeMatcher(): iframeRender(),
+                          },
+                          onLinkTap:
+                              (String? url, context, attributes, element) {
+                            if (url != null) {
+                              launch(url);
+                            }
+                          },
                         ),
                       ),
                     ],
                   ),
                 ),
-                SizedBox(
-                  height: 112,
-                  width: double.infinity,
-                  child: ListView(
-                    scrollDirection: Axis.horizontal,
-                    children: List.generate(
-                      newsItem.images.length,
-                      (index) {
-                        if (index != 0) {
-                          return GestureDetector(
-                            onTap: () {
-                              Navigator.push(context,
-                                  MaterialPageRoute(builder: (_) {
-                                return FullScreenImage(
-                                  imageUrl: newsItem.images[index],
-                                );
-                              }));
-                            },
-                            child: Padding(
-                              padding: const EdgeInsets.only(left: 24),
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(12.0),
-                                child: Image.network(
-                                  newsItem.images[index],
-                                  height: 112,
-                                  width: 158,
-                                  fit: BoxFit.cover,
-                                ),
-                              ),
-                            ),
-                          );
-                        } else {
-                          return Container();
-                        }
-                      },
-                    ),
-                  ),
-                ),
+                ImagesHorizontalSlider(images: newsItem.images),
                 const SizedBox(height: 24),
               ],
             ),
           ),
         ),
       ),
+    );
+  }
+}
+
+/// Tags and date of publication of the news
+class _NewsItemInfo extends StatelessWidget {
+  const _NewsItemInfo({Key? key, required this.tags, required this.date})
+      : super(key: key);
+
+  final List<String> tags;
+  final DateTime date;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Expanded(
+          child: Tags(
+            isClickable: false,
+            withIcon: true,
+            tags: tags,
+          ),
+        ),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            SvgPicture.asset("assets/icons/calendar.svg", height: 50),
+            Padding(
+              padding: const EdgeInsets.only(left: 8, top: 4),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "Дата",
+                    style: DarkTextTheme.body
+                        .copyWith(color: DarkThemeColors.deactive),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    DateFormat.MMMd('ru_RU').format(date).toString(),
+                    style: DarkTextTheme.titleM
+                        .copyWith(color: DarkThemeColors.colorful02),
+                  ),
+                ],
+              ),
+            )
+          ],
+        )
+      ],
     );
   }
 }

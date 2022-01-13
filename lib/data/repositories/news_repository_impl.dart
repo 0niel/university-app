@@ -16,17 +16,19 @@ class NewsRepositoryImpl implements NewsRepository {
   });
 
   @override
-  Future<Either<Failure, List<NewsItem>>> getNews(int offset, int limit,
+  Future<Either<Failure, List<NewsItem>>> getNews(
+      int offset, int limit, bool isImportant,
       [String? tag]) async {
     if (await connectionChecker.hasConnection) {
       try {
-        final newsList = await remoteDataSource.getNews(offset, limit, tag);
+        final newsList =
+            await remoteDataSource.getNews(offset, limit, isImportant, tag);
         return Right(newsList);
       } on ServerException {
-        return Left(ServerFailure());
+        return const Left(const ServerFailure());
       }
     } else {
-      return Left(ServerFailure());
+      return const Left(const ServerFailure());
     }
   }
 
@@ -37,10 +39,10 @@ class NewsRepositoryImpl implements NewsRepository {
         final tagsList = await remoteDataSource.getTags();
         return Right(tagsList);
       } on ServerException {
-        return Left(ServerFailure());
+        return const Left(const ServerFailure());
       }
     } else {
-      return Left(ServerFailure());
+      return const Left(const ServerFailure());
     }
   }
 }
