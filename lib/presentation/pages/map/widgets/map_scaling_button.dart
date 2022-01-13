@@ -22,12 +22,10 @@ class MapScalingButton extends StatelessWidget {
   final Function onClick;
 
   int _calculateScalePercentage() {
-    var result =
-        (((controller.scale ?? defaultScale) * 100 / (maxScale - minScale)) - 5)
-            .round();
-    if (result <= 0) return 0;
-    if (result >= 100) return 100;
-    return result;
+    return (((controller.scale ?? defaultScale) - minScale) *
+            200 /
+            (maxScale - minScale))
+        .round();
   }
 
   @override
