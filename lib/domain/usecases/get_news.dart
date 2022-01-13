@@ -13,17 +13,23 @@ class GetNews extends UseCase<List<NewsItem>, GetNewsParams> {
   @override
   Future<Either<Failure, List<NewsItem>>> call(GetNewsParams params) async {
     return await newsRepository.getNews(
-        params.offset, params.limit, params.tag ?? 'все');
+        params.offset, params.limit, params.isImportant, params.tag);
   }
 }
 
 class GetNewsParams extends Equatable {
   final int offset;
   final int limit;
+  final bool isImportant;
   final String? tag;
 
-  const GetNewsParams({required this.offset, required this.limit, this.tag});
+  const GetNewsParams({
+    required this.offset,
+    required this.limit,
+    required this.isImportant,
+    this.tag,
+  });
 
   @override
-  List<Object?> get props => [offset, limit, tag];
+  List<Object?> get props => [offset, limit, isImportant, tag];
 }

@@ -32,7 +32,7 @@ class StrapiMediaModel extends StrapiMedia {
         height: json["height"],
         formats: FormatsModel.fromJson(json["formats"]),
         size: json["size"].toDouble(),
-        url: 'https://cms.mirea.ninja' + json["url"],
+        url: json["url"],
       );
 
   Map<String, dynamic> toJson() => {
@@ -105,7 +105,7 @@ class StrapiImageModel extends StrapiImage {
 
   factory StrapiImageModel.fromJson(Map<String, dynamic> json) =>
       StrapiImageModel(
-        url: 'https://cms.mirea.ninja' + json["url"],
+        url: json["url"],
         name: json["name"],
         path: json["path"],
         size: json["size"].toDouble(),

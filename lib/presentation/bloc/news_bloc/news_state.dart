@@ -14,6 +14,9 @@ class NewsLoading extends NewsState {
   final List<NewsItem> oldNews;
 
   const NewsLoading({required this.isFirstFetch, required this.oldNews});
+
+  @override
+  List<Object> get props => [isFirstFetch, oldNews];
 }
 
 class NewsLoaded extends NewsState {
@@ -21,6 +24,9 @@ class NewsLoaded extends NewsState {
   final List<String> tags;
 
   const NewsLoaded({required this.news, required this.tags});
+
+  @override
+  List<Object> get props => [news, tags];
 }
 
 class NewsLoadError extends NewsState {}

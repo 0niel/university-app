@@ -10,7 +10,12 @@ abstract class NewsEvent extends Equatable {
 class NewsLoadTagsEvent extends NewsEvent {}
 
 class NewsLoadEvent extends NewsEvent {
+  final bool isImportant;
   final bool? refresh;
+  final String? tag;
 
-  const NewsLoadEvent({this.refresh});
+  const NewsLoadEvent({required this.isImportant, this.refresh, this.tag});
+
+  @override
+  List<Object> get props => [isImportant];
 }
