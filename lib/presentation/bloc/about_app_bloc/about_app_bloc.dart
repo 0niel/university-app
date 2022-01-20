@@ -12,47 +12,47 @@ part 'about_app_state.dart';
 
 class AboutAppBloc extends Bloc<AboutAppEvent, AboutAppState> {
   AboutAppBloc({required this.getContributors, required this.getForumPatrons})
-      : super(AboutAppInitial());
+      : super(AboutAppInitial()) {
+    on<AboutAppGetMembers>(_onAboutAppGetMembers);
+  }
 
   final GetContributors getContributors;
   final GetForumPatrons getForumPatrons;
 
-  @override
-  Stream<AboutAppState> mapEventToState(
-    AboutAppEvent event,
-  ) async* {
-    if (event is AboutAppGetMembers) {
-      bool contributorsLoadError = false;
-      bool patronsLoadError = false;
+  void _onAboutAppGetMembers(
+    AboutAppGetMembers event,
+    Emitter<AboutAppState> emit,
+  ) async {
+    bool contributorsLoadError = false;
+    bool patronsLoadError = false;
 
-      List<Contributor> contributorsList = [];
-      List<ForumMember> patronsList = [];
+    List<Contributor> contributorsList = [];
+    List<ForumMember> patronsList = [];
 
-      yield AboutAppMembersLoading();
-      final contributors = await getContributors();
-      contributors.fold((failure) {
-        contributorsLoadError = true;
-      }, (r) {
-        contributorsList = r;
-      });
+    emit(AboutAppMembersLoading());
+    final contributors = await getContributors();
+    contributors.fold((failure) {
+      contributorsLoadError = true;
+    }, (r) {
+      contributorsList = r;
+    });
 
-      final patrons = await getForumPatrons();
-      patrons.fold((failure) {
-        patronsLoadError = true;
-      }, (r) {
-        patronsList = r;
-      });
+    final patrons = await getForumPatrons();
+    patrons.fold((failure) {
+      patronsLoadError = true;
+    }, (r) {
+      patronsList = r;
+    });
 
-      if (contributorsLoadError && patronsLoadError) {
-        yield const AboutAppMembersLoadError(
-            contributorsLoadError: true, patronsLoadError: true);
-      } else {
-        yield AboutAppMembersLoadError(
-            contributorsLoadError: contributorsLoadError,
-            patronsLoadError: patronsLoadError);
-        yield AboutAppMembersLoaded(
-            patrons: patronsList, contributors: contributorsList);
-      }
+    if (contributorsLoadError && patronsLoadError) {
+      emit(const AboutAppMembersLoadError(
+          contributorsLoadError: true, patronsLoadError: true));
+    } else {
+      emit(AboutAppMembersLoadError(
+          contributorsLoadError: contributorsLoadError,
+          patronsLoadError: patronsLoadError));
+      emit(AboutAppMembersLoaded(
+          patrons: patronsList, contributors: contributorsList));
     }
   }
 }

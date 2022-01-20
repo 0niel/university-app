@@ -12,33 +12,31 @@ part 'home_navigator_event.dart';
 part 'home_navigator_state.dart';
 
 class HomeNavigatorBloc extends Bloc<HomeNavigatorEvent, HomeNavigatorState> {
-  HomeNavigatorBloc() : super(SchedulePage());
+  HomeNavigatorBloc() : super(SchedulePage()) {
+    on<ChangeScreen>(_onChangeScreen);
+  }
 
   int selectedPageIndex = 1;
 
-  @override
-  Stream<HomeNavigatorState> mapEventToState(
-    HomeNavigatorEvent event,
-  ) async* {
-    if (event is ChangeScreen) {
-      if (selectedPageIndex != event.pageIndex) {
-        selectedPageIndex = event.pageIndex;
-        switch (event.routeName) {
-          case ScheduleScreen.routeName:
-            yield SchedulePage();
-            break;
-          case ProfileScreen.routeName:
-            yield ProfilePage();
-            break;
-          case MapScreen.routeName:
-            yield MapPage();
-            break;
-          case NewsScreen.routeName:
-            yield NewsPage();
-            break;
-          default:
-            break;
-        }
+  void _onChangeScreen(
+      ChangeScreen event, Emitter<HomeNavigatorState> emit) async {
+    if (selectedPageIndex != event.pageIndex) {
+      selectedPageIndex = event.pageIndex;
+      switch (event.routeName) {
+        case ScheduleScreen.routeName:
+          emit(SchedulePage());
+          break;
+        case ProfileScreen.routeName:
+          emit(ProfilePage());
+          break;
+        case MapScreen.routeName:
+          emit(MapPage());
+          break;
+        case NewsScreen.routeName:
+          emit(NewsPage());
+          break;
+        default:
+          break;
       }
     }
   }
