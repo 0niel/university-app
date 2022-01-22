@@ -19,18 +19,19 @@ class StoryModel extends Story {
 
   factory StoryModel.fromJson(Map<String, dynamic> json) => StoryModel(
         title: json["title"],
-        publishedAt: DateTime.parse(json["published_at"]),
-        stopShowDate: DateTime.parse(json["stop_show_date"]),
-        author: AuthorModel.fromJson(json["author"]),
+        publishedAt: DateTime.parse(json["publishedAt"]),
+        stopShowDate: DateTime.parse(json["stopShowDate"]),
+        author: AuthorModel.fromJson(json["author"]["data"]["attributes"]),
         pages: List<StoryPageModel>.from(
             json["pages"].map((x) => StoryPageModel.fromJson(x))),
-        preview: StrapiMediaModel.fromJson(json["preview"]),
+        preview:
+            StrapiMediaModel.fromJson(json["preview"]["data"]["attributes"]),
       );
 
   Map<String, dynamic> toJson() => {
         "title": title,
-        "published_at": publishedAt.toIso8601String(),
-        "stop_show_date":
+        "publishedAt": publishedAt.toIso8601String(),
+        "stopShowDate":
             "${stopShowDate.year.toString().padLeft(4, '0')}-${stopShowDate.month.toString().padLeft(2, '0')}-${stopShowDate.day.toString().padLeft(2, '0')}",
         "author": (author as AuthorModel).toJson(),
         "pages": List<dynamic>.from(
@@ -52,7 +53,7 @@ class StoryPageModel extends StoryPage {
         text: json["text"],
         actions: List<StoryPageActionModel>.from(
             json["actions"].map((x) => StoryPageActionModel.fromJson(x))),
-        media: StrapiMediaModel.fromJson(json["media"]),
+        media: StrapiMediaModel.fromJson(json["media"]["data"]["attributes"]),
       );
 
   Map<String, dynamic> toJson() => {
@@ -90,8 +91,8 @@ class AuthorModel extends Author {
 
   factory AuthorModel.fromJson(Map<String, dynamic> json) => AuthorModel(
         name: json["name"],
-        url: 'https://cms.mirea.ninja' + json["url"],
-        logo: StrapiMediaModel.fromJson(json["logo"]),
+        url: json["url"],
+        logo: StrapiMediaModel.fromJson(json["logo"]["data"]["attributes"]),
       );
 
   Map<String, dynamic> toJson() => {
