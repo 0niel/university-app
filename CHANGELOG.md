@@ -10,12 +10,15 @@
 - \[FEATURE REQUEST\] Полное ФИО преподавателей [\#102](https://github.com/Ninja-Official/rtu-mirea-mobile/issues/102)
 - \[FEATURE REQUEST\] Изменение поведения дефиса в поле ввода группы [\#85](https://github.com/Ninja-Official/rtu-mirea-mobile/issues/85)
 - \[FEATURE REQUEST\] Оптимизировать ввод группы с клавиатуры [\#58](https://github.com/Ninja-Official/rtu-mirea-mobile/issues/58)
+- \[FEATURE REQUEST\] Реализация меню тегов во вкладке "Новости" [\#51](https://github.com/Ninja-Official/rtu-mirea-mobile/issues/51)
 - \[FEATURE REQUEST\] Добавить виджеты рабочего стола для Android и iOS [\#40](https://github.com/Ninja-Official/rtu-mirea-mobile/issues/40)
 - \[FEATURE REQUEST\] Страница профиля [\#6](https://github.com/Ninja-Official/rtu-mirea-mobile/issues/6)
 
 **Fixed bugs:**
 
+- \[BUG\] Ошибка загрузки патронов [\#122](https://github.com/Ninja-Official/rtu-mirea-mobile/issues/122)
 - \[BUG\] Скачивание некорректных данных ломает сторис [\#114](https://github.com/Ninja-Official/rtu-mirea-mobile/issues/114)
+- \[BUG\] Некорректное отображение процента масштаба [\#94](https://github.com/Ninja-Official/rtu-mirea-mobile/issues/94)
 
 **Closed issues:**
 
