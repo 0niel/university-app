@@ -90,19 +90,30 @@ class _ProfileAttendancePageState extends State<ProfileAttendancePage> {
                       else if (state is AttendanceLoaded &&
                           state.attendance.isNotEmpty)
                         Expanded(
-                          child: ListView.builder(
-                            itemCount: state.attendance.length,
-                            itemBuilder: (context, index) {
-                              return Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    vertical: 16, horizontal: 24),
-                                child: AttendanceCard(
-                                  type: state.attendance[index].eventType,
-                                  date: state.attendance[index].date,
-                                  time: state.attendance[index].time,
+                          child: Column(
+                            children: [
+                              const SizedBox(height: 8),
+                              Text(
+                                  'Дней посещено: ' +
+                                      state.visitsCount.toString(),
+                                  style: DarkTextTheme.body),
+                              Expanded(
+                                child: ListView.builder(
+                                  itemCount: state.attendance.length,
+                                  itemBuilder: (context, index) {
+                                    return Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: 16, horizontal: 24),
+                                      child: AttendanceCard(
+                                        type: state.attendance[index].eventType,
+                                        date: state.attendance[index].date,
+                                        time: state.attendance[index].time,
+                                      ),
+                                    );
+                                  },
                                 ),
-                              );
-                            },
+                              ),
+                            ],
                           ),
                         ),
                       if (state is AttendanceLoaded && state.attendance.isEmpty)

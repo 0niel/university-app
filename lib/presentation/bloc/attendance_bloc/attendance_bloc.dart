@@ -13,6 +13,28 @@ class AttendanceBloc extends Bloc<AttendanceEvent, AttendanceState> {
     on<LoadAttendance>(_onLoadAttendance);
   }
 
+  int _getVisistsCount(List<Attendance> allVisits) {
+    int count = 0;
+    List<Attendance> visits = [];
+    for (final visit in allVisits) {
+      bool haveThisDay = false;
+
+      // It happens that there are many entrances or many exits in one day
+      for (final visitTmp in visits) {
+        if (visitTmp.date.split(',')[0] == visit.date.split(',')[0]) {
+          haveThisDay = true;
+        }
+      }
+
+      if (haveThisDay == false) {
+        count++;
+        visits.add(visit);
+      }
+    }
+
+    return count;
+  }
+
   void _onLoadAttendance(
       LoadAttendance event, Emitter<AttendanceState> emit) async {
     emit(AttendanceLoading());
@@ -20,7 +42,9 @@ class AttendanceBloc extends Bloc<AttendanceEvent, AttendanceState> {
     final announces = await getAttendance(
         GetAttendanceParams(event.token, event.startDate, event.endDate));
 
-    announces.fold((failure) => emit(AttendanceLoadError()),
-        (result) => emit(AttendanceLoaded(attendance: result)));
+    announces.fold((failure) => emit(AttendanceLoadError()), (result) {
+      emit(AttendanceLoaded(
+          attendance: result, visitsCount: _getVisistsCount(result)));
+    });
   }
 }
