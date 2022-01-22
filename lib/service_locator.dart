@@ -180,7 +180,7 @@ Future<void> setup() async {
 
   // External Dependency
   getIt.registerLazySingleton(
-      () => Dio(BaseOptions(connectTimeout: 5000, receiveTimeout: 7000)));
+      () => Dio(BaseOptions(connectTimeout: 30000, receiveTimeout: 30000)));
   final sharedPreferences = await SharedPreferences.getInstance();
   getIt.registerLazySingleton(() => sharedPreferences);
   getIt.registerLazySingleton(() => InternetConnectionChecker());
