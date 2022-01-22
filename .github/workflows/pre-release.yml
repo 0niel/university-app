@@ -1,0 +1,52 @@
+# This is a basic workflow to help you get started with Actions
+
+name: Build pre-release 
+
+# Controls when the workflow will run
+on:
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - name: Export Release Timestamp
+        run: echo "APP_VERSION=v$(date +'%Y.%m.%d.%H.%M.%S')" >> $GITHUB_ENV
+      - uses: actions/checkout@v2
+      - name: Set up Java
+        uses: actions/setup-java@v2
+        with:
+          java-version: '15'
+          distribution: 'adopt'
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '2.8.1'
+      - run: flutter pub get
+      - name: Run Tests
+        run: flutter test
+      - name: Build Android App
+        run: flutter build apk --split-per-abi
+      - name: Build iOS App
+        run: |
+          flutter build ios --no-codesign
+          cd build/ios/iphoneos
+          mkdir Payload
+          cd Payload
+          ln -s ../Runner.app
+          cd ..
+          zip -r app.ipa Payload
+      - name: Build Web App
+        run: |
+          flutter build web
+          cd build/web
+          zip -r web-app.zip .
+      - name: Release Apps
+        uses: ncipollo/release-action@v1
+        with:
+          prerelease: true
+          tag: ${{ env.APP_VERSION }}
+          name: ${{ env.APP_VERSION }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          artifacts: 'build/app/outputs/apk/release/*.apk,build/ios/iphoneos/app.ipa,build/web/web-app.zip'
