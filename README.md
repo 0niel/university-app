@@ -35,6 +35,21 @@ flutter build appbundle
 flutter doctor
 ```
 
+## При ошибках
+**Исключения платформы**
+1. flutter clean
+2. flutter pub get
+3. flutter run
+
+**Любое исключение пакета (зависимости)**
+- Удалите pubspec.lock файл
+
+Выполните следующие команды:
+1. flutter clean
+2. flutter pub cache repair
+3. flutter pub get
+4. flutter run
+
 # Установка
 Следить за актуальностью приложения и скачать готовый билд вы можете на [странице релизов](https://github.com/Ninja-Official/rtu-mirea-mobile/releases) этого репозитория.
 
