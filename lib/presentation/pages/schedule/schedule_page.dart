@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_inner_drawer/inner_drawer.dart';
@@ -11,15 +10,14 @@ import 'package:rtu_mirea_app/presentation/widgets/settings_switch_button.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'widgets/schedule_page_view.dart';
 
-class ScheduleScreen extends StatefulWidget {
-  static const String routeName = '/schedule';
-  const ScheduleScreen({Key? key}) : super(key: key);
+class SchedulePage extends StatefulWidget {
+  const SchedulePage({Key? key}) : super(key: key);
 
   @override
-  _ScheduleScreenState createState() => _ScheduleScreenState();
+  _SchedulePageState createState() => _SchedulePageState();
 }
 
-class _ScheduleScreenState extends State<ScheduleScreen> {
+class _SchedulePageState extends State<SchedulePage> {
   bool _modalShown = false;
 
   //  Current State of InnerDrawerState
@@ -307,12 +305,14 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
             'Расписание',
             style: DarkTextTheme.title,
           ),
+          backgroundColor: DarkThemeColors.background01,
           actions: [
             IconButton(
-                icon: const Icon(Icons.dehaze),
-                onPressed: () {
-                  _innerDrawerKey.currentState!.toggle();
-                }),
+              icon: const Icon(Icons.dehaze),
+              onPressed: () {
+                _innerDrawerKey.currentState!.toggle();
+              },
+            ),
           ],
         ),
         body: SafeArea(

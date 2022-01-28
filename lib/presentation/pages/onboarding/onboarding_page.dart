@@ -1,25 +1,22 @@
-import 'dart:ui';
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/onboarding_cubit/onboarding_cubit.dart';
 import 'package:rtu_mirea_app/presentation/colors.dart';
-import 'package:rtu_mirea_app/presentation/pages/home/home_navigator_screen.dart';
+import 'package:rtu_mirea_app/presentation/core/routes/routes.gr.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 
 import 'widgets/indicator.dart';
 import 'widgets/next_button.dart';
 
 /// OnBoarding screen that greets new users
-class OnBoardingScreen extends StatefulWidget {
-  static const String routeName = '/onboarding';
-
-  const OnBoardingScreen({Key? key}) : super(key: key);
+class OnBoardingPage extends StatefulWidget {
+  const OnBoardingPage({Key? key}) : super(key: key);
   @override
-  _OnBoardingScreenState createState() => _OnBoardingScreenState();
+  _OnBoardingPageState createState() => _OnBoardingPageState();
 }
 
-class _OnBoardingScreenState extends State<OnBoardingScreen> {
+class _OnBoardingPageState extends State<OnBoardingPage> {
   final int _numPages = 4;
 
   /// Main images
@@ -171,15 +168,8 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
                     isLastPage
                         ? Container()
                         : InkWell(
-                            onTap: () {
-                              Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) =>
-                                        const HomeNavigatorScreen(
-                                            isFirstRun: true)),
-                              );
-                            },
+                            onTap: () =>
+                                context.router.replace(const HomeRoute()),
                             child: Text(
                               "Пропустить",
                               style: DarkTextTheme.buttonS,

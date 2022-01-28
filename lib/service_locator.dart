@@ -49,7 +49,6 @@ import 'package:rtu_mirea_app/presentation/bloc/announces_bloc/announces_bloc.da
 import 'package:rtu_mirea_app/presentation/bloc/attendance_bloc/attendance_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/auth_bloc/auth_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/employee_bloc/employee_bloc.dart';
-import 'package:rtu_mirea_app/presentation/bloc/home_navigator_bloc/home_navigator_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/map_cubit/map_cubit.dart';
 import 'package:rtu_mirea_app/presentation/bloc/news_bloc/news_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/onboarding_cubit/onboarding_cubit.dart';
@@ -79,7 +78,6 @@ Future<void> setup() async {
   getIt.registerFactory(() => NewsBloc(getNews: getIt(), getNewsTags: getIt()));
   getIt.registerFactory(
       () => AboutAppBloc(getContributors: getIt(), getForumPatrons: getIt()));
-  getIt.registerFactory(() => HomeNavigatorBloc());
   getIt.registerFactory(() => OnboardingCubit());
   getIt.registerFactory(() => MapCubit());
   getIt.registerFactory(() => AuthBloc(

@@ -1,3 +1,4 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:dismissible_page/dismissible_page.dart';
 import 'package:flutter/material.dart';
 import 'package:rtu_mirea_app/domain/entities/story.dart';
@@ -18,7 +19,7 @@ class StoriesWrapper extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DismissiblePage(
-      onDismiss: () => Navigator.of(context).pop(),
+      onDismiss: () => context.router.pop(),
       isFullScreen: false,
       direction: DismissDirection.vertical,
       child: Material(
@@ -111,9 +112,7 @@ class StoriesWrapper extends StatelessWidget {
                           padding: EdgeInsets.zero,
                           color: Colors.white,
                           icon: const Icon(Icons.close),
-                          onPressed: () {
-                            Navigator.pop(context);
-                          },
+                          onPressed: () => context.router.pop(),
                         ),
                       ),
                     ),
@@ -150,9 +149,7 @@ class StoriesWrapper extends StatelessWidget {
             storyLength: (int pageIndex) {
               return stories[pageIndex].pages.length;
             },
-            onPageLimitReached: () {
-              Navigator.pop(context);
-            },
+            onPageLimitReached: () => context.router.pop(),
           ),
         ),
       ),

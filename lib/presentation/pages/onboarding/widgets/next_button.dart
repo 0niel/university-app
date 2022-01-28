@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:rtu_mirea_app/presentation/colors.dart';
-import 'package:rtu_mirea_app/presentation/pages/home/home_navigator_screen.dart';
+import 'package:rtu_mirea_app/presentation/pages/home_page.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 
 /// Get next button to open next page
@@ -18,12 +18,11 @@ class NextPageViewButton extends StatelessWidget {
     return ElevatedButton(
       onPressed: () {
         if (isLastPage) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-                builder: (context) =>
-                    const HomeNavigatorScreen(isFirstRun: true)),
-          );
+          // Navigator.pushReplacement(
+          //   context,
+          //   MaterialPageRoute(
+          //       builder: (context) => HomePage(isFirstRun: true)),
+          // );
         } else {
           onClick();
         }
