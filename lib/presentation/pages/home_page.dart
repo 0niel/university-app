@@ -1,8 +1,9 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:rtu_mirea_app/presentation/bloc/app_cubit/cubit/app_cubit.dart';
 import 'package:rtu_mirea_app/presentation/colors.dart';
 import 'package:rtu_mirea_app/presentation/core/routes/routes.gr.dart';
-
 import 'package:salomon_bottom_bar/salomon_bottom_bar.dart';
 
 class HomePage extends StatelessWidget {
@@ -10,38 +11,49 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AutoTabsRouter(
-      routes: const [
-        NewsRouter(),
-        ScheduleRoute(),
-        MapRoute(),
-        ProfileRouter()
-      ],
-      homeIndex: 2,
-      builder: (context, child, animation) {
-        final tabsRouter = AutoTabsRouter.of(context);
-
-        return Column(
-          children: [
-            Expanded(
-              child: FadeTransition(
-                opacity: animation,
-                child: child,
-              ),
-            ),
-            Container(
-              decoration: const BoxDecoration(
-                color: DarkThemeColors.background01,
-              ),
-              child: AppBottomNavigationBar(
-                index: tabsRouter.activeIndex,
-                onClick: tabsRouter.setActiveIndex,
-              ),
-            ),
+    return BlocConsumer<AppCubit, AppState>(builder: (context, state) {
+      if (state is AppClean) {
+        return AutoTabsRouter(
+          routes: const [
+            NewsRouter(),
+            ScheduleRoute(),
+            MapRoute(),
+            ProfileRouter()
           ],
+          homeIndex: 2,
+          builder: (context, child, animation) {
+            final tabsRouter = AutoTabsRouter.of(context);
+
+            return Column(
+              children: [
+                Expanded(
+                  child: FadeTransition(
+                    opacity: animation,
+                    child: child,
+                  ),
+                ),
+                Container(
+                  decoration: const BoxDecoration(
+                    color: DarkThemeColors.background01,
+                  ),
+                  child: AppBottomNavigationBar(
+                    index: tabsRouter.activeIndex,
+                    onClick: tabsRouter.setActiveIndex,
+                  ),
+                ),
+              ],
+            );
+          },
         );
-      },
-    );
+      }
+
+      context.read<AppCubit>().checkOnboarding();
+      return Container();
+    }, listener: (context, state) {
+      if (state is AppOnboarding) {
+        context.router.replace(const OnBoardingRoute());
+      }
+    });
   }
 }
 

@@ -6,36 +6,33 @@ import 'package:rtu_mirea_app/common/widget_data_init.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:rtu_mirea_app/presentation/bloc/about_app_bloc/about_app_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/announces_bloc/announces_bloc.dart';
+import 'package:rtu_mirea_app/presentation/bloc/app_cubit/cubit/app_cubit.dart';
 import 'package:rtu_mirea_app/presentation/bloc/attendance_bloc/attendance_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/auth_bloc/auth_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/employee_bloc/employee_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/map_cubit/map_cubit.dart';
 import 'package:rtu_mirea_app/presentation/bloc/news_bloc/news_bloc.dart';
-import 'package:rtu_mirea_app/presentation/bloc/onboarding_cubit/onboarding_cubit.dart';
 import 'package:rtu_mirea_app/presentation/bloc/profile_bloc/profile_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/schedule_bloc/schedule_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/scores_bloc/scores_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/stories_bloc/stories_bloc.dart';
 import 'package:rtu_mirea_app/presentation/core/routes/routes.gr.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl_standalone.dart';
 import 'package:rtu_mirea_app/service_locator.dart' as dependency_injection;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_strategy/url_strategy.dart';
 import 'service_locator.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dependency_injection.setup();
-  // var prefs = getIt<SharedPreferences>();
-  // const String onboardingKey = 'show_onboarding';
-  // bool showOnboarding = prefs.getBool(onboardingKey) ?? true;
-  // if (showOnboarding) prefs.setBool(onboardingKey, false);
 
   WidgetDataProvider.initData();
 
   // to debug:
-  //await prefs.clear();
+  // var prefs = getIt<SharedPreferences>();
+  // await prefs.clear();
 
   setPathUrlStrategy();
 
@@ -64,8 +61,6 @@ class App extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider<ScheduleBloc>(create: (context) => getIt<ScheduleBloc>()),
-        BlocProvider<OnboardingCubit>(
-            create: (context) => getIt<OnboardingCubit>()),
         BlocProvider<MapCubit>(create: (context) => getIt<MapCubit>()),
         BlocProvider<NewsBloc>(create: (context) => getIt<NewsBloc>()),
         BlocProvider<AboutAppBloc>(
@@ -81,6 +76,7 @@ class App extends StatelessWidget {
         BlocProvider<AttendanceBloc>(
             create: (context) => getIt<AttendanceBloc>()),
         BlocProvider<StoriesBloc>(create: (context) => getIt<StoriesBloc>()),
+        BlocProvider<AppCubit>(create: (context) => getIt<AppCubit>()),
       ],
       child: AdaptiveTheme(
         light: lightTheme,
