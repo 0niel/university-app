@@ -6,7 +6,7 @@ import 'package:rtu_mirea_app/common/widget_data_init.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:rtu_mirea_app/presentation/bloc/about_app_bloc/about_app_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/announces_bloc/announces_bloc.dart';
-import 'package:rtu_mirea_app/presentation/bloc/app_cubit/cubit/app_cubit.dart';
+import 'package:rtu_mirea_app/presentation/bloc/app_cubit/app_cubit.dart';
 import 'package:rtu_mirea_app/presentation/bloc/attendance_bloc/attendance_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/auth_bloc/auth_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/employee_bloc/employee_bloc.dart';
@@ -60,7 +60,9 @@ class App extends StatelessWidget {
 
     return MultiBlocProvider(
       providers: [
-        BlocProvider<ScheduleBloc>(create: (context) => getIt<ScheduleBloc>()),
+        BlocProvider<ScheduleBloc>(
+            create: (context) =>
+                getIt<ScheduleBloc>()..add(ScheduleOpenEvent())),
         BlocProvider<MapCubit>(create: (context) => getIt<MapCubit>()),
         BlocProvider<NewsBloc>(create: (context) => getIt<NewsBloc>()),
         BlocProvider<AboutAppBloc>(

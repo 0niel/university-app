@@ -1,6 +1,6 @@
 import 'package:auto_route/auto_route.dart';
-import 'package:rtu_mirea_app/presentation/pages/auth/login_page.dart';
 import 'package:rtu_mirea_app/presentation/pages/home_page.dart';
+import 'package:rtu_mirea_app/presentation/pages/login/login_page.dart';
 import 'package:rtu_mirea_app/presentation/pages/map/map_page.dart';
 import 'package:rtu_mirea_app/presentation/pages/news/news_details_page.dart';
 import 'package:rtu_mirea_app/presentation/pages/news/news_page.dart';
@@ -55,6 +55,10 @@ import 'package:rtu_mirea_app/presentation/pages/schedule/schedule_page.dart';
               page: ProfilePage,
             ),
             AutoRoute(
+              path: 'login',
+              page: LoginPage,
+            ),
+            AutoRoute(
               path: 'about',
               page: AboutAppPage,
             ),
@@ -81,10 +85,6 @@ import 'package:rtu_mirea_app/presentation/pages/schedule/schedule_page.dart';
           ],
         ),
       ],
-    ),
-    AutoRoute(
-      path: '/login',
-      page: LoginPage,
     ),
     AutoRoute(path: '/onboarding', page: OnBoardingPage),
     RedirectRoute(path: '*', redirectTo: '/'),
