@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/auth_bloc/auth_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/scores_bloc/scores_bloc.dart';
+import 'package:rtu_mirea_app/presentation/colors.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:rtu_mirea_app/presentation/widgets/buttons/primary_tab_button.dart';
 
@@ -19,11 +20,10 @@ class _ProfileScoresPageState extends State<ProfileScoresPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          'Зачетная книжка',
-          style: DarkTextTheme.title,
-        ),
+        title: const Text("Детали профиля"),
+        backgroundColor: DarkThemeColors.background01,
       ),
+      backgroundColor: DarkThemeColors.background01,
       body: SafeArea(
         child: BlocBuilder<AuthBloc, AuthState>(
           builder: (context, authState) {

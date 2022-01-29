@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/attendance_bloc/attendance_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/auth_bloc/auth_bloc.dart';
+import 'package:rtu_mirea_app/presentation/colors.dart';
 import 'package:rtu_mirea_app/presentation/pages/profile/widgets/attendance_card.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:intl/intl.dart';
@@ -37,11 +38,10 @@ class _ProfileAttendancePageState extends State<ProfileAttendancePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          'Посещения',
-          style: DarkTextTheme.title,
-        ),
+        title: const Text("Посещаемость"),
+        backgroundColor: DarkThemeColors.background01,
       ),
+      backgroundColor: DarkThemeColors.background01,
       body: SafeArea(
         child: BlocBuilder<AuthBloc, AuthState>(
           builder: (context, authState) {

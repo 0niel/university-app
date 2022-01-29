@@ -2,7 +2,7 @@ import 'package:clock/clock.dart';
 
 abstract class Calendar {
   /// Maximum number of academic weeks per semester
-  static const int kMaxWeekInSemester = 16;
+  static const int kMaxWeekInSemester = 17;
 
   /// Returns the current day of the week, where 1 is Mon, 7 is Sun
   static int getCurrentDayOfWeek({final Clock clock = const Clock()}) {

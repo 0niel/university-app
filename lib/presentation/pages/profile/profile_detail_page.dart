@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:rtu_mirea_app/domain/entities/user.dart';
+import 'package:rtu_mirea_app/presentation/colors.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:rtu_mirea_app/presentation/widgets/badged_container.dart';
 import 'package:rtu_mirea_app/presentation/widgets/copy_text_block.dart';
@@ -17,11 +18,10 @@ class ProfileDetailPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          'Детали профиля',
-          style: DarkTextTheme.title,
-        ),
+        title: const Text("Детали профиля"),
+        backgroundColor: DarkThemeColors.background01,
       ),
+      backgroundColor: DarkThemeColors.background01,
       body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(

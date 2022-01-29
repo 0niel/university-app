@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -13,11 +14,16 @@ import 'widgets/news_item.dart';
 import 'widgets/story_item.dart';
 import 'widgets/tags_widgets.dart';
 
-class NewsScreen extends StatelessWidget {
-  NewsScreen({Key? key}) : super(key: key);
+class NewsPage extends StatefulWidget {
+  const NewsPage({Key? key}) : super(key: key);
 
-  static const String routeName = '/news';
+  @override
+  State<NewsPage> createState() => _NewsPageState();
+}
+
+class _NewsPageState extends State<NewsPage> {
   final _scrollController = ScrollController();
+
   final ValueNotifier<int> _tabValueNotifier = ValueNotifier(0);
 
   void _filterNewsByTag(NewsBloc bloc, String tag) {
@@ -41,9 +47,8 @@ class NewsScreen extends StatelessWidget {
             padding:
                 const EdgeInsets.only(top: 4, bottom: 16, left: 24, right: 24),
             child: BlocConsumer<NewsBloc, NewsState>(
-              listener: (context, state) => state.runtimeType != NewsLoaded
-                  ? Navigator.of(context).pop()
-                  : null,
+              listener: (context, state) =>
+                  state.runtimeType != NewsLoaded ? context.router.pop() : null,
               buildWhen: (previous, current) => (current is NewsLoaded),
               builder: (context, state) {
                 return Tags(
@@ -109,6 +114,7 @@ class NewsScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Новости"),
+        backgroundColor: DarkThemeColors.background01,
       ),
       backgroundColor: DarkThemeColors.background01,
       body: RefreshIndicator(

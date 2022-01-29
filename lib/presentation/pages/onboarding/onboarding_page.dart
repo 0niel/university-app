@@ -1,26 +1,24 @@
-import 'dart:ui';
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:rtu_mirea_app/presentation/bloc/onboarding_cubit/onboarding_cubit.dart';
+import 'package:provider/provider.dart';
+import 'package:rtu_mirea_app/presentation/bloc/app_cubit/app_cubit.dart';
 import 'package:rtu_mirea_app/presentation/colors.dart';
-import 'package:rtu_mirea_app/presentation/pages/home/home_navigator_screen.dart';
+import 'package:rtu_mirea_app/presentation/core/routes/routes.gr.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 
 import 'widgets/indicator.dart';
 import 'widgets/next_button.dart';
 
 /// OnBoarding screen that greets new users
-class OnBoardingScreen extends StatefulWidget {
-  static const String routeName = '/onboarding';
-
-  const OnBoardingScreen({Key? key}) : super(key: key);
+class OnBoardingPage extends StatefulWidget {
+  const OnBoardingPage({Key? key}) : super(key: key);
   @override
-  _OnBoardingScreenState createState() => _OnBoardingScreenState();
+  _OnBoardingPageState createState() => _OnBoardingPageState();
 }
 
-class _OnBoardingScreenState extends State<OnBoardingScreen> {
-  final int _numPages = 4;
+class _OnBoardingPageState extends State<OnBoardingPage> {
+  final int _numPages = 3;
 
   /// Main images
   static const List<Image> containersImages = [
@@ -44,11 +42,11 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
     //   height: 375.0,
     //   width: 315.0,
     // ),
-    Image(
-      image: AssetImage('assets/images/Saly-5.png'),
-      height: 315.0,
-      width: 315.0,
-    ),
+    // Image(
+    //   image: AssetImage('assets/images/Saly-5.png'),
+    //   height: 315.0,
+    //   width: 315.0,
+    // ),
   ];
 
   static const List titlesTexts = [
@@ -56,7 +54,7 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
     'Смотри расписание!',
     'Будь в курсе, не надевая штаны!',
     // 'Ставь цели!',
-    'Коммуницируй!',
+    //'Коммуницируй!',
   ];
 
   /// Bottom text strings
@@ -65,7 +63,7 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
     'Как же легко, оказывается, можно смотреть расписание, а главное – быстро',
     'Иногда так лень заходить на сайт и искать нужную тебе информацию, мы это исправили',
     // 'Как же много дедлайнов!? Создавать дедлайны теперь как никогда просто и удобно',
-    'Слово сложное, но на деле всё легко. Общайся и делись материалами с другими группами мгновенно',
+    //'Слово сложное, но на деле всё легко. Общайся и делись материалами с другими группами мгновенно',
   ];
 
   /// Top padding for every image
@@ -89,16 +87,7 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
   /// Page controller, that will execute Cubit method
   final PageController _pageController = PageController(initialPage: 0);
 
-  /// Build indicators depending on current opened page
-  List<Widget> _buildPageIndicators(int _currentPage) {
-    List<Widget> list = [];
-    for (int i = 0; i < _numPages; i++) {
-      list.add(i == _currentPage
-          ? const IndicatorPageView(isActive: true)
-          : const IndicatorPageView(isActive: false));
-    }
-    return list;
-  }
+  int _currentPage = 0;
 
   /// Build block with image and texts
   List<Widget> _buildPageView() {
@@ -143,7 +132,19 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
 
   @override
   Widget build(BuildContext context) {
-    OnboardingCubit cubit = BlocProvider.of<OnboardingCubit>(context);
+    GlobalKey<_PageIndicatorsState> pageStateKey = GlobalKey();
+
+    final Widget pageIndicator = PageIndicators(
+      key: pageStateKey,
+      onClick: () {
+        _pageController.nextPage(
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.ease,
+        );
+      },
+      dotsNum: _numPages,
+    );
+
     return Scaffold(
       backgroundColor: DarkThemeColors.background01,
       body: SafeArea(
@@ -155,52 +156,83 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
                 allowImplicitScrolling: true,
                 physics: const ClampingScrollPhysics(),
                 controller: _pageController,
-                onPageChanged: (int page) => cubit.swipe(page),
+                onPageChanged: (int page) {
+                  _currentPage = page;
+                  pageStateKey.currentState!.updateWith(_currentPage);
+                },
                 children: _buildPageView(),
               ),
             ),
-            BlocBuilder<OnboardingCubit, int>(builder: (context, state) {
-              bool isLastPage = cubit.state == _numPages - 1;
-              return Padding(
-                padding: const EdgeInsets.only(
-                    bottom: 35.0, left: 20.0, right: 20.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    isLastPage
-                        ? Container()
-                        : InkWell(
-                            onTap: () {
-                              Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) =>
-                                        const HomeNavigatorScreen(
-                                            isFirstRun: true)),
-                              );
-                            },
-                            child: Text(
-                              "Пропустить",
-                              style: DarkTextTheme.buttonS,
-                            ),
-                          ),
-                    Row(
-                      children: _buildPageIndicators(state),
-                    ),
-                    NextPageViewButton(
-                      isLastPage: isLastPage,
-                      onClick: () => _pageController.nextPage(
-                        duration: const Duration(milliseconds: 300),
-                        curve: Curves.ease,
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            }),
+            pageIndicator,
           ],
         ),
+      ),
+    );
+  }
+}
+
+class PageIndicators extends StatefulWidget {
+  const PageIndicators({
+    Key? key,
+    required this.onClick,
+    required this.dotsNum,
+  }) : super(key: key);
+
+  final VoidCallback onClick;
+  final int dotsNum;
+
+  @override
+  State<PageIndicators> createState() => _PageIndicatorsState();
+}
+
+class _PageIndicatorsState extends State<PageIndicators> {
+  /// Build indicators depending on current opened page
+  List<Widget> _buildPageIndicators(int _currentPage) {
+    List<Widget> list = [];
+    for (int i = 0; i < widget.dotsNum; i++) {
+      list.add(i == _currentPage
+          ? const IndicatorPageView(isActive: true)
+          : const IndicatorPageView(isActive: false));
+    }
+    return list;
+  }
+
+  int _currentPage = 0;
+
+  void updateWith(int value) {
+    setState(() {
+      _currentPage = value;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 35.0, left: 20.0, right: 20.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          widget.dotsNum - 1 == _currentPage
+              ? Container()
+              : InkWell(
+                  onTap: () {
+                    context.read<AppCubit>().closeOnboarding();
+                    context.router.replace(const HomeRoute());
+                  },
+                  child: Text(
+                    "Пропустить",
+                    style: DarkTextTheme.buttonS,
+                  ),
+                ),
+          Row(
+            children: _buildPageIndicators(_currentPage),
+          ),
+          NextPageViewButton(
+            isLastPage: widget.dotsNum - 1 == _currentPage,
+            onClick: widget.onClick,
+          ),
+        ],
       ),
     );
   }

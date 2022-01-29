@@ -1,6 +1,9 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/src/provider.dart';
+import 'package:rtu_mirea_app/presentation/bloc/app_cubit/app_cubit.dart';
 import 'package:rtu_mirea_app/presentation/colors.dart';
-import 'package:rtu_mirea_app/presentation/pages/home/home_navigator_screen.dart';
+import 'package:rtu_mirea_app/presentation/core/routes/routes.gr.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 
 /// Get next button to open next page
@@ -18,12 +21,8 @@ class NextPageViewButton extends StatelessWidget {
     return ElevatedButton(
       onPressed: () {
         if (isLastPage) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-                builder: (context) =>
-                    const HomeNavigatorScreen(isFirstRun: true)),
-          );
+          context.read<AppCubit>().closeOnboarding();
+          context.router.replace(const HomeRoute());
         } else {
           onClick();
         }

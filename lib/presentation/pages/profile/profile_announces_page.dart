@@ -12,11 +12,10 @@ class ProfileAnnouncesPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          'Объявления',
-          style: DarkTextTheme.title,
-        ),
+        title: const Text("Объявления"),
+        backgroundColor: DarkThemeColors.background01,
       ),
+      backgroundColor: DarkThemeColors.background01,
       body: SafeArea(
         child: BlocBuilder<AnnouncesBloc, AnnouncesState>(
             builder: (context, state) {

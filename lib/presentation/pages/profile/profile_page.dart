@@ -1,42 +1,33 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/announces_bloc/announces_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/auth_bloc/auth_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/profile_bloc/profile_bloc.dart';
 import 'package:rtu_mirea_app/presentation/colors.dart';
-import 'package:rtu_mirea_app/presentation/pages/auth/auth_screen.dart';
-import 'package:rtu_mirea_app/presentation/pages/profile/about_app_page.dart';
-import 'package:rtu_mirea_app/presentation/pages/profile/profile_announces_page.dart';
-import 'package:rtu_mirea_app/presentation/pages/profile/profile_attendance_page.dart';
-import 'package:rtu_mirea_app/presentation/pages/profile/profile_detail_page.dart';
-import 'package:rtu_mirea_app/presentation/pages/profile/profile_lectors_page.dart';
-import 'package:rtu_mirea_app/presentation/pages/profile/profile_scores_page.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:rtu_mirea_app/presentation/widgets/buttons/colorful_button.dart';
 import 'package:rtu_mirea_app/presentation/widgets/buttons/settings_button.dart';
 import 'package:rtu_mirea_app/presentation/widgets/buttons/text_outlined_button.dart';
 import 'package:rtu_mirea_app/presentation/widgets/container_label.dart';
+import 'package:rtu_mirea_app/presentation/core/routes/routes.gr.dart';
 
-class ProfileScreen extends StatefulWidget {
-  static const String routeName = '/profile';
-
-  const ProfileScreen({Key? key}) : super(key: key);
+class ProfilePage extends StatefulWidget {
+  const ProfilePage({Key? key}) : super(key: key);
 
   @override
-  State<ProfileScreen> createState() => _ProfileScreenState();
+  State<ProfilePage> createState() => _ProfilePageState();
 }
 
-class _ProfileScreenState extends State<ProfileScreen> {
+class _ProfilePageState extends State<ProfilePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        automaticallyImplyLeading: false,
-        title: Text(
-          'Профиль',
-          style: DarkTextTheme.title,
-        ),
+        title: const Text("Профиль"),
+        backgroundColor: DarkThemeColors.background01,
       ),
+      backgroundColor: DarkThemeColors.background01,
       body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(
@@ -83,14 +74,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           TextOutlinedButton(
                               content: "Просмотр профиля",
                               width: 200,
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => ProfileDetailPage(
-                                          user: profileState.user)),
-                                );
-                              }),
+                              onPressed: () => context.router.push(
+                                  ProfileDetailRoute(user: profileState.user))),
                           const SizedBox(height: 40),
                           const ContainerLabel(label: "Информация"),
                           const SizedBox(height: 20),
@@ -101,12 +86,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 context
                                     .read<AnnouncesBloc>()
                                     .add(LoadAnnounces(token: state.token));
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) =>
-                                          const ProfileAnnouncesPage()),
-                                );
+                                context.router
+                                    .push(const ProfileAnnouncesRoute());
                               }),
                           // const SizedBox(height: 8),
                           // SettingsButton(
@@ -115,58 +96,36 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           //     onClick: () {}),
                           const SizedBox(height: 8),
                           SettingsButton(
-                              text: 'Преподаватели',
-                              icon: Icons.people_alt_rounded,
-                              onClick: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) =>
-                                          const ProfileLectrosPage()),
-                                );
-                              }),
+                            text: 'Преподаватели',
+                            icon: Icons.people_alt_rounded,
+                            onClick: () => context.router
+                                .push(const ProfileLectrosRoute()),
+                          ),
                           const SizedBox(height: 8),
                           SettingsButton(
-                              text: 'Посещения',
-                              icon: Icons.access_time_rounded,
-                              onClick: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) =>
-                                          const ProfileAttendancePage()),
-                                );
-                              }),
+                            text: 'Посещения',
+                            icon: Icons.access_time_rounded,
+                            onClick: () => context.router
+                                .push(const ProfileAttendanceRoute()),
+                          ),
                           const SizedBox(height: 8),
                           SettingsButton(
                               text: 'Зачетная книжка',
                               icon: Icons.menu_book_rounded,
-                              onClick: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) =>
-                                          const ProfileScoresPage()),
-                                );
-                              }),
+                              onClick: () => context.router
+                                  .push(const ProfileScoresRoute())),
                           const SizedBox(height: 8),
                           SettingsButton(
                             text: 'О приложении',
                             icon: Icons.apps_rounded,
-                            onClick: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => const AboutAppPage()),
-                              );
-                            },
+                            onClick: () =>
+                                context.router.push(const AboutAppRoute()),
                           ),
                           const SizedBox(height: 8),
                           ColorfulButton(
                               text: 'Выйти',
-                              onClick: () {
-                                context.read<AuthBloc>().add(AuthLogOut());
-                              },
+                              onClick: () =>
+                                  context.read<AuthBloc>().add(AuthLogOut()),
                               backgroundColor: DarkThemeColors.colorful07),
                         ],
                       );
@@ -181,24 +140,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ColorfulButton(
                           text: 'Войти',
                           onClick: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => const AuthScreen()),
-                            );
+                            context.router.push(const LoginRoute());
                           },
                           backgroundColor: DarkThemeColors.colorful03),
                       const SizedBox(height: 8),
                       SettingsButton(
                         text: 'О приложении',
                         icon: Icons.apps_rounded,
-                        onClick: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => const AboutAppPage()),
-                          );
-                        },
+                        onClick: () =>
+                            context.router.push(const AboutAppRoute()),
                       ),
                     ],
                   );

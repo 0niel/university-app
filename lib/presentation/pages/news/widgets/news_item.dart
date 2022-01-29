@@ -1,9 +1,10 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
 import 'package:rtu_mirea_app/domain/entities/news_item.dart';
 import 'package:intl/intl.dart';
 import 'package:rtu_mirea_app/presentation/colors.dart';
-import 'package:rtu_mirea_app/presentation/pages/news/news_details_page.dart';
+import 'package:rtu_mirea_app/presentation/core/routes/routes.gr.dart';
 import 'package:rtu_mirea_app/presentation/pages/news/widgets/tags_widgets.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:shimmer/shimmer.dart';
@@ -18,14 +19,9 @@ class NewsItemWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => NewsDetailsPage(newsItem: newsItem),
-          ),
-        );
-      },
+      onTap: () => context.router.push(NewsDetailsRoute(
+        newsItem: newsItem,
+      )),
       child: Container(
         margin: const EdgeInsets.only(bottom: 24, left: 16, right: 16),
         width: MediaQuery.of(context).size.width,

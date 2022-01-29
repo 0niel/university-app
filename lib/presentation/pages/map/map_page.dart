@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
@@ -14,16 +13,14 @@ import 'package:implicitly_animated_reorderable_list/transitions.dart';
 import 'widgets/map_navigation_button.dart';
 import 'widgets/search_item_button.dart';
 
-class MapScreen extends StatefulWidget {
-  static const String routeName = '/map';
-
-  const MapScreen({Key? key}) : super(key: key);
+class MapPage extends StatefulWidget {
+  const MapPage({Key? key}) : super(key: key);
 
   @override
-  State<StatefulWidget> createState() => _MapScreenState();
+  State<StatefulWidget> createState() => _MapPageState();
 }
 
-class _MapScreenState extends State<MapScreen> {
+class _MapPageState extends State<MapPage> {
   @override
   void initState() {
     super.initState();
