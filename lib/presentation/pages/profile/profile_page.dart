@@ -131,7 +131,10 @@ class _ProfilePageState extends State<ProfilePage> {
                         ],
                       );
                     } else if (profileState is ProfileLoading) {
-                      return const Center(child: CircularProgressIndicator());
+                      return SizedBox(
+                          height: MediaQuery.of(context).size.height,
+                          child:
+                              const Center(child: CircularProgressIndicator()));
                     }
                     return Container();
                   });
@@ -154,7 +157,9 @@ class _ProfilePageState extends State<ProfilePage> {
                     ],
                   );
                 } else if (state is AuthUnknown) {
-                  return const Center(child: CircularProgressIndicator());
+                  return SizedBox(
+                      height: MediaQuery.of(context).size.height,
+                      child: const Center(child: CircularProgressIndicator()));
                 }
                 return Container();
               },
