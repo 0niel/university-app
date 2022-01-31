@@ -10,7 +10,7 @@ class GetContributors extends UseCase<List<Contributor>, void> {
   GetContributors(this.githubRepository);
 
   @override
-  Future<Either<Failure, List<Contributor>>> call([_]) async {
+  Future<Either<Failure, List<Contributor>>> call([params]) async {
     return await githubRepository.getContributors();
   }
 }

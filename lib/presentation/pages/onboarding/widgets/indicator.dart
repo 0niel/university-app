@@ -9,21 +9,21 @@ class IndicatorPageView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AnimatedContainer(
-      duration: Duration(milliseconds: 150),
-      margin: EdgeInsets.symmetric(horizontal: 3.75),
+      duration: const Duration(milliseconds: 150),
+      margin: const EdgeInsets.symmetric(horizontal: 3.75),
       height: isActive ? 15.0 : 11.0,
       width: isActive ? 15.0 : 11.0,
       decoration: BoxDecoration(
         color: isActive ? Colors.white : DarkThemeColors.active,
-        borderRadius: BorderRadius.all(Radius.circular(12.0)),
+        borderRadius: const BorderRadius.all(Radius.circular(12.0)),
         boxShadow: <BoxShadow>[
           isActive
               ? BoxShadow(
                   color: Colors.black.withOpacity(0.25),
-                  offset: Offset(0.0, 2.0),
+                  offset: const Offset(0.0, 2.0),
                   blurRadius: 4.0,
                 )
-              : BoxShadow(color: Colors.transparent),
+              : const BoxShadow(color: Colors.transparent),
         ],
       ),
     );

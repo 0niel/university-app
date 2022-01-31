@@ -9,7 +9,7 @@ class GetActiveGroup extends UseCase<String, void> {
   GetActiveGroup(this.scheduleRepository);
 
   @override
-  Future<Either<Failure, String>> call([_]) async {
+  Future<Either<Failure, String>> call([params]) async {
     return await scheduleRepository.getActiveGroup();
   }
 }

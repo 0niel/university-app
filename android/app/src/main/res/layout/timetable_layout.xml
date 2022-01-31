@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/widget_container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_margin="8dp"
+
+    android:orientation="vertical"
+    android:padding="8dp">
+
+    <LinearLayout
+        android:id="@+id/widget_main"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/label_bg_01"
+        android:orientation="vertical"
+
+        android:padding="8dp">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:layout_marginBottom="5dp">
+
+            <TextView
+                android:id="@+id/widget_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentBottom="true"
+                android:background="@drawable/label_bg_title"
+                android:gravity="center"
+                android:paddingHorizontal="2dp"
+                android:paddingVertical="5dp"
+                android:textAlignment="center"
+                android:textColor="@android:color/white"
+                android:textSize="14sp"
+                tools:text="Группа ИКБО-13-37 | Неделя: 228" />
+        </RelativeLayout>
+
+        <ListView
+            android:id="@+id/lvList"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/widget_placeHolder"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/label_bg_black"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <include
+            layout="@layout/placeholder"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/widget_no_lessons"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/label_bg_black"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <include
+            layout="@layout/timetable_empty"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    </LinearLayout>
+</LinearLayout>

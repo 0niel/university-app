@@ -18,7 +18,7 @@ class SetActiveGroup extends UseCase<void, SetActiveGroupParams> {
 class SetActiveGroupParams extends Equatable {
   final String group;
 
-  SetActiveGroupParams(this.group);
+  const SetActiveGroupParams(this.group);
 
   @override
   List<Object?> get props => [group];

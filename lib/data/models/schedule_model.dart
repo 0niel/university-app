@@ -1,16 +1,10 @@
 import 'dart:convert';
-
 import 'package:rtu_mirea_app/data/models/lesson_model.dart';
 import 'package:rtu_mirea_app/domain/entities/schedule.dart';
 
 class ScheduleModel extends Schedule {
-  ScheduleModel(
-      {required this.isRemote, required this.group, required this.schedule})
+  const ScheduleModel({required isRemote, required group, required schedule})
       : super(isRemote: isRemote, group: group, schedule: schedule);
-
-  final bool isRemote;
-  final String group;
-  final Map<String, ScheduleWeekdayValueModel> schedule;
 
   factory ScheduleModel.fromRawJson(String str) =>
       ScheduleModel.fromJson(json.decode(str));
@@ -33,8 +27,10 @@ class ScheduleModel extends Schedule {
 }
 
 class ScheduleWeekdayValueModel extends ScheduleWeekdayValue {
-  ScheduleWeekdayValueModel({required this.lessons}) : super(lessons: lessons);
+  const ScheduleWeekdayValueModel({required this.lessons})
+      : super(lessons: lessons);
 
+  // ignore: annotate_overrides, overridden_fields
   final List<List<LessonModel>> lessons;
 
   factory ScheduleWeekdayValueModel.fromRawJson(String str) =>

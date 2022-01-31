@@ -17,6 +17,7 @@ jobs:
         java-version: '12.x'
     - uses: subosito/flutter-action@v1
       with:
+        flutter-version: '2.8.1'
         channel: 'stable' # or: 'beta', 'dev' or 'master'
     - run: flutter pub get
     - run: flutter test ./test/mirea_test.dart

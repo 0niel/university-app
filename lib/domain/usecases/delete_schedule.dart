@@ -18,7 +18,7 @@ class DeleteSchedule extends UseCase<void, DeleteScheduleParams> {
 class DeleteScheduleParams extends Equatable {
   final String group;
 
-  DeleteScheduleParams({required this.group});
+  const DeleteScheduleParams({required this.group});
 
   @override
   List<Object?> get props => [group];

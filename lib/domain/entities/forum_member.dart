@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 
 class ForumMember extends Equatable {
-  ForumMember({
+  const ForumMember({
     required this.id,
     required this.username,
     required this.name,
@@ -21,8 +21,8 @@ class ForumMember extends Equatable {
   final String name;
   final String avatarTemplate;
   final String primaryGroupName;
-  final String flairName;
-  final String flairUrl;
+  final String? flairName;
+  final String? flairUrl;
   final int trustLevel;
   final String title;
   final DateTime? lastPostedAt;

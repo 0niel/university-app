@@ -10,7 +10,7 @@ class GetDownloadedSchedules extends UseCase<List<Schedule>, void> {
   GetDownloadedSchedules(this.scheduleRepository);
 
   @override
-  Future<Either<Failure, List<Schedule>>> call([_]) async {
+  Future<Either<Failure, List<Schedule>>> call([params]) async {
     return await scheduleRepository.getDownloadedSchedules();
   }
 }
