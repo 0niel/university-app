@@ -280,7 +280,9 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
         "12:40": 3,
         "14:20": 4,
         "16:20": 5,
-        "18:00": 6
+        "18:00": 6,
+        "18:30": 7,
+        "20:10": 8
       };
 
   static Map<String, int> get universityTimesEnd => const {
@@ -289,7 +291,9 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
         "14:10": 3,
         "15:50": 4,
         "17:50": 5,
-        "19:30": 6
+        "19:30": 6,
+        "20:00": 7,
+        "21:40": 8
       };
 
   static bool isCollegeGroup(String group) {
