@@ -102,12 +102,12 @@ abstract class _CurrentSemesterStart {
 
   /// Get the expected start date of the semester.
   /// For the first semester it is September 1
-  /// For the second semester it is February 8th
+  /// For the second semester it is February 9th
   static DateTime _getExpectedSemesterStart(DateTime currentDate) {
     if (currentDate.month >= DateTime.september) {
       return DateTime(currentDate.year, DateTime.september, 1);
     } else {
-      return DateTime(currentDate.year, DateTime.february, 8);
+      return DateTime(currentDate.year, DateTime.february, 9);
     }
   }
 
