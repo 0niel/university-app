@@ -4,36 +4,36 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/about_app_bloc/about_app_bloc.dart';
 import 'package:rtu_mirea_app/presentation/colors.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
-import 'package:rtu_mirea_app/presentation/widgets/icon_button.dart';
+import 'package:rtu_mirea_app/presentation/widgets/buttons/icon_button.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'widgets/member_info.dart';
 
 class AboutAppPage extends StatelessWidget {
-  static const String routeName = '/profile/about_app';
+  const AboutAppPage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          'О приложении',
-          style: DarkTextTheme.title,
-        ),
+        title: const Text("О приложении"),
+        backgroundColor: DarkThemeColors.background01,
       ),
+      backgroundColor: DarkThemeColors.background01,
       body: SafeArea(
+        bottom: false,
         child: SingleChildScrollView(
           child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 24),
+            padding: const EdgeInsets.symmetric(horizontal: 24),
             child:
                 Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               Text('Open Source', style: DarkTextTheme.h4),
-              SizedBox(height: 8),
+              const SizedBox(height: 8),
               Text(
                 'Это приложение и все относящиеся к нему сервисы являются 100% бесплатными и Open Source продуктами. Мы с огромным удовольствием примем любые ваши предложения и сообщения, а также мы рады любому вашему участию в проекте!',
                 style: DarkTextTheme.bodyRegular,
               ),
-              SizedBox(height: 8),
+              const SizedBox(height: 8),
               RichText(
                 text: TextSpan(
                   children: [
@@ -53,7 +53,7 @@ class AboutAppPage extends StatelessWidget {
                   ],
                 ),
               ),
-              SizedBox(height: 8),
+              const SizedBox(height: 8),
               RichText(
                 text: TextSpan(
                   children: [
@@ -73,12 +73,12 @@ class AboutAppPage extends StatelessWidget {
                   ],
                 ),
               ),
-              SizedBox(height: 8),
+              const SizedBox(height: 8),
               Text(
                 'Связаться с нами вы можете с помощью email: contact@mirea.ninja',
                 style: DarkTextTheme.bodyRegular,
               ),
-              SizedBox(height: 8),
+              const SizedBox(height: 8),
               RichText(
                 text: TextSpan(
                   children: [
@@ -98,25 +98,27 @@ class AboutAppPage extends StatelessWidget {
                   ],
                 ),
               ),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  SocialIconButton(const AssetImage('assets/icons/github.png'),
-                      () {
-                    launch(
-                        'https://github.com/Ninja-Official/rtu-mirea-mobile');
-                  }),
+                  SocialIconButton(
+                      assetImage: const AssetImage('assets/icons/github.png'),
+                      onClick: () {
+                        launch(
+                            'https://github.com/Ninja-Official/rtu-mirea-mobile');
+                      }),
                   const SizedBox(width: 12),
                   SocialIconButton(
-                      const AssetImage('assets/icons/telegram.png'), () {
-                    launch('https://t.me/joinchat/LyM7jcoRXUhmOGM6');
-                  }),
+                      assetImage: const AssetImage('assets/icons/telegram.png'),
+                      onClick: () {
+                        launch('https://t.me/joinchat/LyM7jcoRXUhmOGM6');
+                      }),
                 ],
               ),
-              SizedBox(height: 24),
+              const SizedBox(height: 24),
               Text('Разработчики', style: DarkTextTheme.h4),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
               BlocBuilder<AboutAppBloc, AboutAppState>(
                 buildWhen: (prevState, currentState) {
                   if (prevState is AboutAppMembersLoadError) {
@@ -126,7 +128,7 @@ class AboutAppPage extends StatelessWidget {
                 },
                 builder: (context, state) {
                   if (state is AboutAppMembersLoading) {
-                    return Center(
+                    return const Center(
                       child: CircularProgressIndicator(
                         backgroundColor: DarkThemeColors.primary,
                         strokeWidth: 5,
@@ -138,11 +140,12 @@ class AboutAppPage extends StatelessWidget {
                       runSpacing: 8.0,
                       children: [
                         for (var contributor in state.contributors)
-                          MemberInfo(
-                            username: contributor.login,
-                            avatarUrl: contributor.avatarUrl,
-                            profileUrl: contributor.htmlUrl,
-                          ),
+                          if (contributor.contributions > 5)
+                            MemberInfo(
+                              username: contributor.login,
+                              avatarUrl: contributor.avatarUrl,
+                              profileUrl: contributor.htmlUrl,
+                            ),
                       ],
                     );
                   } else if (state is AboutAppMembersLoadError) {
@@ -156,9 +159,9 @@ class AboutAppPage extends StatelessWidget {
                   return Container();
                 },
               ),
-              SizedBox(height: 24),
+              const SizedBox(height: 24),
               Text('Патроны', style: DarkTextTheme.h4),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
               BlocBuilder<AboutAppBloc, AboutAppState>(
                 buildWhen: (prevState, currentState) {
                   if (prevState is AboutAppMembersLoadError) {
@@ -168,7 +171,7 @@ class AboutAppPage extends StatelessWidget {
                 },
                 builder: (context, state) {
                   if (state is AboutAppMembersLoading) {
-                    return Center(
+                    return const Center(
                       child: CircularProgressIndicator(
                         backgroundColor: DarkThemeColors.primary,
                         strokeWidth: 5,

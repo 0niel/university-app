@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:rtu_mirea_app/domain/entities/lesson.dart';
 
 class LessonModel extends Lesson {
-  LessonModel({
+  const LessonModel({
     required name,
     required weeks,
     required timeStart,

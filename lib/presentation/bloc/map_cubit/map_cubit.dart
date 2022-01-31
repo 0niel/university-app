@@ -1,6 +1,4 @@
-import 'dart:convert';
 import 'package:bloc/bloc.dart';
-import 'package:flutter/services.dart';
 import 'package:equatable/equatable.dart';
 
 part 'map_state.dart';
@@ -26,14 +24,6 @@ class MapCubit extends Cubit<MapState> {
     //_loadRoomsData();
   }
 
-  void _loadRoomsData() {
-    Future.delayed(Duration.zero, () async {
-      if (roomsData == null)
-        roomsData =
-            json.decode(await rootBundle.loadString('assets/map/rooms.json'));
-    });
-  }
-
   void setSearchQuery(String query) {
     final floors = roomsData!['floors'];
     List<Map<String, dynamic>> newFound = [];
@@ -44,8 +34,6 @@ class MapCubit extends Cubit<MapState> {
           room['floor'] = i;
           room['x'] = floors[i.toString()]['v'][room['i'][0]]['x'];
           room['y'] = floors[i.toString()]['v'][room['i'][0]]['y'];
-          print(double.parse(room['x']));
-          print(double.parse(room['y']));
           newFound.add(room);
         }
       }
@@ -55,7 +43,8 @@ class MapCubit extends Cubit<MapState> {
   }
 
   /// Set map scale to value
-  void setMapScale (double scale) => emit(MapScaleSet(floor: currentFloor, scale: scale));
+  void setMapScale(double scale) =>
+      emit(MapScaleSet(floor: currentFloor, scale: scale));
 
   /// Open the floor by [index]
   void goToFloor(int index) => emit(MapFloorLoaded(floor: index));

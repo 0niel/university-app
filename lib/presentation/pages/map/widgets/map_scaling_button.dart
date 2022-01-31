@@ -6,12 +6,12 @@ import 'package:rtu_mirea_app/presentation/colors.dart';
 
 class MapScalingButton extends StatelessWidget {
   const MapScalingButton(
-      { Key? key,
-        required this.onClick,
-        required this.maxScale,
-        required this.minScale,
-        required this.defaultScale,
-        required this.controller})
+      {Key? key,
+      required this.onClick,
+      required this.maxScale,
+      required this.minScale,
+      required this.defaultScale,
+      required this.controller})
       : super(key: key);
 
   final double defaultScale;
@@ -22,10 +22,10 @@ class MapScalingButton extends StatelessWidget {
   final Function onClick;
 
   int _calculateScalePercentage() {
-    var result = (((controller.scale ?? defaultScale) * 100 / (maxScale - minScale)) - 5).round();
-    if (result <= 0) return 0;
-    if (result >= 100) return 100;
-    return result;
+    return (((controller.scale ?? defaultScale) - minScale) *
+            200 /
+            (maxScale - minScale))
+        .round();
   }
 
   @override
@@ -35,16 +35,16 @@ class MapScalingButton extends StatelessWidget {
         constraints: const BoxConstraints.tightFor(width: 64, height: 48),
         child: ElevatedButton(
           style: ButtonStyle(
-              backgroundColor: MaterialStateProperty.all<Color>(DarkThemeColors.background02),
+              backgroundColor: MaterialStateProperty.all<Color>(
+                  DarkThemeColors.background02),
               shadowColor: MaterialStateProperty.all<Color>(Colors.transparent),
               shape: MaterialStateProperty.all<RoundedRectangleBorder>(
                   RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12.0),
-                  ))),
+                borderRadius: BorderRadius.circular(12.0),
+              ))),
           child: FittedBox(
               fit: BoxFit.fitWidth,
-              child:Text(_calculateScalePercentage().toString() + "%")
-          ),
+              child: Text(_calculateScalePercentage().toString() + "%")),
           onPressed: () => onClick(),
         ),
       ),

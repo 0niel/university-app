@@ -2,7 +2,7 @@ import 'package:clock/clock.dart';
 
 abstract class Calendar {
   /// Maximum number of academic weeks per semester
-  static const int kMaxWeekInSemester = 16;
+  static const int kMaxWeekInSemester = 17;
 
   /// Returns the current day of the week, where 1 is Mon, 7 is Sun
   static int getCurrentDayOfWeek({final Clock clock = const Clock()}) {
@@ -14,6 +14,11 @@ abstract class Calendar {
       {DateTime? mCurrentDate, final Clock clock = const Clock()}) {
     DateTime currentDate = mCurrentDate ?? clock.now();
     DateTime startDate = getSemesterStart(mCurrentDate: currentDate);
+
+    // If the semester has not begun, return the beginning
+    if (currentDate.isBefore(startDate)) {
+      return 1;
+    }
 
     int week = 1;
     int prevWeekday = startDate.weekday;
@@ -48,7 +53,7 @@ abstract class Calendar {
     // Добавляем дни в массив, увеличивая счётчик на 1 день
     for (int i = 0; i < 7; ++i) {
       daysInWeek.add(firstDayOfChosenWeek);
-      firstDayOfChosenWeek = firstDayOfChosenWeek.add(Duration(days: 1));
+      firstDayOfChosenWeek = firstDayOfChosenWeek.add(const Duration(days: 1));
     }
     return daysInWeek;
   }
@@ -97,12 +102,12 @@ abstract class _CurrentSemesterStart {
 
   /// Get the expected start date of the semester.
   /// For the first semester it is September 1
-  /// For the second semester it is February 8th
+  /// For the second semester it is February 9th
   static DateTime _getExpectedSemesterStart(DateTime currentDate) {
     if (currentDate.month >= DateTime.september) {
       return DateTime(currentDate.year, DateTime.september, 1);
     } else {
-      return DateTime(currentDate.year, DateTime.february, 8);
+      return DateTime(currentDate.year, DateTime.february, 9);
     }
   }
 

@@ -26,7 +26,7 @@ class ForumRepositoryImpl implements ForumRepository {
         localDataSource.setPatronsToCache(patrons);
         return Right(patrons);
       } on ServerException {
-        return Left(ServerFailure());
+        return const Left(ServerFailure());
       }
     } else {
       try {

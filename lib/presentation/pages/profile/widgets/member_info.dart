@@ -20,15 +20,15 @@ class MemberInfo extends StatelessWidget {
       child: Column(children: [
         CachedNetworkImage(
           progressIndicatorBuilder: (context, url, progress) =>
-              Container(width: 60, height: 60),
+              const SizedBox(width: 60, height: 60),
           imageUrl: avatarUrl,
-          errorWidget: (context, url, error) => Icon(Icons.error),
+          errorWidget: (context, url, error) => const Icon(Icons.error),
           imageBuilder: (context, imageProvider) => CircleAvatar(
             radius: 30,
             backgroundImage: imageProvider,
           ),
         ),
-        SizedBox(height: 8),
+        const SizedBox(height: 8),
         Text(
           username,
           style: DarkTextTheme.bodyBold,
