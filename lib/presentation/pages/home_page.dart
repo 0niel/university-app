@@ -36,9 +36,15 @@ class HomePage extends StatelessWidget {
                   decoration: const BoxDecoration(
                     color: DarkThemeColors.background01,
                   ),
-                  child: AppBottomNavigationBar(
-                    index: tabsRouter.activeIndex,
-                    onClick: tabsRouter.setActiveIndex,
+                  child: SafeArea(
+                    left: false,
+                    top: false,
+                    right: false,
+                    bottom: true,
+                    child: AppBottomNavigationBar(
+                      index: tabsRouter.activeIndex,
+                      onClick: tabsRouter.setActiveIndex,
+                    ),
                   ),
                 ),
               ],
