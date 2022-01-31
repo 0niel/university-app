@@ -25,6 +25,8 @@ class NewsBloc extends Bloc<NewsEvent, NewsState> {
   String? _selectedTag;
 
   void _onNewsLoadEvent(NewsLoadEvent event, Emitter<NewsState> emit) async {
+    if (state is NewsLoading) return;
+
     final bool refresh = event.refresh ?? false;
     if (refresh) {
       _isFirstFetch = true;
