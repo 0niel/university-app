@@ -87,14 +87,12 @@ class StrapiImageModel extends StrapiImage {
   const StrapiImageModel({
     required url,
     required name,
-    required path,
     required size,
     required width,
     required height,
   }) : super(
           url: url,
           name: name,
-          path: path,
           size: size,
           width: width,
           height: height,
@@ -107,7 +105,6 @@ class StrapiImageModel extends StrapiImage {
       StrapiImageModel(
         url: json["url"],
         name: json["name"],
-        path: json["path"],
         size: json["size"].toDouble(),
         width: json["width"],
         height: json["height"],
@@ -116,7 +113,6 @@ class StrapiImageModel extends StrapiImage {
   Map<String, dynamic> toJson() => {
         "url": url,
         "name": name,
-        "path": path,
         "size": size,
         "width": width,
         "height": height,
