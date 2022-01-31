@@ -103,15 +103,19 @@ class _NewsItemInfo extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      mainAxisAlignment: tags.isNotEmpty
+          ? MainAxisAlignment.spaceBetween
+          : MainAxisAlignment.start,
       children: [
-        Expanded(
-          child: Tags(
-            isClickable: false,
-            withIcon: true,
-            tags: tags,
-          ),
-        ),
+        tags.isNotEmpty
+            ? Expanded(
+                child: Tags(
+                  isClickable: false,
+                  withIcon: true,
+                  tags: tags,
+                ),
+              )
+            : Container(),
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.end,
