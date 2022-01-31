@@ -4,6 +4,7 @@ import 'package:flutter_html/flutter_html.dart';
 import 'package:rtu_mirea_app/presentation/bloc/announces_bloc/announces_bloc.dart';
 import 'package:rtu_mirea_app/presentation/colors.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class ProfileAnnouncesPage extends StatelessWidget {
   const ProfileAnnouncesPage({Key? key}) : super(key: key);
@@ -48,6 +49,11 @@ class ProfileAnnouncesPage extends StatelessWidget {
                         style: {
                           "body": Style(
                               fontStyle: DarkTextTheme.bodyRegular.fontStyle),
+                        },
+                        onLinkTap: (String? url, context, attributes, element) {
+                          if (url != null) {
+                            launch(url);
+                          }
                         },
                       ),
                       const SizedBox(height: 13),
