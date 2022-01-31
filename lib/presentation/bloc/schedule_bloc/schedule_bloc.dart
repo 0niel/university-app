@@ -65,7 +65,7 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
     // The group for which the schedule is selected
     final activeGroup = await getActiveGroup();
 
-    activeGroup.fold((failure) {
+    await activeGroup.fold((failure) {
       emit(ScheduleActiveGroupEmpty(groups: groupsList));
     }, (activeGroupName) async {
       final schedule = await getSchedule(
@@ -76,7 +76,7 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
       // If we have a schedule in the cache then we display it
       // to avoid a long download from the Internet.
       // Otherwise, download the schedule.
-      schedule.fold((failure) async {
+      await schedule.fold((failure) async {
         emit(ScheduleLoading());
         final remoteSchedule = await getSchedule(
             GetScheduleParams(group: activeGroupName, fromRemote: true));
