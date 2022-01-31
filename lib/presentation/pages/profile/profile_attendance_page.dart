@@ -98,6 +98,7 @@ class _ProfileAttendancePageState extends State<ProfileAttendancePage> {
                                   'Дней посещено: ' +
                                       state.visitsCount.toString(),
                                   style: DarkTextTheme.body),
+                              const SizedBox(height: 8),
                               Expanded(
                                 child: ListView.builder(
                                   itemCount: state.attendance.length,

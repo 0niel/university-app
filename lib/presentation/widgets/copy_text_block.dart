@@ -33,8 +33,9 @@ class CopyTextBlockWithLabel extends StatelessWidget {
             borderRadius: BorderRadius.circular(10),
             onTap: () {
               Clipboard.setData(ClipboardData(text: text));
-              ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Текст скопирован!')));
+              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                  padding: EdgeInsets.all(4),
+                  content: Text('Текст скопирован!')));
             },
             child: const SizedBox(
               width: 30,

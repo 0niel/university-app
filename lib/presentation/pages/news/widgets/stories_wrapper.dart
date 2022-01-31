@@ -38,9 +38,9 @@ class StoriesWrapper extends StatelessWidget {
                   ),
                   Positioned.fill(
                     child: Image.network(
-                      page.media.formats.large != null
-                          ? page.media.formats.large!.url
-                          : page.media.formats.medium!.url,
+                      page.media.formats.medium != null
+                          ? page.media.formats.medium!.url
+                          : page.media.formats.small!.url,
                       fit: BoxFit.cover,
                     ),
                   ),
