@@ -17,6 +17,7 @@ class ProfileAnnouncesPage extends StatelessWidget {
       ),
       backgroundColor: DarkThemeColors.background01,
       body: SafeArea(
+        bottom: false,
         child: BlocBuilder<AnnouncesBloc, AnnouncesState>(
             builder: (context, state) {
           if (state is AnnouncesLoading) {

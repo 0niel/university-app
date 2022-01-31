@@ -23,6 +23,7 @@ class ProfileDetailPage extends StatelessWidget {
       ),
       backgroundColor: DarkThemeColors.background01,
       body: SafeArea(
+        bottom: false,
         child: SingleChildScrollView(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24),

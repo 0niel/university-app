@@ -43,6 +43,7 @@ class _ProfileAttendancePageState extends State<ProfileAttendancePage> {
       ),
       backgroundColor: DarkThemeColors.background01,
       body: SafeArea(
+        bottom: false,
         child: BlocBuilder<AuthBloc, AuthState>(
           builder: (context, authState) {
             if (authState is LogInSuccess) {

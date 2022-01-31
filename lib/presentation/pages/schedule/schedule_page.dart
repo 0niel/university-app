@@ -150,6 +150,7 @@ class _SchedulePageState extends State<SchedulePage> {
         onTapClose: true,
         boxShadow: const [],
         rightChild: SafeArea(
+          bottom: false,
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 10),
             child: Column(
