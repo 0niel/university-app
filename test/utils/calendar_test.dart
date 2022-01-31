@@ -44,7 +44,7 @@ getSemesterStart() {
     test('Winter start in 2021', () {
       DateTime semStart =
           m_cal.Calendar.getSemesterStart(mCurrentDate: startSecondHalf);
-      expect(semStart.day, 8);
+      expect(semStart.day, 9);
       expect(semStart.month, DateTime.february);
       expect(semStart.year, 2021);
     });
