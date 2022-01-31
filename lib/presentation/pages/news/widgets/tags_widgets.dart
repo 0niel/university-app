@@ -33,13 +33,15 @@ class Tags extends StatelessWidget {
             runSpacing: 6,
             children: tags
                 .map(
-                  (element) => (GestureDetector(
-                    onTap: () {
-                      if (isClickable && onClick != null) {
-                        onClick!(element);
-                      }
-                    },
+                  (element) => (Material(
+                    color: Colors.transparent,
                     child: InkWell(
+                      borderRadius: BorderRadius.circular(16),
+                      onTap: () {
+                        if (isClickable && onClick != null) {
+                          onClick!(element);
+                        }
+                      },
                       child: Container(
                         decoration: BoxDecoration(
                           border: Border.all(
