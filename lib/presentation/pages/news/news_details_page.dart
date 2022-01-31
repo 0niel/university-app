@@ -38,6 +38,7 @@ class NewsDetailsPage extends StatelessWidget {
           ];
         },
         body: SafeArea(
+          bottom: false,
           child: Container(
             color: DarkThemeColors.background01,
             child: ListView(

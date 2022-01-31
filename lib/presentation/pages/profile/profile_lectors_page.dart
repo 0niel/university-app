@@ -41,6 +41,7 @@ class _ProfileLectrosPageState extends State<ProfileLectrosPage> {
       ),
       backgroundColor: DarkThemeColors.background01,
       body: SafeArea(
+        bottom: false,
         child: BlocBuilder<AuthBloc, AuthState>(
           builder: (context, authState) {
             if (authState is LogInSuccess) {

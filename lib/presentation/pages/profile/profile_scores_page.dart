@@ -25,6 +25,7 @@ class _ProfileScoresPageState extends State<ProfileScoresPage> {
       ),
       backgroundColor: DarkThemeColors.background01,
       body: SafeArea(
+        bottom: false,
         child: BlocBuilder<AuthBloc, AuthState>(
           builder: (context, authState) {
             if (authState is LogInSuccess) {
