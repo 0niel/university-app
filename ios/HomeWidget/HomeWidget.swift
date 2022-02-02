@@ -423,7 +423,7 @@ struct HomeWidgetExampleEntryView : View {
     
     func getNoLessonsPlaceholder()-> some View{
         VStack.init(alignment: .center, spacing: /*@START_MENU_TOKEN@*/nil/*@END_MENU_TOKEN@*/, content:{
-            Text("Сессия...").bold().font(/*@START_MENU_TOKEN@*/.title/*@END_MENU_TOKEN@*/).foregroundColor(Color.white)
+            Text("Пар нет").bold().font(/*@START_MENU_TOKEN@*/.title/*@END_MENU_TOKEN@*/).foregroundColor(Color.white)
         }
         )
             .frame(
