@@ -176,26 +176,28 @@ class _SchedulePageState extends State<SchedulePage> {
                       prevState.runtimeType != ScheduleLoaded) return true;
                   return false;
                 }, builder: (context, state) {
-                  if (state is ScheduleLoaded) {
+                  if (state is ScheduleLoaded ||
+                      state is ScheduleActiveGroupEmpty) {
                     return Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          SettingsSwitchButton(
-                            initialValue:
-                                state.scheduleSettings.showEmptyLessons,
-                            svgPicture: SvgPicture.asset(
-                              'assets/icons/lessons.svg',
-                              height: 16,
-                              width: 16,
+                          if (state is ScheduleLoaded)
+                            SettingsSwitchButton(
+                              initialValue:
+                                  state.scheduleSettings.showEmptyLessons,
+                              svgPicture: SvgPicture.asset(
+                                'assets/icons/lessons.svg',
+                                height: 16,
+                                width: 16,
+                              ),
+                              text: "Пустые пары",
+                              onChanged: (value) {
+                                context.read<ScheduleBloc>().add(
+                                    ScheduleUpdateSettingsEvent(
+                                        showEmptyLessons: value));
+                              },
                             ),
-                            text: "Пустые пары",
-                            onChanged: (value) {
-                              context.read<ScheduleBloc>().add(
-                                  ScheduleUpdateSettingsEvent(
-                                      showEmptyLessons: value));
-                            },
-                          ),
                           // SizedBox(height: 10),
                           // SettingsSwitchButton(
                           //   initialValue:
@@ -260,37 +262,48 @@ class _SchedulePageState extends State<SchedulePage> {
                               },
                             ),
                           ),
-                          const SizedBox(height: 20),
-                          Text(
-                            "Группы".toUpperCase(),
-                            style: DarkTextTheme.chip.copyWith(
-                                color: DarkThemeColors.deactiveDarker),
-                            textAlign: TextAlign.left,
-                          ),
-                          const SizedBox(height: 10),
-                          _buildGroupButton(
-                            state.activeGroup,
-                            state.activeGroup,
-                            true,
-                            state.schedule,
-                          ),
-                          Expanded(
-                            child: ListView.builder(
-                              itemCount: state.downloadedScheduleGroups.length,
-                              itemBuilder: (context, index) {
-                                if (state.downloadedScheduleGroups[index] !=
-                                    state.activeGroup) {
-                                  return _buildGroupButton(
-                                    state.downloadedScheduleGroups[index],
+                          if (state is ScheduleLoaded)
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const SizedBox(height: 20),
+                                  Text(
+                                    "Группы".toUpperCase(),
+                                    style: DarkTextTheme.chip.copyWith(
+                                        color: DarkThemeColors.deactiveDarker),
+                                    textAlign: TextAlign.left,
+                                  ),
+                                  const SizedBox(height: 10),
+                                  _buildGroupButton(
                                     state.activeGroup,
-                                    false,
+                                    state.activeGroup,
+                                    true,
                                     state.schedule,
-                                  );
-                                }
-                                return Container();
-                              },
+                                  ),
+                                  Expanded(
+                                    child: ListView.builder(
+                                      itemCount:
+                                          state.downloadedScheduleGroups.length,
+                                      itemBuilder: (context, index) {
+                                        if (state.downloadedScheduleGroups[
+                                                index] !=
+                                            state.activeGroup) {
+                                          return _buildGroupButton(
+                                            state.downloadedScheduleGroups[
+                                                index],
+                                            state.activeGroup,
+                                            false,
+                                            state.schedule,
+                                          );
+                                        }
+                                        return Container();
+                                      },
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
                         ],
                       ),
                     );

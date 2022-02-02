@@ -22,7 +22,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:text="Сессия..."
+        android:text="Пар нет"
         android:textColor="@android:color/white"
         android:textSize="18dp" />
 </LinearLayout>
