@@ -144,6 +144,10 @@ dependencies:
 
   salomon_bottom_bar: ^3.2.0
 
+  # Get version name in runtime
+  # https://pub.dev/packages/package_info_plus
+  package_info_plus: ^1.3.0
+
   # Encapsulates the notion of the "current time". Very useful for testing
   # See https://pub.dev/packages/clock
   clock: ^1.1.0
