@@ -16,11 +16,11 @@ import 'package:rtu_mirea_app/presentation/bloc/profile_bloc/profile_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/schedule_bloc/schedule_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/scores_bloc/scores_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/stories_bloc/stories_bloc.dart';
+import 'package:rtu_mirea_app/presentation/bloc/update_info_bloc/update_info_bloc.dart';
 import 'package:rtu_mirea_app/presentation/core/routes/routes.gr.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:intl/intl_standalone.dart';
 import 'package:rtu_mirea_app/service_locator.dart' as dependency_injection;
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_strategy/url_strategy.dart';
 import 'service_locator.dart';
 
@@ -79,6 +79,10 @@ class App extends StatelessWidget {
             create: (context) => getIt<AttendanceBloc>()),
         BlocProvider<StoriesBloc>(create: (context) => getIt<StoriesBloc>()),
         BlocProvider<AppCubit>(create: (context) => getIt<AppCubit>()),
+        BlocProvider<UpdateInfoBloc>(
+          create: (_) => getIt<UpdateInfoBloc>(),
+          lazy: false, // We need to init it as soon as possible
+        ),
       ],
       child: AdaptiveTheme(
         light: lightTheme,

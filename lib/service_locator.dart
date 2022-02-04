@@ -43,6 +43,7 @@ import 'package:rtu_mirea_app/domain/usecases/get_schedule.dart';
 import 'package:rtu_mirea_app/domain/usecases/get_schedule_settings.dart';
 import 'package:rtu_mirea_app/domain/usecases/get_scores.dart';
 import 'package:rtu_mirea_app/domain/usecases/get_stories.dart';
+import 'package:rtu_mirea_app/domain/usecases/get_update_info.dart';
 import 'package:rtu_mirea_app/domain/usecases/get_user_data.dart';
 import 'package:rtu_mirea_app/domain/usecases/log_in.dart';
 import 'package:rtu_mirea_app/domain/usecases/log_out.dart';
@@ -61,6 +62,7 @@ import 'package:rtu_mirea_app/presentation/bloc/profile_bloc/profile_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/schedule_bloc/schedule_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/scores_bloc/scores_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/stories_bloc/stories_bloc.dart';
+import 'package:rtu_mirea_app/presentation/bloc/update_info_bloc/update_info_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'data/repositories/schedule_repository_impl.dart';
@@ -95,11 +97,13 @@ Future<void> setup() async {
   getIt.registerFactory(() => ScoresBloc(getScores: getIt()));
   getIt.registerFactory(() => AttendanceBloc(getAttendance: getIt()));
   getIt.registerFactory(() => StoriesBloc(getStories: getIt()));
+  getIt.registerFactory(() => UpdateInfoBloc(getUpdateInfo: getIt())..init());
   getIt.registerFactory(
       () => AppCubit(getAppSettings: getIt(), setAppSettings: getIt()));
 
   // Usecases
   getIt.registerLazySingleton(() => GetStories(getIt()));
+  getIt.registerLazySingleton(() => GetUpdateInfo(getIt()));
   getIt.registerLazySingleton(() => GetAttendance(getIt()));
   getIt.registerLazySingleton(() => GetScores(getIt()));
   getIt.registerLazySingleton(() => GetEmployees(getIt()));

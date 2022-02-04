@@ -1,22 +1,31 @@
-import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:rtu_mirea_app/domain/entities/update_info.dart';
+import 'package:rtu_mirea_app/presentation/bloc/update_info_bloc/update_info_bloc.dart';
 import 'package:rtu_mirea_app/presentation/colors.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
-import 'package:rtu_mirea_app/presentation/widgets/buttons/colorful_button.dart';
 import 'package:rtu_mirea_app/presentation/widgets/buttons/primary_button.dart';
 
-abstract class UpdatesInfoModal {
-  static void checkAndShow(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => const UpdatesInfo(),
-    );
+abstract class UpdateInfoModal {
+  static void checkAndShow(BuildContext context, UpdateInfoState state) {
+    if (state is ShowUpdateDialog) {
+      showDialog(
+        context: context,
+        builder: (context) => _UpdateInfo(
+          data: state.data,
+        ),
+      );
+      BlocProvider.of<UpdateInfoBloc>(context).add(const DialogIsShown());
+    }
   }
 }
 
-class UpdatesInfo extends StatelessWidget {
-  const UpdatesInfo({
+class _UpdateInfo extends StatelessWidget {
+  final UpdateInfo data;
+
+  const _UpdateInfo({
     Key? key,
+    required this.data,
   }) : super(key: key);
 
   @override
@@ -45,20 +54,20 @@ class UpdatesInfo extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Text(
-                  'обновление',
+                  'обновление ${data.serverVersion}',
                   style: DarkTextTheme.captionS.copyWith(
                     color: DarkThemeColors.deactive,
                   ),
                 ),
                 const Padding(padding: EdgeInsets.only(top: 16)),
                 Text(
-                  'Вход в СДО 😱',
+                  data.title,
                   textAlign: TextAlign.center,
                   style: DarkTextTheme.h5,
                 ),
                 const Padding(padding: EdgeInsets.only(top: 24)),
                 Text(
-                  'Откройте страницу Профиля, чтобы всё увидеть 👀',
+                  data.description,
                   style: DarkTextTheme.bodyL,
                 ),
                 const Padding(padding: EdgeInsets.only(top: 24)),
@@ -73,17 +82,7 @@ class UpdatesInfo extends StatelessWidget {
                     shrinkWrap: true,
                     children: [
                       Text(
-                        """
-Подробный change log:
-
-* Добавлены виджеты рабочего стола
-* Добавлен профиль с интеграцией ЛК МИРЭА
-* Добавлены сторисы на страницу новостей
-* Добавлены важные новости на страницу новостей
-* Добавлен фильтр тегов на странице новостей
-* Изменена система навигации приложения
-* Множество других изменение, исправлений и улучшений
-""",
+                        data.changeLog,
                         style: DarkTextTheme.body.copyWith(
                           color: DarkThemeColors.deactive,
                         ),
@@ -104,7 +103,7 @@ class UpdatesInfo extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     Text(
-                      'Ваша версия приложения - 1.2.0',
+                      'Ваша версия приложения - ${data.appVersion}',
                       style: DarkTextTheme.captionL,
                     ),
                   ],
