@@ -1,5 +1,6 @@
 import 'package:dartz/dartz.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:rtu_mirea_app/common/errors/exceptions.dart';
 
 import 'package:rtu_mirea_app/common/errors/failures.dart';
@@ -11,10 +12,12 @@ import 'package:rtu_mirea_app/domain/repositories/strapi_repository.dart';
 class StrapiRepositoryImpl implements StrapiRepository {
   final StrapiRemoteData remoteDataSource;
   final InternetConnectionChecker connectionChecker;
+  final PackageInfo packageInfo;
 
   StrapiRepositoryImpl({
     required this.remoteDataSource,
     required this.connectionChecker,
+    required this.packageInfo,
   });
 
   @override
@@ -36,9 +39,17 @@ class StrapiRepositoryImpl implements StrapiRepository {
   Future<Either<Failure, UpdateInfo>> getLastUpdateInfo() async {
     if (await connectionChecker.hasConnection) {
       try {
-        final updateInfo = await remoteDataSource.getLastUpdateInfo();
+        final updateInfoModal = await remoteDataSource.getLastUpdateInfo();
 
-        return Right(updateInfo);
+        return Right(
+          UpdateInfo(
+            title: updateInfoModal.title,
+            description: updateInfoModal.description,
+            changeLog: updateInfoModal.changeLog,
+            serverVersion: updateInfoModal.serverVersion,
+            appVersion: packageInfo.version,
+          ),
+        );
       } on ParsingException catch (e) {
         return Left(ServerFailure(e.cause));
       } on ServerException {

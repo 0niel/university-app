@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:rtu_mirea_app/data/datasources/app_settings_local.dart';
 import 'package:rtu_mirea_app/data/datasources/forum_local.dart';
 import 'package:rtu_mirea_app/data/datasources/forum_remote.dart';
@@ -174,6 +175,7 @@ Future<void> setup() async {
   getIt.registerLazySingleton<StrapiRepository>(() => StrapiRepositoryImpl(
         remoteDataSource: getIt(),
         connectionChecker: getIt(),
+        packageInfo: getIt(),
       ));
 
   getIt.registerLazySingleton<AppSettingsRepository>(
@@ -213,4 +215,6 @@ Future<void> setup() async {
   final sharedPreferences = await SharedPreferences.getInstance();
   getIt.registerLazySingleton(() => sharedPreferences);
   getIt.registerLazySingleton(() => InternetConnectionChecker());
+  final PackageInfo packageInfo = await PackageInfo.fromPlatform();
+  getIt.registerLazySingleton(() => packageInfo);
 }

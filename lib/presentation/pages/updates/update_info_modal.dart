@@ -6,7 +6,7 @@ import 'package:rtu_mirea_app/presentation/colors.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:rtu_mirea_app/presentation/widgets/buttons/primary_button.dart';
 
-abstract class UpdateInfoModal {
+abstract class UpdateInfoDialog {
   static void checkAndShow(BuildContext context, UpdateInfoState state) {
     if (state is ShowUpdateDialog) {
       showDialog(

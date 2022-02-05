@@ -31,14 +31,12 @@ class HomePage extends StatelessWidget {
                 Expanded(
                   child: FadeTransition(
                     opacity: animation,
-                    child: BlocBuilder<UpdateInfoBloc, UpdateInfoState>(
-                      builder: (context, state) {
-                        WidgetsBinding.instance!.addPostFrameCallback(
-                          (_) => UpdateInfoModal.checkAndShow(context, state),
-                        );
-
-                        return child;
-                      },
+                    child: BlocListener<UpdateInfoBloc, UpdateInfoState>(
+                      child: child,
+                      listener: (context, state) =>
+                          WidgetsBinding.instance!.addPostFrameCallback(
+                        (_) => UpdateInfoDialog.checkAndShow(context, state),
+                      ),
                     ),
                   ),
                 ),
