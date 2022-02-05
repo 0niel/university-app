@@ -86,20 +86,32 @@ Future<void> setup() async {
   getIt.registerFactory(
       () => AboutAppBloc(getContributors: getIt(), getForumPatrons: getIt()));
   getIt.registerFactory(() => MapCubit());
-  getIt.registerFactory(() => AuthBloc(
-      logOut: getIt(),
-      getAuthToken: getIt(),
-      logIn: getIt(),
-      getUserData: getIt()));
+  getIt.registerFactory(
+    () => AuthBloc(
+        logOut: getIt(),
+        getAuthToken: getIt(),
+        logIn: getIt(),
+        getUserData: getIt()),
+  );
   getIt.registerFactory(() => ProfileBloc(getUserData: getIt()));
   getIt.registerFactory(() => AnnouncesBloc(getAnnounces: getIt()));
   getIt.registerFactory(() => EmployeeBloc(getEmployees: getIt()));
   getIt.registerFactory(() => ScoresBloc(getScores: getIt()));
   getIt.registerFactory(() => AttendanceBloc(getAttendance: getIt()));
   getIt.registerFactory(() => StoriesBloc(getStories: getIt()));
-  getIt.registerFactory(() => UpdateInfoBloc(getUpdateInfo: getIt())..init());
   getIt.registerFactory(
-      () => AppCubit(getAppSettings: getIt(), setAppSettings: getIt()));
+    () => UpdateInfoBloc(
+      getUpdateInfo: getIt(),
+      getAppSettings: getIt(),
+      setAppSettings: getIt(),
+    )..init(),
+  );
+  getIt.registerFactory(
+    () => AppCubit(
+      getAppSettings: getIt(),
+      setAppSettings: getIt(),
+    ),
+  );
 
   // Usecases
   getIt.registerLazySingleton(() => GetStories(getIt()));

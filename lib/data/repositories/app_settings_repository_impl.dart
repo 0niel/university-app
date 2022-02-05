@@ -17,7 +17,10 @@ class AppSettingsRepositoryImpl implements AppSettingsRepository {
       final settings = await localDataSource.getSettingsFromCache();
       return settings;
     } on CacheException {
-      const newLocalSettings = AppSettingsModel(onboardingShown: false);
+      const newLocalSettings = AppSettingsModel(
+        onboardingShown: false,
+        lastUpdateVersion: '',
+      );
       await localDataSource.setSettingsToCache(newLocalSettings);
       return newLocalSettings;
     }
@@ -26,6 +29,10 @@ class AppSettingsRepositoryImpl implements AppSettingsRepository {
   @override
   Future<void> setSettings(AppSettings settings) async {
     localDataSource.setSettingsToCache(
-        AppSettingsModel(onboardingShown: settings.onboardingShown));
+      AppSettingsModel(
+        onboardingShown: settings.onboardingShown,
+        lastUpdateVersion: settings.lastUpdateVersion,
+      ),
+    );
   }
 }

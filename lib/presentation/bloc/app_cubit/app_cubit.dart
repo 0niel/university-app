@@ -18,7 +18,13 @@ class AppCubit extends Cubit<AppState> {
 
     if (settings.onboardingShown == false) {
       await setAppSettings(
-          const SetAppSettingsParams(AppSettings(onboardingShown: true)));
+        SetAppSettingsParams(
+          AppSettings(
+            onboardingShown: true,
+            lastUpdateVersion: settings.lastUpdateVersion,
+          ),
+        ),
+      );
       emit(AppOnboarding());
     } else {
       closeOnboarding();

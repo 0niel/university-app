@@ -15,7 +15,11 @@ abstract class UpdateInfoModal {
           data: state.data,
         ),
       );
-      BlocProvider.of<UpdateInfoBloc>(context).add(const DialogIsShown());
+      BlocProvider.of<UpdateInfoBloc>(context).add(
+        DialogIsShown(
+          versionToSave: state.data.serverVersion,
+        ),
+      );
     }
   }
 }
@@ -54,7 +58,7 @@ class _UpdateInfo extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Text(
-                  'обновление ${data.serverVersion}',
+                  'обновление',
                   style: DarkTextTheme.captionS.copyWith(
                     color: DarkThemeColors.deactive,
                   ),

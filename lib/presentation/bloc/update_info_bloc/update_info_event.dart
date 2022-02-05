@@ -13,7 +13,11 @@ class SetUpdateInfo extends UpdateInfoEvent {
   final UpdateInfo data;
 }
 
-/// Make dialog not show again
+/// Make dialog not show again and save version to settings
 class DialogIsShown extends UpdateInfoEvent {
-  const DialogIsShown();
+  const DialogIsShown({
+    required this.versionToSave,
+  });
+
+  final String versionToSave;
 }

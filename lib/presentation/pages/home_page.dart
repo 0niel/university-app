@@ -26,11 +26,6 @@ class HomePage extends StatelessWidget {
           builder: (context, child, animation) {
             final tabsRouter = AutoTabsRouter.of(context);
 
-            // final state = BlocProvider.of<UpdateInfoBloc>(context).state;
-            // if (state is ShowUpdateDialog) {
-            //   UpdateInfoModal.checkAndShow(context, state);
-            // }
-
             return Column(
               children: [
                 Expanded(
@@ -38,8 +33,9 @@ class HomePage extends StatelessWidget {
                     opacity: animation,
                     child: BlocBuilder<UpdateInfoBloc, UpdateInfoState>(
                       builder: (context, state) {
-                        WidgetsBinding.instance!.addPostFrameCallback((_) =>
-                            UpdateInfoModal.checkAndShow(context, state));
+                        WidgetsBinding.instance!.addPostFrameCallback(
+                          (_) => UpdateInfoModal.checkAndShow(context, state),
+                        );
 
                         return child;
                       },

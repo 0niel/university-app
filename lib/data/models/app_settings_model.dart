@@ -4,8 +4,12 @@ import 'package:rtu_mirea_app/domain/entities/app_settings.dart';
 
 class AppSettingsModel extends AppSettings {
   const AppSettingsModel({
-    required onboardingShown,
-  }) : super(onboardingShown: onboardingShown);
+    required bool onboardingShown,
+    required String lastUpdateVersion,
+  }) : super(
+          onboardingShown: onboardingShown,
+          lastUpdateVersion: lastUpdateVersion,
+        );
 
   factory AppSettingsModel.fromRawJson(String str) =>
       AppSettingsModel.fromJson(json.decode(str));
@@ -13,6 +17,7 @@ class AppSettingsModel extends AppSettings {
   factory AppSettingsModel.fromJson(Map<String, dynamic> json) {
     return AppSettingsModel(
       onboardingShown: json["onboarding_shown"],
+      lastUpdateVersion: json["last_update_version"] ?? '',
     );
   }
 
@@ -20,5 +25,6 @@ class AppSettingsModel extends AppSettings {
 
   Map<String, dynamic> toJson() => {
         "onboarding_shown": onboardingShown,
+        "last_update_version": lastUpdateVersion,
       };
 }
