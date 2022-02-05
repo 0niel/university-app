@@ -5,8 +5,9 @@ abstract class UpdateInfoEvent {
 }
 
 /// Set data got from Strapi
-class SetUpdateInfo extends UpdateInfoEvent {
-  const SetUpdateInfo({
+/// Used as an internal [UpdateInfoBloc] event
+class _SetUpdateInfo extends UpdateInfoEvent {
+  const _SetUpdateInfo({
     required this.data,
   });
 

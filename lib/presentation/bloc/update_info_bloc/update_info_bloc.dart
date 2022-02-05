@@ -15,29 +15,39 @@ class UpdateInfoBloc extends Bloc<UpdateInfoEvent, UpdateInfoState> {
   final GetAppSettings getAppSettings;
   final SetAppSettings setAppSettings;
 
+  /// On the first run, do not show the dialog
+  late bool _isFirstStart;
+
   UpdateInfoBloc({
     required this.getUpdateInfo,
     required this.getAppSettings,
     required this.setAppSettings,
   }) : super(const NoUpdateDialog()) {
-    on<SetUpdateInfo>(_onSetInfo);
+    on<_SetUpdateInfo>(_onSetInfo);
     on<DialogIsShown>(_setShown);
   }
 
   /// Download update info from api
   void init() async {
+    final settings = await getAppSettings.call();
+    _isFirstStart = !settings.onboardingShown;
+
     final res = await getUpdateInfo.call();
     res.fold(
       (l) => log('Fail happened : ${l.cause}'),
-      (r) => add(SetUpdateInfo(data: r)),
+      (r) => add(_SetUpdateInfo(data: r)),
     );
   }
 
   /// If server sent new version update, show info dialog
-  void _onSetInfo(SetUpdateInfo event, emit) async {
+  void _onSetInfo(_SetUpdateInfo event, emit) async {
     final settings = await getAppSettings.call();
     if (settings.lastUpdateVersion != event.data.serverVersion) {
-      emit(ShowUpdateDialog(data: event.data));
+      if (_isFirstStart) {
+        add(DialogIsShown(versionToSave: event.data.serverVersion));
+      } else {
+        emit(ShowUpdateDialog(data: event.data));
+      }
     }
   }
 
