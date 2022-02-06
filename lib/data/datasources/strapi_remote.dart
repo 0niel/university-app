@@ -1,11 +1,11 @@
 import 'package:dio/dio.dart';
 import 'package:rtu_mirea_app/common/errors/exceptions.dart';
 import 'package:rtu_mirea_app/data/models/story_model.dart';
-import 'package:rtu_mirea_app/data/models/update_info_modal/update_info_modal.dart';
+import 'package:rtu_mirea_app/data/models/update_info_model/update_info_model.dart';
 
 abstract class StrapiRemoteData {
   Future<List<StoryModel>> getStories();
-  Future<UpdateInfoModal> getLastUpdateInfo();
+  Future<UpdateInfoModel> getLastUpdateInfo();
 }
 
 class StrapiRemoteDataImpl implements StrapiRemoteData {
@@ -31,14 +31,14 @@ class StrapiRemoteDataImpl implements StrapiRemoteData {
   }
 
   @override
-  Future<UpdateInfoModal> getLastUpdateInfo() async {
+  Future<UpdateInfoModel> getLastUpdateInfo() async {
     final response = await httpClient.get(_apiUrl + '/updates');
     if (response.statusCode == 200) {
       try {
         final listOfUpdates = response.data['data'] as List;
         final raw = listOfUpdates.last['attributes'];
 
-        return UpdateInfoModal.fromJson(raw);
+        return UpdateInfoModel.fromJson(raw);
       } catch (e) {
         throw ParsingException(
           "Couldn't parse UpdateInfo from strapi remote because $e",
