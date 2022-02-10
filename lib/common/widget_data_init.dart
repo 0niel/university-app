@@ -1,4 +1,5 @@
-import 'package:flutter/material.dart';
+import 'dart:developer';
+
 import 'package:home_widget/home_widget.dart';
 import 'package:rtu_mirea_app/common/calendar.dart';
 import 'package:rtu_mirea_app/common/errors/exceptions.dart';
@@ -11,7 +12,7 @@ import 'package:rtu_mirea_app/service_locator.dart';
 /// Sets data for home widgets
 class WidgetDataProvider {
   static void initData() {
-    HomeWidget.setAppGroupId('group.com.MireaNinja.rtuMireaApp');
+    HomeWidget.setAppGroupId('group.mirea.ninja.mireaapp');
     _init();
   }
 
@@ -26,8 +27,8 @@ class WidgetDataProvider {
   static _checkWeeks() async {
     final need = await getIt<WidgetData>().needWeeksReload();
     // print('isNeedWeek $need');
-    if (true) {
-      // if (need) {
+    // if (true) {
+    if (need) {
       // Map for day_of_year : schedule_week_number
       Map<String, int> days = {};
 
@@ -57,24 +58,24 @@ class WidgetDataProvider {
 
   /// Set schedule info on first start
   static _checkSchedule() async {
-    // if (true) {
-    // print(
-    //     'isScheduleLoaded ${!(await getIt<WidgetData>().isScheduleLoaded())}');
-    if (!(await getIt<WidgetData>().isScheduleLoaded())) {
+    final scheduleIsLoaded = await getIt<WidgetData>().isScheduleLoaded();
+    // print('isScheduleLoaded ${scheduleIsLoaded}');
+    if (!scheduleIsLoaded) {
       try {
         var a = await getIt<ScheduleLocalData>().getScheduleFromCache();
         var a2 = await getIt<ScheduleLocalData>().getActiveGroupFromCache();
+        // log('Going to set schedule from group: $a');
 
         for (ScheduleModel schedule in a) {
           if (schedule.group == a2) {
             getIt<WidgetData>().setSchedule(schedule.toRawJson());
-            // print('done schedule');
+            // log('done schedule');
           }
         }
       } on CacheException {
-        debugPrint("Tried to set schedule for widgets, but no cache saved");
+        log("Tried to set schedule for widgets, but no cache saved");
       } catch (e) {
-        debugPrint(e.toString());
+        log(e.toString());
       }
     }
   }
@@ -89,6 +90,7 @@ class WidgetDataProvider {
 
   /// Refresh widgets
   static _update() {
+    log('widget update');
     HomeWidget.updateWidget(
       name: 'HomeWidgetExampleProvider',
       androidName: 'HomeWidgetProvider',

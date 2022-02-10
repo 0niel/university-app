@@ -9,7 +9,7 @@ import WidgetKit
 import SwiftUI
 import Intents
 
-private let widgetGroupId = "group.com.MireaNinja.rtuMireaApp"
+private let widgetGroupId = "group.mirea.ninja.mireaapp"
 
 /// Comfortable way to get calendar properties from date
 extension Date {
@@ -321,7 +321,12 @@ struct HomeWidgetExampleEntryView : View {
             text_lesson = " "+lesson.name.prefix(max-3)+"..."
         }
         
-        let room_text = ", "+lesson.rooms[0]
+        var room_text = ""
+        // No room is specified for some lessons
+        if (!lesson.rooms.isEmpty){
+            room_text = ", "+lesson.rooms[0]
+        }
+        
         return ZStack(alignment:.leading){
             RoundedRectangle(cornerRadius: 12, style: .continuous)
                 .fill(midbg)
