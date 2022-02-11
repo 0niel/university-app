@@ -3,6 +3,7 @@ import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter_html_iframe/flutter_html_iframe.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
+import 'package:rtu_mirea_app/common/utils/strapi_utils.dart';
 import 'package:rtu_mirea_app/domain/entities/news_item.dart';
 import 'package:rtu_mirea_app/presentation/colors.dart';
 import 'package:rtu_mirea_app/presentation/pages/news/widgets/tags_widgets.dart';
@@ -28,7 +29,7 @@ class NewsDetailsPage extends StatelessWidget {
                 children: <Widget>[
                   Positioned.fill(
                     child: Image.network(
-                      newsItem.images[0].formats.medium!.url,
+                      StrapiUtils.getMediumImageUrl(newsItem.images[0].formats),
                       fit: BoxFit.cover,
                     ),
                   ),
