@@ -1,6 +1,7 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
+import 'package:rtu_mirea_app/common/utils/strapi_utils.dart';
 import 'package:rtu_mirea_app/domain/entities/news_item.dart';
 import 'package:intl/intl.dart';
 import 'package:rtu_mirea_app/presentation/colors.dart';
@@ -36,7 +37,7 @@ class NewsItemWidget extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               ExtendedImage.network(
-                newsItem.images[0].formats.thumbnail.url,
+                StrapiUtils.getMediumImageUrl(newsItem.images[0].formats),
                 height: 175,
                 width: MediaQuery.of(context).size.width,
                 fit: BoxFit.cover,
