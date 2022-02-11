@@ -81,9 +81,12 @@ class WidgetDataProvider {
   }
 
   /// Update schedule when active group is changed
-  static setSchedule(Schedule schedule) {
+  static void setSchedule(Schedule schedule) {
     final model = ScheduleModel(
-        group: schedule.group, isRemote: false, schedule: schedule.schedule);
+      group: schedule.group,
+      isRemote: false,
+      schedule: schedule.schedule,
+    );
     getIt<WidgetData>().setSchedule(model.toRawJson());
     _update();
   }
