@@ -1,7 +1,7 @@
 import 'dart:developer';
 
 import 'package:home_widget/home_widget.dart';
-import 'package:rtu_mirea_app/common/calendar.dart';
+import 'package:rtu_mirea_app/common/utils/calendar_utils.dart';
 import 'package:rtu_mirea_app/common/errors/exceptions.dart';
 import 'package:rtu_mirea_app/data/datasources/schedule_local.dart';
 import 'package:rtu_mirea_app/data/datasources/widget_data.dart';
@@ -35,7 +35,7 @@ class WidgetDataProvider {
       final DateTime now = DateTime.now();
       final DateTime firstDayOfYear =
           DateTime(now.year, DateTime.january, 1, 0, 0);
-      final lastDay = Calendar.getSemesterLastDay();
+      final lastDay = CalendarUtils.getSemesterLastDay();
 
       for (DateTime indexDay = DateTime(now.year, now.month, now.day);
           indexDay.year == now.year;
@@ -43,7 +43,8 @@ class WidgetDataProvider {
         //  print(indexDay.toString());
         final dayOfYear = indexDay.difference(firstDayOfYear).inDays.toString();
         if (indexDay.isBefore(lastDay)) {
-          days[dayOfYear] = Calendar.getCurrentWeek(mCurrentDate: indexDay);
+          days[dayOfYear] =
+              CalendarUtils.getCurrentWeek(mCurrentDate: indexDay);
         } else {
           days[dayOfYear] = -228;
         }
