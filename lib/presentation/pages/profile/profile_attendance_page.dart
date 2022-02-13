@@ -66,9 +66,10 @@ class _ProfileAttendancePageState extends State<ProfileAttendancePage> {
                   return Column(
                     children: [
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text('Промежуток: ', style: DarkTextTheme.body),
+                          const SizedBox(width: 16),
                           SelectRangeDateButton(
                             initialRange: PickerDateRange(
                                 _getFirstAndLastWeekDaysText()[0],
