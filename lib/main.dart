@@ -1,4 +1,8 @@
+import 'dart:io';
+
 import 'package:adaptive_theme/adaptive_theme.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -21,8 +25,12 @@ import 'package:rtu_mirea_app/presentation/core/routes/routes.gr.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:intl/intl_standalone.dart';
 import 'package:rtu_mirea_app/service_locator.dart' as dependency_injection;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_strategy/url_strategy.dart';
 import 'service_locator.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'firebase_options.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -30,9 +38,22 @@ Future<void> main() async {
 
   WidgetDataProvider.initData();
 
-  // to debug:
-  // var prefs = getIt<SharedPreferences>();
-  // await prefs.clear();
+  Platform.isAndroid
+      ? await Firebase.initializeApp()
+      : await Firebase.initializeApp(
+          options: DefaultFirebaseOptions.currentPlatform,
+        );
+
+  await FirebaseAnalytics.instance.logAppOpen();
+
+  if (kDebugMode) {
+    // Force disable Crashlytics collection while doing every day development
+    await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(false);
+
+    // Clear local dota
+    // var prefs = getIt<SharedPreferences>();
+    // await prefs.clear();
+  }
 
   setPathUrlStrategy();
 
@@ -102,7 +123,13 @@ class App extends StatelessWidget {
           debugShowCheckedModeBanner: false,
           title: 'Приложение РТУ МИРЭА',
           theme: theme,
-          routerDelegate: _appRouter.delegate(),
+          routerDelegate: _appRouter.delegate(
+            navigatorObservers: () => [
+              FirebaseAnalyticsObserver(
+                analytics: FirebaseAnalytics.instance,
+              ),
+            ],
+          ),
           routeInformationProvider: _appRouter.routeInfoProvider(),
           routeInformationParser: _appRouter.defaultRouteParser(),
         ),
