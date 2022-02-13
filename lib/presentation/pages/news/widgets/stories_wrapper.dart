@@ -1,16 +1,15 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:dismissible_page/dismissible_page.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:rtu_mirea_app/common/utils/utils.dart';
-import 'package:rtu_mirea_app/presentation/core/routes/routes.gr.dart';
 import 'package:story/story_page_view/story_page_view.dart';
 import 'package:url_launcher/url_launcher.dart';
-
 import 'package:rtu_mirea_app/domain/entities/story.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:rtu_mirea_app/presentation/widgets/buttons/primary_button.dart';
 
-class StoriesWrapper extends StatelessWidget {
+class StoriesWrapper extends StatefulWidget {
   const StoriesWrapper({
     Key? key,
     required this.stories,
@@ -21,6 +20,14 @@ class StoriesWrapper extends StatelessWidget {
   final int storyIndex;
 
   @override
+  State<StoriesWrapper> createState() => _StoriesWrapperState();
+}
+
+class _StoriesWrapperState extends State<StoriesWrapper> {
+  // In order not to send the same request to analytics several times
+  int _prevStoryIndex = -1;
+
+  @override
   Widget build(BuildContext context) {
     return DismissiblePage(
       onDismiss: () => context.router.pop(),
@@ -29,13 +36,20 @@ class StoriesWrapper extends StatelessWidget {
       child: Material(
         color: Colors.transparent,
         child: Hero(
-          tag: stories[storyIndex].title,
+          tag: widget.stories[widget.storyIndex].title,
           child: StoryPageView(
             indicatorDuration: const Duration(seconds: 6, milliseconds: 500),
-            initialPage: storyIndex,
+            initialPage: widget.storyIndex,
             itemBuilder: (context, pageIndex, storyIndex) {
-              final author = stories[pageIndex].author;
-              final page = stories[pageIndex].pages[storyIndex];
+              if (pageIndex != _prevStoryIndex) {
+                _prevStoryIndex = pageIndex;
+                FirebaseAnalytics.instance
+                    .logEvent(name: 'view_story', parameters: {
+                  'story_title': widget.stories[pageIndex].title,
+                });
+              }
+              final author = widget.stories[pageIndex].author;
+              final page = widget.stories[pageIndex].pages[storyIndex];
               return Stack(
                 children: [
                   Positioned.fill(
@@ -133,19 +147,16 @@ class StoriesWrapper extends StatelessWidget {
                         horizontal: 24, vertical: 20),
                     child: Column(
                       children: List.generate(
-                        stories[pageIndex].pages[storyIndex].actions.length,
+                        widget.stories[pageIndex].pages[storyIndex].actions
+                            .length,
                         (index) => Padding(
                           padding: const EdgeInsets.only(bottom: 8),
                           child: PrimaryButton(
-                            text: stories[pageIndex]
-                                .pages[storyIndex]
-                                .actions[index]
-                                .title,
+                            text: widget.stories[pageIndex].pages[storyIndex]
+                                .actions[index].title,
                             onClick: () async {
-                              await launch(stories[pageIndex]
-                                  .pages[storyIndex]
-                                  .actions[index]
-                                  .url);
+                              await launch(widget.stories[pageIndex]
+                                  .pages[storyIndex].actions[index].url);
                             },
                           ),
                         ),
@@ -155,9 +166,9 @@ class StoriesWrapper extends StatelessWidget {
                 ],
               );
             },
-            pageLength: stories.length,
+            pageLength: widget.stories.length,
             storyLength: (int pageIndex) {
-              return stories[pageIndex].pages.length;
+              return widget.stories[pageIndex].pages.length;
             },
             onPageLimitReached: () => context.router.pop(),
           ),
