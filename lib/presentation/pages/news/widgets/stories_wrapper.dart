@@ -1,17 +1,21 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:dismissible_page/dismissible_page.dart';
 import 'package:flutter/material.dart';
-import 'package:rtu_mirea_app/domain/entities/story.dart';
-import 'package:rtu_mirea_app/presentation/theme.dart';
-import 'package:rtu_mirea_app/presentation/widgets/buttons/primary_button.dart';
+import 'package:rtu_mirea_app/common/utils/utils.dart';
+import 'package:rtu_mirea_app/presentation/core/routes/routes.gr.dart';
 import 'package:story/story_page_view/story_page_view.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import 'package:rtu_mirea_app/domain/entities/story.dart';
+import 'package:rtu_mirea_app/presentation/theme.dart';
+import 'package:rtu_mirea_app/presentation/widgets/buttons/primary_button.dart';
+
 class StoriesWrapper extends StatelessWidget {
   const StoriesWrapper({
+    Key? key,
     required this.stories,
     required this.storyIndex,
-  });
+  }) : super(key: key);
 
   final List<Story> stories;
   final int storyIndex;
@@ -27,6 +31,7 @@ class StoriesWrapper extends StatelessWidget {
         child: Hero(
           tag: stories[storyIndex].title,
           child: StoryPageView(
+            indicatorDuration: const Duration(seconds: 6, milliseconds: 500),
             initialPage: storyIndex,
             itemBuilder: (context, pageIndex, storyIndex) {
               final author = stories[pageIndex].author;
@@ -38,9 +43,9 @@ class StoriesWrapper extends StatelessWidget {
                   ),
                   Positioned.fill(
                     child: Image.network(
-                      page.media.formats.medium != null
-                          ? page.media.formats.medium!.url
-                          : page.media.formats.small!.url,
+                      MediaQuery.of(context).size.width > 580
+                          ? StrapiUtils.getLargestImageUrl(page.media.formats)
+                          : StrapiUtils.getMediumImageUrl(page.media.formats),
                       fit: BoxFit.cover,
                     ),
                   ),
@@ -83,9 +88,14 @@ class StoriesWrapper extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           if (page.title != null)
-                            Text(
-                              page.title!,
-                              style: DarkTextTheme.h4,
+                            Column(
+                              children: [
+                                Text(
+                                  page.title!,
+                                  style: DarkTextTheme.h4,
+                                ),
+                                const SizedBox(height: 16)
+                              ],
                             ),
                           if (page.text != null)
                             Text(
