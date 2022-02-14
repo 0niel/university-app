@@ -36,20 +36,23 @@ class StrapiRepositoryImpl implements StrapiRepository {
   }
 
   @override
-  Future<Either<Failure, UpdateInfo>> getLastUpdateInfo() async {
+  Future<Either<Failure, UpdateInfo?>> getLastUpdateInfo() async {
     if (await connectionChecker.hasConnection) {
       try {
-        final updateInfoModal = await remoteDataSource.getLastUpdateInfo();
-
-        return Right(
-          UpdateInfo(
-            title: updateInfoModal.title,
-            description: updateInfoModal.description,
-            changeLog: updateInfoModal.changeLog,
-            serverVersion: updateInfoModal.serverVersion,
-            appVersion: packageInfo.version,
-          ),
-        );
+        final updatesList = await remoteDataSource.getLastUpdateInfo();
+        final currentBuildNumber = int.parse(packageInfo.buildNumber);
+        for (final updateInfo in updatesList) {
+          if (updateInfo.buildNumber > currentBuildNumber) {
+            return Right(UpdateInfo(
+              appVersion: updateInfo.appVersion,
+              title: updateInfo.title,
+              description: updateInfo.description,
+              text: updateInfo.text,
+              buildNumber: updateInfo.buildNumber,
+            ));
+          }
+        }
+        return const Right(null);
       } on ParsingException catch (e) {
         return Left(ServerFailure(e.cause));
       } on ServerException {

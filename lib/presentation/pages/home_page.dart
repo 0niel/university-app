@@ -5,7 +5,7 @@ import 'package:rtu_mirea_app/presentation/bloc/app_cubit/app_cubit.dart';
 import 'package:rtu_mirea_app/presentation/bloc/update_info_bloc/update_info_bloc.dart';
 import 'package:rtu_mirea_app/presentation/colors.dart';
 import 'package:rtu_mirea_app/presentation/core/routes/routes.gr.dart';
-import 'package:rtu_mirea_app/presentation/pages/updates/update_info_modal.dart';
+import 'package:rtu_mirea_app/presentation/widgets/update_info_modal.dart';
 import 'package:salomon_bottom_bar/salomon_bottom_bar.dart';
 
 class HomePage extends StatelessWidget {
@@ -35,9 +35,7 @@ class HomePage extends StatelessWidget {
                     child: BlocListener<UpdateInfoBloc, UpdateInfoState>(
                       child: child,
                       listener: (context, state) =>
-                          WidgetsBinding.instance!.addPostFrameCallback(
-                        (_) => UpdateInfoDialog.checkAndShow(context, state),
-                      ),
+                          UpdateInfoDialog.checkAndShow(context, state),
                     ),
                   ),
                 ),

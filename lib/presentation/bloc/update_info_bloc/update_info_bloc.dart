@@ -1,5 +1,4 @@
 import 'dart:developer';
-
 import 'package:bloc/bloc.dart';
 import 'package:rtu_mirea_app/domain/entities/app_settings.dart';
 import 'package:rtu_mirea_app/domain/entities/update_info.dart';
@@ -33,18 +32,21 @@ class UpdateInfoBloc extends Bloc<UpdateInfoEvent, UpdateInfoState> {
     _isFirstStart = !settings.onboardingShown;
 
     final res = await getUpdateInfo.call();
+
     res.fold(
       (l) => log('Fail happened : ${l.cause}'),
-      (r) => add(_SetUpdateInfo(data: r)),
+      (r) => {
+        if (r != null) {add(_SetUpdateInfo(data: r))}
+      },
     );
   }
 
   /// If server sent new version update, show info dialog
   void _onSetInfo(_SetUpdateInfo event, emit) async {
     final settings = await getAppSettings.call();
-    if (settings.lastUpdateVersion != event.data.serverVersion) {
+    if (settings.lastUpdateVersion != event.data.appVersion) {
       if (_isFirstStart) {
-        add(DialogIsShown(versionToSave: event.data.serverVersion));
+        add(DialogIsShown(versionToSave: event.data.appVersion));
       } else {
         emit(ShowUpdateDialog(data: event.data));
       }
