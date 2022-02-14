@@ -17,7 +17,7 @@ abstract class UpdateInfoDialog {
       );
       BlocProvider.of<UpdateInfoBloc>(context).add(
         DialogIsShown(
-          versionToSave: state.data.serverVersion,
+          versionToSave: state.data.appVersion,
         ),
       );
     }
@@ -58,7 +58,7 @@ class _UpdateInfo extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Text(
-                  'обновление',
+                  'Вышла новая версия ${data.appVersion}',
                   style: DarkTextTheme.captionS.copyWith(
                     color: DarkThemeColors.deactive,
                   ),
@@ -69,11 +69,13 @@ class _UpdateInfo extends StatelessWidget {
                   textAlign: TextAlign.center,
                   style: DarkTextTheme.h5,
                 ),
-                const Padding(padding: EdgeInsets.only(top: 24)),
-                Text(
-                  data.description,
-                  style: DarkTextTheme.bodyL,
-                ),
+                if (data.description != null)
+                  const Padding(padding: EdgeInsets.only(top: 24)),
+                if (data.description != null)
+                  Text(
+                    data.description!,
+                    style: DarkTextTheme.bodyL,
+                  ),
                 const Padding(padding: EdgeInsets.only(top: 24)),
                 Container(
                   constraints: const BoxConstraints(
@@ -86,7 +88,7 @@ class _UpdateInfo extends StatelessWidget {
                     shrinkWrap: true,
                     children: [
                       Text(
-                        data.changeLog,
+                        data.text,
                         style: DarkTextTheme.body.copyWith(
                           color: DarkThemeColors.deactive,
                         ),
@@ -101,16 +103,6 @@ class _UpdateInfo extends StatelessWidget {
                   text: 'Класс!',
                   onClick: () => Navigator.pop(context),
                   // backgroundColor: DarkThemeColors.primary,
-                ),
-                const Padding(padding: EdgeInsets.only(top: 24)),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    Text(
-                      'Ваша версия приложения - ${data.appVersion}',
-                      style: DarkTextTheme.captionL,
-                    ),
-                  ],
                 ),
               ],
             ),

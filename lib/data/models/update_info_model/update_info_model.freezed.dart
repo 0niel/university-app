@@ -24,14 +24,16 @@ class _$UpdateInfoModelTearOff {
 
   _UpdateInfoModel call(
       {@JsonKey(name: 'title') required String title,
-      @JsonKey(name: 'description') required String description,
-      @JsonKey(name: 'text') required String changeLog,
-      @JsonKey(name: 'appVersion') required String serverVersion}) {
+      @JsonKey(name: 'description') required String? description,
+      @JsonKey(name: 'text') required String text,
+      @JsonKey(name: 'appVersion') required String appVersion,
+      @JsonKey(name: 'buildNumber') required int buildNumber}) {
     return _UpdateInfoModel(
       title: title,
       description: description,
-      changeLog: changeLog,
-      serverVersion: serverVersion,
+      text: text,
+      appVersion: appVersion,
+      buildNumber: buildNumber,
     );
   }
 
@@ -48,11 +50,13 @@ mixin _$UpdateInfoModel {
   @JsonKey(name: 'title')
   String get title => throw _privateConstructorUsedError;
   @JsonKey(name: 'description')
-  String get description => throw _privateConstructorUsedError;
+  String? get description => throw _privateConstructorUsedError;
   @JsonKey(name: 'text')
-  String get changeLog => throw _privateConstructorUsedError;
+  String get text => throw _privateConstructorUsedError;
   @JsonKey(name: 'appVersion')
-  String get serverVersion => throw _privateConstructorUsedError;
+  String get appVersion => throw _privateConstructorUsedError;
+  @JsonKey(name: 'buildNumber')
+  int get buildNumber => throw _privateConstructorUsedError;
 
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
@@ -67,9 +71,10 @@ abstract class $UpdateInfoModelCopyWith<$Res> {
       _$UpdateInfoModelCopyWithImpl<$Res>;
   $Res call(
       {@JsonKey(name: 'title') String title,
-      @JsonKey(name: 'description') String description,
-      @JsonKey(name: 'text') String changeLog,
-      @JsonKey(name: 'appVersion') String serverVersion});
+      @JsonKey(name: 'description') String? description,
+      @JsonKey(name: 'text') String text,
+      @JsonKey(name: 'appVersion') String appVersion,
+      @JsonKey(name: 'buildNumber') int buildNumber});
 }
 
 /// @nodoc
@@ -85,8 +90,9 @@ class _$UpdateInfoModelCopyWithImpl<$Res>
   $Res call({
     Object? title = freezed,
     Object? description = freezed,
-    Object? changeLog = freezed,
-    Object? serverVersion = freezed,
+    Object? text = freezed,
+    Object? appVersion = freezed,
+    Object? buildNumber = freezed,
   }) {
     return _then(_value.copyWith(
       title: title == freezed
@@ -96,15 +102,19 @@ class _$UpdateInfoModelCopyWithImpl<$Res>
       description: description == freezed
           ? _value.description
           : description // ignore: cast_nullable_to_non_nullable
+              as String?,
+      text: text == freezed
+          ? _value.text
+          : text // ignore: cast_nullable_to_non_nullable
               as String,
-      changeLog: changeLog == freezed
-          ? _value.changeLog
-          : changeLog // ignore: cast_nullable_to_non_nullable
+      appVersion: appVersion == freezed
+          ? _value.appVersion
+          : appVersion // ignore: cast_nullable_to_non_nullable
               as String,
-      serverVersion: serverVersion == freezed
-          ? _value.serverVersion
-          : serverVersion // ignore: cast_nullable_to_non_nullable
-              as String,
+      buildNumber: buildNumber == freezed
+          ? _value.buildNumber
+          : buildNumber // ignore: cast_nullable_to_non_nullable
+              as int,
     ));
   }
 }
@@ -118,9 +128,10 @@ abstract class _$UpdateInfoModelCopyWith<$Res>
   @override
   $Res call(
       {@JsonKey(name: 'title') String title,
-      @JsonKey(name: 'description') String description,
-      @JsonKey(name: 'text') String changeLog,
-      @JsonKey(name: 'appVersion') String serverVersion});
+      @JsonKey(name: 'description') String? description,
+      @JsonKey(name: 'text') String text,
+      @JsonKey(name: 'appVersion') String appVersion,
+      @JsonKey(name: 'buildNumber') int buildNumber});
 }
 
 /// @nodoc
@@ -138,8 +149,9 @@ class __$UpdateInfoModelCopyWithImpl<$Res>
   $Res call({
     Object? title = freezed,
     Object? description = freezed,
-    Object? changeLog = freezed,
-    Object? serverVersion = freezed,
+    Object? text = freezed,
+    Object? appVersion = freezed,
+    Object? buildNumber = freezed,
   }) {
     return _then(_UpdateInfoModel(
       title: title == freezed
@@ -149,15 +161,19 @@ class __$UpdateInfoModelCopyWithImpl<$Res>
       description: description == freezed
           ? _value.description
           : description // ignore: cast_nullable_to_non_nullable
+              as String?,
+      text: text == freezed
+          ? _value.text
+          : text // ignore: cast_nullable_to_non_nullable
               as String,
-      changeLog: changeLog == freezed
-          ? _value.changeLog
-          : changeLog // ignore: cast_nullable_to_non_nullable
+      appVersion: appVersion == freezed
+          ? _value.appVersion
+          : appVersion // ignore: cast_nullable_to_non_nullable
               as String,
-      serverVersion: serverVersion == freezed
-          ? _value.serverVersion
-          : serverVersion // ignore: cast_nullable_to_non_nullable
-              as String,
+      buildNumber: buildNumber == freezed
+          ? _value.buildNumber
+          : buildNumber // ignore: cast_nullable_to_non_nullable
+              as int,
     ));
   }
 }
@@ -168,8 +184,9 @@ class _$_UpdateInfoModel implements _UpdateInfoModel {
   const _$_UpdateInfoModel(
       {@JsonKey(name: 'title') required this.title,
       @JsonKey(name: 'description') required this.description,
-      @JsonKey(name: 'text') required this.changeLog,
-      @JsonKey(name: 'appVersion') required this.serverVersion});
+      @JsonKey(name: 'text') required this.text,
+      @JsonKey(name: 'appVersion') required this.appVersion,
+      @JsonKey(name: 'buildNumber') required this.buildNumber});
 
   factory _$_UpdateInfoModel.fromJson(Map<String, dynamic> json) =>
       _$$_UpdateInfoModelFromJson(json);
@@ -179,17 +196,20 @@ class _$_UpdateInfoModel implements _UpdateInfoModel {
   final String title;
   @override
   @JsonKey(name: 'description')
-  final String description;
+  final String? description;
   @override
   @JsonKey(name: 'text')
-  final String changeLog;
+  final String text;
   @override
   @JsonKey(name: 'appVersion')
-  final String serverVersion;
+  final String appVersion;
+  @override
+  @JsonKey(name: 'buildNumber')
+  final int buildNumber;
 
   @override
   String toString() {
-    return 'UpdateInfoModel(title: $title, description: $description, changeLog: $changeLog, serverVersion: $serverVersion)';
+    return 'UpdateInfoModel(title: $title, description: $description, text: $text, appVersion: $appVersion, buildNumber: $buildNumber)';
   }
 
   @override
@@ -200,9 +220,11 @@ class _$_UpdateInfoModel implements _UpdateInfoModel {
             const DeepCollectionEquality().equals(other.title, title) &&
             const DeepCollectionEquality()
                 .equals(other.description, description) &&
-            const DeepCollectionEquality().equals(other.changeLog, changeLog) &&
+            const DeepCollectionEquality().equals(other.text, text) &&
             const DeepCollectionEquality()
-                .equals(other.serverVersion, serverVersion));
+                .equals(other.appVersion, appVersion) &&
+            const DeepCollectionEquality()
+                .equals(other.buildNumber, buildNumber));
   }
 
   @override
@@ -210,8 +232,9 @@ class _$_UpdateInfoModel implements _UpdateInfoModel {
       runtimeType,
       const DeepCollectionEquality().hash(title),
       const DeepCollectionEquality().hash(description),
-      const DeepCollectionEquality().hash(changeLog),
-      const DeepCollectionEquality().hash(serverVersion));
+      const DeepCollectionEquality().hash(text),
+      const DeepCollectionEquality().hash(appVersion),
+      const DeepCollectionEquality().hash(buildNumber));
 
   @JsonKey(ignore: true)
   @override
@@ -227,9 +250,10 @@ class _$_UpdateInfoModel implements _UpdateInfoModel {
 abstract class _UpdateInfoModel implements UpdateInfoModel {
   const factory _UpdateInfoModel(
           {@JsonKey(name: 'title') required String title,
-          @JsonKey(name: 'description') required String description,
-          @JsonKey(name: 'text') required String changeLog,
-          @JsonKey(name: 'appVersion') required String serverVersion}) =
+          @JsonKey(name: 'description') required String? description,
+          @JsonKey(name: 'text') required String text,
+          @JsonKey(name: 'appVersion') required String appVersion,
+          @JsonKey(name: 'buildNumber') required int buildNumber}) =
       _$_UpdateInfoModel;
 
   factory _UpdateInfoModel.fromJson(Map<String, dynamic> json) =
@@ -240,13 +264,16 @@ abstract class _UpdateInfoModel implements UpdateInfoModel {
   String get title;
   @override
   @JsonKey(name: 'description')
-  String get description;
+  String? get description;
   @override
   @JsonKey(name: 'text')
-  String get changeLog;
+  String get text;
   @override
   @JsonKey(name: 'appVersion')
-  String get serverVersion;
+  String get appVersion;
+  @override
+  @JsonKey(name: 'buildNumber')
+  int get buildNumber;
   @override
   @JsonKey(ignore: true)
   _$UpdateInfoModelCopyWith<_UpdateInfoModel> get copyWith =>

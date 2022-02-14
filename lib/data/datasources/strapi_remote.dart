@@ -5,7 +5,7 @@ import 'package:rtu_mirea_app/data/models/update_info_model/update_info_model.da
 
 abstract class StrapiRemoteData {
   Future<List<StoryModel>> getStories();
-  Future<UpdateInfoModel> getLastUpdateInfo();
+  Future<List<UpdateInfoModel>> getLastUpdateInfo();
 }
 
 class StrapiRemoteDataImpl implements StrapiRemoteData {
@@ -31,14 +31,16 @@ class StrapiRemoteDataImpl implements StrapiRemoteData {
   }
 
   @override
-  Future<UpdateInfoModel> getLastUpdateInfo() async {
-    final response = await httpClient.get(_apiUrl + '/updates');
+  Future<List<UpdateInfoModel>> getLastUpdateInfo() async {
+    final response =
+        await httpClient.get(_apiUrl + '/updates?sort=buildNumber:DESC');
     if (response.statusCode == 200) {
       try {
-        final listOfUpdates = response.data['data'] as List;
-        final raw = listOfUpdates.last['attributes'];
-
-        return UpdateInfoModel.fromJson(raw);
+        final responseBody = response.data;
+        List<UpdateInfoModel> updatesList = [];
+        updatesList = List<UpdateInfoModel>.from(responseBody['data']
+            .map((x) => UpdateInfoModel.fromJson(x['attributes'])));
+        return updatesList;
       } catch (e) {
         throw ParsingException(
           "Couldn't parse UpdateInfo from strapi remote because $e",
