@@ -1,4 +1,7 @@
+import 'dart:math';
+
 import 'package:clock/clock.dart';
+import 'package:intl/intl.dart';
 
 abstract class CalendarUtils {
   /// Maximum number of academic weeks per semester
@@ -20,18 +23,11 @@ abstract class CalendarUtils {
       return 1;
     }
 
-    int week = 1;
-    int prevWeekday = startDate.weekday;
+    int week = _weekNumber(currentDate) - _weekNumber(startDate);
 
-    while (currentDate.difference(startDate).inDays != 0) {
-      if (startDate.weekday == 7 && startDate.weekday != prevWeekday) {
-        week += 1;
-      }
-      prevWeekday = startDate.weekday;
-      startDate = startDate.add(const Duration(days: 1));
+    if (currentDate.weekday != 0) {
+      week++;
     }
-
-    // int week = ((milliseconds / (24 * 60 * 60 * 1000) / 7) + 1).round();
 
     return week;
   }
@@ -76,6 +72,25 @@ abstract class CalendarUtils {
             _CurrentSemesterStart.getCurrentSemesterStart(
                 mCurrentDate: mCurrentDate, clock: clock))
         .last;
+  }
+
+  /// Calculates number of weeks for a given year as per https://en.wikipedia.org/wiki/ISO_week_date#Weeks_per_year
+  static int _numOfWeeks(int year) {
+    DateTime dec28 = DateTime(year, 12, 28);
+    int dayOfDec28 = int.parse(DateFormat("D").format(dec28));
+    return ((dayOfDec28 - dec28.weekday + 10) / 7).floor();
+  }
+
+  /// Calculates week number from a date as per https://en.wikipedia.org/wiki/ISO_week_date#Calculation
+  static int _weekNumber(DateTime date) {
+    int dayOfYear = int.parse(DateFormat("D").format(date));
+    int woy = ((dayOfYear - date.weekday + 10) / 7).floor();
+    if (woy < 1) {
+      woy = _numOfWeeks(date.year - 1);
+    } else if (woy > _numOfWeeks(date.year)) {
+      woy = 1;
+    }
+    return woy;
   }
 }
 
