@@ -35,6 +35,18 @@ flutter build appbundle
 flutter doctor
 ```
 
+## Генерация кода
+Пакеты **freezed** и **auto_route** генерируют код для API моделей данных и навигации.
+Используйте флаг [watch], чтобы следить за изменениями в файловой системе и перестраивать код при необходимости.
+```
+flutter packages pub run build_runner watch --delete-conflicting-outputs
+```
+
+Tсли вы хотите, чтобы генератор запустился один раз и завершил работу, используйте
+```
+flutter packages pub run build_runner build --delete-conflicting-outputs
+```
+
 ## Конфигурация Firebase Analytics и Crashlytics
 1. Зарегистрируйте приложение в [Firebase](https://console.firebase.google.com/).
 1. Выполните шаги для генерации `firebase_options.dart` файла с помощью [FlutterFire CLI](https://firebase.flutter.dev/docs/cli).
