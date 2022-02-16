@@ -16,7 +16,7 @@ class GroupTextFormatter extends TextInputFormatter {
     var text =
         newValue.text.replaceAll('-', '').replaceAll(' ', '').toUpperCase();
     if (text.length > 1 && oldValue.text.length > newValue.text.length) {
-      text = text.substring(1, text.length);
+      text = text.substring(0, text.length);
     }
     var readPosition = 0;
     for (var i = 0; i < groupMask.length; i++) {
