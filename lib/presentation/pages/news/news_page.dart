@@ -101,8 +101,10 @@ class _NewsPageState extends State<NewsPage> {
           ),
           Padding(
             padding: const EdgeInsets.only(right: 12),
-            child:
-                AppSettingsButton(onClick: () => _showTagsModalWindow(context)),
+            child: AppSettingsButton(
+                onClick: () => (context.read<NewsBloc>().state is NewsLoaded)
+                    ? _showTagsModalWindow(context)
+                    : null),
           ),
         ],
       ),
