@@ -1,10 +1,12 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:rtu_mirea_app/presentation/bloc/about_app_bloc/about_app_bloc.dart';
 import 'package:rtu_mirea_app/presentation/colors.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:rtu_mirea_app/presentation/widgets/buttons/icon_button.dart';
+import 'package:rtu_mirea_app/service_locator.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'widgets/member_info.dart';
@@ -27,7 +29,24 @@ class AboutAppPage extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 24),
             child:
                 Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text('Open Source', style: DarkTextTheme.h4),
+              Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Text('Open Source', style: DarkTextTheme.h4),
+                    Container(
+                      padding: const EdgeInsets.only(
+                          left: 8, right: 8, top: 4, bottom: 4),
+                      decoration: const BoxDecoration(
+                        borderRadius: BorderRadius.all(Radius.circular(4)),
+                        color: DarkThemeColors.primary,
+                      ),
+                      child: Text(
+                        getIt<PackageInfo>().version,
+                        style: DarkTextTheme.buttonS,
+                      ),
+                    ),
+                  ]),
               const SizedBox(height: 8),
               Text(
                 'Это приложение и все относящиеся к нему сервисы являются 100% бесплатными и Open Source продуктами. Мы с огромным удовольствием примем любые ваши предложения и сообщения, а также мы рады любому вашему участию в проекте!',
@@ -110,6 +129,12 @@ class AboutAppPage extends StatelessWidget {
                       }),
                   const SizedBox(width: 12),
                   SocialIconButton(
+                      assetImage: const AssetImage('assets/icons/patreon.png'),
+                      onClick: () {
+                        launch('https://www.patreon.com/mireaninja');
+                      }),
+                  const SizedBox(width: 12),
+                  SocialIconButton(
                       assetImage: const AssetImage('assets/icons/telegram.png'),
                       onClick: () {
                         launch('https://t.me/joinchat/LyM7jcoRXUhmOGM6');
@@ -117,7 +142,7 @@ class AboutAppPage extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 24),
-              Text('Разработчики', style: DarkTextTheme.h4),
+              Text('Контрибьюторы', style: DarkTextTheme.h4),
               const SizedBox(height: 16),
               BlocBuilder<AboutAppBloc, AboutAppState>(
                 buildWhen: (prevState, currentState) {
@@ -137,15 +162,14 @@ class AboutAppPage extends StatelessWidget {
                   } else if (state is AboutAppMembersLoaded) {
                     return Wrap(
                       spacing: 16.0,
-                      runSpacing: 8.0,
+                      runSpacing: 16.0,
                       children: [
                         for (var contributor in state.contributors)
-                          if (contributor.contributions > 5)
-                            MemberInfo(
-                              username: contributor.login,
-                              avatarUrl: contributor.avatarUrl,
-                              profileUrl: contributor.htmlUrl,
-                            ),
+                          MemberInfo(
+                            username: contributor.login,
+                            avatarUrl: contributor.avatarUrl,
+                            profileUrl: contributor.htmlUrl,
+                          ),
                       ],
                     );
                   } else if (state is AboutAppMembersLoadError) {
@@ -180,7 +204,7 @@ class AboutAppPage extends StatelessWidget {
                   } else if (state is AboutAppMembersLoaded) {
                     return Wrap(
                       spacing: 16.0,
-                      runSpacing: 8.0,
+                      runSpacing: 16.0,
                       children: List.generate(state.patrons.length, (index) {
                         return MemberInfo(
                           username: state.patrons[index].username,
