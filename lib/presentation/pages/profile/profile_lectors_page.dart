@@ -8,6 +8,9 @@ import 'package:rtu_mirea_app/presentation/colors.dart';
 import 'package:rtu_mirea_app/presentation/pages/profile/widgets/lector_search_card.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 
+final GlobalKey<FloatingSearchBarState> _searchBarKey =
+    GlobalKey<FloatingSearchBarState>();
+
 class ProfileLectrosPage extends StatefulWidget {
   const ProfileLectrosPage({Key? key}) : super(key: key);
 
@@ -32,12 +35,11 @@ class _ProfileLectrosPageState extends State<ProfileLectrosPage> {
 
   @override
   Widget build(BuildContext context) {
-    final isPortrait =
-        MediaQuery.of(context).orientation == Orientation.portrait;
     return Scaffold(
       appBar: AppBar(
         title: const Text("Преподаватели"),
         backgroundColor: DarkThemeColors.background01,
+        automaticallyImplyLeading: false,
       ),
       backgroundColor: DarkThemeColors.background01,
       body: SafeArea(
@@ -48,6 +50,7 @@ class _ProfileLectrosPageState extends State<ProfileLectrosPage> {
               return BlocBuilder<EmployeeBloc, EmployeeState>(
                 builder: (context, state) {
                   return FloatingSearchBar(
+                    key: _searchBarKey,
                     controller: _controller,
                     backdropColor: DarkThemeColors.background01,
                     shadowColor: DarkThemeColors.background03,
@@ -73,9 +76,7 @@ class _ProfileLectrosPageState extends State<ProfileLectrosPage> {
                     transitionDuration: const Duration(milliseconds: 800),
                     transitionCurve: Curves.easeInOut,
                     physics: const BouncingScrollPhysics(),
-                    axisAlignment: isPortrait ? 0.0 : -1.0,
                     openAxisAlignment: 0.0,
-                    width: isPortrait ? 600 : 500,
                     debounceDelay: const Duration(milliseconds: 500),
                     progress: state is EmployeeLoading,
                     onQueryChanged: (query) {
