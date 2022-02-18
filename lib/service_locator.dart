@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:rtu_mirea_app/data/datasources/app_settings_local.dart';
 import 'package:rtu_mirea_app/data/datasources/forum_local.dart';
 import 'package:rtu_mirea_app/data/datasources/forum_remote.dart';
@@ -43,6 +44,7 @@ import 'package:rtu_mirea_app/domain/usecases/get_schedule.dart';
 import 'package:rtu_mirea_app/domain/usecases/get_schedule_settings.dart';
 import 'package:rtu_mirea_app/domain/usecases/get_scores.dart';
 import 'package:rtu_mirea_app/domain/usecases/get_stories.dart';
+import 'package:rtu_mirea_app/domain/usecases/get_update_info.dart';
 import 'package:rtu_mirea_app/domain/usecases/get_user_data.dart';
 import 'package:rtu_mirea_app/domain/usecases/log_in.dart';
 import 'package:rtu_mirea_app/domain/usecases/log_out.dart';
@@ -61,6 +63,7 @@ import 'package:rtu_mirea_app/presentation/bloc/profile_bloc/profile_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/schedule_bloc/schedule_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/scores_bloc/scores_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/stories_bloc/stories_bloc.dart';
+import 'package:rtu_mirea_app/presentation/bloc/update_info_bloc/update_info_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'data/repositories/schedule_repository_impl.dart';
@@ -84,11 +87,13 @@ Future<void> setup() async {
   getIt.registerFactory(
       () => AboutAppBloc(getContributors: getIt(), getForumPatrons: getIt()));
   getIt.registerFactory(() => MapCubit());
-  getIt.registerFactory(() => AuthBloc(
-      logOut: getIt(),
-      getAuthToken: getIt(),
-      logIn: getIt(),
-      getUserData: getIt()));
+  getIt.registerFactory(
+    () => AuthBloc(
+        logOut: getIt(),
+        getAuthToken: getIt(),
+        logIn: getIt(),
+        getUserData: getIt()),
+  );
   getIt.registerFactory(() => ProfileBloc(getUserData: getIt()));
   getIt.registerFactory(() => AnnouncesBloc(getAnnounces: getIt()));
   getIt.registerFactory(() => EmployeeBloc(getEmployees: getIt()));
@@ -96,10 +101,22 @@ Future<void> setup() async {
   getIt.registerFactory(() => AttendanceBloc(getAttendance: getIt()));
   getIt.registerFactory(() => StoriesBloc(getStories: getIt()));
   getIt.registerFactory(
-      () => AppCubit(getAppSettings: getIt(), setAppSettings: getIt()));
+    () => UpdateInfoBloc(
+      getUpdateInfo: getIt(),
+      getAppSettings: getIt(),
+      setAppSettings: getIt(),
+    )..init(),
+  );
+  getIt.registerFactory(
+    () => AppCubit(
+      getAppSettings: getIt(),
+      setAppSettings: getIt(),
+    ),
+  );
 
   // Usecases
   getIt.registerLazySingleton(() => GetStories(getIt()));
+  getIt.registerLazySingleton(() => GetUpdateInfo(getIt()));
   getIt.registerLazySingleton(() => GetAttendance(getIt()));
   getIt.registerLazySingleton(() => GetScores(getIt()));
   getIt.registerLazySingleton(() => GetEmployees(getIt()));
@@ -158,6 +175,7 @@ Future<void> setup() async {
   getIt.registerLazySingleton<StrapiRepository>(() => StrapiRepositoryImpl(
         remoteDataSource: getIt(),
         connectionChecker: getIt(),
+        packageInfo: getIt(),
       ));
 
   getIt.registerLazySingleton<AppSettingsRepository>(
@@ -197,4 +215,6 @@ Future<void> setup() async {
   final sharedPreferences = await SharedPreferences.getInstance();
   getIt.registerLazySingleton(() => sharedPreferences);
   getIt.registerLazySingleton(() => InternetConnectionChecker());
+  final PackageInfo packageInfo = await PackageInfo.fromPlatform();
+  getIt.registerLazySingleton(() => packageInfo);
 }

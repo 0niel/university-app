@@ -333,6 +333,7 @@ class _SchedulePageState extends State<SchedulePage> {
             ],
           ),
           body: SafeArea(
+            bottom: false,
             child: BlocConsumer<ScheduleBloc, ScheduleState>(
               buildWhen: (prevState, currentState) {
                 if (prevState is ScheduleLoaded &&

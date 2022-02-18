@@ -2,8 +2,10 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/app_cubit/app_cubit.dart';
+import 'package:rtu_mirea_app/presentation/bloc/update_info_bloc/update_info_bloc.dart';
 import 'package:rtu_mirea_app/presentation/colors.dart';
 import 'package:rtu_mirea_app/presentation/core/routes/routes.gr.dart';
+import 'package:rtu_mirea_app/presentation/widgets/update_info_modal.dart';
 import 'package:salomon_bottom_bar/salomon_bottom_bar.dart';
 
 class HomePage extends StatelessWidget {
@@ -20,7 +22,8 @@ class HomePage extends StatelessWidget {
             MapRoute(),
             ProfileRouter()
           ],
-          homeIndex: 2,
+          navigatorObservers: () => [HeroController()],
+          homeIndex: 1,
           builder: (context, child, animation) {
             final tabsRouter = AutoTabsRouter.of(context);
 
@@ -29,7 +32,11 @@ class HomePage extends StatelessWidget {
                 Expanded(
                   child: FadeTransition(
                     opacity: animation,
-                    child: child,
+                    child: BlocListener<UpdateInfoBloc, UpdateInfoState>(
+                      child: child,
+                      listener: (context, state) =>
+                          UpdateInfoDialog.checkAndShow(context, state),
+                    ),
                   ),
                 ),
                 Container(

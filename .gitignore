@@ -1,3 +1,6 @@
+# Custom
+.fvm/
+
 # Miscellaneous
 *.class
 *.lock

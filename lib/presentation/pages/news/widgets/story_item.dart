@@ -1,9 +1,9 @@
-import 'package:dismissible_page/src/dismissible_extensions.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:auto_route/auto_route.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:rtu_mirea_app/domain/entities/story.dart';
 import 'package:rtu_mirea_app/presentation/colors.dart';
-import 'package:rtu_mirea_app/presentation/pages/news/widgets/stories_wrapper.dart';
+import 'package:rtu_mirea_app/presentation/core/routes/routes.gr.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 
 class StoryWidget extends StatelessWidget {
@@ -17,12 +17,8 @@ class StoryWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        context.pushTransparentRoute(
-          StoriesWrapper(
-            stories: stories,
-            storyIndex: storyIndex,
-          ),
-        );
+        context.router.push(
+            StoriesWrapperRoute(stories: stories, storyIndex: storyIndex));
       },
       child: Hero(
         tag: stories[storyIndex].title,

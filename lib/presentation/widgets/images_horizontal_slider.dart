@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:rtu_mirea_app/common/utils/utils.dart';
 import 'package:rtu_mirea_app/domain/entities/strapi_media.dart';
 
 import 'fullscreen_image.dart';
@@ -8,11 +9,6 @@ class ImagesHorizontalSlider extends StatelessWidget {
       : super(key: key);
 
   final List<StrapiMedia> images;
-
-  String _getLargestImage(Formats imagesFormats) {
-    return imagesFormats.large?.url ??
-        (imagesFormats.medium?.url ?? imagesFormats.small!.url);
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +26,8 @@ class ImagesHorizontalSlider extends StatelessWidget {
                   context,
                   MaterialPageRoute(
                     builder: (_) => FullScreenImage(
-                      imageUrl: _getLargestImage(images[index].formats),
+                      imageUrl:
+                          StrapiUtils.getLargestImageUrl(images[index].formats),
                     ),
                   ),
                 );

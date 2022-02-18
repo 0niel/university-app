@@ -9,8 +9,8 @@ void main() {
   group('calendar utils', cal_utils.main);
 
   // Prepare to widget-testing
-  setUpAll(() async {
-    SharedPreferences.setMockInitialValues({});
-    await service_locator.setup();
-  });
+  // setUpAll(() async {
+  //   SharedPreferences.setMockInitialValues({});
+  //   await service_locator.setup();
+  // });
 }
