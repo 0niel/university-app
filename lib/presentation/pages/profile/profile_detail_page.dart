@@ -42,7 +42,7 @@ class ProfileDetailPage extends StatelessWidget {
                 const SizedBox(height: 13),
                 Center(
                   child: Text(
-                    user.name + ' ' + user.secondName + ' ' + user.lastName,
+                    user.lastName + ' ' + user.name + ' ' + user.secondName,
                     style: DarkTextTheme.h6,
                   ),
                 ),

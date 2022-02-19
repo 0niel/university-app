@@ -20,7 +20,7 @@ class _ProfileScoresPageState extends State<ProfileScoresPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Детали профиля"),
+        title: const Text("Зачётная книжка"),
         backgroundColor: DarkThemeColors.background01,
       ),
       backgroundColor: DarkThemeColors.background01,
