@@ -129,6 +129,12 @@ dependencies:
   # See https://pub.dev/packages/implicitly_animated_reorderable_list
   implicitly_animated_reorderable_list: ^0.4.2
 
+  syncfusion_flutter_core: ^19.4.38
+  syncfusion_flutter_datagrid: 
+  syncfusion_flutter_sliders: ^19.4.38
+  syncfusion_flutter_charts: ^19.4.38
+  syncfusion_flutter_gauges: ^19.4.38
+
   auto_route: ^3.2.2
 
   flutter_inner_drawer:

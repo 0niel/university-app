@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:rtu_mirea_app/domain/entities/score.dart';
 import 'package:rtu_mirea_app/presentation/bloc/auth_bloc/auth_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/scores_bloc/scores_bloc.dart';
 import 'package:rtu_mirea_app/presentation/colors.dart';
+import 'package:rtu_mirea_app/presentation/pages/profile/widgets/scores_chart_modal.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
+import 'package:rtu_mirea_app/presentation/widgets/buttons/text_outlined_button.dart';
+import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 import 'package:rtu_mirea_app/presentation/widgets/buttons/primary_tab_button.dart';
 
 class ProfileScoresPage extends StatefulWidget {
@@ -15,6 +19,53 @@ class ProfileScoresPage extends StatefulWidget {
 
 class _ProfileScoresPageState extends State<ProfileScoresPage> {
   final ValueNotifier<int> _tabValueNotifier = ValueNotifier(0);
+
+  SfDataGrid _buildDataGridForMobile(_ScoresDataGridSource dateGridSource) {
+    return SfDataGrid(
+      source: dateGridSource,
+      columnWidthMode: ColumnWidthMode.auto,
+      rowHeight: 80,
+      columnWidthCalculationRange: ColumnWidthCalculationRange.allRows,
+      columns: <GridColumn>[
+        GridColumn(
+          columnName: 'date',
+          width: 90,
+          label: const Center(child: Text('Дата')),
+        ),
+        GridColumn(
+          columnWidthMode: ColumnWidthMode.fitByColumnName,
+          columnName: 'name',
+          width: 180,
+          label: Container(
+            alignment: Alignment.centerLeft,
+            child: const Text('Название'),
+          ),
+        ),
+        GridColumn(
+          maximumWidth: 180,
+          columnName: 'score',
+          columnWidthMode: ColumnWidthMode.fitByCellValue,
+          label: const Center(
+            child: Text('Оценка'),
+          ),
+        ),
+        GridColumn(
+            columnWidthMode: ColumnWidthMode.fitByCellValue,
+            columnName: 'type',
+            label: const Center(
+              child: Text('Тип'),
+            )),
+        GridColumn(
+          columnWidthMode: ColumnWidthMode.fitByCellValue,
+          columnName: 'teacher',
+          label: Container(
+            alignment: Alignment.centerLeft,
+            child: const Text('Преподаватель'),
+          ),
+        ),
+      ],
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -39,7 +90,9 @@ class _ProfileScoresPageState extends State<ProfileScoresPage> {
                     _tabValueNotifier.value = state.scores.keys
                         .toList()
                         .indexOf(state.selectedSemester);
+
                     return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const SizedBox(height: 12),
                         SizedBox(
@@ -65,73 +118,22 @@ class _ProfileScoresPageState extends State<ProfileScoresPage> {
                               },
                               itemCount: state.scores.keys.length),
                         ),
-                        const SizedBox(height: 12),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 12, horizontal: 16),
+                          child: TextOutlinedButton(
+                              content: 'Средний балл',
+                              width: 230,
+                              onPressed: () {
+                                showModalBottomSheet(
+                                    context: context,
+                                    builder: (BuildContext context) =>
+                                        ScoresChartModal(scores: state.scores));
+                              }),
+                        ),
                         Expanded(
-                          child: ListView.separated(
-                            padding: const EdgeInsets.symmetric(horizontal: 24),
-                            itemBuilder: (context, index) {
-                              final scores =
-                                  state.scores[state.selectedSemester]!;
-
-                              if (scores[index].exam != null &&
-                                  scores[index].credit != null) {
-                                return Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(scores[index].subjectName,
-                                        style: DarkTextTheme.bodyBold),
-                                    Text("Тип: " + scores[index].type,
-                                        style: DarkTextTheme.bodyRegular),
-                                    Text(
-                                        "Оценка за курсовую: " +
-                                            scores[index].credit!,
-                                        style: DarkTextTheme.bodyRegular),
-                                    Text(
-                                        "Оценка за экзамен: " +
-                                            scores[index].exam!,
-                                        style: DarkTextTheme.bodyRegular),
-                                    if (scores[index].comission != null)
-                                      Text(
-                                          "Преподаватель: " +
-                                              scores[index].comission!,
-                                          style: DarkTextTheme.bodyRegular),
-                                    Text("Год: " + scores[index].year,
-                                        style: DarkTextTheme.bodyRegular),
-                                    Text("Дата: " + scores[index].date,
-                                        style: DarkTextTheme.bodyRegular),
-                                  ],
-                                );
-                              }
-                              return Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(scores[index].subjectName,
-                                      style: DarkTextTheme.bodyBold),
-                                  Text("Тип: " + scores[index].type,
-                                      style: DarkTextTheme.bodyRegular),
-                                  Text("Оценка: " + scores[index].result,
-                                      style: DarkTextTheme.bodyRegular),
-                                  if (scores[index].comission != null)
-                                    Text(
-                                        "Преподаватель: " +
-                                            scores[index].comission!,
-                                        style: DarkTextTheme.bodyRegular),
-                                  Text("Год: " + scores[index].year,
-                                      style: DarkTextTheme.bodyRegular),
-                                  Text("Дата: " + scores[index].date,
-                                      style: DarkTextTheme.bodyRegular),
-                                ],
-                              );
-                            },
-                            separatorBuilder: (context, index) => index !=
-                                    state.scores[state.selectedSemester]!
-                                            .length -
-                                        1
-                                ? const Divider()
-                                : const SizedBox(height: 16),
-                            itemCount:
-                                state.scores[state.selectedSemester]!.length,
-                          ),
+                          child: _buildDataGridForMobile(_ScoresDataGridSource(
+                              state.scores[state.selectedSemester]!)),
                         ),
                       ],
                     );
@@ -153,5 +155,101 @@ class _ProfileScoresPageState extends State<ProfileScoresPage> {
         ),
       ),
     );
+  }
+}
+
+/// Set team's data collection to data grid source.
+class _ScoresDataGridSource extends DataGridSource {
+  /// Creates the team data source class with required details.
+  _ScoresDataGridSource(List<Score> scores) {
+    _scores = scores;
+    buildDataGridRows();
+  }
+
+  List<Score> _scores = <Score>[];
+
+  List<DataGridRow> _dataGridRows = <DataGridRow>[];
+
+  /// Building DataGridRows
+  void buildDataGridRows() {
+    _dataGridRows = _scores.map<DataGridRow>((Score score) {
+      return DataGridRow(cells: <DataGridCell>[
+        DataGridCell<String>(columnName: 'date', value: score.date),
+        DataGridCell<String>(columnName: 'name', value: score.subjectName),
+        DataGridCell<String>(columnName: 'score', value: score.result),
+        DataGridCell<String>(columnName: 'type', value: score.type),
+        DataGridCell<String>(
+            columnName: 'teacher', value: score.comission ?? ""),
+      ]);
+    }).toList();
+  }
+
+  Color _getColorByResult(String result) {
+    if (result.contains("неуваж")) {
+      return DarkThemeColors.colorful07;
+    }
+
+    switch (result.toLowerCase()) {
+      case 'зачтено':
+      case 'отлично':
+        return Colors.green;
+      case 'хорошо':
+        return DarkThemeColors.colorful05;
+      case 'удовлетворительно':
+        return DarkThemeColors.colorful06;
+      default:
+        return Colors.white;
+    }
+  }
+
+  @override
+  List<DataGridRow> get rows => _dataGridRows;
+
+  @override
+  DataGridRowAdapter buildRow(DataGridRow row) {
+    return DataGridRowAdapter(cells: <Widget>[
+      Container(
+        padding: const EdgeInsets.all(8.0),
+        alignment: Alignment.center,
+        child: Text(
+          row.getCells()[0].value.toString(),
+          overflow: TextOverflow.ellipsis,
+        ),
+      ),
+      Container(
+        padding: const EdgeInsets.all(8.0),
+        alignment: Alignment.centerLeft,
+        child: Text(
+          row.getCells()[1].value.toString(),
+          softWrap: true,
+        ),
+      ),
+      Container(
+        padding: const EdgeInsets.all(8.0),
+        alignment: Alignment.center,
+        child: Text(
+          row.getCells()[2].value.toString(),
+          style: TextStyle(
+              color: _getColorByResult(row.getCells()[2].value.toString())),
+          overflow: TextOverflow.ellipsis,
+        ),
+      ),
+      Container(
+        padding: const EdgeInsets.all(8.0),
+        alignment: Alignment.center,
+        child: Text(
+          row.getCells()[3].value.toString(),
+          overflow: TextOverflow.ellipsis,
+        ),
+      ),
+      Container(
+        padding: const EdgeInsets.all(8.0),
+        alignment: Alignment.centerLeft,
+        child: Text(
+          row.getCells()[4].value.toString(),
+          softWrap: true,
+        ),
+      ),
+    ]);
   }
 }
