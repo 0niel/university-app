@@ -106,6 +106,8 @@ Route<T> transparentRoute<T>(
     BuildContext context, Widget child, CustomPage<T> page) {
   return TransparentRoute(
     settings: page,
+    transitionDuration: const Duration(milliseconds: 250),
+    reverseTransitionDuration: const Duration(milliseconds: 250),
     builder: (context) => child,
     backgroundColor: Colors.black.withOpacity(0.45),
   );

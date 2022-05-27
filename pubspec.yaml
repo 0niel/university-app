@@ -1,5 +1,6 @@
 name: rtu_mirea_app
 description: Mobile application for students of RTU MIREA
+publish_to: 'none'
 
 # The following defines the version and build number for your application.
 # A version number is three numbers separated by dots, like 1.2.43
@@ -80,7 +81,7 @@ dependencies:
   # dates or a range of dates. It has four built-in views that allow quick 
   # navigation to the desired date.
   # See https://pub.dev/packages/syncfusion_flutter_datepicker
-  syncfusion_flutter_datepicker: ^19.3.54
+  syncfusion_flutter_datepicker: ^20.1.57
 
   # A Flutter widget rendering static HTML and CSS as Flutter widgets.
   # See https://pub.dev/packages/flutter_html
@@ -128,12 +129,11 @@ dependencies:
   # ListView that implicitly animates between the changes of two lists
   # See https://pub.dev/packages/implicitly_animated_reorderable_list
   implicitly_animated_reorderable_list: ^0.4.2
-
-  syncfusion_flutter_core: ^19.4.38
-  syncfusion_flutter_datagrid: 
-  syncfusion_flutter_sliders: ^19.4.38
-  syncfusion_flutter_charts: ^19.4.38
-  syncfusion_flutter_gauges: ^19.4.38
+  syncfusion_flutter_datagrid: ^20.1.57
+  syncfusion_flutter_core: ^20.1.57
+  syncfusion_flutter_sliders: ^20.1.57
+  syncfusion_flutter_charts: ^20.1.57
+  syncfusion_flutter_gauges: ^20.1.57
 
   auto_route: ^3.2.2
 
@@ -168,7 +168,7 @@ dependencies:
   get_storage:
 
   # https://pub.dev/packages/home_widget
-  home_widget: ^0.1.5
+  home_widget: ^0.1.6
   
   freezed_annotation: ^1.1.0
   firebase_core: ^1.12.0

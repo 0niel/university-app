@@ -25,7 +25,6 @@ import 'package:rtu_mirea_app/presentation/core/routes/routes.gr.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:intl/intl_standalone.dart';
 import 'package:rtu_mirea_app/service_locator.dart' as dependency_injection;
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_strategy/url_strategy.dart';
 import 'service_locator.dart';
 import 'package:firebase_core/firebase_core.dart';

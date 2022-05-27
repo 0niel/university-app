@@ -33,7 +33,7 @@ class ForumRepositoryImpl implements ForumRepository {
         final patrons = await localDataSource.getPatronsFromCache();
         return Right(patrons);
       } on CacheException {
-        return Left(CacheFailure());
+        return const Left(CacheFailure());
       }
     }
   }
