@@ -25,10 +25,10 @@ class NewsRepositoryImpl implements NewsRepository {
             await remoteDataSource.getNews(offset, limit, isImportant, tag);
         return Right(newsList);
       } on ServerException {
-        return const Left(const ServerFailure());
+        return const Left(ServerFailure());
       }
     } else {
-      return const Left(const ServerFailure());
+      return const Left(ServerFailure());
     }
   }
 
@@ -39,10 +39,10 @@ class NewsRepositoryImpl implements NewsRepository {
         final tagsList = await remoteDataSource.getTags();
         return Right(tagsList);
       } on ServerException {
-        return const Left(const ServerFailure());
+        return const Left(ServerFailure());
       }
     } else {
-      return const Left(const ServerFailure());
+      return const Left(ServerFailure());
     }
   }
 }

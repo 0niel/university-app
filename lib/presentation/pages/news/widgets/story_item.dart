@@ -1,5 +1,4 @@
 import 'package:auto_route/auto_route.dart';
-import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:rtu_mirea_app/domain/entities/story.dart';
 import 'package:rtu_mirea_app/presentation/colors.dart';
