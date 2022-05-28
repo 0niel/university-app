@@ -1,5 +1,5 @@
 import 'dart:convert';
-
+import 'dart:developer';
 import 'package:dio/dio.dart';
 import 'package:rtu_mirea_app/common/errors/exceptions.dart';
 import 'package:rtu_mirea_app/data/models/announce_model.dart';
@@ -31,6 +31,7 @@ class UserRemoteDataImpl implements UserRemoteData {
     final response = await httpClient.get(_apiUrl, queryParameters: data);
     if (response.statusCode == 200) {
       var jsonResponse = json.decode(response.data);
+      log('Response: $jsonResponse');
       if (jsonResponse.containsKey('errors')) {
         throw ServerException(jsonResponse['errors'][0]);
       }
@@ -49,6 +50,7 @@ class UserRemoteDataImpl implements UserRemoteData {
       ),
     );
     var jsonResponse = json.decode(response.data);
+    log('Response: $jsonResponse');
     if (jsonResponse.containsKey('errors')) {
       throw ServerException(jsonResponse['errors'][0]);
     }
