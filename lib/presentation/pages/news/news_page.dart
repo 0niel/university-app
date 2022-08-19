@@ -1,269 +1,166 @@
-import 'package:auto_route/auto_route.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:rtu_mirea_app/domain/entities/news_item.dart';
-import 'package:rtu_mirea_app/domain/entities/story.dart';
-import 'package:rtu_mirea_app/presentation/bloc/news_bloc/news_bloc.dart';
-import 'package:rtu_mirea_app/presentation/bloc/stories_bloc/stories_bloc.dart';
-import 'package:rtu_mirea_app/presentation/colors.dart';
-import 'package:rtu_mirea_app/presentation/theme.dart';
-import 'package:rtu_mirea_app/presentation/widgets/buttons/app_settings_button.dart';
-import 'package:rtu_mirea_app/presentation/widgets/buttons/primary_tab_button.dart';
-import 'widgets/news_item.dart';
-import 'widgets/story_item.dart';
-import 'widgets/tags_widgets.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:rtu_app_core/rtu_app_core.dart';
+import 'package:rtu_mirea_app/presentation/pages/news/widgets/event_card.dart';
+import 'package:unicons/unicons.dart';
 
-class NewsPage extends StatefulWidget {
+import 'widgets/news_card.dart';
+
+class NewsPage extends StatelessWidget {
   const NewsPage({Key? key}) : super(key: key);
 
+  // void _showBottomSheet(context) {
+  //   showModalBottomSheet(
+  //       context: context,
+  //       builder: (BuildContext buildContext) {
+  //         return Container(
+  //           decoration: BoxDecoration(
+  //               color: theme.backgroundColor,
+  //               borderRadius: BorderRadius.only(
+  //                   topLeft: Radius.circular(16),
+  //                   topRight: Radius.circular(16))),
+  //           child: Padding(
+  //             padding: FxSpacing.fromLTRB(24, 24, 24, 36),
+  //             child: Column(
+  //               mainAxisSize: MainAxisSize.min,
+  //               children: <Widget>[
+  //                 Row(
+  //                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+  //                   children: <Widget>[
+  //                     Column(
+  //                       children: <Widget>[
+  //                         Icon(Icons.supervisor_account_outlined,
+  //                             size: 26, color: theme.colorScheme.onBackground),
+  //                         Container(
+  //                           margin: FxSpacing.top(4),
+  //                           child: Text(
+  //                             "180 Followers",
+  //                             textAlign: TextAlign.center,
+  //                             style: TextStyle(
+  //                                 color: theme.colorScheme.onBackground),
+  //                           ),
+  //                         )
+  //                       ],
+  //                     ),
+  //                     Column(
+  //                       children: <Widget>[
+  //                         Icon(Icons.supervisor_account_outlined,
+  //                             size: 26, color: theme.colorScheme.onBackground),
+  //                         Container(
+  //                           margin: FxSpacing.top(4),
+  //                           child: Text(
+  //                             "147 Following",
+  //                             textAlign: TextAlign.center,
+  //                             style: TextStyle(
+  //                                 color: theme.colorScheme.onBackground),
+  //                           ),
+  //                         )
+  //                       ],
+  //                     ),
+  //                   ],
+  //                 ),
+  //               ],
+  //             ),
+  //           ),
+  //         );
+  //       });
+  // }
+
   @override
-  State<NewsPage> createState() => _NewsPageState();
-}
-
-class _NewsPageState extends State<NewsPage> {
-  final _scrollController = ScrollController();
-
-  final ValueNotifier<int> _tabValueNotifier = ValueNotifier(0);
-
-  void _filterNewsByTag(NewsBloc bloc, String tag) {
-    bloc.add(
-      NewsLoadEvent(
-        refresh: true,
-        isImportant: _tabValueNotifier.value == 1,
-        tag: tag,
-      ),
-    );
-  }
-
-  void _showTagsModalWindow(BuildContext context) {
-    showCupertinoModalPopup(
-      context: context,
-      builder: (ctx) => Material(
-        child: Container(
-          padding: const EdgeInsets.all(8),
-          color: DarkThemeColors.background03,
-          child: Padding(
-            padding:
-                const EdgeInsets.only(top: 4, bottom: 16, left: 24, right: 24),
-            child: BlocConsumer<NewsBloc, NewsState>(
-              listener: (context, state) =>
-                  state.runtimeType != NewsLoaded ? context.router.pop() : null,
-              buildWhen: (previous, current) => (current is NewsLoaded),
-              builder: (context, state) {
-                return Tags(
-                  isClickable: true,
-                  withIcon: false,
-                  tags: ["все", ...(state as NewsLoaded).tags],
-                  onClick: (tag) =>
-                      _filterNewsByTag(context.read<NewsBloc>(), tag),
-                );
-              },
-            ),
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const _ScrollableAppBar(),
+              const _EventsHeader(),
+              const SizedBox(height: 34),
+              NinjaChoiceChip(
+                onPressed: (choice) {},
+                choicesList: const ['Все новости', 'Важные'],
+                oneChoice: true,
+              ),
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+                child: Column(
+                  children: const [
+                    _NewsCardWithSpace(),
+                    _NewsCardWithSpace(),
+                    _NewsCardWithSpace(),
+                    _NewsCardWithSpace(),
+                  ],
+                ),
+              ),
+            ],
           ),
         ),
       ),
     );
   }
+}
 
-  Widget _buildTabButtons(BuildContext context) {
+class _ScrollableAppBar extends StatelessWidget {
+  const _ScrollableAppBar({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12),
+      padding: const EdgeInsets.only(left: 24, bottom: 24, right: 12, top: 17),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              PrimaryTabButton(
-                text: 'Новости',
-                itemIndex: 0,
-                notifier: _tabValueNotifier,
-                onClick: () {
-                  context.read<NewsBloc>().add(NewsLoadEvent(
-                      refresh: true,
-                      isImportant: _tabValueNotifier.value == 1));
-                },
+          const NinjaText.h6('Новости и мероприятия'),
+          SizedBox(
+            width: 34,
+            height: 34,
+            child: NinjaButton.rounded(
+              borderRadiusAll: 50,
+              backgroundColor: Colors.transparent,
+              padding: const EdgeInsets.all(0),
+              expanded: false,
+              child: SvgPicture.asset(
+                'assets/icons/filter.svg',
+                color: Theme.of(context).colorScheme.onBackground,
               ),
-              PrimaryTabButton(
-                text: 'Важное',
-                itemIndex: 1,
-                notifier: _tabValueNotifier,
-                onClick: () {
-                  context.read<NewsBloc>().add(NewsLoadEvent(
-                      refresh: true,
-                      isImportant: _tabValueNotifier.value == 1,
-                      tag: "все"));
-                },
-              )
-            ],
-          ),
-          Padding(
-            padding: const EdgeInsets.only(right: 12),
-            child: AppSettingsButton(
-                onClick: () => (context.read<NewsBloc>().state is NewsLoaded)
-                    ? _showTagsModalWindow(context)
-                    : null),
+              onPressed: () {},
+            ),
           ),
         ],
       ),
     );
   }
+}
 
-  List<Story> _getActualStories(List<Story> stories) {
-    List<Story> actualStories = [];
-    for (final story in stories) {
-      if (DateTime.now().compareTo(story.stopShowDate) == -1) {
-        actualStories.add(story);
-      }
-    }
-
-    return actualStories;
-  }
-
-  Widget _buildFlexibleSpace(List<Story> stories) {
-    return SizedBox(
-      height: 120,
-      child: ListView.separated(
-        padding: const EdgeInsets.symmetric(horizontal: 20),
-        scrollDirection: Axis.horizontal,
-        itemBuilder: (_, int i) {
-          if (DateTime.now().compareTo(stories[i].stopShowDate) == -1) {
-            return StoryWidget(
-              stories: stories,
-              storyIndex: i,
-            );
-          }
-          return Container();
-        },
-        separatorBuilder: (_, int i) => const SizedBox(width: 10),
-        itemCount: stories.length,
-      ),
-    );
-  }
+class _NewsCardWithSpace extends StatelessWidget {
+  const _NewsCardWithSpace({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Новости"),
-        backgroundColor: DarkThemeColors.background01,
-      ),
-      backgroundColor: DarkThemeColors.background01,
-      body: NestedScrollView(
-        controller: _scrollController,
-        headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
-          return [
-            BlocBuilder<StoriesBloc, StoriesState>(
-              builder: (context, state) {
-                if (state is StoriesInitial) {
-                  context.read<StoriesBloc>().add(LoadStories());
-                } else if (state is StoriesLoaded) {
-                  final actualStories = _getActualStories(state.stories);
-                  if (actualStories.isNotEmpty) {
-                    return SliverAppBar(
-                        automaticallyImplyLeading: false,
-                        expandedHeight: 110,
-                        actionsIconTheme: const IconThemeData(opacity: 0.0),
-                        flexibleSpace: _buildFlexibleSpace(actualStories));
-                  }
-                }
-                return const SliverAppBar(
-                  automaticallyImplyLeading: false,
-                  toolbarHeight: 0,
-                  elevation: 0,
-                  primary: false,
-                  actionsIconTheme: IconThemeData(opacity: 0.0),
-                );
-              },
-            ),
-          ];
-        },
-        body: Builder(
-          builder: (BuildContext context) {
-            final innerScrollController = PrimaryScrollController.of(context);
-            _setupScrollController(innerScrollController!);
-
-            return RefreshIndicator(
-              onRefresh: () async {
-                context.read<NewsBloc>().add(NewsLoadEvent(
-                    refresh: true, isImportant: _tabValueNotifier.value == 1));
-                context.read<StoriesBloc>().add(LoadStories());
-              },
-              child: Column(children: [
-                const SizedBox(height: 16),
-                _buildTabButtons(context),
-                BlocBuilder<NewsBloc, NewsState>(
-                  builder: (context, state) {
-                    List<NewsItem> news = [];
-                    bool isLoading = false;
-
-                    if (state is NewsInitial) {
-                      context.read<NewsBloc>().add(NewsLoadEvent(
-                          isImportant: _tabValueNotifier.value == 1));
-                    } else if (state is NewsLoaded) {
-                      news = state.news;
-                    } else if (state is NewsLoading && state.isFirstFetch) {
-                      return const Center(
-                        child: CircularProgressIndicator(),
-                      );
-                    } else if (state is NewsLoading) {
-                      news = state.oldNews;
-                      isLoading = true;
-                    } else if (state is NewsLoadError) {
-                      return SingleChildScrollView(
-                        physics: const AlwaysScrollableScrollPhysics(),
-                        child: Center(
-                          child: Text(
-                            'Произошла ошибка при загрузке новостей.',
-                            textAlign: TextAlign.center,
-                            style: DarkTextTheme.title,
-                          ),
-                        ),
-                      );
-                    }
-                    return Expanded(
-                      child: Column(
-                        children: [
-                          const SizedBox(height: 12),
-                          Expanded(
-                            child: ListView.builder(
-                              itemCount: news.length + (isLoading ? 1 : 0),
-                              itemBuilder: (context, index) {
-                                if (index < news.length) {
-                                  return NewsItemWidget(
-                                      newsItem: news[index],
-                                      onClickNewsTag: (tag) => _filterNewsByTag(
-                                          context.read<NewsBloc>(), tag));
-                                } else {
-                                  return const Center(
-                                      child: CircularProgressIndicator());
-                                }
-                              },
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
-                ),
-              ]),
-            );
-          },
-        ),
-      ),
+    return const Padding(
+      padding: EdgeInsets.only(bottom: 10),
+      child: NewsCard(),
     );
   }
+}
 
-  void _setupScrollController(ScrollController controller) {
-    controller.addListener(() {
-      if (controller.position.atEdge) {
-        if (controller.position.pixels != 0) {
-          context
-              .read<NewsBloc>()
-              .add(NewsLoadEvent(isImportant: _tabValueNotifier.value == 1));
-        }
-      }
-    });
+class _EventsHeader extends StatelessWidget {
+  const _EventsHeader({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 160,
+      child: ListView.separated(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        shrinkWrap: true,
+        scrollDirection: Axis.horizontal,
+        itemCount: 5,
+        itemBuilder: (context, index) => const EventCard(),
+        separatorBuilder: (context, index) => const SizedBox(width: 16),
+      ),
+    );
   }
 }
