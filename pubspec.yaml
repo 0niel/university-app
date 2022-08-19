@@ -49,6 +49,9 @@ dependencies:
   # displaying Scalable Vector Graphics 1.1 files.
   flutter_svg: ^1.1.4
 
+  # Customizable animated page indicator with a set of built-in effects.
+  smooth_page_indicator: ^1.0.0+2
+
   flutter_localizations:
     sdk: flutter
 
