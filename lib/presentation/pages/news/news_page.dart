@@ -9,63 +9,6 @@ import 'widgets/news_card.dart';
 class NewsPage extends StatelessWidget {
   const NewsPage({Key? key}) : super(key: key);
 
-  // void _showBottomSheet(context) {
-  //   showModalBottomSheet(
-  //       context: context,
-  //       builder: (BuildContext buildContext) {
-  //         return Container(
-  //           decoration: BoxDecoration(
-  //               color: theme.backgroundColor,
-  //               borderRadius: BorderRadius.only(
-  //                   topLeft: Radius.circular(16),
-  //                   topRight: Radius.circular(16))),
-  //           child: Padding(
-  //             padding: FxSpacing.fromLTRB(24, 24, 24, 36),
-  //             child: Column(
-  //               mainAxisSize: MainAxisSize.min,
-  //               children: <Widget>[
-  //                 Row(
-  //                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-  //                   children: <Widget>[
-  //                     Column(
-  //                       children: <Widget>[
-  //                         Icon(Icons.supervisor_account_outlined,
-  //                             size: 26, color: theme.colorScheme.onBackground),
-  //                         Container(
-  //                           margin: FxSpacing.top(4),
-  //                           child: Text(
-  //                             "180 Followers",
-  //                             textAlign: TextAlign.center,
-  //                             style: TextStyle(
-  //                                 color: theme.colorScheme.onBackground),
-  //                           ),
-  //                         )
-  //                       ],
-  //                     ),
-  //                     Column(
-  //                       children: <Widget>[
-  //                         Icon(Icons.supervisor_account_outlined,
-  //                             size: 26, color: theme.colorScheme.onBackground),
-  //                         Container(
-  //                           margin: FxSpacing.top(4),
-  //                           child: Text(
-  //                             "147 Following",
-  //                             textAlign: TextAlign.center,
-  //                             style: TextStyle(
-  //                                 color: theme.colorScheme.onBackground),
-  //                           ),
-  //                         )
-  //                       ],
-  //                     ),
-  //                   ],
-  //                 ),
-  //               ],
-  //             ),
-  //           ),
-  //         );
-  //       });
-  // }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -105,6 +48,73 @@ class NewsPage extends StatelessWidget {
 class _ScrollableAppBar extends StatelessWidget {
   const _ScrollableAppBar({Key? key}) : super(key: key);
 
+  void _showBottomSheet(context) {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext buildContext) {
+        return Container(
+          decoration: BoxDecoration(
+            color: Theme.of(context).backgroundColor,
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(20),
+              topRight: Radius.circular(20),
+            ),
+          ),
+          child: Padding(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 24).copyWith(top: 27),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const NinjaText.bodyLarge("Фильтр", fontWeight: 500),
+                    SizedBox(
+                      width: 28,
+                      height: 28,
+                      child: NinjaButton.rounded(
+                        padding: EdgeInsets.zero,
+                        borderRadiusAll: 50,
+                        backgroundColor: Colors.transparent,
+                        onPressed: () => Navigator.of(context).pop(),
+                        child: SvgPicture.asset("assets/icons/close_modal.svg"),
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 30),
+                NinjaChoiceChip(
+                  onPressed: (selected) {
+                    print(selected);
+                  },
+                  choicesList: [
+                    "#Праздники",
+                    "#Минобрнауки РФ",
+                    "#Ректор",
+                    "#Абитуриентам",
+                    "#Студентам",
+                    "#ИИТ",
+                    "#ИКБ",
+                    "#Сотрудникам",
+                    "#ИПИТИП",
+                    "#Спорт",
+                    "#Колледж",
+                    "#Оброзование",
+                    "#ИМО",
+                    "#ИИИ",
+                    "#ИТХТ им. М.В. Ломоносова",
+                    "#Волонтерство",
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -125,7 +135,7 @@ class _ScrollableAppBar extends StatelessWidget {
                 'assets/icons/filter.svg',
                 color: Theme.of(context).colorScheme.onBackground,
               ),
-              onPressed: () {},
+              onPressed: () => _showBottomSheet(context),
             ),
           ),
         ],

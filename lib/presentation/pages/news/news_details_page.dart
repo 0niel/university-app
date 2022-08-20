@@ -19,11 +19,24 @@ class NewsDetailsPage extends StatelessWidget {
         headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
           return [
             SliverAppBar(
+              leading: IconButton(
+                icon: ColorFiltered(
+                  colorFilter: ColorFilter.mode(
+                    Theme.of(context).colorScheme.onBackground,
+                    BlendMode.srcIn,
+                  ),
+                  child: SvgPicture.asset(
+                    'assets/icons/appbar_back.svg',
+                    width: 14,
+                    height: 14,
+                  ),
+                ),
+                onPressed: () => Navigator.of(context).pop(),
+              ),
               expandedHeight: 340,
               actionsIconTheme: const IconThemeData(opacity: 0.0),
               flexibleSpace: Stack(
                 children: [
-                  // PageView with images
                   SizedBox(
                     width: double.infinity,
                     height: 340,
@@ -45,60 +58,9 @@ class NewsDetailsPage extends StatelessWidget {
                       ],
                     ),
                   ),
-
-                  Positioned.fill(
-                    child: Align(
-                      alignment: Alignment.bottomCenter,
-                      child: Container(
-                        width: double.infinity,
-                        height: 84,
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                            colors: [
-                              Colors.transparent,
-                              Colors.black.withOpacity(0.5),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  Positioned.fill(
-                    child: Align(
-                      alignment: Alignment.bottomCenter,
-                      child: Container(
-                        height: 23,
-                        width: double.infinity,
-                        decoration: const BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.only(
-                            topLeft: Radius.circular(20),
-                            topRight: Radius.circular(20),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  Positioned.fill(
-                    child: Align(
-                      alignment: Alignment.bottomCenter,
-                      child: Padding(
-                        padding: const EdgeInsets.only(bottom: 43),
-                        child: SmoothPageIndicator(
-                          controller: _controller,
-                          count: 3,
-                          effect: ScrollingDotsEffect(
-                            dotWidth: 7.0,
-                            dotHeight: 7.0,
-                            dotColor: Colors.white.withOpacity(0.6),
-                            activeDotColor: Colors.white,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
+                  const _BottomGradientShadow(),
+                  const _BottomRoundedContainer(),
+                  _BottomPageIndicators(controller: _controller, count: 3)
                 ],
               ),
             ),
@@ -137,24 +99,7 @@ class NewsDetailsPage extends StatelessWidget {
 Но насколько она безопасна? «При необходимости любую одноразовую посуду можно использовать повторно, не только пищевые контейнеры для хранения продуктов, но и любые тарелки, одноразовые стаканы. Никакого вреда они не приносят», — сказал кандидат химических наук, доцент кафедры неорганической химии в МИРЭА – Российского технологического университета Андрей Дорохов. Подробности — в материале."""),
                       const Spacer(),
                       const Divider(thickness: 1, height: 24),
-                      NinjaButton(
-                        backgroundColor:
-                            Theme.of(context).colorScheme.background,
-                        splashColor: Colors.transparent,
-                        onPressed: () {},
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            const NinjaText.bodySmall(
-                              "Следующая новость",
-                              fontWeight: 500,
-                            ),
-                            SvgPicture.asset(
-                              'assets/icons/arrow_right.svg',
-                            ),
-                          ],
-                        ),
-                      ),
+                      _NextButton(onPressed: () {}, isEvent: isEvent),
                       const SizedBox(height: 8),
                     ],
                   ),
@@ -163,6 +108,117 @@ class NewsDetailsPage extends StatelessWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _BottomPageIndicators extends StatelessWidget {
+  const _BottomPageIndicators(
+      {Key? key, required this.controller, required this.count})
+      : super(key: key);
+
+  final PageController controller;
+  final int count;
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned.fill(
+      child: Align(
+        alignment: Alignment.bottomCenter,
+        child: Padding(
+          padding: const EdgeInsets.only(bottom: 43),
+          child: SmoothPageIndicator(
+            controller: controller,
+            count: count,
+            effect: ScrollingDotsEffect(
+              dotWidth: 7.0,
+              dotHeight: 7.0,
+              dotColor: Colors.white.withOpacity(0.6),
+              activeDotColor: Colors.white,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _BottomRoundedContainer extends StatelessWidget {
+  const _BottomRoundedContainer({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned.fill(
+      child: Align(
+        alignment: Alignment.bottomCenter,
+        child: Container(
+          height: 23,
+          width: double.infinity,
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(20),
+              topRight: Radius.circular(20),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _BottomGradientShadow extends StatelessWidget {
+  const _BottomGradientShadow({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned.fill(
+      child: Align(
+        alignment: Alignment.bottomCenter,
+        child: Container(
+          width: double.infinity,
+          height: 84,
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Colors.transparent,
+                Colors.black.withOpacity(0.5),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _NextButton extends StatelessWidget {
+  const _NextButton({Key? key, required this.onPressed, required this.isEvent})
+      : super(key: key);
+
+  final VoidCallback onPressed;
+  final bool isEvent;
+
+  @override
+  Widget build(BuildContext context) {
+    return NinjaButton(
+      backgroundColor: Theme.of(context).colorScheme.background,
+      splashColor: Colors.transparent,
+      onPressed: () {},
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          NinjaText.bodySmall(
+            isEvent ? "Следующее мероприятие" : "Следующая новость",
+            fontWeight: 500,
+          ),
+          SvgPicture.asset(
+            'assets/icons/arrow_right.svg',
+          ),
+        ],
       ),
     );
   }

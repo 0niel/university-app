@@ -13,6 +13,7 @@ class HomePage extends StatelessWidget {
     return AutoTabsRouter(
       routes: const [
         NewsRouter(),
+        DashboardRouter(),
       ],
       duration: const Duration(milliseconds: 400),
       builder: (context, child, animation) {
