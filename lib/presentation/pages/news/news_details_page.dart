@@ -20,48 +20,50 @@ class NewsDetailsPage extends StatelessWidget {
           return [
             SliverAppBar(
               leading: IconButton(
-                icon: ColorFiltered(
-                  colorFilter: ColorFilter.mode(
-                    Theme.of(context).colorScheme.onBackground,
-                    BlendMode.srcIn,
-                  ),
-                  child: SvgPicture.asset(
-                    'assets/icons/appbar_back.svg',
-                    width: 14,
-                    height: 14,
-                  ),
+                icon: SvgPicture.asset(
+                  color: Colors.white,
+                  'assets/icons/appbar_back.svg',
+                  width: 14,
+                  height: 14,
                 ),
                 onPressed: () => Navigator.of(context).pop(),
               ),
               expandedHeight: 340,
-              actionsIconTheme: const IconThemeData(opacity: 0.0),
-              flexibleSpace: Stack(
-                children: [
-                  SizedBox(
-                    width: double.infinity,
-                    height: 340,
-                    child: PageView(
-                      controller: _controller,
-                      children: [
-                        Image.network(
-                          'https://picsum.photos/375/340',
-                          fit: BoxFit.cover,
-                        ),
-                        Image.network(
-                          'https://picsum.photos/375/340',
-                          fit: BoxFit.cover,
-                        ),
-                        Image.network(
-                          'https://picsum.photos/375/340',
-                          fit: BoxFit.cover,
-                        ),
-                      ],
-                    ),
-                  ),
-                  const _BottomGradientShadow(),
-                  const _BottomRoundedContainer(),
-                  _BottomPageIndicators(controller: _controller, count: 3)
+              stretch: true,
+              flexibleSpace: FlexibleSpaceBar(
+                stretchModes: const [
+                  StretchMode.zoomBackground, // zoom effect
+                  StretchMode.fadeTitle, // fade effect
                 ],
+                collapseMode: CollapseMode.pin,
+                background: Stack(
+                  children: [
+                    SizedBox(
+                      width: double.infinity,
+                      height: 340,
+                      child: PageView(
+                        controller: _controller,
+                        children: [
+                          Image.network(
+                            'https://picsum.photos/375/340',
+                            fit: BoxFit.cover,
+                          ),
+                          Image.network(
+                            'https://picsum.photos/375/340',
+                            fit: BoxFit.cover,
+                          ),
+                          Image.network(
+                            'https://picsum.photos/375/340',
+                            fit: BoxFit.cover,
+                          ),
+                        ],
+                      ),
+                    ),
+                    const _BottomGradientShadow(),
+                    const _BottomRoundedContainer(),
+                    _BottomPageIndicators(controller: _controller, count: 3)
+                  ],
+                ),
               ),
             ),
           ];
@@ -124,19 +126,19 @@ class _BottomPageIndicators extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Positioned.fill(
+      bottom: 43,
+      left: 0,
+      right: 0,
       child: Align(
         alignment: Alignment.bottomCenter,
-        child: Padding(
-          padding: const EdgeInsets.only(bottom: 43),
-          child: SmoothPageIndicator(
-            controller: controller,
-            count: count,
-            effect: ScrollingDotsEffect(
-              dotWidth: 7.0,
-              dotHeight: 7.0,
-              dotColor: Colors.white.withOpacity(0.6),
-              activeDotColor: Colors.white,
-            ),
+        child: SmoothPageIndicator(
+          controller: controller,
+          count: count,
+          effect: ScrollingDotsEffect(
+            dotWidth: 7.0,
+            dotHeight: 7.0,
+            dotColor: Colors.white.withOpacity(0.6),
+            activeDotColor: Colors.white,
           ),
         ),
       ),
@@ -149,18 +151,21 @@ class _BottomRoundedContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Positioned.fill(
-      child: Align(
-        alignment: Alignment.bottomCenter,
-        child: Container(
-          height: 23,
-          width: double.infinity,
-          decoration: const BoxDecoration(
+    return Positioned(
+      bottom: -1,
+      left: 0,
+      right: 0,
+      child: Container(
+        height: 23,
+        clipBehavior: Clip.antiAlias,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: const BorderRadius.vertical(
+            top: Radius.circular(20),
+          ),
+          border: Border.all(
             color: Colors.white,
-            borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(20),
-              topRight: Radius.circular(20),
-            ),
+            width: 0,
           ),
         ),
       ),

@@ -50,6 +50,7 @@ class _ScrollableAppBar extends StatelessWidget {
 
   void _showBottomSheet(context) {
     showModalBottomSheet(
+      isScrollControlled: true,
       context: context,
       builder: (BuildContext buildContext) {
         return Container(
@@ -83,7 +84,7 @@ class _ScrollableAppBar extends StatelessWidget {
                     ),
                   ],
                 ),
-                SizedBox(height: 30),
+                const SizedBox(height: 30),
                 NinjaChoiceChip(
                   onPressed: (selected) {
                     print(selected);

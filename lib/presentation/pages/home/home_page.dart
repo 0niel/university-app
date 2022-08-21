@@ -13,7 +13,9 @@ class HomePage extends StatelessWidget {
     return AutoTabsRouter(
       routes: const [
         NewsRouter(),
+        ScheduleRouter(),
         DashboardRouter(),
+        ProfileRouter(),
       ],
       duration: const Duration(milliseconds: 400),
       builder: (context, child, animation) {
@@ -36,7 +38,7 @@ class _BottomNavigationBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return NinjaBottomNavigationBar(
-      activeItemColor: AppTheme.theme.colorScheme.secondary,
+      activeItemColor: NinjaAppTheme.theme.colorScheme.secondary,
       itemColor: const Color(0xFFB8B8B8),
       initialIndex: tabsRouter.activeIndex,
       items: [

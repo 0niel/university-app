@@ -25,10 +25,10 @@ class AppWidget extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         title: 'Flutter Demo',
         material: (_, __) => MaterialAppRouterData(
-          theme: AppTheme.theme,
+          theme: NinjaAppTheme.theme,
         ),
         cupertino: (_, __) => CupertinoAppRouterData(
-          theme: AppTheme.cupertinoLightTheme,
+          theme: NinjaAppTheme.cupertinoLightTheme,
         ),
         routerDelegate: _appRouter.delegate(),
         routeInformationParser: _appRouter.defaultRouteParser(),

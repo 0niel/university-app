@@ -3,6 +3,8 @@ import 'package:auto_route/empty_router_widgets.dart';
 import 'package:rtu_mirea_app/presentation/pages/dashboard/dashboard_page.dart';
 import 'package:rtu_mirea_app/presentation/pages/news/news_details_page.dart';
 import 'package:rtu_mirea_app/presentation/pages/news/news_page.dart';
+import 'package:rtu_mirea_app/presentation/pages/profile/profile_page.dart';
+import 'package:rtu_mirea_app/presentation/pages/schedule/schedule_page.dart';
 
 import '../pages/home/home_page.dart';
 
@@ -25,10 +27,26 @@ import '../pages/home/home_page.dart';
         ),
         AutoRoute(
           page: EmptyRouterPage,
+          name: 'ScheduleRouter',
+          path: 'schedule',
+          children: [
+            AutoRoute(page: SchedulePage, path: ''),
+          ],
+        ),
+        AutoRoute(
+          page: EmptyRouterPage,
           name: 'DashboardRouter',
           path: 'dashboard',
           children: [
             AutoRoute(page: DashboardPage, path: ''),
+          ],
+        ),
+        AutoRoute(
+          page: EmptyRouterPage,
+          name: 'ProfileRouter',
+          path: 'profile',
+          children: [
+            AutoRoute(page: ProfilePage, path: ''),
           ],
         ),
       ],

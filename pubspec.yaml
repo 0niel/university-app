@@ -39,7 +39,7 @@ dependencies:
   auto_route: ^5.0.0
 
   # Simplifying the use of both Material and Cupertino widgets with a single widget
-  flutter_platform_widgets: ^1.2.0
+  flutter_platform_widgets: ^2.0.0
 
   # 1000+ beautiful icons to use in you dream project, with all the customization
   # Flutter provides
@@ -55,7 +55,7 @@ dependencies:
   flutter_localizations:
     sdk: flutter
 
-  rtu_app_core: ^1.0.3
+  rtu_app_core:
     git:
       url: https://github.com/mirea-ninja/rtu-app-core.git
       ref: main 
