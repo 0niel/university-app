@@ -32,8 +32,8 @@ class NewsDetailsPage extends StatelessWidget {
               stretch: true,
               flexibleSpace: FlexibleSpaceBar(
                 stretchModes: const [
-                  StretchMode.zoomBackground, // zoom effect
-                  StretchMode.fadeTitle, // fade effect
+                  StretchMode.zoomBackground,
+                  StretchMode.fadeTitle,
                 ],
                 collapseMode: CollapseMode.pin,
                 background: Stack(
@@ -44,16 +44,16 @@ class NewsDetailsPage extends StatelessWidget {
                       child: PageView(
                         controller: _controller,
                         children: [
-                          Image.network(
-                            'https://picsum.photos/375/340',
+                          Image.asset(
+                            "assets/images/test_cover.png",
                             fit: BoxFit.cover,
                           ),
-                          Image.network(
-                            'https://picsum.photos/375/340',
+                          Image.asset(
+                            "assets/images/test_cover.png",
                             fit: BoxFit.cover,
                           ),
-                          Image.network(
-                            'https://picsum.photos/375/340',
+                          Image.asset(
+                            "assets/images/test_cover.png",
                             fit: BoxFit.cover,
                           ),
                         ],
