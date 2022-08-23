@@ -54,6 +54,9 @@ dependencies:
   # Flutter plugin for launching a URL. Supports web, phone, SMS, and email schemes.
   url_launcher: ^6.1.5
 
+  # A flutter package to let users easily add a dashed border around any widget.
+  dotted_border: ^2.0.0+2
+
   flutter_localizations:
     sdk: flutter
 
