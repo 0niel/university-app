@@ -1,6 +1,7 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:auto_route/empty_router_widgets.dart';
 import 'package:rtu_mirea_app/presentation/pages/dashboard/dashboard_page.dart';
+import 'package:rtu_mirea_app/presentation/pages/dashboard/lost_and_found_service_page.dart';
 import 'package:rtu_mirea_app/presentation/pages/news/news_details_page.dart';
 import 'package:rtu_mirea_app/presentation/pages/news/news_page.dart';
 import 'package:rtu_mirea_app/presentation/pages/profile/about_app_page.dart';
@@ -40,6 +41,7 @@ import '../pages/home/home_page.dart';
           path: 'dashboard',
           children: [
             AutoRoute(page: DashboardPage, path: ''),
+            AutoRoute(page: LostAndFoundServicePage, path: 'lost-and-found'),
           ],
         ),
         AutoRoute(

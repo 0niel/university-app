@@ -1,6 +1,9 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:rtu_app_core/rtu_app_core.dart';
 import 'package:unicons/unicons.dart';
+
+import '../../routes/router.gr.dart';
 
 class DashboardPage extends StatelessWidget {
   const DashboardPage({Key? key}) : super(key: key);
@@ -58,56 +61,60 @@ class _ServiceCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SizedBox(
       width: 110,
       height: 125,
-      padding: const EdgeInsets.only(top: 8, right: 13, bottom: 13, left: 16),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(13),
-        color: NinjaConstant.grey100,
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(top: 5),
-                child: Container(
-                  width: 45,
-                  height: 45,
-                  decoration: const BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.white,
+      child: NinjaButton.rounded(
+        expanded: true,
+        padding: const EdgeInsets.only(top: 8, right: 13, bottom: 13, left: 16),
+        backgroundColor: NinjaConstant.grey100,
+        borderRadiusAll: 13.0,
+        onPressed: () {
+          context.router.push(const LostAndFoundServiceRoute());
+        },
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(top: 5),
+                  child: Container(
+                    width: 45,
+                    height: 45,
+                    decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.white,
+                    ),
+                    child: const Icon(UniconsLine.hunting, size: 20),
                   ),
-                  child: const Icon(UniconsLine.hunting, size: 20),
                 ),
-              ),
-              if (isNew)
-                Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(50),
-                    color: NinjaConstant.primary,
-                  ),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 1,
-                  ),
-                  child: const NinjaText.bodyXSmall("New", fontWeight: 500),
-                )
-            ],
-          ),
-          const SizedBox(
-            width: 73,
-            child: NinjaText.bodySmall(
-              "Бюро находок",
-              fontWeight: 500,
-              maxLines: 3,
-              overflow: TextOverflow.ellipsis,
+                if (isNew)
+                  Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(50),
+                      color: NinjaConstant.primary,
+                    ),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 1,
+                    ),
+                    child: const NinjaText.bodyXSmall("New", fontWeight: 500),
+                  )
+              ],
             ),
-          )
-        ],
+            const SizedBox(
+              width: 73,
+              child: NinjaText.bodySmall(
+                "Бюро находок",
+                fontWeight: 500,
+                maxLines: 3,
+                overflow: TextOverflow.ellipsis,
+              ),
+            )
+          ],
+        ),
       ),
     );
   }
