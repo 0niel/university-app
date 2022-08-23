@@ -1,5 +1,7 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:rtu_app_core/rtu_app_core.dart';
+import 'package:rtu_mirea_app/presentation/routes/router.gr.dart';
 import 'package:unicons/unicons.dart';
 
 class ProfilePage extends StatelessWidget {
@@ -96,7 +98,7 @@ class ProfilePage extends StatelessWidget {
                   NinjaIconButton(
                     icon: UniconsLine.coffee,
                     text: 'О приложении',
-                    onPressed: () {},
+                    onPressed: () => context.router.push(const AboutAppRoute()),
                   ),
                   NinjaSwitchButton(
                     icon: UniconsLine.moon,

@@ -19,11 +19,15 @@ class NewsPage extends StatelessWidget {
             children: [
               const _ScrollableAppBar(),
               const _EventsHeader(),
-              const SizedBox(height: 34),
-              NinjaChoiceChip(
-                onPressed: (choice) {},
-                choicesList: const ['Все новости', 'Важные'],
-                oneChoice: true,
+              Padding(
+                padding: const EdgeInsets.only(left: 24, top: 34),
+                child: NinjaChoiceChip(
+                  onPressed: (choice) {},
+                  choicesList: const ['Все новости', 'Важные'],
+                  oneChoice: true,
+                  spacing: 10.0,
+                  runSpacing: 0,
+                ),
               ),
               Padding(
                 padding:
@@ -62,8 +66,7 @@ class _ScrollableAppBar extends StatelessWidget {
             ),
           ),
           child: Padding(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 24).copyWith(top: 27),
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 27),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -86,6 +89,8 @@ class _ScrollableAppBar extends StatelessWidget {
                 ),
                 const SizedBox(height: 30),
                 NinjaChoiceChip(
+                  spacing: 8.0,
+                  runSpacing: 8.0,
                   onPressed: (selected) {
                     print(selected);
                   },

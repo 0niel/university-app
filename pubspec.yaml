@@ -35,7 +35,6 @@ dependencies:
 
   # AutoRoute is a declarative routing solution, where everything needed for navigation
   # is automatically generated for you.
-
   auto_route: ^5.0.0
 
   # Simplifying the use of both Material and Cupertino widgets with a single widget
@@ -51,6 +50,9 @@ dependencies:
 
   # Customizable animated page indicator with a set of built-in effects.
   smooth_page_indicator: ^1.0.0+2
+
+  # Flutter plugin for launching a URL. Supports web, phone, SMS, and email schemes.
+  url_launcher: ^6.1.5
 
   flutter_localizations:
     sdk: flutter
