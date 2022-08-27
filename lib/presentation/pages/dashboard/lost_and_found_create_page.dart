@@ -15,9 +15,20 @@ class LostAndFoundCreatePage extends StatelessWidget {
           scrolledUnderElevation: 8,
           centerTitle: true,
           title: const NinjaText.bodyMedium(
-            "Добавить в бюро находок",
+            "Бюро находок",
             fontWeight: 600,
           ),
+          actions: [
+            NinjaButton.text(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              onPressed: () {},
+              child: const NinjaText.bodyMedium(
+                "Добавить",
+                color: NinjaConstant.secondary,
+                fontWeight: 600,
+              ),
+            ),
+          ],
         ),
         body: SingleChildScrollView(
           child: Padding(
@@ -25,6 +36,10 @@ class LostAndFoundCreatePage extends StatelessWidget {
             child: Column(
               children: [
                 const _ImageSelector(),
+                const SizedBox(height: 16),
+                _TypeSelector(),
+                const SizedBox(height: 16),
+                NinjaInputUnderlined(hintText: "Введите"),
               ],
             ),
           ),
@@ -33,6 +48,36 @@ class LostAndFoundCreatePage extends StatelessWidget {
     );
   }
 }
+
+class _TypeSelector extends StatelessWidget {
+  const _TypeSelector({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return NinjaSelector<_Type>(
+      direction: Axis.horizontal,
+      onChanged: (role) {
+        print(role.toString());
+      },
+      values: _Type.values,
+      builder: (context, value) => SizedBox(
+        height: 40,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            NinjaText.bodyLarge(
+              'Я ${value == _Type.found ? 'нашёл' : 'потерял'}',
+              fontWeight: 500,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+enum _Type { found, lost }
 
 class _ImageSelector extends StatelessWidget {
   const _ImageSelector({Key? key}) : super(key: key);
