@@ -23,7 +23,6 @@ class HomePage extends StatelessWidget {
             ProfileRouter()
           ],
           navigatorObservers: () => [HeroController()],
-          homeIndex: 1,
           builder: (context, child, animation) {
             final tabsRouter = AutoTabsRouter.of(context);
 

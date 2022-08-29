@@ -41,14 +41,14 @@ class _FullScreenImageState extends State<FullScreenImage>
       }),
       child: PhotoView.customChild(
         initialScale: 1.0,
+        backgroundDecoration:
+            const BoxDecoration(color: DarkThemeColors.background01),
         child: ExtendedImage.network(
           widget.imageUrl,
           width: MediaQuery.of(context).size.width,
           fit: BoxFit.contain,
           cache: false,
         ),
-        backgroundDecoration:
-            const BoxDecoration(color: DarkThemeColors.background01),
       ),
     );
   }

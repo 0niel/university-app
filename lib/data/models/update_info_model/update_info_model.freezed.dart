@@ -12,38 +12,11 @@ part of 'update_info_model.dart';
 T _$identity<T>(T value) => value;
 
 final _privateConstructorUsedError = UnsupportedError(
-    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more informations: https://github.com/rrousselGit/freezed#custom-getters-and-methods');
+    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#custom-getters-and-methods');
 
 UpdateInfoModel _$UpdateInfoModelFromJson(Map<String, dynamic> json) {
   return _UpdateInfoModel.fromJson(json);
 }
-
-/// @nodoc
-class _$UpdateInfoModelTearOff {
-  const _$UpdateInfoModelTearOff();
-
-  _UpdateInfoModel call(
-      {@JsonKey(name: 'title') required String title,
-      @JsonKey(name: 'description') required String? description,
-      @JsonKey(name: 'text') required String text,
-      @JsonKey(name: 'appVersion') required String appVersion,
-      @JsonKey(name: 'buildNumber') required int buildNumber}) {
-    return _UpdateInfoModel(
-      title: title,
-      description: description,
-      text: text,
-      appVersion: appVersion,
-      buildNumber: buildNumber,
-    );
-  }
-
-  UpdateInfoModel fromJson(Map<String, Object?> json) {
-    return UpdateInfoModel.fromJson(json);
-  }
-}
-
-/// @nodoc
-const $UpdateInfoModel = _$UpdateInfoModelTearOff();
 
 /// @nodoc
 mixin _$UpdateInfoModel {
@@ -120,11 +93,11 @@ class _$UpdateInfoModelCopyWithImpl<$Res>
 }
 
 /// @nodoc
-abstract class _$UpdateInfoModelCopyWith<$Res>
+abstract class _$$_UpdateInfoModelCopyWith<$Res>
     implements $UpdateInfoModelCopyWith<$Res> {
-  factory _$UpdateInfoModelCopyWith(
-          _UpdateInfoModel value, $Res Function(_UpdateInfoModel) then) =
-      __$UpdateInfoModelCopyWithImpl<$Res>;
+  factory _$$_UpdateInfoModelCopyWith(
+          _$_UpdateInfoModel value, $Res Function(_$_UpdateInfoModel) then) =
+      __$$_UpdateInfoModelCopyWithImpl<$Res>;
   @override
   $Res call(
       {@JsonKey(name: 'title') String title,
@@ -135,15 +108,15 @@ abstract class _$UpdateInfoModelCopyWith<$Res>
 }
 
 /// @nodoc
-class __$UpdateInfoModelCopyWithImpl<$Res>
+class __$$_UpdateInfoModelCopyWithImpl<$Res>
     extends _$UpdateInfoModelCopyWithImpl<$Res>
-    implements _$UpdateInfoModelCopyWith<$Res> {
-  __$UpdateInfoModelCopyWithImpl(
-      _UpdateInfoModel _value, $Res Function(_UpdateInfoModel) _then)
-      : super(_value, (v) => _then(v as _UpdateInfoModel));
+    implements _$$_UpdateInfoModelCopyWith<$Res> {
+  __$$_UpdateInfoModelCopyWithImpl(
+      _$_UpdateInfoModel _value, $Res Function(_$_UpdateInfoModel) _then)
+      : super(_value, (v) => _then(v as _$_UpdateInfoModel));
 
   @override
-  _UpdateInfoModel get _value => super._value as _UpdateInfoModel;
+  _$_UpdateInfoModel get _value => super._value as _$_UpdateInfoModel;
 
   @override
   $Res call({
@@ -153,7 +126,7 @@ class __$UpdateInfoModelCopyWithImpl<$Res>
     Object? appVersion = freezed,
     Object? buildNumber = freezed,
   }) {
-    return _then(_UpdateInfoModel(
+    return _then(_$_UpdateInfoModel(
       title: title == freezed
           ? _value.title
           : title // ignore: cast_nullable_to_non_nullable
@@ -216,7 +189,7 @@ class _$_UpdateInfoModel implements _UpdateInfoModel {
   bool operator ==(dynamic other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is _UpdateInfoModel &&
+            other is _$_UpdateInfoModel &&
             const DeepCollectionEquality().equals(other.title, title) &&
             const DeepCollectionEquality()
                 .equals(other.description, description) &&
@@ -227,6 +200,7 @@ class _$_UpdateInfoModel implements _UpdateInfoModel {
                 .equals(other.buildNumber, buildNumber));
   }
 
+  @JsonKey(ignore: true)
   @override
   int get hashCode => Object.hash(
       runtimeType,
@@ -238,22 +212,24 @@ class _$_UpdateInfoModel implements _UpdateInfoModel {
 
   @JsonKey(ignore: true)
   @override
-  _$UpdateInfoModelCopyWith<_UpdateInfoModel> get copyWith =>
-      __$UpdateInfoModelCopyWithImpl<_UpdateInfoModel>(this, _$identity);
+  _$$_UpdateInfoModelCopyWith<_$_UpdateInfoModel> get copyWith =>
+      __$$_UpdateInfoModelCopyWithImpl<_$_UpdateInfoModel>(this, _$identity);
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$_UpdateInfoModelToJson(this);
+    return _$$_UpdateInfoModelToJson(
+      this,
+    );
   }
 }
 
 abstract class _UpdateInfoModel implements UpdateInfoModel {
   const factory _UpdateInfoModel(
-          {@JsonKey(name: 'title') required String title,
-          @JsonKey(name: 'description') required String? description,
-          @JsonKey(name: 'text') required String text,
-          @JsonKey(name: 'appVersion') required String appVersion,
-          @JsonKey(name: 'buildNumber') required int buildNumber}) =
+          {@JsonKey(name: 'title') required final String title,
+          @JsonKey(name: 'description') required final String? description,
+          @JsonKey(name: 'text') required final String text,
+          @JsonKey(name: 'appVersion') required final String appVersion,
+          @JsonKey(name: 'buildNumber') required final int buildNumber}) =
       _$_UpdateInfoModel;
 
   factory _UpdateInfoModel.fromJson(Map<String, dynamic> json) =
@@ -276,6 +252,6 @@ abstract class _UpdateInfoModel implements UpdateInfoModel {
   int get buildNumber;
   @override
   @JsonKey(ignore: true)
-  _$UpdateInfoModelCopyWith<_UpdateInfoModel> get copyWith =>
+  _$$_UpdateInfoModelCopyWith<_$_UpdateInfoModel> get copyWith =>
       throw _privateConstructorUsedError;
 }

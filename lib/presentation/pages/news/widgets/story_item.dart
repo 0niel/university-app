@@ -25,13 +25,6 @@ class StoryWidget extends StatelessWidget {
           height: 120,
           width: 88,
           padding: const EdgeInsets.all(8),
-          child: Material(
-            type: MaterialType.transparency,
-            child: Text(
-              stories[storyIndex].title,
-              style: DarkTextTheme.chip,
-            ),
-          ),
           clipBehavior: Clip.antiAlias,
           alignment: Alignment.bottomLeft,
           decoration: BoxDecoration(
@@ -45,6 +38,13 @@ class StoryWidget extends StatelessWidget {
               colorFilter: ColorFilter.mode(
                   DarkThemeColors.background02.withOpacity(0.15),
                   BlendMode.dstOut),
+            ),
+          ),
+          child: Material(
+            type: MaterialType.transparency,
+            child: Text(
+              stories[storyIndex].title,
+              style: DarkTextTheme.chip,
             ),
           ),
         ),

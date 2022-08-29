@@ -151,9 +151,9 @@ class _MapPageState extends State<MapPage> {
         initialScale: defaultScale,
         maxScale: maxScale,
         minScale: minScale,
-        child: floors[state.floor],
         backgroundDecoration:
             const BoxDecoration(color: DarkThemeColors.background01),
+        child: floors[state.floor],
       ),
     );
   }

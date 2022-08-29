@@ -9,10 +9,32 @@ class BottomErrorInfo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+      height: MediaQuery.of(context).size.height * 0.95,
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            DarkThemeColors.secondary,
+            DarkThemeColors.deactive,
+            DarkThemeColors.background01
+          ],
+          begin: Alignment(-1, -1),
+          end: Alignment(-1, 1),
+        ),
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(25.0),
+          topRight: Radius.circular(25.0),
+        ),
+      ),
       child: Padding(
         padding: const EdgeInsets.all(3.0),
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 24),
+          decoration: const BoxDecoration(
+            color: DarkThemeColors.background01,
+            borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(25.0),
+                topRight: Radius.circular(25.0)),
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
@@ -59,28 +81,6 @@ class BottomErrorInfo extends StatelessWidget {
               ),
             ],
           ),
-          decoration: const BoxDecoration(
-            color: DarkThemeColors.background01,
-            borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(25.0),
-                topRight: Radius.circular(25.0)),
-          ),
-        ),
-      ),
-      height: MediaQuery.of(context).size.height * 0.95,
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            DarkThemeColors.secondary,
-            DarkThemeColors.deactive,
-            DarkThemeColors.background01
-          ],
-          begin: Alignment(-1, -1),
-          end: Alignment(-1, 1),
-        ),
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(25.0),
-          topRight: Radius.circular(25.0),
         ),
       ),
     );
