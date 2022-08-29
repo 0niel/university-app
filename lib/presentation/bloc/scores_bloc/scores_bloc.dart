@@ -24,6 +24,20 @@ class ScoresBloc extends Bloc<ScoresEvent, ScoresState> {
     }
   }
 
+  Map<String, List<Score>> _sortScores(Map<String, List<Score>> scores) {
+    Map<String, List<Score>> newMap = {};
+
+    final sortedKeys = scores.keys.toList()
+      ..sort((a, b) =>
+          int.parse(a.split(' ')[0]).compareTo(int.parse(b.split(' ')[0])));
+
+    for (final key in sortedKeys) {
+      newMap[key] = scores[key]!;
+    }
+
+    return newMap;
+  }
+
   void _onLoadScores(
     LoadScores event,
     Emitter<ScoresState> emit,
@@ -34,7 +48,8 @@ class ScoresBloc extends Bloc<ScoresEvent, ScoresState> {
       final scores = await getScores(GetScoresParams(event.token));
 
       scores.fold((failure) => emit(ScoresLoadError()), (result) {
-        emit(ScoresLoaded(scores: result, selectedSemester: result.keys.last));
+        emit(ScoresLoaded(
+            scores: _sortScores(result), selectedSemester: result.keys.last));
       });
     }
   }

@@ -51,6 +51,16 @@ class _UpdateInfo extends StatelessWidget {
             top: 8,
             bottom: 24,
           ),
+          decoration: BoxDecoration(
+            border: Border.all(
+              width: 2.5,
+              color: DarkThemeColors.secondary,
+            ),
+            color: DarkThemeColors.background03,
+            borderRadius: const BorderRadius.all(
+              Radius.circular(25.0),
+            ),
+          ),
           child: SingleChildScrollView(
             physics: const BouncingScrollPhysics(),
             child: Column(
@@ -105,16 +115,6 @@ class _UpdateInfo extends StatelessWidget {
                   // backgroundColor: DarkThemeColors.primary,
                 ),
               ],
-            ),
-          ),
-          decoration: BoxDecoration(
-            border: Border.all(
-              width: 2.5,
-              color: DarkThemeColors.secondary,
-            ),
-            color: DarkThemeColors.background03,
-            borderRadius: const BorderRadius.all(
-              Radius.circular(25.0),
             ),
           ),
         ),

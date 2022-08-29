@@ -208,11 +208,9 @@ class AboutAppPage extends StatelessWidget {
                       children: List.generate(state.patrons.length, (index) {
                         return MemberInfo(
                           username: state.patrons[index].username,
-                          avatarUrl: 'https://mirea.ninja/' +
-                              state.patrons[index].avatarTemplate
-                                  .replaceAll('{size}', '120'),
-                          profileUrl: 'https://mirea.ninja/u/' +
-                              state.patrons[index].username,
+                          avatarUrl: 'https://mirea.ninja/${state.patrons[index].avatarTemplate
+                                  .replaceAll('{size}', '120')}',
+                          profileUrl: 'https://mirea.ninja/u/${state.patrons[index].username}',
                         );
                       }),
                     );

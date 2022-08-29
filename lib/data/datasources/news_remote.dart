@@ -20,9 +20,7 @@ class NewsRemoteDataImpl extends NewsRemoteData {
       [String? tag]) async {
     final String tagsFilter =
         tag != null ? "&filters[tags][name][\$eq]=$tag" : "";
-    final String requestUrl = _apiUrl +
-        '/announcements?populate=*&pagination[limit]=$limit&pagination[start]=$offset&sort=date:DESC&filters[isImportant][\$eq]=${isImportant.toString()}' +
-        tagsFilter;
+    final String requestUrl = '$_apiUrl/announcements?populate=*&pagination[limit]=$limit&pagination[start]=$offset&sort=date:DESC&filters[isImportant][\$eq]=${isImportant.toString()}$tagsFilter';
 
     final response = await httpClient.get(requestUrl);
 
@@ -39,7 +37,7 @@ class NewsRemoteDataImpl extends NewsRemoteData {
 
   @override
   Future<List<String>> getTags() async {
-    final response = await httpClient.get(_apiUrl + '/tags');
+    final response = await httpClient.get('$_apiUrl/tags');
 
     if (response.statusCode == 200) {
       Map responseBody = response.data;

@@ -1,5 +1,4 @@
 import 'package:auto_route/auto_route.dart';
-import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:rtu_mirea_app/domain/entities/story.dart';
 import 'package:rtu_mirea_app/presentation/colors.dart';
@@ -26,13 +25,6 @@ class StoryWidget extends StatelessWidget {
           height: 120,
           width: 88,
           padding: const EdgeInsets.all(8),
-          child: Material(
-            type: MaterialType.transparency,
-            child: Text(
-              stories[storyIndex].title,
-              style: DarkTextTheme.chip,
-            ),
-          ),
           clipBehavior: Clip.antiAlias,
           alignment: Alignment.bottomLeft,
           decoration: BoxDecoration(
@@ -46,6 +38,13 @@ class StoryWidget extends StatelessWidget {
               colorFilter: ColorFilter.mode(
                   DarkThemeColors.background02.withOpacity(0.15),
                   BlendMode.dstOut),
+            ),
+          ),
+          child: Material(
+            type: MaterialType.transparency,
+            child: Text(
+              stories[storyIndex].title,
+              style: DarkTextTheme.chip,
             ),
           ),
         ),

@@ -1,4 +1,5 @@
 import 'package:auto_route/auto_route.dart';
+import 'package:auto_route/empty_router_widgets.dart';
 import 'package:dismissible_page/dismissible_page.dart';
 import 'package:flutter/material.dart';
 import 'package:rtu_mirea_app/presentation/pages/home_page.dart';
@@ -23,8 +24,12 @@ import 'package:rtu_mirea_app/presentation/pages/schedule/schedule_page.dart';
     AutoRoute(
       path: '/',
       page: HomePage,
-      initial: true,
       children: [
+        AutoRoute(
+          path: 'schedule',
+          page: SchedulePage,
+          initial: true,
+        ),
         AutoRoute(
           path: 'news',
           name: 'NewsRouter',
@@ -39,10 +44,6 @@ import 'package:rtu_mirea_app/presentation/pages/schedule/schedule_page.dart';
               page: NewsDetailsPage,
             ),
           ],
-        ),
-        AutoRoute(
-          path: 'schedule',
-          page: SchedulePage,
         ),
         AutoRoute(
           path: 'map',
@@ -106,6 +107,8 @@ Route<T> transparentRoute<T>(
     BuildContext context, Widget child, CustomPage<T> page) {
   return TransparentRoute(
     settings: page,
+    transitionDuration: const Duration(milliseconds: 250),
+    reverseTransitionDuration: const Duration(milliseconds: 250),
     builder: (context) => child,
     backgroundColor: Colors.black.withOpacity(0.45),
   );

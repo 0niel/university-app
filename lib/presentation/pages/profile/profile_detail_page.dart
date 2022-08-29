@@ -35,14 +35,14 @@ class ProfileDetailPage extends StatelessWidget {
                   child: CircleAvatar(
                     radius: 68,
                     backgroundImage:
-                        Image.network('https://lk.mirea.ru' + user.photoUrl)
+                        Image.network('https://lk.mirea.ru${user.photoUrl}')
                             .image,
                   ),
                 ),
                 const SizedBox(height: 13),
                 Center(
                   child: Text(
-                    user.name + ' ' + user.secondName + ' ' + user.lastName,
+                    '${user.lastName} ${user.name} ${user.secondName}',
                     style: DarkTextTheme.h6,
                   ),
                 ),
@@ -89,8 +89,7 @@ class ProfileDetailPage extends StatelessWidget {
                 if (user.authShortlink != null)
                   CopyTextBlockWithLabel(
                       label: "Ссылка авторизации",
-                      text: 'https://lk.mirea.ru/auth/link/?url=' +
-                          user.authShortlink!),
+                      text: 'https://lk.mirea.ru/auth/link/?url=${user.authShortlink!}'),
                 const SizedBox(height: 23),
                 CopyTextBlockWithLabel(label: "Логин", text: user.login),
                 const SizedBox(height: 23),

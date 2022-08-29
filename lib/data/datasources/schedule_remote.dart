@@ -17,7 +17,7 @@ class ScheduleRemoteDataImpl implements ScheduleRemoteData {
   @override
   Future<List<String>> getGroups() async {
     try {
-      final response = await httpClient.get(_apiUrl + 'schedule/groups');
+      final response = await httpClient.get('${_apiUrl}schedule/groups');
       if (response.statusCode == 200) {
         Map responseBody = response.data;
         List<String> groups = [];
@@ -35,7 +35,7 @@ class ScheduleRemoteDataImpl implements ScheduleRemoteData {
   Future<ScheduleModel> getScheduleByGroup(String group) async {
     try {
       final response =
-          await httpClient.get(_apiUrl + 'schedule/$group/full_schedule');
+          await httpClient.get('${_apiUrl}schedule/$group/full_schedule');
       if (response.statusCode == 200) {
         final data = response.data as Map<String, dynamic>;
         data["remote"] = true;

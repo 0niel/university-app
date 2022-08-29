@@ -26,14 +26,14 @@ class GithubRepositoryImpl implements GithubRepository {
         localDataSource.setContributorsToCache(contributors);
         return Right(contributors);
       } on ServerException {
-        return Left(ServerFailure());
+        return const Left(ServerFailure());
       }
     } else {
       try {
         final contributors = await localDataSource.getContributorsFromCache();
         return Right(contributors);
       } on CacheException {
-        return Left(CacheFailure());
+        return const Left(CacheFailure());
       }
     }
   }

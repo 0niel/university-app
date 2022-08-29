@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:clock/clock.dart';
 import 'package:intl/intl.dart';
 
@@ -68,10 +66,11 @@ abstract class CalendarUtils {
   static DateTime getSemesterLastDay(
       {DateTime? mCurrentDate, final Clock clock = const Clock()}) {
     return getDaysInWeek(
-            kMaxWeekInSemester,
-            _CurrentSemesterStart.getCurrentSemesterStart(
-                mCurrentDate: mCurrentDate, clock: clock))
-        .last;
+        kMaxWeekInSemester,
+        _CurrentSemesterStart.getCurrentSemesterStart(
+          mCurrentDate: mCurrentDate,
+          clock: clock,
+        )).last;
   }
 
   /// Calculates number of weeks for a given year as per https://en.wikipedia.org/wiki/ISO_week_date#Weeks_per_year
@@ -119,7 +118,8 @@ abstract class _CurrentSemesterStart {
   /// For the first semester it is September 1
   /// For the second semester it is February 9th
   static DateTime _getExpectedSemesterStart(DateTime currentDate) {
-    if (currentDate.month >= DateTime.september) {
+    if (currentDate.month >= DateTime.september ||
+        (currentDate.month == DateTime.august && currentDate.day >= 25)) {
       return DateTime(currentDate.year, DateTime.september, 1);
     } else {
       return DateTime(currentDate.year, DateTime.february, 9);

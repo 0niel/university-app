@@ -37,6 +37,15 @@ class _SchedulePageState extends State<SchedulePage> {
         padding: const EdgeInsets.only(bottom: 10),
         child: Container(
           padding: const EdgeInsets.only(left: 10),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              width: 1.5,
+              color: schedule.isRemote
+                  ? DarkThemeColors.colorful05
+                  : DarkThemeColors.colorful06,
+            ),
+          ),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -57,26 +66,17 @@ class _SchedulePageState extends State<SchedulePage> {
                       context.read<ScheduleBloc>().add(ScheduleUpdateEvent(
                           group: group, activeGroup: activeGroup));
                     },
+                    shape: const CircleBorder(),
+                    constraints:
+                        const BoxConstraints(minWidth: 36.0, minHeight: 36.0),
                     child: Icon(Icons.refresh_rounded,
                         color: schedule.isRemote
                             ? DarkThemeColors.colorful05
                             : DarkThemeColors.colorful06),
-                    shape: const CircleBorder(),
-                    constraints:
-                        const BoxConstraints(minWidth: 36.0, minHeight: 36.0),
                   ),
                 ],
               ),
             ],
-          ),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              width: 1.5,
-              color: schedule.isRemote
-                  ? DarkThemeColors.colorful05
-                  : DarkThemeColors.colorful06,
-            ),
           ),
         ),
       );
@@ -85,6 +85,10 @@ class _SchedulePageState extends State<SchedulePage> {
         padding: const EdgeInsets.only(bottom: 10),
         child: Container(
           padding: const EdgeInsets.only(left: 10),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: DarkThemeColors.deactive),
+          ),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -101,38 +105,34 @@ class _SchedulePageState extends State<SchedulePage> {
                           .read<ScheduleBloc>()
                           .add(ScheduleSetActiveGroupEvent(group));
                     },
-                    child: const Icon(Icons.check_rounded),
                     shape: const CircleBorder(),
                     constraints:
                         const BoxConstraints(minWidth: 36.0, minHeight: 36.0),
+                    child: const Icon(Icons.check_rounded),
                   ),
                   RawMaterialButton(
                     onPressed: () {
                       context.read<ScheduleBloc>().add(ScheduleUpdateEvent(
                           group: group, activeGroup: activeGroup));
                     },
-                    child: const Icon(Icons.refresh_rounded),
                     shape: const CircleBorder(),
                     constraints:
                         const BoxConstraints(minWidth: 36.0, minHeight: 36.0),
+                    child: const Icon(Icons.refresh_rounded),
                   ),
                   RawMaterialButton(
                     onPressed: () {
                       context.read<ScheduleBloc>().add(ScheduleDeleteEvent(
                           group: group, schedule: schedule));
                     },
-                    child: const Icon(Icons.delete_rounded),
                     shape: const CircleBorder(),
                     constraints:
                         const BoxConstraints(minWidth: 36.0, minHeight: 36.0),
+                    child: const Icon(Icons.delete_rounded),
                   ),
                 ],
               ),
             ],
-          ),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: DarkThemeColors.deactive),
           ),
         ),
       );

@@ -54,6 +54,9 @@ class NewsItemWidget extends StatelessWidget {
                   switch (state.extendedImageLoadState) {
                     case LoadState.loading:
                       return Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
                         child: Shimmer.fromColors(
                           baseColor: DarkThemeColors.background03,
                           highlightColor:
@@ -64,21 +67,18 @@ class NewsItemWidget extends StatelessWidget {
                             color: DarkThemeColors.background03,
                           ),
                         ),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
                       );
 
                     case LoadState.completed:
                       return Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
                         child: ExtendedRawImage(
                           fit: BoxFit.cover,
                           height: 175,
                           width: double.infinity,
                           image: state.extendedImageInfo?.image,
-                        ),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(16),
                         ),
                       );
 
