@@ -10,12 +10,14 @@
 //
 // ignore_for_file: type=lint
 
-import 'package:auto_route/auto_route.dart' as _i4;
-import 'package:flutter/material.dart' as _i17;
-import 'package:rtu_mirea_app/domain/entities/news_item.dart' as _i20;
-import 'package:rtu_mirea_app/domain/entities/story.dart' as _i19;
-import 'package:rtu_mirea_app/domain/entities/user.dart' as _i21;
-import 'package:rtu_mirea_app/presentation/core/routes/routes.dart' as _i18;
+// ignore_for_file: no_leading_underscores_for_library_prefixes
+import 'package:auto_route/auto_route.dart' as _i17;
+import 'package:auto_route/empty_router_widgets.dart' as _i5;
+import 'package:flutter/material.dart' as _i18;
+import 'package:rtu_mirea_app/domain/entities/news_item.dart' as _i21;
+import 'package:rtu_mirea_app/domain/entities/story.dart' as _i20;
+import 'package:rtu_mirea_app/domain/entities/user.dart' as _i22;
+import 'package:rtu_mirea_app/presentation/core/routes/routes.dart' as _i19;
 import 'package:rtu_mirea_app/presentation/pages/home_page.dart' as _i1;
 import 'package:rtu_mirea_app/presentation/pages/login/login_page.dart' as _i10;
 import 'package:rtu_mirea_app/presentation/pages/map/map_page.dart' as _i6;
@@ -41,144 +43,149 @@ import 'package:rtu_mirea_app/presentation/pages/profile/profile_page.dart'
 import 'package:rtu_mirea_app/presentation/pages/profile/profile_scores_page.dart'
     as _i16;
 import 'package:rtu_mirea_app/presentation/pages/schedule/schedule_page.dart'
-    as _i5;
+    as _i4;
 
-class AppRouter extends _i4.RootStackRouter {
-  AppRouter([_i17.GlobalKey<_i17.NavigatorState>? navigatorKey])
+class AppRouter extends _i17.RootStackRouter {
+  AppRouter([_i18.GlobalKey<_i18.NavigatorState>? navigatorKey])
       : super(navigatorKey);
 
   @override
-  final Map<String, _i4.PageFactory> pagesMap = {
+  final Map<String, _i17.PageFactory> pagesMap = {
     HomeRoute.name: (routeData) {
-      return _i4.AdaptivePage<dynamic>(
+      return _i17.AdaptivePage<dynamic>(
           routeData: routeData, child: const _i1.HomePage());
     },
     OnBoardingRoute.name: (routeData) {
-      return _i4.AdaptivePage<dynamic>(
+      return _i17.AdaptivePage<dynamic>(
           routeData: routeData, child: const _i2.OnBoardingPage());
     },
     StoriesWrapperRoute.name: (routeData) {
       final args = routeData.argsAs<StoriesWrapperRouteArgs>();
-      return _i4.CustomPage<dynamic>(
+      return _i17.CustomPage<dynamic>(
           routeData: routeData,
           child: _i3.StoriesWrapper(
               key: args.key,
               stories: args.stories,
               storyIndex: args.storyIndex),
-          customRouteBuilder: _i18.transparentRoute,
+          customRouteBuilder: _i19.transparentRoute,
           opaque: false,
           barrierDismissible: false);
     },
-    NewsRouter.name: (routeData) {
-      return _i4.AdaptivePage<dynamic>(
-          routeData: routeData, child: const _i4.EmptyRouterPage());
-    },
     ScheduleRoute.name: (routeData) {
-      return _i4.AdaptivePage<dynamic>(
-          routeData: routeData, child: const _i5.SchedulePage());
+      return _i17.AdaptivePage<dynamic>(
+          routeData: routeData, child: const _i4.SchedulePage());
+    },
+    NewsRouter.name: (routeData) {
+      return _i17.AdaptivePage<dynamic>(
+          routeData: routeData, child: const _i5.EmptyRouterPage());
     },
     MapRoute.name: (routeData) {
-      return _i4.AdaptivePage<dynamic>(
+      return _i17.AdaptivePage<dynamic>(
           routeData: routeData, child: const _i6.MapPage());
     },
     ProfileRouter.name: (routeData) {
-      return _i4.AdaptivePage<dynamic>(
-          routeData: routeData, child: const _i4.EmptyRouterPage());
+      return _i17.AdaptivePage<dynamic>(
+          routeData: routeData, child: const _i5.EmptyRouterPage());
     },
     NewsRoute.name: (routeData) {
-      return _i4.AdaptivePage<dynamic>(
+      return _i17.AdaptivePage<dynamic>(
           routeData: routeData, child: const _i7.NewsPage());
     },
     NewsDetailsRoute.name: (routeData) {
       final args = routeData.argsAs<NewsDetailsRouteArgs>();
-      return _i4.AdaptivePage<dynamic>(
+      return _i17.AdaptivePage<dynamic>(
           routeData: routeData,
           child: _i8.NewsDetailsPage(key: args.key, newsItem: args.newsItem));
     },
     ProfileRoute.name: (routeData) {
-      return _i4.AdaptivePage<dynamic>(
+      return _i17.AdaptivePage<dynamic>(
           routeData: routeData, child: const _i9.ProfilePage());
     },
     LoginRoute.name: (routeData) {
-      return _i4.AdaptivePage<dynamic>(
+      return _i17.AdaptivePage<dynamic>(
           routeData: routeData, child: const _i10.LoginPage());
     },
     AboutAppRoute.name: (routeData) {
-      return _i4.AdaptivePage<dynamic>(
+      return _i17.AdaptivePage<dynamic>(
           routeData: routeData, child: const _i11.AboutAppPage());
     },
     ProfileAnnouncesRoute.name: (routeData) {
-      return _i4.AdaptivePage<dynamic>(
+      return _i17.AdaptivePage<dynamic>(
           routeData: routeData, child: const _i12.ProfileAnnouncesPage());
     },
     ProfileAttendanceRoute.name: (routeData) {
-      return _i4.AdaptivePage<dynamic>(
+      return _i17.AdaptivePage<dynamic>(
           routeData: routeData, child: const _i13.ProfileAttendancePage());
     },
     ProfileDetailRoute.name: (routeData) {
       final args = routeData.argsAs<ProfileDetailRouteArgs>();
-      return _i4.AdaptivePage<dynamic>(
+      return _i17.AdaptivePage<dynamic>(
           routeData: routeData,
           child: _i14.ProfileDetailPage(key: args.key, user: args.user));
     },
     ProfileLectrosRoute.name: (routeData) {
-      return _i4.AdaptivePage<dynamic>(
+      return _i17.AdaptivePage<dynamic>(
           routeData: routeData, child: const _i15.ProfileLectrosPage());
     },
     ProfileScoresRoute.name: (routeData) {
-      return _i4.AdaptivePage<dynamic>(
+      return _i17.AdaptivePage<dynamic>(
           routeData: routeData, child: const _i16.ProfileScoresPage());
     }
   };
 
   @override
-  List<_i4.RouteConfig> get routes => [
-        _i4.RouteConfig(HomeRoute.name, path: '/', children: [
-          _i4.RouteConfig(NewsRouter.name,
+  List<_i17.RouteConfig> get routes => [
+        _i17.RouteConfig(HomeRoute.name, path: '/', children: [
+          _i17.RouteConfig('#redirect',
+              path: '',
+              parent: HomeRoute.name,
+              redirectTo: 'schedule',
+              fullMatch: true),
+          _i17.RouteConfig(ScheduleRoute.name,
+              path: 'schedule', parent: HomeRoute.name),
+          _i17.RouteConfig(NewsRouter.name,
               path: 'news',
               parent: HomeRoute.name,
               children: [
-                _i4.RouteConfig(NewsRoute.name,
+                _i17.RouteConfig(NewsRoute.name,
                     path: '', parent: NewsRouter.name),
-                _i4.RouteConfig(NewsDetailsRoute.name,
+                _i17.RouteConfig(NewsDetailsRoute.name,
                     path: 'details', parent: NewsRouter.name)
               ]),
-          _i4.RouteConfig(ScheduleRoute.name,
-              path: 'schedule', parent: HomeRoute.name),
-          _i4.RouteConfig(MapRoute.name, path: 'map', parent: HomeRoute.name),
-          _i4.RouteConfig(ProfileRouter.name,
+          _i17.RouteConfig(MapRoute.name, path: 'map', parent: HomeRoute.name),
+          _i17.RouteConfig(ProfileRouter.name,
               path: 'profile',
               parent: HomeRoute.name,
               children: [
-                _i4.RouteConfig(ProfileRoute.name,
+                _i17.RouteConfig(ProfileRoute.name,
                     path: '', parent: ProfileRouter.name),
-                _i4.RouteConfig(LoginRoute.name,
+                _i17.RouteConfig(LoginRoute.name,
                     path: 'login', parent: ProfileRouter.name),
-                _i4.RouteConfig(AboutAppRoute.name,
+                _i17.RouteConfig(AboutAppRoute.name,
                     path: 'about', parent: ProfileRouter.name),
-                _i4.RouteConfig(ProfileAnnouncesRoute.name,
+                _i17.RouteConfig(ProfileAnnouncesRoute.name,
                     path: 'announces', parent: ProfileRouter.name),
-                _i4.RouteConfig(ProfileAttendanceRoute.name,
+                _i17.RouteConfig(ProfileAttendanceRoute.name,
                     path: 'attendance', parent: ProfileRouter.name),
-                _i4.RouteConfig(ProfileDetailRoute.name,
+                _i17.RouteConfig(ProfileDetailRoute.name,
                     path: 'details', parent: ProfileRouter.name),
-                _i4.RouteConfig(ProfileLectrosRoute.name,
+                _i17.RouteConfig(ProfileLectrosRoute.name,
                     path: 'lectors', parent: ProfileRouter.name),
-                _i4.RouteConfig(ProfileScoresRoute.name,
+                _i17.RouteConfig(ProfileScoresRoute.name,
                     path: 'scores', parent: ProfileRouter.name)
               ])
         ]),
-        _i4.RouteConfig(OnBoardingRoute.name, path: '/onboarding'),
-        _i4.RouteConfig(StoriesWrapperRoute.name, path: '/story'),
-        _i4.RouteConfig('*#redirect',
+        _i17.RouteConfig(OnBoardingRoute.name, path: '/onboarding'),
+        _i17.RouteConfig(StoriesWrapperRoute.name, path: '/story'),
+        _i17.RouteConfig('*#redirect',
             path: '*', redirectTo: '/', fullMatch: true)
       ];
 }
 
 /// generated route for
 /// [_i1.HomePage]
-class HomeRoute extends _i4.PageRouteInfo<void> {
-  const HomeRoute({List<_i4.PageRouteInfo>? children})
+class HomeRoute extends _i17.PageRouteInfo<void> {
+  const HomeRoute({List<_i17.PageRouteInfo>? children})
       : super(HomeRoute.name, path: '/', initialChildren: children);
 
   static const String name = 'HomeRoute';
@@ -186,7 +193,7 @@ class HomeRoute extends _i4.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i2.OnBoardingPage]
-class OnBoardingRoute extends _i4.PageRouteInfo<void> {
+class OnBoardingRoute extends _i17.PageRouteInfo<void> {
   const OnBoardingRoute() : super(OnBoardingRoute.name, path: '/onboarding');
 
   static const String name = 'OnBoardingRoute';
@@ -194,10 +201,10 @@ class OnBoardingRoute extends _i4.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i3.StoriesWrapper]
-class StoriesWrapperRoute extends _i4.PageRouteInfo<StoriesWrapperRouteArgs> {
+class StoriesWrapperRoute extends _i17.PageRouteInfo<StoriesWrapperRouteArgs> {
   StoriesWrapperRoute(
-      {_i17.Key? key,
-      required List<_i19.Story> stories,
+      {_i18.Key? key,
+      required List<_i20.Story> stories,
       required int storyIndex})
       : super(StoriesWrapperRoute.name,
             path: '/story',
@@ -211,9 +218,9 @@ class StoriesWrapperRouteArgs {
   const StoriesWrapperRouteArgs(
       {this.key, required this.stories, required this.storyIndex});
 
-  final _i17.Key? key;
+  final _i18.Key? key;
 
-  final List<_i19.Story> stories;
+  final List<_i20.Story> stories;
 
   final int storyIndex;
 
@@ -224,34 +231,34 @@ class StoriesWrapperRouteArgs {
 }
 
 /// generated route for
-/// [_i4.EmptyRouterPage]
-class NewsRouter extends _i4.PageRouteInfo<void> {
-  const NewsRouter({List<_i4.PageRouteInfo>? children})
-      : super(NewsRouter.name, path: 'news', initialChildren: children);
-
-  static const String name = 'NewsRouter';
-}
-
-/// generated route for
-/// [_i5.SchedulePage]
-class ScheduleRoute extends _i4.PageRouteInfo<void> {
+/// [_i4.SchedulePage]
+class ScheduleRoute extends _i17.PageRouteInfo<void> {
   const ScheduleRoute() : super(ScheduleRoute.name, path: 'schedule');
 
   static const String name = 'ScheduleRoute';
 }
 
 /// generated route for
+/// [_i5.EmptyRouterPage]
+class NewsRouter extends _i17.PageRouteInfo<void> {
+  const NewsRouter({List<_i17.PageRouteInfo>? children})
+      : super(NewsRouter.name, path: 'news', initialChildren: children);
+
+  static const String name = 'NewsRouter';
+}
+
+/// generated route for
 /// [_i6.MapPage]
-class MapRoute extends _i4.PageRouteInfo<void> {
+class MapRoute extends _i17.PageRouteInfo<void> {
   const MapRoute() : super(MapRoute.name, path: 'map');
 
   static const String name = 'MapRoute';
 }
 
 /// generated route for
-/// [_i4.EmptyRouterPage]
-class ProfileRouter extends _i4.PageRouteInfo<void> {
-  const ProfileRouter({List<_i4.PageRouteInfo>? children})
+/// [_i5.EmptyRouterPage]
+class ProfileRouter extends _i17.PageRouteInfo<void> {
+  const ProfileRouter({List<_i17.PageRouteInfo>? children})
       : super(ProfileRouter.name, path: 'profile', initialChildren: children);
 
   static const String name = 'ProfileRouter';
@@ -259,7 +266,7 @@ class ProfileRouter extends _i4.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i7.NewsPage]
-class NewsRoute extends _i4.PageRouteInfo<void> {
+class NewsRoute extends _i17.PageRouteInfo<void> {
   const NewsRoute() : super(NewsRoute.name, path: '');
 
   static const String name = 'NewsRoute';
@@ -267,8 +274,8 @@ class NewsRoute extends _i4.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i8.NewsDetailsPage]
-class NewsDetailsRoute extends _i4.PageRouteInfo<NewsDetailsRouteArgs> {
-  NewsDetailsRoute({_i17.Key? key, required _i20.NewsItem newsItem})
+class NewsDetailsRoute extends _i17.PageRouteInfo<NewsDetailsRouteArgs> {
+  NewsDetailsRoute({_i18.Key? key, required _i21.NewsItem newsItem})
       : super(NewsDetailsRoute.name,
             path: 'details',
             args: NewsDetailsRouteArgs(key: key, newsItem: newsItem));
@@ -279,9 +286,9 @@ class NewsDetailsRoute extends _i4.PageRouteInfo<NewsDetailsRouteArgs> {
 class NewsDetailsRouteArgs {
   const NewsDetailsRouteArgs({this.key, required this.newsItem});
 
-  final _i17.Key? key;
+  final _i18.Key? key;
 
-  final _i20.NewsItem newsItem;
+  final _i21.NewsItem newsItem;
 
   @override
   String toString() {
@@ -291,7 +298,7 @@ class NewsDetailsRouteArgs {
 
 /// generated route for
 /// [_i9.ProfilePage]
-class ProfileRoute extends _i4.PageRouteInfo<void> {
+class ProfileRoute extends _i17.PageRouteInfo<void> {
   const ProfileRoute() : super(ProfileRoute.name, path: '');
 
   static const String name = 'ProfileRoute';
@@ -299,7 +306,7 @@ class ProfileRoute extends _i4.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i10.LoginPage]
-class LoginRoute extends _i4.PageRouteInfo<void> {
+class LoginRoute extends _i17.PageRouteInfo<void> {
   const LoginRoute() : super(LoginRoute.name, path: 'login');
 
   static const String name = 'LoginRoute';
@@ -307,7 +314,7 @@ class LoginRoute extends _i4.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i11.AboutAppPage]
-class AboutAppRoute extends _i4.PageRouteInfo<void> {
+class AboutAppRoute extends _i17.PageRouteInfo<void> {
   const AboutAppRoute() : super(AboutAppRoute.name, path: 'about');
 
   static const String name = 'AboutAppRoute';
@@ -315,7 +322,7 @@ class AboutAppRoute extends _i4.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i12.ProfileAnnouncesPage]
-class ProfileAnnouncesRoute extends _i4.PageRouteInfo<void> {
+class ProfileAnnouncesRoute extends _i17.PageRouteInfo<void> {
   const ProfileAnnouncesRoute()
       : super(ProfileAnnouncesRoute.name, path: 'announces');
 
@@ -324,7 +331,7 @@ class ProfileAnnouncesRoute extends _i4.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i13.ProfileAttendancePage]
-class ProfileAttendanceRoute extends _i4.PageRouteInfo<void> {
+class ProfileAttendanceRoute extends _i17.PageRouteInfo<void> {
   const ProfileAttendanceRoute()
       : super(ProfileAttendanceRoute.name, path: 'attendance');
 
@@ -333,8 +340,8 @@ class ProfileAttendanceRoute extends _i4.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i14.ProfileDetailPage]
-class ProfileDetailRoute extends _i4.PageRouteInfo<ProfileDetailRouteArgs> {
-  ProfileDetailRoute({_i17.Key? key, required _i21.User user})
+class ProfileDetailRoute extends _i17.PageRouteInfo<ProfileDetailRouteArgs> {
+  ProfileDetailRoute({_i18.Key? key, required _i22.User user})
       : super(ProfileDetailRoute.name,
             path: 'details',
             args: ProfileDetailRouteArgs(key: key, user: user));
@@ -345,9 +352,9 @@ class ProfileDetailRoute extends _i4.PageRouteInfo<ProfileDetailRouteArgs> {
 class ProfileDetailRouteArgs {
   const ProfileDetailRouteArgs({this.key, required this.user});
 
-  final _i17.Key? key;
+  final _i18.Key? key;
 
-  final _i21.User user;
+  final _i22.User user;
 
   @override
   String toString() {
@@ -357,7 +364,7 @@ class ProfileDetailRouteArgs {
 
 /// generated route for
 /// [_i15.ProfileLectrosPage]
-class ProfileLectrosRoute extends _i4.PageRouteInfo<void> {
+class ProfileLectrosRoute extends _i17.PageRouteInfo<void> {
   const ProfileLectrosRoute()
       : super(ProfileLectrosRoute.name, path: 'lectors');
 
@@ -366,7 +373,7 @@ class ProfileLectrosRoute extends _i4.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i16.ProfileScoresPage]
-class ProfileScoresRoute extends _i4.PageRouteInfo<void> {
+class ProfileScoresRoute extends _i17.PageRouteInfo<void> {
   const ProfileScoresRoute() : super(ProfileScoresRoute.name, path: 'scores');
 
   static const String name = 'ProfileScoresRoute';

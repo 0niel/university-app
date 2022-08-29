@@ -106,7 +106,7 @@ class _ProfileScoresPageState extends State<ProfileScoresPage> {
                                 final String semester =
                                     state.scores.keys.toList()[index];
                                 return PrimaryTabButton(
-                                    text: semester + ' семестр',
+                                    text: '$semester семестр',
                                     itemIndex: index,
                                     notifier: _tabValueNotifier,
                                     onClick: () {

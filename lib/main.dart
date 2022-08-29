@@ -76,7 +76,7 @@ class App extends StatelessWidget {
       statusBarColor: Colors.transparent,
     ));
 
-    final _appRouter = AppRouter();
+    final appRouter = AppRouter();
 
     return MultiBlocProvider(
       providers: [
@@ -122,15 +122,15 @@ class App extends StatelessWidget {
           debugShowCheckedModeBanner: false,
           title: 'Приложение РТУ МИРЭА',
           theme: theme,
-          routerDelegate: _appRouter.delegate(
+          routerDelegate: appRouter.delegate(
             navigatorObservers: () => [
               FirebaseAnalyticsObserver(
                 analytics: FirebaseAnalytics.instance,
               ),
             ],
           ),
-          routeInformationProvider: _appRouter.routeInfoProvider(),
-          routeInformationParser: _appRouter.defaultRouteParser(),
+          routeInformationProvider: appRouter.routeInfoProvider(),
+          routeInformationParser: appRouter.defaultRouteParser(),
         ),
       ),
     );

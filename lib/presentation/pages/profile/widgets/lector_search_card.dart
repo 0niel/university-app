@@ -21,7 +21,7 @@ class LectorSearchCard extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
           Text(
-            employee.name + ' ' + employee.secondName + ' ' + employee.lastName,
+            '${employee.name} ${employee.secondName} ${employee.lastName}',
             style: DarkTextTheme.bodyBold,
           ),
           SizedBox(

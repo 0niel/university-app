@@ -27,6 +27,13 @@ class NextPageViewButton extends StatelessWidget {
           onClick();
         }
       },
+      style: ElevatedButton.styleFrom(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        onPrimary: DarkThemeColors.primary.withOpacity(0.25),
+        shadowColor: const Color(0x7f000000),
+        primary: DarkThemeColors.primary,
+        elevation: 8.0,
+      ),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         padding: isLastPage
@@ -38,13 +45,6 @@ class NextPageViewButton extends StatelessWidget {
                 style: DarkTextTheme.buttonS,
               )
             : const Icon(Icons.arrow_forward_ios, color: DarkThemeColors.white),
-      ),
-      style: ElevatedButton.styleFrom(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        onPrimary: DarkThemeColors.primary.withOpacity(0.25),
-        shadowColor: const Color(0x7f000000),
-        primary: DarkThemeColors.primary,
-        elevation: 8.0,
       ),
     );
   }

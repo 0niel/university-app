@@ -44,7 +44,7 @@ class MapScalingButton extends StatelessWidget {
               ))),
           child: FittedBox(
               fit: BoxFit.fitWidth,
-              child: Text(_calculateScalePercentage().toString() + "%")),
+              child: Text("${_calculateScalePercentage()}%")),
           onPressed: () => onClick(),
         ),
       ),
