@@ -1,16 +1,13 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:rtu_mirea_app/presentation/bloc/announces_bloc/announces_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/auth_bloc/auth_bloc.dart';
-import 'package:rtu_mirea_app/presentation/bloc/profile_bloc/profile_bloc.dart';
 import 'package:rtu_mirea_app/presentation/colors.dart';
-import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:rtu_mirea_app/presentation/widgets/buttons/colorful_button.dart';
 import 'package:rtu_mirea_app/presentation/widgets/buttons/settings_button.dart';
-import 'package:rtu_mirea_app/presentation/widgets/buttons/text_outlined_button.dart';
-import 'package:rtu_mirea_app/presentation/widgets/container_label.dart';
 import 'package:rtu_mirea_app/presentation/core/routes/routes.gr.dart';
+
+import 'widgets/bottom_error_info.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({Key? key}) : super(key: key);
@@ -37,6 +34,8 @@ class _ProfilePageState extends State<ProfilePage> {
                 padding: const EdgeInsets.symmetric(horizontal: 24),
                 child: BlocBuilder<AuthBloc, AuthState>(
                   builder: (context, state) {
+                    return const _InitialProfileStatePage();
+                    /*
                     if (state is LogInSuccess) {
                       context
                           .read<ProfileBloc>()
@@ -146,23 +145,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       });
                     } else if (state is LogInError ||
                         state is AuthUnauthorized) {
-                      return Column(
-                        children: [
-                          ColorfulButton(
-                              text: 'Войти',
-                              onClick: () {
-                                context.router.push(const LoginRoute());
-                              },
-                              backgroundColor: DarkThemeColors.colorful03),
-                          const SizedBox(height: 8),
-                          SettingsButton(
-                            text: 'О приложении',
-                            icon: Icons.apps_rounded,
-                            onClick: () =>
-                                context.router.push(const AboutAppRoute()),
-                          ),
-                        ],
-                      );
+                      return _InitialProfileStatePage();
                     } else if (state is AuthUnknown) {
                       return ConstrainedBox(
                         constraints: BoxConstraints(
@@ -172,6 +155,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       );
                     }
                     return Container();
+                    */
                   },
                 ),
               ),
@@ -179,6 +163,36 @@ class _ProfilePageState extends State<ProfilePage> {
           },
         ),
       ),
+    );
+  }
+}
+
+class _InitialProfileStatePage extends StatelessWidget {
+  const _InitialProfileStatePage({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        ColorfulButton(
+            text: 'Войти',
+            onClick: () {
+              // context.router.push(const LoginRoute());
+              showModalBottomSheet(
+                context: context,
+                isScrollControlled: true,
+                backgroundColor: Colors.transparent,
+                builder: (context) => const BottomErrorInfo(),
+              );
+            },
+            backgroundColor: DarkThemeColors.colorful03),
+        const SizedBox(height: 8),
+        SettingsButton(
+          text: 'О приложении',
+          icon: Icons.apps_rounded,
+          onClick: () => context.router.push(const AboutAppRoute()),
+        ),
+      ],
     );
   }
 }
