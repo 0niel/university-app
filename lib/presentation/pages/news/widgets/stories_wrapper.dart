@@ -30,9 +30,9 @@ class _StoriesWrapperState extends State<StoriesWrapper> {
   @override
   Widget build(BuildContext context) {
     return DismissiblePage(
-      onDismiss: () => context.router.pop(),
+      onDismissed: () => context.router.pop(),
       isFullScreen: false,
-      direction: DismissDirection.vertical,
+      direction: DismissiblePageDismissDirection.vertical,
       child: Material(
         color: Colors.transparent,
         child: Hero(

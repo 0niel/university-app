@@ -96,8 +96,7 @@ class _ProfileAttendancePageState extends State<ProfileAttendancePage> {
                             children: [
                               const SizedBox(height: 8),
                               Text(
-                                  'Дней посещено: ' +
-                                      state.visitsCount.toString(),
+                                  'Дней посещено: ${state.visitsCount}',
                                   style: DarkTextTheme.body),
                               const SizedBox(height: 8),
                               Expanded(

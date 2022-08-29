@@ -68,7 +68,7 @@ class AttendanceCard extends StatelessWidget {
                 style: DarkTextTheme.bodyBold,
               ),
               Text(
-                date + ', ' + time,
+                '$date, $time',
                 style: DarkTextTheme.captionL.copyWith(
                     color: type == "Вход"
                         ? DarkThemeColors.colorful05

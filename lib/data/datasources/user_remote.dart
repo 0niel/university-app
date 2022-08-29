@@ -44,7 +44,7 @@ class UserRemoteDataImpl implements UserRemoteData {
   @override
   Future<UserModel> getProfileData(String token) async {
     final response = await httpClient.get(
-      _apiUrl + '?action=getData&url=https://lk.mirea.ru/profile/',
+      '$_apiUrl?action=getData&url=https://lk.mirea.ru/profile/',
       options: Options(
         headers: {'Authorization': token},
       ),
@@ -64,7 +64,7 @@ class UserRemoteDataImpl implements UserRemoteData {
   @override
   Future<List<AnnounceModel>> getAnnounces(String token) async {
     final response = await httpClient.get(
-      _apiUrl + '?action=getData&url=https://lk.mirea.ru/livestream/',
+      '$_apiUrl?action=getData&url=https://lk.mirea.ru/livestream/',
       options: Options(
         headers: {'Authorization': token},
       ),
@@ -89,9 +89,7 @@ class UserRemoteDataImpl implements UserRemoteData {
   @override
   Future<List<EmployeeModel>> getEmployees(String token, String name) async {
     final response = await httpClient.get(
-      _apiUrl +
-          '?action=getData&url=https://lk.mirea.ru/lectors/&page=undefined&findname=' +
-          name,
+      '$_apiUrl?action=getData&url=https://lk.mirea.ru/lectors/&page=undefined&findname=$name',
       options: Options(
         headers: {'Authorization': token},
       ),
@@ -118,7 +116,7 @@ class UserRemoteDataImpl implements UserRemoteData {
   @override
   Future<Map<String, List<ScoreModel>>> getScores(String token) async {
     final response = await httpClient.get(
-      _apiUrl + '?action=getData&url=https://lk.mirea.ru/learning/scores/',
+      '$_apiUrl?action=getData&url=https://lk.mirea.ru/learning/scores/',
       options: Options(
         headers: {'Authorization': token},
       ),
@@ -151,8 +149,7 @@ class UserRemoteDataImpl implements UserRemoteData {
   Future<List<AttendanceModel>> getAttendance(
       String token, String dateStart, String dateEnd) async {
     final response = await httpClient.get(
-      _apiUrl +
-          '?action=getData&url=https://lk.mirea.ru/schedule/attendance/&startDate=$dateStart&endDate=$dateEnd',
+      '$_apiUrl?action=getData&url=https://lk.mirea.ru/schedule/attendance/&startDate=$dateStart&endDate=$dateEnd',
       options: Options(
         headers: {'Authorization': token},
       ),

@@ -320,7 +320,6 @@ class _SchedulePageViewState extends State<SchedulePageView> {
                   children: [
                     for (int i = 1; i <= CalendarUtils.kMaxWeekInSemester; i++)
                       ElevatedButton(
-                        child: Text(i.toString()),
                         style: ElevatedButton.styleFrom(
                           primary: DarkThemeColors.primary,
                           onPrimary: Colors.white,
@@ -344,6 +343,7 @@ class _SchedulePageViewState extends State<SchedulePageView> {
                             _controller.jumpToPage(_selectedPage);
                           });
                         },
+                        child: Text(i.toString()),
                       ),
                   ],
                 ));

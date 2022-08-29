@@ -187,10 +187,10 @@ class PageIndicators extends StatefulWidget {
 
 class _PageIndicatorsState extends State<PageIndicators> {
   /// Build indicators depending on current opened page
-  List<Widget> _buildPageIndicators(int _currentPage) {
+  List<Widget> _buildPageIndicators(int currentPage) {
     List<Widget> list = [];
     for (int i = 0; i < widget.dotsNum; i++) {
-      list.add(i == _currentPage
+      list.add(i == currentPage
           ? const IndicatorPageView(isActive: true)
           : const IndicatorPageView(isActive: false));
     }
