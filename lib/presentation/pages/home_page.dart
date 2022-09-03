@@ -26,34 +26,12 @@ class HomePage extends StatelessWidget {
           builder: (context, child, animation) {
             final tabsRouter = AutoTabsRouter.of(context);
 
-            return Column(
-              children: [
-                Expanded(
-                  child: FadeTransition(
-                    opacity: animation,
-                    child: BlocListener<UpdateInfoBloc, UpdateInfoState>(
-                      child: child,
-                      listener: (context, state) =>
-                          UpdateInfoDialog.checkAndShow(context, state),
-                    ),
-                  ),
-                ),
-                Container(
-                  decoration: const BoxDecoration(
-                    color: DarkThemeColors.background01,
-                  ),
-                  child: SafeArea(
-                    left: false,
-                    top: false,
-                    right: false,
-                    bottom: true,
-                    child: AppBottomNavigationBar(
-                      index: tabsRouter.activeIndex,
-                      onClick: tabsRouter.setActiveIndex,
-                    ),
-                  ),
-                ),
-              ],
+            return Scaffold(
+              body: child,
+              bottomNavigationBar: AppBottomNavigationBar(
+                index: tabsRouter.activeIndex,
+                onClick: tabsRouter.setActiveIndex,
+              ),
             );
           },
         );
