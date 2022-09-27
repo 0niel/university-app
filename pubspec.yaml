@@ -85,12 +85,11 @@ dependencies:
 
   # A Flutter widget rendering static HTML and CSS as Flutter widgets.
   # See https://pub.dev/packages/flutter_html
-
-  flutter_html: ^3.0.0-alpha.2
+  flutter_html: ^3.0.0-alpha.5
 
   # Iframe widget for flutter_html
   # See https://pub.dev/packages/flutter_html_iframe
-  flutter_html_iframe: ^3.0.0-alpha.2
+  flutter_html_iframe: ^3.0.0-alpha.3
 
   # The Font Awesome Icon pack available as Flutter Icons. 
   # Provides 1600 additional icons to use in your apps.
@@ -136,11 +135,6 @@ dependencies:
   syncfusion_flutter_gauges: ^20.1.57
 
   auto_route: ^5.0.1
-
-  flutter_inner_drawer:
-    git:
-      url: https://github.com/0niel/flutter_inner_drawer.git
-      ref: bugfix/type-casting
   
   url_launcher: ^6.0.17
 
