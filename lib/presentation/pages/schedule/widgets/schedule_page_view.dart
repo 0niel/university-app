@@ -321,8 +321,8 @@ class _SchedulePageViewState extends State<SchedulePageView> {
                     for (int i = 1; i <= CalendarUtils.kMaxWeekInSemester; i++)
                       ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          primary: DarkThemeColors.primary,
-                          onPrimary: Colors.white,
+                          foregroundColor: Colors.white,
+                          backgroundColor: DarkThemeColors.primary,
                           shadowColor: Colors.transparent,
                         ),
                         onPressed: () {
