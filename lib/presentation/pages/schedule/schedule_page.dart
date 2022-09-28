@@ -7,6 +7,7 @@ import 'package:rtu_mirea_app/presentation/bloc/schedule_bloc/schedule_bloc.dart
 import 'package:rtu_mirea_app/presentation/colors.dart';
 import 'package:rtu_mirea_app/presentation/pages/schedule/widgets/schedule_settings_drawer.dart';
 import 'package:rtu_mirea_app/presentation/pages/schedule/widgets/schedule_settings_modal.dart';
+import 'package:rtu_mirea_app/presentation/widgets/buttons/colorful_button.dart';
 import 'package:rtu_mirea_app/presentation/widgets/settings_switch_button.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'widgets/schedule_page_view.dart';
@@ -24,28 +25,14 @@ class _SchedulePageState extends State<SchedulePage> {
   @override
   void initState() {
     super.initState();
-
-    WidgetsBinding.instance
-        .addPostFrameCallback((_) => _showScheduleSettingsModal(context));
   }
 
-  /// Shows schedule settings modal if it's not shown yet and if there is no
-  /// schedule data in the cache.
-  void _showScheduleSettingsModal(BuildContext context) {
-    final state = context.read<ScheduleBloc>().state;
-    if (state is ScheduleActiveGroupEmpty) {
-      if (!_modalShown) {
-        showModalBottomSheet(
-          useRootNavigator: false,
-          context: context,
-          isScrollControlled: true,
-          backgroundColor: Colors.transparent,
-          builder: (context) => const ScheduleSettingsModal(isFirstRun: true),
-        ).whenComplete(() {
-          _modalShown = false;
-        });
-      }
-      _modalShown = true;
+  @override
+  void dispose() {
+    super.dispose();
+    // dispose mounted modal
+    if (_modalShown) {
+      Navigator.of(context).pop();
     }
   }
 
@@ -162,6 +149,23 @@ class _SchedulePageState extends State<SchedulePage> {
     }
   }
 
+  /// Show modal with group settings. If [_modalShown] is true, then modal is
+  /// already shown and we don't need to show it again.
+  void _showModal({bool? isFirstRun}) {
+    if (!_modalShown) {
+      _modalShown = true;
+      showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        backgroundColor: Colors.transparent,
+        builder: (context) =>
+            ScheduleSettingsModal(isFirstRun: isFirstRun ?? true),
+      ).whenComplete(() {
+        _modalShown = false;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -254,21 +258,7 @@ class _SchedulePageState extends State<SchedulePage> {
                                 ),
                               ],
                             ),
-                            onTap: () {
-                              if (!_modalShown) {
-                                showModalBottomSheet(
-                                  context: context,
-                                  isScrollControlled: true,
-                                  backgroundColor: Colors.transparent,
-                                  builder: (context) =>
-                                      const ScheduleSettingsModal(
-                                          isFirstRun: false),
-                                ).whenComplete(() {
-                                  _modalShown = false;
-                                });
-                              }
-                              _modalShown = true;
-                            },
+                            onTap: () => _showModal(isFirstRun: false),
                           ),
                         ),
                         if (state is ScheduleLoaded)
@@ -353,7 +343,18 @@ class _SchedulePageState extends State<SchedulePage> {
       body: Container(
         color: DarkThemeColors.background01,
         child: SafeArea(
-          child: BlocBuilder<ScheduleBloc, ScheduleState>(
+          child: BlocConsumer<ScheduleBloc, ScheduleState>(
+            listener: (context, state) {
+              if (state is ScheduleActiveGroupEmpty) {
+                if (!_modalShown) {
+                  // show after 300 ms
+                  Future.delayed(
+                    const Duration(milliseconds: 300),
+                    () => _showModal(),
+                  );
+                }
+              }
+            },
             buildWhen: (prevState, currentState) {
               if (prevState is ScheduleLoaded &&
                   currentState is ScheduleLoaded) {
@@ -396,12 +397,76 @@ class _SchedulePageState extends State<SchedulePage> {
                   ],
                 );
               } else {
-                return Container();
+                return _NoActiveGroupFoundMessage(onTap: () => _showModal());
               }
             },
           ),
         ),
       ),
+    );
+  }
+}
+
+class _NoActiveGroupFoundMessage extends StatelessWidget {
+  const _NoActiveGroupFoundMessage({Key? key, required this.onTap})
+      : super(key: key);
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder(
+      future: Future.delayed(const Duration(milliseconds: 600)),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(
+            child: CircularProgressIndicator(
+              backgroundColor: DarkThemeColors.primary,
+              strokeWidth: 5,
+            ),
+          );
+        } else {
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Image.asset(
+                    'assets/images/Saly-2.png',
+                    height: 200,
+                  ),
+                ),
+                const SizedBox(
+                  height: 8,
+                ),
+                Text(
+                  "Не установлена активная группа",
+                  style: DarkTextTheme.h5,
+                ),
+                const SizedBox(
+                  height: 8,
+                ),
+                Text(
+                  "Скачайте расписание по крайней мере для одной группы, чтобы отобразить календарь.",
+                  style: DarkTextTheme.captionL.copyWith(
+                    color: DarkThemeColors.deactive,
+                  ),
+                ),
+                const SizedBox(
+                  height: 24,
+                ),
+                ColorfulButton(
+                  text: "Настроить",
+                  onClick: onTap,
+                  backgroundColor: DarkThemeColors.primary,
+                ),
+              ],
+            ),
+          );
+        }
+      },
     );
   }
 }
