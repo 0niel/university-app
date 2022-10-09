@@ -42,7 +42,7 @@ flutter doctor
 flutter packages pub run build_runner watch --delete-conflicting-outputs
 ```
 
-Tсли вы хотите, чтобы генератор запустился один раз и завершил работу, используйте
+Если вы хотите, чтобы генератор запустился один раз и завершил работу, используйте
 ```
 flutter packages pub run build_runner build --delete-conflicting-outputs
 ```
