@@ -67,7 +67,7 @@ dependencies:
 
   # Internet connection checker.
   # See https://pub.dev/packages/internet_connection_checker
-  internet_connection_checker: ^0.0.1+3
+  internet_connection_checker: ^1.0.0+1
 
   # Functional Programming in Dart
   # See https://pub.dev/packages/dartz/versions/0.10.0-nullsafety.2
@@ -146,7 +146,7 @@ dependencies:
 
   # Get version name in runtime
   # https://pub.dev/packages/package_info_plus
-  package_info_plus: ^1.3.0
+  package_info_plus: ^3.0.2
 
   # Encapsulates the notion of the "current time". Very useful for testing
   # See https://pub.dev/packages/clock
@@ -165,9 +165,9 @@ dependencies:
   home_widget: ^0.1.6
   
   freezed_annotation: ^2.1.0
-  firebase_core: ^1.12.0
-  firebase_analytics: ^9.1.0
-  firebase_crashlytics: ^2.5.1
+  firebase_core: ^2.4.0
+  firebase_analytics: ^10.0.7
+  firebase_crashlytics: ^3.0.7
   
 
 dev_dependencies:
@@ -179,7 +179,7 @@ dev_dependencies:
   flutter_lints: ^2.0.1
   flutter_test:
     sdk: flutter
-  flutter_launcher_icons: ^0.10.0
+  flutter_launcher_icons: ^0.11.0
   auto_route_generator: ^5.0.2
   build_runner:
   # https://pub.dev/packages/freezed
