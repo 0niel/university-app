@@ -7,9 +7,23 @@ import 'package:rtu_mirea_app/data/models/attendance_model.dart';
 import 'package:rtu_mirea_app/data/models/employee_model.dart';
 import 'package:rtu_mirea_app/data/models/score_model.dart';
 import 'package:rtu_mirea_app/data/models/user_model.dart';
+import 'package:oauth2_client/oauth2_helper.dart';
+import 'package:oauth2_client/oauth2_client.dart';
+
+class MireaNinjaOauth2Client extends OAuth2Client {
+  MireaNinjaOauth2Client({
+    required String redirectUri,
+    required String customUriScheme,
+  }) : super(
+          authorizeUrl: 'https://lks.mirea.ninja/oauth/authorize',
+          tokenUrl: 'https://lks.mirea.ninja/oauth/token',
+          redirectUri: redirectUri,
+          customUriScheme: customUriScheme,
+        );
+}
 
 abstract class UserRemoteData {
-  Future<String> auth(String login, String password);
+  Future<String> auth();
   Future<UserModel> getProfileData(String token);
   Future<List<AnnounceModel>> getAnnounces(String token);
   Future<List<EmployeeModel>> getEmployees(String token, String name);
@@ -19,25 +33,33 @@ abstract class UserRemoteData {
 }
 
 class UserRemoteDataImpl implements UserRemoteData {
-  static const _apiUrl = 'https://lk.mirea.ru/local/ajax/mrest.php';
+  static const _apiUrl = 'https://lks.mirea.ninja/api/';
 
   final Dio httpClient;
+
+  final oauth2Client = MireaNinjaOauth2Client(
+    customUriScheme: 'ninja.mirea.mireaapp',
+    redirectUri: 'ninja.mirea.mireaapp:/oauth2redirect',
+  );
 
   UserRemoteDataImpl({required this.httpClient});
 
   @override
-  Future<String> auth(String login, String password) async {
-    final data = {"action": "login", "login": login, "password": password};
-    final response = await httpClient.get(_apiUrl, queryParameters: data);
-    if (response.statusCode == 200) {
-      var jsonResponse = json.decode(response.data);
-      log('Response: $jsonResponse');
-      if (jsonResponse.containsKey('errors')) {
-        throw ServerException(jsonResponse['errors'][0]);
-      }
-      return jsonResponse['token'];
+  Future<String> auth() async {
+    final OAuth2Helper oauth2Helper = OAuth2Helper(
+      oauth2Client,
+      grantType: OAuth2Helper.authorizationCode,
+      clientId: const String.fromEnvironment('LK_CLIENT_ID', defaultValue: ''),
+      clientSecret:
+          const String.fromEnvironment('LK_CLIENT_SECRET', defaultValue: ''),
+      scopes: ['profile', 'livestream', 'employees', 'attendance', 'scores'],
+    );
+
+    final token = await oauth2Helper.getToken();
+    if (token != null) {
+      return token.accessToken!;
     } else {
-      throw ServerException('Response status code is $response.statusCode');
+      throw ServerException('Token is null');
     }
   }
 
@@ -46,11 +68,13 @@ class UserRemoteDataImpl implements UserRemoteData {
     final response = await httpClient.get(
       '$_apiUrl?action=getData&url=https://lk.mirea.ru/profile/',
       options: Options(
-        headers: {'Authorization': token},
+        headers: {'Authorization': 'Bearer $token'},
       ),
     );
     var jsonResponse = json.decode(response.data);
+
     log('Response: $jsonResponse');
+
     if (jsonResponse.containsKey('errors')) {
       throw ServerException(jsonResponse['errors'][0]);
     }
@@ -66,9 +90,11 @@ class UserRemoteDataImpl implements UserRemoteData {
     final response = await httpClient.get(
       '$_apiUrl?action=getData&url=https://lk.mirea.ru/livestream/',
       options: Options(
-        headers: {'Authorization': token},
+        headers: {'Authorization': 'Bearer $token'},
       ),
     );
+
+    log('Response: ${response.data}');
 
     var jsonResponse = json.decode(response.data);
     if (jsonResponse.containsKey('errors')) {
@@ -91,9 +117,11 @@ class UserRemoteDataImpl implements UserRemoteData {
     final response = await httpClient.get(
       '$_apiUrl?action=getData&url=https://lk.mirea.ru/lectors/&page=undefined&findname=$name',
       options: Options(
-        headers: {'Authorization': token},
+        headers: {'Authorization': 'Bearer $token'},
       ),
     );
+
+    log('Response: ${response.data}');
 
     var jsonResponse = json.decode(response.data);
     if (jsonResponse.containsKey('errors')) {
@@ -118,9 +146,11 @@ class UserRemoteDataImpl implements UserRemoteData {
     final response = await httpClient.get(
       '$_apiUrl?action=getData&url=https://lk.mirea.ru/learning/scores/',
       options: Options(
-        headers: {'Authorization': token},
+        headers: {'Authorization': 'Bearer $token'},
       ),
     );
+
+    log('Response: ${response.data}');
 
     var jsonResponse = json.decode(response.data);
     if (jsonResponse.containsKey('errors')) {
@@ -151,9 +181,11 @@ class UserRemoteDataImpl implements UserRemoteData {
     final response = await httpClient.get(
       '$_apiUrl?action=getData&url=https://lk.mirea.ru/schedule/attendance/&startDate=$dateStart&endDate=$dateEnd',
       options: Options(
-        headers: {'Authorization': token},
+        headers: {'Authorization': 'Bearer $token'},
       ),
     );
+
+    log('Response: ${response.data}');
 
     var jsonResponse = json.decode(response.data);
     if (jsonResponse.containsKey('errors')) {
