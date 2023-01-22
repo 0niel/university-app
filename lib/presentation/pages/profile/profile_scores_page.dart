@@ -118,19 +118,28 @@ class _ProfileScoresPageState extends State<ProfileScoresPage> {
                               },
                               itemCount: state.scores.keys.length),
                         ),
+                        // Небольшая кнопка с иконкой для открытия модального окна с графиком
                         Padding(
-                          padding: const EdgeInsets.symmetric(
-                              vertical: 12, horizontal: 16),
-                          child: TextOutlinedButton(
-                              content: 'Средний балл',
-                              width: 230,
-                              onPressed: () {
-                                showModalBottomSheet(
-                                    context: context,
-                                    builder: (BuildContext context) =>
-                                        ScoresChartModal(scores: state.scores));
-                              }),
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                "Всего предметов: ${state.scores[state.selectedSemester]!.length}",
+                                style: DarkTextTheme.body,
+                              ),
+                              IconButton(
+                                  onPressed: () => showModalBottomSheet(
+                                        context: context,
+                                        builder: (BuildContext context) =>
+                                            ScoresChartModal(
+                                                scores: state.scores),
+                                      ),
+                                  icon: const Icon(Icons.bar_chart))
+                            ],
+                          ),
                         ),
+
                         Expanded(
                           child: _buildDataGridForMobile(_ScoresDataGridSource(
                               state.scores[state.selectedSemester]!)),

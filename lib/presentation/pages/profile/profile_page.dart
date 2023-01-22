@@ -4,10 +4,17 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/auth_bloc/auth_bloc.dart';
 import 'package:rtu_mirea_app/presentation/colors.dart';
 import 'package:rtu_mirea_app/presentation/widgets/buttons/colorful_button.dart';
+import 'package:rtu_mirea_app/presentation/widgets/buttons/icon_button.dart';
 import 'package:rtu_mirea_app/presentation/widgets/buttons/settings_button.dart';
 import 'package:rtu_mirea_app/presentation/core/routes/routes.gr.dart';
 
+import '../../bloc/announces_bloc/announces_bloc.dart';
+import '../../bloc/profile_bloc/profile_bloc.dart';
+import '../../theme.dart';
+import '../../widgets/buttons/text_outlined_button.dart';
+import '../../widgets/container_label.dart';
 import 'widgets/bottom_error_info.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({Key? key}) : super(key: key);
@@ -34,8 +41,8 @@ class _ProfilePageState extends State<ProfilePage> {
                 padding: const EdgeInsets.symmetric(horizontal: 24),
                 child: BlocBuilder<AuthBloc, AuthState>(
                   builder: (context, state) {
-                    return const _InitialProfileStatePage();
-                    /*
+                    // return const _InitialProfileStatePage();
+
                     if (state is LogInSuccess) {
                       context
                           .read<ProfileBloc>()
@@ -49,19 +56,16 @@ class _ProfilePageState extends State<ProfilePage> {
                               CircleAvatar(
                                 radius: 68,
                                 backgroundImage: Image.network(
-                                        'https://lk.mirea.ru' +
-                                            profileState.user.photoUrl)
+                                        'https://lk.mirea.ru${profileState.user.photoUrl}')
                                     .image,
                               ),
                               Padding(
-                                child: Text(
-                                  profileState.user.name +
-                                      ' ' +
-                                      profileState.user.lastName,
-                                  style: DarkTextTheme.h5,
-                                ),
                                 padding:
                                     const EdgeInsets.only(top: 13, bottom: 4),
+                                child: Text(
+                                  '${profileState.user.name} ${profileState.user.lastName}',
+                                  style: DarkTextTheme.h5,
+                                ),
                               ),
                               ShaderMask(
                                 shaderCallback: (bounds) =>
@@ -75,12 +79,25 @@ class _ProfilePageState extends State<ProfilePage> {
                                 ),
                               ),
                               const SizedBox(height: 12),
-                              TextOutlinedButton(
-                                  content: "Просмотр профиля",
+                              Row(children: [
+                                TextOutlinedButton(
+                                  content: "Профиль",
                                   width: 200,
                                   onPressed: () => context.router.push(
-                                      ProfileDetailRoute(
-                                          user: profileState.user))),
+                                    ProfileDetailRoute(user: profileState.user),
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                SocialIconButton(
+                                  assetImage:
+                                      const AssetImage('assets/icons/gerb.ico'),
+                                  onClick: () {
+                                    launchUrl(Uri.parse(
+                                        profileState.user.authShortlink ??
+                                            "https://lk.mirea.ru/auth"));
+                                  },
+                                ),
+                              ]),
                               const SizedBox(height: 40),
                               const ContainerLabel(label: "Информация"),
                               const SizedBox(height: 20),
@@ -91,8 +108,9 @@ class _ProfilePageState extends State<ProfilePage> {
                                     context
                                         .read<AnnouncesBloc>()
                                         .add(LoadAnnounces(token: state.token));
-                                    context.router
-                                        .push(const ProfileAnnouncesRoute());
+                                    context.router.push(
+                                      const ProfileAnnouncesRoute(),
+                                    );
                                   }),
                               // const SizedBox(height: 8),
                               // SettingsButton(
@@ -145,7 +163,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       });
                     } else if (state is LogInError ||
                         state is AuthUnauthorized) {
-                      return _InitialProfileStatePage();
+                      return const _InitialProfileStatePage();
                     } else if (state is AuthUnknown) {
                       return ConstrainedBox(
                         constraints: BoxConstraints(
@@ -155,7 +173,6 @@ class _ProfilePageState extends State<ProfilePage> {
                       );
                     }
                     return Container();
-                    */
                   },
                 ),
               ),
@@ -177,13 +194,23 @@ class _InitialProfileStatePage extends StatelessWidget {
         ColorfulButton(
             text: 'Войти',
             onClick: () {
+              // Мы используем oauth2 для авторизации, поэтому
+              // вместо того, чтобы открывать страницу с логином и паролем,
+              // мы просто вызываем событие авторизации, которое откроет
+              // страницу авторизации в браузере.
+              context.read<AuthBloc>().add(
+                  const AuthLogInEvent(login: 'login', password: 'password'));
+
+              // Страница с вводом логина и пароля:
               // context.router.push(const LoginRoute());
-              showModalBottomSheet(
-                context: context,
-                isScrollControlled: true,
-                backgroundColor: Colors.transparent,
-                builder: (context) => const BottomErrorInfo(),
-              );
+
+              // Страница с ошибкой:
+              // showModalBottomSheet(
+              //   context: context,
+              //   isScrollControlled: true,
+              //   backgroundColor: Colors.transparent,
+              //   builder: (context) => const BottomErrorInfo(),
+              // );
             },
             backgroundColor: DarkThemeColors.colorful03),
         const SizedBox(height: 8),

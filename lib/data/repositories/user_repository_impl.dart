@@ -24,7 +24,7 @@ class UserRepositoryImpl implements UserRepository {
   Future<Either<Failure, String>> logIn(String login, String password) async {
     if (await connectionChecker.hasConnection) {
       try {
-        final authToken = await remoteDataSource.auth(login, password);
+        final authToken = await remoteDataSource.auth();
         localDataSource.setTokenToCache(authToken);
         return Right(authToken);
       } catch (e) {

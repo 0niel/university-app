@@ -8,14 +8,14 @@ class EmployeeModel extends Employee {
     required secondName,
     required lastName,
     required email,
-    required post,
+    required institute,
     required department,
   }) : super(
           name: name,
           secondName: secondName,
           lastName: lastName,
           email: email,
-          post: post,
+          institute: institute,
           department: department,
         );
 
@@ -28,8 +28,8 @@ class EmployeeModel extends Employee {
       secondName: json["HUMAN"]["SECOND_NAME"],
       lastName: json["HUMAN"]["LAST_NAME"],
       email: json["HUMAN"]["EMAIL"],
-      post: json["EMPLOYEE"]["PROPERTIES"]["POST"]["VALUE"],
-      department: json["EMPLOYEE"]["PROPERTIES"]["DEPARTMENT"]["VALUE"],
+      institute: json["HUMAN"]["INSTITUTE"],
+      department: json["HUMAN"]["DEPARTMENT"],
     );
   }
 }

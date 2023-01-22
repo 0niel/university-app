@@ -5,7 +5,7 @@ class Employee extends Equatable {
   final String secondName;
   final String lastName;
   final String email;
-  final String post;
+  final String institute;
   final String department;
 
   const Employee({
@@ -13,7 +13,7 @@ class Employee extends Equatable {
     required this.secondName,
     required this.lastName,
     required this.email,
-    required this.post,
+    required this.institute,
     required this.department,
   });
 
@@ -23,7 +23,7 @@ class Employee extends Equatable {
         secondName,
         lastName,
         email,
-        post,
+        institute,
         department,
       ];
 }

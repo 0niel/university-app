@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:rtu_mirea_app/common/oauth.dart';
 import 'package:rtu_mirea_app/common/widget_data_init.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:rtu_mirea_app/presentation/bloc/about_app_bloc/about_app_bloc.dart';
@@ -30,6 +31,7 @@ import 'service_locator.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'firebase_options.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -50,8 +52,12 @@ Future<void> main() async {
     await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(false);
 
     // Clear local dota
-    // var prefs = getIt<SharedPreferences>();
-    // await prefs.clear();
+    var prefs = getIt<SharedPreferences>();
+    await prefs.clear();
+
+    // Clear oauth tokens
+    var lksOauth2 = getIt<LksOauth2>();
+    await lksOauth2.oauth2Helper.removeAllTokens();
   }
 
   setPathUrlStrategy();
