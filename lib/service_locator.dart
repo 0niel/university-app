@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:rtu_mirea_app/common/oauth.dart';
 import 'package:rtu_mirea_app/data/datasources/app_settings_local.dart';
 import 'package:rtu_mirea_app/data/datasources/forum_local.dart';
 import 'package:rtu_mirea_app/data/datasources/forum_remote.dart';
@@ -186,7 +187,7 @@ Future<void> setup() async {
   getIt.registerLazySingleton<UserLocalData>(
       () => UserLocalDataImpl(sharedPreferences: getIt()));
   getIt.registerLazySingleton<UserRemoteData>(
-      () => UserRemoteDataImpl(httpClient: getIt()));
+      () => UserRemoteDataImpl(httpClient: getIt(), lksOauth2: getIt()));
   getIt.registerLazySingleton<ScheduleRemoteData>(
       () => ScheduleRemoteDataImpl(httpClient: getIt()));
   getIt.registerLazySingleton<ScheduleLocalData>(
@@ -217,4 +218,5 @@ Future<void> setup() async {
   getIt.registerLazySingleton(() => InternetConnectionChecker());
   final PackageInfo packageInfo = await PackageInfo.fromPlatform();
   getIt.registerLazySingleton(() => packageInfo);
+  getIt.registerLazySingleton(() => LksOauth2());
 }

@@ -46,9 +46,9 @@ class LectorSearchCard extends StatelessWidget {
               ),
             ),
           ),
-          // const SizedBox(height: 8),
-          // Text(employee.post, style: DarkTextTheme.bodyRegular),
-          // Text(employee.department, style: DarkTextTheme.bodyRegular),
+          const SizedBox(height: 8),
+          Text(employee.institute, style: DarkTextTheme.bodyRegular),
+          Text(employee.department, style: DarkTextTheme.bodyRegular),
         ],
       ),
     );
