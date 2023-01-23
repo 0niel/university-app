@@ -93,8 +93,10 @@ class _ProfilePageState extends State<ProfilePage> {
                                       const AssetImage('assets/icons/gerb.ico'),
                                   onClick: () {
                                     launchUrl(Uri.parse(
-                                        profileState.user.authShortlink ??
-                                            "https://lk.mirea.ru/auth"));
+                                      profileState.user.authShortlink != null
+                                          ? "https://lk.mirea.ru/auth/link/?url=${profileState.user.authShortlink!}"
+                                          : "https://lk.mirea.ru/auth",
+                                    ));
                                   },
                                 ),
                               ]),
