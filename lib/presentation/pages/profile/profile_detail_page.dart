@@ -95,7 +95,7 @@ class ProfileDetailPage extends StatelessWidget {
                 CopyTextBlockWithLabel(label: "Логин", text: user.login),
                 const SizedBox(height: 23),
                 CopyTextBlockWithLabel(
-                    label: "Персональный email", text: 'dmitriev@mirea.ru'),
+                    label: "Персональный email", text: user.email),
                 const SizedBox(height: 23),
                 CopyTextBlockWithLabel(
                     label: "Дата рождения", text: user.birthday),
