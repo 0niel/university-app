@@ -13,7 +13,6 @@ import '../../bloc/profile_bloc/profile_bloc.dart';
 import '../../theme.dart';
 import '../../widgets/buttons/text_outlined_button.dart';
 import '../../widgets/container_label.dart';
-import 'widgets/bottom_error_info.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class ProfilePage extends StatefulWidget {

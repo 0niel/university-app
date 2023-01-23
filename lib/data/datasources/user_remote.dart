@@ -27,6 +27,7 @@ class UserRemoteDataImpl implements UserRemoteData {
 
   UserRemoteDataImpl({required this.httpClient, required this.lksOauth2});
 
+  @override
   Future<String> auth() async {
     final token = await lksOauth2.oauth2Helper.getToken();
 
