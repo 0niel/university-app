@@ -8,7 +8,7 @@ abstract class ScheduleRemoteData {
 }
 
 class ScheduleRemoteDataImpl implements ScheduleRemoteData {
-  static const _apiUrl = 'http://schedule.mirea.ninja:5000/api/';
+  static const _apiUrl = 'https://schedule.mirea.ninja/api/';
 
   final Dio httpClient;
 
