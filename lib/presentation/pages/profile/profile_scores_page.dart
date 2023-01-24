@@ -9,6 +9,28 @@ import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 import 'package:rtu_mirea_app/presentation/widgets/buttons/primary_tab_button.dart';
 
+Color getColorByResult(String result) {
+  result = result.toLowerCase();
+
+  if (result.contains("неуваж")) {
+    return DarkThemeColors.colorful07;
+  }
+
+  if (result.contains("зач")) {
+    return Colors.green;
+  } else if (result.contains("отл")) {
+    return Colors.green;
+  } else if (result.contains("хор")) {
+    return DarkThemeColors.colorful05;
+  } else if (result.contains("удовл")) {
+    return DarkThemeColors.colorful06;
+  } else {
+    return Colors.white;
+  }
+}
+
+enum ViewType { table, cards }
+
 class ProfileScoresPage extends StatefulWidget {
   const ProfileScoresPage({Key? key}) : super(key: key);
 
@@ -19,9 +41,237 @@ class ProfileScoresPage extends StatefulWidget {
 class _ProfileScoresPageState extends State<ProfileScoresPage> {
   final ValueNotifier<int> _tabValueNotifier = ValueNotifier(0);
 
-  SfDataGrid _buildDataGridForMobile(_ScoresDataGridSource dateGridSource) {
+  ViewType _viewType = ViewType.cards;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("Зачётная книжка"),
+        backgroundColor: DarkThemeColors.background01,
+      ),
+      backgroundColor: DarkThemeColors.background01,
+      body: SafeArea(
+        bottom: false,
+        child: BlocBuilder<AuthBloc, AuthState>(
+          builder: (context, authState) {
+            if (authState is LogInSuccess) {
+              return BlocBuilder<ScoresBloc, ScoresState>(
+                builder: (context, state) {
+                  if (state is ScoresInitial) {
+                    context
+                        .read<ScoresBloc>()
+                        .add(LoadScores(token: authState.token));
+                  } else if (state is ScoresLoaded) {
+                    _tabValueNotifier.value = state.scores.keys
+                        .toList()
+                        .indexOf(state.selectedSemester);
+
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(height: 12),
+                        SizedBox(
+                          height: 32,
+                          width: double.infinity,
+                          child: ListView.builder(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 12),
+                              scrollDirection: Axis.horizontal,
+                              itemBuilder: (context, index) {
+                                final String semester =
+                                    state.scores.keys.toList()[index];
+                                return PrimaryTabButton(
+                                  text: '$semester семестр',
+                                  itemIndex: index,
+                                  notifier: _tabValueNotifier,
+                                  onClick: () {
+                                    _tabValueNotifier.value = index;
+                                    context.read<ScoresBloc>().add(
+                                        ChangeSelectedScoresSemester(
+                                            semester: semester));
+                                  },
+                                );
+                              },
+                              itemCount: state.scores.keys.length),
+                        ),
+                        // Небольшая кнопка с иконкой для открытия модального окна с графиком
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                "Всего предметов: ${state.scores[state.selectedSemester]!.length}",
+                                style: DarkTextTheme.body,
+                              ),
+                              Row(children: [
+                                IconButton(
+                                  onPressed: () => showModalBottomSheet(
+                                    context: context,
+                                    builder: (BuildContext context) =>
+                                        ScoresChartModal(scores: state.scores),
+                                  ),
+                                  icon: const Icon(Icons.bar_chart),
+                                ),
+                                IconButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      _viewType = _viewType == ViewType.table
+                                          ? ViewType.cards
+                                          : ViewType.table;
+                                    });
+                                  },
+                                  icon: Icon(_viewType == ViewType.cards
+                                      ? Icons.view_list
+                                      : Icons.view_module),
+                                ),
+                              ]),
+                            ],
+                          ),
+                        ),
+
+                        Expanded(
+                          child: _viewType == ViewType.table
+                              ? _ScoresDataGrid(
+                                  dataGridSource: _ScoresDataGridSource(
+                                      state.scores[state.selectedSemester]!))
+                              : _ScoresCardListView(
+                                  scores:
+                                      state.scores[state.selectedSemester]!),
+                        ),
+                      ],
+                    );
+                  } else if (state is ScoresLoading) {
+                    return const Center(child: CircularProgressIndicator());
+                  } else if (state is ScoresLoadError) {
+                    return Center(
+                      child: Text(
+                          "Произошла ошибка при попытке загрузить посещаемость. Повторите попытку позже",
+                          style: DarkTextTheme.body),
+                    );
+                  }
+                  return Container();
+                },
+              );
+            }
+            return Container();
+          },
+        ),
+      ),
+    );
+  }
+}
+
+class _ScoresCardListView extends StatelessWidget {
+  const _ScoresCardListView({Key? key, required this.scores}) : super(key: key);
+
+  final List<Score> scores;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.builder(
+      itemBuilder: (context, index) {
+        final Score score = scores[index];
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          child: Card(
+            color: DarkThemeColors.background02,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 13),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    score.type,
+                    style: DarkTextTheme.body.copyWith(
+                        color: score.type.toLowerCase() == "экзамен"
+                            ? DarkThemeColors.colorful04
+                            : DarkThemeColors.colorful02),
+                  ),
+                  const SizedBox(height: 9),
+                  Text(
+                    score.subjectName,
+                    style: DarkTextTheme.headline,
+                  ),
+                  const Divider(
+                    color: DarkThemeColors.deactiveDarker,
+                    thickness: 1,
+                    height: 30,
+                  ),
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.star_border_outlined,
+                        color: getColorByResult(score.result),
+                      ),
+                      const SizedBox(width: 10),
+                      Text(
+                        score.result,
+                        style: DarkTextTheme.body
+                            .copyWith(color: getColorByResult(score.result)),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      const Icon(
+                        Icons.person_sharp,
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          score.comission ?? "",
+                          style: DarkTextTheme.body,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      const Icon(
+                        Icons.calendar_month,
+                      ),
+                      const SizedBox(width: 10),
+                      Text(score.year, style: DarkTextTheme.body),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      const Icon(
+                        Icons.calendar_month,
+                      ),
+                      const SizedBox(width: 10),
+                      Text(score.date, style: DarkTextTheme.body),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+      itemCount: scores.length,
+    );
+  }
+}
+
+class _ScoresDataGrid extends StatelessWidget {
+  const _ScoresDataGrid({Key? key, required this.dataGridSource})
+      : super(key: key);
+
+  final _ScoresDataGridSource dataGridSource;
+
+  @override
+  Widget build(BuildContext context) {
     return SfDataGrid(
-      source: dateGridSource,
+      source: dataGridSource,
       columnWidthMode: ColumnWidthMode.auto,
       rowHeight: 80,
       columnWidthCalculationRange: ColumnWidthCalculationRange.allRows,
@@ -65,112 +315,15 @@ class _ProfileScoresPageState extends State<ProfileScoresPage> {
       ],
     );
   }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Зачётная книжка"),
-        backgroundColor: DarkThemeColors.background01,
-      ),
-      backgroundColor: DarkThemeColors.background01,
-      body: SafeArea(
-        bottom: false,
-        child: BlocBuilder<AuthBloc, AuthState>(
-          builder: (context, authState) {
-            if (authState is LogInSuccess) {
-              return BlocBuilder<ScoresBloc, ScoresState>(
-                builder: (context, state) {
-                  if (state is ScoresInitial) {
-                    context
-                        .read<ScoresBloc>()
-                        .add(LoadScores(token: authState.token));
-                  } else if (state is ScoresLoaded) {
-                    _tabValueNotifier.value = state.scores.keys
-                        .toList()
-                        .indexOf(state.selectedSemester);
-
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const SizedBox(height: 12),
-                        SizedBox(
-                          height: 32,
-                          width: double.infinity,
-                          child: ListView.builder(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 12),
-                              scrollDirection: Axis.horizontal,
-                              itemBuilder: (context, index) {
-                                final String semester =
-                                    state.scores.keys.toList()[index];
-                                return PrimaryTabButton(
-                                    text: '$semester семестр',
-                                    itemIndex: index,
-                                    notifier: _tabValueNotifier,
-                                    onClick: () {
-                                      _tabValueNotifier.value = index;
-                                      context.read<ScoresBloc>().add(
-                                          ChangeSelectedScoresSemester(
-                                              semester: semester));
-                                    });
-                              },
-                              itemCount: state.scores.keys.length),
-                        ),
-                        // Небольшая кнопка с иконкой для открытия модального окна с графиком
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 12),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                "Всего предметов: ${state.scores[state.selectedSemester]!.length}",
-                                style: DarkTextTheme.body,
-                              ),
-                              IconButton(
-                                  onPressed: () => showModalBottomSheet(
-                                        context: context,
-                                        builder: (BuildContext context) =>
-                                            ScoresChartModal(
-                                                scores: state.scores),
-                                      ),
-                                  icon: const Icon(Icons.bar_chart))
-                            ],
-                          ),
-                        ),
-
-                        Expanded(
-                          child: _buildDataGridForMobile(_ScoresDataGridSource(
-                              state.scores[state.selectedSemester]!)),
-                        ),
-                      ],
-                    );
-                  } else if (state is ScoresLoading) {
-                    return const Center(child: CircularProgressIndicator());
-                  } else if (state is ScoresLoadError) {
-                    return Center(
-                      child: Text(
-                          "Произошла ошибка при попытке загрузить посещаемость. Повторите попытку позже",
-                          style: DarkTextTheme.body),
-                    );
-                  }
-                  return Container();
-                },
-              );
-            }
-            return Container();
-          },
-        ),
-      ),
-    );
-  }
 }
 
 /// Set team's data collection to data grid source.
 class _ScoresDataGridSource extends DataGridSource {
   /// Creates the team data source class with required details.
   _ScoresDataGridSource(List<Score> scores) {
-    _scores = scores;
+    _scores = scores
+        .map((e) => e.copyWith(result: _shortenResult(e.result)))
+        .toList();
     buildDataGridRows();
   }
 
@@ -192,21 +345,18 @@ class _ScoresDataGridSource extends DataGridSource {
     }).toList();
   }
 
-  Color _getColorByResult(String result) {
-    if (result.contains("неуваж")) {
-      return DarkThemeColors.colorful07;
-    }
-
-    switch (result.toLowerCase()) {
+  String _shortenResult(String score) {
+    switch (score.toLowerCase()) {
       case 'зачтено':
+        return "Зач.";
       case 'отлично':
-        return Colors.green;
+        return "Отл.";
       case 'хорошо':
-        return DarkThemeColors.colorful05;
+        return "Хор.";
       case 'удовлетворительно':
-        return DarkThemeColors.colorful06;
+        return "Удовл.";
       default:
-        return Colors.white;
+        return score;
     }
   }
 
@@ -238,7 +388,7 @@ class _ScoresDataGridSource extends DataGridSource {
         child: Text(
           row.getCells()[2].value.toString(),
           style: TextStyle(
-              color: _getColorByResult(row.getCells()[2].value.toString())),
+              color: getColorByResult(row.getCells()[2].value.toString())),
           overflow: TextOverflow.ellipsis,
         ),
       ),
