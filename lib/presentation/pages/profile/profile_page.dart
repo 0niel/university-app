@@ -78,27 +78,37 @@ class _ProfilePageState extends State<ProfilePage> {
                                 ),
                               ),
                               const SizedBox(height: 12),
-                              Row(children: [
-                                TextOutlinedButton(
-                                  content: "Профиль",
-                                  width: 200,
-                                  onPressed: () => context.router.push(
-                                    ProfileDetailRoute(user: profileState.user),
-                                  ),
-                                ),
-                                const SizedBox(width: 12),
-                                SocialIconButton(
-                                  assetImage:
-                                      const AssetImage('assets/icons/gerb.ico'),
-                                  onClick: () {
-                                    launchUrl(Uri.parse(
-                                      profileState.user.authShortlink != null
-                                          ? "https://lk.mirea.ru/auth/link/?url=${profileState.user.authShortlink!}"
-                                          : "https://lk.mirea.ru/auth",
-                                    ));
-                                  },
-                                ),
-                              ]),
+                              Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    TextOutlinedButton(
+                                      width: 160,
+                                      content: "Профиль",
+                                      onPressed: () => context.router.push(
+                                        ProfileDetailRoute(
+                                            user: profileState.user),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    SizedBox(
+                                      width: 146,
+                                      height: 45,
+                                      child: SocialIconButton(
+                                        assetImage: const AssetImage(
+                                            'assets/icons/gerb.ico'),
+                                        onClick: () {
+                                          launchUrl(Uri.parse(
+                                            profileState.user.authShortlink !=
+                                                    null
+                                                ? "https://lk.mirea.ru/auth/link/?url=${profileState.user.authShortlink!}"
+                                                : "https://lk.mirea.ru/auth",
+                                          ));
+                                        },
+                                        text: "Вход в ЛКС",
+                                      ),
+                                    ),
+                                  ]),
+
                               const SizedBox(height: 40),
                               const ContainerLabel(label: "Информация"),
                               const SizedBox(height: 20),

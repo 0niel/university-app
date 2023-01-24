@@ -2,11 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:rtu_mirea_app/presentation/colors.dart';
 
 class SocialIconButton extends StatelessWidget {
-  const SocialIconButton(
-      {Key? key, required this.assetImage, required this.onClick})
-      : super(key: key);
+  const SocialIconButton({
+    Key? key,
+    required this.assetImage,
+    required this.onClick,
+    this.text,
+  }) : super(key: key);
   final AssetImage assetImage;
   final Function onClick;
+  final String? text;
 
   @override
   Widget build(BuildContext context) {
@@ -24,10 +28,22 @@ class SocialIconButton extends StatelessWidget {
         ),
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 16),
-          child: Image(
-            image: assetImage,
-            height: 16.0,
-          ),
+          child: text != null
+              ? Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(text!),
+                    const SizedBox(width: 8),
+                    Image(
+                      image: assetImage,
+                      height: 16.0,
+                    ),
+                  ],
+                )
+              : Image(
+                  image: assetImage,
+                  height: 16.0,
+                ),
         ),
         onPressed: () {
           onClick();

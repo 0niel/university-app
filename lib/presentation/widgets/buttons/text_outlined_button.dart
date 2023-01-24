@@ -3,10 +3,10 @@ import 'package:rtu_mirea_app/presentation/colors.dart';
 
 class TextOutlinedButton extends StatelessWidget {
   final String content;
-  final double width;
+  final double? width;
   final VoidCallback? onPressed;
   const TextOutlinedButton(
-      {Key? key, required this.content, required this.width, this.onPressed})
+      {Key? key, required this.content, this.width, this.onPressed})
       : super(key: key);
 
   @override
