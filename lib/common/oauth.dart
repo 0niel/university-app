@@ -17,14 +17,13 @@ class LksOauth2 {
   late final OAuth2Helper oauth2Helper;
   late final MireaNinjaOauth2Client oauth2Client;
 
-  // Конструктор
   LksOauth2({
     String? redirectUri,
     String? customUriScheme,
   }) {
     oauth2Client = MireaNinjaOauth2Client(
       customUriScheme: customUriScheme ?? 'ninja.mirea.mireaapp',
-      redirectUri: redirectUri ?? 'ninja.mirea.mireaapp:/oauth2redirect',
+      redirectUri: redirectUri ?? 'ninja.mirea.mireaapp://oauth2redirect',
     );
 
     oauth2Helper = OAuth2Helper(
