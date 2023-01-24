@@ -31,4 +31,28 @@ class Score extends Equatable {
         date,
         year,
       ];
+
+  Score copyWith({
+    String? subjectName,
+    String? result,
+    String? type,
+    String? comission,
+    String? courseWork,
+    String? exam,
+    String? credit,
+    String? date,
+    String? year,
+  }) {
+    return Score(
+      subjectName: subjectName ?? this.subjectName,
+      result: result ?? this.result,
+      type: type ?? this.type,
+      comission: comission ?? this.comission,
+      courseWork: courseWork ?? this.courseWork,
+      exam: exam ?? this.exam,
+      credit: credit ?? this.credit,
+      date: date ?? this.date,
+      year: year ?? this.year,
+    );
+  }
 }
