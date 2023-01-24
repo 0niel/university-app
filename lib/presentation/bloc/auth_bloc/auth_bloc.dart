@@ -47,22 +47,19 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     AuthLogInEvent event,
     Emitter<AuthState> emit,
   ) async {
-    if (event is AuthLogInEvent) {
-      if (event.login.length < 4 || event.password.length < 4) {
-        return emit(
-            const LogInError(cause: "Введёт неверный логин или пароль"));
-      }
-
-      final res = await logIn(LogInParams(event.login, event.password));
-      res.fold(
-        (failure) => emit(LogInError(
-            cause: failure.cause ??
-                "Ошибка при авторизации. Повторите попытку позже")),
-        (res) {
-          emit(LogInSuccess(token: res));
-          FirebaseAnalytics.instance.logLogin();
-        },
-      );
+    if (event.login.length < 4 || event.password.length < 4) {
+      return emit(const LogInError(cause: "Введёт неверный логин или пароль"));
     }
+
+    final res = await logIn(LogInParams(event.login, event.password));
+    res.fold(
+      (failure) => emit(LogInError(
+          cause: failure.cause ??
+              "Ошибка при авторизации. Повторите попытку позже")),
+      (res) {
+        emit(LogInSuccess(token: res));
+        FirebaseAnalytics.instance.logLogin();
+      },
+    );
   }
 }

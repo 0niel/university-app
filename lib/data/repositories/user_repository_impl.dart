@@ -40,11 +40,12 @@ class UserRepositoryImpl implements UserRepository {
 
   @override
   Future<Either<Failure, void>> logOut() async {
-    try {
-      return Right(await localDataSource.removeTokenFromCache());
-    } on CacheException {
-      return Future.value(const Left(CacheFailure()));
-    }
+    // try {
+    //   return Right(await localDataSource.removeTokenFromCache());
+    // } on CacheException {
+    //   return Future.value(const Left(CacheFailure()));
+    // }
+    return Right(await remoteDataSource.logOut());
   }
 
   @override

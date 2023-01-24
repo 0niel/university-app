@@ -11,6 +11,7 @@ import 'package:rtu_mirea_app/data/models/user_model.dart';
 
 abstract class UserRemoteData {
   Future<String> auth();
+  Future<void> logOut();
   Future<UserModel> getProfileData(String token);
   Future<List<AnnounceModel>> getAnnounces(String token);
   Future<List<EmployeeModel>> getEmployees(String token, String name);
@@ -36,6 +37,11 @@ class UserRemoteDataImpl implements UserRemoteData {
     } else {
       throw ServerException('Токен не получен');
     }
+  }
+
+  @override
+  Future<void> logOut() async {
+    await lksOauth2.oauth2Helper.removeAllTokens();
   }
 
   @override
