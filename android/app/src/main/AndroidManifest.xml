@@ -7,7 +7,8 @@
    <application
         android:label="Ninja Mirea"
         android:usesCleartextTraffic="true"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/ic_launcher"
+        android:fullBackupContent="@xml/backup_rules">
         <activity android:name="com.linusu.flutter_web_auth_2.CallbackActivity" android:exported="true">
             <intent-filter android:label="flutter_web_auth_2">
                 <action android:name="android.intent.action.VIEW" />
