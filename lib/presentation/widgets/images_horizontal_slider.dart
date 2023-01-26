@@ -26,8 +26,10 @@ class ImagesHorizontalSlider extends StatelessWidget {
                   context,
                   MaterialPageRoute(
                     builder: (_) => FullScreenImage(
-                      imageUrl:
-                          StrapiUtils.getLargestImageUrl(images[index].formats),
+                      imageUrl: images[index].formats != null
+                          ? StrapiUtils.getLargestImageUrl(
+                              images[index].formats!)
+                          : images[index].url,
                     ),
                   ),
                 );
@@ -37,7 +39,9 @@ class ImagesHorizontalSlider extends StatelessWidget {
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(12.0),
                   child: Image.network(
-                    images[index].formats.thumbnail.url,
+                    images[index].formats != null
+                        ? images[index].formats!.thumbnail.url
+                        : images[index].url,
                     height: 112,
                     width: 158,
                     fit: BoxFit.cover,

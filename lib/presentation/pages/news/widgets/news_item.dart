@@ -43,7 +43,9 @@ class NewsItemWidget extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               ExtendedImage.network(
-                StrapiUtils.getMediumImageUrl(newsItem.images[0].formats),
+                newsItem.images[0].formats != null
+                    ? StrapiUtils.getMediumImageUrl(newsItem.images[0].formats!)
+                    : newsItem.images[0].url,
                 height: 175,
                 width: MediaQuery.of(context).size.width,
                 fit: BoxFit.cover,

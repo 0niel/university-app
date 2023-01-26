@@ -57,11 +57,11 @@ class Author extends Equatable {
   });
 
   final String name;
-  final String url;
+  final String? url;
   final StrapiMedia logo;
 
   @override
-  List<Object> get props => [name, url, logo];
+  List<Object> get props => [name, logo];
 }
 
 class StoryPageAction extends Equatable {
