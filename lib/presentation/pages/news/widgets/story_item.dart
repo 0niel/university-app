@@ -31,10 +31,12 @@ class StoryWidget extends StatelessWidget {
             borderRadius: BorderRadius.circular(12),
             image: DecorationImage(
               fit: BoxFit.cover,
-              image: NetworkImage(
-                  stories[storyIndex].preview.formats.small != null
-                      ? stories[storyIndex].preview.formats.small!.url
-                      : stories[storyIndex].preview.formats.thumbnail.url),
+              image: stories[storyIndex].preview.formats != null
+                  ? NetworkImage(
+                      stories[storyIndex].preview.formats!.small != null
+                          ? stories[storyIndex].preview.formats!.small!.url
+                          : stories[storyIndex].preview.formats!.thumbnail.url)
+                  : NetworkImage(stories[storyIndex].preview.url),
               colorFilter: ColorFilter.mode(
                   DarkThemeColors.background02.withOpacity(0.15),
                   BlendMode.dstOut),

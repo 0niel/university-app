@@ -29,7 +29,10 @@ class NewsDetailsPage extends StatelessWidget {
                 children: <Widget>[
                   Positioned.fill(
                     child: Image.network(
-                      StrapiUtils.getMediumImageUrl(newsItem.images[0].formats),
+                      newsItem.images[0].formats != null
+                          ? StrapiUtils.getMediumImageUrl(
+                              newsItem.images[0].formats!)
+                          : newsItem.images[0].url,
                       fit: BoxFit.cover,
                     ),
                   ),

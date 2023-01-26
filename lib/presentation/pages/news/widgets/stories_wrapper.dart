@@ -56,12 +56,19 @@ class _StoriesWrapperState extends State<StoriesWrapper> {
                     child: Container(color: Colors.black),
                   ),
                   Positioned.fill(
-                    child: Image.network(
-                      MediaQuery.of(context).size.width > 580
-                          ? StrapiUtils.getLargestImageUrl(page.media.formats)
-                          : StrapiUtils.getMediumImageUrl(page.media.formats),
-                      fit: BoxFit.cover,
-                    ),
+                    child: page.media.formats != null
+                        ? Image.network(
+                            MediaQuery.of(context).size.width > 580
+                                ? StrapiUtils.getLargestImageUrl(
+                                    page.media.formats!)
+                                : StrapiUtils.getMediumImageUrl(
+                                    page.media.formats!),
+                            fit: BoxFit.cover,
+                          )
+                        : Image.network(
+                            page.media.url,
+                            fit: BoxFit.cover,
+                          ),
                   ),
                   Padding(
                     padding: const EdgeInsets.only(top: 44, left: 8),
@@ -72,10 +79,12 @@ class _StoriesWrapperState extends State<StoriesWrapper> {
                           width: 32,
                           decoration: BoxDecoration(
                             image: DecorationImage(
-                              image: NetworkImage(
-                                  author.logo.formats.small != null
-                                      ? author.logo.formats.small!.url
-                                      : author.logo.formats.thumbnail.url),
+                              image: author.logo.formats != null
+                                  ? NetworkImage(
+                                      author.logo.formats!.small != null
+                                          ? author.logo.formats!.small!.url
+                                          : author.logo.formats!.thumbnail.url)
+                                  : NetworkImage(author.logo.url),
                               fit: BoxFit.cover,
                             ),
                             shape: BoxShape.circle,
