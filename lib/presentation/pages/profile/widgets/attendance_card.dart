@@ -53,8 +53,8 @@ class AttendanceCard extends StatelessWidget {
                     ),
               alignment: Alignment.center,
               child: type == "Вход"
-                  ? const Icon(FontAwesomeIcons.signInAlt, size: 15)
-                  : const Icon(FontAwesomeIcons.signOutAlt, size: 15),
+                  ? const Icon(FontAwesomeIcons.rightToBracket, size: 15)
+                  : const Icon(FontAwesomeIcons.rightToBracket, size: 15),
             ),
           ),
           const SizedBox(width: 55.50),

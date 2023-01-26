@@ -79,7 +79,7 @@ class _LabelledInputState extends State<LabelledInput> {
                     onTap: () {
                       widget.controller.text = "";
                     },
-                    child: const Icon(FontAwesomeIcons.solidTimesCircle,
+                    child: const Icon(FontAwesomeIcons.solidCircleXmark,
                         size: 15, color: DarkThemeColors.deactiveDarker),
                   ),
             hintText: widget.placeholder,

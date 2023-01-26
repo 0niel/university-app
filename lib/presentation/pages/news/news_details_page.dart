@@ -9,7 +9,7 @@ import 'package:rtu_mirea_app/presentation/colors.dart';
 import 'package:rtu_mirea_app/presentation/pages/news/widgets/tags_widgets.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:rtu_mirea_app/presentation/widgets/images_horizontal_slider.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 class NewsDetailsPage extends StatelessWidget {
   const NewsDetailsPage({Key? key, required this.newsItem}) : super(key: key);
@@ -76,7 +76,7 @@ class NewsDetailsPage extends StatelessWidget {
                           onLinkTap:
                               (String? url, context, attributes, element) {
                             if (url != null) {
-                              launch(url);
+                              launchUrlString(url);
                             }
                           },
                         ),

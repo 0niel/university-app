@@ -52,7 +52,7 @@ class ProfileAnnouncesPage extends StatelessWidget {
                         },
                         onLinkTap: (String? url, context, attributes, element) {
                           if (url != null) {
-                            launch(url);
+                            launchUrl(Uri.parse(url));
                           }
                         },
                       ),

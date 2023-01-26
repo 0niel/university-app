@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:rtu_mirea_app/domain/entities/employee.dart';
 import 'package:rtu_mirea_app/presentation/colors.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 class LectorSearchCard extends StatelessWidget {
   const LectorSearchCard({Key? key, required this.employee}) : super(key: key);
@@ -36,8 +36,8 @@ class LectorSearchCard extends StatelessWidget {
                 ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text('Email адрес скопирован!')));
               },
-              onPressed: () async {
-                await launch("mailto:${employee.email}?subject=&body=");
+              onPressed: () {
+                launchUrlString("mailto:${employee.email}?subject=&body=");
               },
               child: Text(
                 employee.email,

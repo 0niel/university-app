@@ -28,7 +28,9 @@ class NextPageViewButton extends StatelessWidget {
         }
       },
       style: ElevatedButton.styleFrom(
-        foregroundColor: DarkThemeColors.primary.withOpacity(0.25), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)), backgroundColor: DarkThemeColors.primary,
+        foregroundColor: DarkThemeColors.primary.withOpacity(0.25),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        backgroundColor: DarkThemeColors.primary,
         shadowColor: const Color(0x7f000000),
         elevation: 8.0,
       ),

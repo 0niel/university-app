@@ -15,7 +15,8 @@ class ForumRemoteDataImpl implements ForumRemoteData {
 
   @override
   Future<List<ForumMemberModel>> getPatrons() async {
-    final response = await httpClient.get('${_apiUrl}groups/patrons/members.json?offset=0&order=&asc=true&filter=');
+    final response = await httpClient.get(
+        '${_apiUrl}groups/patrons/members.json?offset=0&order=&asc=true&filter=');
     if (response.statusCode == 200) {
       Map responseBody = response.data;
       List<ForumMemberModel> patrons = [];

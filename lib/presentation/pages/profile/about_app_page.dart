@@ -7,7 +7,7 @@ import 'package:rtu_mirea_app/presentation/colors.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:rtu_mirea_app/presentation/widgets/buttons/icon_button.dart';
 import 'package:rtu_mirea_app/service_locator.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 import 'widgets/member_info.dart';
 
@@ -66,7 +66,7 @@ class AboutAppPage extends StatelessWidget {
                           .copyWith(color: DarkThemeColors.primary),
                       recognizer: TapGestureRecognizer()
                         ..onTap = () {
-                          launch('https://ischemes.ru/');
+                          launchUrlString('https://ischemes.ru/');
                         },
                     ),
                   ],
@@ -86,7 +86,7 @@ class AboutAppPage extends StatelessWidget {
                           .copyWith(color: DarkThemeColors.primary),
                       recognizer: TapGestureRecognizer()
                         ..onTap = () {
-                          launch('https://mirea.ru/news/');
+                          launchUrlString('https://mirea.ru/news/');
                         },
                     ),
                   ],
@@ -111,7 +111,7 @@ class AboutAppPage extends StatelessWidget {
                           .copyWith(color: DarkThemeColors.primary),
                       recognizer: TapGestureRecognizer()
                         ..onTap = () {
-                          launch('https://mirea.ninja/');
+                          launchUrlString("https://mirea.ninja/");
                         },
                     ),
                   ],
@@ -124,20 +124,21 @@ class AboutAppPage extends StatelessWidget {
                   SocialIconButton(
                       assetImage: const AssetImage('assets/icons/github.png'),
                       onClick: () {
-                        launch(
+                        launchUrlString(
                             'https://github.com/Ninja-Official/rtu-mirea-mobile');
                       }),
                   const SizedBox(width: 12),
                   SocialIconButton(
                       assetImage: const AssetImage('assets/icons/patreon.png'),
                       onClick: () {
-                        launch('https://www.patreon.com/mireaninja');
+                        launchUrlString('https://www.patreon.com/mireaninja');
                       }),
                   const SizedBox(width: 12),
                   SocialIconButton(
                       assetImage: const AssetImage('assets/icons/telegram.png'),
                       onClick: () {
-                        launch('https://t.me/joinchat/LyM7jcoRXUhmOGM6');
+                        launchUrlString(
+                            'https://t.me/joinchat/LyM7jcoRXUhmOGM6');
                       }),
                 ],
               ),
@@ -208,9 +209,10 @@ class AboutAppPage extends StatelessWidget {
                       children: List.generate(state.patrons.length, (index) {
                         return MemberInfo(
                           username: state.patrons[index].username,
-                          avatarUrl: 'https://mirea.ninja/${state.patrons[index].avatarTemplate
-                                  .replaceAll('{size}', '120')}',
-                          profileUrl: 'https://mirea.ninja/u/${state.patrons[index].username}',
+                          avatarUrl:
+                              'https://mirea.ninja/${state.patrons[index].avatarTemplate.replaceAll('{size}', '120')}',
+                          profileUrl:
+                              'https://mirea.ninja/u/${state.patrons[index].username}',
                         );
                       }),
                     );

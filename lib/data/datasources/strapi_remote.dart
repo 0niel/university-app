@@ -17,7 +17,8 @@ class StrapiRemoteDataImpl implements StrapiRemoteData {
 
   @override
   Future<List<StoryModel>> getStories() async {
-    final response = await httpClient.get('$_apiUrl/stories?populate[0]=pages.actions&populate[1]=pages.media&populate[2]=author&populate[3]=author.logo&populate[4]=preview');
+    final response = await httpClient.get(
+        '$_apiUrl/stories?populate[0]=pages.actions&populate[1]=pages.media&populate[2]=author&populate[3]=author.logo&populate[4]=preview');
     if (response.statusCode == 200) {
       final responseBody = response.data;
       List<StoryModel> stories = [];

@@ -20,7 +20,7 @@ class SelectDateButton extends StatefulWidget {
   final String? text;
 
   @override
-  _SelectDateButtonState createState() => _SelectDateButtonState();
+  State<SelectDateButton> createState() => _SelectDateButtonState();
 }
 
 class _SelectDateButtonState extends State<SelectDateButton> {

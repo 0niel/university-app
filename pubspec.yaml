@@ -23,6 +23,11 @@ dependencies:
 
   flutter_localizations:
     sdk: flutter
+
+  # Contains code to deal with internationalized/localized messages, date and number formatting 
+  # and parsing, bi-directional text, and other internationalization issues.
+  # See https://pub.dev/packages/intl
+  intl: ^0.17.0
   
   # Http client. 
   # See https://pub.dev/packages/dio

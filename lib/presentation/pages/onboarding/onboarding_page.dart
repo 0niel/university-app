@@ -13,8 +13,9 @@ import 'widgets/next_button.dart';
 /// OnBoarding screen that greets new users
 class OnBoardingPage extends StatefulWidget {
   const OnBoardingPage({Key? key}) : super(key: key);
+
   @override
-  _OnBoardingPageState createState() => _OnBoardingPageState();
+  State<StatefulWidget> createState() => _OnBoardingPageState();
 }
 
 class _OnBoardingPageState extends State<OnBoardingPage> {
