@@ -18,7 +18,7 @@ class SchedulePageView extends StatefulWidget {
   final Schedule schedule;
 
   @override
-  _SchedulePageViewState createState() => _SchedulePageViewState();
+  State<StatefulWidget> createState() => _SchedulePageViewState();
 }
 
 class _SchedulePageViewState extends State<SchedulePageView> {

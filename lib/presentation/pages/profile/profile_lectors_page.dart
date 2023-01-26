@@ -62,7 +62,8 @@ class _ProfileLectrosPageState extends State<ProfileLectrosPage> {
                         ? Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              const Icon(FontAwesomeIcons.search, size: 85),
+                              const Icon(FontAwesomeIcons.magnifyingGlass,
+                                  size: 85),
                               const SizedBox(height: 24),
                               Text('Здесь появятся результаты поиска',
                                   style: DarkTextTheme.body)

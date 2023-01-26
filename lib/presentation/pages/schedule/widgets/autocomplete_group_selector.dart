@@ -46,8 +46,7 @@ class AutocompleteGroupSelector extends StatefulWidget {
   const AutocompleteGroupSelector({Key? key}) : super(key: key);
 
   @override
-  _AutocompleteGroupSelectorState createState() =>
-      _AutocompleteGroupSelectorState();
+  State<StatefulWidget> createState() => _AutocompleteGroupSelectorState();
 }
 
 class _AutocompleteGroupSelectorState extends State<AutocompleteGroupSelector> {

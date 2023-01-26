@@ -9,7 +9,7 @@ class FullScreenImage extends StatefulWidget {
   final String imageUrl;
 
   @override
-  _FullScreenImageState createState() => _FullScreenImageState();
+  State<FullScreenImage> createState() => _FullScreenImageState();
 }
 
 class _FullScreenImageState extends State<FullScreenImage>

@@ -13,7 +13,7 @@ class ProfileAttendancePage extends StatefulWidget {
   const ProfileAttendancePage({Key? key}) : super(key: key);
 
   @override
-  _ProfileAttendancePageState createState() => _ProfileAttendancePageState();
+  State<StatefulWidget> createState() => _ProfileAttendancePageState();
 }
 
 class _ProfileAttendancePageState extends State<ProfileAttendancePage> {
@@ -95,8 +95,7 @@ class _ProfileAttendancePageState extends State<ProfileAttendancePage> {
                           child: Column(
                             children: [
                               const SizedBox(height: 8),
-                              Text(
-                                  'Дней посещено: ${state.visitsCount}',
+                              Text('Дней посещено: ${state.visitsCount}',
                                   style: DarkTextTheme.body),
                               const SizedBox(height: 8),
                               Expanded(

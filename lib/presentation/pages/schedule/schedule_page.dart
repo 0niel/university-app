@@ -16,7 +16,7 @@ class SchedulePage extends StatefulWidget {
   const SchedulePage({Key? key}) : super(key: key);
 
   @override
-  _SchedulePageState createState() => _SchedulePageState();
+  State<SchedulePage> createState() => _SchedulePageState();
 }
 
 class _SchedulePageState extends State<SchedulePage> {

@@ -21,7 +21,7 @@ class SelectRangeDateButton extends StatefulWidget {
   final String? text;
 
   @override
-  _SelectRangeDateButtonState createState() => _SelectRangeDateButtonState();
+  State<SelectRangeDateButton> createState() => _SelectRangeDateButtonState();
 }
 
 class _SelectRangeDateButtonState extends State<SelectRangeDateButton> {

@@ -19,7 +19,7 @@ class SettingsSwitchButton extends StatefulWidget {
   final bool initialValue;
 
   @override
-  _SettingsSwitchButtonState createState() => _SettingsSwitchButtonState();
+  State<SettingsSwitchButton> createState() => _SettingsSwitchButtonState();
 }
 
 class _SettingsSwitchButtonState extends State<SettingsSwitchButton> {
