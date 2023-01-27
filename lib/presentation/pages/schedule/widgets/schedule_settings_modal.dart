@@ -1,8 +1,7 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:rtu_mirea_app/presentation/bloc/schedule_bloc/schedule_bloc.dart';
 import 'package:rtu_mirea_app/presentation/colors.dart';
-import 'package:rtu_mirea_app/presentation/pages/schedule/widgets/autocomplete_group_selector.dart';
+import 'package:rtu_mirea_app/presentation/core/routes/routes.gr.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:rtu_mirea_app/presentation/widgets/keyboard_positioned.dart';
 
@@ -16,7 +15,7 @@ class ScheduleSettingsModal extends StatelessWidget {
   Widget build(BuildContext context) {
     return KeyboardPositioned(
       child: Container(
-        height: MediaQuery.of(context).size.height * 0.95,
+        height: MediaQuery.of(context).size.height * 0.85,
         decoration: const BoxDecoration(
           gradient: LinearGradient(
             colors: [
@@ -51,31 +50,16 @@ class ScheduleSettingsModal extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  isFirstRun ? "Настройте расписание" : "Выберите группу",
+                  "Настройте расписание",
                   style: DarkTextTheme.h5,
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  isFirstRun
-                      ? "Кажется, что это ваш первый запуск. Установите вашу учебную группу, чтобы начать пользоваться расписанием"
-                      : "Введите название группы, для которой вы хотите скачать расписание",
+                  "Кажется, что это ваш первый запуск. Установите вашу учебную группу, чтобы начать пользоваться расписанием",
                   style: DarkTextTheme.captionL
                       .copyWith(color: DarkThemeColors.deactive),
                   textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: 24),
-                Row(
-                  children: [
-                    Text(
-                      "Ваша группа".toUpperCase(),
-                      style: DarkTextTheme.chip
-                          .copyWith(color: DarkThemeColors.deactiveDarker),
-                      textAlign: TextAlign.left,
-                    )
-                  ],
-                ),
-                const SizedBox(height: 8),
-                const AutocompleteGroupSelector(),
                 const SizedBox(height: 32),
                 ConstrainedBox(
                   constraints: const BoxConstraints.tightFor(
@@ -91,9 +75,10 @@ class ScheduleSettingsModal extends StatelessWidget {
                       ),
                     ),
                     onPressed: () {
-                      context
-                          .read<ScheduleBloc>()
-                          .add(const ScheduleSetActiveGroupEvent());
+                      // Close modal
+                      Navigator.of(context).pop();
+
+                      context.router.push(const GroupsSelectRoute());
                     },
                     child: Text(
                       'Начать',

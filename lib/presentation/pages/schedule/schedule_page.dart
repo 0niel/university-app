@@ -113,7 +113,7 @@ class _SchedulePageState extends State<SchedulePage> {
                     onPressed: () {
                       context
                           .read<ScheduleBloc>()
-                          .add(ScheduleSetActiveGroupEvent(group));
+                          .add(ScheduleSetActiveGroupEvent(group: group));
                     },
                     shape: const CircleBorder(),
                     constraints:
