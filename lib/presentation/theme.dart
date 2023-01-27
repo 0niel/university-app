@@ -52,7 +52,7 @@ final darkTheme = ThemeData.dark().copyWith(
   backgroundColor: DarkThemeColors.background01,
   appBarTheme: AppBarTheme(
     titleSpacing: 24,
-    backgroundColor: Colors.transparent,
+    backgroundColor: DarkThemeColors.background01,
     shadowColor: Colors.transparent,
     titleTextStyle: DarkTextTheme.title,
   ),
