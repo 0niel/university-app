@@ -3,17 +3,17 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:rtu_mirea_app/domain/entities/score.dart';
 import 'package:rtu_mirea_app/presentation/bloc/auth_bloc/auth_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/scores_bloc/scores_bloc.dart';
-import 'package:rtu_mirea_app/presentation/colors.dart';
 import 'package:rtu_mirea_app/presentation/pages/profile/widgets/scores_chart_modal.dart';
-import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 import 'package:rtu_mirea_app/presentation/widgets/buttons/primary_tab_button.dart';
+import 'package:rtu_mirea_app/presentation/typography.dart';
+import 'package:rtu_mirea_app/presentation/theme.dart';
 
 Color getColorByResult(String result) {
   result = result.toLowerCase();
 
   if (result.contains("неуваж")) {
-    return DarkThemeColors.colorful07;
+    return AppTheme.colors.colorful07;
   }
 
   if (result.contains("зач")) {
@@ -21,9 +21,9 @@ Color getColorByResult(String result) {
   } else if (result.contains("отл")) {
     return Colors.green;
   } else if (result.contains("хор")) {
-    return DarkThemeColors.colorful05;
+    return AppTheme.colors.colorful05;
   } else if (result.contains("удовл")) {
-    return DarkThemeColors.colorful06;
+    return AppTheme.colors.colorful06;
   } else {
     return Colors.white;
   }
@@ -48,9 +48,9 @@ class _ProfileScoresPageState extends State<ProfileScoresPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Зачётная книжка"),
-        backgroundColor: DarkThemeColors.background01,
+        backgroundColor: AppTheme.colors.background01,
       ),
-      backgroundColor: DarkThemeColors.background01,
+      backgroundColor: AppTheme.colors.background01,
       body: SafeArea(
         bottom: false,
         child: BlocBuilder<AuthBloc, AuthState>(
@@ -103,7 +103,7 @@ class _ProfileScoresPageState extends State<ProfileScoresPage> {
                             children: [
                               Text(
                                 "Всего предметов: ${state.scores[state.selectedSemester]!.length}",
-                                style: DarkTextTheme.body,
+                                style: AppTextStyle.body,
                               ),
                               Row(children: [
                                 IconButton(
@@ -148,7 +148,7 @@ class _ProfileScoresPageState extends State<ProfileScoresPage> {
                     return Center(
                       child: Text(
                           "Произошла ошибка при попытке загрузить посещаемость. Повторите попытку позже",
-                          style: DarkTextTheme.body),
+                          style: AppTextStyle.body),
                     );
                   }
                   return Container();
@@ -176,10 +176,11 @@ class _ScoresCardListView extends StatelessWidget {
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           child: Card(
-            color: DarkThemeColors.background02,
+            color: AppTheme.colors.background02,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
             ),
+            elevation: 0,
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 13),
               child: Column(
@@ -187,19 +188,18 @@ class _ScoresCardListView extends StatelessWidget {
                 children: [
                   Text(
                     score.type,
-                    style: DarkTextTheme.body.copyWith(
+                    style: AppTextStyle.body.copyWith(
                         color: score.type.toLowerCase() == "экзамен"
-                            ? DarkThemeColors.colorful04
-                            : DarkThemeColors.colorful02),
+                            ? AppTheme.colors.colorful04
+                            : AppTheme.colors.colorful02),
                   ),
                   const SizedBox(height: 9),
                   Text(
                     score.subjectName,
-                    style: DarkTextTheme.headline,
+                    style: AppTextStyle.titleM,
                   ),
-                  const Divider(
-                    color: DarkThemeColors.deactiveDarker,
-                    thickness: 1,
+                  Divider(
+                    color: AppTheme.colors.deactiveDarker,
                     height: 30,
                   ),
                   Row(
@@ -211,7 +211,7 @@ class _ScoresCardListView extends StatelessWidget {
                       const SizedBox(width: 10),
                       Text(
                         score.result,
-                        style: DarkTextTheme.body
+                        style: AppTextStyle.body
                             .copyWith(color: getColorByResult(score.result)),
                       ),
                     ],
@@ -226,7 +226,7 @@ class _ScoresCardListView extends StatelessWidget {
                       Expanded(
                         child: Text(
                           score.comission ?? "",
-                          style: DarkTextTheme.body,
+                          style: AppTextStyle.body,
                         ),
                       ),
                     ],
@@ -238,7 +238,7 @@ class _ScoresCardListView extends StatelessWidget {
                         Icons.calendar_month,
                       ),
                       const SizedBox(width: 10),
-                      Text(score.year, style: DarkTextTheme.body),
+                      Text(score.year, style: AppTextStyle.body),
                     ],
                   ),
                   const SizedBox(height: 12),
@@ -248,7 +248,7 @@ class _ScoresCardListView extends StatelessWidget {
                         Icons.calendar_month,
                       ),
                       const SizedBox(width: 10),
-                      Text(score.date, style: DarkTextTheme.body),
+                      Text(score.date, style: AppTextStyle.body),
                     ],
                   ),
                 ],

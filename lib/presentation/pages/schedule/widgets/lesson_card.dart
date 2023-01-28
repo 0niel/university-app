@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:rtu_mirea_app/presentation/colors.dart';
+import 'package:rtu_mirea_app/presentation/typography.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 
 class LessonCard extends StatelessWidget {
@@ -22,13 +22,13 @@ class LessonCard extends StatelessWidget {
 
   static Color getColorByType(String lessonType) {
     if (lessonType.contains('лк') || lessonType.contains('лек')) {
-      return DarkThemeColors.colorful01;
+      return AppTheme.colors.colorful01;
     } else if (lessonType.contains('лб') || lessonType.contains('лаб')) {
-      return DarkThemeColors.colorful07;
+      return AppTheme.colors.colorful07;
     } else if (lessonType.contains('с/р')) {
-      return DarkThemeColors.colorful02;
+      return AppTheme.colors.colorful02;
     } else {
-      return DarkThemeColors.colorful03;
+      return AppTheme.colors.colorful03;
     }
   }
 
@@ -36,7 +36,7 @@ class LessonCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       shadowColor: Colors.transparent,
-      color: DarkThemeColors.background03,
+      color: AppTheme.colors.background03,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12.0),
       ),
@@ -54,16 +54,16 @@ class LessonCard extends StatelessWidget {
                 children: [
                   Text(
                     timeStart,
-                    style: DarkTextTheme.bodyBold.copyWith(
-                        color: DarkThemeColors.deactive, fontSize: 12),
+                    style: AppTextStyle.bodyBold.copyWith(
+                        color: AppTheme.colors.deactive, fontSize: 12),
                   ),
                   const SizedBox(
                     height: 5,
                   ),
                   Text(
                     timeEnd,
-                    style: DarkTextTheme.bodyBold.copyWith(
-                        color: DarkThemeColors.deactive, fontSize: 12),
+                    style: AppTextStyle.bodyBold.copyWith(
+                        color: AppTheme.colors.deactive, fontSize: 12),
                   )
                 ],
               ),
@@ -74,7 +74,7 @@ class LessonCard extends StatelessWidget {
                 children: [
                   Text(
                     room != '' ? '$name, $room' : name,
-                    style: DarkTextTheme.titleM,
+                    style: AppTextStyle.titleM,
                     maxLines: 8,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -83,8 +83,8 @@ class LessonCard extends StatelessWidget {
                   ),
                   Text(
                     teacher,
-                    style: DarkTextTheme.body
-                        .copyWith(color: DarkThemeColors.deactive),
+                    style: AppTextStyle.body
+                        .copyWith(color: AppTheme.colors.deactive),
                   ),
                 ],
               ),
@@ -100,7 +100,7 @@ class LessonCard extends StatelessWidget {
                     color: getColorByType(type)),
                 height: 24,
                 // width: 10 * 7,
-                child: Text(type, style: DarkTextTheme.chip),
+                child: Text(type, style: AppTextStyle.chip),
               ),
             ),
           ],

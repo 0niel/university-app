@@ -1,9 +1,9 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:rtu_mirea_app/domain/entities/story.dart';
-import 'package:rtu_mirea_app/presentation/colors.dart';
 import 'package:rtu_mirea_app/presentation/core/routes/routes.gr.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
+import 'package:rtu_mirea_app/presentation/typography.dart';
 
 class StoryWidget extends StatelessWidget {
   const StoryWidget({Key? key, required this.stories, required this.storyIndex})
@@ -38,7 +38,7 @@ class StoryWidget extends StatelessWidget {
                           : stories[storyIndex].preview.formats!.thumbnail.url)
                   : NetworkImage(stories[storyIndex].preview.url),
               colorFilter: ColorFilter.mode(
-                  DarkThemeColors.background02.withOpacity(0.15),
+                  AppTheme.colors.background02.withOpacity(0.15),
                   BlendMode.dstOut),
             ),
           ),
@@ -46,7 +46,7 @@ class StoryWidget extends StatelessWidget {
             type: MaterialType.transparency,
             child: Text(
               stories[storyIndex].title,
-              style: DarkTextTheme.chip,
+              style: AppTextStyle.chip,
             ),
           ),
         ),

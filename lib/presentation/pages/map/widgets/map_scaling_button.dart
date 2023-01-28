@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:rtu_mirea_app/presentation/bloc/map_cubit/map_cubit.dart';
-import 'package:rtu_mirea_app/presentation/colors.dart';
+import 'package:rtu_mirea_app/presentation/theme.dart';
+import 'package:rtu_mirea_app/presentation/typography.dart';
 
 class MapScalingButton extends StatelessWidget {
   const MapScalingButton(
@@ -36,15 +37,20 @@ class MapScalingButton extends StatelessWidget {
         child: ElevatedButton(
           style: ButtonStyle(
               backgroundColor: MaterialStateProperty.all<Color>(
-                  DarkThemeColors.background02),
+                  AppTheme.colors.background02),
               shadowColor: MaterialStateProperty.all<Color>(Colors.transparent),
               shape: MaterialStateProperty.all<RoundedRectangleBorder>(
                   RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12.0),
               ))),
           child: FittedBox(
-              fit: BoxFit.fitWidth,
-              child: Text("${_calculateScalePercentage()}%")),
+            fit: BoxFit.fitWidth,
+            child: Text(
+              "${_calculateScalePercentage()}%",
+              style:
+                  AppTextStyle.buttonS.copyWith(color: AppTheme.colors.active),
+            ),
+          ),
           onPressed: () => onClick(),
         ),
       ),

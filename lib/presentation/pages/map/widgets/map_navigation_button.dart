@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/map_cubit/map_cubit.dart';
-import 'package:rtu_mirea_app/presentation/colors.dart';
+import 'package:rtu_mirea_app/presentation/theme.dart';
+import 'package:rtu_mirea_app/presentation/typography.dart';
 
 class MapNavigationButton extends StatelessWidget {
   const MapNavigationButton(
@@ -22,15 +23,22 @@ class MapNavigationButton extends StatelessWidget {
           style: ButtonStyle(
               backgroundColor: MaterialStateProperty.all<Color>(
                 state.floor == floor
-                    ? DarkThemeColors.background03
-                    : DarkThemeColors.background02,
+                    ? AppTheme.colors.background03
+                    : AppTheme.colors.background02,
               ),
               shadowColor: MaterialStateProperty.all<Color>(Colors.transparent),
               shape: MaterialStateProperty.all<RoundedRectangleBorder>(
                   RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12.0),
               ))),
-          child: Text(floor.toString()),
+          child: Text(
+            floor.toString(),
+            style: AppTextStyle.buttonS.copyWith(
+              color: state.floor == floor
+                  ? AppTheme.colors.active
+                  : AppTheme.colors.active.withOpacity(0.5),
+            ),
+          ),
           onPressed: () => onClick(),
         ),
       ),

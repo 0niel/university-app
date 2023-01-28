@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:rtu_mirea_app/presentation/colors.dart';
+import 'package:rtu_mirea_app/presentation/typography.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 
 class ScheduleSettingsDrawer extends StatelessWidget {
@@ -18,13 +18,13 @@ class ScheduleSettingsDrawer extends StatelessWidget {
         bottom: 16,
       ),
       decoration: BoxDecoration(
-        color: DarkThemeColors.background01,
+        color: AppTheme.colors.background01,
         borderRadius: BorderRadius.circular(16),
       ),
       clipBehavior: Clip.antiAliasWithSaveLayer,
       child: Drawer(
         child: Container(
-          color: DarkThemeColors.background01,
+          color: AppTheme.colors.background01,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             mainAxisSize: MainAxisSize.min,
@@ -32,7 +32,7 @@ class ScheduleSettingsDrawer extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.only(
                     left: 16, bottom: 24, top: 24, right: 16),
-                child: Text("Настройки", style: DarkTextTheme.h5),
+                child: Text("Настройки", style: AppTextStyle.h5),
               ),
               Expanded(
                 child: builder(context),

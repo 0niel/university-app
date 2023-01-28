@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:rtu_mirea_app/presentation/theme.dart';
+import 'package:rtu_mirea_app/presentation/typography.dart';
 
 import 'container_label.dart';
 
@@ -26,7 +26,7 @@ class CopyTextBlockWithLabel extends StatelessWidget {
           Expanded(
             child: Text(
               text,
-              style: DarkTextTheme.titleM,
+              style: AppTextStyle.titleM,
             ),
           ),
           InkWell(

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-
-import '../../../colors.dart';
-import '../../../theme.dart';
+import 'package:rtu_mirea_app/presentation/typography.dart';
+import 'package:rtu_mirea_app/presentation/theme.dart';
 
 class BottomErrorInfo extends StatelessWidget {
   const BottomErrorInfo({Key? key}) : super(key: key);
@@ -11,17 +10,17 @@ class BottomErrorInfo extends StatelessWidget {
     return SafeArea(
       child: Container(
         height: MediaQuery.of(context).size.height * 0.95,
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [
-              DarkThemeColors.secondary,
-              DarkThemeColors.deactive,
-              DarkThemeColors.background01
+              AppTheme.colors.secondary,
+              AppTheme.colors.deactive,
+              AppTheme.colors.background01
             ],
-            begin: Alignment(-1, -1),
-            end: Alignment(-1, 1),
+            begin: const Alignment(-1, -1),
+            end: const Alignment(-1, 1),
           ),
-          borderRadius: BorderRadius.only(
+          borderRadius: const BorderRadius.only(
             topLeft: Radius.circular(25.0),
             topRight: Radius.circular(25.0),
           ),
@@ -30,9 +29,9 @@ class BottomErrorInfo extends StatelessWidget {
           padding: const EdgeInsets.all(3.0),
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 24),
-            decoration: const BoxDecoration(
-              color: DarkThemeColors.background01,
-              borderRadius: BorderRadius.only(
+            decoration: BoxDecoration(
+              color: AppTheme.colors.background01,
+              borderRadius: const BorderRadius.only(
                   topLeft: Radius.circular(25.0),
                   topRight: Radius.circular(25.0)),
             ),
@@ -49,14 +48,14 @@ class BottomErrorInfo extends StatelessWidget {
                 ),
                 Text(
                   "Профиль теперь недоступен",
-                  style: DarkTextTheme.h5,
+                  style: AppTextStyle.h5,
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 8),
                 Text(
                   "Разработчики, отвечающие за API ЛКС, отключили возможность производить аутентификацию и получать данные своего аккаунта. Пожалуйста, используйте lk.mirea.ru",
-                  style: DarkTextTheme.captionL
-                      .copyWith(color: DarkThemeColors.deactive),
+                  style: AppTextStyle.captionL
+                      .copyWith(color: AppTheme.colors.deactive),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 32),
@@ -66,7 +65,7 @@ class BottomErrorInfo extends StatelessWidget {
                   child: ElevatedButton(
                     style: ButtonStyle(
                       backgroundColor:
-                          MaterialStateProperty.all(DarkThemeColors.primary),
+                          MaterialStateProperty.all(AppTheme.colors.primary),
                       shape: MaterialStateProperty.all<RoundedRectangleBorder>(
                         RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(24.0),
@@ -78,7 +77,7 @@ class BottomErrorInfo extends StatelessWidget {
                     },
                     child: Text(
                       'Понятно!',
-                      style: DarkTextTheme.buttonS,
+                      style: AppTextStyle.buttonS,
                     ),
                   ),
                 ),

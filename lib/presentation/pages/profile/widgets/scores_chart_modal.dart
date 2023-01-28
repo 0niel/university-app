@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:rtu_mirea_app/domain/entities/score.dart';
-import 'package:rtu_mirea_app/presentation/colors.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
+import 'package:rtu_mirea_app/presentation/theme.dart';
 
 class ScoresChartModal extends StatefulWidget {
   const ScoresChartModal({Key? key, required this.scores}) : super(key: key);
@@ -72,7 +72,7 @@ class _ScoresChartModalState extends State<ScoresChartModal> {
   @override
   Widget build(BuildContext context) {
     return SfCartesianChart(
-      backgroundColor: DarkThemeColors.background02,
+      backgroundColor: AppTheme.colors.background02,
       plotAreaBorderWidth: 0,
       title: ChartTitle(text: 'Средний балл успеваемости'),
       legend:

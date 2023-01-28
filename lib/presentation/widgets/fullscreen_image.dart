@@ -1,7 +1,7 @@
 import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
 import 'package:photo_view/photo_view.dart';
-import 'package:rtu_mirea_app/presentation/colors.dart';
+import 'package:rtu_mirea_app/presentation/theme.dart';
 
 class FullScreenImage extends StatefulWidget {
   const FullScreenImage({Key? key, required this.imageUrl}) : super(key: key);
@@ -42,7 +42,7 @@ class _FullScreenImageState extends State<FullScreenImage>
       child: PhotoView.customChild(
         initialScale: 1.0,
         backgroundDecoration:
-            const BoxDecoration(color: DarkThemeColors.background01),
+            BoxDecoration(color: AppTheme.colors.background01),
         child: ExtendedImage.network(
           widget.imageUrl,
           width: MediaQuery.of(context).size.width,
@@ -66,7 +66,7 @@ class _FullScreenImageState extends State<FullScreenImage>
         SlideTransition(
           position: offsetAnimation,
           child: Container(
-            color: DarkThemeColors.background01,
+            color: AppTheme.colors.background01,
             height: 85,
             child: AppBar(
               title: const Text("Просмотр изображения"),

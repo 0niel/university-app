@@ -61,6 +61,7 @@ class UpdateInfoBloc extends Bloc<UpdateInfoEvent, UpdateInfoState> {
         AppSettings(
           onboardingShown: settings.onboardingShown,
           lastUpdateVersion: event.versionToSave,
+          theme: settings.theme,
         ),
       ),
     );

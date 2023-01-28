@@ -24,6 +24,10 @@ dependencies:
   flutter_localizations:
     sdk: flutter
 
+  # A wrapper around InheritedWidget to make them easier to use and more reusable.
+  # See https://pub.dev/packages/provider
+  provider: ^6.0.5
+
   # Contains code to deal with internationalized/localized messages, date and number formatting 
   # and parsing, bi-directional text, and other internationalization issues.
   # See https://pub.dev/packages/intl
@@ -48,10 +52,6 @@ dependencies:
   # SVG rendering widget for Flutter. 
   # See https://pub.dev/packages/flutter_svg
   flutter_svg: ^1.0.0
-
-  # Allows dynamically change between light and dark theme. 
-  # See https://pub.dev/packages/adaptive_theme
-  adaptive_theme: ^3.1.1
 
   # Helps to implement value based equality without explicitly 
   # override == and hashCode. 
@@ -139,7 +139,7 @@ dependencies:
   syncfusion_flutter_charts: ^20.1.57
   syncfusion_flutter_gauges: ^20.1.57
 
-  auto_route: ^5.0.1
+  auto_route: ^5.0.3
   
   url_launcher: ^6.0.17
 

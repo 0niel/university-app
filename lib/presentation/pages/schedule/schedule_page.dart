@@ -4,13 +4,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:rtu_mirea_app/domain/entities/schedule.dart';
 import 'package:rtu_mirea_app/presentation/bloc/schedule_bloc/schedule_bloc.dart';
-import 'package:rtu_mirea_app/presentation/colors.dart';
 import 'package:rtu_mirea_app/presentation/pages/schedule/widgets/schedule_settings_drawer.dart';
 import 'package:rtu_mirea_app/presentation/pages/schedule/widgets/schedule_settings_modal.dart';
+import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:rtu_mirea_app/presentation/widgets/buttons/colorful_button.dart';
 import 'package:rtu_mirea_app/presentation/widgets/settings_switch_button.dart';
-import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'widgets/schedule_page_view.dart';
+import 'package:rtu_mirea_app/presentation/typography.dart';
 
 class SchedulePage extends StatefulWidget {
   const SchedulePage({Key? key}) : super(key: key);
@@ -52,8 +52,8 @@ class _SchedulePageState extends State<SchedulePage> {
             border: Border.all(
               width: 1.5,
               color: schedule.isRemote
-                  ? DarkThemeColors.colorful05
-                  : DarkThemeColors.colorful06,
+                  ? AppTheme.colors.colorful05
+                  : AppTheme.colors.colorful06,
             ),
           ),
           child: Row(
@@ -62,15 +62,15 @@ class _SchedulePageState extends State<SchedulePage> {
             children: [
               Text(
                 group,
-                style: DarkTextTheme.buttonL,
+                style: AppTextStyle.buttonL,
               ),
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   if (!schedule.isRemote)
                     Text('кэш',
-                        style: DarkTextTheme.buttonS
-                            .copyWith(color: DarkThemeColors.colorful06)),
+                        style: AppTextStyle.buttonS
+                            .copyWith(color: AppTheme.colors.colorful06)),
                   RawMaterialButton(
                     onPressed: () {
                       context.read<ScheduleBloc>().add(ScheduleUpdateEvent(
@@ -81,8 +81,8 @@ class _SchedulePageState extends State<SchedulePage> {
                         const BoxConstraints(minWidth: 36.0, minHeight: 36.0),
                     child: Icon(Icons.refresh_rounded,
                         color: schedule.isRemote
-                            ? DarkThemeColors.colorful05
-                            : DarkThemeColors.colorful06),
+                            ? AppTheme.colors.colorful05
+                            : AppTheme.colors.colorful06),
                   ),
                 ],
               ),
@@ -97,7 +97,7 @@ class _SchedulePageState extends State<SchedulePage> {
           padding: const EdgeInsets.only(left: 10),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: DarkThemeColors.deactive),
+            border: Border.all(color: AppTheme.colors.deactive),
           ),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -105,7 +105,7 @@ class _SchedulePageState extends State<SchedulePage> {
             children: [
               Text(
                 group,
-                style: DarkTextTheme.buttonL,
+                style: AppTextStyle.buttonL,
               ),
               Row(
                 children: [
@@ -169,7 +169,6 @@ class _SchedulePageState extends State<SchedulePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: DarkThemeColors.background01,
       endDrawer: ScheduleSettingsDrawer(
         builder: (_) => Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -244,7 +243,7 @@ class _SchedulePageState extends State<SchedulePage> {
                                       ),
                                       const SizedBox(width: 20),
                                       Text("Добавить группу",
-                                          style: DarkTextTheme.buttonL),
+                                          style: AppTextStyle.buttonL),
                                     ],
                                   ),
                                 ),
@@ -269,8 +268,8 @@ class _SchedulePageState extends State<SchedulePage> {
                                 const SizedBox(height: 20),
                                 Text(
                                   "Группы".toUpperCase(),
-                                  style: DarkTextTheme.chip.copyWith(
-                                      color: DarkThemeColors.deactiveDarker),
+                                  style: AppTextStyle.chip.copyWith(
+                                      color: AppTheme.colors.deactiveDarker),
                                   textAlign: TextAlign.left,
                                 ),
                                 const SizedBox(height: 10),
@@ -318,8 +317,8 @@ class _SchedulePageState extends State<SchedulePage> {
                               const SizedBox(height: 20),
                               Text(
                                 "Группы".toUpperCase(),
-                                style: DarkTextTheme.chip.copyWith(
-                                    color: DarkThemeColors.deactiveDarker),
+                                style: AppTextStyle.chip.copyWith(
+                                    color: AppTheme.colors.deactiveDarker),
                                 textAlign: TextAlign.left,
                               ),
                               const SizedBox(height: 10),
@@ -336,12 +335,10 @@ class _SchedulePageState extends State<SchedulePage> {
         ),
       ),
       appBar: AppBar(
-        backgroundColor: DarkThemeColors.background01,
-        elevation: 0,
         title: const Text('Расписание'),
       ),
       body: Container(
-        color: DarkThemeColors.background01,
+        color: AppTheme.colors.background01,
         child: SafeArea(
           child: BlocConsumer<ScheduleBloc, ScheduleState>(
             listener: (context, state) {
@@ -372,9 +369,9 @@ class _SchedulePageState extends State<SchedulePage> {
                   }
                 });
 
-                return const Center(
+                return Center(
                   child: CircularProgressIndicator(
-                    backgroundColor: DarkThemeColors.primary,
+                    backgroundColor: AppTheme.colors.primary,
                     strokeWidth: 5,
                   ),
                 );
@@ -385,14 +382,14 @@ class _SchedulePageState extends State<SchedulePage> {
                   children: [
                     Text(
                       'Упс!',
-                      style: DarkTextTheme.h3,
+                      style: AppTextStyle.h3,
                     ),
                     const SizedBox(
                       height: 24,
                     ),
                     Text(
                       state.errorMessage,
-                      style: DarkTextTheme.bodyBold,
+                      style: AppTextStyle.bodyBold,
                     )
                   ],
                 );
@@ -419,9 +416,9 @@ class _NoActiveGroupFoundMessage extends StatelessWidget {
       future: Future.delayed(const Duration(milliseconds: 600)),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(
+          return Center(
             child: CircularProgressIndicator(
-              backgroundColor: DarkThemeColors.primary,
+              backgroundColor: AppTheme.colors.primary,
               strokeWidth: 5,
             ),
           );
@@ -443,15 +440,15 @@ class _NoActiveGroupFoundMessage extends StatelessWidget {
                 ),
                 Text(
                   "Не установлена активная группа",
-                  style: DarkTextTheme.h5,
+                  style: AppTextStyle.h5,
                 ),
                 const SizedBox(
                   height: 8,
                 ),
                 Text(
                   "Скачайте расписание по крайней мере для одной группы, чтобы отобразить календарь.",
-                  style: DarkTextTheme.captionL.copyWith(
-                    color: DarkThemeColors.deactive,
+                  style: AppTextStyle.captionL.copyWith(
+                    color: AppTheme.colors.deactive,
                   ),
                 ),
                 const SizedBox(
@@ -460,7 +457,7 @@ class _NoActiveGroupFoundMessage extends StatelessWidget {
                 ColorfulButton(
                   text: "Настроить",
                   onClick: onTap,
-                  backgroundColor: DarkThemeColors.primary,
+                  backgroundColor: AppTheme.colors.primary,
                 ),
               ],
             ),

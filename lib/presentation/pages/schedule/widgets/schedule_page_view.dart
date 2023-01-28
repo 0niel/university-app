@@ -5,12 +5,12 @@ import 'package:rtu_mirea_app/domain/entities/lesson.dart';
 import 'package:rtu_mirea_app/domain/entities/schedule.dart';
 import 'package:rtu_mirea_app/domain/entities/schedule_settings.dart';
 import 'package:rtu_mirea_app/presentation/bloc/schedule_bloc/schedule_bloc.dart';
-import 'package:rtu_mirea_app/presentation/colors.dart';
 import 'package:rtu_mirea_app/presentation/pages/schedule/widgets/empty_lesson_card.dart';
-import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/intl.dart';
 import 'lesson_card.dart';
+import 'package:rtu_mirea_app/presentation/typography.dart';
+import 'package:rtu_mirea_app/presentation/theme.dart';
 
 class SchedulePageView extends StatefulWidget {
   const SchedulePageView({Key? key, required this.schedule}) : super(key: key);
@@ -82,7 +82,7 @@ class _SchedulePageViewState extends State<SchedulePageView> {
           image: AssetImage('assets/images/Saly-18.png'),
           height: 225.0,
         ),
-        Text('Пар нет!', style: DarkTextTheme.title),
+        Text('Пар нет!', style: AppTextStyle.title),
       ],
     );
   }
@@ -217,26 +217,26 @@ class _SchedulePageViewState extends State<SchedulePageView> {
           startingDayOfWeek: StartingDayOfWeek.monday,
           headerStyle: HeaderStyle(
             formatButtonShowsNext: false,
-            titleTextStyle: DarkTextTheme.captionL,
-            formatButtonTextStyle: DarkTextTheme.buttonS,
+            titleTextStyle: AppTextStyle.captionL,
+            formatButtonTextStyle: AppTextStyle.buttonS,
             titleTextFormatter: (DateTime date, dynamic locale) {
               String dateStr = DateFormat.yMMMM(locale).format(date);
               String weekStr = _selectedWeek.toString();
               return '$dateStr\nвыбрана $weekStr неделя';
             },
-            formatButtonDecoration: const BoxDecoration(
+            formatButtonDecoration: BoxDecoration(
                 border: Border.fromBorderSide(
-                    BorderSide(color: DarkThemeColors.deactive)),
-                borderRadius: BorderRadius.all(Radius.circular(12.0))),
+                    BorderSide(color: AppTheme.colors.deactive)),
+                borderRadius: const BorderRadius.all(Radius.circular(12.0))),
           ),
-          calendarStyle: const CalendarStyle(
-            rangeHighlightColor: DarkThemeColors.secondary,
+          calendarStyle: CalendarStyle(
+            rangeHighlightColor: AppTheme.colors.secondary,
           ),
           daysOfWeekStyle: DaysOfWeekStyle(
             weekdayStyle:
-                DarkTextTheme.body.copyWith(color: DarkThemeColors.deactive),
-            weekendStyle: DarkTextTheme.body
-                .copyWith(color: DarkThemeColors.deactiveDarker),
+                AppTextStyle.body.copyWith(color: AppTheme.colors.deactive),
+            weekendStyle: AppTextStyle.body
+                .copyWith(color: AppTheme.colors.deactiveDarker),
           ),
           focusedDay: _focusedDay,
           availableCalendarFormats: const {
@@ -310,7 +310,7 @@ class _SchedulePageViewState extends State<SchedulePageView> {
             // set up the AlertDialog
             AlertDialog alert = AlertDialog(
                 contentPadding: const EdgeInsets.fromLTRB(8.0, 20.0, 8.0, 8.0),
-                backgroundColor: DarkThemeColors.background02,
+                backgroundColor: AppTheme.colors.background02,
                 title: const Text("Выберите неделю"),
                 content: Wrap(
                   spacing: 4.0,
@@ -322,7 +322,7 @@ class _SchedulePageViewState extends State<SchedulePageView> {
                       ElevatedButton(
                         style: ElevatedButton.styleFrom(
                           foregroundColor: Colors.white,
-                          backgroundColor: DarkThemeColors.primary,
+                          backgroundColor: AppTheme.colors.primary,
                           shadowColor: Colors.transparent,
                         ),
                         onPressed: () {

@@ -5,11 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:rtu_mirea_app/common/utils/strapi_utils.dart';
 import 'package:rtu_mirea_app/domain/entities/news_item.dart';
 import 'package:intl/intl.dart';
-import 'package:rtu_mirea_app/presentation/colors.dart';
 import 'package:rtu_mirea_app/presentation/core/routes/routes.gr.dart';
 import 'package:rtu_mirea_app/presentation/pages/news/widgets/tags_widgets.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:rtu_mirea_app/presentation/typography.dart';
 
 class NewsItemWidget extends StatelessWidget {
   final NewsItem newsItem;
@@ -33,7 +33,7 @@ class NewsItemWidget extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 24, left: 16, right: 16),
         width: MediaQuery.of(context).size.width,
         decoration: BoxDecoration(
-          color: DarkThemeColors.background02,
+          color: AppTheme.colors.background02,
           borderRadius: BorderRadius.circular(16),
         ),
         child: Padding(
@@ -60,13 +60,13 @@ class NewsItemWidget extends StatelessWidget {
                           borderRadius: BorderRadius.circular(16),
                         ),
                         child: Shimmer.fromColors(
-                          baseColor: DarkThemeColors.background03,
+                          baseColor: AppTheme.colors.background03,
                           highlightColor:
-                              DarkThemeColors.background03.withOpacity(0.5),
+                              AppTheme.colors.background03.withOpacity(0.5),
                           child: Container(
                             height: double.infinity,
                             width: double.infinity,
-                            color: DarkThemeColors.background03,
+                            color: AppTheme.colors.background03,
                           ),
                         ),
                       );
@@ -110,13 +110,13 @@ class NewsItemWidget extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.only(top: 16),
                 child: Text(newsItem.title,
-                    textAlign: TextAlign.start, style: DarkTextTheme.titleM),
+                    textAlign: TextAlign.start, style: AppTextStyle.titleM),
               ),
               const SizedBox(height: 4),
               Text((DateFormat.yMMMd('ru_RU').format(newsItem.date).toString()),
                   textAlign: TextAlign.start,
-                  style: DarkTextTheme.captionL
-                      .copyWith(color: DarkThemeColors.secondary)),
+                  style: AppTextStyle.captionL
+                      .copyWith(color: AppTheme.colors.secondary)),
               newsItem.tags.isNotEmpty
                   ? const SizedBox(height: 16)
                   : Container(),

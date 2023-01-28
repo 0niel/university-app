@@ -2,7 +2,6 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/auth_bloc/auth_bloc.dart';
-import 'package:rtu_mirea_app/presentation/colors.dart';
 import 'package:rtu_mirea_app/presentation/widgets/buttons/colorful_button.dart';
 import 'package:rtu_mirea_app/presentation/widgets/buttons/icon_button.dart';
 import 'package:rtu_mirea_app/presentation/widgets/buttons/settings_button.dart';
@@ -10,10 +9,11 @@ import 'package:rtu_mirea_app/presentation/core/routes/routes.gr.dart';
 
 import '../../bloc/announces_bloc/announces_bloc.dart';
 import '../../bloc/profile_bloc/profile_bloc.dart';
-import '../../theme.dart';
 import '../../widgets/buttons/text_outlined_button.dart';
 import '../../widgets/container_label.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:rtu_mirea_app/presentation/typography.dart';
+import 'package:rtu_mirea_app/presentation/theme.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({Key? key}) : super(key: key);
@@ -28,9 +28,8 @@ class _ProfilePageState extends State<ProfilePage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Профиль"),
-        backgroundColor: DarkThemeColors.background01,
       ),
-      backgroundColor: DarkThemeColors.background01,
+      backgroundColor: AppTheme.colors.background01,
       body: SafeArea(
         bottom: false,
         child: LayoutBuilder(
@@ -63,18 +62,18 @@ class _ProfilePageState extends State<ProfilePage> {
                                     const EdgeInsets.only(top: 13, bottom: 4),
                                 child: Text(
                                   '${profileState.user.name} ${profileState.user.lastName}',
-                                  style: DarkTextTheme.h5,
+                                  style: AppTextStyle.h5,
                                 ),
                               ),
                               ShaderMask(
                                 shaderCallback: (bounds) =>
-                                    DarkThemeColors.gradient07.createShader(
+                                    AppTheme.colors.gradient07.createShader(
                                   Rect.fromLTWH(
                                       0, 0, bounds.width, bounds.height),
                                 ),
                                 child: Text(
                                   profileState.user.login,
-                                  style: DarkTextTheme.titleS,
+                                  style: AppTextStyle.titleS,
                                 ),
                               ),
                               const SizedBox(height: 12),
@@ -156,12 +155,20 @@ class _ProfilePageState extends State<ProfilePage> {
                                     context.router.push(const AboutAppRoute()),
                               ),
                               const SizedBox(height: 8),
+                              SettingsButton(
+                                  text: 'Настройки',
+                                  icon: Icons.settings_rounded,
+                                  onClick: () => {
+                                        context.router
+                                            .push(const ProfileSettingsRoute()),
+                                      }),
+                              const SizedBox(height: 8),
                               ColorfulButton(
                                   text: 'Выйти',
                                   onClick: () => context
                                       .read<AuthBloc>()
                                       .add(AuthLogOut()),
-                                  backgroundColor: DarkThemeColors.colorful07),
+                                  backgroundColor: AppTheme.colors.colorful07),
                             ],
                           );
                         } else if (profileState is ProfileLoading) {
@@ -223,12 +230,18 @@ class _InitialProfileStatePage extends StatelessWidget {
               //   builder: (context) => const BottomErrorInfo(),
               // );
             },
-            backgroundColor: DarkThemeColors.colorful03),
+            backgroundColor: AppTheme.colors.colorful03),
         const SizedBox(height: 8),
         SettingsButton(
           text: 'О приложении',
           icon: Icons.apps_rounded,
           onClick: () => context.router.push(const AboutAppRoute()),
+        ),
+        const SizedBox(height: 8),
+        SettingsButton(
+          text: 'Настройки',
+          icon: Icons.settings_rounded,
+          onClick: () => context.router.push(const ProfileSettingsRoute()),
         ),
       ],
     );

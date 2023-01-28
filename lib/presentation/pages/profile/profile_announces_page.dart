@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:rtu_mirea_app/presentation/bloc/announces_bloc/announces_bloc.dart';
-import 'package:rtu_mirea_app/presentation/colors.dart';
-import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:url_launcher/url_launcher_string.dart';
+import 'package:rtu_mirea_app/presentation/typography.dart';
+import 'package:rtu_mirea_app/presentation/theme.dart';
 
 class ProfileAnnouncesPage extends StatelessWidget {
   const ProfileAnnouncesPage({Key? key}) : super(key: key);
@@ -14,9 +14,9 @@ class ProfileAnnouncesPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Объявления"),
-        backgroundColor: DarkThemeColors.background01,
+        backgroundColor: AppTheme.colors.background01,
       ),
-      backgroundColor: DarkThemeColors.background01,
+      backgroundColor: AppTheme.colors.background01,
       body: SafeArea(
         bottom: false,
         child: BlocBuilder<AnnouncesBloc, AnnouncesState>(
@@ -35,20 +35,20 @@ class ProfileAnnouncesPage extends StatelessWidget {
                     children: [
                       Text(
                         state.announces[index].name,
-                        style: DarkTextTheme.title,
+                        style: AppTextStyle.title,
                       ),
                       const SizedBox(height: 6),
                       Text(
                         state.announces[index].date,
-                        style: DarkTextTheme.bodyRegular
-                            .copyWith(color: DarkThemeColors.deactive),
+                        style: AppTextStyle.bodyRegular
+                            .copyWith(color: AppTheme.colors.deactive),
                       ),
                       const SizedBox(height: 8),
                       Html(
                         data: state.announces[index].text,
                         style: {
                           "body": Style(
-                              fontStyle: DarkTextTheme.bodyRegular.fontStyle),
+                              fontStyle: AppTextStyle.bodyRegular.fontStyle),
                         },
                         onLinkTap: (String? url, context, attributes, element) {
                           if (url != null) {
