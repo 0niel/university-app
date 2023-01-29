@@ -29,7 +29,7 @@ class ProfileSettingsPage extends StatelessWidget {
         final routeName = route?.current.name;
         if (routeName == null) continue;
 
-        route?.popUntilRoot();
+        route?.popUntil((route) => false);
         route?.pushNamed(routeName);
       }
     }
