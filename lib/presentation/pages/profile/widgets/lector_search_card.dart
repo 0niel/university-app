@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:rtu_mirea_app/domain/entities/employee.dart';
-import 'package:rtu_mirea_app/presentation/colors.dart';
-import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:url_launcher/url_launcher_string.dart';
+import 'package:rtu_mirea_app/presentation/typography.dart';
+import 'package:rtu_mirea_app/presentation/theme.dart';
 
 class LectorSearchCard extends StatelessWidget {
   const LectorSearchCard({Key? key, required this.employee}) : super(key: key);
@@ -15,14 +15,14 @@ class LectorSearchCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(8),
       width: double.infinity,
-      color: DarkThemeColors.background02,
+      color: AppTheme.colors.background02,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
           Text(
             '${employee.name} ${employee.secondName} ${employee.lastName}',
-            style: DarkTextTheme.bodyBold,
+            style: AppTextStyle.bodyBold,
           ),
           SizedBox(
             height: 30,
@@ -41,14 +41,14 @@ class LectorSearchCard extends StatelessWidget {
               },
               child: Text(
                 employee.email,
-                style: DarkTextTheme.bodyRegular
-                    .copyWith(color: DarkThemeColors.colorful02),
+                style: AppTextStyle.bodyRegular
+                    .copyWith(color: AppTheme.colors.colorful02),
               ),
             ),
           ),
           const SizedBox(height: 8),
-          Text(employee.institute, style: DarkTextTheme.bodyRegular),
-          Text(employee.department, style: DarkTextTheme.bodyRegular),
+          Text(employee.institute, style: AppTextStyle.bodyRegular),
+          Text(employee.department, style: AppTextStyle.bodyRegular),
         ],
       ),
     );

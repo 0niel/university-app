@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:rtu_mirea_app/presentation/theme.dart';
+import 'package:rtu_mirea_app/presentation/typography.dart';
 
 class SearchItemButton extends StatelessWidget {
   const SearchItemButton({Key? key, required this.room, required this.onClick})
@@ -22,7 +22,7 @@ class SearchItemButton extends StatelessWidget {
           children: [
             Text(
               room['t'],
-              style: DarkTextTheme.buttonS,
+              style: AppTextStyle.buttonS,
               textAlign: TextAlign.left,
             ),
           ],

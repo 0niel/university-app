@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:rtu_mirea_app/presentation/theme.dart';
+import 'package:rtu_mirea_app/presentation/typography.dart';
 
 class ColorfulButton extends StatelessWidget {
   const ColorfulButton(
@@ -29,7 +29,7 @@ class ColorfulButton extends StatelessWidget {
           child: Center(
             child: Text(
               text,
-              style: DarkTextTheme.buttonL,
+              style: AppTextStyle.buttonL,
             ),
           ),
           onTap: () {

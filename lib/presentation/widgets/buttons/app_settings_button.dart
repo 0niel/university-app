@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:rtu_mirea_app/presentation/theme.dart';
 
 class AppSettingsButton extends StatelessWidget {
   final VoidCallback onClick;
@@ -19,6 +20,7 @@ class AppSettingsButton extends StatelessWidget {
           'assets/icons/filter.svg',
           width: 20,
           height: 20,
+          color: AppTheme.colors.active,
         ),
       ),
     );

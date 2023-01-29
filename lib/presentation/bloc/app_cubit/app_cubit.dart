@@ -22,6 +22,7 @@ class AppCubit extends Cubit<AppState> {
           AppSettings(
             onboardingShown: true,
             lastUpdateVersion: settings.lastUpdateVersion,
+            theme: settings.theme,
           ),
         ),
       );

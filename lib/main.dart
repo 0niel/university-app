@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:adaptive_theme/adaptive_theme.dart';
+import 'package:auto_route/auto_route.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -22,17 +22,18 @@ import 'package:rtu_mirea_app/presentation/bloc/schedule_bloc/schedule_bloc.dart
 import 'package:rtu_mirea_app/presentation/bloc/scores_bloc/scores_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/stories_bloc/stories_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/update_info_bloc/update_info_bloc.dart';
-import 'package:rtu_mirea_app/presentation/colors.dart';
 import 'package:rtu_mirea_app/presentation/core/routes/routes.gr.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:intl/intl_standalone.dart';
 import 'package:rtu_mirea_app/service_locator.dart' as dependency_injection;
 import 'package:url_strategy/url_strategy.dart';
+import 'presentation/app_notifier.dart';
 import 'service_locator.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'firebase_options.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:provider/provider.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -63,11 +64,18 @@ Future<void> main() async {
 
   setPathUrlStrategy();
 
-  findSystemLocale().then((_) => runApp(const App()));
+  findSystemLocale().then(
+    (_) => runApp(ChangeNotifierProvider<AppNotifier>(
+      create: (context) => getIt<AppNotifier>(),
+      child: const App(),
+    )),
+  );
 }
 
 class App extends StatelessWidget {
   const App({Key? key}) : super(key: key);
+
+  static final appRouter = AppRouter();
 
   @override
   Widget build(BuildContext context) {
@@ -77,14 +85,6 @@ class App extends StatelessWidget {
       DeviceOrientation.portraitDown,
       DeviceOrientation.portraitUp,
     ]);
-
-    // deleting the system status bar color
-    SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
-      statusBarColor: Colors.transparent,
-      systemNavigationBarColor: DarkThemeColors.background01
-    ));
-
-    final appRouter = AppRouter();
 
     return MultiBlocProvider(
       providers: [
@@ -112,34 +112,36 @@ class App extends StatelessWidget {
           lazy: false, // We need to init it as soon as possible
         ),
       ],
-      child: AdaptiveTheme(
-        light: lightTheme,
-        dark: darkTheme,
-        initial: AdaptiveThemeMode.dark,
-        builder: (theme, darkTheme) => MaterialApp.router(
-          localizationsDelegates: const [
-            GlobalMaterialLocalizations.delegate,
-            GlobalWidgetsLocalizations.delegate,
-            GlobalCupertinoLocalizations.delegate,
-          ],
-          supportedLocales: const [
-            Locale('en'),
-            Locale('ru'),
-          ],
-          locale: const Locale('ru'),
-          debugShowCheckedModeBanner: false,
-          title: 'Приложение РТУ МИРЭА',
-          theme: theme,
-          routerDelegate: appRouter.delegate(
-            navigatorObservers: () => [
-              FirebaseAnalyticsObserver(
-                analytics: FirebaseAnalytics.instance,
-              ),
+      child: Consumer<AppNotifier>(
+        builder: (BuildContext context, AppNotifier value, Widget? child) {
+          return MaterialApp.router(
+            localizationsDelegates: const [
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
             ],
-          ),
-          routeInformationProvider: appRouter.routeInfoProvider(),
-          routeInformationParser: appRouter.defaultRouteParser(),
-        ),
+            supportedLocales: const [
+              Locale('en'),
+              Locale('ru'),
+            ],
+            locale: const Locale('ru'),
+            debugShowCheckedModeBanner: false,
+            title: 'Приложение РТУ МИРЭА',
+            routerDelegate: appRouter.delegate(
+              navigatorObservers: () => [
+                FirebaseAnalyticsObserver(
+                  analytics: FirebaseAnalytics.instance,
+                ),
+                AutoRouteObserver(),
+              ],
+            ),
+            routeInformationProvider: appRouter.routeInfoProvider(),
+            routeInformationParser: appRouter.defaultRouteParser(),
+            themeMode: AppTheme.themeMode,
+            theme: AppTheme.theme,
+            darkTheme: AppTheme.darkTheme,
+          );
+        },
       ),
     );
   }

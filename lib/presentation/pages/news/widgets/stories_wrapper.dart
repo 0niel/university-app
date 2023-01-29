@@ -5,9 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:rtu_mirea_app/common/utils/utils.dart';
 import 'package:story/story_page_view/story_page_view.dart';
 import 'package:rtu_mirea_app/domain/entities/story.dart';
-import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:rtu_mirea_app/presentation/widgets/buttons/primary_button.dart';
 import 'package:url_launcher/url_launcher_string.dart';
+import 'package:rtu_mirea_app/presentation/typography.dart';
 
 class StoriesWrapper extends StatefulWidget {
   const StoriesWrapper({
@@ -96,7 +96,7 @@ class _StoriesWrapperState extends State<StoriesWrapper> {
                         Material(
                           type: MaterialType.transparency,
                           child:
-                              Text(author.name, style: DarkTextTheme.bodyBold),
+                              Text(author.name, style: AppTextStyle.bodyBold),
                         ),
                       ],
                     ),
@@ -115,7 +115,7 @@ class _StoriesWrapperState extends State<StoriesWrapper> {
                               children: [
                                 Text(
                                   page.title!,
-                                  style: DarkTextTheme.h4,
+                                  style: AppTextStyle.h4,
                                 ),
                                 const SizedBox(height: 16)
                               ],
@@ -123,7 +123,7 @@ class _StoriesWrapperState extends State<StoriesWrapper> {
                           if (page.text != null)
                             Text(
                               page.text!,
-                              style: DarkTextTheme.bodyBold,
+                              style: AppTextStyle.bodyBold,
                             )
                         ],
                       ),

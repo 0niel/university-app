@@ -4,12 +4,11 @@ import 'package:flutter_svg/svg.dart';
 import 'package:material_floating_search_bar/material_floating_search_bar.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:rtu_mirea_app/presentation/bloc/map_cubit/map_cubit.dart';
-import 'package:rtu_mirea_app/presentation/colors.dart';
 import 'package:rtu_mirea_app/presentation/pages/map/widgets/map_scaling_button.dart';
-import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:implicitly_animated_reorderable_list/implicitly_animated_reorderable_list.dart';
 import 'package:implicitly_animated_reorderable_list/transitions.dart';
-
+import 'package:rtu_mirea_app/presentation/theme.dart';
+import 'package:rtu_mirea_app/presentation/typography.dart';
 import 'widgets/map_navigation_button.dart';
 import 'widgets/search_item_button.dart';
 
@@ -57,7 +56,7 @@ class _MapPageState extends State<MapPage> {
           Container(
             height: double.infinity,
             width: double.infinity,
-            color: DarkThemeColors.background01,
+            color: AppTheme.colors.background01,
           ),
           _buildMap(),
           Align(
@@ -83,11 +82,11 @@ class _MapPageState extends State<MapPage> {
   // ignore: unused_element
   Widget _buildSearchBar() {
     return FloatingSearchBar(
-      accentColor: DarkThemeColors.primary,
-      iconColor: DarkThemeColors.white,
-      backgroundColor: DarkThemeColors.background02,
+      accentColor: AppTheme.colors.primary,
+      iconColor: AppTheme.colors.white,
+      backgroundColor: AppTheme.colors.background02,
       hint: 'Что будем искать, Милорд?',
-      hintStyle: DarkTextTheme.titleS.copyWith(color: DarkThemeColors.deactive),
+      hintStyle: AppTextStyle.titleS.copyWith(color: AppTheme.colors.deactive),
       borderRadius: const BorderRadius.all(Radius.circular(12)),
       onQueryChanged: (query) {
         context.read<MapCubit>().setSearchQuery(query);
@@ -96,7 +95,7 @@ class _MapPageState extends State<MapPage> {
         return Padding(
           padding: const EdgeInsets.only(top: 16.0),
           child: Material(
-            color: DarkThemeColors.background03,
+            color: AppTheme.colors.background03,
             elevation: 4.0,
             borderRadius: BorderRadius.circular(8),
             child: BlocBuilder<MapCubit, MapState>(
@@ -152,7 +151,7 @@ class _MapPageState extends State<MapPage> {
         maxScale: maxScale,
         minScale: minScale,
         backgroundDecoration:
-            const BoxDecoration(color: DarkThemeColors.background01),
+            BoxDecoration(color: AppTheme.colors.background01),
         child: floors[state.floor],
       ),
     );
@@ -161,7 +160,7 @@ class _MapPageState extends State<MapPage> {
   Widget _buildScalingButton() {
     return Container(
       decoration: BoxDecoration(
-        color: DarkThemeColors.background02,
+        color: AppTheme.colors.background02,
         borderRadius: BorderRadius.circular(12),
       ),
       child: MapScalingButton(
@@ -180,7 +179,7 @@ class _MapPageState extends State<MapPage> {
   Widget _buildNavigation() {
     return Container(
       decoration: BoxDecoration(
-        color: DarkThemeColors.background02,
+        color: AppTheme.colors.background02,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(

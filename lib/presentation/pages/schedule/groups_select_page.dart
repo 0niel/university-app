@@ -1,13 +1,11 @@
-import 'dart:convert';
-
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:rtu_mirea_app/presentation/bloc/schedule_bloc/schedule_bloc.dart';
-import 'package:rtu_mirea_app/presentation/colors.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
+import 'package:rtu_mirea_app/presentation/typography.dart';
 
 class GroupsSelectPage extends StatefulWidget {
   const GroupsSelectPage({Key? key}) : super(key: key);
@@ -101,9 +99,9 @@ class _GroupsSelectPageState extends State<GroupsSelectPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: DarkThemeColors.background01,
+      backgroundColor: AppTheme.colors.background01,
       appBar: AppBar(
-        backgroundColor: DarkThemeColors.background01,
+        backgroundColor: AppTheme.colors.background01,
         title: const Text('Выбор группы'),
       ),
       body: SafeArea(
@@ -126,60 +124,26 @@ class _GroupsSelectPageState extends State<GroupsSelectPage> {
               return Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.max,
                   children: [
                     const SizedBox(height: 16),
-                    Container(
-                      height: 48,
-                      decoration: BoxDecoration(
-                        color: DarkThemeColors.background02,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: TextField(
-                        onChanged: (value) {
-                          setState(() {
-                            _filteredGroups = groups
-                                .where((group) =>
-                                    group.toLowerCase().contains(value))
-                                .toList();
-                          });
-                        },
-                        style: DarkTextTheme.titleS.copyWith(
-                          color: DarkThemeColors.deactive,
-                        ),
-                        decoration: InputDecoration(
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 12,
-                          ),
-                          border: InputBorder.none,
-                          hintText: 'Поиск',
-                          hintStyle: DarkTextTheme.titleS.copyWith(
-                            color: DarkThemeColors.deactive,
-                          ),
-                          prefixIcon: Padding(
-                            padding: const EdgeInsets.only(right: 8, left: 16),
-                            child: SvgPicture.asset(
-                              'assets/icons/search.svg',
-                              color: Colors.white,
-                              width: 24,
-                              height: 24,
-                            ),
-                          ),
-                          prefixIconConstraints: const BoxConstraints(
-                            maxWidth: 48,
-                            maxHeight: 48,
-                          ),
-                        ),
-                        inputFormatters: [
-                          _GroupTextFormatter(),
-                        ],
-                      ),
-                    ),
+                    _GroupTextField(onChanged: (value) {
+                      setState(() {
+                        _filteredGroups = groups
+                            .where((group) => group
+                                .toUpperCase()
+                                .contains(value.toUpperCase()))
+                            .toList();
+                      });
+                    }),
                     const SizedBox(height: 16),
                     if (_filteredGroups.isNotEmpty)
                       Expanded(
                         child: ListView.separated(
-                          itemCount: groups.length,
+                          shrinkWrap: true,
+                          itemCount: _filteredGroups.length,
                           separatorBuilder: (context, index) => const SizedBox(
                             height: 10,
                           ),
@@ -215,6 +179,56 @@ class _GroupsSelectPageState extends State<GroupsSelectPage> {
   }
 }
 
+class _GroupTextField extends StatelessWidget {
+  const _GroupTextField({Key? key, required this.onChanged}) : super(key: key);
+
+  final Function(String) onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 48,
+      decoration: BoxDecoration(
+        color: AppTheme.colors.background02,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: TextField(
+        onChanged: (value) => onChanged(value),
+        style: AppTextStyle.titleS.copyWith(
+          color: AppTheme.colors.active,
+        ),
+        decoration: InputDecoration(
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 12,
+          ),
+          border: InputBorder.none,
+          hintText: 'Поиск',
+          hintStyle: AppTextStyle.titleS.copyWith(
+            color: AppTheme.colors.deactive,
+          ),
+          prefixIcon: Padding(
+            padding: const EdgeInsets.only(right: 8, left: 16),
+            child: SvgPicture.asset(
+              'assets/icons/search.svg',
+              color: AppTheme.colors.active,
+              width: 24,
+              height: 24,
+            ),
+          ),
+          prefixIconConstraints: const BoxConstraints(
+            maxWidth: 48,
+            maxHeight: 48,
+          ),
+        ),
+        inputFormatters: [
+          _GroupTextFormatter(),
+        ],
+      ),
+    );
+  }
+}
+
 class _GroupListTile extends StatelessWidget {
   const _GroupListTile({
     Key? key,
@@ -231,48 +245,59 @@ class _GroupListTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Ink(
+    return Container(
+      clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(10),
-        color: DarkThemeColors.background03,
+        //color: AppTheme.colors.background03,
       ),
-      child: ListTile(
+      child: Card(
+        color: AppTheme.colors.background02,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10),
         ),
-        leading: Container(
-          width: 40,
-          height: 40,
-          decoration: BoxDecoration(
-            color: color,
+        borderOnForeground: true,
+        margin: const EdgeInsets.all(0),
+        child: ListTile(
+          shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10),
           ),
-          child: Center(
-            child: Text(
-              institute,
-              style: DarkTextTheme.titleS.copyWith(
-                color: Colors.white,
+          leading: Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: color,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Center(
+              child: Text(
+                institute,
+                style: AppTextStyle.titleS.copyWith(
+                  color: institute == 'ИПТИП'
+                      ? Colors.black.withOpacity(0.8)
+                      : Colors.white.withOpacity(0.8),
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
               ),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              textAlign: TextAlign.center,
             ),
           ),
+          title: Text(
+            group,
+            style: AppTextStyle.titleM,
+          ),
+          trailing: const Icon(
+            Icons.chevron_right,
+            size: 24,
+          ),
+          onTap: () {
+            context
+                .read<ScheduleBloc>()
+                .add(ScheduleSetActiveGroupEvent(group: group));
+            context.router.pop();
+          },
         ),
-        title: Text(
-          group,
-          style: DarkTextTheme.titleM,
-        ),
-        trailing: const Icon(
-          Icons.chevron_right,
-          size: 24,
-        ),
-        onTap: () {
-          context
-              .read<ScheduleBloc>()
-              .add(ScheduleSetActiveGroupEvent(group: group));
-          context.router.pop();
-        },
       ),
     );
   }

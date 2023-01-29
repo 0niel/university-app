@@ -6,14 +6,14 @@ import 'package:rtu_mirea_app/domain/entities/news_item.dart';
 import 'package:rtu_mirea_app/domain/entities/story.dart';
 import 'package:rtu_mirea_app/presentation/bloc/news_bloc/news_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/stories_bloc/stories_bloc.dart';
-import 'package:rtu_mirea_app/presentation/colors.dart';
-import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:rtu_mirea_app/presentation/widgets/buttons/app_settings_button.dart';
 import 'package:rtu_mirea_app/presentation/widgets/buttons/primary_tab_button.dart';
 import 'package:shimmer/shimmer.dart';
 import 'widgets/news_item.dart';
 import 'widgets/story_item.dart';
 import 'widgets/tags_widgets.dart';
+import 'package:rtu_mirea_app/presentation/typography.dart';
+import 'package:rtu_mirea_app/presentation/theme.dart';
 
 class NewsPage extends StatefulWidget {
   const NewsPage({Key? key}) : super(key: key);
@@ -45,7 +45,7 @@ class _NewsPageState extends State<NewsPage> {
       builder: (ctx) => Material(
         child: Container(
           padding: const EdgeInsets.all(8),
-          color: DarkThemeColors.background03,
+          color: AppTheme.colors.background03,
           child: Padding(
             padding:
                 const EdgeInsets.only(top: 4, bottom: 16, left: 24, right: 24),
@@ -152,11 +152,10 @@ class _NewsPageState extends State<NewsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppTheme.colors.background01,
       appBar: AppBar(
         title: const Text("Новости"),
-        backgroundColor: DarkThemeColors.background01,
       ),
-      backgroundColor: DarkThemeColors.background01,
       body: NestedScrollView(
         controller: _scrollController,
         headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
@@ -236,7 +235,7 @@ class _NewsPageState extends State<NewsPage> {
                           child: Text(
                             'Произошла ошибка при загрузке новостей.',
                             textAlign: TextAlign.center,
-                            style: DarkTextTheme.title,
+                            style: AppTextStyle.title,
                           ),
                         ),
                       );
@@ -297,7 +296,7 @@ class _ShimmerNewsCardLoading extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 24, left: 16, right: 16),
       decoration: BoxDecoration(
-        color: DarkThemeColors.background02,
+        color: AppTheme.colors.background02,
         borderRadius: BorderRadius.circular(16),
       ),
       child: Padding(
@@ -307,12 +306,12 @@ class _ShimmerNewsCardLoading extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             Shimmer.fromColors(
-              baseColor: DarkThemeColors.background01,
-              highlightColor: DarkThemeColors.background02,
+              baseColor: AppTheme.colors.background01,
+              highlightColor: AppTheme.colors.background02,
               child: Container(
                 height: 175,
                 decoration: BoxDecoration(
-                  color: DarkThemeColors.background02,
+                  color: AppTheme.colors.background02,
                   borderRadius: BorderRadius.circular(16),
                 ),
               ),
@@ -323,25 +322,25 @@ class _ShimmerNewsCardLoading extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Shimmer.fromColors(
-                    baseColor: DarkThemeColors.background01,
-                    highlightColor: DarkThemeColors.background02,
+                    baseColor: AppTheme.colors.background01,
+                    highlightColor: AppTheme.colors.background02,
                     child: Container(
                       height: 18,
                       decoration: BoxDecoration(
-                        color: DarkThemeColors.background02,
+                        color: AppTheme.colors.background02,
                         borderRadius: BorderRadius.circular(16),
                       ),
                     ),
                   ),
                   const SizedBox(height: 4),
                   Shimmer.fromColors(
-                    baseColor: DarkThemeColors.background01,
-                    highlightColor: DarkThemeColors.background02,
+                    baseColor: AppTheme.colors.background01,
+                    highlightColor: AppTheme.colors.background02,
                     child: Container(
                       height: 18,
                       width: MediaQuery.of(context).size.width * 0.4,
                       decoration: BoxDecoration(
-                        color: DarkThemeColors.background02,
+                        color: AppTheme.colors.background02,
                         borderRadius: BorderRadius.circular(16),
                       ),
                     ),

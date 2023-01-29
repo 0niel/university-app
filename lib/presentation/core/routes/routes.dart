@@ -16,6 +16,7 @@ import 'package:rtu_mirea_app/presentation/pages/profile/profile_detail_page.dar
 import 'package:rtu_mirea_app/presentation/pages/profile/profile_lectors_page.dart';
 import 'package:rtu_mirea_app/presentation/pages/profile/profile_scores_page.dart';
 import 'package:rtu_mirea_app/presentation/pages/profile/profile_page.dart';
+import 'package:rtu_mirea_app/presentation/pages/profile/profile_settings_page.dart';
 import 'package:rtu_mirea_app/presentation/pages/schedule/groups_select_page.dart';
 import 'package:rtu_mirea_app/presentation/pages/schedule/schedule_page.dart';
 
@@ -97,6 +98,10 @@ import 'package:rtu_mirea_app/presentation/pages/schedule/schedule_page.dart';
             AutoRoute(
               path: 'scores',
               page: ProfileScoresPage,
+            ),
+            AutoRoute(
+              path: 'settings',
+              page: ProfileSettingsPage,
             ),
           ],
         ),

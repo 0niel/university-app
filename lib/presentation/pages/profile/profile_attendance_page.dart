@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/attendance_bloc/attendance_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/auth_bloc/auth_bloc.dart';
-import 'package:rtu_mirea_app/presentation/colors.dart';
 import 'package:rtu_mirea_app/presentation/pages/profile/widgets/attendance_card.dart';
-import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:intl/intl.dart';
 import 'package:rtu_mirea_app/presentation/widgets/buttons/select_range_date_button.dart';
 import 'package:syncfusion_flutter_datepicker/datepicker.dart';
+import 'package:rtu_mirea_app/presentation/typography.dart';
+import 'package:rtu_mirea_app/presentation/theme.dart';
 
 class ProfileAttendancePage extends StatefulWidget {
   const ProfileAttendancePage({Key? key}) : super(key: key);
@@ -39,9 +39,7 @@ class _ProfileAttendancePageState extends State<ProfileAttendancePage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Посещаемость"),
-        backgroundColor: DarkThemeColors.background01,
       ),
-      backgroundColor: DarkThemeColors.background01,
       body: SafeArea(
         bottom: false,
         child: BlocBuilder<AuthBloc, AuthState>(
@@ -60,7 +58,7 @@ class _ProfileAttendancePageState extends State<ProfileAttendancePage> {
                     return Center(
                       child: Text(
                           "Произошла ошибка при попытке загрузить посещаемость. Повторите попытку позже",
-                          style: DarkTextTheme.body),
+                          style: AppTextStyle.body),
                     );
                   }
                   return Column(
@@ -68,7 +66,9 @@ class _ProfileAttendancePageState extends State<ProfileAttendancePage> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text('Промежуток: ', style: DarkTextTheme.body),
+                          Text('Промежуток: ',
+                              style: AppTextStyle.body
+                                  .copyWith(color: AppTheme.colors.active)),
                           const SizedBox(width: 16),
                           SelectRangeDateButton(
                             initialRange: PickerDateRange(
@@ -77,10 +77,12 @@ class _ProfileAttendancePageState extends State<ProfileAttendancePage> {
                             text:
                                 "с ${_getTextDates(_getFirstAndLastWeekDaysText())[0]} по ${_getTextDates(_getFirstAndLastWeekDaysText())[1]}",
                             onDateSelected: (date) {
-                              context.read<AttendanceBloc>().add(LoadAttendance(
-                                  token: authState.token,
-                                  startDate: _getTextDates(date)[0],
-                                  endDate: _getTextDates(date)[1]));
+                              context.read<AttendanceBloc>().add(
+                                    LoadAttendance(
+                                        token: authState.token,
+                                        startDate: _getTextDates(date)[0],
+                                        endDate: _getTextDates(date)[1]),
+                                  );
                             },
                           ),
                         ],
@@ -96,7 +98,7 @@ class _ProfileAttendancePageState extends State<ProfileAttendancePage> {
                             children: [
                               const SizedBox(height: 8),
                               Text('Дней посещено: ${state.visitsCount}',
-                                  style: DarkTextTheme.body),
+                                  style: AppTextStyle.body),
                               const SizedBox(height: 8),
                               Expanded(
                                 child: ListView.builder(
@@ -125,7 +127,7 @@ class _ProfileAttendancePageState extends State<ProfileAttendancePage> {
                                   const EdgeInsets.symmetric(horizontal: 24),
                               child: Text(
                                 "Ничего не найдено. Выберите другой промежуток времени",
-                                style: DarkTextTheme.body,
+                                style: AppTextStyle.body,
                               ),
                             ),
                           ),

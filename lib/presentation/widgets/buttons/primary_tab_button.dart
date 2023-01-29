@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:rtu_mirea_app/presentation/colors.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
+import 'package:rtu_mirea_app/presentation/typography.dart';
 
 class PrimaryTabButton extends StatelessWidget {
   final String text;
@@ -31,9 +31,9 @@ class PrimaryTabButton extends StatelessWidget {
             },
             style: ButtonStyle(
               backgroundColor: notifier.value == itemIndex
-                  ? MaterialStateProperty.all<Color>(DarkThemeColors.primary)
+                  ? MaterialStateProperty.all<Color>(AppTheme.colors.primary)
                   : MaterialStateProperty.all<Color>(
-                      DarkThemeColors.background01),
+                      AppTheme.colors.background01),
               shape: MaterialStateProperty.all<RoundedRectangleBorder>(
                 RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(50.0),
@@ -42,10 +42,10 @@ class PrimaryTabButton extends StatelessWidget {
               shadowColor: MaterialStateProperty.all<Color>(Colors.transparent),
             ),
             child: Text(text,
-                style: DarkTextTheme.tab.copyWith(
+                style: AppTextStyle.tab.copyWith(
                   color: notifier.value == itemIndex
-                      ? DarkThemeColors.active
-                      : DarkThemeColors.deactive,
+                      ? AppTheme.colors.active
+                      : AppTheme.colors.deactive,
                 )),
           );
         },

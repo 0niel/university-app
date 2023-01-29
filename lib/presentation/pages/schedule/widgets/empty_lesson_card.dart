@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:rtu_mirea_app/presentation/colors.dart';
+import 'package:rtu_mirea_app/presentation/typography.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 
 class EmptyLessonCard extends StatelessWidget {
@@ -16,7 +16,7 @@ class EmptyLessonCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       shadowColor: Colors.transparent,
-      color: DarkThemeColors.background03,
+      color: AppTheme.colors.background03,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12.0),
       ),
@@ -34,14 +34,14 @@ class EmptyLessonCard extends StatelessWidget {
                 children: [
                   Text(
                     timeStart,
-                    style: DarkTextTheme.bodyBold.copyWith(
-                        color: DarkThemeColors.deactive, fontSize: 12),
+                    style: AppTextStyle.bodyBold.copyWith(
+                        color: AppTheme.colors.deactive, fontSize: 12),
                   ),
                   const SizedBox(height: 5),
                   Text(
                     timeEnd,
-                    style: DarkTextTheme.bodyBold.copyWith(
-                        color: DarkThemeColors.deactive, fontSize: 12),
+                    style: AppTextStyle.bodyBold.copyWith(
+                        color: AppTheme.colors.deactive, fontSize: 12),
                   )
                 ],
               ),
@@ -51,13 +51,13 @@ class EmptyLessonCard extends StatelessWidget {
                 Container(
                   width: 25,
                   height: 1,
-                  color: DarkThemeColors.deactive,
+                  color: AppTheme.colors.deactive,
                 ),
                 const SizedBox(height: 20),
                 Container(
                   width: 25,
                   height: 1,
-                  color: DarkThemeColors.deactive,
+                  color: AppTheme.colors.deactive,
                 ),
               ],
             ),

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:rtu_mirea_app/presentation/colors.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
+import 'package:rtu_mirea_app/presentation/typography.dart';
 
 class ContainerLabel extends StatelessWidget {
   final String label;
@@ -15,7 +15,7 @@ class ContainerLabel extends StatelessWidget {
       alignment: Alignment.centerLeft,
       child: Text(
         label,
-        style: DarkTextTheme.titleM.copyWith(color: DarkThemeColors.deactive),
+        style: AppTextStyle.titleM.copyWith(color: AppTheme.colors.deactive),
       ),
     );
   }

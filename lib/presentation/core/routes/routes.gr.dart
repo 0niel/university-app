@@ -11,302 +11,400 @@
 // ignore_for_file: type=lint
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'package:auto_route/auto_route.dart' as _i18;
-import 'package:auto_route/empty_router_widgets.dart' as _i4;
-import 'package:flutter/material.dart' as _i19;
-import 'package:rtu_mirea_app/domain/entities/news_item.dart' as _i22;
-import 'package:rtu_mirea_app/domain/entities/story.dart' as _i21;
-import 'package:rtu_mirea_app/domain/entities/user.dart' as _i23;
-import 'package:rtu_mirea_app/presentation/core/routes/routes.dart' as _i20;
-import 'package:rtu_mirea_app/presentation/pages/home_page.dart' as _i1;
-import 'package:rtu_mirea_app/presentation/pages/login/login_page.dart' as _i11;
-import 'package:rtu_mirea_app/presentation/pages/map/map_page.dart' as _i5;
+import 'package:auto_route/auto_route.dart' as _i19;
+import 'package:auto_route/empty_router_widgets.dart' deferred as _i4;
+import 'package:flutter/material.dart' as _i20;
+import 'package:rtu_mirea_app/domain/entities/news_item.dart' as _i23;
+import 'package:rtu_mirea_app/domain/entities/story.dart' as _i22;
+import 'package:rtu_mirea_app/domain/entities/user.dart' as _i24;
+import 'package:rtu_mirea_app/presentation/core/routes/routes.dart' as _i21;
+import 'package:rtu_mirea_app/presentation/pages/home_page.dart'
+    deferred as _i1;
+import 'package:rtu_mirea_app/presentation/pages/login/login_page.dart'
+    deferred as _i11;
+import 'package:rtu_mirea_app/presentation/pages/map/map_page.dart'
+    deferred as _i5;
 import 'package:rtu_mirea_app/presentation/pages/news/news_details_page.dart'
-    as _i9;
-import 'package:rtu_mirea_app/presentation/pages/news/news_page.dart' as _i8;
+    deferred as _i9;
+import 'package:rtu_mirea_app/presentation/pages/news/news_page.dart'
+    deferred as _i8;
 import 'package:rtu_mirea_app/presentation/pages/news/widgets/stories_wrapper.dart'
-    as _i3;
+    deferred as _i3;
 import 'package:rtu_mirea_app/presentation/pages/onboarding/onboarding_page.dart'
-    as _i2;
+    deferred as _i2;
 import 'package:rtu_mirea_app/presentation/pages/profile/about_app_page.dart'
-    as _i12;
+    deferred as _i12;
 import 'package:rtu_mirea_app/presentation/pages/profile/profile_announces_page.dart'
-    as _i13;
+    deferred as _i13;
 import 'package:rtu_mirea_app/presentation/pages/profile/profile_attendance_page.dart'
-    as _i14;
+    deferred as _i14;
 import 'package:rtu_mirea_app/presentation/pages/profile/profile_detail_page.dart'
-    as _i15;
+    deferred as _i15;
 import 'package:rtu_mirea_app/presentation/pages/profile/profile_lectors_page.dart'
-    as _i16;
+    deferred as _i16;
 import 'package:rtu_mirea_app/presentation/pages/profile/profile_page.dart'
-    as _i10;
+    deferred as _i10;
 import 'package:rtu_mirea_app/presentation/pages/profile/profile_scores_page.dart'
-    as _i17;
+    deferred as _i17;
+import 'package:rtu_mirea_app/presentation/pages/profile/profile_settings_page.dart'
+    deferred as _i18;
 import 'package:rtu_mirea_app/presentation/pages/schedule/groups_select_page.dart'
-    as _i7;
+    deferred as _i7;
 import 'package:rtu_mirea_app/presentation/pages/schedule/schedule_page.dart'
-    as _i6;
+    deferred as _i6;
 
-class AppRouter extends _i18.RootStackRouter {
-  AppRouter([_i19.GlobalKey<_i19.NavigatorState>? navigatorKey])
+class AppRouter extends _i19.RootStackRouter {
+  AppRouter([_i20.GlobalKey<_i20.NavigatorState>? navigatorKey])
       : super(navigatorKey);
 
   @override
-  final Map<String, _i18.PageFactory> pagesMap = {
+  final Map<String, _i19.PageFactory> pagesMap = {
     HomeRoute.name: (routeData) {
-      return _i18.AdaptivePage<dynamic>(
+      return _i19.AdaptivePage<dynamic>(
         routeData: routeData,
-        child: const _i1.HomePage(),
+        child: _i19.DeferredWidget(
+          _i1.loadLibrary,
+          () => _i1.HomePage(),
+        ),
       );
     },
     OnBoardingRoute.name: (routeData) {
-      return _i18.AdaptivePage<dynamic>(
+      return _i19.AdaptivePage<dynamic>(
         routeData: routeData,
-        child: const _i2.OnBoardingPage(),
+        child: _i19.DeferredWidget(
+          _i2.loadLibrary,
+          () => _i2.OnBoardingPage(),
+        ),
       );
     },
     StoriesWrapperRoute.name: (routeData) {
       final args = routeData.argsAs<StoriesWrapperRouteArgs>();
-      return _i18.CustomPage<dynamic>(
+      return _i19.CustomPage<dynamic>(
         routeData: routeData,
-        child: _i3.StoriesWrapper(
-          key: args.key,
-          stories: args.stories,
-          storyIndex: args.storyIndex,
+        child: _i19.DeferredWidget(
+          _i3.loadLibrary,
+          () => _i3.StoriesWrapper(
+            key: args.key,
+            stories: args.stories,
+            storyIndex: args.storyIndex,
+          ),
         ),
-        customRouteBuilder: _i20.transparentRoute,
+        customRouteBuilder: _i21.transparentRoute,
         opaque: false,
         barrierDismissible: false,
       );
     },
     ScheduleRouter.name: (routeData) {
-      return _i18.AdaptivePage<dynamic>(
+      return _i19.AdaptivePage<dynamic>(
         routeData: routeData,
-        child: const _i4.EmptyRouterPage(),
+        child: _i19.DeferredWidget(
+          _i4.loadLibrary,
+          () => _i4.EmptyRouterPage(),
+        ),
       );
     },
     NewsRouter.name: (routeData) {
-      return _i18.AdaptivePage<dynamic>(
+      return _i19.AdaptivePage<dynamic>(
         routeData: routeData,
-        child: const _i4.EmptyRouterPage(),
+        child: _i19.DeferredWidget(
+          _i4.loadLibrary,
+          () => _i4.EmptyRouterPage(),
+        ),
       );
     },
     MapRoute.name: (routeData) {
-      return _i18.AdaptivePage<dynamic>(
+      return _i19.AdaptivePage<dynamic>(
         routeData: routeData,
-        child: const _i5.MapPage(),
+        child: _i19.DeferredWidget(
+          _i5.loadLibrary,
+          () => _i5.MapPage(),
+        ),
       );
     },
     ProfileRouter.name: (routeData) {
-      return _i18.AdaptivePage<dynamic>(
+      return _i19.AdaptivePage<dynamic>(
         routeData: routeData,
-        child: const _i4.EmptyRouterPage(),
+        child: _i19.DeferredWidget(
+          _i4.loadLibrary,
+          () => _i4.EmptyRouterPage(),
+        ),
       );
     },
     ScheduleRoute.name: (routeData) {
-      return _i18.AdaptivePage<dynamic>(
+      return _i19.AdaptivePage<dynamic>(
         routeData: routeData,
-        child: const _i6.SchedulePage(),
+        child: _i19.DeferredWidget(
+          _i6.loadLibrary,
+          () => _i6.SchedulePage(),
+        ),
       );
     },
     GroupsSelectRoute.name: (routeData) {
-      return _i18.AdaptivePage<dynamic>(
+      return _i19.AdaptivePage<dynamic>(
         routeData: routeData,
-        child: const _i7.GroupsSelectPage(),
+        child: _i19.DeferredWidget(
+          _i7.loadLibrary,
+          () => _i7.GroupsSelectPage(),
+        ),
       );
     },
     NewsRoute.name: (routeData) {
-      return _i18.AdaptivePage<dynamic>(
+      return _i19.AdaptivePage<dynamic>(
         routeData: routeData,
-        child: const _i8.NewsPage(),
+        child: _i19.DeferredWidget(
+          _i8.loadLibrary,
+          () => _i8.NewsPage(),
+        ),
       );
     },
     NewsDetailsRoute.name: (routeData) {
       final args = routeData.argsAs<NewsDetailsRouteArgs>();
-      return _i18.AdaptivePage<dynamic>(
+      return _i19.AdaptivePage<dynamic>(
         routeData: routeData,
-        child: _i9.NewsDetailsPage(
-          key: args.key,
-          newsItem: args.newsItem,
+        child: _i19.DeferredWidget(
+          _i9.loadLibrary,
+          () => _i9.NewsDetailsPage(
+            key: args.key,
+            newsItem: args.newsItem,
+          ),
         ),
       );
     },
     ProfileRoute.name: (routeData) {
-      return _i18.AdaptivePage<dynamic>(
+      return _i19.AdaptivePage<dynamic>(
         routeData: routeData,
-        child: const _i10.ProfilePage(),
+        child: _i19.DeferredWidget(
+          _i10.loadLibrary,
+          () => _i10.ProfilePage(),
+        ),
       );
     },
     LoginRoute.name: (routeData) {
-      return _i18.AdaptivePage<dynamic>(
+      return _i19.AdaptivePage<dynamic>(
         routeData: routeData,
-        child: const _i11.LoginPage(),
+        child: _i19.DeferredWidget(
+          _i11.loadLibrary,
+          () => _i11.LoginPage(),
+        ),
       );
     },
     AboutAppRoute.name: (routeData) {
-      return _i18.AdaptivePage<dynamic>(
+      return _i19.AdaptivePage<dynamic>(
         routeData: routeData,
-        child: const _i12.AboutAppPage(),
+        child: _i19.DeferredWidget(
+          _i12.loadLibrary,
+          () => _i12.AboutAppPage(),
+        ),
       );
     },
     ProfileAnnouncesRoute.name: (routeData) {
-      return _i18.AdaptivePage<dynamic>(
+      return _i19.AdaptivePage<dynamic>(
         routeData: routeData,
-        child: const _i13.ProfileAnnouncesPage(),
+        child: _i19.DeferredWidget(
+          _i13.loadLibrary,
+          () => _i13.ProfileAnnouncesPage(),
+        ),
       );
     },
     ProfileAttendanceRoute.name: (routeData) {
-      return _i18.AdaptivePage<dynamic>(
+      return _i19.AdaptivePage<dynamic>(
         routeData: routeData,
-        child: const _i14.ProfileAttendancePage(),
+        child: _i19.DeferredWidget(
+          _i14.loadLibrary,
+          () => _i14.ProfileAttendancePage(),
+        ),
       );
     },
     ProfileDetailRoute.name: (routeData) {
       final args = routeData.argsAs<ProfileDetailRouteArgs>();
-      return _i18.AdaptivePage<dynamic>(
+      return _i19.AdaptivePage<dynamic>(
         routeData: routeData,
-        child: _i15.ProfileDetailPage(
-          key: args.key,
-          user: args.user,
+        child: _i19.DeferredWidget(
+          _i15.loadLibrary,
+          () => _i15.ProfileDetailPage(
+            key: args.key,
+            user: args.user,
+          ),
         ),
       );
     },
     ProfileLectrosRoute.name: (routeData) {
-      return _i18.AdaptivePage<dynamic>(
+      return _i19.AdaptivePage<dynamic>(
         routeData: routeData,
-        child: const _i16.ProfileLectrosPage(),
+        child: _i19.DeferredWidget(
+          _i16.loadLibrary,
+          () => _i16.ProfileLectrosPage(),
+        ),
       );
     },
     ProfileScoresRoute.name: (routeData) {
-      return _i18.AdaptivePage<dynamic>(
+      return _i19.AdaptivePage<dynamic>(
         routeData: routeData,
-        child: const _i17.ProfileScoresPage(),
+        child: _i19.DeferredWidget(
+          _i17.loadLibrary,
+          () => _i17.ProfileScoresPage(),
+        ),
+      );
+    },
+    ProfileSettingsRoute.name: (routeData) {
+      return _i19.AdaptivePage<dynamic>(
+        routeData: routeData,
+        child: _i19.DeferredWidget(
+          _i18.loadLibrary,
+          () => _i18.ProfileSettingsPage(),
+        ),
       );
     },
   };
 
   @override
-  List<_i18.RouteConfig> get routes => [
-        _i18.RouteConfig(
+  List<_i19.RouteConfig> get routes => [
+        _i19.RouteConfig(
           HomeRoute.name,
           path: '/',
+          deferredLoading: true,
           children: [
-            _i18.RouteConfig(
+            _i19.RouteConfig(
               '#redirect',
               path: '',
               parent: HomeRoute.name,
               redirectTo: 'schedule',
               fullMatch: true,
             ),
-            _i18.RouteConfig(
+            _i19.RouteConfig(
               ScheduleRouter.name,
               path: 'schedule',
               parent: HomeRoute.name,
+              deferredLoading: true,
               children: [
-                _i18.RouteConfig(
+                _i19.RouteConfig(
                   ScheduleRoute.name,
                   path: '',
                   parent: ScheduleRouter.name,
+                  deferredLoading: true,
                 ),
-                _i18.RouteConfig(
+                _i19.RouteConfig(
                   GroupsSelectRoute.name,
                   path: 'select-group',
                   parent: ScheduleRouter.name,
+                  deferredLoading: true,
                 ),
               ],
             ),
-            _i18.RouteConfig(
+            _i19.RouteConfig(
               NewsRouter.name,
               path: 'news',
               parent: HomeRoute.name,
+              deferredLoading: true,
               children: [
-                _i18.RouteConfig(
+                _i19.RouteConfig(
                   NewsRoute.name,
                   path: '',
                   parent: NewsRouter.name,
+                  deferredLoading: true,
                 ),
-                _i18.RouteConfig(
+                _i19.RouteConfig(
                   NewsDetailsRoute.name,
                   path: 'details',
                   parent: NewsRouter.name,
+                  deferredLoading: true,
                 ),
               ],
             ),
-            _i18.RouteConfig(
+            _i19.RouteConfig(
               MapRoute.name,
               path: 'map',
               parent: HomeRoute.name,
+              deferredLoading: true,
             ),
-            _i18.RouteConfig(
+            _i19.RouteConfig(
               ProfileRouter.name,
               path: 'profile',
               parent: HomeRoute.name,
+              deferredLoading: true,
               children: [
-                _i18.RouteConfig(
+                _i19.RouteConfig(
                   ProfileRoute.name,
                   path: '',
                   parent: ProfileRouter.name,
+                  deferredLoading: true,
                 ),
-                _i18.RouteConfig(
+                _i19.RouteConfig(
                   LoginRoute.name,
                   path: 'login',
                   parent: ProfileRouter.name,
+                  deferredLoading: true,
                 ),
-                _i18.RouteConfig(
+                _i19.RouteConfig(
                   AboutAppRoute.name,
                   path: 'about',
                   parent: ProfileRouter.name,
+                  deferredLoading: true,
                 ),
-                _i18.RouteConfig(
+                _i19.RouteConfig(
                   ProfileAnnouncesRoute.name,
                   path: 'announces',
                   parent: ProfileRouter.name,
+                  deferredLoading: true,
                 ),
-                _i18.RouteConfig(
+                _i19.RouteConfig(
                   ProfileAttendanceRoute.name,
                   path: 'attendance',
                   parent: ProfileRouter.name,
+                  deferredLoading: true,
                 ),
-                _i18.RouteConfig(
+                _i19.RouteConfig(
                   ProfileDetailRoute.name,
                   path: 'details',
                   parent: ProfileRouter.name,
+                  deferredLoading: true,
                 ),
-                _i18.RouteConfig(
+                _i19.RouteConfig(
                   ProfileLectrosRoute.name,
                   path: 'lectors',
                   parent: ProfileRouter.name,
+                  deferredLoading: true,
                 ),
-                _i18.RouteConfig(
+                _i19.RouteConfig(
                   ProfileScoresRoute.name,
                   path: 'scores',
                   parent: ProfileRouter.name,
+                  deferredLoading: true,
+                ),
+                _i19.RouteConfig(
+                  ProfileSettingsRoute.name,
+                  path: 'settings',
+                  parent: ProfileRouter.name,
+                  deferredLoading: true,
                 ),
               ],
             ),
           ],
         ),
-        _i18.RouteConfig(
+        _i19.RouteConfig(
           OnBoardingRoute.name,
           path: '/onboarding',
+          deferredLoading: true,
         ),
-        _i18.RouteConfig(
+        _i19.RouteConfig(
           StoriesWrapperRoute.name,
           path: '/story',
+          deferredLoading: true,
         ),
-        _i18.RouteConfig(
+        _i19.RouteConfig(
           '*#redirect',
           path: '*',
           redirectTo: '/',
           fullMatch: true,
+          deferredLoading: true,
         ),
       ];
 }
 
 /// generated route for
 /// [_i1.HomePage]
-class HomeRoute extends _i18.PageRouteInfo<void> {
-  const HomeRoute({List<_i18.PageRouteInfo>? children})
+class HomeRoute extends _i19.PageRouteInfo<void> {
+  const HomeRoute({List<_i19.PageRouteInfo>? children})
       : super(
           HomeRoute.name,
           path: '/',
@@ -318,7 +416,7 @@ class HomeRoute extends _i18.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i2.OnBoardingPage]
-class OnBoardingRoute extends _i18.PageRouteInfo<void> {
+class OnBoardingRoute extends _i19.PageRouteInfo<void> {
   const OnBoardingRoute()
       : super(
           OnBoardingRoute.name,
@@ -330,10 +428,10 @@ class OnBoardingRoute extends _i18.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i3.StoriesWrapper]
-class StoriesWrapperRoute extends _i18.PageRouteInfo<StoriesWrapperRouteArgs> {
+class StoriesWrapperRoute extends _i19.PageRouteInfo<StoriesWrapperRouteArgs> {
   StoriesWrapperRoute({
-    _i19.Key? key,
-    required List<_i21.Story> stories,
+    _i20.Key? key,
+    required List<_i22.Story> stories,
     required int storyIndex,
   }) : super(
           StoriesWrapperRoute.name,
@@ -355,9 +453,9 @@ class StoriesWrapperRouteArgs {
     required this.storyIndex,
   });
 
-  final _i19.Key? key;
+  final _i20.Key? key;
 
-  final List<_i21.Story> stories;
+  final List<_i22.Story> stories;
 
   final int storyIndex;
 
@@ -369,8 +467,8 @@ class StoriesWrapperRouteArgs {
 
 /// generated route for
 /// [_i4.EmptyRouterPage]
-class ScheduleRouter extends _i18.PageRouteInfo<void> {
-  const ScheduleRouter({List<_i18.PageRouteInfo>? children})
+class ScheduleRouter extends _i19.PageRouteInfo<void> {
+  const ScheduleRouter({List<_i19.PageRouteInfo>? children})
       : super(
           ScheduleRouter.name,
           path: 'schedule',
@@ -382,8 +480,8 @@ class ScheduleRouter extends _i18.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i4.EmptyRouterPage]
-class NewsRouter extends _i18.PageRouteInfo<void> {
-  const NewsRouter({List<_i18.PageRouteInfo>? children})
+class NewsRouter extends _i19.PageRouteInfo<void> {
+  const NewsRouter({List<_i19.PageRouteInfo>? children})
       : super(
           NewsRouter.name,
           path: 'news',
@@ -395,7 +493,7 @@ class NewsRouter extends _i18.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i5.MapPage]
-class MapRoute extends _i18.PageRouteInfo<void> {
+class MapRoute extends _i19.PageRouteInfo<void> {
   const MapRoute()
       : super(
           MapRoute.name,
@@ -407,8 +505,8 @@ class MapRoute extends _i18.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i4.EmptyRouterPage]
-class ProfileRouter extends _i18.PageRouteInfo<void> {
-  const ProfileRouter({List<_i18.PageRouteInfo>? children})
+class ProfileRouter extends _i19.PageRouteInfo<void> {
+  const ProfileRouter({List<_i19.PageRouteInfo>? children})
       : super(
           ProfileRouter.name,
           path: 'profile',
@@ -420,7 +518,7 @@ class ProfileRouter extends _i18.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i6.SchedulePage]
-class ScheduleRoute extends _i18.PageRouteInfo<void> {
+class ScheduleRoute extends _i19.PageRouteInfo<void> {
   const ScheduleRoute()
       : super(
           ScheduleRoute.name,
@@ -432,7 +530,7 @@ class ScheduleRoute extends _i18.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i7.GroupsSelectPage]
-class GroupsSelectRoute extends _i18.PageRouteInfo<void> {
+class GroupsSelectRoute extends _i19.PageRouteInfo<void> {
   const GroupsSelectRoute()
       : super(
           GroupsSelectRoute.name,
@@ -444,7 +542,7 @@ class GroupsSelectRoute extends _i18.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i8.NewsPage]
-class NewsRoute extends _i18.PageRouteInfo<void> {
+class NewsRoute extends _i19.PageRouteInfo<void> {
   const NewsRoute()
       : super(
           NewsRoute.name,
@@ -456,10 +554,10 @@ class NewsRoute extends _i18.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i9.NewsDetailsPage]
-class NewsDetailsRoute extends _i18.PageRouteInfo<NewsDetailsRouteArgs> {
+class NewsDetailsRoute extends _i19.PageRouteInfo<NewsDetailsRouteArgs> {
   NewsDetailsRoute({
-    _i19.Key? key,
-    required _i22.NewsItem newsItem,
+    _i20.Key? key,
+    required _i23.NewsItem newsItem,
   }) : super(
           NewsDetailsRoute.name,
           path: 'details',
@@ -478,9 +576,9 @@ class NewsDetailsRouteArgs {
     required this.newsItem,
   });
 
-  final _i19.Key? key;
+  final _i20.Key? key;
 
-  final _i22.NewsItem newsItem;
+  final _i23.NewsItem newsItem;
 
   @override
   String toString() {
@@ -490,7 +588,7 @@ class NewsDetailsRouteArgs {
 
 /// generated route for
 /// [_i10.ProfilePage]
-class ProfileRoute extends _i18.PageRouteInfo<void> {
+class ProfileRoute extends _i19.PageRouteInfo<void> {
   const ProfileRoute()
       : super(
           ProfileRoute.name,
@@ -502,7 +600,7 @@ class ProfileRoute extends _i18.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i11.LoginPage]
-class LoginRoute extends _i18.PageRouteInfo<void> {
+class LoginRoute extends _i19.PageRouteInfo<void> {
   const LoginRoute()
       : super(
           LoginRoute.name,
@@ -514,7 +612,7 @@ class LoginRoute extends _i18.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i12.AboutAppPage]
-class AboutAppRoute extends _i18.PageRouteInfo<void> {
+class AboutAppRoute extends _i19.PageRouteInfo<void> {
   const AboutAppRoute()
       : super(
           AboutAppRoute.name,
@@ -526,7 +624,7 @@ class AboutAppRoute extends _i18.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i13.ProfileAnnouncesPage]
-class ProfileAnnouncesRoute extends _i18.PageRouteInfo<void> {
+class ProfileAnnouncesRoute extends _i19.PageRouteInfo<void> {
   const ProfileAnnouncesRoute()
       : super(
           ProfileAnnouncesRoute.name,
@@ -538,7 +636,7 @@ class ProfileAnnouncesRoute extends _i18.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i14.ProfileAttendancePage]
-class ProfileAttendanceRoute extends _i18.PageRouteInfo<void> {
+class ProfileAttendanceRoute extends _i19.PageRouteInfo<void> {
   const ProfileAttendanceRoute()
       : super(
           ProfileAttendanceRoute.name,
@@ -550,10 +648,10 @@ class ProfileAttendanceRoute extends _i18.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i15.ProfileDetailPage]
-class ProfileDetailRoute extends _i18.PageRouteInfo<ProfileDetailRouteArgs> {
+class ProfileDetailRoute extends _i19.PageRouteInfo<ProfileDetailRouteArgs> {
   ProfileDetailRoute({
-    _i19.Key? key,
-    required _i23.User user,
+    _i20.Key? key,
+    required _i24.User user,
   }) : super(
           ProfileDetailRoute.name,
           path: 'details',
@@ -572,9 +670,9 @@ class ProfileDetailRouteArgs {
     required this.user,
   });
 
-  final _i19.Key? key;
+  final _i20.Key? key;
 
-  final _i23.User user;
+  final _i24.User user;
 
   @override
   String toString() {
@@ -584,7 +682,7 @@ class ProfileDetailRouteArgs {
 
 /// generated route for
 /// [_i16.ProfileLectrosPage]
-class ProfileLectrosRoute extends _i18.PageRouteInfo<void> {
+class ProfileLectrosRoute extends _i19.PageRouteInfo<void> {
   const ProfileLectrosRoute()
       : super(
           ProfileLectrosRoute.name,
@@ -596,7 +694,7 @@ class ProfileLectrosRoute extends _i18.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i17.ProfileScoresPage]
-class ProfileScoresRoute extends _i18.PageRouteInfo<void> {
+class ProfileScoresRoute extends _i19.PageRouteInfo<void> {
   const ProfileScoresRoute()
       : super(
           ProfileScoresRoute.name,
@@ -604,4 +702,16 @@ class ProfileScoresRoute extends _i18.PageRouteInfo<void> {
         );
 
   static const String name = 'ProfileScoresRoute';
+}
+
+/// generated route for
+/// [_i18.ProfileSettingsPage]
+class ProfileSettingsRoute extends _i19.PageRouteInfo<void> {
+  const ProfileSettingsRoute()
+      : super(
+          ProfileSettingsRoute.name,
+          path: 'settings',
+        );
+
+  static const String name = 'ProfileSettingsRoute';
 }

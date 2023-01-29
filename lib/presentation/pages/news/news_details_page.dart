@@ -5,11 +5,11 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
 import 'package:rtu_mirea_app/common/utils/strapi_utils.dart';
 import 'package:rtu_mirea_app/domain/entities/news_item.dart';
-import 'package:rtu_mirea_app/presentation/colors.dart';
 import 'package:rtu_mirea_app/presentation/pages/news/widgets/tags_widgets.dart';
-import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:rtu_mirea_app/presentation/widgets/images_horizontal_slider.dart';
 import 'package:url_launcher/url_launcher_string.dart';
+import 'package:rtu_mirea_app/presentation/typography.dart';
+import 'package:rtu_mirea_app/presentation/theme.dart';
 
 class NewsDetailsPage extends StatelessWidget {
   const NewsDetailsPage({Key? key, required this.newsItem}) : super(key: key);
@@ -18,7 +18,7 @@ class NewsDetailsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: DarkThemeColors.background01,
+      backgroundColor: AppTheme.colors.background01,
       body: NestedScrollView(
         headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
           return [
@@ -44,7 +44,7 @@ class NewsDetailsPage extends StatelessWidget {
         body: SafeArea(
           bottom: false,
           child: Container(
-            color: DarkThemeColors.background01,
+            color: AppTheme.colors.background01,
             child: ListView(
               padding: EdgeInsets.zero,
               children: [
@@ -56,7 +56,7 @@ class NewsDetailsPage extends StatelessWidget {
                     children: [
                       Text(
                         newsItem.title,
-                        style: DarkTextTheme.h5,
+                        style: AppTextStyle.h5,
                       ),
                       const SizedBox(height: 24),
                       _NewsItemInfo(tags: newsItem.tags, date: newsItem.date),
@@ -67,7 +67,7 @@ class NewsDetailsPage extends StatelessWidget {
                           data: newsItem.text,
                           style: {
                             "body": Style(
-                                fontStyle: DarkTextTheme.bodyRegular.fontStyle),
+                                fontStyle: AppTextStyle.bodyRegular.fontStyle),
                           },
                           customRenders: {
                             // iframeRenderer to display the YouTube video player
@@ -132,14 +132,14 @@ class _NewsItemInfo extends StatelessWidget {
                 children: [
                   Text(
                     "Дата",
-                    style: DarkTextTheme.body
-                        .copyWith(color: DarkThemeColors.deactive),
+                    style: AppTextStyle.body
+                        .copyWith(color: AppTheme.colors.deactive),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     DateFormat.MMMd('ru_RU').format(date).toString(),
-                    style: DarkTextTheme.titleM
-                        .copyWith(color: DarkThemeColors.colorful02),
+                    style: AppTextStyle.titleM
+                        .copyWith(color: AppTheme.colors.colorful02),
                   ),
                 ],
               ),

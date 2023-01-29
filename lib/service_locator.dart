@@ -52,6 +52,7 @@ import 'package:rtu_mirea_app/domain/usecases/log_out.dart';
 import 'package:rtu_mirea_app/domain/usecases/set_active_group.dart';
 import 'package:rtu_mirea_app/domain/usecases/set_app_settings.dart';
 import 'package:rtu_mirea_app/domain/usecases/set_schedule_settings.dart';
+import 'package:rtu_mirea_app/presentation/app_notifier.dart';
 import 'package:rtu_mirea_app/presentation/bloc/about_app_bloc/about_app_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/announces_bloc/announces_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/app_cubit/app_cubit.dart';
@@ -72,6 +73,14 @@ import 'data/repositories/schedule_repository_impl.dart';
 final getIt = GetIt.instance;
 
 Future<void> setup() async {
+  // Global app notifier
+  getIt.registerFactory(
+    () => AppNotifier(
+      getAppSettings: getIt(),
+      setAppSettings: getIt(),
+    ),
+  );
+
   // BloC / Cubit
   getIt.registerFactory(
     () => ScheduleBloc(

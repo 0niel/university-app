@@ -4,8 +4,8 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:material_floating_search_bar/material_floating_search_bar.dart';
 import 'package:rtu_mirea_app/presentation/bloc/auth_bloc/auth_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/employee_bloc/employee_bloc.dart';
-import 'package:rtu_mirea_app/presentation/colors.dart';
 import 'package:rtu_mirea_app/presentation/pages/profile/widgets/lector_search_card.dart';
+import 'package:rtu_mirea_app/presentation/typography.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 
 final GlobalKey<FloatingSearchBarState> _searchBarKey =
@@ -38,10 +38,10 @@ class _ProfileLectrosPageState extends State<ProfileLectrosPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Преподаватели"),
-        backgroundColor: DarkThemeColors.background01,
+        backgroundColor: AppTheme.colors.background01,
         automaticallyImplyLeading: false,
       ),
-      backgroundColor: DarkThemeColors.background01,
+      backgroundColor: AppTheme.colors.background01,
       body: SafeArea(
         bottom: false,
         child: BlocBuilder<AuthBloc, AuthState>(
@@ -52,11 +52,12 @@ class _ProfileLectrosPageState extends State<ProfileLectrosPage> {
                   return FloatingSearchBar(
                     key: _searchBarKey,
                     controller: _controller,
-                    backdropColor: DarkThemeColors.background01,
-                    shadowColor: DarkThemeColors.background03,
-                    accentColor: DarkThemeColors.primary,
-                    iconColor: DarkThemeColors.white,
-                    backgroundColor: DarkThemeColors.background02,
+                    elevation: 0,
+                    backdropColor: AppTheme.colors.background01,
+                    shadowColor: AppTheme.colors.background03,
+                    accentColor: AppTheme.colors.primary,
+                    iconColor: AppTheme.colors.active,
+                    backgroundColor: AppTheme.colors.background02,
                     hint: 'Начните вводить фамилию',
                     body: _controller.isOpen == false || _controller.isHidden
                         ? Column(
@@ -66,12 +67,13 @@ class _ProfileLectrosPageState extends State<ProfileLectrosPage> {
                                   size: 85),
                               const SizedBox(height: 24),
                               Text('Здесь появятся результаты поиска',
-                                  style: DarkTextTheme.body)
+                                  style: AppTextStyle.body.copyWith(
+                                      color: AppTheme.colors.deactive)),
                             ],
                           )
                         : Container(),
-                    hintStyle: DarkTextTheme.titleS
-                        .copyWith(color: DarkThemeColors.deactive),
+                    hintStyle: AppTextStyle.titleS
+                        .copyWith(color: AppTheme.colors.deactive),
                     borderRadius: const BorderRadius.all(Radius.circular(12)),
                     scrollPadding: const EdgeInsets.only(top: 16, bottom: 56),
                     transitionDuration: const Duration(milliseconds: 800),
@@ -104,7 +106,7 @@ class _ProfileLectrosPageState extends State<ProfileLectrosPage> {
                         return ClipRRect(
                           borderRadius: BorderRadius.circular(8),
                           child: Material(
-                            color: DarkThemeColors.background02,
+                            color: AppTheme.colors.background02,
                             elevation: 4.0,
                             child: Column(
                               mainAxisSize: MainAxisSize.min,
