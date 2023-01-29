@@ -2,6 +2,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:rtu_mirea_app/presentation/app_notifier.dart';
+import 'package:rtu_mirea_app/presentation/core/routes/routes.gr.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:rtu_mirea_app/presentation/typography.dart';
 
@@ -16,11 +17,14 @@ class ProfileSettingsPage extends StatelessWidget {
       final tabsRouter = AutoTabsRouter.of(context);
 
       // Rebuild current router stack
-      router.popUntil((route) => true);
-      router.pushNamed(router.current.name);
+      router.popUntil((route) => false);
+      router.replaceAll([const ProfileRoute()]);
+
+      final currentTabIndex = tabsRouter.activeIndex;
 
       // Rebuild tabs router stack
       for (var i = 0; i < tabsRouter.pageCount; i++) {
+        if (i == currentTabIndex) continue;
         final route = tabsRouter.stackRouterOfIndex(i);
         final routeName = route?.current.name;
         if (routeName == null) continue;
@@ -40,13 +44,14 @@ class ProfileSettingsPage extends StatelessWidget {
           children: [
             const SizedBox(height: 24),
             ListTile(
-              title: const Text("Тема"),
+              title: Text("Тема", style: AppTextStyle.body),
+              leading: Icon(Icons.brightness_6, color: AppTheme.colors.active),
               trailing: const Icon(Icons.chevron_right),
               onTap: () {
                 showDialog(
                   context: context,
                   builder: (context) => SimpleDialog(
-                    title: Text("Тема", style: AppTextStyle.titleS),
+                    title: Text("Выбор темы", style: AppTextStyle.titleS),
                     contentPadding: const EdgeInsets.all(16),
                     backgroundColor: AppTheme.colors.background02,
                     elevation: 0,

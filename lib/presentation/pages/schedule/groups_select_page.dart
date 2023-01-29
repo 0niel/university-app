@@ -195,7 +195,7 @@ class _GroupTextField extends StatelessWidget {
       child: TextField(
         onChanged: (value) => onChanged(value),
         style: AppTextStyle.titleS.copyWith(
-          color: AppTheme.colors.deactive,
+          color: AppTheme.colors.active,
         ),
         decoration: InputDecoration(
           contentPadding: const EdgeInsets.symmetric(

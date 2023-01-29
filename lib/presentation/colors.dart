@@ -26,7 +26,7 @@ class ThemeColors {
   Color get white => const Color(0xFFFFFFFF);
 
   // States
-  Color get active => const Color(0xFFE5E5E5);
+  Color get active => const Color(0xFFFFFFFF);
   Color get deactive => const Color(0xFF5E6272);
   Color get activeLightMode => const Color(0xFF200745);
   Color get deactiveDarker => const Color(0xFF3A3D46);

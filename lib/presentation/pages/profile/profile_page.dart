@@ -6,12 +6,12 @@ import 'package:rtu_mirea_app/presentation/widgets/buttons/colorful_button.dart'
 import 'package:rtu_mirea_app/presentation/widgets/buttons/icon_button.dart';
 import 'package:rtu_mirea_app/presentation/widgets/buttons/settings_button.dart';
 import 'package:rtu_mirea_app/presentation/core/routes/routes.gr.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 import '../../bloc/announces_bloc/announces_bloc.dart';
 import '../../bloc/profile_bloc/profile_bloc.dart';
 import '../../widgets/buttons/text_outlined_button.dart';
 import '../../widgets/container_label.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:rtu_mirea_app/presentation/typography.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 
@@ -96,12 +96,13 @@ class _ProfilePageState extends State<ProfilePage> {
                                         assetImage: const AssetImage(
                                             'assets/icons/gerb.ico'),
                                         onClick: () {
-                                          launchUrl(Uri.parse(
-                                            profileState.user.authShortlink !=
-                                                    null
-                                                ? "https://lk.mirea.ru/auth/link/?url=${profileState.user.authShortlink!}"
-                                                : "https://lk.mirea.ru/auth",
-                                          ));
+                                          launchUrlString(
+                                              profileState.user.authShortlink !=
+                                                      null
+                                                  ? "https://lk.mirea.ru/auth/link/?url=${profileState.user.authShortlink!}"
+                                                  : "https://lk.mirea.ru/auth",
+                                              mode: LaunchMode
+                                                  .externalApplication);
                                         },
                                         text: "Вход в ЛКС",
                                       ),
