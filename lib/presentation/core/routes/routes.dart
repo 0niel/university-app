@@ -22,6 +22,7 @@ import 'package:rtu_mirea_app/presentation/pages/schedule/schedule_page.dart';
 
 @AdaptiveAutoRouter(
   replaceInRouteName: 'Page,Route',
+  deferredLoading: true,
   routes: [
     AutoRoute(
       path: '/',
