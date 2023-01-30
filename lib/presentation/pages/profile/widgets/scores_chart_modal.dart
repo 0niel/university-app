@@ -24,7 +24,7 @@ class _ScoresChartModalState extends State<ScoresChartModal> {
       case "удовлетворительно":
         return 3;
       default:
-        return -1;
+        return 1;
     }
   }
 
@@ -39,11 +39,8 @@ class _ScoresChartModalState extends State<ScoresChartModal> {
       double average = 0;
       for (final score in scores) {
         final scoreValue = _getScoreByName(score.result);
-
-        if (scoreValue != -1) {
-          count++;
-          average += scoreValue;
-        }
+        count++;
+        average += scoreValue;
       }
 
       average = average / count;
