@@ -24,7 +24,7 @@ class _ScoresChartModalState extends State<ScoresChartModal> {
       case "удовлетворительно":
         return 3;
       default:
-        return 1;
+        return 0;
     }
   }
 
