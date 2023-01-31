@@ -130,9 +130,6 @@ dependencies:
   # See https://pub.dev/packages/cached_network_image
   cached_network_image: ^3.2.0
 
-  # ListView that implicitly animates between the changes of two lists
-  # See https://pub.dev/packages/implicitly_animated_reorderable_list
-  implicitly_animated_reorderable_list: ^0.4.2
   syncfusion_flutter_datagrid: ^20.1.57
   syncfusion_flutter_core: ^20.1.57
   syncfusion_flutter_sliders: ^20.1.57

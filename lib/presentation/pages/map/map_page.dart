@@ -1,16 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:material_floating_search_bar/material_floating_search_bar.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:rtu_mirea_app/presentation/bloc/map_cubit/map_cubit.dart';
 import 'package:rtu_mirea_app/presentation/pages/map/widgets/map_scaling_button.dart';
-import 'package:implicitly_animated_reorderable_list/implicitly_animated_reorderable_list.dart';
-import 'package:implicitly_animated_reorderable_list/transitions.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
-import 'package:rtu_mirea_app/presentation/typography.dart';
 import 'widgets/map_navigation_button.dart';
-import 'widgets/search_item_button.dart';
 
 class MapPage extends StatefulWidget {
   const MapPage({Key? key}) : super(key: key);
@@ -79,68 +74,71 @@ class _MapPageState extends State<MapPage> {
     );
   }
 
-  // ignore: unused_element
-  Widget _buildSearchBar() {
-    return FloatingSearchBar(
-      accentColor: AppTheme.colors.primary,
-      iconColor: AppTheme.colors.white,
-      backgroundColor: AppTheme.colors.background02,
-      hint: 'Что будем искать, Милорд?',
-      hintStyle: AppTextStyle.titleS.copyWith(color: AppTheme.colors.deactive),
-      borderRadius: const BorderRadius.all(Radius.circular(12)),
-      onQueryChanged: (query) {
-        context.read<MapCubit>().setSearchQuery(query);
-      },
-      builder: (context, transition) {
-        return Padding(
-          padding: const EdgeInsets.only(top: 16.0),
-          child: Material(
-            color: AppTheme.colors.background03,
-            elevation: 4.0,
-            borderRadius: BorderRadius.circular(8),
-            child: BlocBuilder<MapCubit, MapState>(
-              buildWhen: (prevState, currentState) =>
-                  currentState is MapSearchFoundUpdated,
-              builder: (context, state) {
-                if (state is MapFloorLoaded) return Container();
-                return ImplicitlyAnimatedList<Map<String, dynamic>>(
-                  shrinkWrap: true,
-                  items: (state as MapSearchFoundUpdated)
-                      .foundRooms
-                      .take(6)
-                      .toList(),
-                  physics: const NeverScrollableScrollPhysics(),
-                  areItemsTheSame: (a, b) => a == b,
-                  itemBuilder: (context, animation, room, i) {
-                    return SizeFadeTransition(
-                      animation: animation,
-                      child: SearchItemButton(
-                          room: room,
-                          onClick: () {
-                            // todo: change position
-                            context.read<MapCubit>().goToFloor(room['floor']);
-                          }),
-                    );
-                  },
-                  updateItemBuilder: (context, animation, room) {
-                    return FadeTransition(
-                      opacity: animation,
-                      child: SearchItemButton(
-                          room: room,
-                          onClick: () {
-                            // todo: change position
-                            context.read<MapCubit>().goToFloor(room['floor']);
-                          }),
-                    );
-                  },
-                );
-              },
-            ),
-          ),
-        );
-      },
-    );
-  }
+  // TODO: implement search bar without using [ImplicitlyAnimatedList].
+  // Package implicitly_animated_reorderable_list is DISCONTINUED and
+  // project compilation fails because of it.
+
+  // Widget _buildSearchBar() {
+  //   return FloatingSearchBar(
+  //     accentColor: AppTheme.colors.primary,
+  //     iconColor: AppTheme.colors.white,
+  //     backgroundColor: AppTheme.colors.background02,
+  //     hint: 'Что будем искать, Милорд?',
+  //     hintStyle: AppTextStyle.titleS.copyWith(color: AppTheme.colors.deactive),
+  //     borderRadius: const BorderRadius.all(Radius.circular(12)),
+  //     onQueryChanged: (query) {
+  //       context.read<MapCubit>().setSearchQuery(query);
+  //     },
+  //     builder: (context, transition) {
+  //       return Padding(
+  //         padding: const EdgeInsets.only(top: 16.0),
+  //         child: Material(
+  //           color: AppTheme.colors.background03,
+  //           elevation: 4.0,
+  //           borderRadius: BorderRadius.circular(8),
+  //           child: BlocBuilder<MapCubit, MapState>(
+  //             buildWhen: (prevState, currentState) =>
+  //                 currentState is MapSearchFoundUpdated,
+  //             builder: (context, state) {
+  //               if (state is MapFloorLoaded) return Container();
+  //               return ImplicitlyAnimatedList<Map<String, dynamic>>(
+  //                 shrinkWrap: true,
+  //                 items: (state as MapSearchFoundUpdated)
+  //                     .foundRooms
+  //                     .take(6)
+  //                     .toList(),
+  //                 physics: const NeverScrollableScrollPhysics(),
+  //                 areItemsTheSame: (a, b) => a == b,
+  //                 itemBuilder: (context, animation, room, i) {
+  //                   return SizeFadeTransition(
+  //                     animation: animation,
+  //                     child: SearchItemButton(
+  //                         room: room,
+  //                         onClick: () {
+  //                           // todo: change position
+  //                           context.read<MapCubit>().goToFloor(room['floor']);
+  //                         }),
+  //                   );
+  //                 },
+  //                 updateItemBuilder: (context, animation, room) {
+  //                   return FadeTransition(
+  //                     opacity: animation,
+  //                     child: SearchItemButton(
+  //                         room: room,
+  //                         onClick: () {
+  //                           // todo: change position
+  //                           context.read<MapCubit>().goToFloor(room['floor']);
+  //                         }),
+  //                   );
+  //                 },
+  //               );
+  //             },
+  //           ),
+  //         ),
+  //       );
+  //     },
+  //   );
+  // }
 
   Widget _buildMap() {
     return BlocBuilder<MapCubit, MapState>(
