@@ -188,7 +188,7 @@ class _NewsPageState extends State<NewsPage> {
         body: Builder(
           builder: (BuildContext context) {
             final innerScrollController = PrimaryScrollController.of(context);
-            _setupScrollController(innerScrollController!);
+            _setupScrollController(innerScrollController);
 
             return RefreshIndicator(
               onRefresh: () async {

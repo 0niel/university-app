@@ -12,46 +12,42 @@
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:auto_route/auto_route.dart' as _i19;
-import 'package:auto_route/empty_router_widgets.dart' deferred as _i4;
+import 'package:auto_route/empty_router_widgets.dart' as _i4;
 import 'package:flutter/material.dart' as _i20;
 import 'package:rtu_mirea_app/domain/entities/news_item.dart' as _i23;
 import 'package:rtu_mirea_app/domain/entities/story.dart' as _i22;
 import 'package:rtu_mirea_app/domain/entities/user.dart' as _i24;
 import 'package:rtu_mirea_app/presentation/core/routes/routes.dart' as _i21;
-import 'package:rtu_mirea_app/presentation/pages/home_page.dart'
-    deferred as _i1;
-import 'package:rtu_mirea_app/presentation/pages/login/login_page.dart'
-    deferred as _i11;
-import 'package:rtu_mirea_app/presentation/pages/map/map_page.dart'
-    deferred as _i5;
+import 'package:rtu_mirea_app/presentation/pages/home_page.dart' as _i1;
+import 'package:rtu_mirea_app/presentation/pages/login/login_page.dart' as _i11;
+import 'package:rtu_mirea_app/presentation/pages/map/map_page.dart' as _i5;
 import 'package:rtu_mirea_app/presentation/pages/news/news_details_page.dart'
-    deferred as _i9;
-import 'package:rtu_mirea_app/presentation/pages/news/news_page.dart'
-    deferred as _i8;
+    as _i9;
+import 'package:rtu_mirea_app/presentation/pages/news/news_page.dart' as _i8;
 import 'package:rtu_mirea_app/presentation/pages/news/widgets/stories_wrapper.dart'
-    deferred as _i3;
+    as _i3;
 import 'package:rtu_mirea_app/presentation/pages/onboarding/onboarding_page.dart'
-    deferred as _i2;
+    as _i2;
 import 'package:rtu_mirea_app/presentation/pages/profile/about_app_page.dart'
-    deferred as _i12;
+    as _i12;
 import 'package:rtu_mirea_app/presentation/pages/profile/profile_announces_page.dart'
-    deferred as _i13;
+    as _i13;
 import 'package:rtu_mirea_app/presentation/pages/profile/profile_attendance_page.dart'
-    deferred as _i14;
+    as _i14;
 import 'package:rtu_mirea_app/presentation/pages/profile/profile_detail_page.dart'
-    deferred as _i15;
+    as _i15;
 import 'package:rtu_mirea_app/presentation/pages/profile/profile_lectors_page.dart'
-    deferred as _i16;
+    as _i16;
 import 'package:rtu_mirea_app/presentation/pages/profile/profile_page.dart'
-    deferred as _i10;
+    as _i10;
 import 'package:rtu_mirea_app/presentation/pages/profile/profile_scores_page.dart'
-    deferred as _i17;
+    as _i17;
 import 'package:rtu_mirea_app/presentation/pages/profile/profile_settings_page.dart'
-    deferred as _i18;
+    as _i18;
 import 'package:rtu_mirea_app/presentation/pages/schedule/groups_select_page.dart'
-    deferred as _i7;
+    as _i7;
 import 'package:rtu_mirea_app/presentation/pages/schedule/schedule_page.dart'
-    deferred as _i6;
+    as _i6;
 
 class AppRouter extends _i19.RootStackRouter {
   AppRouter([_i20.GlobalKey<_i20.NavigatorState>? navigatorKey])
@@ -62,32 +58,23 @@ class AppRouter extends _i19.RootStackRouter {
     HomeRoute.name: (routeData) {
       return _i19.AdaptivePage<dynamic>(
         routeData: routeData,
-        child: _i19.DeferredWidget(
-          _i1.loadLibrary,
-          () => _i1.HomePage(),
-        ),
+        child: const _i1.HomePage(),
       );
     },
     OnBoardingRoute.name: (routeData) {
       return _i19.AdaptivePage<dynamic>(
         routeData: routeData,
-        child: _i19.DeferredWidget(
-          _i2.loadLibrary,
-          () => _i2.OnBoardingPage(),
-        ),
+        child: const _i2.OnBoardingPage(),
       );
     },
     StoriesWrapperRoute.name: (routeData) {
       final args = routeData.argsAs<StoriesWrapperRouteArgs>();
       return _i19.CustomPage<dynamic>(
         routeData: routeData,
-        child: _i19.DeferredWidget(
-          _i3.loadLibrary,
-          () => _i3.StoriesWrapper(
-            key: args.key,
-            stories: args.stories,
-            storyIndex: args.storyIndex,
-          ),
+        child: _i3.StoriesWrapper(
+          key: args.key,
+          stories: args.stories,
+          storyIndex: args.storyIndex,
         ),
         customRouteBuilder: _i21.transparentRoute,
         opaque: false,
@@ -97,162 +84,111 @@ class AppRouter extends _i19.RootStackRouter {
     ScheduleRouter.name: (routeData) {
       return _i19.AdaptivePage<dynamic>(
         routeData: routeData,
-        child: _i19.DeferredWidget(
-          _i4.loadLibrary,
-          () => _i4.EmptyRouterPage(),
-        ),
+        child: const _i4.EmptyRouterPage(),
       );
     },
     NewsRouter.name: (routeData) {
       return _i19.AdaptivePage<dynamic>(
         routeData: routeData,
-        child: _i19.DeferredWidget(
-          _i4.loadLibrary,
-          () => _i4.EmptyRouterPage(),
-        ),
+        child: const _i4.EmptyRouterPage(),
       );
     },
     MapRoute.name: (routeData) {
       return _i19.AdaptivePage<dynamic>(
         routeData: routeData,
-        child: _i19.DeferredWidget(
-          _i5.loadLibrary,
-          () => _i5.MapPage(),
-        ),
+        child: const _i5.MapPage(),
       );
     },
     ProfileRouter.name: (routeData) {
       return _i19.AdaptivePage<dynamic>(
         routeData: routeData,
-        child: _i19.DeferredWidget(
-          _i4.loadLibrary,
-          () => _i4.EmptyRouterPage(),
-        ),
+        child: const _i4.EmptyRouterPage(),
       );
     },
     ScheduleRoute.name: (routeData) {
       return _i19.AdaptivePage<dynamic>(
         routeData: routeData,
-        child: _i19.DeferredWidget(
-          _i6.loadLibrary,
-          () => _i6.SchedulePage(),
-        ),
+        child: const _i6.SchedulePage(),
       );
     },
     GroupsSelectRoute.name: (routeData) {
       return _i19.AdaptivePage<dynamic>(
         routeData: routeData,
-        child: _i19.DeferredWidget(
-          _i7.loadLibrary,
-          () => _i7.GroupsSelectPage(),
-        ),
+        child: const _i7.GroupsSelectPage(),
       );
     },
     NewsRoute.name: (routeData) {
       return _i19.AdaptivePage<dynamic>(
         routeData: routeData,
-        child: _i19.DeferredWidget(
-          _i8.loadLibrary,
-          () => _i8.NewsPage(),
-        ),
+        child: const _i8.NewsPage(),
       );
     },
     NewsDetailsRoute.name: (routeData) {
       final args = routeData.argsAs<NewsDetailsRouteArgs>();
       return _i19.AdaptivePage<dynamic>(
         routeData: routeData,
-        child: _i19.DeferredWidget(
-          _i9.loadLibrary,
-          () => _i9.NewsDetailsPage(
-            key: args.key,
-            newsItem: args.newsItem,
-          ),
+        child: _i9.NewsDetailsPage(
+          key: args.key,
+          newsItem: args.newsItem,
         ),
       );
     },
     ProfileRoute.name: (routeData) {
       return _i19.AdaptivePage<dynamic>(
         routeData: routeData,
-        child: _i19.DeferredWidget(
-          _i10.loadLibrary,
-          () => _i10.ProfilePage(),
-        ),
+        child: const _i10.ProfilePage(),
       );
     },
     LoginRoute.name: (routeData) {
       return _i19.AdaptivePage<dynamic>(
         routeData: routeData,
-        child: _i19.DeferredWidget(
-          _i11.loadLibrary,
-          () => _i11.LoginPage(),
-        ),
+        child: const _i11.LoginPage(),
       );
     },
     AboutAppRoute.name: (routeData) {
       return _i19.AdaptivePage<dynamic>(
         routeData: routeData,
-        child: _i19.DeferredWidget(
-          _i12.loadLibrary,
-          () => _i12.AboutAppPage(),
-        ),
+        child: const _i12.AboutAppPage(),
       );
     },
     ProfileAnnouncesRoute.name: (routeData) {
       return _i19.AdaptivePage<dynamic>(
         routeData: routeData,
-        child: _i19.DeferredWidget(
-          _i13.loadLibrary,
-          () => _i13.ProfileAnnouncesPage(),
-        ),
+        child: const _i13.ProfileAnnouncesPage(),
       );
     },
     ProfileAttendanceRoute.name: (routeData) {
       return _i19.AdaptivePage<dynamic>(
         routeData: routeData,
-        child: _i19.DeferredWidget(
-          _i14.loadLibrary,
-          () => _i14.ProfileAttendancePage(),
-        ),
+        child: const _i14.ProfileAttendancePage(),
       );
     },
     ProfileDetailRoute.name: (routeData) {
       final args = routeData.argsAs<ProfileDetailRouteArgs>();
       return _i19.AdaptivePage<dynamic>(
         routeData: routeData,
-        child: _i19.DeferredWidget(
-          _i15.loadLibrary,
-          () => _i15.ProfileDetailPage(
-            key: args.key,
-            user: args.user,
-          ),
+        child: _i15.ProfileDetailPage(
+          key: args.key,
+          user: args.user,
         ),
       );
     },
     ProfileLectrosRoute.name: (routeData) {
       return _i19.AdaptivePage<dynamic>(
         routeData: routeData,
-        child: _i19.DeferredWidget(
-          _i16.loadLibrary,
-          () => _i16.ProfileLectrosPage(),
-        ),
+        child: const _i16.ProfileLectrosPage(),
       );
     },
     ProfileScoresRoute.name: (routeData) {
       return _i19.AdaptivePage<dynamic>(
         routeData: routeData,
-        child: _i19.DeferredWidget(
-          _i17.loadLibrary,
-          () => _i17.ProfileScoresPage(),
-        ),
+        child: const _i17.ProfileScoresPage(),
       );
     },
     ProfileSettingsRoute.name: (routeData) {
       return _i19.AdaptivePage<dynamic>(
         routeData: routeData,
-        child: _i19.DeferredWidget(
-          _i18.loadLibrary,
-          () => _i18.ProfileSettingsPage(),
-        ),
+        child: const _i18.ProfileSettingsPage(),
       );
     },
   };
@@ -262,7 +198,6 @@ class AppRouter extends _i19.RootStackRouter {
         _i19.RouteConfig(
           HomeRoute.name,
           path: '/',
-          deferredLoading: true,
           children: [
             _i19.RouteConfig(
               '#redirect',
@@ -275,19 +210,16 @@ class AppRouter extends _i19.RootStackRouter {
               ScheduleRouter.name,
               path: 'schedule',
               parent: HomeRoute.name,
-              deferredLoading: true,
               children: [
                 _i19.RouteConfig(
                   ScheduleRoute.name,
                   path: '',
                   parent: ScheduleRouter.name,
-                  deferredLoading: true,
                 ),
                 _i19.RouteConfig(
                   GroupsSelectRoute.name,
                   path: 'select-group',
                   parent: ScheduleRouter.name,
-                  deferredLoading: true,
                 ),
               ],
             ),
@@ -295,19 +227,16 @@ class AppRouter extends _i19.RootStackRouter {
               NewsRouter.name,
               path: 'news',
               parent: HomeRoute.name,
-              deferredLoading: true,
               children: [
                 _i19.RouteConfig(
                   NewsRoute.name,
                   path: '',
                   parent: NewsRouter.name,
-                  deferredLoading: true,
                 ),
                 _i19.RouteConfig(
                   NewsDetailsRoute.name,
                   path: 'details',
                   parent: NewsRouter.name,
-                  deferredLoading: true,
                 ),
               ],
             ),
@@ -315,67 +244,56 @@ class AppRouter extends _i19.RootStackRouter {
               MapRoute.name,
               path: 'map',
               parent: HomeRoute.name,
-              deferredLoading: true,
             ),
             _i19.RouteConfig(
               ProfileRouter.name,
               path: 'profile',
               parent: HomeRoute.name,
-              deferredLoading: true,
               children: [
                 _i19.RouteConfig(
                   ProfileRoute.name,
                   path: '',
                   parent: ProfileRouter.name,
-                  deferredLoading: true,
                 ),
                 _i19.RouteConfig(
                   LoginRoute.name,
                   path: 'login',
                   parent: ProfileRouter.name,
-                  deferredLoading: true,
                 ),
                 _i19.RouteConfig(
                   AboutAppRoute.name,
                   path: 'about',
                   parent: ProfileRouter.name,
-                  deferredLoading: true,
                 ),
                 _i19.RouteConfig(
                   ProfileAnnouncesRoute.name,
                   path: 'announces',
                   parent: ProfileRouter.name,
-                  deferredLoading: true,
                 ),
                 _i19.RouteConfig(
                   ProfileAttendanceRoute.name,
                   path: 'attendance',
                   parent: ProfileRouter.name,
-                  deferredLoading: true,
                 ),
                 _i19.RouteConfig(
                   ProfileDetailRoute.name,
                   path: 'details',
                   parent: ProfileRouter.name,
-                  deferredLoading: true,
                 ),
                 _i19.RouteConfig(
                   ProfileLectrosRoute.name,
                   path: 'lectors',
                   parent: ProfileRouter.name,
-                  deferredLoading: true,
                 ),
                 _i19.RouteConfig(
                   ProfileScoresRoute.name,
                   path: 'scores',
                   parent: ProfileRouter.name,
-                  deferredLoading: true,
                 ),
                 _i19.RouteConfig(
                   ProfileSettingsRoute.name,
                   path: 'settings',
                   parent: ProfileRouter.name,
-                  deferredLoading: true,
                 ),
               ],
             ),
@@ -384,19 +302,16 @@ class AppRouter extends _i19.RootStackRouter {
         _i19.RouteConfig(
           OnBoardingRoute.name,
           path: '/onboarding',
-          deferredLoading: true,
         ),
         _i19.RouteConfig(
           StoriesWrapperRoute.name,
           path: '/story',
-          deferredLoading: true,
         ),
         _i19.RouteConfig(
           '*#redirect',
           path: '*',
           redirectTo: '/',
           fullMatch: true,
-          deferredLoading: true,
         ),
       ];
 }

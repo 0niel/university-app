@@ -15,7 +15,7 @@ publish_to: 'none'
 version: 1.2.3+9
 
 environment:
-  sdk: ">=2.12.0 <3.0.0"
+  sdk: ">=2.19.0 <3.0.0"
 
 dependencies:
   flutter:
@@ -35,7 +35,7 @@ dependencies:
   
   # Http client. 
   # See https://pub.dev/packages/dio
-  dio: ^4.0.4
+  dio: ^4.0.6
 
   # Simple no-sql local database. 
   # See https://pub.dev/packages/shared_preferences
@@ -71,8 +71,8 @@ dependencies:
   material_floating_search_bar: ^0.3.6
 
   # Internet connection checker.
-  # See https://pub.dev/packages/internet_connection_checker
-  internet_connection_checker: ^1.0.0+1
+  # See https://pub.dev/packages/internet_connection_checker_plus
+  internet_connection_checker_plus: ^1.0.1
 
   # Functional Programming in Dart
   # See https://pub.dev/packages/dartz/versions/0.10.0-nullsafety.2
@@ -169,6 +169,7 @@ dependencies:
   freezed_annotation: ^2.1.0
 
   firebase_core: ^2.4.1
+  firebase_core_web: ^2.1.0
   firebase_analytics: ^10.1.0
   firebase_crashlytics: ^3.0.11
 
