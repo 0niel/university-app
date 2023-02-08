@@ -1,6 +1,5 @@
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
-import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:rtu_mirea_app/common/oauth.dart';
 import 'package:rtu_mirea_app/data/datasources/app_settings_local.dart';
@@ -67,6 +66,7 @@ import 'package:rtu_mirea_app/presentation/bloc/scores_bloc/scores_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/stories_bloc/stories_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/update_info_bloc/update_info_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 
 import 'data/repositories/schedule_repository_impl.dart';
 
@@ -220,11 +220,10 @@ Future<void> setup() async {
   // Common / Core
 
   // External Dependency
-  getIt.registerLazySingleton(
-      () => Dio(BaseOptions(connectTimeout: 30000, receiveTimeout: 30000)));
+  getIt.registerLazySingleton(() => Dio(BaseOptions(receiveTimeout: 20000)));
   final sharedPreferences = await SharedPreferences.getInstance();
   getIt.registerLazySingleton(() => sharedPreferences);
-  getIt.registerLazySingleton(() => InternetConnectionChecker());
+  getIt.registerLazySingleton(() => InternetConnectionCheckerPlus());
   final PackageInfo packageInfo = await PackageInfo.fromPlatform();
   getIt.registerLazySingleton(() => packageInfo);
   getIt.registerLazySingleton(() => LksOauth2());

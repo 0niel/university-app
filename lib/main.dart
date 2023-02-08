@@ -1,4 +1,3 @@
-import 'dart:io';
 
 import 'package:auto_route/auto_route.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
@@ -6,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/intl.dart';
 import 'package:rtu_mirea_app/common/oauth.dart';
 import 'package:rtu_mirea_app/common/widget_data_init.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -28,6 +28,7 @@ import 'package:intl/intl_standalone.dart';
 import 'package:rtu_mirea_app/service_locator.dart' as dependency_injection;
 import 'package:url_strategy/url_strategy.dart';
 import 'presentation/app_notifier.dart';
+import 'package:intl/intl_browser.dart' as intl_browser;
 import 'service_locator.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
@@ -37,22 +38,28 @@ import 'package:provider/provider.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
   await dependency_injection.setup();
 
   WidgetDataProvider.initData();
 
-  Platform.isAndroid
-      ? await Firebase.initializeApp()
-      : await Firebase.initializeApp(
-          options: DefaultFirebaseOptions.currentPlatform,
-        );
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
+  // Crashlytics instance must be initialized only on non-web platforms. On web
+  // platforms, it is throw an exception.
+  if (!kIsWeb) {
+    if (kDebugMode) {
+      await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(false);
+    } else {
+      await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(true);
+    }
+  }
 
   await FirebaseAnalytics.instance.logAppOpen();
 
   if (kDebugMode) {
-    // Force disable Crashlytics collection while doing every day development
-    await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(false);
-
     // Clear local dota
     var prefs = getIt<SharedPreferences>();
     await prefs.clear();
@@ -64,12 +71,20 @@ Future<void> main() async {
 
   setPathUrlStrategy();
 
-  findSystemLocale().then(
-    (_) => runApp(ChangeNotifierProvider<AppNotifier>(
-      create: (context) => getIt<AppNotifier>(),
-      child: const App(),
-    )),
-  );
+  Intl.defaultLocale = 'ru_RU';
+
+  if (kIsWeb) {
+    await intl_browser
+        .findSystemLocale()
+        .then((value) => Intl.systemLocale = value);
+  } else {
+    Intl.systemLocale = await findSystemLocale();
+  }
+
+  runApp(ChangeNotifierProvider<AppNotifier>(
+    create: (context) => getIt<AppNotifier>(),
+    child: const App(),
+  ));
 }
 
 class App extends StatelessWidget {

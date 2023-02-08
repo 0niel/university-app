@@ -30,7 +30,7 @@ class SettingsButton extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Icon(
                   icon,
-                  color: Theme.of(context).textTheme.bodyText1?.color,
+                  color: Theme.of(context).textTheme.bodyLarge?.color,
                 ),
               ),
               Text(
