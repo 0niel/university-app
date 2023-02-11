@@ -7,6 +7,7 @@ import 'package:rtu_mirea_app/data/datasources/user_remote.dart';
 import 'package:rtu_mirea_app/domain/entities/announce.dart';
 import 'package:rtu_mirea_app/domain/entities/attendance.dart';
 import 'package:rtu_mirea_app/domain/entities/employee.dart';
+import 'package:rtu_mirea_app/domain/entities/nfc_pass.dart';
 import 'package:rtu_mirea_app/domain/entities/score.dart';
 import 'package:rtu_mirea_app/domain/entities/user.dart';
 import 'package:rtu_mirea_app/domain/repositories/user_repository.dart';
@@ -110,6 +111,29 @@ class UserRepositoryImpl implements UserRepository {
       final attendance =
           await remoteDataSource.getAttendance(token, dateStart, dateEnd);
       return Right(attendance);
+    } on ServerException {
+      return Future.value(const Left(ServerFailure()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<NfcPass>>> getNfcPasses(
+      String code, String studentId, String deviceId) async {
+    try {
+      final nfcPasses =
+          await remoteDataSource.getNfcPasses(code, studentId, deviceId);
+      return Right(nfcPasses);
+    } on ServerException {
+      return Future.value(const Left(ServerFailure()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> connectNfcPass(
+      String code, String studentId, String deviceId, String deviceName) {
+    try {
+      remoteDataSource.connectNfcPass(code, studentId, deviceId, deviceName);
+      return Future.value(const Right(null));
     } on ServerException {
       return Future.value(const Left(ServerFailure()));
     }

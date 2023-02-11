@@ -6,8 +6,10 @@ import 'package:rtu_mirea_app/common/oauth.dart';
 import 'package:rtu_mirea_app/data/models/announce_model.dart';
 import 'package:rtu_mirea_app/data/models/attendance_model.dart';
 import 'package:rtu_mirea_app/data/models/employee_model.dart';
+import 'package:rtu_mirea_app/data/models/nfc_pass_model.dart';
 import 'package:rtu_mirea_app/data/models/score_model.dart';
 import 'package:rtu_mirea_app/data/models/user_model.dart';
+import 'package:rtu_mirea_app/domain/entities/nfc_pass.dart';
 
 abstract class UserRemoteData {
   Future<String> auth();
@@ -18,10 +20,14 @@ abstract class UserRemoteData {
   Future<List<AttendanceModel>> getAttendance(
       String token, String dateStart, String dateEnd);
   Future<Map<String, List<ScoreModel>>> getScores(String token);
+  Future<List<NfcPassModel>> getNfcPasses(
+      String code, String studentId, String deviceId);
+  Future<void> connectNfcPass(
+      String code, String studentId, String deviceId, String deviceName);
 }
 
 class UserRemoteDataImpl implements UserRemoteData {
-  static const _apiUrl = 'https://lks.mirea.ninja/api/';
+  static const _apiUrl = 'https://lks.mirea.ninja/api';
 
   final Dio httpClient;
   final LksOauth2 lksOauth2;
@@ -47,7 +53,7 @@ class UserRemoteDataImpl implements UserRemoteData {
   @override
   Future<UserModel> getProfileData(String token) async {
     final response = await lksOauth2.oauth2Helper.get(
-      '$_apiUrl?action=getData&url=https://lk.mirea.ru/profile/',
+      '$_apiUrl/?action=getData&url=https://lk.mirea.ru/profile/',
     );
     var jsonResponse = json.decode(response.body);
 
@@ -66,7 +72,7 @@ class UserRemoteDataImpl implements UserRemoteData {
   @override
   Future<List<AnnounceModel>> getAnnounces(String token) async {
     final response = await lksOauth2.oauth2Helper.get(
-      '$_apiUrl?action=getData&url=https://lk.mirea.ru/livestream/',
+      '$_apiUrl/?action=getData&url=https://lk.mirea.ru/livestream/',
     );
 
     log('Status code: ${response.statusCode}, Response: ${response.body}');
@@ -90,7 +96,7 @@ class UserRemoteDataImpl implements UserRemoteData {
   @override
   Future<List<EmployeeModel>> getEmployees(String token, String name) async {
     final response = await lksOauth2.oauth2Helper.get(
-      '$_apiUrl?action=getData&url=https://lk.mirea.ru/lectors/&page=undefined&findname=$name',
+      '$_apiUrl/?action=getData&url=https://lk.mirea.ru/lectors/&page=undefined&findname=$name',
     );
 
     log('Status code: ${response.statusCode}, Response: ${response.body}');
@@ -116,7 +122,7 @@ class UserRemoteDataImpl implements UserRemoteData {
   @override
   Future<Map<String, List<ScoreModel>>> getScores(String token) async {
     final response = await lksOauth2.oauth2Helper.get(
-      '$_apiUrl?action=getData&url=https://lk.mirea.ru/learning/scores/',
+      '$_apiUrl/?action=getData&url=https://lk.mirea.ru/learning/scores/',
     );
 
     log('Status code: ${response.statusCode}, Response: ${response.body}');
@@ -142,6 +148,56 @@ class UserRemoteDataImpl implements UserRemoteData {
     } else {
       throw ServerException('Response status code is $response.statusCode');
     }
+  }
+
+  @override
+  Future<List<NfcPassModel>> getNfcPasses(
+      String code, String studentId, String deviceId) async {
+    final response = await lksOauth2.oauth2Helper
+        .get('$_apiUrl/cms/nfc-passes/$code/$studentId/$deviceId');
+
+    if (response.statusCode != 200) {
+      throw ServerException('Response status code is $response.statusCode');
+    }
+
+    print(response.body);
+
+    var jsonResponse = json.decode(response.body);
+
+    log('Status code: ${response.statusCode}, Response: ${response.body}');
+
+    List<NfcPassModel> userNfcPasses = [];
+    userNfcPasses = List<NfcPassModel>.from(jsonResponse['data']
+        .map((x) => NfcPassModel.fromJson(x['attributes'])));
+    return userNfcPasses;
+  }
+
+  @override
+  Future<void> connectNfcPass(
+      String code, String studentId, String deviceId, String deviceName) async {
+    final data = {
+      'code': code,
+      'studentId': studentId,
+      'deviceId': deviceId,
+      'deviceName': deviceName,
+    };
+
+    final response = await lksOauth2.oauth2Helper.post(
+      '$_apiUrl/cms/nfc-passes',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: json.encode(data),
+    );
+
+    if (response.statusCode != 200) {
+      throw ServerException('Response status code is $response.statusCode');
+    }
+
+    log('Status code: ${response.statusCode}, Response: ${response.body}');
+
+    var jsonResponse = json.decode(response.body);
   }
 
   @override

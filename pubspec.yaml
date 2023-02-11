@@ -130,9 +130,6 @@ dependencies:
   # See https://pub.dev/packages/cached_network_image
   cached_network_image: ^3.2.0
 
-  # ListView that implicitly animates between the changes of two lists
-  # See https://pub.dev/packages/implicitly_animated_reorderable_list
-  implicitly_animated_reorderable_list: ^0.4.2
   syncfusion_flutter_datagrid: ^20.1.57
   syncfusion_flutter_core: ^20.1.57
   syncfusion_flutter_sliders: ^20.1.57
@@ -180,7 +177,20 @@ dependencies:
   # Flutter Secure Storage provides API to store data in secure storage. 
   # See https://pub.dev/packages/flutter_secure_storage
   flutter_secure_storage: ^6.0.0
+
+  # Flutter plugin providing detailed information about the device (make, model, etc.), 
+  # and Android or iOS version the app is running on.
+  # See https://pub.dev/packages/device_info_plus
+  device_info_plus: ^8.0.0
+
+  # Provide NFC functionality on Android, iOS & Web, including reading metadata, read & write 
+  # NDEF records, and transceive layer 3 & 4 data with NFC tags / cards
+  # See https://pub.dev/packages/flutter_nfc_kit
+  flutter_nfc_kit: ^3.3.1
   
+  # A Flutter plugin for opening iOS and Android phone settings from an app.
+  # See https://pub.dev/packages/app_settings
+  app_settings: ^4.2.0
 
 dev_dependencies:
   # The "flutter_lints" package below contains a set of recommended lints to

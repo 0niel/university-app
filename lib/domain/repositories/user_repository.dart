@@ -3,6 +3,7 @@ import 'package:rtu_mirea_app/common/errors/failures.dart';
 import 'package:rtu_mirea_app/domain/entities/announce.dart';
 import 'package:rtu_mirea_app/domain/entities/attendance.dart';
 import 'package:rtu_mirea_app/domain/entities/employee.dart';
+import 'package:rtu_mirea_app/domain/entities/nfc_pass.dart';
 import 'package:rtu_mirea_app/domain/entities/score.dart';
 import 'package:rtu_mirea_app/domain/entities/user.dart';
 
@@ -17,4 +18,9 @@ abstract class UserRepository {
   Future<Either<Failure, List<Attendance>>> getAattendance(
       String token, String dateStart, String dateEnd);
   Future<Either<Failure, String>> getAuthToken();
+
+  Future<Either<Failure, List<NfcPass>>> getNfcPasses(
+      String code, String studentId, String deviceId);
+  Future<Either<Failure, void>> connectNfcPass(
+      String code, String studentId, String deviceId, String deviceName);
 }

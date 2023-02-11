@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -155,6 +157,19 @@ class _ProfilePageState extends State<ProfilePage> {
                                 onClick: () =>
                                     context.router.push(const AboutAppRoute()),
                               ),
+
+                              // Display only for android devices because of
+                              // NFC support only for android
+                              if (Platform.isAndroid) ...[
+                                const SizedBox(height: 8),
+                                SettingsButton(
+                                  text: 'NFC пропуск',
+                                  icon: Icons.nfc_rounded,
+                                  onClick: () => context.router
+                                      .push(const ProfileNfcPassRoute()),
+                                ),
+                              ],
+
                               const SizedBox(height: 8),
                               SettingsButton(
                                   text: 'Настройки',

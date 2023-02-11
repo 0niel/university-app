@@ -9,6 +9,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:rtu_mirea_app/common/oauth.dart';
 import 'package:rtu_mirea_app/common/widget_data_init.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:rtu_mirea_app/domain/entities/nfc_pass.dart';
 import 'package:rtu_mirea_app/presentation/bloc/about_app_bloc/about_app_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/announces_bloc/announces_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/app_cubit/app_cubit.dart';
@@ -17,6 +18,7 @@ import 'package:rtu_mirea_app/presentation/bloc/auth_bloc/auth_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/employee_bloc/employee_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/map_cubit/map_cubit.dart';
 import 'package:rtu_mirea_app/presentation/bloc/news_bloc/news_bloc.dart';
+import 'package:rtu_mirea_app/presentation/bloc/nfc_pass_bloc/nfc_pass_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/profile_bloc/profile_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/schedule_bloc/schedule_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/scores_bloc/scores_bloc.dart';
@@ -111,6 +113,7 @@ class App extends StatelessWidget {
           create: (_) => getIt<UpdateInfoBloc>(),
           lazy: false, // We need to init it as soon as possible
         ),
+        BlocProvider<NfcPassBloc>(create: (_) => getIt<NfcPassBloc>()),
       ],
       child: Consumer<AppNotifier>(
         builder: (BuildContext context, AppNotifier value, Widget? child) {
