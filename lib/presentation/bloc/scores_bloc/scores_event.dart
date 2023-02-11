@@ -8,14 +8,10 @@ abstract class ScoresEvent extends Equatable {
 }
 
 class LoadScores extends ScoresEvent {
-  final String token;
-
-  const LoadScores({
-    required this.token,
-  });
+  const LoadScores();
 
   @override
-  List<Object> get props => [token];
+  List<Object> get props => [];
 }
 
 class ChangeSelectedScoresSemester extends ScoresEvent {

@@ -1,7 +1,7 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:rtu_mirea_app/presentation/bloc/auth_bloc/auth_bloc.dart';
+import 'package:rtu_mirea_app/presentation/bloc/user_bloc/user_bloc.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:rtu_mirea_app/presentation/widgets/buttons/primary_button.dart';
 import 'package:rtu_mirea_app/presentation/widgets/forms/labelled_input.dart';
@@ -23,13 +23,15 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: BlocListener<AuthBloc, AuthState>(
+      body: BlocConsumer<UserBloc, UserState>(
         listener: (context, state) {
-          if (state is LogInSuccess) {
-            context.router.pop();
-          }
+          state.whenOrNull(
+            logInSuccess: (st) {
+              context.router.pop();
+            },
+          );
         },
-        child: SafeArea(
+        builder: (context, state) => SafeArea(
           bottom: false,
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24.0),
@@ -75,26 +77,22 @@ class _LoginPageState extends State<LoginPage> {
                     ],
                   ),
                 ),
-                BlocBuilder<AuthBloc, AuthState>(builder: (context, state) {
-                  if (state is LogInError && state.cause != '') {
-                    return Padding(
-                      padding: const EdgeInsets.only(top: 10),
-                      child: Text(
-                        state.cause,
-                        style: AppTextStyle.bodyRegular
-                            .copyWith(color: AppTheme.colors.colorful07),
-                      ),
-                    );
-                  }
-                  return Container();
-                }),
+                state.maybeMap(
+                  logInError: (st) => Padding(
+                    padding: const EdgeInsets.only(top: 10),
+                    child: Text(
+                      st.cause,
+                      style: AppTextStyle.bodyRegular
+                          .copyWith(color: AppTheme.colors.colorful07),
+                    ),
+                  ),
+                  orElse: () => Container(),
+                ),
                 const SizedBox(height: 40),
                 PrimaryButton(
                   text: 'Войти',
                   onClick: () {
-                    context.read<AuthBloc>().add(AuthLogInEvent(
-                        login: _emailController.text,
-                        password: _passController.text));
+                    context.read<UserBloc>().add(const UserEvent.logIn());
                   },
                 ),
               ],

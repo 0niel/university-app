@@ -1,6 +1,6 @@
-import 'dart:math';
 
 import 'package:bloc/bloc.dart';
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_nfc_kit/flutter_nfc_kit.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
@@ -15,9 +15,13 @@ part 'nfc_pass_bloc.freezed.dart';
 class NfcPassBloc extends Bloc<NfcPassEvent, NfcPassState> {
   final GetNfcPasses getNfcPasses;
   final ConnectNfcPass connectNfcPass;
+  final DeviceInfoPlugin deviceInfo;
 
-  NfcPassBloc({required this.getNfcPasses, required this.connectNfcPass})
-      : super(const _Initial()) {
+  NfcPassBloc({
+    required this.getNfcPasses,
+    required this.connectNfcPass,
+    required this.deviceInfo,
+  }) : super(const _Initial()) {
     on<_GetNfcPasses>((event, emit) async {
       final failureOrNfcPasses = await getNfcPasses(
         GetNfcPassesParams(

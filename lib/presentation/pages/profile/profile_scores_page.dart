@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:rtu_mirea_app/domain/entities/score.dart';
-import 'package:rtu_mirea_app/presentation/bloc/auth_bloc/auth_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/scores_bloc/scores_bloc.dart';
+import 'package:rtu_mirea_app/presentation/bloc/user_bloc/user_bloc.dart';
 import 'package:rtu_mirea_app/presentation/pages/profile/widgets/scores_chart_modal.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 import 'package:rtu_mirea_app/presentation/widgets/buttons/primary_tab_button.dart';
@@ -53,15 +53,13 @@ class _ProfileScoresPageState extends State<ProfileScoresPage> {
       backgroundColor: AppTheme.colors.background01,
       body: SafeArea(
         bottom: false,
-        child: BlocBuilder<AuthBloc, AuthState>(
-          builder: (context, authState) {
-            if (authState is LogInSuccess) {
-              return BlocBuilder<ScoresBloc, ScoresState>(
+        child: BlocBuilder<UserBloc, UserState>(
+          builder: (context, userState) {
+            return userState.maybeMap(
+              logInSuccess: (_) => BlocBuilder<ScoresBloc, ScoresState>(
                 builder: (context, state) {
                   if (state is ScoresInitial) {
-                    context
-                        .read<ScoresBloc>()
-                        .add(LoadScores(token: authState.token));
+                    context.read<ScoresBloc>().add(const LoadScores());
                   } else if (state is ScoresLoaded) {
                     _tabValueNotifier.value = state.scores.keys
                         .toList()
@@ -153,9 +151,9 @@ class _ProfileScoresPageState extends State<ProfileScoresPage> {
                   }
                   return Container();
                 },
-              );
-            }
-            return Container();
+              ),
+              orElse: () => Container(),
+            );
           },
         ),
       ),

@@ -1,18 +1,12 @@
-import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:rtu_mirea_app/domain/entities/nfc_pass.dart';
-import 'package:rtu_mirea_app/presentation/bloc/auth_bloc/auth_bloc.dart';
+
 import 'package:rtu_mirea_app/presentation/bloc/nfc_pass_bloc/nfc_pass_bloc.dart';
+import 'package:rtu_mirea_app/presentation/bloc/user_bloc/user_bloc.dart';
 import 'package:rtu_mirea_app/presentation/widgets/buttons/colorful_button.dart';
-import 'package:rtu_mirea_app/presentation/widgets/buttons/icon_button.dart';
-import 'package:rtu_mirea_app/presentation/widgets/buttons/settings_button.dart';
-import 'package:rtu_mirea_app/presentation/core/routes/routes.gr.dart';
-import 'package:url_launcher/url_launcher_string.dart';
-import 'package:flutter_nfc_kit/flutter_nfc_kit.dart';
-import '../../bloc/announces_bloc/announces_bloc.dart';
 import 'package:device_info_plus/device_info_plus.dart';
-import '../../bloc/profile_bloc/profile_bloc.dart';
+
 import '../../widgets/buttons/text_outlined_button.dart';
 import 'package:rtu_mirea_app/presentation/typography.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
@@ -38,119 +32,124 @@ class _ProfileNfcPageState extends State<ProfileNfcPassPage> {
         bottom: false,
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: BlocBuilder<ProfileBloc, ProfileState>(
+          child: BlocBuilder<UserBloc, UserState>(
             builder: (context, state) {
-              if (state is ProfileLoaded) {
-                context.read<NfcPassBloc>().add(const NfcPassEvent.started());
-                final student = state.user;
-                return ListView(
-                  children: [
-                    const SizedBox(height: 24),
-                    FutureBuilder<AndroidDeviceInfo>(
-                      future: deviceInfo.androidInfo,
-                      builder: (context, snapshot) {
-                        if (snapshot.hasData) {
-                          if (snapshot.data == null) {
-                            return const _ErrorAndroidDataFetch();
-                          }
-                          return BlocBuilder<NfcPassBloc, NfcPassState>(
-                            builder: (context, state) => state.map(
-                              initial: (_) {
-                                context.read<NfcPassBloc>().add(
-                                      NfcPassEvent.getNfcPasses(
-                                        student.code,
-                                        student.studentId,
-                                        snapshot.data!.id,
-                                      ),
-                                    );
-                                return const Center(
-                                  child: CircularProgressIndicator(),
-                                );
-                              },
-                              loading: (_) => const Center(
-                                child: CircularProgressIndicator(),
-                              ),
-                              loaded: (state) {
-                                if (state.nfcPasses.isEmpty) {
-                                  return _NfcNotConnected(
-                                    onPressed: () =>
-                                        context.read<NfcPassBloc>().add(
-                                              NfcPassEvent.connectNfcPass(
-                                                student.code,
-                                                student.studentId,
-                                                snapshot.data!.id,
-                                                snapshot.data!.model,
-                                              ),
-                                            ),
+              state.whenOrNull(
+                  logInSuccess: (user) => context
+                      .read<NfcPassBloc>()
+                      .add(const NfcPassEvent.started()));
+
+              return state.maybeMap(
+                logInSuccess: (state) {
+                  final student = state.user;
+                  return ListView(
+                    children: [
+                      const SizedBox(height: 24),
+                      FutureBuilder<AndroidDeviceInfo>(
+                        future: deviceInfo.androidInfo,
+                        builder: (context, snapshot) {
+                          if (snapshot.hasData) {
+                            if (snapshot.data == null) {
+                              return const _ErrorAndroidDataFetch();
+                            }
+                            return BlocBuilder<NfcPassBloc, NfcPassState>(
+                              builder: (context, state) => state.map(
+                                initial: (_) {
+                                  context.read<NfcPassBloc>().add(
+                                        NfcPassEvent.getNfcPasses(
+                                          student.code,
+                                          student.studentId,
+                                          snapshot.data!.id,
+                                        ),
+                                      );
+                                  return const Center(
+                                    child: CircularProgressIndicator(),
                                   );
-                                }
-                                return Column(
-                                  children: [
-                                    Text(
-                                      "Подключенные устройства",
-                                      style: AppTextStyle.title,
-                                    ),
-                                    const SizedBox(height: 16),
-                                    // Сначала подключенные устройства
-                                    for (final nfcPass in state.nfcPasses)
-                                      if (nfcPass.connected)
-                                        _NfcPassCard(
-                                          nfcPass: nfcPass,
-                                        ),
-                                    // Потом остальные
-                                    for (final nfcPass in state.nfcPasses)
-                                      if (!nfcPass.connected)
-                                        _NfcPassCard(
-                                          nfcPass: nfcPass,
-                                        ),
-                                    const SizedBox(height: 16),
-                                    // Если нет ни одного подключенного или подключенное устройство не текущее
-                                    if (state.nfcPasses.every(
-                                            (element) => !element.connected) ||
-                                        state.nfcPasses.any((element) =>
-                                            element.connected &&
-                                            element.deviceId !=
-                                                snapshot.data!.id))
-                                      ColorfulButton(
-                                        text: "Привязать это устройство",
-                                        backgroundColor:
-                                            AppTheme.colors.primary,
-                                        onClick: () =>
-                                            context.read<NfcPassBloc>().add(
-                                                  NfcPassEvent.connectNfcPass(
-                                                    student.code,
-                                                    student.studentId,
-                                                    snapshot.data!.id,
-                                                    snapshot.data!.model,
-                                                  ),
+                                },
+                                loading: (_) => const Center(
+                                  child: CircularProgressIndicator(),
+                                ),
+                                loaded: (state) {
+                                  if (state.nfcPasses.isEmpty) {
+                                    return _NfcNotConnected(
+                                      onPressed: () =>
+                                          context.read<NfcPassBloc>().add(
+                                                NfcPassEvent.connectNfcPass(
+                                                  student.code,
+                                                  student.studentId,
+                                                  snapshot.data!.id,
+                                                  snapshot.data!.model,
                                                 ),
+                                              ),
+                                    );
+                                  }
+                                  return Column(
+                                    children: [
+                                      Text(
+                                        "Подключенные устройства",
+                                        style: AppTextStyle.title,
                                       ),
-                                  ],
-                                );
-                              },
-                              nfcDisabled: (_) =>
-                                  const _NfcNotAviable(disabled: true),
-                              nfcNotSupported: (_) =>
-                                  const _NfcNotAviable(disabled: false),
-                              error: (_) => const Center(
-                                child: Text("Ошибка"),
+                                      const SizedBox(height: 16),
+                                      // Сначала подключенные устройства
+                                      for (final nfcPass in state.nfcPasses)
+                                        if (nfcPass.connected)
+                                          _NfcPassCard(
+                                            nfcPass: nfcPass,
+                                          ),
+                                      // Потом остальные
+                                      for (final nfcPass in state.nfcPasses)
+                                        if (!nfcPass.connected)
+                                          _NfcPassCard(
+                                            nfcPass: nfcPass,
+                                          ),
+                                      const SizedBox(height: 16),
+                                      // Если нет ни одного подключенного или подключенное устройство не текущее
+                                      if (state.nfcPasses.every((element) =>
+                                              !element.connected) ||
+                                          state.nfcPasses.any((element) =>
+                                              element.connected &&
+                                              element.deviceId !=
+                                                  snapshot.data!.id))
+                                        ColorfulButton(
+                                          text: "Привязать это устройство",
+                                          backgroundColor:
+                                              AppTheme.colors.primary,
+                                          onClick: () =>
+                                              context.read<NfcPassBloc>().add(
+                                                    NfcPassEvent.connectNfcPass(
+                                                      student.code,
+                                                      student.studentId,
+                                                      snapshot.data!.id,
+                                                      snapshot.data!.model,
+                                                    ),
+                                                  ),
+                                        ),
+                                    ],
+                                  );
+                                },
+                                nfcDisabled: (_) =>
+                                    const _NfcNotAviable(disabled: true),
+                                nfcNotSupported: (_) =>
+                                    const _NfcNotAviable(disabled: false),
+                                error: (_) => const Center(
+                                  child: Text("Ошибка"),
+                                ),
                               ),
-                            ),
-                          );
-                        } else {
-                          return const Center(
-                            child: CircularProgressIndicator(),
-                          );
-                        }
-                      },
-                    )
-                  ],
-                );
-              } else {
-                return const Center(
+                            );
+                          } else {
+                            return const Center(
+                              child: CircularProgressIndicator(),
+                            );
+                          }
+                        },
+                      )
+                    ],
+                  );
+                },
+                orElse: () => const Center(
                   child: CircularProgressIndicator(),
-                );
-              }
+                ),
+              );
             },
           ),
         ),

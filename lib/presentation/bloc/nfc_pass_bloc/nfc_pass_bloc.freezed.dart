@@ -24,6 +24,8 @@ mixin _$NfcPassEvent {
         connectNfcPass,
     required TResult Function(String code, String studentId, String deviceId)
         getNfcPasses,
+    required TResult Function(String code, String studentId, String deviceId)
+        fetchNfcCode,
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
@@ -34,6 +36,8 @@ mixin _$NfcPassEvent {
         connectNfcPass,
     TResult? Function(String code, String studentId, String deviceId)?
         getNfcPasses,
+    TResult? Function(String code, String studentId, String deviceId)?
+        fetchNfcCode,
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
@@ -44,6 +48,8 @@ mixin _$NfcPassEvent {
         connectNfcPass,
     TResult Function(String code, String studentId, String deviceId)?
         getNfcPasses,
+    TResult Function(String code, String studentId, String deviceId)?
+        fetchNfcCode,
     required TResult orElse(),
   }) =>
       throw _privateConstructorUsedError;
@@ -52,6 +58,7 @@ mixin _$NfcPassEvent {
     required TResult Function(_Started value) started,
     required TResult Function(_ConnectNfcPass value) connectNfcPass,
     required TResult Function(_GetNfcPasses value) getNfcPasses,
+    required TResult Function(_FetchNfcCode value) fetchNfcCode,
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
@@ -59,6 +66,7 @@ mixin _$NfcPassEvent {
     TResult? Function(_Started value)? started,
     TResult? Function(_ConnectNfcPass value)? connectNfcPass,
     TResult? Function(_GetNfcPasses value)? getNfcPasses,
+    TResult? Function(_FetchNfcCode value)? fetchNfcCode,
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
@@ -66,6 +74,7 @@ mixin _$NfcPassEvent {
     TResult Function(_Started value)? started,
     TResult Function(_ConnectNfcPass value)? connectNfcPass,
     TResult Function(_GetNfcPasses value)? getNfcPasses,
+    TResult Function(_FetchNfcCode value)? fetchNfcCode,
     required TResult orElse(),
   }) =>
       throw _privateConstructorUsedError;
@@ -138,6 +147,8 @@ class _$_Started with DiagnosticableTreeMixin implements _Started {
         connectNfcPass,
     required TResult Function(String code, String studentId, String deviceId)
         getNfcPasses,
+    required TResult Function(String code, String studentId, String deviceId)
+        fetchNfcCode,
   }) {
     return started();
   }
@@ -151,6 +162,8 @@ class _$_Started with DiagnosticableTreeMixin implements _Started {
         connectNfcPass,
     TResult? Function(String code, String studentId, String deviceId)?
         getNfcPasses,
+    TResult? Function(String code, String studentId, String deviceId)?
+        fetchNfcCode,
   }) {
     return started?.call();
   }
@@ -164,6 +177,8 @@ class _$_Started with DiagnosticableTreeMixin implements _Started {
         connectNfcPass,
     TResult Function(String code, String studentId, String deviceId)?
         getNfcPasses,
+    TResult Function(String code, String studentId, String deviceId)?
+        fetchNfcCode,
     required TResult orElse(),
   }) {
     if (started != null) {
@@ -178,6 +193,7 @@ class _$_Started with DiagnosticableTreeMixin implements _Started {
     required TResult Function(_Started value) started,
     required TResult Function(_ConnectNfcPass value) connectNfcPass,
     required TResult Function(_GetNfcPasses value) getNfcPasses,
+    required TResult Function(_FetchNfcCode value) fetchNfcCode,
   }) {
     return started(this);
   }
@@ -188,6 +204,7 @@ class _$_Started with DiagnosticableTreeMixin implements _Started {
     TResult? Function(_Started value)? started,
     TResult? Function(_ConnectNfcPass value)? connectNfcPass,
     TResult? Function(_GetNfcPasses value)? getNfcPasses,
+    TResult? Function(_FetchNfcCode value)? fetchNfcCode,
   }) {
     return started?.call(this);
   }
@@ -198,6 +215,7 @@ class _$_Started with DiagnosticableTreeMixin implements _Started {
     TResult Function(_Started value)? started,
     TResult Function(_ConnectNfcPass value)? connectNfcPass,
     TResult Function(_GetNfcPasses value)? getNfcPasses,
+    TResult Function(_FetchNfcCode value)? fetchNfcCode,
     required TResult orElse(),
   }) {
     if (started != null) {
@@ -324,6 +342,8 @@ class _$_ConnectNfcPass
         connectNfcPass,
     required TResult Function(String code, String studentId, String deviceId)
         getNfcPasses,
+    required TResult Function(String code, String studentId, String deviceId)
+        fetchNfcCode,
   }) {
     return connectNfcPass(code, studentId, deviceId, deviceName);
   }
@@ -337,6 +357,8 @@ class _$_ConnectNfcPass
         connectNfcPass,
     TResult? Function(String code, String studentId, String deviceId)?
         getNfcPasses,
+    TResult? Function(String code, String studentId, String deviceId)?
+        fetchNfcCode,
   }) {
     return connectNfcPass?.call(code, studentId, deviceId, deviceName);
   }
@@ -350,6 +372,8 @@ class _$_ConnectNfcPass
         connectNfcPass,
     TResult Function(String code, String studentId, String deviceId)?
         getNfcPasses,
+    TResult Function(String code, String studentId, String deviceId)?
+        fetchNfcCode,
     required TResult orElse(),
   }) {
     if (connectNfcPass != null) {
@@ -364,6 +388,7 @@ class _$_ConnectNfcPass
     required TResult Function(_Started value) started,
     required TResult Function(_ConnectNfcPass value) connectNfcPass,
     required TResult Function(_GetNfcPasses value) getNfcPasses,
+    required TResult Function(_FetchNfcCode value) fetchNfcCode,
   }) {
     return connectNfcPass(this);
   }
@@ -374,6 +399,7 @@ class _$_ConnectNfcPass
     TResult? Function(_Started value)? started,
     TResult? Function(_ConnectNfcPass value)? connectNfcPass,
     TResult? Function(_GetNfcPasses value)? getNfcPasses,
+    TResult? Function(_FetchNfcCode value)? fetchNfcCode,
   }) {
     return connectNfcPass?.call(this);
   }
@@ -384,6 +410,7 @@ class _$_ConnectNfcPass
     TResult Function(_Started value)? started,
     TResult Function(_ConnectNfcPass value)? connectNfcPass,
     TResult Function(_GetNfcPasses value)? getNfcPasses,
+    TResult Function(_FetchNfcCode value)? fetchNfcCode,
     required TResult orElse(),
   }) {
     if (connectNfcPass != null) {
@@ -504,6 +531,8 @@ class _$_GetNfcPasses with DiagnosticableTreeMixin implements _GetNfcPasses {
         connectNfcPass,
     required TResult Function(String code, String studentId, String deviceId)
         getNfcPasses,
+    required TResult Function(String code, String studentId, String deviceId)
+        fetchNfcCode,
   }) {
     return getNfcPasses(code, studentId, deviceId);
   }
@@ -517,6 +546,8 @@ class _$_GetNfcPasses with DiagnosticableTreeMixin implements _GetNfcPasses {
         connectNfcPass,
     TResult? Function(String code, String studentId, String deviceId)?
         getNfcPasses,
+    TResult? Function(String code, String studentId, String deviceId)?
+        fetchNfcCode,
   }) {
     return getNfcPasses?.call(code, studentId, deviceId);
   }
@@ -530,6 +561,8 @@ class _$_GetNfcPasses with DiagnosticableTreeMixin implements _GetNfcPasses {
         connectNfcPass,
     TResult Function(String code, String studentId, String deviceId)?
         getNfcPasses,
+    TResult Function(String code, String studentId, String deviceId)?
+        fetchNfcCode,
     required TResult orElse(),
   }) {
     if (getNfcPasses != null) {
@@ -544,6 +577,7 @@ class _$_GetNfcPasses with DiagnosticableTreeMixin implements _GetNfcPasses {
     required TResult Function(_Started value) started,
     required TResult Function(_ConnectNfcPass value) connectNfcPass,
     required TResult Function(_GetNfcPasses value) getNfcPasses,
+    required TResult Function(_FetchNfcCode value) fetchNfcCode,
   }) {
     return getNfcPasses(this);
   }
@@ -554,6 +588,7 @@ class _$_GetNfcPasses with DiagnosticableTreeMixin implements _GetNfcPasses {
     TResult? Function(_Started value)? started,
     TResult? Function(_ConnectNfcPass value)? connectNfcPass,
     TResult? Function(_GetNfcPasses value)? getNfcPasses,
+    TResult? Function(_FetchNfcCode value)? fetchNfcCode,
   }) {
     return getNfcPasses?.call(this);
   }
@@ -564,6 +599,7 @@ class _$_GetNfcPasses with DiagnosticableTreeMixin implements _GetNfcPasses {
     TResult Function(_Started value)? started,
     TResult Function(_ConnectNfcPass value)? connectNfcPass,
     TResult Function(_GetNfcPasses value)? getNfcPasses,
+    TResult Function(_FetchNfcCode value)? fetchNfcCode,
     required TResult orElse(),
   }) {
     if (getNfcPasses != null) {
@@ -583,6 +619,195 @@ abstract class _GetNfcPasses implements NfcPassEvent {
   String get deviceId;
   @JsonKey(ignore: true)
   _$$_GetNfcPassesCopyWith<_$_GetNfcPasses> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class _$$_FetchNfcCodeCopyWith<$Res> {
+  factory _$$_FetchNfcCodeCopyWith(
+          _$_FetchNfcCode value, $Res Function(_$_FetchNfcCode) then) =
+      __$$_FetchNfcCodeCopyWithImpl<$Res>;
+  @useResult
+  $Res call({String code, String studentId, String deviceId});
+}
+
+/// @nodoc
+class __$$_FetchNfcCodeCopyWithImpl<$Res>
+    extends _$NfcPassEventCopyWithImpl<$Res, _$_FetchNfcCode>
+    implements _$$_FetchNfcCodeCopyWith<$Res> {
+  __$$_FetchNfcCodeCopyWithImpl(
+      _$_FetchNfcCode _value, $Res Function(_$_FetchNfcCode) _then)
+      : super(_value, _then);
+
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? code = null,
+    Object? studentId = null,
+    Object? deviceId = null,
+  }) {
+    return _then(_$_FetchNfcCode(
+      null == code
+          ? _value.code
+          : code // ignore: cast_nullable_to_non_nullable
+              as String,
+      null == studentId
+          ? _value.studentId
+          : studentId // ignore: cast_nullable_to_non_nullable
+              as String,
+      null == deviceId
+          ? _value.deviceId
+          : deviceId // ignore: cast_nullable_to_non_nullable
+              as String,
+    ));
+  }
+}
+
+/// @nodoc
+
+class _$_FetchNfcCode with DiagnosticableTreeMixin implements _FetchNfcCode {
+  const _$_FetchNfcCode(this.code, this.studentId, this.deviceId);
+
+  @override
+  final String code;
+  @override
+  final String studentId;
+  @override
+  final String deviceId;
+
+  @override
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
+    return 'NfcPassEvent.fetchNfcCode(code: $code, studentId: $studentId, deviceId: $deviceId)';
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties
+      ..add(DiagnosticsProperty('type', 'NfcPassEvent.fetchNfcCode'))
+      ..add(DiagnosticsProperty('code', code))
+      ..add(DiagnosticsProperty('studentId', studentId))
+      ..add(DiagnosticsProperty('deviceId', deviceId));
+  }
+
+  @override
+  bool operator ==(dynamic other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$_FetchNfcCode &&
+            (identical(other.code, code) || other.code == code) &&
+            (identical(other.studentId, studentId) ||
+                other.studentId == studentId) &&
+            (identical(other.deviceId, deviceId) ||
+                other.deviceId == deviceId));
+  }
+
+  @override
+  int get hashCode => Object.hash(runtimeType, code, studentId, deviceId);
+
+  @JsonKey(ignore: true)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$_FetchNfcCodeCopyWith<_$_FetchNfcCode> get copyWith =>
+      __$$_FetchNfcCodeCopyWithImpl<_$_FetchNfcCode>(this, _$identity);
+
+  @override
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>({
+    required TResult Function() started,
+    required TResult Function(
+            String code, String studentId, String deviceId, String deviceName)
+        connectNfcPass,
+    required TResult Function(String code, String studentId, String deviceId)
+        getNfcPasses,
+    required TResult Function(String code, String studentId, String deviceId)
+        fetchNfcCode,
+  }) {
+    return fetchNfcCode(code, studentId, deviceId);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult? Function()? started,
+    TResult? Function(
+            String code, String studentId, String deviceId, String deviceName)?
+        connectNfcPass,
+    TResult? Function(String code, String studentId, String deviceId)?
+        getNfcPasses,
+    TResult? Function(String code, String studentId, String deviceId)?
+        fetchNfcCode,
+  }) {
+    return fetchNfcCode?.call(code, studentId, deviceId);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>({
+    TResult Function()? started,
+    TResult Function(
+            String code, String studentId, String deviceId, String deviceName)?
+        connectNfcPass,
+    TResult Function(String code, String studentId, String deviceId)?
+        getNfcPasses,
+    TResult Function(String code, String studentId, String deviceId)?
+        fetchNfcCode,
+    required TResult orElse(),
+  }) {
+    if (fetchNfcCode != null) {
+      return fetchNfcCode(code, studentId, deviceId);
+    }
+    return orElse();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>({
+    required TResult Function(_Started value) started,
+    required TResult Function(_ConnectNfcPass value) connectNfcPass,
+    required TResult Function(_GetNfcPasses value) getNfcPasses,
+    required TResult Function(_FetchNfcCode value) fetchNfcCode,
+  }) {
+    return fetchNfcCode(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult? Function(_Started value)? started,
+    TResult? Function(_ConnectNfcPass value)? connectNfcPass,
+    TResult? Function(_GetNfcPasses value)? getNfcPasses,
+    TResult? Function(_FetchNfcCode value)? fetchNfcCode,
+  }) {
+    return fetchNfcCode?.call(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>({
+    TResult Function(_Started value)? started,
+    TResult Function(_ConnectNfcPass value)? connectNfcPass,
+    TResult Function(_GetNfcPasses value)? getNfcPasses,
+    TResult Function(_FetchNfcCode value)? fetchNfcCode,
+    required TResult orElse(),
+  }) {
+    if (fetchNfcCode != null) {
+      return fetchNfcCode(this);
+    }
+    return orElse();
+  }
+}
+
+abstract class _FetchNfcCode implements NfcPassEvent {
+  const factory _FetchNfcCode(
+          final String code, final String studentId, final String deviceId) =
+      _$_FetchNfcCode;
+
+  String get code;
+  String get studentId;
+  String get deviceId;
+  @JsonKey(ignore: true)
+  _$$_FetchNfcCodeCopyWith<_$_FetchNfcCode> get copyWith =>
       throw _privateConstructorUsedError;
 }
 

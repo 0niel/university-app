@@ -12,15 +12,14 @@ class GetEmployees extends UseCase<List<Employee>, GetEmployeesParams> {
 
   @override
   Future<Either<Failure, List<Employee>>> call(GetEmployeesParams params) {
-    return userRepository.getEmployees(params.token, params.name);
+    return userRepository.getEmployees(params.name);
   }
 }
 
 class GetEmployeesParams extends Equatable {
-  final String token;
   final String name;
-  const GetEmployeesParams(this.token, this.name);
+  const GetEmployeesParams(this.name);
 
   @override
-  List<Object?> get props => [token, name];
+  List<Object?> get props => [name];
 }

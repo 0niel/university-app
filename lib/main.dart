@@ -14,16 +14,17 @@ import 'package:rtu_mirea_app/presentation/bloc/about_app_bloc/about_app_bloc.da
 import 'package:rtu_mirea_app/presentation/bloc/announces_bloc/announces_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/app_cubit/app_cubit.dart';
 import 'package:rtu_mirea_app/presentation/bloc/attendance_bloc/attendance_bloc.dart';
-import 'package:rtu_mirea_app/presentation/bloc/auth_bloc/auth_bloc.dart';
+
 import 'package:rtu_mirea_app/presentation/bloc/employee_bloc/employee_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/map_cubit/map_cubit.dart';
 import 'package:rtu_mirea_app/presentation/bloc/news_bloc/news_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/nfc_pass_bloc/nfc_pass_bloc.dart';
-import 'package:rtu_mirea_app/presentation/bloc/profile_bloc/profile_bloc.dart';
+
 import 'package:rtu_mirea_app/presentation/bloc/schedule_bloc/schedule_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/scores_bloc/scores_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/stories_bloc/stories_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/update_info_bloc/update_info_bloc.dart';
+import 'package:rtu_mirea_app/presentation/bloc/user_bloc/user_bloc.dart';
 import 'package:rtu_mirea_app/presentation/core/routes/routes.gr.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:intl/intl_standalone.dart';
@@ -98,9 +99,11 @@ class App extends StatelessWidget {
         BlocProvider<AboutAppBloc>(
             create: (context) =>
                 getIt<AboutAppBloc>()..add(AboutAppGetMembers())),
-        BlocProvider<AuthBloc>(
-            create: (context) => getIt<AuthBloc>()..add(AuthLogInFromCache())),
-        BlocProvider<ProfileBloc>(create: (context) => getIt<ProfileBloc>()),
+        BlocProvider<UserBloc>(
+          create: (context) =>
+              getIt<UserBloc>()..add(const UserEvent.started()),
+          lazy: false,
+        ),
         BlocProvider<AnnouncesBloc>(
             create: (context) => getIt<AnnouncesBloc>()),
         BlocProvider<EmployeeBloc>(create: (context) => getIt<EmployeeBloc>()),

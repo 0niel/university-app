@@ -60,17 +60,18 @@ import 'package:rtu_mirea_app/presentation/bloc/about_app_bloc/about_app_bloc.da
 import 'package:rtu_mirea_app/presentation/bloc/announces_bloc/announces_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/app_cubit/app_cubit.dart';
 import 'package:rtu_mirea_app/presentation/bloc/attendance_bloc/attendance_bloc.dart';
-import 'package:rtu_mirea_app/presentation/bloc/auth_bloc/auth_bloc.dart';
+
 import 'package:rtu_mirea_app/presentation/bloc/employee_bloc/employee_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/map_cubit/map_cubit.dart';
 import 'package:rtu_mirea_app/presentation/bloc/news_bloc/news_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/nfc_pass_bloc/nfc_pass_bloc.dart';
-import 'package:rtu_mirea_app/presentation/bloc/profile_bloc/profile_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/schedule_bloc/schedule_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/scores_bloc/scores_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/stories_bloc/stories_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/update_info_bloc/update_info_bloc.dart';
+import 'package:rtu_mirea_app/presentation/bloc/user_bloc/user_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import 'data/repositories/schedule_repository_impl.dart';
 
@@ -101,14 +102,11 @@ Future<void> setup() async {
   getIt.registerFactory(
       () => AboutAppBloc(getContributors: getIt(), getForumPatrons: getIt()));
   getIt.registerFactory(() => MapCubit());
-  getIt.registerFactory(
-    () => AuthBloc(
-        logOut: getIt(),
-        getAuthToken: getIt(),
-        logIn: getIt(),
-        getUserData: getIt()),
-  );
-  getIt.registerFactory(() => ProfileBloc(getUserData: getIt()));
+  getIt.registerFactory(() => UserBloc(
+      logIn: getIt(),
+      logOut: getIt(),
+      getUserData: getIt(),
+      getAuthToken: getIt()));
   getIt.registerFactory(() => AnnouncesBloc(getAnnounces: getIt()));
   getIt.registerFactory(() => EmployeeBloc(getEmployees: getIt()));
   getIt.registerFactory(() => ScoresBloc(getScores: getIt()));
@@ -127,8 +125,8 @@ Future<void> setup() async {
       setAppSettings: getIt(),
     ),
   );
-  getIt.registerFactory(
-      () => NfcPassBloc(getNfcPasses: getIt(), connectNfcPass: getIt()));
+  getIt.registerFactory(() => NfcPassBloc(
+      getNfcPasses: getIt(), connectNfcPass: getIt(), deviceInfo: getIt()));
 
   // Usecases
   getIt.registerLazySingleton(() => GetStories(getIt()));
@@ -201,8 +199,8 @@ Future<void> setup() async {
             localDataSource: getIt(),
           ));
 
-  getIt.registerLazySingleton<UserLocalData>(
-      () => UserLocalDataImpl(sharedPreferences: getIt()));
+  getIt.registerLazySingleton<UserLocalData>(() =>
+      UserLocalDataImpl(sharedPreferences: getIt(), secureStorage: getIt()));
   getIt.registerLazySingleton<UserRemoteData>(
       () => UserRemoteDataImpl(httpClient: getIt(), lksOauth2: getIt()));
   getIt.registerLazySingleton<ScheduleRemoteData>(
@@ -232,6 +230,11 @@ Future<void> setup() async {
       () => Dio(BaseOptions(connectTimeout: 30000, receiveTimeout: 30000)));
   final sharedPreferences = await SharedPreferences.getInstance();
   getIt.registerLazySingleton(() => sharedPreferences);
+  const secureStorage = FlutterSecureStorage(
+      aOptions: AndroidOptions(
+    encryptedSharedPreferences: true,
+  ));
+  getIt.registerLazySingleton(() => secureStorage);
   getIt.registerLazySingleton(() => InternetConnectionChecker());
   final PackageInfo packageInfo = await PackageInfo.fromPlatform();
   getIt.registerLazySingleton(() => packageInfo);

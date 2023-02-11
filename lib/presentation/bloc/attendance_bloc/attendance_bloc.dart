@@ -40,7 +40,7 @@ class AttendanceBloc extends Bloc<AttendanceEvent, AttendanceState> {
     emit(AttendanceLoading());
 
     final announces = await getAttendance(
-        GetAttendanceParams(event.token, event.startDate, event.endDate));
+        GetAttendanceParams(event.startDate, event.endDate));
 
     announces.fold((failure) => emit(AttendanceLoadError()), (result) {
       emit(AttendanceLoaded(

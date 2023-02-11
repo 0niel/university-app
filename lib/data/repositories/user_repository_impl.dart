@@ -17,12 +17,13 @@ class UserRepositoryImpl implements UserRepository {
   final UserLocalData localDataSource;
   final InternetConnectionChecker connectionChecker;
 
-  UserRepositoryImpl(
-      {required this.remoteDataSource,
-      required this.localDataSource,
-      required this.connectionChecker});
+  UserRepositoryImpl({
+    required this.remoteDataSource,
+    required this.localDataSource,
+    required this.connectionChecker,
+  });
   @override
-  Future<Either<Failure, String>> logIn(String login, String password) async {
+  Future<Either<Failure, String>> logIn() async {
     if (await connectionChecker.hasConnection) {
       try {
         final authToken = await remoteDataSource.auth();
@@ -41,18 +42,18 @@ class UserRepositoryImpl implements UserRepository {
 
   @override
   Future<Either<Failure, void>> logOut() async {
-    // try {
-    //   return Right(await localDataSource.removeTokenFromCache());
-    // } on CacheException {
-    //   return Future.value(const Left(CacheFailure()));
-    // }
-    return Right(await remoteDataSource.logOut());
+    try {
+      await remoteDataSource.logOut();
+      return Right(await localDataSource.removeTokenFromCache());
+    } on CacheException {
+      return Future.value(const Left(CacheFailure()));
+    }
   }
 
   @override
-  Future<Either<Failure, User>> getUserData(String token) async {
+  Future<Either<Failure, User>> getUserData() async {
     try {
-      final user = await remoteDataSource.getProfileData(token);
+      final user = await remoteDataSource.getProfileData();
       return Future.value(Right(user));
     } on ServerException {
       return Future.value(const Left(ServerFailure()));
@@ -63,19 +64,16 @@ class UserRepositoryImpl implements UserRepository {
   Future<Either<Failure, String>> getAuthToken() async {
     try {
       final token = await localDataSource.getTokenFromCache();
-      final _ = await remoteDataSource.getProfileData(token);
       return Future.value(Right(token));
     } on CacheException {
       return Future.value(const Left(CacheFailure()));
-    } on ServerException {
-      return Future.value(const Left(ServerFailure()));
     }
   }
 
   @override
-  Future<Either<Failure, List<Announce>>> getAnnounces(String token) async {
+  Future<Either<Failure, List<Announce>>> getAnnounces() async {
     try {
-      final announces = await remoteDataSource.getAnnounces(token);
+      final announces = await remoteDataSource.getAnnounces();
       return Right(announces);
     } on ServerException {
       return Future.value(const Left(ServerFailure()));
@@ -83,10 +81,9 @@ class UserRepositoryImpl implements UserRepository {
   }
 
   @override
-  Future<Either<Failure, List<Employee>>> getEmployees(
-      String token, String name) async {
+  Future<Either<Failure, List<Employee>>> getEmployees(String name) async {
     try {
-      final employees = await remoteDataSource.getEmployees(token, name);
+      final employees = await remoteDataSource.getEmployees(name);
       return Right(employees);
     } on ServerException {
       return Future.value(const Left(ServerFailure()));
@@ -94,10 +91,9 @@ class UserRepositoryImpl implements UserRepository {
   }
 
   @override
-  Future<Either<Failure, Map<String, List<Score>>>> getScores(
-      String token) async {
+  Future<Either<Failure, Map<String, List<Score>>>> getScores() async {
     try {
-      final scores = await remoteDataSource.getScores(token);
+      final scores = await remoteDataSource.getScores();
       return Right(scores);
     } on ServerException {
       return Future.value(const Left(ServerFailure()));
@@ -106,10 +102,10 @@ class UserRepositoryImpl implements UserRepository {
 
   @override
   Future<Either<Failure, List<Attendance>>> getAattendance(
-      String token, String dateStart, String dateEnd) async {
+      String dateStart, String dateEnd) async {
     try {
       final attendance =
-          await remoteDataSource.getAttendance(token, dateStart, dateEnd);
+          await remoteDataSource.getAttendance(dateStart, dateEnd);
       return Right(attendance);
     } on ServerException {
       return Future.value(const Left(ServerFailure()));
@@ -136,6 +132,35 @@ class UserRepositoryImpl implements UserRepository {
       return Future.value(const Right(null));
     } on ServerException {
       return Future.value(const Left(ServerFailure()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> fetchNfcCode(
+      String code, String studentId, String deviceId, String deviceName) async {
+    final isLoggedIn = await getAuthToken().then((value) => value.isRight());
+
+    if (!isLoggedIn) {
+      return const Left(ServerFailure("Пользователь не авторизован"));
+    }
+
+    if (await connectionChecker.hasConnection) {
+      try {
+        final nfcCode =
+            await remoteDataSource.getNfcCode(code, studentId, deviceId);
+        await localDataSource.setNfcCodeToCache(nfcCode);
+        return const Right(null);
+      } on ServerException catch (e) {
+        if (e is NfcStaffnodeNotExistFailure) {
+          return const Left(NfcStaffnodeNotExistFailure());
+        }
+
+        await localDataSource.removeNfcCodeFromCache();
+
+        return Left(ServerFailure(e.cause));
+      }
+    } else {
+      return const Left(ServerFailure("Отсутсвует соединение с интернетом"));
     }
   }
 }

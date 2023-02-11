@@ -8,4 +8,13 @@ class NfcPassEvent with _$NfcPassEvent {
       _ConnectNfcPass;
   const factory NfcPassEvent.getNfcPasses(
       String code, String studentId, String deviceId) = _GetNfcPasses;
+
+  /// Event for fetching NFC code from server. If device is connected to the
+  /// server, it will return NFC code. If not, it will clear NFC code from
+  /// the device (Secure Storage)
+  ///
+  /// This event must be called after application is started, user is logged in
+  /// and device is connected to the server.
+  const factory NfcPassEvent.fetchNfcCode(
+      String code, String studentId, String deviceId) = _FetchNfcCode;
 }

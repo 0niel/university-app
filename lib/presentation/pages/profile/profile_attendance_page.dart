@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/attendance_bloc/attendance_bloc.dart';
-import 'package:rtu_mirea_app/presentation/bloc/auth_bloc/auth_bloc.dart';
+import 'package:rtu_mirea_app/presentation/bloc/user_bloc/user_bloc.dart';
 import 'package:rtu_mirea_app/presentation/pages/profile/widgets/attendance_card.dart';
 import 'package:intl/intl.dart';
 import 'package:rtu_mirea_app/presentation/widgets/buttons/select_range_date_button.dart';
@@ -42,14 +42,14 @@ class _ProfileAttendancePageState extends State<ProfileAttendancePage> {
       ),
       body: SafeArea(
         bottom: false,
-        child: BlocBuilder<AuthBloc, AuthState>(
-          builder: (context, authState) {
-            if (authState is LogInSuccess) {
-              return BlocBuilder<AttendanceBloc, AttendanceState>(
+        child: BlocBuilder<UserBloc, UserState>(
+          builder: (context, userState) {
+            return userState.maybeMap(
+              logInSuccess: (value) =>
+                  BlocBuilder<AttendanceBloc, AttendanceState>(
                 builder: (context, state) {
                   if (state is AttendanceInitial) {
                     context.read<AttendanceBloc>().add(LoadAttendance(
-                        token: authState.token,
                         startDate:
                             _getTextDates(_getFirstAndLastWeekDaysText())[0],
                         endDate:
@@ -79,7 +79,6 @@ class _ProfileAttendancePageState extends State<ProfileAttendancePage> {
                             onDateSelected: (date) {
                               context.read<AttendanceBloc>().add(
                                     LoadAttendance(
-                                        token: authState.token,
                                         startDate: _getTextDates(date)[0],
                                         endDate: _getTextDates(date)[1]),
                                   );
@@ -135,9 +134,9 @@ class _ProfileAttendancePageState extends State<ProfileAttendancePage> {
                     ],
                   );
                 },
-              );
-            }
-            return Container();
+              ),
+              orElse: () => const Center(child: Text("Ошибка")),
+            );
           },
         ),
       ),
