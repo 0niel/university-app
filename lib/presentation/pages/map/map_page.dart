@@ -74,6 +74,9 @@ class _MapPageState extends State<MapPage> {
     );
   }
 
+  // TODO: implement search bar without using [ImplicitlyAnimatedList].
+  // Package implicitly_animated_reorderable_list is DISCONTINUED and
+  // project compilation fails because of it.
   // Widget _buildSearchBar() {
   //   return FloatingSearchBar(
   //     accentColor: AppTheme.colors.primary,
