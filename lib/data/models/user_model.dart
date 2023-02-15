@@ -62,6 +62,7 @@ class UserModel extends User {
     final student = json["STUDENTS"].values.firstWhere((element) =>
         !element["PROPERTIES"]["PERSONAL_NUMBER"]["VALUE"].contains("Д") &&
         !element["PROPERTIES"]["PERSONAL_NUMBER"]["VALUE"].contains("Ж"));
+        
     final eduProgram = json["EDU_PROGRAM"]
         .values
         .firstWhere((element) => element["ACTIVE"] == "Y");

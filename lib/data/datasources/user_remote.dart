@@ -23,6 +23,8 @@ abstract class UserRemoteData {
   Future<int> getNfcCode(String code, String studentId, String deviceId);
   Future<void> connectNfcPass(
       String code, String studentId, String deviceId, String deviceName);
+  Future<void> sendNfcNotExistFeedback(
+      String fullName, String group, String personalNumber, String studentId);
 }
 
 class UserRemoteDataImpl implements UserRemoteData {
@@ -56,7 +58,8 @@ class UserRemoteDataImpl implements UserRemoteData {
     );
     var jsonResponse = json.decode(response.body);
 
-    log('Status code: ${response.statusCode}, Response: ${response.body}');
+    log('Status code: ${response.statusCode}, Response: ${response.body}',
+        name: 'getProfileData');
 
     if (jsonResponse.containsKey('errors')) {
       throw ServerException(jsonResponse['errors'][0]);
@@ -64,7 +67,7 @@ class UserRemoteDataImpl implements UserRemoteData {
     if (response.statusCode == 200) {
       return UserModel.fromRawJson(response.body);
     } else {
-      throw ServerException('Response status code is $response.statusCode');
+      throw ServerException('Response status code is ${response.statusCode}');
     }
   }
 
@@ -74,7 +77,8 @@ class UserRemoteDataImpl implements UserRemoteData {
       '$_apiUrl/?action=getData&url=https://lk.mirea.ru/livestream/',
     );
 
-    log('Status code: ${response.statusCode}, Response: ${response.body}');
+    log('Status code: ${response.statusCode}, Response: ${response.body}',
+        name: 'getAnnounces');
 
     var jsonResponse = json.decode(response.body);
     if (jsonResponse.containsKey('errors')) {
@@ -88,7 +92,7 @@ class UserRemoteDataImpl implements UserRemoteData {
       }
       return announces;
     } else {
-      throw ServerException('Response status code is $response.statusCode');
+      throw ServerException('Response status code is ${response.statusCode}');
     }
   }
 
@@ -98,7 +102,8 @@ class UserRemoteDataImpl implements UserRemoteData {
       '$_apiUrl/?action=getData&url=https://lk.mirea.ru/lectors/&page=undefined&findname=$name',
     );
 
-    log('Status code: ${response.statusCode}, Response: ${response.body}');
+    log('Status code: ${response.statusCode}, Response: ${response.body}',
+        name: 'getEmployees');
 
     var jsonResponse = json.decode(response.body);
     if (jsonResponse.containsKey('errors')) {
@@ -114,7 +119,7 @@ class UserRemoteDataImpl implements UserRemoteData {
       }
       return employees;
     } else {
-      throw ServerException('Response status code is $response.statusCode');
+      throw ServerException('Response status code is ${response.statusCode}');
     }
   }
 
@@ -124,7 +129,8 @@ class UserRemoteDataImpl implements UserRemoteData {
       '$_apiUrl/?action=getData&url=https://lk.mirea.ru/learning/scores/',
     );
 
-    log('Status code: ${response.statusCode}, Response: ${response.body}');
+    log('Status code: ${response.statusCode}, Response: ${response.body}',
+        name: 'getScores');
 
     var jsonResponse = json.decode(response.body);
     if (jsonResponse.containsKey('errors')) {
@@ -145,7 +151,7 @@ class UserRemoteDataImpl implements UserRemoteData {
 
       return scores;
     } else {
-      throw ServerException('Response status code is $response.statusCode');
+      throw ServerException('Response status code is ${response.statusCode}');
     }
   }
 
@@ -155,10 +161,18 @@ class UserRemoteDataImpl implements UserRemoteData {
     final response = await lksOauth2.oauth2Helper
         .get('$_apiUrl/cms/nfc-passes/$code/$studentId/$deviceId');
 
-    log('Status code: ${response.statusCode}, Response: ${response.body}');
+    log('Status code: ${response.statusCode}, Response: ${response.body}',
+        name: 'getScores');
 
     if (response.statusCode != 200) {
-      throw ServerException('Response status code is $response.statusCode');
+      try {
+        var jsonResponse = json.decode(response.body);
+        if (jsonResponse.containsKey('message')) {
+          throw ServerException(jsonResponse['message']);
+        }
+      } catch (e) {
+        throw ServerException('Response status code is ${response.statusCode}');
+      }
     }
 
     var jsonResponse = json.decode(response.body);
@@ -188,21 +202,23 @@ class UserRemoteDataImpl implements UserRemoteData {
       body: json.encode(data),
     );
 
-    if (response.statusCode != 200) {
-      throw ServerException('Response status code is $response.statusCode');
-    }
+    log('Status code: ${response.statusCode}, Response: ${response.body}',
+        name: 'connectNfcPass');
 
-    log('Status code: ${response.statusCode}, Response: ${response.body}');
+    if (response.statusCode != 200) {
+      throw ServerException('Response status code is ${response.statusCode}');
+    }
   }
 
   @override
   Future<List<AttendanceModel>> getAttendance(
       String dateStart, String dateEnd) async {
     final response = await lksOauth2.oauth2Helper.get(
-      '$_apiUrl?action=getData&url=https://lk.mirea.ru/schedule/attendance/&startDate=$dateStart&endDate=$dateEnd',
+      '$_apiUrl/?action=getData&url=https://lk.mirea.ru/schedule/attendance/&startDate=$dateStart&endDate=$dateEnd',
     );
 
-    log('Status code: ${response.statusCode}, Response: ${response.body}');
+    log('Status code: ${response.statusCode}, Response: ${response.body}',
+        name: 'getAttendance');
 
     var jsonResponse = json.decode(response.body);
     if (jsonResponse.containsKey('errors')) {
@@ -225,30 +241,67 @@ class UserRemoteDataImpl implements UserRemoteData {
       }
       return attendance;
     } else {
-      throw ServerException('Response status code is $response.statusCode');
+      throw ServerException('Response status code is ${response.statusCode}');
     }
   }
 
   @override
   Future<int> getNfcCode(String code, String studentId, String deviceId) async {
     final response = await lksOauth2.oauth2Helper
-        .get('$_apiUrl/api/get-nfc-code/$code/$studentId/$deviceId');
+        .get('$_apiUrl/get-nfc-code/$code/$studentId/$deviceId');
 
-    log('Status code: ${response.statusCode}, Response: ${response.body}');
-    if (response.statusCode != 200) {
-      throw ServerException('Response status code is $response.statusCode');
-    }
+    log('Status code: ${response.statusCode}, Response: ${response.body}',
+        name: 'getNfcCode');
 
     var jsonResponse = json.decode(response.body);
 
     if (jsonResponse.containsKey('code')) {
       return jsonResponse['code'];
     } else {
-      if (jsonResponse.containsKey('error') &&
+      // Local api error
+      if (jsonResponse.containsKey('message')) {
+        throw ServerException(jsonResponse['message']);
+      }
+      // LKS api error
+      else if (jsonResponse.containsKey('error') &&
           jsonResponse['error'] == 'StaffnodeNotExist') {
         throw NfcStaffnodeNotExistException();
       } else {
-        throw ServerException('Error: ${jsonResponse['error']}');
+        throw ServerException('${jsonResponse['error']}');
+      }
+    }
+  }
+
+  @override
+  Future<void> sendNfcNotExistFeedback(String fullName, String group,
+      String personalNumber, String studentId) async {
+    final data = {
+      'fullName': fullName,
+      'group': group,
+      'personalNumber': personalNumber,
+      'studentId': studentId,
+    };
+
+    final response = await lksOauth2.oauth2Helper.post(
+      '$_apiUrl/cms/nfc-pass-not-exist-feedback',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: json.encode(data),
+    );
+
+    log('Status code: ${response.statusCode}, Response: ${response.body}',
+        name: 'sendNfcNotExistFeedback');
+
+    if (response.statusCode != 200) {
+      if (response.statusCode == 400) {
+        if (response.body.contains("This attribute must be unique")) {
+          throw ServerException('Уже отправлено. Пожалуйста, подождите. '
+              'Время обработки заявки - до 7 рабочих дней.');
+        }
+      } else {
+        throw ServerException('Response status code is ${response.statusCode}');
       }
     }
   }

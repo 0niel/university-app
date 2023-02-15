@@ -1,6 +1,3 @@
-import 'dart:developer';
-import 'dart:math';
-
 import 'package:bloc/bloc.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
@@ -80,8 +77,6 @@ class UserBloc extends Bloc<UserEvent, UserState> {
     // To get profile data only once (If state is not loading)
     if (state is _Loading) return;
 
-    emit(const _Loading());
-
     final token = await getAuthToken();
 
     bool loggedIn = false;
@@ -93,6 +88,7 @@ class UserBloc extends Bloc<UserEvent, UserState> {
     });
 
     if (loggedIn) {
+      emit(const _Loading());
       final user = await getUserData();
 
       user.fold(

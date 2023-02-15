@@ -11,6 +11,6 @@ class GetUserData extends UseCase<User, void> {
 
   @override
   Future<Either<Failure, User>> call([params]) async {
-    return await userRepository.getUserData();
+    return userRepository.getUserData();
   }
 }

@@ -8,6 +8,7 @@ class NfcPassState with _$NfcPassState {
   /// and get NFC passes from the server
   const factory NfcPassState.loading() = _Loading;
   const factory NfcPassState.loaded(List<NfcPass> nfcPasses) = _Loaded;
+  const factory NfcPassState.nfcNotExist() = _NfcNotExist;
   const factory NfcPassState.error(String cause) = _Error;
   const factory NfcPassState.nfcDisabled() = _NfcDisabled;
   const factory NfcPassState.nfcNotSupported() = _NfcNotSupported;

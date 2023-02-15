@@ -15,6 +15,5 @@ class NfcPassEvent with _$NfcPassEvent {
   ///
   /// This event must be called after application is started, user is logged in
   /// and device is connected to the server.
-  const factory NfcPassEvent.fetchNfcCode(
-      String code, String studentId, String deviceId) = _FetchNfcCode;
+  const factory NfcPassEvent.fetchNfcCode() = _FetchNfcCode;
 }

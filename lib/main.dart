@@ -6,10 +6,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:rtu_mirea_app/common/oauth.dart';
 import 'package:rtu_mirea_app/common/widget_data_init.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:rtu_mirea_app/domain/entities/nfc_pass.dart';
 import 'package:rtu_mirea_app/presentation/bloc/about_app_bloc/about_app_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/announces_bloc/announces_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/app_cubit/app_cubit.dart';
@@ -18,6 +18,7 @@ import 'package:rtu_mirea_app/presentation/bloc/attendance_bloc/attendance_bloc.
 import 'package:rtu_mirea_app/presentation/bloc/employee_bloc/employee_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/map_cubit/map_cubit.dart';
 import 'package:rtu_mirea_app/presentation/bloc/news_bloc/news_bloc.dart';
+import 'package:rtu_mirea_app/presentation/bloc/nfc_feedback_bloc/nfc_feedback_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/nfc_pass_bloc/nfc_pass_bloc.dart';
 
 import 'package:rtu_mirea_app/presentation/bloc/schedule_bloc/schedule_bloc.dart';
@@ -55,6 +56,10 @@ Future<void> main() async {
   if (kDebugMode) {
     // Force disable Crashlytics collection while doing every day development
     await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(false);
+
+    // Clear Secure Storage
+    var secureStorage = getIt<FlutterSecureStorage>();
+    await secureStorage.deleteAll();
 
     // Clear local dota
     var prefs = getIt<SharedPreferences>();
@@ -116,7 +121,16 @@ class App extends StatelessWidget {
           create: (_) => getIt<UpdateInfoBloc>(),
           lazy: false, // We need to init it as soon as possible
         ),
-        BlocProvider<NfcPassBloc>(create: (_) => getIt<NfcPassBloc>()),
+        BlocProvider<NfcPassBloc>(
+          create: (_) => getIt<NfcPassBloc>()
+            ..add(
+              const NfcPassEvent.fetchNfcCode(),
+            ),
+          lazy: false,
+        ),
+        BlocProvider<NfcFeedbackBloc>(
+          create: (_) => getIt<NfcFeedbackBloc>(),
+        ),
       ],
       child: Consumer<AppNotifier>(
         builder: (BuildContext context, AppNotifier value, Widget? child) {

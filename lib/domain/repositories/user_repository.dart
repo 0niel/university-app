@@ -31,4 +31,7 @@ abstract class UserRepository {
   /// connection. Returns [void] if device is connected.
   Future<Either<Failure, void>> fetchNfcCode(
       String code, String studentId, String deviceId, String deviceName);
+
+  Future<Either<Failure, void>> sendNfcNotExistFeedback(
+      String fullName, String group, String personalNumber, String studentId);
 }

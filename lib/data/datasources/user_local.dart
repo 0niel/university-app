@@ -25,19 +25,19 @@ class UserLocalDataImpl implements UserLocalData {
 
   @override
   Future<void> setTokenToCache(String token) {
-    return sharedPreferences.setString('auth_token', token);
+    return secureStorage.write(key: 'lks_access_token', value: token);
   }
 
   @override
-  Future<String> getTokenFromCache() {
-    String? token = sharedPreferences.getString('auth_token');
+  Future<String> getTokenFromCache() async {
+    String? token = await secureStorage.read(key: 'lks_access_token');
     if (token == null) throw CacheException('Auth token are not set');
     return Future.value(token);
   }
 
   @override
   Future<void> removeTokenFromCache() {
-    return sharedPreferences.remove('auth_token');
+    return secureStorage.delete(key: 'lks_access_token');
   }
 
   @override

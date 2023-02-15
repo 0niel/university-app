@@ -31,6 +31,7 @@ import 'package:rtu_mirea_app/domain/repositories/strapi_repository.dart';
 import 'package:rtu_mirea_app/domain/repositories/user_repository.dart';
 import 'package:rtu_mirea_app/domain/usecases/connect_nfc_pass.dart';
 import 'package:rtu_mirea_app/domain/usecases/delete_schedule.dart';
+import 'package:rtu_mirea_app/domain/usecases/fetch_nfc_code.dart';
 import 'package:rtu_mirea_app/domain/usecases/get_active_group.dart';
 import 'package:rtu_mirea_app/domain/usecases/get_announces.dart';
 import 'package:rtu_mirea_app/domain/usecases/get_app_settings.dart';
@@ -52,6 +53,7 @@ import 'package:rtu_mirea_app/domain/usecases/get_update_info.dart';
 import 'package:rtu_mirea_app/domain/usecases/get_user_data.dart';
 import 'package:rtu_mirea_app/domain/usecases/log_in.dart';
 import 'package:rtu_mirea_app/domain/usecases/log_out.dart';
+import 'package:rtu_mirea_app/domain/usecases/send_nfc_not_exist_feedback.dart';
 import 'package:rtu_mirea_app/domain/usecases/set_active_group.dart';
 import 'package:rtu_mirea_app/domain/usecases/set_app_settings.dart';
 import 'package:rtu_mirea_app/domain/usecases/set_schedule_settings.dart';
@@ -64,6 +66,7 @@ import 'package:rtu_mirea_app/presentation/bloc/attendance_bloc/attendance_bloc.
 import 'package:rtu_mirea_app/presentation/bloc/employee_bloc/employee_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/map_cubit/map_cubit.dart';
 import 'package:rtu_mirea_app/presentation/bloc/news_bloc/news_bloc.dart';
+import 'package:rtu_mirea_app/presentation/bloc/nfc_feedback_bloc/nfc_feedback_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/nfc_pass_bloc/nfc_pass_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/schedule_bloc/schedule_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/scores_bloc/scores_bloc.dart';
@@ -126,7 +129,15 @@ Future<void> setup() async {
     ),
   );
   getIt.registerFactory(() => NfcPassBloc(
-      getNfcPasses: getIt(), connectNfcPass: getIt(), deviceInfo: getIt()));
+        getNfcPasses: getIt(),
+        connectNfcPass: getIt(),
+        deviceInfo: getIt(),
+        fetchNfcCode: getIt(),
+        getAuthToken: getIt(),
+        getUserData: getIt(),
+      ));
+  getIt
+      .registerFactory(() => NfcFeedbackBloc(sendNfcNotExistFeedback: getIt()));
 
   // Usecases
   getIt.registerLazySingleton(() => GetStories(getIt()));
@@ -155,6 +166,8 @@ Future<void> setup() async {
   getIt.registerLazySingleton(() => GetAppSettings(getIt()));
   getIt.registerLazySingleton(() => GetNfcPasses(getIt()));
   getIt.registerLazySingleton(() => ConnectNfcPass(getIt()));
+  getIt.registerLazySingleton(() => FetchNfcCode(getIt()));
+  getIt.registerLazySingleton(() => SendNfcNotExistFeedback(getIt()));
 
   // Repositories
   getIt.registerLazySingleton<NewsRepository>(

@@ -24,8 +24,7 @@ mixin _$NfcPassEvent {
         connectNfcPass,
     required TResult Function(String code, String studentId, String deviceId)
         getNfcPasses,
-    required TResult Function(String code, String studentId, String deviceId)
-        fetchNfcCode,
+    required TResult Function() fetchNfcCode,
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
@@ -36,8 +35,7 @@ mixin _$NfcPassEvent {
         connectNfcPass,
     TResult? Function(String code, String studentId, String deviceId)?
         getNfcPasses,
-    TResult? Function(String code, String studentId, String deviceId)?
-        fetchNfcCode,
+    TResult? Function()? fetchNfcCode,
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
@@ -48,8 +46,7 @@ mixin _$NfcPassEvent {
         connectNfcPass,
     TResult Function(String code, String studentId, String deviceId)?
         getNfcPasses,
-    TResult Function(String code, String studentId, String deviceId)?
-        fetchNfcCode,
+    TResult Function()? fetchNfcCode,
     required TResult orElse(),
   }) =>
       throw _privateConstructorUsedError;
@@ -147,8 +144,7 @@ class _$_Started with DiagnosticableTreeMixin implements _Started {
         connectNfcPass,
     required TResult Function(String code, String studentId, String deviceId)
         getNfcPasses,
-    required TResult Function(String code, String studentId, String deviceId)
-        fetchNfcCode,
+    required TResult Function() fetchNfcCode,
   }) {
     return started();
   }
@@ -162,8 +158,7 @@ class _$_Started with DiagnosticableTreeMixin implements _Started {
         connectNfcPass,
     TResult? Function(String code, String studentId, String deviceId)?
         getNfcPasses,
-    TResult? Function(String code, String studentId, String deviceId)?
-        fetchNfcCode,
+    TResult? Function()? fetchNfcCode,
   }) {
     return started?.call();
   }
@@ -177,8 +172,7 @@ class _$_Started with DiagnosticableTreeMixin implements _Started {
         connectNfcPass,
     TResult Function(String code, String studentId, String deviceId)?
         getNfcPasses,
-    TResult Function(String code, String studentId, String deviceId)?
-        fetchNfcCode,
+    TResult Function()? fetchNfcCode,
     required TResult orElse(),
   }) {
     if (started != null) {
@@ -342,8 +336,7 @@ class _$_ConnectNfcPass
         connectNfcPass,
     required TResult Function(String code, String studentId, String deviceId)
         getNfcPasses,
-    required TResult Function(String code, String studentId, String deviceId)
-        fetchNfcCode,
+    required TResult Function() fetchNfcCode,
   }) {
     return connectNfcPass(code, studentId, deviceId, deviceName);
   }
@@ -357,8 +350,7 @@ class _$_ConnectNfcPass
         connectNfcPass,
     TResult? Function(String code, String studentId, String deviceId)?
         getNfcPasses,
-    TResult? Function(String code, String studentId, String deviceId)?
-        fetchNfcCode,
+    TResult? Function()? fetchNfcCode,
   }) {
     return connectNfcPass?.call(code, studentId, deviceId, deviceName);
   }
@@ -372,8 +364,7 @@ class _$_ConnectNfcPass
         connectNfcPass,
     TResult Function(String code, String studentId, String deviceId)?
         getNfcPasses,
-    TResult Function(String code, String studentId, String deviceId)?
-        fetchNfcCode,
+    TResult Function()? fetchNfcCode,
     required TResult orElse(),
   }) {
     if (connectNfcPass != null) {
@@ -531,8 +522,7 @@ class _$_GetNfcPasses with DiagnosticableTreeMixin implements _GetNfcPasses {
         connectNfcPass,
     required TResult Function(String code, String studentId, String deviceId)
         getNfcPasses,
-    required TResult Function(String code, String studentId, String deviceId)
-        fetchNfcCode,
+    required TResult Function() fetchNfcCode,
   }) {
     return getNfcPasses(code, studentId, deviceId);
   }
@@ -546,8 +536,7 @@ class _$_GetNfcPasses with DiagnosticableTreeMixin implements _GetNfcPasses {
         connectNfcPass,
     TResult? Function(String code, String studentId, String deviceId)?
         getNfcPasses,
-    TResult? Function(String code, String studentId, String deviceId)?
-        fetchNfcCode,
+    TResult? Function()? fetchNfcCode,
   }) {
     return getNfcPasses?.call(code, studentId, deviceId);
   }
@@ -561,8 +550,7 @@ class _$_GetNfcPasses with DiagnosticableTreeMixin implements _GetNfcPasses {
         connectNfcPass,
     TResult Function(String code, String studentId, String deviceId)?
         getNfcPasses,
-    TResult Function(String code, String studentId, String deviceId)?
-        fetchNfcCode,
+    TResult Function()? fetchNfcCode,
     required TResult orElse(),
   }) {
     if (getNfcPasses != null) {
@@ -627,8 +615,6 @@ abstract class _$$_FetchNfcCodeCopyWith<$Res> {
   factory _$$_FetchNfcCodeCopyWith(
           _$_FetchNfcCode value, $Res Function(_$_FetchNfcCode) then) =
       __$$_FetchNfcCodeCopyWithImpl<$Res>;
-  @useResult
-  $Res call({String code, String studentId, String deviceId});
 }
 
 /// @nodoc
@@ -638,78 +624,32 @@ class __$$_FetchNfcCodeCopyWithImpl<$Res>
   __$$_FetchNfcCodeCopyWithImpl(
       _$_FetchNfcCode _value, $Res Function(_$_FetchNfcCode) _then)
       : super(_value, _then);
-
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({
-    Object? code = null,
-    Object? studentId = null,
-    Object? deviceId = null,
-  }) {
-    return _then(_$_FetchNfcCode(
-      null == code
-          ? _value.code
-          : code // ignore: cast_nullable_to_non_nullable
-              as String,
-      null == studentId
-          ? _value.studentId
-          : studentId // ignore: cast_nullable_to_non_nullable
-              as String,
-      null == deviceId
-          ? _value.deviceId
-          : deviceId // ignore: cast_nullable_to_non_nullable
-              as String,
-    ));
-  }
 }
 
 /// @nodoc
 
 class _$_FetchNfcCode with DiagnosticableTreeMixin implements _FetchNfcCode {
-  const _$_FetchNfcCode(this.code, this.studentId, this.deviceId);
-
-  @override
-  final String code;
-  @override
-  final String studentId;
-  @override
-  final String deviceId;
+  const _$_FetchNfcCode();
 
   @override
   String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
-    return 'NfcPassEvent.fetchNfcCode(code: $code, studentId: $studentId, deviceId: $deviceId)';
+    return 'NfcPassEvent.fetchNfcCode()';
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties
-      ..add(DiagnosticsProperty('type', 'NfcPassEvent.fetchNfcCode'))
-      ..add(DiagnosticsProperty('code', code))
-      ..add(DiagnosticsProperty('studentId', studentId))
-      ..add(DiagnosticsProperty('deviceId', deviceId));
+    properties.add(DiagnosticsProperty('type', 'NfcPassEvent.fetchNfcCode'));
   }
 
   @override
   bool operator ==(dynamic other) {
     return identical(this, other) ||
-        (other.runtimeType == runtimeType &&
-            other is _$_FetchNfcCode &&
-            (identical(other.code, code) || other.code == code) &&
-            (identical(other.studentId, studentId) ||
-                other.studentId == studentId) &&
-            (identical(other.deviceId, deviceId) ||
-                other.deviceId == deviceId));
+        (other.runtimeType == runtimeType && other is _$_FetchNfcCode);
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, code, studentId, deviceId);
-
-  @JsonKey(ignore: true)
-  @override
-  @pragma('vm:prefer-inline')
-  _$$_FetchNfcCodeCopyWith<_$_FetchNfcCode> get copyWith =>
-      __$$_FetchNfcCodeCopyWithImpl<_$_FetchNfcCode>(this, _$identity);
+  int get hashCode => runtimeType.hashCode;
 
   @override
   @optionalTypeArgs
@@ -720,10 +660,9 @@ class _$_FetchNfcCode with DiagnosticableTreeMixin implements _FetchNfcCode {
         connectNfcPass,
     required TResult Function(String code, String studentId, String deviceId)
         getNfcPasses,
-    required TResult Function(String code, String studentId, String deviceId)
-        fetchNfcCode,
+    required TResult Function() fetchNfcCode,
   }) {
-    return fetchNfcCode(code, studentId, deviceId);
+    return fetchNfcCode();
   }
 
   @override
@@ -735,10 +674,9 @@ class _$_FetchNfcCode with DiagnosticableTreeMixin implements _FetchNfcCode {
         connectNfcPass,
     TResult? Function(String code, String studentId, String deviceId)?
         getNfcPasses,
-    TResult? Function(String code, String studentId, String deviceId)?
-        fetchNfcCode,
+    TResult? Function()? fetchNfcCode,
   }) {
-    return fetchNfcCode?.call(code, studentId, deviceId);
+    return fetchNfcCode?.call();
   }
 
   @override
@@ -750,12 +688,11 @@ class _$_FetchNfcCode with DiagnosticableTreeMixin implements _FetchNfcCode {
         connectNfcPass,
     TResult Function(String code, String studentId, String deviceId)?
         getNfcPasses,
-    TResult Function(String code, String studentId, String deviceId)?
-        fetchNfcCode,
+    TResult Function()? fetchNfcCode,
     required TResult orElse(),
   }) {
     if (fetchNfcCode != null) {
-      return fetchNfcCode(code, studentId, deviceId);
+      return fetchNfcCode();
     }
     return orElse();
   }
@@ -799,16 +736,7 @@ class _$_FetchNfcCode with DiagnosticableTreeMixin implements _FetchNfcCode {
 }
 
 abstract class _FetchNfcCode implements NfcPassEvent {
-  const factory _FetchNfcCode(
-          final String code, final String studentId, final String deviceId) =
-      _$_FetchNfcCode;
-
-  String get code;
-  String get studentId;
-  String get deviceId;
-  @JsonKey(ignore: true)
-  _$$_FetchNfcCodeCopyWith<_$_FetchNfcCode> get copyWith =>
-      throw _privateConstructorUsedError;
+  const factory _FetchNfcCode() = _$_FetchNfcCode;
 }
 
 /// @nodoc
@@ -818,6 +746,7 @@ mixin _$NfcPassState {
     required TResult Function() initial,
     required TResult Function() loading,
     required TResult Function(List<NfcPass> nfcPasses) loaded,
+    required TResult Function() nfcNotExist,
     required TResult Function(String cause) error,
     required TResult Function() nfcDisabled,
     required TResult Function() nfcNotSupported,
@@ -828,6 +757,7 @@ mixin _$NfcPassState {
     TResult? Function()? initial,
     TResult? Function()? loading,
     TResult? Function(List<NfcPass> nfcPasses)? loaded,
+    TResult? Function()? nfcNotExist,
     TResult? Function(String cause)? error,
     TResult? Function()? nfcDisabled,
     TResult? Function()? nfcNotSupported,
@@ -838,6 +768,7 @@ mixin _$NfcPassState {
     TResult Function()? initial,
     TResult Function()? loading,
     TResult Function(List<NfcPass> nfcPasses)? loaded,
+    TResult Function()? nfcNotExist,
     TResult Function(String cause)? error,
     TResult Function()? nfcDisabled,
     TResult Function()? nfcNotSupported,
@@ -849,6 +780,7 @@ mixin _$NfcPassState {
     required TResult Function(_Initial value) initial,
     required TResult Function(_Loading value) loading,
     required TResult Function(_Loaded value) loaded,
+    required TResult Function(_NfcNotExist value) nfcNotExist,
     required TResult Function(_Error value) error,
     required TResult Function(_NfcDisabled value) nfcDisabled,
     required TResult Function(_NfcNotSupported value) nfcNotSupported,
@@ -859,6 +791,7 @@ mixin _$NfcPassState {
     TResult? Function(_Initial value)? initial,
     TResult? Function(_Loading value)? loading,
     TResult? Function(_Loaded value)? loaded,
+    TResult? Function(_NfcNotExist value)? nfcNotExist,
     TResult? Function(_Error value)? error,
     TResult? Function(_NfcDisabled value)? nfcDisabled,
     TResult? Function(_NfcNotSupported value)? nfcNotSupported,
@@ -869,6 +802,7 @@ mixin _$NfcPassState {
     TResult Function(_Initial value)? initial,
     TResult Function(_Loading value)? loading,
     TResult Function(_Loaded value)? loaded,
+    TResult Function(_NfcNotExist value)? nfcNotExist,
     TResult Function(_Error value)? error,
     TResult Function(_NfcDisabled value)? nfcDisabled,
     TResult Function(_NfcNotSupported value)? nfcNotSupported,
@@ -941,6 +875,7 @@ class _$_Initial with DiagnosticableTreeMixin implements _Initial {
     required TResult Function() initial,
     required TResult Function() loading,
     required TResult Function(List<NfcPass> nfcPasses) loaded,
+    required TResult Function() nfcNotExist,
     required TResult Function(String cause) error,
     required TResult Function() nfcDisabled,
     required TResult Function() nfcNotSupported,
@@ -954,6 +889,7 @@ class _$_Initial with DiagnosticableTreeMixin implements _Initial {
     TResult? Function()? initial,
     TResult? Function()? loading,
     TResult? Function(List<NfcPass> nfcPasses)? loaded,
+    TResult? Function()? nfcNotExist,
     TResult? Function(String cause)? error,
     TResult? Function()? nfcDisabled,
     TResult? Function()? nfcNotSupported,
@@ -967,6 +903,7 @@ class _$_Initial with DiagnosticableTreeMixin implements _Initial {
     TResult Function()? initial,
     TResult Function()? loading,
     TResult Function(List<NfcPass> nfcPasses)? loaded,
+    TResult Function()? nfcNotExist,
     TResult Function(String cause)? error,
     TResult Function()? nfcDisabled,
     TResult Function()? nfcNotSupported,
@@ -984,6 +921,7 @@ class _$_Initial with DiagnosticableTreeMixin implements _Initial {
     required TResult Function(_Initial value) initial,
     required TResult Function(_Loading value) loading,
     required TResult Function(_Loaded value) loaded,
+    required TResult Function(_NfcNotExist value) nfcNotExist,
     required TResult Function(_Error value) error,
     required TResult Function(_NfcDisabled value) nfcDisabled,
     required TResult Function(_NfcNotSupported value) nfcNotSupported,
@@ -997,6 +935,7 @@ class _$_Initial with DiagnosticableTreeMixin implements _Initial {
     TResult? Function(_Initial value)? initial,
     TResult? Function(_Loading value)? loading,
     TResult? Function(_Loaded value)? loaded,
+    TResult? Function(_NfcNotExist value)? nfcNotExist,
     TResult? Function(_Error value)? error,
     TResult? Function(_NfcDisabled value)? nfcDisabled,
     TResult? Function(_NfcNotSupported value)? nfcNotSupported,
@@ -1010,6 +949,7 @@ class _$_Initial with DiagnosticableTreeMixin implements _Initial {
     TResult Function(_Initial value)? initial,
     TResult Function(_Loading value)? loading,
     TResult Function(_Loaded value)? loaded,
+    TResult Function(_NfcNotExist value)? nfcNotExist,
     TResult Function(_Error value)? error,
     TResult Function(_NfcDisabled value)? nfcDisabled,
     TResult Function(_NfcNotSupported value)? nfcNotSupported,
@@ -1072,6 +1012,7 @@ class _$_Loading with DiagnosticableTreeMixin implements _Loading {
     required TResult Function() initial,
     required TResult Function() loading,
     required TResult Function(List<NfcPass> nfcPasses) loaded,
+    required TResult Function() nfcNotExist,
     required TResult Function(String cause) error,
     required TResult Function() nfcDisabled,
     required TResult Function() nfcNotSupported,
@@ -1085,6 +1026,7 @@ class _$_Loading with DiagnosticableTreeMixin implements _Loading {
     TResult? Function()? initial,
     TResult? Function()? loading,
     TResult? Function(List<NfcPass> nfcPasses)? loaded,
+    TResult? Function()? nfcNotExist,
     TResult? Function(String cause)? error,
     TResult? Function()? nfcDisabled,
     TResult? Function()? nfcNotSupported,
@@ -1098,6 +1040,7 @@ class _$_Loading with DiagnosticableTreeMixin implements _Loading {
     TResult Function()? initial,
     TResult Function()? loading,
     TResult Function(List<NfcPass> nfcPasses)? loaded,
+    TResult Function()? nfcNotExist,
     TResult Function(String cause)? error,
     TResult Function()? nfcDisabled,
     TResult Function()? nfcNotSupported,
@@ -1115,6 +1058,7 @@ class _$_Loading with DiagnosticableTreeMixin implements _Loading {
     required TResult Function(_Initial value) initial,
     required TResult Function(_Loading value) loading,
     required TResult Function(_Loaded value) loaded,
+    required TResult Function(_NfcNotExist value) nfcNotExist,
     required TResult Function(_Error value) error,
     required TResult Function(_NfcDisabled value) nfcDisabled,
     required TResult Function(_NfcNotSupported value) nfcNotSupported,
@@ -1128,6 +1072,7 @@ class _$_Loading with DiagnosticableTreeMixin implements _Loading {
     TResult? Function(_Initial value)? initial,
     TResult? Function(_Loading value)? loading,
     TResult? Function(_Loaded value)? loaded,
+    TResult? Function(_NfcNotExist value)? nfcNotExist,
     TResult? Function(_Error value)? error,
     TResult? Function(_NfcDisabled value)? nfcDisabled,
     TResult? Function(_NfcNotSupported value)? nfcNotSupported,
@@ -1141,6 +1086,7 @@ class _$_Loading with DiagnosticableTreeMixin implements _Loading {
     TResult Function(_Initial value)? initial,
     TResult Function(_Loading value)? loading,
     TResult Function(_Loaded value)? loaded,
+    TResult Function(_NfcNotExist value)? nfcNotExist,
     TResult Function(_Error value)? error,
     TResult Function(_NfcDisabled value)? nfcDisabled,
     TResult Function(_NfcNotSupported value)? nfcNotSupported,
@@ -1237,6 +1183,7 @@ class _$_Loaded with DiagnosticableTreeMixin implements _Loaded {
     required TResult Function() initial,
     required TResult Function() loading,
     required TResult Function(List<NfcPass> nfcPasses) loaded,
+    required TResult Function() nfcNotExist,
     required TResult Function(String cause) error,
     required TResult Function() nfcDisabled,
     required TResult Function() nfcNotSupported,
@@ -1250,6 +1197,7 @@ class _$_Loaded with DiagnosticableTreeMixin implements _Loaded {
     TResult? Function()? initial,
     TResult? Function()? loading,
     TResult? Function(List<NfcPass> nfcPasses)? loaded,
+    TResult? Function()? nfcNotExist,
     TResult? Function(String cause)? error,
     TResult? Function()? nfcDisabled,
     TResult? Function()? nfcNotSupported,
@@ -1263,6 +1211,7 @@ class _$_Loaded with DiagnosticableTreeMixin implements _Loaded {
     TResult Function()? initial,
     TResult Function()? loading,
     TResult Function(List<NfcPass> nfcPasses)? loaded,
+    TResult Function()? nfcNotExist,
     TResult Function(String cause)? error,
     TResult Function()? nfcDisabled,
     TResult Function()? nfcNotSupported,
@@ -1280,6 +1229,7 @@ class _$_Loaded with DiagnosticableTreeMixin implements _Loaded {
     required TResult Function(_Initial value) initial,
     required TResult Function(_Loading value) loading,
     required TResult Function(_Loaded value) loaded,
+    required TResult Function(_NfcNotExist value) nfcNotExist,
     required TResult Function(_Error value) error,
     required TResult Function(_NfcDisabled value) nfcDisabled,
     required TResult Function(_NfcNotSupported value) nfcNotSupported,
@@ -1293,6 +1243,7 @@ class _$_Loaded with DiagnosticableTreeMixin implements _Loaded {
     TResult? Function(_Initial value)? initial,
     TResult? Function(_Loading value)? loading,
     TResult? Function(_Loaded value)? loaded,
+    TResult? Function(_NfcNotExist value)? nfcNotExist,
     TResult? Function(_Error value)? error,
     TResult? Function(_NfcDisabled value)? nfcDisabled,
     TResult? Function(_NfcNotSupported value)? nfcNotSupported,
@@ -1306,6 +1257,7 @@ class _$_Loaded with DiagnosticableTreeMixin implements _Loaded {
     TResult Function(_Initial value)? initial,
     TResult Function(_Loading value)? loading,
     TResult Function(_Loaded value)? loaded,
+    TResult Function(_NfcNotExist value)? nfcNotExist,
     TResult Function(_Error value)? error,
     TResult Function(_NfcDisabled value)? nfcDisabled,
     TResult Function(_NfcNotSupported value)? nfcNotSupported,
@@ -1325,6 +1277,144 @@ abstract class _Loaded implements NfcPassState {
   @JsonKey(ignore: true)
   _$$_LoadedCopyWith<_$_Loaded> get copyWith =>
       throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class _$$_NfcNotExistCopyWith<$Res> {
+  factory _$$_NfcNotExistCopyWith(
+          _$_NfcNotExist value, $Res Function(_$_NfcNotExist) then) =
+      __$$_NfcNotExistCopyWithImpl<$Res>;
+}
+
+/// @nodoc
+class __$$_NfcNotExistCopyWithImpl<$Res>
+    extends _$NfcPassStateCopyWithImpl<$Res, _$_NfcNotExist>
+    implements _$$_NfcNotExistCopyWith<$Res> {
+  __$$_NfcNotExistCopyWithImpl(
+      _$_NfcNotExist _value, $Res Function(_$_NfcNotExist) _then)
+      : super(_value, _then);
+}
+
+/// @nodoc
+
+class _$_NfcNotExist with DiagnosticableTreeMixin implements _NfcNotExist {
+  const _$_NfcNotExist();
+
+  @override
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
+    return 'NfcPassState.nfcNotExist()';
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty('type', 'NfcPassState.nfcNotExist'));
+  }
+
+  @override
+  bool operator ==(dynamic other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType && other is _$_NfcNotExist);
+  }
+
+  @override
+  int get hashCode => runtimeType.hashCode;
+
+  @override
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>({
+    required TResult Function() initial,
+    required TResult Function() loading,
+    required TResult Function(List<NfcPass> nfcPasses) loaded,
+    required TResult Function() nfcNotExist,
+    required TResult Function(String cause) error,
+    required TResult Function() nfcDisabled,
+    required TResult Function() nfcNotSupported,
+  }) {
+    return nfcNotExist();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult? Function()? initial,
+    TResult? Function()? loading,
+    TResult? Function(List<NfcPass> nfcPasses)? loaded,
+    TResult? Function()? nfcNotExist,
+    TResult? Function(String cause)? error,
+    TResult? Function()? nfcDisabled,
+    TResult? Function()? nfcNotSupported,
+  }) {
+    return nfcNotExist?.call();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>({
+    TResult Function()? initial,
+    TResult Function()? loading,
+    TResult Function(List<NfcPass> nfcPasses)? loaded,
+    TResult Function()? nfcNotExist,
+    TResult Function(String cause)? error,
+    TResult Function()? nfcDisabled,
+    TResult Function()? nfcNotSupported,
+    required TResult orElse(),
+  }) {
+    if (nfcNotExist != null) {
+      return nfcNotExist();
+    }
+    return orElse();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>({
+    required TResult Function(_Initial value) initial,
+    required TResult Function(_Loading value) loading,
+    required TResult Function(_Loaded value) loaded,
+    required TResult Function(_NfcNotExist value) nfcNotExist,
+    required TResult Function(_Error value) error,
+    required TResult Function(_NfcDisabled value) nfcDisabled,
+    required TResult Function(_NfcNotSupported value) nfcNotSupported,
+  }) {
+    return nfcNotExist(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult? Function(_Initial value)? initial,
+    TResult? Function(_Loading value)? loading,
+    TResult? Function(_Loaded value)? loaded,
+    TResult? Function(_NfcNotExist value)? nfcNotExist,
+    TResult? Function(_Error value)? error,
+    TResult? Function(_NfcDisabled value)? nfcDisabled,
+    TResult? Function(_NfcNotSupported value)? nfcNotSupported,
+  }) {
+    return nfcNotExist?.call(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>({
+    TResult Function(_Initial value)? initial,
+    TResult Function(_Loading value)? loading,
+    TResult Function(_Loaded value)? loaded,
+    TResult Function(_NfcNotExist value)? nfcNotExist,
+    TResult Function(_Error value)? error,
+    TResult Function(_NfcDisabled value)? nfcDisabled,
+    TResult Function(_NfcNotSupported value)? nfcNotSupported,
+    required TResult orElse(),
+  }) {
+    if (nfcNotExist != null) {
+      return nfcNotExist(this);
+    }
+    return orElse();
+  }
+}
+
+abstract class _NfcNotExist implements NfcPassState {
+  const factory _NfcNotExist() = _$_NfcNotExist;
 }
 
 /// @nodoc
@@ -1400,6 +1490,7 @@ class _$_Error with DiagnosticableTreeMixin implements _Error {
     required TResult Function() initial,
     required TResult Function() loading,
     required TResult Function(List<NfcPass> nfcPasses) loaded,
+    required TResult Function() nfcNotExist,
     required TResult Function(String cause) error,
     required TResult Function() nfcDisabled,
     required TResult Function() nfcNotSupported,
@@ -1413,6 +1504,7 @@ class _$_Error with DiagnosticableTreeMixin implements _Error {
     TResult? Function()? initial,
     TResult? Function()? loading,
     TResult? Function(List<NfcPass> nfcPasses)? loaded,
+    TResult? Function()? nfcNotExist,
     TResult? Function(String cause)? error,
     TResult? Function()? nfcDisabled,
     TResult? Function()? nfcNotSupported,
@@ -1426,6 +1518,7 @@ class _$_Error with DiagnosticableTreeMixin implements _Error {
     TResult Function()? initial,
     TResult Function()? loading,
     TResult Function(List<NfcPass> nfcPasses)? loaded,
+    TResult Function()? nfcNotExist,
     TResult Function(String cause)? error,
     TResult Function()? nfcDisabled,
     TResult Function()? nfcNotSupported,
@@ -1443,6 +1536,7 @@ class _$_Error with DiagnosticableTreeMixin implements _Error {
     required TResult Function(_Initial value) initial,
     required TResult Function(_Loading value) loading,
     required TResult Function(_Loaded value) loaded,
+    required TResult Function(_NfcNotExist value) nfcNotExist,
     required TResult Function(_Error value) error,
     required TResult Function(_NfcDisabled value) nfcDisabled,
     required TResult Function(_NfcNotSupported value) nfcNotSupported,
@@ -1456,6 +1550,7 @@ class _$_Error with DiagnosticableTreeMixin implements _Error {
     TResult? Function(_Initial value)? initial,
     TResult? Function(_Loading value)? loading,
     TResult? Function(_Loaded value)? loaded,
+    TResult? Function(_NfcNotExist value)? nfcNotExist,
     TResult? Function(_Error value)? error,
     TResult? Function(_NfcDisabled value)? nfcDisabled,
     TResult? Function(_NfcNotSupported value)? nfcNotSupported,
@@ -1469,6 +1564,7 @@ class _$_Error with DiagnosticableTreeMixin implements _Error {
     TResult Function(_Initial value)? initial,
     TResult Function(_Loading value)? loading,
     TResult Function(_Loaded value)? loaded,
+    TResult Function(_NfcNotExist value)? nfcNotExist,
     TResult Function(_Error value)? error,
     TResult Function(_NfcDisabled value)? nfcDisabled,
     TResult Function(_NfcNotSupported value)? nfcNotSupported,
@@ -1537,6 +1633,7 @@ class _$_NfcDisabled with DiagnosticableTreeMixin implements _NfcDisabled {
     required TResult Function() initial,
     required TResult Function() loading,
     required TResult Function(List<NfcPass> nfcPasses) loaded,
+    required TResult Function() nfcNotExist,
     required TResult Function(String cause) error,
     required TResult Function() nfcDisabled,
     required TResult Function() nfcNotSupported,
@@ -1550,6 +1647,7 @@ class _$_NfcDisabled with DiagnosticableTreeMixin implements _NfcDisabled {
     TResult? Function()? initial,
     TResult? Function()? loading,
     TResult? Function(List<NfcPass> nfcPasses)? loaded,
+    TResult? Function()? nfcNotExist,
     TResult? Function(String cause)? error,
     TResult? Function()? nfcDisabled,
     TResult? Function()? nfcNotSupported,
@@ -1563,6 +1661,7 @@ class _$_NfcDisabled with DiagnosticableTreeMixin implements _NfcDisabled {
     TResult Function()? initial,
     TResult Function()? loading,
     TResult Function(List<NfcPass> nfcPasses)? loaded,
+    TResult Function()? nfcNotExist,
     TResult Function(String cause)? error,
     TResult Function()? nfcDisabled,
     TResult Function()? nfcNotSupported,
@@ -1580,6 +1679,7 @@ class _$_NfcDisabled with DiagnosticableTreeMixin implements _NfcDisabled {
     required TResult Function(_Initial value) initial,
     required TResult Function(_Loading value) loading,
     required TResult Function(_Loaded value) loaded,
+    required TResult Function(_NfcNotExist value) nfcNotExist,
     required TResult Function(_Error value) error,
     required TResult Function(_NfcDisabled value) nfcDisabled,
     required TResult Function(_NfcNotSupported value) nfcNotSupported,
@@ -1593,6 +1693,7 @@ class _$_NfcDisabled with DiagnosticableTreeMixin implements _NfcDisabled {
     TResult? Function(_Initial value)? initial,
     TResult? Function(_Loading value)? loading,
     TResult? Function(_Loaded value)? loaded,
+    TResult? Function(_NfcNotExist value)? nfcNotExist,
     TResult? Function(_Error value)? error,
     TResult? Function(_NfcDisabled value)? nfcDisabled,
     TResult? Function(_NfcNotSupported value)? nfcNotSupported,
@@ -1606,6 +1707,7 @@ class _$_NfcDisabled with DiagnosticableTreeMixin implements _NfcDisabled {
     TResult Function(_Initial value)? initial,
     TResult Function(_Loading value)? loading,
     TResult Function(_Loaded value)? loaded,
+    TResult Function(_NfcNotExist value)? nfcNotExist,
     TResult Function(_Error value)? error,
     TResult Function(_NfcDisabled value)? nfcDisabled,
     TResult Function(_NfcNotSupported value)? nfcNotSupported,
@@ -1671,6 +1773,7 @@ class _$_NfcNotSupported
     required TResult Function() initial,
     required TResult Function() loading,
     required TResult Function(List<NfcPass> nfcPasses) loaded,
+    required TResult Function() nfcNotExist,
     required TResult Function(String cause) error,
     required TResult Function() nfcDisabled,
     required TResult Function() nfcNotSupported,
@@ -1684,6 +1787,7 @@ class _$_NfcNotSupported
     TResult? Function()? initial,
     TResult? Function()? loading,
     TResult? Function(List<NfcPass> nfcPasses)? loaded,
+    TResult? Function()? nfcNotExist,
     TResult? Function(String cause)? error,
     TResult? Function()? nfcDisabled,
     TResult? Function()? nfcNotSupported,
@@ -1697,6 +1801,7 @@ class _$_NfcNotSupported
     TResult Function()? initial,
     TResult Function()? loading,
     TResult Function(List<NfcPass> nfcPasses)? loaded,
+    TResult Function()? nfcNotExist,
     TResult Function(String cause)? error,
     TResult Function()? nfcDisabled,
     TResult Function()? nfcNotSupported,
@@ -1714,6 +1819,7 @@ class _$_NfcNotSupported
     required TResult Function(_Initial value) initial,
     required TResult Function(_Loading value) loading,
     required TResult Function(_Loaded value) loaded,
+    required TResult Function(_NfcNotExist value) nfcNotExist,
     required TResult Function(_Error value) error,
     required TResult Function(_NfcDisabled value) nfcDisabled,
     required TResult Function(_NfcNotSupported value) nfcNotSupported,
@@ -1727,6 +1833,7 @@ class _$_NfcNotSupported
     TResult? Function(_Initial value)? initial,
     TResult? Function(_Loading value)? loading,
     TResult? Function(_Loaded value)? loaded,
+    TResult? Function(_NfcNotExist value)? nfcNotExist,
     TResult? Function(_Error value)? error,
     TResult? Function(_NfcDisabled value)? nfcDisabled,
     TResult? Function(_NfcNotSupported value)? nfcNotSupported,
@@ -1740,6 +1847,7 @@ class _$_NfcNotSupported
     TResult Function(_Initial value)? initial,
     TResult Function(_Loading value)? loading,
     TResult Function(_Loaded value)? loaded,
+    TResult Function(_NfcNotExist value)? nfcNotExist,
     TResult Function(_Error value)? error,
     TResult Function(_NfcDisabled value)? nfcDisabled,
     TResult Function(_NfcNotSupported value)? nfcNotSupported,

@@ -151,7 +151,7 @@ class UserRepositoryImpl implements UserRepository {
         await localDataSource.setNfcCodeToCache(nfcCode);
         return const Right(null);
       } on ServerException catch (e) {
-        if (e is NfcStaffnodeNotExistFailure) {
+        if (e is NfcStaffnodeNotExistException) {
           return const Left(NfcStaffnodeNotExistFailure());
         }
 
@@ -161,6 +161,18 @@ class UserRepositoryImpl implements UserRepository {
       }
     } else {
       return const Left(ServerFailure("Отсутсвует соединение с интернетом"));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> sendNfcNotExistFeedback(
+      String fullName, String group, String personalNumber, String studentId) {
+    try {
+      remoteDataSource.sendNfcNotExistFeedback(
+          fullName, group, personalNumber, studentId);
+      return Future.value(const Right(null));
+    } on ServerException catch (e) {
+      return Future.value(Left(ServerFailure(e.cause)));
     }
   }
 }
