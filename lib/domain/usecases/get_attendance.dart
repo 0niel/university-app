@@ -14,16 +14,15 @@ class GetAttendance extends UseCase<List<Attendance>, GetAttendanceParams> {
   Future<Either<Failure, List<Attendance>>> call(
       GetAttendanceParams params) async {
     return await userRepository.getAattendance(
-        params.token, params.startDate, params.endDate);
+        params.startDate, params.endDate);
   }
 }
 
 class GetAttendanceParams extends Equatable {
-  final String token;
   final String startDate;
   final String endDate;
-  const GetAttendanceParams(this.token, this.startDate, this.endDate);
+  const GetAttendanceParams(this.startDate, this.endDate);
 
   @override
-  List<Object?> get props => [token, startDate, endDate];
+  List<Object?> get props => [startDate, endDate];
 }

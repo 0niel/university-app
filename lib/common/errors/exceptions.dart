@@ -3,6 +3,10 @@ class ServerException implements Exception {
   ServerException(this.cause);
 }
 
+class NfcStaffnodeNotExistException extends ServerException {
+  NfcStaffnodeNotExistException() : super("NfcStaffnodeNotExistException");
+}
+
 class CacheException implements Exception {
   final String cause;
   CacheException(this.cause);

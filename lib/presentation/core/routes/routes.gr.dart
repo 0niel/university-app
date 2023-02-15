@@ -11,13 +11,13 @@
 // ignore_for_file: type=lint
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'package:auto_route/auto_route.dart' as _i19;
+import 'package:auto_route/auto_route.dart' as _i20;
 import 'package:auto_route/empty_router_widgets.dart' as _i4;
-import 'package:flutter/material.dart' as _i20;
-import 'package:rtu_mirea_app/domain/entities/news_item.dart' as _i23;
-import 'package:rtu_mirea_app/domain/entities/story.dart' as _i22;
-import 'package:rtu_mirea_app/domain/entities/user.dart' as _i24;
-import 'package:rtu_mirea_app/presentation/core/routes/routes.dart' as _i21;
+import 'package:flutter/material.dart' as _i21;
+import 'package:rtu_mirea_app/domain/entities/news_item.dart' as _i24;
+import 'package:rtu_mirea_app/domain/entities/story.dart' as _i23;
+import 'package:rtu_mirea_app/domain/entities/user.dart' as _i25;
+import 'package:rtu_mirea_app/presentation/core/routes/routes.dart' as _i22;
 import 'package:rtu_mirea_app/presentation/pages/home_page.dart' as _i1;
 import 'package:rtu_mirea_app/presentation/pages/login/login_page.dart' as _i11;
 import 'package:rtu_mirea_app/presentation/pages/map/map_page.dart' as _i5;
@@ -38,6 +38,8 @@ import 'package:rtu_mirea_app/presentation/pages/profile/profile_detail_page.dar
     as _i15;
 import 'package:rtu_mirea_app/presentation/pages/profile/profile_lectors_page.dart'
     as _i16;
+import 'package:rtu_mirea_app/presentation/pages/profile/profile_nfc_pass_page.dart'
+    as _i19;
 import 'package:rtu_mirea_app/presentation/pages/profile/profile_page.dart'
     as _i10;
 import 'package:rtu_mirea_app/presentation/pages/profile/profile_scores_page.dart'
@@ -49,83 +51,83 @@ import 'package:rtu_mirea_app/presentation/pages/schedule/groups_select_page.dar
 import 'package:rtu_mirea_app/presentation/pages/schedule/schedule_page.dart'
     as _i6;
 
-class AppRouter extends _i19.RootStackRouter {
-  AppRouter([_i20.GlobalKey<_i20.NavigatorState>? navigatorKey])
+class AppRouter extends _i20.RootStackRouter {
+  AppRouter([_i21.GlobalKey<_i21.NavigatorState>? navigatorKey])
       : super(navigatorKey);
 
   @override
-  final Map<String, _i19.PageFactory> pagesMap = {
+  final Map<String, _i20.PageFactory> pagesMap = {
     HomeRoute.name: (routeData) {
-      return _i19.AdaptivePage<dynamic>(
+      return _i20.AdaptivePage<dynamic>(
         routeData: routeData,
         child: const _i1.HomePage(),
       );
     },
     OnBoardingRoute.name: (routeData) {
-      return _i19.AdaptivePage<dynamic>(
+      return _i20.AdaptivePage<dynamic>(
         routeData: routeData,
         child: const _i2.OnBoardingPage(),
       );
     },
     StoriesWrapperRoute.name: (routeData) {
       final args = routeData.argsAs<StoriesWrapperRouteArgs>();
-      return _i19.CustomPage<dynamic>(
+      return _i20.CustomPage<dynamic>(
         routeData: routeData,
         child: _i3.StoriesWrapper(
           key: args.key,
           stories: args.stories,
           storyIndex: args.storyIndex,
         ),
-        customRouteBuilder: _i21.transparentRoute,
+        customRouteBuilder: _i22.transparentRoute,
         opaque: false,
         barrierDismissible: false,
       );
     },
     ScheduleRouter.name: (routeData) {
-      return _i19.AdaptivePage<dynamic>(
+      return _i20.AdaptivePage<dynamic>(
         routeData: routeData,
         child: const _i4.EmptyRouterPage(),
       );
     },
     NewsRouter.name: (routeData) {
-      return _i19.AdaptivePage<dynamic>(
+      return _i20.AdaptivePage<dynamic>(
         routeData: routeData,
         child: const _i4.EmptyRouterPage(),
       );
     },
     MapRoute.name: (routeData) {
-      return _i19.AdaptivePage<dynamic>(
+      return _i20.AdaptivePage<dynamic>(
         routeData: routeData,
         child: const _i5.MapPage(),
       );
     },
     ProfileRouter.name: (routeData) {
-      return _i19.AdaptivePage<dynamic>(
+      return _i20.AdaptivePage<dynamic>(
         routeData: routeData,
         child: const _i4.EmptyRouterPage(),
       );
     },
     ScheduleRoute.name: (routeData) {
-      return _i19.AdaptivePage<dynamic>(
+      return _i20.AdaptivePage<dynamic>(
         routeData: routeData,
         child: const _i6.SchedulePage(),
       );
     },
     GroupsSelectRoute.name: (routeData) {
-      return _i19.AdaptivePage<dynamic>(
+      return _i20.AdaptivePage<dynamic>(
         routeData: routeData,
         child: const _i7.GroupsSelectPage(),
       );
     },
     NewsRoute.name: (routeData) {
-      return _i19.AdaptivePage<dynamic>(
+      return _i20.AdaptivePage<dynamic>(
         routeData: routeData,
         child: const _i8.NewsPage(),
       );
     },
     NewsDetailsRoute.name: (routeData) {
       final args = routeData.argsAs<NewsDetailsRouteArgs>();
-      return _i19.AdaptivePage<dynamic>(
+      return _i20.AdaptivePage<dynamic>(
         routeData: routeData,
         child: _i9.NewsDetailsPage(
           key: args.key,
@@ -134,38 +136,38 @@ class AppRouter extends _i19.RootStackRouter {
       );
     },
     ProfileRoute.name: (routeData) {
-      return _i19.AdaptivePage<dynamic>(
+      return _i20.AdaptivePage<dynamic>(
         routeData: routeData,
         child: const _i10.ProfilePage(),
       );
     },
     LoginRoute.name: (routeData) {
-      return _i19.AdaptivePage<dynamic>(
+      return _i20.AdaptivePage<dynamic>(
         routeData: routeData,
         child: const _i11.LoginPage(),
       );
     },
     AboutAppRoute.name: (routeData) {
-      return _i19.AdaptivePage<dynamic>(
+      return _i20.AdaptivePage<dynamic>(
         routeData: routeData,
         child: const _i12.AboutAppPage(),
       );
     },
     ProfileAnnouncesRoute.name: (routeData) {
-      return _i19.AdaptivePage<dynamic>(
+      return _i20.AdaptivePage<dynamic>(
         routeData: routeData,
         child: const _i13.ProfileAnnouncesPage(),
       );
     },
     ProfileAttendanceRoute.name: (routeData) {
-      return _i19.AdaptivePage<dynamic>(
+      return _i20.AdaptivePage<dynamic>(
         routeData: routeData,
         child: const _i14.ProfileAttendancePage(),
       );
     },
     ProfileDetailRoute.name: (routeData) {
       final args = routeData.argsAs<ProfileDetailRouteArgs>();
-      return _i19.AdaptivePage<dynamic>(
+      return _i20.AdaptivePage<dynamic>(
         routeData: routeData,
         child: _i15.ProfileDetailPage(
           key: args.key,
@@ -174,140 +176,151 @@ class AppRouter extends _i19.RootStackRouter {
       );
     },
     ProfileLectrosRoute.name: (routeData) {
-      return _i19.AdaptivePage<dynamic>(
+      return _i20.AdaptivePage<dynamic>(
         routeData: routeData,
         child: const _i16.ProfileLectrosPage(),
       );
     },
     ProfileScoresRoute.name: (routeData) {
-      return _i19.AdaptivePage<dynamic>(
+      return _i20.AdaptivePage<dynamic>(
         routeData: routeData,
         child: const _i17.ProfileScoresPage(),
       );
     },
     ProfileSettingsRoute.name: (routeData) {
-      return _i19.AdaptivePage<dynamic>(
+      return _i20.AdaptivePage<dynamic>(
         routeData: routeData,
         child: const _i18.ProfileSettingsPage(),
+      );
+    },
+    ProfileNfcPassRoute.name: (routeData) {
+      return _i20.AdaptivePage<dynamic>(
+        routeData: routeData,
+        child: const _i19.ProfileNfcPassPage(),
       );
     },
   };
 
   @override
-  List<_i19.RouteConfig> get routes => [
-        _i19.RouteConfig(
+  List<_i20.RouteConfig> get routes => [
+        _i20.RouteConfig(
           HomeRoute.name,
           path: '/',
           children: [
-            _i19.RouteConfig(
+            _i20.RouteConfig(
               '#redirect',
               path: '',
               parent: HomeRoute.name,
               redirectTo: 'schedule',
               fullMatch: true,
             ),
-            _i19.RouteConfig(
+            _i20.RouteConfig(
               ScheduleRouter.name,
               path: 'schedule',
               parent: HomeRoute.name,
               children: [
-                _i19.RouteConfig(
+                _i20.RouteConfig(
                   ScheduleRoute.name,
                   path: '',
                   parent: ScheduleRouter.name,
                 ),
-                _i19.RouteConfig(
+                _i20.RouteConfig(
                   GroupsSelectRoute.name,
                   path: 'select-group',
                   parent: ScheduleRouter.name,
                 ),
               ],
             ),
-            _i19.RouteConfig(
+            _i20.RouteConfig(
               NewsRouter.name,
               path: 'news',
               parent: HomeRoute.name,
               children: [
-                _i19.RouteConfig(
+                _i20.RouteConfig(
                   NewsRoute.name,
                   path: '',
                   parent: NewsRouter.name,
                 ),
-                _i19.RouteConfig(
+                _i20.RouteConfig(
                   NewsDetailsRoute.name,
                   path: 'details',
                   parent: NewsRouter.name,
                 ),
               ],
             ),
-            _i19.RouteConfig(
+            _i20.RouteConfig(
               MapRoute.name,
               path: 'map',
               parent: HomeRoute.name,
             ),
-            _i19.RouteConfig(
+            _i20.RouteConfig(
               ProfileRouter.name,
               path: 'profile',
               parent: HomeRoute.name,
               children: [
-                _i19.RouteConfig(
+                _i20.RouteConfig(
                   ProfileRoute.name,
                   path: '',
                   parent: ProfileRouter.name,
                 ),
-                _i19.RouteConfig(
+                _i20.RouteConfig(
                   LoginRoute.name,
                   path: 'login',
                   parent: ProfileRouter.name,
                 ),
-                _i19.RouteConfig(
+                _i20.RouteConfig(
                   AboutAppRoute.name,
                   path: 'about',
                   parent: ProfileRouter.name,
                 ),
-                _i19.RouteConfig(
+                _i20.RouteConfig(
                   ProfileAnnouncesRoute.name,
                   path: 'announces',
                   parent: ProfileRouter.name,
                 ),
-                _i19.RouteConfig(
+                _i20.RouteConfig(
                   ProfileAttendanceRoute.name,
                   path: 'attendance',
                   parent: ProfileRouter.name,
                 ),
-                _i19.RouteConfig(
+                _i20.RouteConfig(
                   ProfileDetailRoute.name,
                   path: 'details',
                   parent: ProfileRouter.name,
                 ),
-                _i19.RouteConfig(
+                _i20.RouteConfig(
                   ProfileLectrosRoute.name,
                   path: 'lectors',
                   parent: ProfileRouter.name,
                 ),
-                _i19.RouteConfig(
+                _i20.RouteConfig(
                   ProfileScoresRoute.name,
                   path: 'scores',
                   parent: ProfileRouter.name,
                 ),
-                _i19.RouteConfig(
+                _i20.RouteConfig(
                   ProfileSettingsRoute.name,
                   path: 'settings',
+                  parent: ProfileRouter.name,
+                ),
+                _i20.RouteConfig(
+                  ProfileNfcPassRoute.name,
+                  path: 'nfc-pass',
                   parent: ProfileRouter.name,
                 ),
               ],
             ),
           ],
         ),
-        _i19.RouteConfig(
+        _i20.RouteConfig(
           OnBoardingRoute.name,
           path: '/onboarding',
         ),
-        _i19.RouteConfig(
+        _i20.RouteConfig(
           StoriesWrapperRoute.name,
           path: '/story',
         ),
-        _i19.RouteConfig(
+        _i20.RouteConfig(
           '*#redirect',
           path: '*',
           redirectTo: '/',
@@ -318,8 +331,8 @@ class AppRouter extends _i19.RootStackRouter {
 
 /// generated route for
 /// [_i1.HomePage]
-class HomeRoute extends _i19.PageRouteInfo<void> {
-  const HomeRoute({List<_i19.PageRouteInfo>? children})
+class HomeRoute extends _i20.PageRouteInfo<void> {
+  const HomeRoute({List<_i20.PageRouteInfo>? children})
       : super(
           HomeRoute.name,
           path: '/',
@@ -331,7 +344,7 @@ class HomeRoute extends _i19.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i2.OnBoardingPage]
-class OnBoardingRoute extends _i19.PageRouteInfo<void> {
+class OnBoardingRoute extends _i20.PageRouteInfo<void> {
   const OnBoardingRoute()
       : super(
           OnBoardingRoute.name,
@@ -343,10 +356,10 @@ class OnBoardingRoute extends _i19.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i3.StoriesWrapper]
-class StoriesWrapperRoute extends _i19.PageRouteInfo<StoriesWrapperRouteArgs> {
+class StoriesWrapperRoute extends _i20.PageRouteInfo<StoriesWrapperRouteArgs> {
   StoriesWrapperRoute({
-    _i20.Key? key,
-    required List<_i22.Story> stories,
+    _i21.Key? key,
+    required List<_i23.Story> stories,
     required int storyIndex,
   }) : super(
           StoriesWrapperRoute.name,
@@ -368,9 +381,9 @@ class StoriesWrapperRouteArgs {
     required this.storyIndex,
   });
 
-  final _i20.Key? key;
+  final _i21.Key? key;
 
-  final List<_i22.Story> stories;
+  final List<_i23.Story> stories;
 
   final int storyIndex;
 
@@ -382,8 +395,8 @@ class StoriesWrapperRouteArgs {
 
 /// generated route for
 /// [_i4.EmptyRouterPage]
-class ScheduleRouter extends _i19.PageRouteInfo<void> {
-  const ScheduleRouter({List<_i19.PageRouteInfo>? children})
+class ScheduleRouter extends _i20.PageRouteInfo<void> {
+  const ScheduleRouter({List<_i20.PageRouteInfo>? children})
       : super(
           ScheduleRouter.name,
           path: 'schedule',
@@ -395,8 +408,8 @@ class ScheduleRouter extends _i19.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i4.EmptyRouterPage]
-class NewsRouter extends _i19.PageRouteInfo<void> {
-  const NewsRouter({List<_i19.PageRouteInfo>? children})
+class NewsRouter extends _i20.PageRouteInfo<void> {
+  const NewsRouter({List<_i20.PageRouteInfo>? children})
       : super(
           NewsRouter.name,
           path: 'news',
@@ -408,7 +421,7 @@ class NewsRouter extends _i19.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i5.MapPage]
-class MapRoute extends _i19.PageRouteInfo<void> {
+class MapRoute extends _i20.PageRouteInfo<void> {
   const MapRoute()
       : super(
           MapRoute.name,
@@ -420,8 +433,8 @@ class MapRoute extends _i19.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i4.EmptyRouterPage]
-class ProfileRouter extends _i19.PageRouteInfo<void> {
-  const ProfileRouter({List<_i19.PageRouteInfo>? children})
+class ProfileRouter extends _i20.PageRouteInfo<void> {
+  const ProfileRouter({List<_i20.PageRouteInfo>? children})
       : super(
           ProfileRouter.name,
           path: 'profile',
@@ -433,7 +446,7 @@ class ProfileRouter extends _i19.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i6.SchedulePage]
-class ScheduleRoute extends _i19.PageRouteInfo<void> {
+class ScheduleRoute extends _i20.PageRouteInfo<void> {
   const ScheduleRoute()
       : super(
           ScheduleRoute.name,
@@ -445,7 +458,7 @@ class ScheduleRoute extends _i19.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i7.GroupsSelectPage]
-class GroupsSelectRoute extends _i19.PageRouteInfo<void> {
+class GroupsSelectRoute extends _i20.PageRouteInfo<void> {
   const GroupsSelectRoute()
       : super(
           GroupsSelectRoute.name,
@@ -457,7 +470,7 @@ class GroupsSelectRoute extends _i19.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i8.NewsPage]
-class NewsRoute extends _i19.PageRouteInfo<void> {
+class NewsRoute extends _i20.PageRouteInfo<void> {
   const NewsRoute()
       : super(
           NewsRoute.name,
@@ -469,10 +482,10 @@ class NewsRoute extends _i19.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i9.NewsDetailsPage]
-class NewsDetailsRoute extends _i19.PageRouteInfo<NewsDetailsRouteArgs> {
+class NewsDetailsRoute extends _i20.PageRouteInfo<NewsDetailsRouteArgs> {
   NewsDetailsRoute({
-    _i20.Key? key,
-    required _i23.NewsItem newsItem,
+    _i21.Key? key,
+    required _i24.NewsItem newsItem,
   }) : super(
           NewsDetailsRoute.name,
           path: 'details',
@@ -491,9 +504,9 @@ class NewsDetailsRouteArgs {
     required this.newsItem,
   });
 
-  final _i20.Key? key;
+  final _i21.Key? key;
 
-  final _i23.NewsItem newsItem;
+  final _i24.NewsItem newsItem;
 
   @override
   String toString() {
@@ -503,7 +516,7 @@ class NewsDetailsRouteArgs {
 
 /// generated route for
 /// [_i10.ProfilePage]
-class ProfileRoute extends _i19.PageRouteInfo<void> {
+class ProfileRoute extends _i20.PageRouteInfo<void> {
   const ProfileRoute()
       : super(
           ProfileRoute.name,
@@ -515,7 +528,7 @@ class ProfileRoute extends _i19.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i11.LoginPage]
-class LoginRoute extends _i19.PageRouteInfo<void> {
+class LoginRoute extends _i20.PageRouteInfo<void> {
   const LoginRoute()
       : super(
           LoginRoute.name,
@@ -527,7 +540,7 @@ class LoginRoute extends _i19.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i12.AboutAppPage]
-class AboutAppRoute extends _i19.PageRouteInfo<void> {
+class AboutAppRoute extends _i20.PageRouteInfo<void> {
   const AboutAppRoute()
       : super(
           AboutAppRoute.name,
@@ -539,7 +552,7 @@ class AboutAppRoute extends _i19.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i13.ProfileAnnouncesPage]
-class ProfileAnnouncesRoute extends _i19.PageRouteInfo<void> {
+class ProfileAnnouncesRoute extends _i20.PageRouteInfo<void> {
   const ProfileAnnouncesRoute()
       : super(
           ProfileAnnouncesRoute.name,
@@ -551,7 +564,7 @@ class ProfileAnnouncesRoute extends _i19.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i14.ProfileAttendancePage]
-class ProfileAttendanceRoute extends _i19.PageRouteInfo<void> {
+class ProfileAttendanceRoute extends _i20.PageRouteInfo<void> {
   const ProfileAttendanceRoute()
       : super(
           ProfileAttendanceRoute.name,
@@ -563,10 +576,10 @@ class ProfileAttendanceRoute extends _i19.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i15.ProfileDetailPage]
-class ProfileDetailRoute extends _i19.PageRouteInfo<ProfileDetailRouteArgs> {
+class ProfileDetailRoute extends _i20.PageRouteInfo<ProfileDetailRouteArgs> {
   ProfileDetailRoute({
-    _i20.Key? key,
-    required _i24.User user,
+    _i21.Key? key,
+    required _i25.User user,
   }) : super(
           ProfileDetailRoute.name,
           path: 'details',
@@ -585,9 +598,9 @@ class ProfileDetailRouteArgs {
     required this.user,
   });
 
-  final _i20.Key? key;
+  final _i21.Key? key;
 
-  final _i24.User user;
+  final _i25.User user;
 
   @override
   String toString() {
@@ -597,7 +610,7 @@ class ProfileDetailRouteArgs {
 
 /// generated route for
 /// [_i16.ProfileLectrosPage]
-class ProfileLectrosRoute extends _i19.PageRouteInfo<void> {
+class ProfileLectrosRoute extends _i20.PageRouteInfo<void> {
   const ProfileLectrosRoute()
       : super(
           ProfileLectrosRoute.name,
@@ -609,7 +622,7 @@ class ProfileLectrosRoute extends _i19.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i17.ProfileScoresPage]
-class ProfileScoresRoute extends _i19.PageRouteInfo<void> {
+class ProfileScoresRoute extends _i20.PageRouteInfo<void> {
   const ProfileScoresRoute()
       : super(
           ProfileScoresRoute.name,
@@ -621,7 +634,7 @@ class ProfileScoresRoute extends _i19.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i18.ProfileSettingsPage]
-class ProfileSettingsRoute extends _i19.PageRouteInfo<void> {
+class ProfileSettingsRoute extends _i20.PageRouteInfo<void> {
   const ProfileSettingsRoute()
       : super(
           ProfileSettingsRoute.name,
@@ -629,4 +642,16 @@ class ProfileSettingsRoute extends _i19.PageRouteInfo<void> {
         );
 
   static const String name = 'ProfileSettingsRoute';
+}
+
+/// generated route for
+/// [_i19.ProfileNfcPassPage]
+class ProfileNfcPassRoute extends _i20.PageRouteInfo<void> {
+  const ProfileNfcPassRoute()
+      : super(
+          ProfileNfcPassRoute.name,
+          path: 'nfc-pass',
+        );
+
+  static const String name = 'ProfileNfcPassRoute';
 }

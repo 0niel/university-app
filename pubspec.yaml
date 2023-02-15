@@ -12,7 +12,7 @@ publish_to: 'none'
 # In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-version: 1.2.3+9
+version: 1.3.0+12
 
 environment:
   sdk: ">=2.19.0 <3.0.0"
@@ -43,11 +43,11 @@ dependencies:
 
   # State management library. 
   # See https://pub.dev/packages/bloc
-  bloc: ^8.0.2
+  bloc: ^8.1.1
 
   # Widgets that make it easy to implement the BLoC. 
   # See https://pub.dev/packages/flutter_bloc
-  flutter_bloc: ^8.0.1
+  flutter_bloc: ^8.1.2
 
   # SVG rendering widget for Flutter. 
   # See https://pub.dev/packages/flutter_svg
@@ -173,12 +173,26 @@ dependencies:
   firebase_analytics: ^10.1.0
   firebase_crashlytics: ^3.0.11
 
-  oauth2_client: ^3.0.0
+  oauth2_client: ^3.1.0
 
   # Flutter Secure Storage provides API to store data in secure storage. 
   # See https://pub.dev/packages/flutter_secure_storage
-  flutter_secure_storage: ^6.0.0
+  flutter_secure_storage: ^7.0.1
+
+  # Flutter plugin providing detailed information about the device (make, model, etc.), 
+  # and Android or iOS version the app is running on.
+  # See https://pub.dev/packages/device_info_plus
+  device_info_plus: ^8.0.0
+
+  # Provide NFC functionality on Android, iOS & Web, including reading metadata, read & write 
+  # NDEF records, and transceive layer 3 & 4 data with NFC tags / cards
+  # See https://pub.dev/packages/flutter_nfc_kit
+  flutter_nfc_kit: ^3.3.1
   
+  # A Flutter plugin for opening iOS and Android phone settings from an app.
+  # See https://pub.dev/packages/app_settings
+  app_settings: ^4.2.0
+
 
 dev_dependencies:
   # The "flutter_lints" package below contains a set of recommended lints to

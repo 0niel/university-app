@@ -14,6 +14,7 @@ import 'package:rtu_mirea_app/presentation/pages/profile/profile_announces_page.
 import 'package:rtu_mirea_app/presentation/pages/profile/profile_attendance_page.dart';
 import 'package:rtu_mirea_app/presentation/pages/profile/profile_detail_page.dart';
 import 'package:rtu_mirea_app/presentation/pages/profile/profile_lectors_page.dart';
+import 'package:rtu_mirea_app/presentation/pages/profile/profile_nfc_pass_page.dart';
 import 'package:rtu_mirea_app/presentation/pages/profile/profile_scores_page.dart';
 import 'package:rtu_mirea_app/presentation/pages/profile/profile_page.dart';
 import 'package:rtu_mirea_app/presentation/pages/profile/profile_settings_page.dart';
@@ -103,6 +104,10 @@ import 'package:rtu_mirea_app/presentation/pages/schedule/schedule_page.dart';
               path: 'settings',
               page: ProfileSettingsPage,
             ),
+            AutoRoute(
+              path: 'nfc-pass',
+              page: ProfileNfcPassPage,
+            )
           ],
         ),
       ],

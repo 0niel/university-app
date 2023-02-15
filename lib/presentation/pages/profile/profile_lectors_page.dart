@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:material_floating_search_bar/material_floating_search_bar.dart';
-import 'package:rtu_mirea_app/presentation/bloc/auth_bloc/auth_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/employee_bloc/employee_bloc.dart';
+import 'package:rtu_mirea_app/presentation/bloc/user_bloc/user_bloc.dart';
 import 'package:rtu_mirea_app/presentation/pages/profile/widgets/lector_search_card.dart';
 import 'package:rtu_mirea_app/presentation/typography.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
@@ -44,10 +44,10 @@ class _ProfileLectrosPageState extends State<ProfileLectrosPage> {
       backgroundColor: AppTheme.colors.background01,
       body: SafeArea(
         bottom: false,
-        child: BlocBuilder<AuthBloc, AuthState>(
-          builder: (context, authState) {
-            if (authState is LogInSuccess) {
-              return BlocBuilder<EmployeeBloc, EmployeeState>(
+        child: BlocBuilder<UserBloc, UserState>(
+          builder: (context, userState) {
+            return userState.maybeMap(
+              logInSuccess: (value) => BlocBuilder<EmployeeBloc, EmployeeState>(
                 builder: (context, state) {
                   return FloatingSearchBar(
                     key: _searchBarKey,
@@ -84,8 +84,9 @@ class _ProfileLectrosPageState extends State<ProfileLectrosPage> {
                     progress: state is EmployeeLoading,
                     onQueryChanged: (query) {
                       if (query.length > 2) {
-                        context.read<EmployeeBloc>().add(
-                            LoadEmployees(token: authState.token, name: query));
+                        context
+                            .read<EmployeeBloc>()
+                            .add(LoadEmployees(name: query));
                       }
                     },
                     transition: CircularFloatingSearchBarTransition(),
@@ -126,9 +127,9 @@ class _ProfileLectrosPageState extends State<ProfileLectrosPage> {
                     },
                   );
                 },
-              );
-            }
-            return Container();
+              ),
+              orElse: () => Container(),
+            );
           },
         ),
       ),

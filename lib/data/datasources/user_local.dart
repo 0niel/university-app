@@ -1,3 +1,6 @@
+import 'dart:core';
+
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:rtu_mirea_app/common/errors/exceptions.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -5,27 +8,54 @@ abstract class UserLocalData {
   Future<void> setTokenToCache(String token);
   Future<String> getTokenFromCache();
   Future<void> removeTokenFromCache();
+
+  Future<int> getNfcCodeFromCache();
+  Future<void> setNfcCodeToCache(int code);
+  Future<void> removeNfcCodeFromCache();
 }
 
 class UserLocalDataImpl implements UserLocalData {
   final SharedPreferences sharedPreferences;
+  final FlutterSecureStorage secureStorage;
 
-  UserLocalDataImpl({required this.sharedPreferences});
+  UserLocalDataImpl({
+    required this.sharedPreferences,
+    required this.secureStorage,
+  });
 
   @override
   Future<void> setTokenToCache(String token) {
-    return sharedPreferences.setString('auth_token', token);
+    return secureStorage.write(key: 'lks_access_token', value: token);
   }
 
   @override
-  Future<String> getTokenFromCache() {
-    String? token = sharedPreferences.getString('auth_token');
+  Future<String> getTokenFromCache() async {
+    String? token = await secureStorage.read(key: 'lks_access_token');
     if (token == null) throw CacheException('Auth token are not set');
     return Future.value(token);
   }
 
   @override
   Future<void> removeTokenFromCache() {
-    return sharedPreferences.remove('auth_token');
+    return secureStorage.delete(key: 'lks_access_token');
+  }
+
+  @override
+  Future<int> getNfcCodeFromCache() async {
+    String? value = await secureStorage.read(key: 'nfc_code');
+
+    if (value == null) throw CacheException('NFC code are not set');
+
+    return Future.value(int.parse(value));
+  }
+
+  @override
+  Future<void> setNfcCodeToCache(int code) async {
+    await secureStorage.write(key: 'nfc_code', value: code.toString());
+  }
+
+  @override
+  Future<void> removeNfcCodeFromCache() async {
+    await secureStorage.delete(key: 'nfc_code');
   }
 }
