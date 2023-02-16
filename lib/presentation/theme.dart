@@ -28,7 +28,6 @@ class AppTheme {
           displayColor: darkThemeColors.active,
         ),
     scaffoldBackgroundColor: darkThemeColors.background01,
-    backgroundColor: darkThemeColors.background01,
     appBarTheme: AppBarTheme(
       titleSpacing: 24,
       backgroundColor: darkThemeColors.background01,
@@ -50,6 +49,19 @@ class AppTheme {
       TargetPlatform.iOS: NoShadowCupertinoPageTransitionsBuilder(),
       TargetPlatform.android: FadeUpwardsPageTransitionsBuilder(),
     }),
+    colorScheme: ColorScheme(
+      background: darkThemeColors.background01,
+      brightness: Brightness.dark,
+      primary: darkThemeColors.primary,
+      secondary: darkThemeColors.background02,
+      surface: darkThemeColors.background01,
+      onBackground: darkThemeColors.active,
+      onSurface: darkThemeColors.active,
+      onError: darkThemeColors.active,
+      onPrimary: darkThemeColors.active,
+      onSecondary: darkThemeColors.active,
+      error: darkThemeColors.colorful07,
+    ),
   );
 
   static final lightTheme = ThemeData.light().copyWith(
@@ -58,7 +70,6 @@ class AppTheme {
           displayColor: lightThemeColors.active,
         ),
     scaffoldBackgroundColor: lightThemeColors.background01,
-    backgroundColor: lightThemeColors.background01,
     appBarTheme: AppBarTheme(
       titleSpacing: 24,
       backgroundColor: lightThemeColors.background01,
@@ -80,35 +91,19 @@ class AppTheme {
       TargetPlatform.iOS: NoShadowCupertinoPageTransitionsBuilder(),
       TargetPlatform.android: FadeUpwardsPageTransitionsBuilder(),
     }),
-  );
-
-  static final blackTheme = ThemeData.dark().copyWith(
-    textTheme: ThemeData.dark().textTheme.apply(
-          bodyColor: blackThemeColors.active,
-          displayColor: blackThemeColors.active,
-        ),
-    scaffoldBackgroundColor: blackThemeColors.background01,
-    backgroundColor: blackThemeColors.background01,
-    appBarTheme: AppBarTheme(
-      titleSpacing: 24,
-      backgroundColor: blackThemeColors.background01,
-      shadowColor: Colors.transparent,
-      titleTextStyle: AppTextStyle.title,
-      iconTheme: IconThemeData(color: blackThemeColors.active),
+    colorScheme: ColorScheme(
+      background: lightThemeColors.background01,
+      brightness: Brightness.light,
+      primary: lightThemeColors.primary,
+      secondary: lightThemeColors.background02,
+      surface: lightThemeColors.background01,
+      onBackground: lightThemeColors.active,
+      onSurface: lightThemeColors.active,
+      onError: lightThemeColors.active,
+      onPrimary: lightThemeColors.active,
+      onSecondary: lightThemeColors.active,
+      error: lightThemeColors.colorful07,
     ),
-    bottomNavigationBarTheme:
-        ThemeData.dark().bottomNavigationBarTheme.copyWith(
-              type: BottomNavigationBarType.shifting,
-              backgroundColor: blackThemeColors.background03,
-              selectedItemColor: blackThemeColors.active,
-              unselectedItemColor: blackThemeColors.deactive,
-              selectedLabelStyle: AppTextStyle.captionL,
-              unselectedLabelStyle: AppTextStyle.captionS,
-            ),
-    pageTransitionsTheme: const PageTransitionsTheme(builders: {
-      TargetPlatform.iOS: NoShadowCupertinoPageTransitionsBuilder(),
-      TargetPlatform.android: FadeUpwardsPageTransitionsBuilder(),
-    }),
   );
 
   static ThemeData getDataByThemeType({AppThemeType? themeType}) {
@@ -117,8 +112,8 @@ class AppTheme {
     switch (themeType) {
       case AppThemeType.light:
         return lightTheme;
-      case AppThemeType.black:
-        return blackTheme;
+      case AppThemeType.dark:
+        return darkTheme;
       default:
         return darkTheme;
     }
