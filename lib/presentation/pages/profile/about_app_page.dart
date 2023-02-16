@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -33,17 +34,58 @@ class AboutAppPage extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Text('Open Source', style: AppTextStyle.h4),
-                    Container(
-                      padding: const EdgeInsets.only(
-                          left: 8, right: 8, top: 4, bottom: 4),
-                      decoration: BoxDecoration(
-                        borderRadius:
-                            const BorderRadius.all(Radius.circular(4)),
-                        color: AppTheme.colors.primary,
-                      ),
-                      child: Text(
-                        getIt<PackageInfo>().version,
-                        style: AppTextStyle.buttonS,
+                    PopupMenuButton<String>(
+                      color: AppTheme.colors.background03,
+                      onSelected: (value) {},
+                      itemBuilder: (BuildContext context) {
+                        return [
+                          PopupMenuItem(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Версия приложения:',
+                                  style: AppTextStyle.body,
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  getIt<PackageInfo>().version,
+                                  style: AppTextStyle.bodyRegular,
+                                ),
+                              ],
+                            ),
+                          ),
+                          const PopupMenuDivider(),
+                          PopupMenuItem(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Номер сборки:',
+                                  style: AppTextStyle.body,
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  getIt<PackageInfo>().buildNumber,
+                                  style: AppTextStyle.bodyRegular,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ];
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.only(
+                            left: 8, right: 8, top: 4, bottom: 4),
+                        decoration: BoxDecoration(
+                          borderRadius:
+                              const BorderRadius.all(Radius.circular(4)),
+                          color: AppTheme.colors.primary,
+                        ),
+                        child: Text(
+                          getIt<PackageInfo>().version,
+                          style: AppTextStyle.buttonS,
+                        ),
                       ),
                     ),
                   ]),
