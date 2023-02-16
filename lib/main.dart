@@ -1,4 +1,3 @@
-
 import 'package:auto_route/auto_route.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/foundation.dart';
@@ -7,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:intl/intl.dart';
+
 import 'package:rtu_mirea_app/common/oauth.dart';
 import 'package:rtu_mirea_app/common/widget_data_init.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -32,7 +32,6 @@ import 'package:intl/intl_standalone.dart';
 import 'package:rtu_mirea_app/service_locator.dart' as dependency_injection;
 import 'package:url_strategy/url_strategy.dart';
 import 'presentation/app_notifier.dart';
-import 'package:intl/intl_browser.dart' as intl_browser;
 import 'service_locator.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
@@ -85,9 +84,7 @@ Future<void> main() async {
   Intl.defaultLocale = 'ru_RU';
 
   if (kIsWeb) {
-    await intl_browser
-        .findSystemLocale()
-        .then((value) => Intl.systemLocale = value);
+    Intl.systemLocale = Intl.defaultLocale!;
   } else {
     Intl.systemLocale = await findSystemLocale();
   }

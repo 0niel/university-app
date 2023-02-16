@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:rtu_mirea_app/domain/entities/schedule.dart';
 import 'package:rtu_mirea_app/presentation/bloc/schedule_bloc/schedule_bloc.dart';
+import 'package:rtu_mirea_app/presentation/core/routes/routes.gr.dart';
 import 'package:rtu_mirea_app/presentation/pages/schedule/widgets/schedule_settings_drawer.dart';
 import 'package:rtu_mirea_app/presentation/pages/schedule/widgets/schedule_settings_modal.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
@@ -30,10 +31,10 @@ class _SchedulePageState extends State<SchedulePage> {
   @override
   void dispose() {
     super.dispose();
-    // dispose mounted modal
-    if (_modalShown) {
-      Navigator.of(context).pop();
-    }
+    // // dispose mounted modal
+    // if (_modalShown) {
+    //   Navigator.of(context).pop();
+    // }
   }
 
   Widget _buildGroupButton(
@@ -257,7 +258,9 @@ class _SchedulePageState extends State<SchedulePage> {
                                 ),
                               ],
                             ),
-                            onTap: () => _showModal(isFirstRun: false),
+                            // onTap: () => _showModal(isFirstRun: false),
+                            onTap: () =>
+                                context.router.push(const GroupsSelectRoute()),
                           ),
                         ),
                         if (state is ScheduleLoaded)
@@ -342,15 +345,15 @@ class _SchedulePageState extends State<SchedulePage> {
         child: SafeArea(
           child: BlocConsumer<ScheduleBloc, ScheduleState>(
             listener: (context, state) {
-              if (state is ScheduleActiveGroupEmpty) {
-                if (!_modalShown) {
-                  // show after 300 ms
-                  Future.delayed(
-                    const Duration(milliseconds: 300),
-                    () => _showModal(),
-                  );
-                }
-              }
+              // if (state is ScheduleActiveGroupEmpty) {
+              //   if (!_modalShown) {
+              //     // show after 300 ms
+              //     Future.delayed(
+              //       const Duration(milliseconds: 300),
+              //       () => _showModal(),
+              //     );
+              //   }
+              // }
             },
             buildWhen: (prevState, currentState) {
               if (prevState is ScheduleLoaded &&
@@ -362,12 +365,12 @@ class _SchedulePageState extends State<SchedulePage> {
             builder: (context, state) {
               if (state is ScheduleLoading) {
                 // Add post frame callback to hide modal after build
-                WidgetsBinding.instance.addPostFrameCallback((_) {
-                  if (_modalShown) {
-                    _modalShown = false;
-                    context.router.root.pop();
-                  }
-                });
+                // WidgetsBinding.instance.addPostFrameCallback((_) {
+                //   if (_modalShown) {
+                //     _modalShown = false;
+                //     context.router.root.pop();
+                //   }
+                // });
 
                 return Center(
                   child: CircularProgressIndicator(
@@ -394,7 +397,10 @@ class _SchedulePageState extends State<SchedulePage> {
                   ],
                 );
               } else {
-                return _NoActiveGroupFoundMessage(onTap: () => _showModal());
+                // return _NoActiveGroupFoundMessage(onTap: () => _showModal());
+                return _NoActiveGroupFoundMessage(
+                    onTap: () =>
+                        context.router.push(const GroupsSelectRoute()));
               }
             },
           ),
