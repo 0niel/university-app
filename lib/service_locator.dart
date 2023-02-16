@@ -253,6 +253,4 @@ Future<void> setup() async {
   getIt.registerLazySingleton(() => LksOauth2());
   final DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
   getIt.registerLazySingleton(() => deviceInfo);
-  final AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
-  getIt.registerLazySingleton(() => androidInfo);
 }
