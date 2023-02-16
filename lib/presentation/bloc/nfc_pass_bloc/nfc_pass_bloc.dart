@@ -1,3 +1,4 @@
+import 'dart:io' show Platform;
 import 'package:bloc/bloc.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/foundation.dart';
@@ -34,10 +35,12 @@ class NfcPassBloc extends Bloc<NfcPassEvent, NfcPassState> {
     required this.getUserData,
     required this.fetchNfcCode,
   }) : super(const _Initial()) {
-    on<_Started>(_onStarted);
-    on<_GetNfcPasses>(_onGetNfcPasses);
-    on<_ConnectNfcPass>(_onConnectNfcPass);
-    on<_FetchNfcCode>(_onFetchNfcCode);
+    if (Platform.isAndroid) {
+      on<_Started>(_onStarted);
+      on<_GetNfcPasses>(_onGetNfcPasses);
+      on<_ConnectNfcPass>(_onConnectNfcPass);
+      on<_FetchNfcCode>(_onFetchNfcCode);
+    }
   }
 
   void _onGetNfcPasses(
