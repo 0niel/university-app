@@ -1,3 +1,4 @@
+import 'dart:io' show Platform;
 import 'package:auto_route/auto_route.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/foundation.dart';
@@ -122,7 +123,6 @@ class App extends StatelessWidget {
         BlocProvider<UserBloc>(
           create: (context) =>
               getIt<UserBloc>()..add(const UserEvent.started()),
-          lazy: false,
         ),
         BlocProvider<AnnouncesBloc>(
             create: (context) => getIt<AnnouncesBloc>()),
@@ -136,13 +136,14 @@ class App extends StatelessWidget {
           create: (_) => getIt<UpdateInfoBloc>(),
           lazy: false, // We need to init it as soon as possible
         ),
-        BlocProvider<NfcPassBloc>(
-          create: (_) => getIt<NfcPassBloc>()
-            ..add(
-              const NfcPassEvent.fetchNfcCode(),
-            ),
-          lazy: false,
-        ),
+        if (Platform.isAndroid)
+          BlocProvider<NfcPassBloc>(
+            create: (_) => getIt<NfcPassBloc>()
+              ..add(
+                const NfcPassEvent.fetchNfcCode(),
+              ),
+            lazy: false,
+          ),
         BlocProvider<NfcFeedbackBloc>(
           create: (_) => getIt<NfcFeedbackBloc>(),
         ),
