@@ -33,15 +33,14 @@ class UserBloc extends Bloc<UserEvent, UserState> {
     UserEvent event,
     Emitter<UserState> emit,
   ) async {
-    if (state is _Loading) return;
-
-    emit(const _Loading());
     // We use oauth2 to get token. So we don't need to pass login and password
     // to the server. We just need to pass them to the oauth2 server.
 
     bool loggedIn = false;
 
-    (await logIn()).fold(
+    final logInRes = await logIn();
+
+    logInRes.fold(
       (failure) => emit(_LogInError(
           failure.cause ?? "Ошибка при авторизации. Повторите попытку")),
       (res) {
@@ -50,6 +49,7 @@ class UserBloc extends Bloc<UserEvent, UserState> {
     );
 
     if (loggedIn) {
+      emit(const _Loading());
       final user = await getUserData();
 
       user.fold(
@@ -74,27 +74,20 @@ class UserBloc extends Bloc<UserEvent, UserState> {
     UserEvent event,
     Emitter<UserState> emit,
   ) async {
-    // To get profile data only once (If state is not loading)
-    if (state is _Loading) return;
-
     final token = await getAuthToken();
 
-    bool loggedIn = false;
+    bool loggedIn = token.isRight();
+
+    if (!loggedIn) return;
 
     // If token in the storage, user is authorized at least once and we can
     // try to get user data
-    token.fold((failure) => emit(const _Unauthorized()), (r) {
-      loggedIn = true;
-    });
+    emit(const _Loading());
+    final user = await getUserData();
 
-    if (loggedIn) {
-      emit(const _Loading());
-      final user = await getUserData();
-
-      user.fold(
-        (failure) => emit(const _Unauthorized()),
-        (r) => emit(_LogInSuccess(r)),
-      );
-    }
+    user.fold(
+      (failure) => emit(const _Unauthorized()),
+      (r) => emit(_LogInSuccess(r)),
+    );
   }
 }
