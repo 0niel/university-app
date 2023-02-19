@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:rtu_mirea_app/presentation/colors.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
+import 'package:rtu_mirea_app/presentation/typography.dart';
 
 class SettingsButton extends StatelessWidget {
   const SettingsButton(
@@ -19,7 +19,7 @@ class SettingsButton extends StatelessWidget {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12.0),
         ),
-        color: DarkThemeColors.background02,
+        color: AppTheme.colors.background02,
         shadowColor: Colors.transparent,
         child: InkWell(
           borderRadius: BorderRadius.circular(12),
@@ -30,12 +30,12 @@ class SettingsButton extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Icon(
                   icon,
-                  color: Theme.of(context).textTheme.bodyText1?.color,
+                  color: Theme.of(context).textTheme.bodyLarge?.color,
                 ),
               ),
               Text(
                 text,
-                style: DarkTextTheme.buttonL,
+                style: AppTextStyle.buttonL,
               ),
             ],
           ),

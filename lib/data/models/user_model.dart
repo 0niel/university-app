@@ -26,6 +26,8 @@ class UserModel extends User {
     required department,
     required prodDepartment,
     required type,
+    required code,
+    required studentId,
   }) : super(
           id: id,
           login: login,
@@ -49,14 +51,21 @@ class UserModel extends User {
           department: department,
           prodDepartment: prodDepartment,
           type: type,
+          code: code,
+          studentId: studentId,
         );
 
   factory UserModel.fromRawJson(String str) =>
       UserModel.fromJson(json.decode(str));
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
-    final student = json["STUDENTS"].values.first;
-    final eduProgram = json["EDU_PROGRAM"].values.first;
+    final student = json["STUDENTS"].values.firstWhere((element) =>
+        !element["PROPERTIES"]["PERSONAL_NUMBER"]["VALUE"].contains("Д") &&
+        !element["PROPERTIES"]["PERSONAL_NUMBER"]["VALUE"].contains("Ж"));
+        
+    final eduProgram = json["EDU_PROGRAM"]
+        .values
+        .firstWhere((element) => element["ACTIVE"] == "Y");
 
     return UserModel(
       id: json["ID"],
@@ -81,6 +90,8 @@ class UserModel extends User {
       department: eduProgram["PROPERTIES"]["DEPARTMENT"]["VALUE_TEXT"],
       prodDepartment: eduProgram["PROPERTIES"]["PROD_DEPARTMENT"]["VALUE_TEXT"],
       type: eduProgram["TYPE"],
+      code: student["CODE"],
+      studentId: student["ID"],
     );
   }
 }

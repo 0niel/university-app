@@ -1,7 +1,7 @@
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter/material.dart';
-import 'package:rtu_mirea_app/presentation/colors.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
+import 'package:rtu_mirea_app/presentation/typography.dart';
 
 class Tags extends StatelessWidget {
   final bool isClickable;
@@ -45,7 +45,7 @@ class Tags extends StatelessWidget {
                       child: Container(
                         decoration: BoxDecoration(
                           border: Border.all(
-                              color: DarkThemeColors.colorful05, width: 2),
+                              color: AppTheme.colors.colorful05, width: 2),
                           borderRadius: BorderRadius.circular(16),
                         ),
                         child: Padding(
@@ -53,8 +53,8 @@ class Tags extends StatelessWidget {
                               vertical: 4, horizontal: 8),
                           child: Text(
                             element,
-                            style: DarkTextTheme.body
-                                .copyWith(color: DarkThemeColors.colorful05),
+                            style: AppTextStyle.body
+                                .copyWith(color: AppTheme.colors.colorful05),
                           ),
                         ),
                       ),

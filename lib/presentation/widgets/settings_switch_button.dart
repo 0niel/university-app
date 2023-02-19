@@ -1,8 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:rtu_mirea_app/presentation/colors.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
+import 'package:rtu_mirea_app/presentation/typography.dart';
 
 class SettingsSwitchButton extends StatefulWidget {
   const SettingsSwitchButton({
@@ -19,7 +19,7 @@ class SettingsSwitchButton extends StatefulWidget {
   final bool initialValue;
 
   @override
-  _SettingsSwitchButtonState createState() => _SettingsSwitchButtonState();
+  State<SettingsSwitchButton> createState() => _SettingsSwitchButtonState();
 }
 
 class _SettingsSwitchButtonState extends State<SettingsSwitchButton> {
@@ -41,7 +41,7 @@ class _SettingsSwitchButtonState extends State<SettingsSwitchButton> {
               children: [
                 widget.svgPicture,
                 const SizedBox(width: 20),
-                Text(widget.text, style: DarkTextTheme.buttonL),
+                Text(widget.text, style: AppTextStyle.buttonL),
               ],
             ),
             Padding(
@@ -49,7 +49,7 @@ class _SettingsSwitchButtonState extends State<SettingsSwitchButton> {
               child: ValueListenableBuilder(
                 valueListenable: _switchValueNotifier,
                 builder: (context, hasError, child) => CupertinoSwitch(
-                  activeColor: DarkThemeColors.primary,
+                  activeColor: AppTheme.colors.primary,
                   value: _switchValueNotifier.value,
                   onChanged: (value) {
                     _switchValueNotifier.value = value;

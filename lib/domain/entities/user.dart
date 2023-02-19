@@ -23,6 +23,8 @@ class User extends Equatable {
   final String department;
   final String prodDepartment;
   final String type;
+  final String code;
+  final String studentId;
 
   const User({
     required this.id,
@@ -47,6 +49,8 @@ class User extends Equatable {
     required this.department,
     required this.prodDepartment,
     required this.type,
+    required this.code,
+    required this.studentId,
   });
 
   @override
@@ -73,5 +77,7 @@ class User extends Equatable {
         department,
         prodDepartment,
         type,
+        code,
+        studentId,
       ];
 }

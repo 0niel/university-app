@@ -20,7 +20,8 @@ class NewsRemoteDataImpl extends NewsRemoteData {
       [String? tag]) async {
     final String tagsFilter =
         tag != null ? "&filters[tags][name][\$eq]=$tag" : "";
-    final String requestUrl = '$_apiUrl/announcements?populate=*&pagination[limit]=$limit&pagination[start]=$offset&sort=date:DESC&filters[isImportant][\$eq]=${isImportant.toString()}$tagsFilter';
+    final String requestUrl =
+        '$_apiUrl/announcements?populate=*&pagination[limit]=$limit&pagination[start]=$offset&sort=date:DESC&filters[isImportant][\$eq]=${isImportant.toString()}$tagsFilter';
 
     final response = await httpClient.get(requestUrl);
 

@@ -1,7 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:rtu_mirea_app/presentation/theme.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:url_launcher/url_launcher_string.dart';
+import 'package:rtu_mirea_app/presentation/typography.dart';
 
 class MemberInfo extends StatelessWidget {
   const MemberInfo(
@@ -31,11 +31,11 @@ class MemberInfo extends StatelessWidget {
         const SizedBox(height: 8),
         Text(
           username,
-          style: DarkTextTheme.bodyBold,
+          style: AppTextStyle.bodyBold,
         ),
       ]),
       onTap: () {
-        launch(profileUrl);
+        launchUrlString(profileUrl);
       },
     );
   }

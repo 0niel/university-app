@@ -20,8 +20,7 @@ class EmployeeBloc extends Bloc<EmployeeEvent, EmployeeState> {
     if (event.name.length > 2) {
       emit(EmployeeLoading());
 
-      final employees =
-          await getEmployees(GetEmployeesParams(event.token, event.name));
+      final employees = await getEmployees(GetEmployeesParams(event.name));
 
       employees.fold((failure) => emit(EmployeeLoadError()), (result) {
         if (result.isEmpty) {

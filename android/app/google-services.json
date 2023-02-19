@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "510978291920",
+    "project_id": "rtu-mirea-app",
+    "storage_bucket": "rtu-mirea-app.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:510978291920:android:0c6dc2379d80661b8c46d5",
+        "android_client_info": {
+          "package_name": "ninja.mirea.mireaapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "510978291920-l17hjoc3ltfj74e73bj73phfivhusppu.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCTfdp1rBC6PkVjwOdZ5XM7_zzwoN0BVPM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "510978291920-l17hjoc3ltfj74e73bj73phfivhusppu.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "510978291920-31sgk97k4bifhc0ebpamk9m46om2e50r.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "mirea.ninja.mireaapp"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

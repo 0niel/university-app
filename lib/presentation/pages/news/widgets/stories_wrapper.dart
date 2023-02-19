@@ -4,10 +4,10 @@ import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:rtu_mirea_app/common/utils/utils.dart';
 import 'package:story/story_page_view/story_page_view.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:rtu_mirea_app/domain/entities/story.dart';
-import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:rtu_mirea_app/presentation/widgets/buttons/primary_button.dart';
+import 'package:url_launcher/url_launcher_string.dart';
+import 'package:rtu_mirea_app/presentation/typography.dart';
 
 class StoriesWrapper extends StatefulWidget {
   const StoriesWrapper({
@@ -56,12 +56,19 @@ class _StoriesWrapperState extends State<StoriesWrapper> {
                     child: Container(color: Colors.black),
                   ),
                   Positioned.fill(
-                    child: Image.network(
-                      MediaQuery.of(context).size.width > 580
-                          ? StrapiUtils.getLargestImageUrl(page.media.formats)
-                          : StrapiUtils.getMediumImageUrl(page.media.formats),
-                      fit: BoxFit.cover,
-                    ),
+                    child: page.media.formats != null
+                        ? Image.network(
+                            MediaQuery.of(context).size.width > 580
+                                ? StrapiUtils.getLargestImageUrl(
+                                    page.media.formats!)
+                                : StrapiUtils.getMediumImageUrl(
+                                    page.media.formats!),
+                            fit: BoxFit.cover,
+                          )
+                        : Image.network(
+                            page.media.url,
+                            fit: BoxFit.cover,
+                          ),
                   ),
                   Padding(
                     padding: const EdgeInsets.only(top: 44, left: 8),
@@ -72,10 +79,12 @@ class _StoriesWrapperState extends State<StoriesWrapper> {
                           width: 32,
                           decoration: BoxDecoration(
                             image: DecorationImage(
-                              image: NetworkImage(
-                                  author.logo.formats.small != null
-                                      ? author.logo.formats.small!.url
-                                      : author.logo.formats.thumbnail.url),
+                              image: author.logo.formats != null
+                                  ? NetworkImage(
+                                      author.logo.formats!.small != null
+                                          ? author.logo.formats!.small!.url
+                                          : author.logo.formats!.thumbnail.url)
+                                  : NetworkImage(author.logo.url),
                               fit: BoxFit.cover,
                             ),
                             shape: BoxShape.circle,
@@ -87,7 +96,7 @@ class _StoriesWrapperState extends State<StoriesWrapper> {
                         Material(
                           type: MaterialType.transparency,
                           child:
-                              Text(author.name, style: DarkTextTheme.bodyBold),
+                              Text(author.name, style: AppTextStyle.bodyBold),
                         ),
                       ],
                     ),
@@ -106,7 +115,7 @@ class _StoriesWrapperState extends State<StoriesWrapper> {
                               children: [
                                 Text(
                                   page.title!,
-                                  style: DarkTextTheme.h4,
+                                  style: AppTextStyle.h4,
                                 ),
                                 const SizedBox(height: 16)
                               ],
@@ -114,7 +123,7 @@ class _StoriesWrapperState extends State<StoriesWrapper> {
                           if (page.text != null)
                             Text(
                               page.text!,
-                              style: DarkTextTheme.bodyBold,
+                              style: AppTextStyle.bodyBold,
                             )
                         ],
                       ),
@@ -154,8 +163,8 @@ class _StoriesWrapperState extends State<StoriesWrapper> {
                           child: PrimaryButton(
                             text: widget.stories[pageIndex].pages[storyIndex]
                                 .actions[index].title,
-                            onClick: () async {
-                              await launch(widget.stories[pageIndex]
+                            onClick: () {
+                              launchUrlString(widget.stories[pageIndex]
                                   .pages[storyIndex].actions[index].url);
                             },
                           ),

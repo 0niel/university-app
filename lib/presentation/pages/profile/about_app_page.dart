@@ -1,15 +1,15 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:rtu_mirea_app/presentation/bloc/about_app_bloc/about_app_bloc.dart';
-import 'package:rtu_mirea_app/presentation/colors.dart';
-import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:rtu_mirea_app/presentation/widgets/buttons/icon_button.dart';
 import 'package:rtu_mirea_app/service_locator.dart';
-import 'package:url_launcher/url_launcher.dart';
-
+import 'package:url_launcher/url_launcher_string.dart';
+import 'package:rtu_mirea_app/presentation/typography.dart';
 import 'widgets/member_info.dart';
+import 'package:rtu_mirea_app/presentation/theme.dart';
 
 class AboutAppPage extends StatelessWidget {
   const AboutAppPage({Key? key}) : super(key: key);
@@ -19,9 +19,9 @@ class AboutAppPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text("О приложении"),
-        backgroundColor: DarkThemeColors.background01,
+        backgroundColor: AppTheme.colors.background01,
       ),
-      backgroundColor: DarkThemeColors.background01,
+      backgroundColor: AppTheme.colors.background01,
       body: SafeArea(
         bottom: false,
         child: SingleChildScrollView(
@@ -33,24 +33,66 @@ class AboutAppPage extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Text('Open Source', style: DarkTextTheme.h4),
-                    Container(
-                      padding: const EdgeInsets.only(
-                          left: 8, right: 8, top: 4, bottom: 4),
-                      decoration: const BoxDecoration(
-                        borderRadius: BorderRadius.all(Radius.circular(4)),
-                        color: DarkThemeColors.primary,
-                      ),
-                      child: Text(
-                        getIt<PackageInfo>().version,
-                        style: DarkTextTheme.buttonS,
+                    Text('Open Source', style: AppTextStyle.h4),
+                    PopupMenuButton<String>(
+                      color: AppTheme.colors.background03,
+                      onSelected: (value) {},
+                      itemBuilder: (BuildContext context) {
+                        return [
+                          PopupMenuItem(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Версия приложения:',
+                                  style: AppTextStyle.body,
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  getIt<PackageInfo>().version,
+                                  style: AppTextStyle.bodyRegular,
+                                ),
+                              ],
+                            ),
+                          ),
+                          const PopupMenuDivider(),
+                          PopupMenuItem(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Номер сборки:',
+                                  style: AppTextStyle.body,
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  getIt<PackageInfo>().buildNumber,
+                                  style: AppTextStyle.bodyRegular,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ];
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.only(
+                            left: 8, right: 8, top: 4, bottom: 4),
+                        decoration: BoxDecoration(
+                          borderRadius:
+                              const BorderRadius.all(Radius.circular(4)),
+                          color: AppTheme.colors.primary,
+                        ),
+                        child: Text(
+                          getIt<PackageInfo>().version,
+                          style: AppTextStyle.buttonS,
+                        ),
                       ),
                     ),
                   ]),
               const SizedBox(height: 8),
               Text(
                 'Это приложение и все относящиеся к нему сервисы являются 100% бесплатными и Open Source продуктами. Мы с огромным удовольствием примем любые ваши предложения и сообщения, а также мы рады любому вашему участию в проекте!',
-                style: DarkTextTheme.bodyRegular,
+                style: AppTextStyle.bodyRegular,
               ),
               const SizedBox(height: 8),
               RichText(
@@ -58,15 +100,17 @@ class AboutAppPage extends StatelessWidget {
                   children: [
                     TextSpan(
                       text: 'Карта для приложения взята из сервиса ',
-                      style: DarkTextTheme.bodyRegular,
+                      style: AppTextStyle.bodyRegular.copyWith(
+                        color: AppTheme.colors.active,
+                      ),
                     ),
                     TextSpan(
                       text: 'Indoor Schemes',
-                      style: DarkTextTheme.bodyRegular
-                          .copyWith(color: DarkThemeColors.primary),
+                      style: AppTextStyle.bodyRegular
+                          .copyWith(color: AppTheme.colors.primary),
                       recognizer: TapGestureRecognizer()
                         ..onTap = () {
-                          launch('https://ischemes.ru/');
+                          launchUrlString('https://ischemes.ru/');
                         },
                     ),
                   ],
@@ -78,15 +122,17 @@ class AboutAppPage extends StatelessWidget {
                   children: [
                     TextSpan(
                       text: 'Все новости берутся из официального сайта ',
-                      style: DarkTextTheme.bodyRegular,
+                      style: AppTextStyle.bodyRegular.copyWith(
+                        color: AppTheme.colors.active,
+                      ),
                     ),
                     TextSpan(
                       text: 'mirea.ru/news',
-                      style: DarkTextTheme.bodyRegular
-                          .copyWith(color: DarkThemeColors.primary),
+                      style: AppTextStyle.bodyRegular
+                          .copyWith(color: AppTheme.colors.primary),
                       recognizer: TapGestureRecognizer()
                         ..onTap = () {
-                          launch('https://mirea.ru/news/');
+                          launchUrlString('https://mirea.ru/news/');
                         },
                     ),
                   ],
@@ -95,7 +141,7 @@ class AboutAppPage extends StatelessWidget {
               const SizedBox(height: 8),
               Text(
                 'Связаться с нами вы можете с помощью email: contact@mirea.ninja',
-                style: DarkTextTheme.bodyRegular,
+                style: AppTextStyle.bodyRegular,
               ),
               const SizedBox(height: 8),
               RichText(
@@ -103,15 +149,17 @@ class AboutAppPage extends StatelessWidget {
                   children: [
                     TextSpan(
                       text: 'Powered by ',
-                      style: DarkTextTheme.bodyRegular,
+                      style: AppTextStyle.bodyRegular.copyWith(
+                        color: AppTheme.colors.active,
+                      ),
                     ),
                     TextSpan(
                       text: 'Mirea Ninja',
-                      style: DarkTextTheme.bodyRegular
-                          .copyWith(color: DarkThemeColors.primary),
+                      style: AppTextStyle.bodyRegular
+                          .copyWith(color: AppTheme.colors.primary),
                       recognizer: TapGestureRecognizer()
                         ..onTap = () {
-                          launch('https://mirea.ninja/');
+                          launchUrlString("https://mirea.ninja/");
                         },
                     ),
                   ],
@@ -121,28 +169,43 @@ class AboutAppPage extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  SocialIconButton(
-                      assetImage: const AssetImage('assets/icons/github.png'),
-                      onClick: () {
-                        launch(
-                            'https://github.com/Ninja-Official/rtu-mirea-mobile');
-                      }),
+                  SizedBox(
+                    height: 40,
+                    width: 90,
+                    child: SocialIconButton(
+                        assetImage: const AssetImage('assets/icons/github.png'),
+                        onClick: () {
+                          launchUrlString(
+                              'https://github.com/Ninja-Official/rtu-mirea-mobile');
+                        }),
+                  ),
                   const SizedBox(width: 12),
-                  SocialIconButton(
-                      assetImage: const AssetImage('assets/icons/patreon.png'),
-                      onClick: () {
-                        launch('https://www.patreon.com/mireaninja');
-                      }),
+                  SizedBox(
+                    height: 40,
+                    width: 90,
+                    child: SocialIconButton(
+                        assetImage:
+                            const AssetImage('assets/icons/patreon.png'),
+                        onClick: () {
+                          launchUrlString('https://www.patreon.com/mireaninja');
+                        }),
+                  ),
                   const SizedBox(width: 12),
-                  SocialIconButton(
-                      assetImage: const AssetImage('assets/icons/telegram.png'),
-                      onClick: () {
-                        launch('https://t.me/joinchat/LyM7jcoRXUhmOGM6');
-                      }),
+                  SizedBox(
+                    height: 40,
+                    width: 90,
+                    child: SocialIconButton(
+                        assetImage:
+                            const AssetImage('assets/icons/telegram.png'),
+                        onClick: () {
+                          launchUrlString(
+                              'https://t.me/joinchat/LyM7jcoRXUhmOGM6');
+                        }),
+                  ),
                 ],
               ),
               const SizedBox(height: 24),
-              Text('Контрибьюторы', style: DarkTextTheme.h4),
+              Text('Контрибьюторы', style: AppTextStyle.h4),
               const SizedBox(height: 16),
               BlocBuilder<AboutAppBloc, AboutAppState>(
                 buildWhen: (prevState, currentState) {
@@ -153,9 +216,9 @@ class AboutAppPage extends StatelessWidget {
                 },
                 builder: (context, state) {
                   if (state is AboutAppMembersLoading) {
-                    return const Center(
+                    return Center(
                       child: CircularProgressIndicator(
-                        backgroundColor: DarkThemeColors.primary,
+                        backgroundColor: AppTheme.colors.primary,
                         strokeWidth: 5,
                       ),
                     );
@@ -176,7 +239,7 @@ class AboutAppPage extends StatelessWidget {
                     return Center(
                       child: Text(
                         'Произошла ошибка при загрузке разработчиков. Проверьте ваше интернет-соединение.',
-                        style: DarkTextTheme.title,
+                        style: AppTextStyle.title,
                       ),
                     );
                   }
@@ -184,7 +247,7 @@ class AboutAppPage extends StatelessWidget {
                 },
               ),
               const SizedBox(height: 24),
-              Text('Патроны', style: DarkTextTheme.h4),
+              Text('Патроны', style: AppTextStyle.h4),
               const SizedBox(height: 16),
               BlocBuilder<AboutAppBloc, AboutAppState>(
                 buildWhen: (prevState, currentState) {
@@ -195,9 +258,9 @@ class AboutAppPage extends StatelessWidget {
                 },
                 builder: (context, state) {
                   if (state is AboutAppMembersLoading) {
-                    return const Center(
+                    return Center(
                       child: CircularProgressIndicator(
-                        backgroundColor: DarkThemeColors.primary,
+                        backgroundColor: AppTheme.colors.primary,
                         strokeWidth: 5,
                       ),
                     );
@@ -208,9 +271,10 @@ class AboutAppPage extends StatelessWidget {
                       children: List.generate(state.patrons.length, (index) {
                         return MemberInfo(
                           username: state.patrons[index].username,
-                          avatarUrl: 'https://mirea.ninja/${state.patrons[index].avatarTemplate
-                                  .replaceAll('{size}', '120')}',
-                          profileUrl: 'https://mirea.ninja/u/${state.patrons[index].username}',
+                          avatarUrl:
+                              'https://mirea.ninja/${state.patrons[index].avatarTemplate.replaceAll('{size}', '120')}',
+                          profileUrl:
+                              'https://mirea.ninja/u/${state.patrons[index].username}',
                         );
                       }),
                     );
@@ -218,7 +282,7 @@ class AboutAppPage extends StatelessWidget {
                     return Center(
                       child: Text(
                         'Произошла ошибка при загрузке патронов.',
-                        style: DarkTextTheme.title,
+                        style: AppTextStyle.title,
                       ),
                     );
                   }

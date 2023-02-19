@@ -29,7 +29,7 @@ class HomeWidgetProvider : AbstractHomeWidgetProvider() {
         // Reload widget every midnight
         val intent = Intent(context, HomeWidgetProvider::class.java)
         intent.action = ACTION_AUTO_UPDATE_WIDGET
-        val pIntent = PendingIntent.getBroadcast(context, 0, intent, 0)
+        val pIntent = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_IMMUTABLE)
         val alarmManager = context
             .getSystemService(Context.ALARM_SERVICE) as AlarmManager
         val c = Calendar.getInstance()
@@ -124,7 +124,7 @@ class HomeWidgetProvider : AbstractHomeWidgetProvider() {
         super.onDisabled(context)
         val intent = Intent(ACTION_AUTO_UPDATE_WIDGET)
         val alarmMgr = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        alarmMgr.cancel(PendingIntent.getBroadcast(context, 0, intent, 0))
+        alarmMgr.cancel(PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_IMMUTABLE))
     }
 
     override fun onReceive(context: Context?, intent: Intent) {

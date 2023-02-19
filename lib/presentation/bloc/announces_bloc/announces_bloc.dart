@@ -19,7 +19,7 @@ class AnnouncesBloc extends Bloc<AnnouncesEvent, AnnouncesState> {
   ) async {
     emit(AnnouncesLoading());
 
-    final announces = await getAnnounces(GetAnnouncesParams(event.token));
+    final announces = await getAnnounces();
 
     announces.fold((failure) => emit(AnnouncesLoadError()),
         (r) => emit(AnnouncesLoaded(announces: r)));

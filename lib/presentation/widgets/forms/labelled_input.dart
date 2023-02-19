@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:rtu_mirea_app/presentation/colors.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
+import 'package:rtu_mirea_app/presentation/typography.dart';
 
 class LabelledInput extends StatefulWidget {
   final String label;
@@ -37,8 +37,8 @@ class _LabelledInputState extends State<LabelledInput> {
         Text(
           widget.label.toUpperCase(),
           textAlign: TextAlign.left,
-          style: DarkTextTheme.chip
-              .copyWith(color: DarkThemeColors.deactiveDarker),
+          style:
+              AppTextStyle.chip.copyWith(color: AppTheme.colors.deactiveDarker),
         ),
         TextField(
           controller: widget.controller,
@@ -48,7 +48,7 @@ class _LabelledInputState extends State<LabelledInput> {
             ] else if (widget.placeholder == "Email")
               AutofillHints.email,
           ],
-          style: DarkTextTheme.title,
+          style: AppTextStyle.title,
           onTap: () {},
           keyboardType: widget.keyboardType,
           obscureText: (widget.placeholder == 'Пароль' ||
@@ -73,24 +73,24 @@ class _LabelledInputState extends State<LabelledInput> {
                           ? FontAwesomeIcons.eye
                           : FontAwesomeIcons.eyeSlash,
                       size: 15.0,
-                      color: DarkThemeColors.deactiveDarker,
+                      color: AppTheme.colors.deactiveDarker,
                     ))
                 : InkWell(
                     onTap: () {
                       widget.controller.text = "";
                     },
-                    child: const Icon(FontAwesomeIcons.solidTimesCircle,
-                        size: 15, color: DarkThemeColors.deactiveDarker),
+                    child: Icon(FontAwesomeIcons.solidCircleXmark,
+                        size: 15, color: AppTheme.colors.deactiveDarker),
                   ),
             hintText: widget.placeholder,
             hintStyle:
-                DarkTextTheme.titleM.copyWith(color: DarkThemeColors.deactive),
-            focusedBorder: const UnderlineInputBorder(
-              borderSide: BorderSide(color: DarkThemeColors.colorful05),
+                AppTextStyle.titleM.copyWith(color: AppTheme.colors.deactive),
+            focusedBorder: UnderlineInputBorder(
+              borderSide: BorderSide(color: AppTheme.colors.colorful05),
             ),
             filled: false,
-            enabledBorder: const UnderlineInputBorder(
-              borderSide: BorderSide(color: DarkThemeColors.deactiveDarker),
+            enabledBorder: UnderlineInputBorder(
+              borderSide: BorderSide(color: AppTheme.colors.deactiveDarker),
             ),
             border: const UnderlineInputBorder(
               borderSide: BorderSide(color: Colors.green),

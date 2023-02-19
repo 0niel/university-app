@@ -30,7 +30,9 @@ class StrapiMediaModel extends StrapiMedia {
         caption: json["caption"],
         width: json["width"],
         height: json["height"],
-        formats: FormatsModel.fromJson(json["formats"]),
+        formats: json["formats"] != null
+            ? FormatsModel.fromJson(json["formats"])
+            : null,
         size: json["size"].toDouble(),
         url: json["url"],
       );

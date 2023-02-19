@@ -1,7 +1,7 @@
 // coverage:ignore-file
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint
-// ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target
+// ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
 part of 'update_info_model.dart';
 
@@ -41,7 +41,8 @@ mixin _$UpdateInfoModel {
 abstract class $UpdateInfoModelCopyWith<$Res> {
   factory $UpdateInfoModelCopyWith(
           UpdateInfoModel value, $Res Function(UpdateInfoModel) then) =
-      _$UpdateInfoModelCopyWithImpl<$Res>;
+      _$UpdateInfoModelCopyWithImpl<$Res, UpdateInfoModel>;
+  @useResult
   $Res call(
       {@JsonKey(name: 'title') String title,
       @JsonKey(name: 'description') String? description,
@@ -51,44 +52,46 @@ abstract class $UpdateInfoModelCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$UpdateInfoModelCopyWithImpl<$Res>
+class _$UpdateInfoModelCopyWithImpl<$Res, $Val extends UpdateInfoModel>
     implements $UpdateInfoModelCopyWith<$Res> {
   _$UpdateInfoModelCopyWithImpl(this._value, this._then);
 
-  final UpdateInfoModel _value;
   // ignore: unused_field
-  final $Res Function(UpdateInfoModel) _then;
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
 
+  @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? title = freezed,
+    Object? title = null,
     Object? description = freezed,
-    Object? text = freezed,
-    Object? appVersion = freezed,
-    Object? buildNumber = freezed,
+    Object? text = null,
+    Object? appVersion = null,
+    Object? buildNumber = null,
   }) {
     return _then(_value.copyWith(
-      title: title == freezed
+      title: null == title
           ? _value.title
           : title // ignore: cast_nullable_to_non_nullable
               as String,
-      description: description == freezed
+      description: freezed == description
           ? _value.description
           : description // ignore: cast_nullable_to_non_nullable
               as String?,
-      text: text == freezed
+      text: null == text
           ? _value.text
           : text // ignore: cast_nullable_to_non_nullable
               as String,
-      appVersion: appVersion == freezed
+      appVersion: null == appVersion
           ? _value.appVersion
           : appVersion // ignore: cast_nullable_to_non_nullable
               as String,
-      buildNumber: buildNumber == freezed
+      buildNumber: null == buildNumber
           ? _value.buildNumber
           : buildNumber // ignore: cast_nullable_to_non_nullable
               as int,
-    ));
+    ) as $Val);
   }
 }
 
@@ -99,6 +102,7 @@ abstract class _$$_UpdateInfoModelCopyWith<$Res>
           _$_UpdateInfoModel value, $Res Function(_$_UpdateInfoModel) then) =
       __$$_UpdateInfoModelCopyWithImpl<$Res>;
   @override
+  @useResult
   $Res call(
       {@JsonKey(name: 'title') String title,
       @JsonKey(name: 'description') String? description,
@@ -109,41 +113,39 @@ abstract class _$$_UpdateInfoModelCopyWith<$Res>
 
 /// @nodoc
 class __$$_UpdateInfoModelCopyWithImpl<$Res>
-    extends _$UpdateInfoModelCopyWithImpl<$Res>
+    extends _$UpdateInfoModelCopyWithImpl<$Res, _$_UpdateInfoModel>
     implements _$$_UpdateInfoModelCopyWith<$Res> {
   __$$_UpdateInfoModelCopyWithImpl(
       _$_UpdateInfoModel _value, $Res Function(_$_UpdateInfoModel) _then)
-      : super(_value, (v) => _then(v as _$_UpdateInfoModel));
+      : super(_value, _then);
 
-  @override
-  _$_UpdateInfoModel get _value => super._value as _$_UpdateInfoModel;
-
+  @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? title = freezed,
+    Object? title = null,
     Object? description = freezed,
-    Object? text = freezed,
-    Object? appVersion = freezed,
-    Object? buildNumber = freezed,
+    Object? text = null,
+    Object? appVersion = null,
+    Object? buildNumber = null,
   }) {
     return _then(_$_UpdateInfoModel(
-      title: title == freezed
+      title: null == title
           ? _value.title
           : title // ignore: cast_nullable_to_non_nullable
               as String,
-      description: description == freezed
+      description: freezed == description
           ? _value.description
           : description // ignore: cast_nullable_to_non_nullable
               as String?,
-      text: text == freezed
+      text: null == text
           ? _value.text
           : text // ignore: cast_nullable_to_non_nullable
               as String,
-      appVersion: appVersion == freezed
+      appVersion: null == appVersion
           ? _value.appVersion
           : appVersion // ignore: cast_nullable_to_non_nullable
               as String,
-      buildNumber: buildNumber == freezed
+      buildNumber: null == buildNumber
           ? _value.buildNumber
           : buildNumber // ignore: cast_nullable_to_non_nullable
               as int,
@@ -190,28 +192,24 @@ class _$_UpdateInfoModel implements _UpdateInfoModel {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$_UpdateInfoModel &&
-            const DeepCollectionEquality().equals(other.title, title) &&
-            const DeepCollectionEquality()
-                .equals(other.description, description) &&
-            const DeepCollectionEquality().equals(other.text, text) &&
-            const DeepCollectionEquality()
-                .equals(other.appVersion, appVersion) &&
-            const DeepCollectionEquality()
-                .equals(other.buildNumber, buildNumber));
+            (identical(other.title, title) || other.title == title) &&
+            (identical(other.description, description) ||
+                other.description == description) &&
+            (identical(other.text, text) || other.text == text) &&
+            (identical(other.appVersion, appVersion) ||
+                other.appVersion == appVersion) &&
+            (identical(other.buildNumber, buildNumber) ||
+                other.buildNumber == buildNumber));
   }
 
   @JsonKey(ignore: true)
   @override
   int get hashCode => Object.hash(
-      runtimeType,
-      const DeepCollectionEquality().hash(title),
-      const DeepCollectionEquality().hash(description),
-      const DeepCollectionEquality().hash(text),
-      const DeepCollectionEquality().hash(appVersion),
-      const DeepCollectionEquality().hash(buildNumber));
+      runtimeType, title, description, text, appVersion, buildNumber);
 
   @JsonKey(ignore: true)
   @override
+  @pragma('vm:prefer-inline')
   _$$_UpdateInfoModelCopyWith<_$_UpdateInfoModel> get copyWith =>
       __$$_UpdateInfoModelCopyWithImpl<_$_UpdateInfoModel>(this, _$identity);
 

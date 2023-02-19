@@ -3,18 +3,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
 import 'package:rtu_mirea_app/presentation/bloc/app_cubit/app_cubit.dart';
-import 'package:rtu_mirea_app/presentation/colors.dart';
 import 'package:rtu_mirea_app/presentation/core/routes/routes.gr.dart';
-import 'package:rtu_mirea_app/presentation/theme.dart';
-
+import 'package:rtu_mirea_app/presentation/typography.dart';
 import 'widgets/indicator.dart';
 import 'widgets/next_button.dart';
+import 'package:rtu_mirea_app/presentation/theme.dart';
 
 /// OnBoarding screen that greets new users
 class OnBoardingPage extends StatefulWidget {
   const OnBoardingPage({Key? key}) : super(key: key);
+
   @override
-  _OnBoardingPageState createState() => _OnBoardingPageState();
+  State<StatefulWidget> createState() => _OnBoardingPageState();
 }
 
 class _OnBoardingPageState extends State<OnBoardingPage> {
@@ -117,10 +117,10 @@ class _OnBoardingPageState extends State<OnBoardingPage> {
                 children: [
                   Text(
                     titlesTexts[index],
-                    style: DarkTextTheme.h4,
+                    style: AppTextStyle.h4,
                   ),
                   const SizedBox(height: 8.0),
-                  Text(contentTexts[index], style: DarkTextTheme.bodyL),
+                  Text(contentTexts[index], style: AppTextStyle.bodyL),
                 ],
               ),
             ),
@@ -146,7 +146,7 @@ class _OnBoardingPageState extends State<OnBoardingPage> {
     );
 
     return Scaffold(
-      backgroundColor: DarkThemeColors.background01,
+      backgroundColor: AppTheme.colors.background01,
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -222,7 +222,9 @@ class _PageIndicatorsState extends State<PageIndicators> {
                   },
                   child: Text(
                     "Пропустить",
-                    style: DarkTextTheme.buttonS,
+                    style: AppTextStyle.buttonS.copyWith(
+                      color: AppTheme.colors.active,
+                    ),
                   ),
                 ),
           Row(

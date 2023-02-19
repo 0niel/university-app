@@ -1,5 +1,5 @@
 import 'package:dartz/dartz.dart';
-import 'package:internet_connection_checker/internet_connection_checker.dart';
+import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:rtu_mirea_app/common/errors/exceptions.dart';
 
@@ -11,7 +11,7 @@ import 'package:rtu_mirea_app/domain/repositories/strapi_repository.dart';
 
 class StrapiRepositoryImpl implements StrapiRepository {
   final StrapiRemoteData remoteDataSource;
-  final InternetConnectionChecker connectionChecker;
+  final InternetConnectionCheckerPlus connectionChecker;
   final PackageInfo packageInfo;
 
   StrapiRepositoryImpl({

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:rtu_mirea_app/presentation/colors.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
+import 'package:rtu_mirea_app/presentation/typography.dart';
 
 class PrimaryButton extends StatelessWidget {
   const PrimaryButton({Key? key, required this.text, required this.onClick})
@@ -16,7 +16,7 @@ class PrimaryButton extends StatelessWidget {
           const BoxConstraints.tightFor(width: double.infinity, height: 48),
       child: ElevatedButton(
         style: ButtonStyle(
-          backgroundColor: MaterialStateProperty.all(DarkThemeColors.primary),
+          backgroundColor: MaterialStateProperty.all(AppTheme.colors.primary),
           shape: MaterialStateProperty.all<RoundedRectangleBorder>(
             RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(24.0),
@@ -28,7 +28,7 @@ class PrimaryButton extends StatelessWidget {
         },
         child: Text(
           text,
-          style: DarkTextTheme.buttonS,
+          style: AppTextStyle.buttonS,
         ),
       ),
     );

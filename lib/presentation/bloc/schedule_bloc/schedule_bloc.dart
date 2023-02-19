@@ -1,7 +1,9 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:flutter/services.dart';
 import 'package:rtu_mirea_app/common/errors/failures.dart';
 import 'package:rtu_mirea_app/common/widget_data_init.dart';
 import 'package:rtu_mirea_app/domain/entities/schedule.dart';
@@ -30,8 +32,6 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
     required this.setScheduleSettings,
   }) : super(ScheduleInitial()) {
     on<ScheduleOpenEvent>(_onScheduleOpenEvent);
-    on<ScheduleUpdateGroupSuggestionEvent>(
-        _onScheduleUpdateGroupSuggestionEvent);
     on<ScheduleSetActiveGroupEvent>(_onScheduleSetActiveGroupEvent);
     on<ScheduleUpdateEvent>(_onScheduleUpdateEvent);
     on<ScheduleDeleteEvent>(_onScheduleDeleteEvent);
@@ -47,26 +47,45 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
   final GetScheduleSettings getScheduleSettings;
   final SetScheduleSettings setScheduleSettings;
 
-  /// List of all groups (1028+)
-  static List<String> groupsList = [];
+  /// It is used to display the list of groups. It is downloaded from the
+  /// Internet once when the schedule page is opened. While downloading,
+  /// state [ScheduleLoading] is displayed.
+  List<String> _groupsList = [];
+
+  // It is used to display the list of groups by institute in the group
+  // selection page. It is stored in the assets folder and is opened once when
+  // the schedule page is opened. While downloading, state [ScheduleLoading] is
+  // displayed. Format: {institute: [group1, group2, ...]}, where institute is
+  // the short name of the institute, for example, "ИИТ" or "ИИИ", and group1,
+  // group2, ... are the names only of the groups of this institute, for  example,
+  // "ИКБО", "ИВБО", etc. Groups names are unique.
+  late final Map<String, List<String>> _groupsByInstitute;
 
   late List<String> _downloadedGroups;
-
-  /// [_groupSuggestion] is used when selecting a group in [AutocompleteGroupSelector]
-  String _groupSuggestion = '';
 
   void _onScheduleOpenEvent(
     ScheduleOpenEvent event,
     Emitter<ScheduleState> emit,
   ) async {
-    // Getting a list of all groups from a remote API
-    _downloadGroups();
+    if (_groupsList.isEmpty) {
+      emit(ScheduleLoading());
+      // Getting a list of all groups from a remote API
+      await _downloadGroups();
+
+      final rawJson =
+          await rootBundle.loadString('assets/json/groups_by_institute.json');
+      _groupsByInstitute = {
+        for (final entry in json.decode(rawJson).entries)
+          entry.key: List<String>.from(entry.value)
+      };
+    }
 
     // The group for which the schedule is selected
     final activeGroup = await getActiveGroup();
 
     await activeGroup.fold((failure) {
-      emit(ScheduleActiveGroupEmpty(groups: groupsList));
+      emit(ScheduleActiveGroupEmpty(
+          groups: _groupsList, groupsByInstitute: _groupsByInstitute));
     }, (activeGroupName) async {
       final schedule = await getSchedule(
           GetScheduleParams(group: activeGroupName, fromRemote: false));
@@ -80,15 +99,20 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
         emit(ScheduleLoading());
         final remoteSchedule = await getSchedule(
             GetScheduleParams(group: activeGroupName, fromRemote: true));
-        emit(remoteSchedule.fold(
+        emit(
+          remoteSchedule.fold(
             (failureRemote) => ScheduleLoadError(
                 errorMessage: _mapFailureToMessage(failureRemote)),
             (scheduleFromRemote) => ScheduleLoaded(
-                  schedule: scheduleFromRemote,
-                  activeGroup: activeGroupName,
-                  downloadedScheduleGroups: downloadedScheduleGroups,
-                  scheduleSettings: scheduleSettings,
-                )));
+              schedule: scheduleFromRemote,
+              activeGroup: activeGroupName,
+              downloadedScheduleGroups: downloadedScheduleGroups,
+              scheduleSettings: scheduleSettings,
+              groups: _groupsList,
+              groupsByInstitute: _groupsByInstitute,
+            ),
+          ),
+        );
       }, (localSchedule) async {
         // display cached schedule
         emit(ScheduleLoaded(
@@ -96,6 +120,8 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
           activeGroup: activeGroupName,
           downloadedScheduleGroups: downloadedScheduleGroups,
           scheduleSettings: scheduleSettings,
+          groups: _groupsList,
+          groupsByInstitute: _groupsByInstitute,
         ));
 
         // We will update the schedule, but without the loading indicator
@@ -109,6 +135,8 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
               activeGroup: activeGroupName,
               downloadedScheduleGroups: downloadedScheduleGroups,
               scheduleSettings: scheduleSettings,
+              groups: _groupsList,
+              groupsByInstitute: _groupsByInstitute,
             ),
           ));
         }
@@ -116,27 +144,17 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
     });
   }
 
-  void _onScheduleUpdateGroupSuggestionEvent(
-    ScheduleUpdateGroupSuggestionEvent event,
-    Emitter<ScheduleState> emit,
-  ) async {
-    _groupSuggestion = event.suggestion;
-  }
-
   void _onScheduleSetActiveGroupEvent(
     ScheduleSetActiveGroupEvent event,
     Emitter<ScheduleState> emit,
   ) async {
-    if (groupsList.contains(_groupSuggestion) || event.group != null) {
-      // on update active group from drawer group list
-      if (event.group != null) _groupSuggestion = event.group!;
-
+    if (_groupsList.contains(event.group)) {
       emit(ScheduleLoading());
 
-      await setActiveGroup(SetActiveGroupParams(_groupSuggestion));
+      await setActiveGroup(SetActiveGroupParams(event.group));
 
       final schedule = await getSchedule(
-          GetScheduleParams(group: _groupSuggestion, fromRemote: true));
+          GetScheduleParams(group: event.group, fromRemote: true));
 
       _downloadedGroups = await _getAllDownloadedScheduleGroups();
       final scheduleSettings = await getScheduleSettings();
@@ -150,13 +168,16 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
         // Set app info
         return ScheduleLoaded(
           schedule: schedule,
-          activeGroup: _groupSuggestion,
+          activeGroup: event.group,
           downloadedScheduleGroups: _downloadedGroups,
           scheduleSettings: scheduleSettings,
+          groups: _groupsList,
+          groupsByInstitute: _groupsByInstitute,
         );
       }));
     } else {
-      emit(ScheduleGroupNotFound());
+      emit(ScheduleActiveGroupEmpty(
+          groups: _groupsList, groupsByInstitute: _groupsByInstitute));
     }
   }
 
@@ -183,6 +204,8 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
           activeGroup: event.activeGroup,
           downloadedScheduleGroups: _downloadedGroups,
           scheduleSettings: scheduleSettings,
+          groups: _groupsList,
+          groupsByInstitute: _groupsByInstitute,
         ),
       ));
     }
@@ -200,6 +223,8 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
       activeGroup: event.schedule.group,
       downloadedScheduleGroups: _downloadedGroups,
       scheduleSettings: scheduleSettings,
+      groups: _groupsList,
+      groupsByInstitute: _groupsByInstitute,
     ));
   }
 
@@ -224,16 +249,16 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
         activeGroup: currentState.schedule.group,
         downloadedScheduleGroups: currentState.downloadedScheduleGroups,
         scheduleSettings: newSettings,
+        groups: currentState.groups,
+        groupsByInstitute: _groupsByInstitute,
       ));
     }
   }
 
   Future<void> _downloadGroups() async {
-    if (groupsList.isEmpty) {
-      final groups = await getGroups();
-      groups.fold(
-          (failure) => groupsList = [], (groups) => groupsList = groups);
-    }
+    final groups = await getGroups();
+    groups.fold(
+        (failure) => _groupsList = [], (groups) => _groupsList = groups);
   }
 
   /// Returns list of cached schedules or empty list

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:rtu_mirea_app/presentation/colors.dart';
-import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:intl/intl.dart';
+import 'package:rtu_mirea_app/presentation/theme.dart';
+import 'package:rtu_mirea_app/presentation/typography.dart';
 
 class SelectDateButton extends StatefulWidget {
   const SelectDateButton({
@@ -20,7 +20,7 @@ class SelectDateButton extends StatefulWidget {
   final String? text;
 
   @override
-  _SelectDateButtonState createState() => _SelectDateButtonState();
+  State<SelectDateButton> createState() => _SelectDateButtonState();
 }
 
 class _SelectDateButtonState extends State<SelectDateButton> {
@@ -57,7 +57,7 @@ class _SelectDateButtonState extends State<SelectDateButton> {
         shape: MaterialStateProperty.all<RoundedRectangleBorder>(
           RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(24.0),
-            side: const BorderSide(color: DarkThemeColors.deactive),
+            side: BorderSide(color: AppTheme.colors.deactive),
           ),
         ),
       ),
@@ -68,7 +68,7 @@ class _SelectDateButtonState extends State<SelectDateButton> {
           children: [
             Text(
               _selectedTextDate,
-              style: DarkTextTheme.captionL,
+              style: AppTextStyle.captionL,
             ),
             const SizedBox(width: 8),
             const Icon(

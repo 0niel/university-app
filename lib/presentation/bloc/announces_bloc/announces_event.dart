@@ -8,12 +8,8 @@ abstract class AnnouncesEvent extends Equatable {
 }
 
 class LoadAnnounces extends AnnouncesEvent {
-  final String token;
-
-  const LoadAnnounces({
-    required this.token,
-  });
+  const LoadAnnounces();
 
   @override
-  List<Object> get props => [token];
+  List<Object> get props => [];
 }

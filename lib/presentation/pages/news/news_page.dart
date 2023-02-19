@@ -6,13 +6,14 @@ import 'package:rtu_mirea_app/domain/entities/news_item.dart';
 import 'package:rtu_mirea_app/domain/entities/story.dart';
 import 'package:rtu_mirea_app/presentation/bloc/news_bloc/news_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/stories_bloc/stories_bloc.dart';
-import 'package:rtu_mirea_app/presentation/colors.dart';
-import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:rtu_mirea_app/presentation/widgets/buttons/app_settings_button.dart';
 import 'package:rtu_mirea_app/presentation/widgets/buttons/primary_tab_button.dart';
+import 'package:shimmer/shimmer.dart';
 import 'widgets/news_item.dart';
 import 'widgets/story_item.dart';
 import 'widgets/tags_widgets.dart';
+import 'package:rtu_mirea_app/presentation/typography.dart';
+import 'package:rtu_mirea_app/presentation/theme.dart';
 
 class NewsPage extends StatefulWidget {
   const NewsPage({Key? key}) : super(key: key);
@@ -36,13 +37,15 @@ class _NewsPageState extends State<NewsPage> {
     );
   }
 
+  /// Show iOS-style bottom sheet with tags. When user taps on tag, news will be filtered by it.
+  /// If user taps on "все", news filter will be reset.
   void _showTagsModalWindow(BuildContext context) {
     showCupertinoModalPopup(
       context: context,
       builder: (ctx) => Material(
         child: Container(
           padding: const EdgeInsets.all(8),
-          color: DarkThemeColors.background03,
+          color: AppTheme.colors.background03,
           child: Padding(
             padding:
                 const EdgeInsets.only(top: 4, bottom: 16, left: 24, right: 24),
@@ -90,10 +93,13 @@ class _NewsPageState extends State<NewsPage> {
                 itemIndex: 1,
                 notifier: _tabValueNotifier,
                 onClick: () {
-                  context.read<NewsBloc>().add(NewsLoadEvent(
-                      refresh: true,
-                      isImportant: _tabValueNotifier.value == 1,
-                      tag: "все"));
+                  context.read<NewsBloc>().add(
+                        NewsLoadEvent(
+                          refresh: true,
+                          isImportant: _tabValueNotifier.value == 1,
+                          tag: "все",
+                        ),
+                      );
                 },
               )
             ],
@@ -101,9 +107,10 @@ class _NewsPageState extends State<NewsPage> {
           Padding(
             padding: const EdgeInsets.only(right: 12),
             child: AppSettingsButton(
-                onClick: () => (context.read<NewsBloc>().state is NewsLoaded)
-                    ? _showTagsModalWindow(context)
-                    : null),
+              onClick: () => (context.read<NewsBloc>().state is NewsLoaded)
+                  ? _showTagsModalWindow(context)
+                  : null,
+            ),
           ),
         ],
       ),
@@ -145,11 +152,10 @@ class _NewsPageState extends State<NewsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppTheme.colors.background01,
       appBar: AppBar(
         title: const Text("Новости"),
-        backgroundColor: DarkThemeColors.background01,
       ),
-      backgroundColor: DarkThemeColors.background01,
       body: NestedScrollView(
         controller: _scrollController,
         headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
@@ -182,7 +188,7 @@ class _NewsPageState extends State<NewsPage> {
         body: Builder(
           builder: (BuildContext context) {
             final innerScrollController = PrimaryScrollController.of(context);
-            _setupScrollController(innerScrollController!);
+            _setupScrollController(innerScrollController);
 
             return RefreshIndicator(
               onRefresh: () async {
@@ -204,8 +210,20 @@ class _NewsPageState extends State<NewsPage> {
                     } else if (state is NewsLoaded) {
                       news = state.news;
                     } else if (state is NewsLoading && state.isFirstFetch) {
-                      return const Center(
-                        child: CircularProgressIndicator(),
+                      return Expanded(
+                        child: Column(
+                          children: [
+                            const SizedBox(height: 12),
+                            Expanded(
+                              child: ListView.builder(
+                                physics: const NeverScrollableScrollPhysics(),
+                                itemCount: 3,
+                                itemBuilder: (context, index) =>
+                                    const _ShimmerNewsCardLoading(),
+                              ),
+                            ),
+                          ],
+                        ),
                       );
                     } else if (state is NewsLoading) {
                       news = state.oldNews;
@@ -217,7 +235,7 @@ class _NewsPageState extends State<NewsPage> {
                           child: Text(
                             'Произошла ошибка при загрузке новостей.',
                             textAlign: TextAlign.center,
-                            style: DarkTextTheme.title,
+                            style: AppTextStyle.title,
                           ),
                         ),
                       );
@@ -265,5 +283,75 @@ class _NewsPageState extends State<NewsPage> {
         }
       }
     });
+  }
+}
+
+/// Widget with news card loading animation (shimmer effect).
+/// Used for first-time loading.
+class _ShimmerNewsCardLoading extends StatelessWidget {
+  const _ShimmerNewsCardLoading({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 24, left: 16, right: 16),
+      decoration: BoxDecoration(
+        color: AppTheme.colors.background02,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Shimmer.fromColors(
+              baseColor: AppTheme.colors.background01,
+              highlightColor: AppTheme.colors.background02,
+              child: Container(
+                height: 175,
+                decoration: BoxDecoration(
+                  color: AppTheme.colors.background02,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(top: 16, bottom: 4),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Shimmer.fromColors(
+                    baseColor: AppTheme.colors.background01,
+                    highlightColor: AppTheme.colors.background02,
+                    child: Container(
+                      height: 18,
+                      decoration: BoxDecoration(
+                        color: AppTheme.colors.background02,
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Shimmer.fromColors(
+                    baseColor: AppTheme.colors.background01,
+                    highlightColor: AppTheme.colors.background02,
+                    child: Container(
+                      height: 18,
+                      width: MediaQuery.of(context).size.width * 0.4,
+                      decoration: BoxDecoration(
+                        color: AppTheme.colors.background02,
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 8),
+          ],
+        ),
+      ),
+    );
   }
 }

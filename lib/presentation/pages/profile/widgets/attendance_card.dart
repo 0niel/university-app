@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:rtu_mirea_app/presentation/colors.dart';
+import 'package:rtu_mirea_app/presentation/typography.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 
 class AttendanceCard extends StatelessWidget {
@@ -19,7 +19,7 @@ class AttendanceCard extends StatelessWidget {
       height: 80,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
-        color: DarkThemeColors.background02,
+        color: AppTheme.colors.background02,
       ),
       padding: const EdgeInsets.all(20),
       child: Row(
@@ -30,9 +30,9 @@ class AttendanceCard extends StatelessWidget {
           Container(
             width: 40,
             height: 40,
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: DarkThemeColors.background03,
+              color: AppTheme.colors.background03,
             ),
             alignment: Alignment.center,
             child: Container(
@@ -47,14 +47,14 @@ class AttendanceCard extends StatelessWidget {
                         colors: [Color(0xff99db7e), Color(0xff6da95b)],
                       ),
                     )
-                  : const BoxDecoration(
+                  : BoxDecoration(
                       shape: BoxShape.circle,
-                      color: DarkThemeColors.colorful02,
+                      color: AppTheme.colors.colorful02,
                     ),
               alignment: Alignment.center,
               child: type == "Вход"
-                  ? const Icon(FontAwesomeIcons.signInAlt, size: 15)
-                  : const Icon(FontAwesomeIcons.signOutAlt, size: 15),
+                  ? const Icon(FontAwesomeIcons.rightToBracket, size: 15)
+                  : const Icon(FontAwesomeIcons.rightToBracket, size: 15),
             ),
           ),
           const SizedBox(width: 55.50),
@@ -65,14 +65,14 @@ class AttendanceCard extends StatelessWidget {
             children: [
               Text(
                 type,
-                style: DarkTextTheme.bodyBold,
+                style: AppTextStyle.bodyBold,
               ),
               Text(
                 '$date, $time',
-                style: DarkTextTheme.captionL.copyWith(
+                style: AppTextStyle.captionL.copyWith(
                     color: type == "Вход"
-                        ? DarkThemeColors.colorful05
-                        : DarkThemeColors.colorful02),
+                        ? AppTheme.colors.colorful05
+                        : AppTheme.colors.colorful02),
               ),
             ],
           ),

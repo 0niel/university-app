@@ -45,7 +45,7 @@ class ScoresBloc extends Bloc<ScoresEvent, ScoresState> {
     if (state.runtimeType != ScoresLoaded) {
       emit(ScoresLoading());
 
-      final scores = await getScores(GetScoresParams(event.token));
+      final scores = await getScores();
 
       scores.fold((failure) => emit(ScoresLoadError()), (result) {
         emit(ScoresLoaded(

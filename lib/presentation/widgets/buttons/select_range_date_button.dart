@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:rtu_mirea_app/presentation/colors.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:syncfusion_flutter_datepicker/datepicker.dart';
 import 'package:intl/intl.dart';
+import 'package:rtu_mirea_app/presentation/typography.dart';
 
 class SelectRangeDateButton extends StatefulWidget {
   const SelectRangeDateButton({
@@ -21,7 +21,7 @@ class SelectRangeDateButton extends StatefulWidget {
   final String? text;
 
   @override
-  _SelectRangeDateButtonState createState() => _SelectRangeDateButtonState();
+  State<SelectRangeDateButton> createState() => _SelectRangeDateButtonState();
 }
 
 class _SelectRangeDateButtonState extends State<SelectRangeDateButton> {
@@ -63,7 +63,7 @@ class _SelectRangeDateButtonState extends State<SelectRangeDateButton> {
         shape: MaterialStateProperty.all<RoundedRectangleBorder>(
           RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(24.0),
-            side: const BorderSide(color: DarkThemeColors.deactive),
+            side: BorderSide(color: AppTheme.colors.deactive),
           ),
         ),
       ),
@@ -74,12 +74,15 @@ class _SelectRangeDateButtonState extends State<SelectRangeDateButton> {
           children: [
             Text(
               _selectedTextDate,
-              style: DarkTextTheme.captionL,
+              style: AppTextStyle.captionL.copyWith(
+                color: AppTheme.colors.deactive,
+              ),
             ),
             const SizedBox(width: 8),
-            const Icon(
+            Icon(
               Icons.calendar_today_rounded,
               size: 18,
+              color: AppTheme.colors.deactive,
             ),
           ],
         ),
@@ -93,23 +96,36 @@ class _SelectRangeDateButtonState extends State<SelectRangeDateButton> {
             child: Container(
               constraints: const BoxConstraints(maxHeight: 360),
               child: SfDateRangePicker(
-                rangeSelectionColor:
-                    DarkThemeColors.colorful03.withOpacity(0.7),
-                headerStyle:
-                    DateRangePickerHeaderStyle(textStyle: DarkTextTheme.titleS),
-                monthCellStyle: DateRangePickerMonthCellStyle(
-                  textStyle: DarkTextTheme.body,
-                  todayTextStyle: DarkTextTheme.body
-                      .copyWith(color: DarkThemeColors.colorful03),
+                monthViewSettings: DateRangePickerMonthViewSettings(
+                  firstDayOfWeek: 1,
+                  viewHeaderStyle: DateRangePickerViewHeaderStyle(
+                    backgroundColor: AppTheme.colors.background02,
+                    textStyle: AppTextStyle.bodyBold.copyWith(
+                      color: AppTheme.colors.deactive,
+                    ),
+                  ),
                 ),
-                selectionTextStyle: DarkTextTheme.bodyBold,
-                rangeTextStyle: DarkTextTheme.body,
-                todayHighlightColor: DarkThemeColors.colorful03,
-                startRangeSelectionColor: DarkThemeColors.colorful03,
-                endRangeSelectionColor: DarkThemeColors.colorful03,
-                selectionColor: DarkThemeColors.primary,
-                monthViewSettings:
-                    const DateRangePickerMonthViewSettings(firstDayOfWeek: 1),
+                view: DateRangePickerView.month,
+                headerHeight: 60,
+                rangeSelectionColor:
+                    AppTheme.colors.colorful03.withOpacity(0.7),
+                headerStyle: DateRangePickerHeaderStyle(
+                  textStyle: AppTextStyle.titleS
+                      .copyWith(color: AppTheme.colors.active),
+                ),
+                monthCellStyle: DateRangePickerMonthCellStyle(
+                  textStyle: AppTextStyle.body.copyWith(
+                    color: AppTheme.colors.deactive,
+                  ),
+                  todayTextStyle: AppTextStyle.body
+                      .copyWith(color: AppTheme.colors.colorful03),
+                ),
+                selectionTextStyle: AppTextStyle.bodyBold,
+                rangeTextStyle: AppTextStyle.body,
+                todayHighlightColor: AppTheme.colors.colorful03,
+                startRangeSelectionColor: AppTheme.colors.colorful03,
+                endRangeSelectionColor: AppTheme.colors.colorful03,
+                selectionColor: AppTheme.colors.primary,
                 toggleDaySelection: true,
                 showActionButtons: true,
                 initialSelectedRange: _initialRange,
@@ -121,7 +137,7 @@ class _SelectRangeDateButtonState extends State<SelectRangeDateButton> {
                     Navigator.of(context).pop();
                   }
                 },
-                backgroundColor: DarkThemeColors.background02,
+                backgroundColor: AppTheme.colors.background02,
                 showNavigationArrow: true,
                 minDate: widget.firstDate,
                 maxDate: widget.lastDate,

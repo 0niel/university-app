@@ -2,7 +2,7 @@
 // ignore_for_file: lines_longer_than_80_chars
 import 'package:firebase_core/firebase_core.dart' show FirebaseOptions;
 import 'package:flutter/foundation.dart'
-    show defaultTargetPlatform, kIsWeb, TargetPlatform;
+    show TargetPlatform, defaultTargetPlatform, kIsWeb;
 
 /// Default [FirebaseOptions] for use with your Firebase apps.
 ///
@@ -16,15 +16,72 @@ import 'package:flutter/foundation.dart'
 /// ```
 class DefaultFirebaseOptions {
   static FirebaseOptions get currentPlatform {
+    try {
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.android:
+          return android;
+        case TargetPlatform.iOS:
+          return ios;
+        case TargetPlatform.macOS:
+          return macos;
+        case TargetPlatform.fuchsia:
+          break;
+        case TargetPlatform.linux:
+          break;
+        case TargetPlatform.windows:
+          break;
+      }
+    } catch (e) {
+      // If we can't determine the platform, we'll just return the web options.
+      if (kIsWeb) {
+        return web;
+      }
+    }
+
     if (kIsWeb) {
-      throw UnsupportedError(
-        'DefaultFirebaseOptions have not been configured for web - '
-        'you can reconfigure this by running the FlutterFire CLI again.',
-      );
+      return web;
     }
 
     throw UnsupportedError(
-      'The configuration file is not assembled. Generate the file using FlutterFire.',
+      'DefaultFirebaseOptions are not supported for this platform.',
     );
   }
+
+  static const FirebaseOptions web = FirebaseOptions(
+    apiKey: 'AIzaSyCTfdp1rBC6PkVjwOdZ5XM7_zzwoN0BVPM',
+    appId: '1:510978291920:web:0c6dc2379d80661b8c46d5',
+    messagingSenderId: '510978291920',
+    projectId: 'rtu-mirea-app',
+    storageBucket: 'rtu-mirea-app.appspot.com',
+  );
+
+  static const FirebaseOptions android = FirebaseOptions(
+    apiKey: 'AIzaSyCTfdp1rBC6PkVjwOdZ5XM7_zzwoN0BVPM',
+    appId: '1:510978291920:android:0c6dc2379d80661b8c46d5',
+    messagingSenderId: '510978291920',
+    projectId: 'rtu-mirea-app',
+    storageBucket: 'rtu-mirea-app.appspot.com',
+  );
+
+  static const FirebaseOptions ios = FirebaseOptions(
+    apiKey: 'AIzaSyAYZ5JlWF94jBGrcds7fSi5uMN1zmuieec',
+    appId: '1:510978291920:ios:dd9496a1680c72828c46d5',
+    messagingSenderId: '510978291920',
+    projectId: 'rtu-mirea-app',
+    storageBucket: 'rtu-mirea-app.appspot.com',
+    iosClientId:
+        '510978291920-31sgk97k4bifhc0ebpamk9m46om2e50r.apps.googleusercontent.com',
+    iosBundleId: 'mirea.ninja.mireaapp',
+  );
+
+  static const FirebaseOptions macos = FirebaseOptions(
+    apiKey: 'AIzaSyAYZ5JlWF94jBGrcds7fSi5uMN1zmuieec',
+    appId: '1:510978291920:ios:dd9496a1680c72828c46d5',
+    messagingSenderId: '510978291920',
+    projectId: 'rtu-mirea-app',
+    storageBucket: 'rtu-mirea-app.appspot.com',
+    iosClientId:
+        '510978291920-31sgk97k4bifhc0ebpamk9m46om2e50r.apps.googleusercontent.com',
+    iosBundleId: 'mirea.ninja.mireaapp',
+  );
 }

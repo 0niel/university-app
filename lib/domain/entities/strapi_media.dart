@@ -17,12 +17,12 @@ class StrapiMedia extends Equatable {
   final String? caption;
   final int width;
   final int height;
-  final Formats formats;
+  final Formats? formats;
   final double size;
   final String url;
 
   @override
-  List<Object> get props => [name, width, height, formats, size, url];
+  List<Object> get props => [name, width, height, size, url];
 }
 
 class Formats extends Equatable {

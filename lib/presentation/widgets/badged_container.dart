@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:rtu_mirea_app/presentation/colors.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
+import 'package:rtu_mirea_app/presentation/typography.dart';
 
 class BadgedContainer extends StatelessWidget {
   final String label;
@@ -17,7 +17,7 @@ class BadgedContainer extends StatelessWidget {
       width: double.infinity,
       height: 90,
       child: Card(
-        color: DarkThemeColors.background02,
+        color: AppTheme.colors.background02,
         margin: const EdgeInsets.all(0),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         child: InkWell(
@@ -33,10 +33,10 @@ class BadgedContainer extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(label,
-                        style: DarkTextTheme.bodyBold
-                            .copyWith(color: DarkThemeColors.deactive)),
+                        style: AppTextStyle.bodyBold
+                            .copyWith(color: AppTheme.colors.deactive)),
                     const SizedBox(height: 5),
-                    Text(text, style: DarkTextTheme.title)
+                    Text(text, style: AppTextStyle.title)
                   ],
                 )
               ],
