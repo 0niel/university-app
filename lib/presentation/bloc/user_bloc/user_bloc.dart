@@ -6,6 +6,7 @@ import 'package:rtu_mirea_app/domain/usecases/get_auth_token.dart';
 import 'package:rtu_mirea_app/domain/usecases/get_user_data.dart';
 import 'package:rtu_mirea_app/domain/usecases/log_in.dart';
 import 'package:rtu_mirea_app/domain/usecases/log_out.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 
 part 'user_event.dart';
 part 'user_state.dart';
@@ -27,6 +28,11 @@ class UserBloc extends Bloc<UserEvent, UserState> {
     on<_LogOut>(_onLogOutEvent);
     on<_Started>(_onGetUserDataEvent);
     on<_GetUserData>(_onGetUserDataEvent);
+  }
+
+  void _setSentryUserIdentity(String id, String email, String group) {
+    Sentry.configureScope((scope) => scope
+        .setUser(SentryUser(id: id, email: email, data: {'group': group})));
   }
 
   void _onLogInEvent(
@@ -56,6 +62,8 @@ class UserBloc extends Bloc<UserEvent, UserState> {
         (failure) => emit(const _Unauthorized()),
         (user) {
           FirebaseAnalytics.instance.logLogin();
+          _setSentryUserIdentity(
+              user.id.toString(), user.login, user.academicGroup);
           emit(_LogInSuccess(user));
         },
       );
@@ -85,9 +93,9 @@ class UserBloc extends Bloc<UserEvent, UserState> {
     emit(const _Loading());
     final user = await getUserData();
 
-    user.fold(
-      (failure) => emit(const _Unauthorized()),
-      (r) => emit(_LogInSuccess(r)),
-    );
+    user.fold((failure) => emit(const _Unauthorized()), (r) {
+      _setSentryUserIdentity(r.id.toString(), r.login, r.academicGroup);
+      emit(_LogInSuccess(r));
+    });
   }
 }
