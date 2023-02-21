@@ -21,7 +21,9 @@ class HomePage extends StatelessWidget {
             MapRoute(),
             ProfileRouter()
           ],
-          navigatorObservers: () => [HeroController(), AutoRouteObserver()],
+          navigatorObservers: () => [
+            HeroController(),
+          ],
           bottomNavigationBuilder: (context, tabsRouter) {
             return AppBottomNavigationBar(
               index: tabsRouter.activeIndex,
