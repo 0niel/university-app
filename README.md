@@ -47,11 +47,27 @@ flutter packages pub run build_runner watch --delete-conflicting-outputs
 flutter packages pub run build_runner build --delete-conflicting-outputs
 ```
 
-## Конфигурация Firebase Analytics и Crashlytics
+## Конфигурация Firebase Analytics
 1. Зарегистрируйте приложение в [Firebase](https://console.firebase.google.com/).
 1. Выполните шаги для генерации `firebase_options.dart` файла с помощью [FlutterFire CLI](https://firebase.flutter.dev/docs/cli).
 2. Firebase Analytics для Android не поддерживает Dart-only конфигурацию. Как только ваше приложение для Android будет зарегистрировано в Firebase, загрузите файл конфигурации с консоли Firebase (файл называется `google-services.json`). Добавьте этот файл в каталог `android/app`.
 3. Проект готов для использования с Firebase Analytics и Crashlytics.
+
+## Переменные окружения
+Приложение использует переменные среды времени компиляции для хранения конфиденциальных данных, таких как ключи API и токены. 
+
+Эти переменные должны передаваться при запуске или сборке приложения с помощью аргумента `--dart-define` или установленной переменной окружения. Если вам нужно передать несколько пар ключ-значение, просто определите --dart-define несколько раз.
+
+### Переменные приложения:
+- `SENTRY_DSN` - DSN для отправки отчетов об ошибках в Sentry.
+- `LK_CLIENT_ID` - ID клиента для авторизации в Личном кабинете с помощью OAuth2.
+- `LK_CLIENT_SECRET` - Секретный ключ клиента для авторизации в Личном кабинете с помощью OAuth2.
+
+**Пример:**
+```bash
+flutter run --dart-define=SENTRY_DSN=YOUR_DSN --dart-define=LK_CLIENT_ID=YOUR_CLIENT_ID --dart-define=LK_CLIENT_SECRET=YOUR_CLIENT_SECRET
+```
+
 
 ## При ошибках
 **Исключения платформы**
