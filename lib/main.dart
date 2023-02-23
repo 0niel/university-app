@@ -43,6 +43,19 @@ import 'package:provider/provider.dart';
 import 'package:sentry_logging/sentry_logging.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 
+class GlobalBlocObserver extends BlocObserver {
+  @override
+  void onError(BlocBase bloc, Object error, StackTrace stackTrace) {
+    Sentry.captureException(error, stackTrace: stackTrace);
+
+    if (kDebugMode) {
+      print(stackTrace);
+    }
+
+    super.onError(bloc, error, stackTrace);
+  }
+}
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -79,6 +92,8 @@ Future<void> main() async {
   } else {
     Intl.systemLocale = await findSystemLocale();
   }
+
+  Bloc.observer = GlobalBlocObserver();
 
   await SentryFlutter.init(
     (options) {
