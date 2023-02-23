@@ -1,6 +1,7 @@
 import 'package:bloc/bloc.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:get/get.dart';
 import 'package:rtu_mirea_app/domain/entities/user.dart';
 import 'package:rtu_mirea_app/domain/usecases/get_auth_token.dart';
 import 'package:rtu_mirea_app/domain/usecases/get_user_data.dart';
@@ -62,8 +63,12 @@ class UserBloc extends Bloc<UserEvent, UserState> {
         (failure) => emit(const _Unauthorized()),
         (user) {
           FirebaseAnalytics.instance.logLogin();
+          var student = user.students
+              .firstWhereOrNull((element) => element.status == 'активный');
+          student ??= user.students.first;
+
           _setSentryUserIdentity(
-              user.id.toString(), user.login, user.academicGroup);
+              user.id.toString(), user.login, student.academicGroup);
           emit(_LogInSuccess(user));
         },
       );
@@ -94,7 +99,11 @@ class UserBloc extends Bloc<UserEvent, UserState> {
     final user = await getUserData();
 
     user.fold((failure) => emit(const _Unauthorized()), (r) {
-      _setSentryUserIdentity(r.id.toString(), r.login, r.academicGroup);
+      var student = r.students
+          .firstWhereOrNull((element) => element.status == 'активный');
+      student ??= r.students.first;
+
+      _setSentryUserIdentity(r.id.toString(), r.login, student.academicGroup);
       emit(_LogInSuccess(r));
     });
   }

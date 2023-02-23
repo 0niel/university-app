@@ -4,6 +4,7 @@ import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_nfc_kit/flutter_nfc_kit.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:get/get.dart';
 import 'package:rtu_mirea_app/common/errors/failures.dart';
 import 'package:rtu_mirea_app/domain/entities/nfc_pass.dart';
 import 'package:rtu_mirea_app/domain/usecases/connect_nfc_pass.dart';
@@ -131,8 +132,12 @@ class NfcPassBloc extends Bloc<NfcPassEvent, NfcPassState> {
     userDataRes.fold(
       (failure) => studentId = null,
       (userData) {
-        studentId = userData.studentId;
-        code = userData.code;
+        var student = userData.students
+            .firstWhereOrNull((element) => element.status == 'активный');
+        student ??= userData.students.first;
+
+        studentId = student.id;
+        code = student.code;
       },
     );
 
