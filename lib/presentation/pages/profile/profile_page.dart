@@ -112,10 +112,7 @@ class _UserLoggedInView extends StatelessWidget {
             child: SocialIconButton(
               assetImage: const AssetImage('assets/icons/gerb.ico'),
               onClick: () {
-                launchUrlString(
-                    user.authShortlink != null
-                        ? "https://lk.mirea.ru/auth/link/?url=${user.authShortlink!}"
-                        : "https://lk.mirea.ru/auth",
+                launchUrlString("https://lk.mirea.ru/auth",
                     mode: LaunchMode.externalApplication);
               },
               text: "Вход в ЛКС",

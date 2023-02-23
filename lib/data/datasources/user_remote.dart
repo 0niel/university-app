@@ -56,18 +56,23 @@ class UserRemoteDataImpl implements UserRemoteData {
     final response = await lksOauth2.oauth2Helper.get(
       '$_apiUrl/?action=getData&url=https://lk.mirea.ru/profile/',
     );
-    var jsonResponse = json.decode(response.body);
 
     log('Status code: ${response.statusCode}, Response: ${response.body}',
         name: 'getProfileData');
 
-    if (jsonResponse.containsKey('errors')) {
-      throw ServerException(jsonResponse['errors'][0]);
-    }
-    if (response.statusCode == 200) {
-      return UserModel.fromRawJson(response.body);
-    } else {
-      throw ServerException('Response status code is ${response.statusCode}');
+    try {
+      var jsonResponse = json.decode(response.body);
+
+      if (jsonResponse.containsKey('errors')) {
+        throw ServerException(jsonResponse['errors'][0]);
+      }
+      if (response.statusCode == 200) {
+        return UserModel.fromJson(jsonResponse);
+      } else {
+        throw ServerException('Response status code is ${response.statusCode}');
+      }
+    } catch (e) {
+      throw ServerException(e.toString());
     }
   }
 
