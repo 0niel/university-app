@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:rtu_mirea_app/domain/entities/score.dart';
+import 'package:rtu_mirea_app/presentation/typography.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 
@@ -41,7 +42,7 @@ class _ScoresChartModalState extends State<ScoresChartModal> {
       double average = 0;
       for (final score in scores) {
         final scoreValue = _getScoreByName(score.result);
-        
+
         if (scoreValue != -1) {
           count++;
           average += scoreValue;
@@ -49,7 +50,7 @@ class _ScoresChartModalState extends State<ScoresChartModal> {
       }
 
       average = average / count;
-      rating[semester] = average;
+      rating[semester] = double.parse(average.toStringAsFixed(2));
     }
 
     return rating;
@@ -73,32 +74,68 @@ class _ScoresChartModalState extends State<ScoresChartModal> {
 
   @override
   Widget build(BuildContext context) {
-    return SfCartesianChart(
-      backgroundColor: AppTheme.colors.background02,
-      plotAreaBorderWidth: 0,
-      title: ChartTitle(text: 'Средний балл успеваемости'),
-      legend:
-          Legend(isVisible: true, overflowMode: LegendItemOverflowMode.wrap),
-      primaryXAxis: NumericAxis(
-          labelFormat: '{value} семестр',
-          edgeLabelPlacement: EdgeLabelPlacement.shift,
+    // Add border radius to top left and top right. Container decoration does not work
+    return ClipRRect(
+      borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+      child: SfCartesianChart(
+        backgroundColor: AppTheme.colors.background02,
+        plotAreaBorderWidth: 0,
+        title: ChartTitle(
+          text: 'Успеваемость',
+          textStyle: AppTextStyle.titleS,
+          alignment: ChartAlignment.center,
+        ),
+        plotAreaBorderColor: AppTheme.colors.active.withOpacity(0.05),
+        borderWidth: 0,
+        legend: Legend(
+          isVisible: true,
+          overflowMode: LegendItemOverflowMode.wrap,
+          borderColor: Colors.transparent,
+          position: LegendPosition.bottom,
+          textStyle: AppTextStyle.bodyBold,
+          iconHeight: 10,
+          iconWidth: 10,
+        ),
+        primaryXAxis: NumericAxis(
+          labelFormat: '{value} сем.',
           interval: 1,
-          majorGridLines: const MajorGridLines(width: 0)),
-      primaryYAxis: NumericAxis(
-          labelFormat: '{value}',
           axisLine: const AxisLine(width: 0),
-          majorTickLines: const MajorTickLines(color: Colors.transparent)),
-      series: [
-        LineSeries<_ChartData, num>(
-            animationDuration: 2500,
+          labelStyle:
+              AppTextStyle.chip.copyWith(color: AppTheme.colors.deactive),
+          minimum: 1,
+          majorTickLines: const MajorTickLines(color: Colors.transparent),
+          edgeLabelPlacement: EdgeLabelPlacement.shift,
+          majorGridLines: const MajorGridLines(width: 0),
+        ),
+        primaryYAxis: NumericAxis(
+            labelFormat: '{value}',
+            axisLine: const AxisLine(width: 0),
+            labelStyle:
+                AppTextStyle.chip.copyWith(color: AppTheme.colors.deactive),
+            minimum: 2,
+            maximum: 5,
+            majorTickLines: const MajorTickLines(color: Colors.transparent)),
+        series: [
+          ColumnSeries<_ChartData, num>(
+            borderRadius: const BorderRadius.all(Radius.circular(8)),
+            animationDuration: 1500,
             dataSource: chartData,
             xValueMapper: (_ChartData sales, _) => sales.x,
             yValueMapper: (_ChartData sales, _) => sales.y,
-            width: 2,
+            width: 0.08,
+            color: AppTheme.colors.colorful01,
             name: 'Средний балл',
-            markerSettings: const MarkerSettings(isVisible: true)),
-      ],
-      tooltipBehavior: TooltipBehavior(enable: true),
+            markerSettings: const MarkerSettings(isVisible: false),
+            dataLabelSettings: DataLabelSettings(
+              isVisible: true,
+              textStyle: AppTextStyle.bodyBold.copyWith(
+                color: AppTheme.colors.active.withOpacity(0.8),
+              ),
+            ),
+          ),
+        ],
+        tooltipBehavior: TooltipBehavior(enable: true),
+      ),
     );
   }
 }
