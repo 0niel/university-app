@@ -5,7 +5,7 @@ class EduProgram extends Equatable {
   final String eduProgramCode;
   final String department;
   final String prodDepartment;
-  final String type;
+  final String? type;
 
   const EduProgram({
     required this.eduProgram,
