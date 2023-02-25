@@ -106,6 +106,13 @@ class _ProfileScoresPageState extends State<ProfileScoresPage> {
                               Row(children: [
                                 IconButton(
                                   onPressed: () => showModalBottomSheet(
+                                    shape: const RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.vertical(
+                                        top: Radius.circular(20),
+                                      ),
+                                    ),
+                                    backgroundColor:
+                                        AppTheme.colors.background02,
                                     context: context,
                                     builder: (BuildContext context) =>
                                         ScoresChartModal(scores: state.scores),
