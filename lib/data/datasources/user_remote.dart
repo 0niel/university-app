@@ -9,6 +9,7 @@ import 'package:rtu_mirea_app/data/models/employee_model.dart';
 import 'package:rtu_mirea_app/data/models/nfc_pass_model.dart';
 import 'package:rtu_mirea_app/data/models/score_model.dart';
 import 'package:rtu_mirea_app/data/models/user_model.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 
 abstract class UserRemoteData {
   Future<String> auth();
@@ -72,6 +73,8 @@ class UserRemoteDataImpl implements UserRemoteData {
         throw ServerException('Response status code is ${response.statusCode}');
       }
     } catch (e) {
+      Sentry.captureException(e, stackTrace: StackTrace.current);
+
       throw ServerException(e.toString());
     }
   }

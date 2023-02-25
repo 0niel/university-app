@@ -136,7 +136,7 @@ class ProfileDetailPage extends StatelessWidget {
                 const SizedBox(height: 23),
                 CopyTextBlockWithLabel(
                     label: "Вид образовательной программы",
-                    text: student.eduProgram.type),
+                    text: student.eduProgram.type ?? ""),
               ],
             ),
           ),
