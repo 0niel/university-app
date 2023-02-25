@@ -35,6 +35,9 @@ class _MapPageState extends State<MapPage> {
   final defaultScale = 11.0;
   final minScale = 1.0;
 
+  Offset _dragGesturePositon = Offset.zero;
+  bool _showMagnifier = false;
+
   final floors = [
     SvgPicture.asset('assets/map/floor_0.svg'),
     SvgPicture.asset('assets/map/floor_1.svg'),
@@ -53,7 +56,38 @@ class _MapPageState extends State<MapPage> {
             width: double.infinity,
             color: AppTheme.colors.background01,
           ),
-          _buildMap(),
+
+          Stack(
+            children: [
+              GestureDetector(
+                onLongPressMoveUpdate: (details) => setState(
+                  () {
+                    _dragGesturePositon = details.localPosition;
+                  },
+                ),
+                onLongPressStart: (_) => setState(() => _showMagnifier = true),
+                onLongPressEnd: (_) => setState(() => _showMagnifier = false),
+                child: _buildMap(),
+              ),
+              if (_showMagnifier)
+                Positioned(
+                  left: _dragGesturePositon.dx,
+                  top: _dragGesturePositon.dy,
+                  child: RawMagnifier(
+                    decoration: MagnifierDecoration(
+                      shape: CircleBorder(
+                        side: BorderSide(
+                          color: AppTheme.colors.deactive,
+                          width: 1,
+                        ),
+                      ),
+                    ),
+                    size: const Size(100, 100),
+                    magnificationScale: 2,
+                  ),
+                ),
+            ],
+          ),
           Align(
               alignment: Alignment.bottomLeft,
               child: Padding(

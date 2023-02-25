@@ -9,6 +9,7 @@ import 'package:rtu_mirea_app/data/models/employee_model.dart';
 import 'package:rtu_mirea_app/data/models/nfc_pass_model.dart';
 import 'package:rtu_mirea_app/data/models/score_model.dart';
 import 'package:rtu_mirea_app/data/models/user_model.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 
 abstract class UserRemoteData {
   Future<String> auth();
@@ -56,18 +57,25 @@ class UserRemoteDataImpl implements UserRemoteData {
     final response = await lksOauth2.oauth2Helper.get(
       '$_apiUrl/?action=getData&url=https://lk.mirea.ru/profile/',
     );
-    var jsonResponse = json.decode(response.body);
 
     log('Status code: ${response.statusCode}, Response: ${response.body}',
         name: 'getProfileData');
 
-    if (jsonResponse.containsKey('errors')) {
-      throw ServerException(jsonResponse['errors'][0]);
-    }
-    if (response.statusCode == 200) {
-      return UserModel.fromRawJson(response.body);
-    } else {
-      throw ServerException('Response status code is ${response.statusCode}');
+    try {
+      var jsonResponse = json.decode(response.body);
+
+      if (jsonResponse.containsKey('errors')) {
+        throw ServerException(jsonResponse['errors'][0]);
+      }
+      if (response.statusCode == 200) {
+        return UserModel.fromJson(jsonResponse);
+      } else {
+        throw ServerException('Response status code is ${response.statusCode}');
+      }
+    } catch (e) {
+      Sentry.captureException(e, stackTrace: StackTrace.current);
+
+      throw ServerException(e.toString());
     }
   }
 

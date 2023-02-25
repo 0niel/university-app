@@ -1,5 +1,6 @@
 import 'dart:io' show Platform;
 import 'package:auto_route/auto_route.dart';
+import 'package:dio/dio.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -31,14 +32,29 @@ import 'package:rtu_mirea_app/presentation/core/routes/routes.gr.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:intl/intl_standalone.dart';
 import 'package:rtu_mirea_app/service_locator.dart' as dependency_injection;
+import 'package:sentry_dio/sentry_dio.dart';
 import 'package:url_strategy/url_strategy.dart';
 import 'presentation/app_notifier.dart';
 import 'service_locator.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'firebase_options.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:provider/provider.dart';
+import 'package:sentry_logging/sentry_logging.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
+
+class GlobalBlocObserver extends BlocObserver {
+  @override
+  void onError(BlocBase bloc, Object error, StackTrace stackTrace) {
+    Sentry.captureException(error, stackTrace: stackTrace);
+
+    if (kDebugMode) {
+      print(stackTrace);
+    }
+
+    super.onError(bloc, error, stackTrace);
+  }
+}
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -51,22 +67,9 @@ Future<void> main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  // Crashlytics instance must be initialized only on non-web platforms. On web
-  // platforms, it is throw an exception.
-  if (!kIsWeb) {
-    if (kDebugMode) {
-      await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(false);
-    } else {
-      await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(true);
-    }
-  }
-
   await FirebaseAnalytics.instance.logAppOpen();
 
   if (kDebugMode) {
-    // Force disable Crashlytics collection while doing every day development
-    await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(false);
-
     // Clear Secure Storage
     var secureStorage = getIt<FlutterSecureStorage>();
     await secureStorage.deleteAll();
@@ -90,10 +93,43 @@ Future<void> main() async {
     Intl.systemLocale = await findSystemLocale();
   }
 
-  runApp(ChangeNotifierProvider<AppNotifier>(
-    create: (context) => getIt<AppNotifier>(),
-    child: const App(),
-  ));
+  Bloc.observer = GlobalBlocObserver();
+
+  await SentryFlutter.init(
+    (options) {
+      options.dsn =
+          const String.fromEnvironment('SENTRY_DSN', defaultValue: '');
+
+      // Set tracesSampleRate to 0.2 to capture 20% of transactions for
+      // performance monitoring.
+      options.tracesSampleRate = 0.2;
+
+      options.enableAutoPerformanceTracking = true;
+
+      options.attachScreenshot = true;
+
+      options.addIntegration(LoggingIntegration());
+    },
+    appRunner: () => runApp(
+      /// When a user experiences an error, an exception or a crash,
+      /// Sentry provides the ability to take a screenshot and include
+      /// it as an attachment.
+      SentryScreenshotWidget(
+        child: DefaultAssetBundle(
+          /// The AssetBundle instrumentation provides insight into how long
+          /// app takes to load its assets, such as files
+          bundle: SentryAssetBundle(),
+          child: ChangeNotifierProvider<AppNotifier>(
+            create: (context) => getIt<AppNotifier>(),
+            child: const App(),
+          ),
+        ),
+      ),
+    ),
+  ).then((value) {
+    final Dio dio = getIt<Dio>();
+    dio.addSentry();
+  });
 }
 
 class App extends StatelessWidget {
@@ -169,6 +205,7 @@ class App extends StatelessWidget {
                   analytics: FirebaseAnalytics.instance,
                 ),
                 AutoRouteObserver(),
+                SentryNavigatorObserver(),
               ],
             ),
             routeInformationProvider: appRouter.routeInfoProvider(),

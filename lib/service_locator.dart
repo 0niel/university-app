@@ -239,7 +239,8 @@ Future<void> setup() async {
   // Common / Core
 
   // External Dependency
-  getIt.registerLazySingleton(() => Dio(BaseOptions(receiveTimeout: 20000)));
+  final dio = Dio(BaseOptions(receiveTimeout: 20000));
+  getIt.registerLazySingleton(() => dio);
   final sharedPreferences = await SharedPreferences.getInstance();
   getIt.registerLazySingleton(() => sharedPreferences);
   const secureStorage = FlutterSecureStorage(
