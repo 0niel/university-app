@@ -4,12 +4,14 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:rtu_mirea_app/domain/entities/schedule.dart';
 import 'package:rtu_mirea_app/presentation/bloc/schedule_bloc/schedule_bloc.dart';
+import 'package:rtu_mirea_app/presentation/bloc/user_bloc/user_bloc.dart';
 import 'package:rtu_mirea_app/presentation/core/routes/routes.gr.dart';
 import 'package:rtu_mirea_app/presentation/pages/schedule/widgets/schedule_settings_drawer.dart';
 import 'package:rtu_mirea_app/presentation/pages/schedule/widgets/schedule_settings_modal.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:rtu_mirea_app/presentation/widgets/buttons/colorful_button.dart';
 import 'package:rtu_mirea_app/presentation/widgets/settings_switch_button.dart';
+import '../../widgets/feedback_modal.dart';
 import 'widgets/schedule_page_view.dart';
 import 'package:rtu_mirea_app/presentation/typography.dart';
 
@@ -263,6 +265,60 @@ class _SchedulePageState extends State<SchedulePage> {
                                 context.router.push(const GroupsSelectRoute()),
                           ),
                         ),
+                        Material(
+                          color: Colors.transparent,
+                          child: InkWell(
+                            child: Column(
+                              children: [
+                                Padding(
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 20),
+                                  child: Row(
+                                    children: [
+                                      SvgPicture.asset(
+                                        'assets/icons/social-sharing.svg',
+                                        height: 16,
+                                        width: 16,
+                                      ),
+                                      const SizedBox(width: 20),
+                                      Text("Проблемы с расписанием",
+                                          style: AppTextStyle.buttonL),
+                                    ],
+                                  ),
+                                ),
+                                Opacity(
+                                  opacity: 0.05,
+                                  child: Container(
+                                    width: double.infinity,
+                                    height: 1,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            onTap: () {
+                              final defaultText = state is ScheduleLoaded
+                                  ? 'Возникла проблема с расписанием группы ${state.activeGroup}:\n\n'
+                                  : null;
+
+                              final userBloc = context.read<UserBloc>();
+
+                              userBloc.state.maybeMap(
+                                logInSuccess: (value) =>
+                                    FeedbackBottomModalSheet.show(
+                                  context,
+                                  defaultText: defaultText,
+                                  defaultEmail: value.user.email,
+                                ),
+                                orElse: () => FeedbackBottomModalSheet.show(
+                                  context,
+                                  defaultText: defaultText,
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+
                         if (state is ScheduleLoaded)
                           Expanded(
                             child: Column(

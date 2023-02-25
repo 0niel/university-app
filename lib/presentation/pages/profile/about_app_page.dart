@@ -3,7 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:rtu_mirea_app/presentation/bloc/about_app_bloc/about_app_bloc.dart';
+import 'package:rtu_mirea_app/presentation/bloc/user_bloc/user_bloc.dart';
+import 'package:rtu_mirea_app/presentation/widgets/buttons/colorful_button.dart';
 import 'package:rtu_mirea_app/presentation/widgets/buttons/icon_button.dart';
+import 'package:rtu_mirea_app/presentation/widgets/feedback_modal.dart';
 import 'package:rtu_mirea_app/service_locator.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 import 'package:rtu_mirea_app/presentation/typography.dart';
@@ -202,6 +205,26 @@ class AboutAppPage extends StatelessWidget {
                         }),
                   ),
                 ],
+              ),
+              const SizedBox(height: 16),
+              SizedBox(
+                height: 40,
+                width: double.infinity,
+                child: ColorfulButton(
+                  text: 'Сообщить об ошибке',
+                  backgroundColor: AppTheme.colors.colorful07.withBlue(180),
+                  onClick: () {
+                    final userBloc = context.read<UserBloc>();
+
+                    userBloc.state.maybeMap(
+                      logInSuccess: (value) => FeedbackBottomModalSheet.show(
+                        context,
+                        defaultEmail: value.user.email,
+                      ),
+                      orElse: () => FeedbackBottomModalSheet.show(context),
+                    );
+                  },
+                ),
               ),
               const SizedBox(height: 24),
               Text('Контрибьюторы', style: AppTextStyle.h4),
