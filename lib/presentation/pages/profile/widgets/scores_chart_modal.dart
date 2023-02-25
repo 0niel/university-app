@@ -13,8 +13,38 @@ class ScoresChartModal extends StatefulWidget {
   State<ScoresChartModal> createState() => _ScoresChartModalState();
 }
 
+enum _TrendlineTypeCustom {
+  linear,
+  exponential,
+  power,
+  logarithmic,
+  polynomial,
+  movingAverage,
+  none,
+}
+
 class _ScoresChartModalState extends State<ScoresChartModal> {
   late List<_ChartData> chartData;
+
+  TrendlineType _getTrendlineType(_TrendlineTypeCustom type) {
+    switch (type) {
+      case _TrendlineTypeCustom.linear:
+        return TrendlineType.linear;
+      case _TrendlineTypeCustom.exponential:
+        return TrendlineType.exponential;
+      case _TrendlineTypeCustom.power:
+        return TrendlineType.power;
+      case _TrendlineTypeCustom.logarithmic:
+        return TrendlineType.logarithmic;
+      case _TrendlineTypeCustom.polynomial:
+        return TrendlineType.polynomial;
+      case _TrendlineTypeCustom.movingAverage:
+        return TrendlineType.movingAverage;
+      case _TrendlineTypeCustom.none:
+        break;
+    }
+    return TrendlineType.linear;
+  }
 
   int _getScoreByName(String name) {
     switch (name.toLowerCase()) {
@@ -72,6 +102,8 @@ class _ScoresChartModalState extends State<ScoresChartModal> {
     super.dispose();
   }
 
+  _TrendlineTypeCustom _trendlineType = _TrendlineTypeCustom.none;
+
   @override
   Widget build(BuildContext context) {
     // Add border radius to top left and top right. Container decoration does not work
@@ -95,28 +127,104 @@ class _ScoresChartModalState extends State<ScoresChartModal> {
           textStyle: AppTextStyle.bodyBold,
           iconHeight: 10,
           iconWidth: 10,
+          legendItemBuilder: (legendText, series, point, seriesIndex) =>
+              Container(
+            padding: const EdgeInsets.symmetric(vertical: 4),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Row(children: [
+                  Container(
+                    width: 10,
+                    height: 10,
+                    decoration: BoxDecoration(
+                      color: series.color,
+                      borderRadius: const BorderRadius.all(Radius.circular(5)),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    legendText,
+                    style: AppTextStyle.bodyBold.copyWith(
+                      color: AppTheme.colors.active.withOpacity(0.8),
+                    ),
+                  ),
+                ]),
+                const SizedBox(width: 8),
+                GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      _trendlineType = _TrendlineTypeCustom.values[
+                          (_TrendlineTypeCustom.values.indexOf(_trendlineType) +
+                                  1) %
+                              _TrendlineTypeCustom.values.length];
+                    });
+                  },
+                  child: Row(children: [
+                    Container(
+                      width: 20,
+                      height: 20,
+                      decoration: BoxDecoration(
+                        color: AppTheme.colors.active.withOpacity(0.1),
+                        borderRadius:
+                            const BorderRadius.all(Radius.circular(10)),
+                      ),
+                      child: Icon(
+                        Icons.trending_up,
+                        size: 16,
+                        color: AppTheme.colors.active,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      _trendlineType.toString().split('.').last,
+                      style: AppTextStyle.bodyBold.copyWith(
+                        color: AppTheme.colors.active.withOpacity(0.8),
+                      ),
+                    ),
+                  ]),
+                ),
+              ],
+            ),
+          ),
         ),
         primaryXAxis: NumericAxis(
           labelFormat: '{value} сем.',
-          interval: 1,
+          interval: 0.5,
           axisLine: const AxisLine(width: 0),
           labelStyle:
               AppTextStyle.chip.copyWith(color: AppTheme.colors.deactive),
-          minimum: 1,
+          minimum: 0.5,
           majorTickLines: const MajorTickLines(color: Colors.transparent),
           edgeLabelPlacement: EdgeLabelPlacement.shift,
           majorGridLines: const MajorGridLines(width: 0),
+          axisLabelFormatter: (axisLabelRenderArgs) => ChartAxisLabel(
+            axisLabelRenderArgs.value % 1 == 0 ? axisLabelRenderArgs.text : '',
+            AppTextStyle.chip.copyWith(
+              color: AppTheme.colors.deactive,
+            ),
+          ),
         ),
         primaryYAxis: NumericAxis(
-            labelFormat: '{value}',
-            axisLine: const AxisLine(width: 0),
-            labelStyle:
-                AppTextStyle.chip.copyWith(color: AppTheme.colors.deactive),
-            minimum: 2,
-            maximum: 5,
-            majorTickLines: const MajorTickLines(color: Colors.transparent)),
+          labelFormat: '{value}',
+          axisLine: const AxisLine(width: 0),
+          labelStyle:
+              AppTextStyle.chip.copyWith(color: AppTheme.colors.deactive),
+          maximum: 5,
+          majorTickLines: const MajorTickLines(color: Colors.transparent),
+        ),
         series: [
           ColumnSeries<_ChartData, num>(
+            trendlines: [
+              if (_trendlineType != _TrendlineTypeCustom.none)
+                Trendline(
+                  type: _getTrendlineType(_trendlineType),
+                  color: AppTheme.colors.colorful01.withOpacity(0.2),
+                  dashArray: [5, 5],
+                  width: 2,
+                ),
+            ],
             borderRadius: const BorderRadius.all(Radius.circular(8)),
             animationDuration: 1500,
             dataSource: chartData,
