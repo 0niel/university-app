@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:rtu_mirea_app/common/oauth.dart';
+import 'package:rtu_mirea_app/common/utils/connection_checker.dart';
 import 'package:rtu_mirea_app/data/datasources/app_settings_local.dart';
 import 'package:rtu_mirea_app/data/datasources/forum_local.dart';
 import 'package:rtu_mirea_app/data/datasources/forum_remote.dart';
@@ -248,7 +249,9 @@ Future<void> setup() async {
     encryptedSharedPreferences: true,
   ));
   getIt.registerLazySingleton(() => secureStorage);
-  getIt.registerLazySingleton(() => InternetConnectionCheckerPlus());
+  getIt.registerLazySingleton(() =>
+      InternetConnectionCheckerPlus.createInstance(
+          addresses: defaultAddresses));
   final PackageInfo packageInfo = await PackageInfo.fromPlatform();
   getIt.registerLazySingleton(() => packageInfo);
   getIt.registerLazySingleton(() => LksOauth2());
