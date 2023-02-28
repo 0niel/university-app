@@ -91,7 +91,8 @@ class UserRepositoryImpl implements UserRepository {
   }
 
   @override
-  Future<Either<Failure, Map<String, List<Score>>>> getScores() async {
+  Future<Either<Failure, Map<String, Map<String, List<Score>>>>>
+      getScores() async {
     try {
       final scores = await remoteDataSource.getScores();
       return Right(scores);

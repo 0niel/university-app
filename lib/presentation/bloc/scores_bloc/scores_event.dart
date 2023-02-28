@@ -8,7 +8,9 @@ abstract class ScoresEvent extends Equatable {
 }
 
 class LoadScores extends ScoresEvent {
-  const LoadScores();
+  const LoadScores({required this.studentCode});
+
+  final String studentCode;
 
   @override
   List<Object> get props => [];

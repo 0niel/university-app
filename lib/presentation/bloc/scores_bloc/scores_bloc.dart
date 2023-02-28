@@ -46,10 +46,18 @@ class ScoresBloc extends Bloc<ScoresEvent, ScoresState> {
       emit(ScoresLoading());
 
       final scores = await getScores();
+      final studentCode = event.studentCode;
 
       scores.fold((failure) => emit(ScoresLoadError()), (result) {
+        final scores = result[studentCode];
+
+        if (scores == null) {
+          emit(ScoresLoadError());
+          return;
+        }
+
         emit(ScoresLoaded(
-            scores: _sortScores(result), selectedSemester: result.keys.last));
+            scores: _sortScores(scores), selectedSemester: scores.keys.last));
       });
     }
   }
