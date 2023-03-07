@@ -1,6 +1,7 @@
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
+import 'package:oauth2_client/oauth2_helper.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:rtu_mirea_app/common/oauth.dart';
 import 'package:rtu_mirea_app/common/utils/connection_checker.dart';
@@ -212,8 +213,10 @@ Future<void> setup() async {
             localDataSource: getIt(),
           ));
 
-  getIt.registerLazySingleton<UserLocalData>(() =>
-      UserLocalDataImpl(sharedPreferences: getIt(), secureStorage: getIt()));
+  getIt.registerLazySingleton<UserLocalData>(() => UserLocalDataImpl(
+      sharedPreferences: getIt(),
+      secureStorage: getIt(),
+      oauthHelper: getIt<LksOauth2>().oauth2Helper));
   getIt.registerLazySingleton<UserRemoteData>(
       () => UserRemoteDataImpl(httpClient: getIt(), lksOauth2: getIt()));
   getIt.registerLazySingleton<ScheduleRemoteData>(
