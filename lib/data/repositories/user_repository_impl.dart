@@ -27,7 +27,6 @@ class UserRepositoryImpl implements UserRepository {
     if (await connectionChecker.hasConnection) {
       try {
         final authToken = await remoteDataSource.auth();
-        await localDataSource.setTokenToCache(authToken);
         return Right(authToken);
       } catch (e) {
         if (e is ServerException) {

@@ -1,11 +1,12 @@
 import 'dart:core';
 
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:oauth2_client/oauth2_helper.dart';
 import 'package:rtu_mirea_app/common/errors/exceptions.dart';
+import 'package:rtu_mirea_app/common/oauth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 abstract class UserLocalData {
-  Future<void> setTokenToCache(String token);
   Future<String> getTokenFromCache();
   Future<void> removeTokenFromCache();
 
@@ -17,27 +18,24 @@ abstract class UserLocalData {
 class UserLocalDataImpl implements UserLocalData {
   final SharedPreferences sharedPreferences;
   final FlutterSecureStorage secureStorage;
+  final OAuth2Helper oauthHelper;
 
   UserLocalDataImpl({
     required this.sharedPreferences,
     required this.secureStorage,
+    required this.oauthHelper,
   });
 
   @override
-  Future<void> setTokenToCache(String token) {
-    return secureStorage.write(key: 'lks_access_token', value: token);
-  }
-
-  @override
   Future<String> getTokenFromCache() async {
-    String? token = await secureStorage.read(key: 'lks_access_token');
+    var token = await oauthHelper.getToken();
     if (token == null) throw CacheException('Auth token are not set');
-    return Future.value(token);
+    return Future.value(token.accessToken);
   }
 
   @override
   Future<void> removeTokenFromCache() {
-    return secureStorage.delete(key: 'lks_access_token');
+    return oauthHelper.removeAllTokens();
   }
 
   @override
