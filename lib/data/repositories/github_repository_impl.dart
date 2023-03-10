@@ -1,7 +1,7 @@
 import 'package:dartz/dartz.dart';
-import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:rtu_mirea_app/common/errors/exceptions.dart';
 import 'package:rtu_mirea_app/common/errors/failures.dart';
+import 'package:rtu_mirea_app/common/utils/connection_checker.dart';
 import 'package:rtu_mirea_app/data/datasources/github_local.dart';
 import 'package:rtu_mirea_app/data/datasources/github_remote.dart';
 import 'package:rtu_mirea_app/domain/entities/contributor.dart';
@@ -10,7 +10,7 @@ import 'package:rtu_mirea_app/domain/repositories/github_repository.dart';
 class GithubRepositoryImpl implements GithubRepository {
   final GithubRemoteData remoteDataSource;
   final GithubLocalData localDataSource;
-  final InternetConnectionCheckerPlus connectionChecker;
+  final InternetConnectionChecker connectionChecker;
 
   GithubRepositoryImpl({
     required this.remoteDataSource,

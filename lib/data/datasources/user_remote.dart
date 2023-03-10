@@ -18,7 +18,7 @@ abstract class UserRemoteData {
   Future<List<AnnounceModel>> getAnnounces();
   Future<List<EmployeeModel>> getEmployees(String name);
   Future<List<AttendanceModel>> getAttendance(String dateStart, String dateEnd);
-  Future<Map<String, List<ScoreModel>>> getScores();
+  Future<Map<String, Map<String, List<ScoreModel>>>> getScores();
   Future<List<NfcPassModel>> getNfcPasses(
       String code, String studentId, String deviceId);
   Future<int> getNfcCode(String code, String studentId, String deviceId);
@@ -132,7 +132,7 @@ class UserRemoteDataImpl implements UserRemoteData {
   }
 
   @override
-  Future<Map<String, List<ScoreModel>>> getScores() async {
+  Future<Map<String, Map<String, List<ScoreModel>>>> getScores() async {
     final response = await lksOauth2.oauth2Helper.get(
       '$_apiUrl/?action=getData&url=https://lk.mirea.ru/learning/scores/',
     );
@@ -146,18 +146,30 @@ class UserRemoteDataImpl implements UserRemoteData {
     }
 
     if (response.statusCode == 200) {
-      Map<String, List<ScoreModel>> scores = {};
-      jsonResponse["SCORES"].values.first.forEach((key, value) {
-        if (scores.containsKey(key) == false) {
-          scores[key] = [];
-        }
+      Map<String, Map<String, List<ScoreModel>>> scoresByStudentCode = {};
+      final scoresRes = jsonResponse["SCORES"] as Map<String, dynamic>;
 
-        for (final score in value.values) {
-          scores[key]!.add(ScoreModel.fromJson(score[0]));
-        }
+      scoresRes.forEach((studentId, semesters) {
+        Map<String, List<ScoreModel>> scoresBySemester = {};
+        final semestersRes = semesters as Map<String, dynamic>;
+
+        semestersRes.forEach((semester, subjects) {
+          List<ScoreModel> scores = [];
+          final subjectsRes = subjects as Map<String, dynamic>;
+
+          subjectsRes.forEach((subjectId, score) {
+            for (final score in score) {
+              scores.add(ScoreModel.fromJson(score));
+            }
+          });
+
+          scoresBySemester[semester] = scores;
+        });
+
+        scoresByStudentCode[studentId] = scoresBySemester;
       });
 
-      return scores;
+      return scoresByStudentCode;
     } else {
       throw ServerException('Response status code is ${response.statusCode}');
     }

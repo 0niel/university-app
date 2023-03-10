@@ -1,6 +1,7 @@
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
+import 'package:oauth2_client/oauth2_helper.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:rtu_mirea_app/common/oauth.dart';
 import 'package:rtu_mirea_app/common/utils/connection_checker.dart';
@@ -75,7 +76,6 @@ import 'package:rtu_mirea_app/presentation/bloc/update_info_bloc/update_info_blo
 import 'package:rtu_mirea_app/presentation/bloc/user_bloc/user_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 
 import 'data/repositories/schedule_repository_impl.dart';
 
@@ -213,8 +213,10 @@ Future<void> setup() async {
             localDataSource: getIt(),
           ));
 
-  getIt.registerLazySingleton<UserLocalData>(() =>
-      UserLocalDataImpl(sharedPreferences: getIt(), secureStorage: getIt()));
+  getIt.registerLazySingleton<UserLocalData>(() => UserLocalDataImpl(
+      sharedPreferences: getIt(),
+      secureStorage: getIt(),
+      oauthHelper: getIt<LksOauth2>().oauth2Helper));
   getIt.registerLazySingleton<UserRemoteData>(
       () => UserRemoteDataImpl(httpClient: getIt(), lksOauth2: getIt()));
   getIt.registerLazySingleton<ScheduleRemoteData>(
@@ -249,9 +251,7 @@ Future<void> setup() async {
     encryptedSharedPreferences: true,
   ));
   getIt.registerLazySingleton(() => secureStorage);
-  getIt.registerLazySingleton(() =>
-      InternetConnectionCheckerPlus.createInstance(
-          addresses: defaultAddresses));
+  getIt.registerLazySingleton(() => InternetConnectionChecker.getInstance());
   final PackageInfo packageInfo = await PackageInfo.fromPlatform();
   getIt.registerLazySingleton(() => packageInfo);
   getIt.registerLazySingleton(() => LksOauth2());

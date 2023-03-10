@@ -1,7 +1,7 @@
-import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:rtu_mirea_app/common/errors/exceptions.dart';
 import 'package:rtu_mirea_app/common/errors/failures.dart';
 import 'package:dartz/dartz.dart';
+import 'package:rtu_mirea_app/common/utils/connection_checker.dart';
 import 'package:rtu_mirea_app/data/datasources/user_local.dart';
 import 'package:rtu_mirea_app/data/datasources/user_remote.dart';
 import 'package:rtu_mirea_app/domain/entities/announce.dart';
@@ -15,7 +15,7 @@ import 'package:rtu_mirea_app/domain/repositories/user_repository.dart';
 class UserRepositoryImpl implements UserRepository {
   final UserRemoteData remoteDataSource;
   final UserLocalData localDataSource;
-  final InternetConnectionCheckerPlus connectionChecker;
+  final InternetConnectionChecker connectionChecker;
 
   UserRepositoryImpl({
     required this.remoteDataSource,
@@ -27,7 +27,6 @@ class UserRepositoryImpl implements UserRepository {
     if (await connectionChecker.hasConnection) {
       try {
         final authToken = await remoteDataSource.auth();
-        await localDataSource.setTokenToCache(authToken);
         return Right(authToken);
       } catch (e) {
         if (e is ServerException) {
@@ -91,7 +90,8 @@ class UserRepositoryImpl implements UserRepository {
   }
 
   @override
-  Future<Either<Failure, Map<String, List<Score>>>> getScores() async {
+  Future<Either<Failure, Map<String, Map<String, List<Score>>>>>
+      getScores() async {
     try {
       final scores = await remoteDataSource.getScores();
       return Right(scores);
