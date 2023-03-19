@@ -7,23 +7,23 @@ part 'rooms_state.dart';
 part 'rooms_cubit.freezed.dart';
 
 class RoomsCubit extends Cubit<RoomsState> {
-  RoomsCubit() : super(RoomsState.initial());
+  RoomsCubit() : super(const RoomsState.initial());
 
   final dio = getIt<Dio>();
 
   final apiUrl = 'https://timetable.mirea.ru/api';
 
   Future<void> loadRoomData(String room) async {
-    emit(RoomsState.loading());
+    emit(const RoomsState.loading());
 
     try {
       final roomSearchResponse = await dio.get('$apiUrl/room/search/$room');
 
-      final roomSearchData =
-          roomSearchResponse.data as List<Map<String, dynamic>>;
+      final roomSearchData = List<Map<String, dynamic>>.from(
+          roomSearchResponse.data as List<dynamic>);
 
       if (roomSearchData.isEmpty) {
-        emit(RoomsState.notFound());
+        emit(const RoomsState.notFound());
         return;
       }
 
@@ -40,14 +40,16 @@ class RoomsCubit extends Cubit<RoomsState> {
       final roomScheduleResponse =
           await dio.get('$apiUrl/schedule/room/$roomId?date=$nowDate');
 
-      final schedule = roomScheduleResponse.data as List<Map<String, dynamic>>;
+      final schedule = List<Map<String, dynamic>>.from(
+          roomScheduleResponse.data as List<dynamic>);
 
       final isoDatetime = DateTime.now().toIso8601String();
       final statusResponse = await dio
           .get('$apiUrl/room/statuses/all?date_time=$isoDatetime&rooms=$room');
 
-      final status = (statusResponse.data as List<Map<String, dynamic>>)
-          .firstWhere((element) => element['name'] == room)['status'];
+      final status =
+          List<Map<String, dynamic>>.from(statusResponse.data as List<dynamic>)
+              .firstWhere((element) => element['name'] == room)['status'];
 
       final result = <String, dynamic>{
         'purpose': purpose,
@@ -58,7 +60,7 @@ class RoomsCubit extends Cubit<RoomsState> {
 
       emit(RoomsState.loaded(result));
     } catch (e) {
-      emit(RoomsState.error());
+      emit(const RoomsState.error());
     }
   }
 }

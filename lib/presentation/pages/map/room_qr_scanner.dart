@@ -7,12 +7,15 @@ import 'package:rtu_mirea_app/domain/entities/news_item.dart';
 import 'package:rtu_mirea_app/domain/entities/story.dart';
 import 'package:rtu_mirea_app/presentation/bloc/news_bloc/news_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/stories_bloc/stories_bloc.dart';
+import 'package:rtu_mirea_app/presentation/pages/map/room_schedule.dart';
 import 'package:rtu_mirea_app/presentation/widgets/buttons/app_settings_button.dart';
 import 'package:rtu_mirea_app/presentation/widgets/buttons/primary_tab_button.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:rtu_mirea_app/presentation/typography.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
+
+import 'cubit/rooms_cubit.dart';
 
 class RoomQrScannerPage extends StatefulWidget {
   const RoomQrScannerPage({Key? key}) : super(key: key);
@@ -38,6 +41,17 @@ class _RoomQrScannerPageState extends State<RoomQrScannerPage> {
           final Uint8List? image = capture.image;
           for (final barcode in barcodes) {
             if (barcode.rawValue == null) return;
+
+            BlocProvider.of<RoomsCubit>(context)
+                .loadRoomData(barcode.rawValue!);
+
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => RoomDataPage(
+                  roomName: barcode.rawValue!,
+                ),
+              ),
+            );
 
             cameraController.stop();
           }

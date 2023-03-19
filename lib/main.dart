@@ -29,6 +29,7 @@ import 'package:rtu_mirea_app/presentation/bloc/stories_bloc/stories_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/update_info_bloc/update_info_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/user_bloc/user_bloc.dart';
 import 'package:rtu_mirea_app/presentation/core/routes/routes.gr.dart';
+import 'package:rtu_mirea_app/presentation/pages/map/cubit/rooms_cubit.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:intl/intl_standalone.dart';
 import 'package:rtu_mirea_app/service_locator.dart' as dependency_injection;
@@ -172,6 +173,7 @@ class App extends StatelessWidget {
           create: (_) => getIt<UpdateInfoBloc>(),
           lazy: false, // We need to init it as soon as possible
         ),
+        BlocProvider<RoomsCubit>(create: (context) => getIt<RoomsCubit>()),
         if (Platform.isAndroid)
           BlocProvider<NfcPassBloc>(
             create: (_) => getIt<NfcPassBloc>()

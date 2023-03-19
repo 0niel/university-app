@@ -29,23 +29,25 @@ class TextBlockWithLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(children: [
-      ContainerLabel(label: label),
-      const SizedBox(height: 20),
-      Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Expanded(
-            child: Text(
-              text,
-              style: AppTextStyle.titleM,
-            ),
+    return Padding(
+        padding: const EdgeInsets.only(bottom: 12),
+        child: Column(children: [
+          ContainerLabel(label: label),
+          const SizedBox(height: 20),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Text(
+                  text,
+                  style: AppTextStyle.titleM,
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
-      const SizedBox(height: 12),
-      const Divider(),
-    ]);
+          const SizedBox(height: 12),
+          const Divider(),
+        ]));
   }
 }
 
@@ -134,36 +136,40 @@ class _RoomDataPageState extends State<RoomDataPage> {
   }
 
   Widget _buildInfo(Map<String, dynamic> data) {
-    return ListView(
-      children: [
-        TextBlockWithLabel(
-          label: 'Назначение',
-          text: data['purpose'],
-        ),
-        TextBlockWithLabel(
-          label: 'Загруженность',
-          text: data['workload'] + '%',
-        ),
-        TextBlockWithLabel(
-          label: 'Статус',
-          text: data['status'],
-        ),
-        if (data['status'] == 'Занята')
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 20),
+      child: ListView(
+        children: [
           TextBlockWithLabel(
-              label: 'Мероприятие',
-              text: getCurrentEvent(data['schedule']) == null
-                  ? 'Нет'
-                  : getCurrentEvent(data['schedule'])!['discipline']['name']),
-        if (data['status'] == 'Занята')
+            label: 'Назначение',
+            text: data['purpose'],
+          ),
           TextBlockWithLabel(
+            label: 'Загруженность',
+            text: '${data['workload']}%',
+          ),
+          TextBlockWithLabel(
+            label: 'Статус',
+            text: data['status'],
+          ),
+          if (data['status'] == 'Занята')
+            TextBlockWithLabel(
+                label: 'Мероприятие',
+                text: getCurrentEvent(data['schedule']) == null
+                    ? 'Нет'
+                    : getCurrentEvent(data['schedule'])!['discipline']['name']),
+          if (data['status'] == 'Занята')
+            TextBlockWithLabel(
               label: 'Ответственный',
               text: getCurrentEvent(data['schedule']) == null
                   ? 'Нет'
                   : (getCurrentEvent(data['schedule'])!['teachers']
                           as List<Map<String, dynamic>>)
                       .map((e) => e['name'])
-                      .join(', ')),
-      ],
+                      .join(', '),
+            ),
+        ],
+      ),
     );
   }
 
@@ -259,81 +265,94 @@ class _RoomDataPageState extends State<RoomDataPage> {
 //     ]
 //   },
 
+  String _getWeekdayByNum(int weekday) {
+    final weekdays = {
+      1: 'Понедельник',
+      2: 'Вторник',
+      3: 'Среда',
+      4: 'Четверг',
+      5: 'Пятница',
+      6: 'Суббота',
+    };
+    return weekdays[weekday] ?? 'Ошибка';
+  }
+
+  static Color getColorByType(String lessonType) {
+    if (lessonType.contains('лк') || lessonType.contains('лек')) {
+      return AppTheme.colors.colorful01;
+    } else if (lessonType.contains('лб') || lessonType.contains('лаб')) {
+      return AppTheme.colors.colorful07;
+    } else if (lessonType.contains('с/р')) {
+      return AppTheme.colors.colorful02;
+    } else {
+      return AppTheme.colors.colorful03;
+    }
+  }
+
   Widget _buildSchedule(Map<String, dynamic> data) {
     final schedule = data['schedule'];
     final now = DateTime.now();
 
-    return ListView.builder(
+    return ListView.separated(
       itemCount: schedule.length,
+      separatorBuilder: (context, index) => const Divider(),
       itemBuilder: (context, index) {
         final item = schedule[index];
 
         final timeStart = item['calls']['time_start'].toString();
         final timeEnd = item['calls']['time_end'].toString();
 
-        final timeStartHour = int.parse(timeStart.split(":")[0]);
-        final timeStartMinute = int.parse(timeStart.split(":")[1]);
+        final disciplineName = item['discipline']['name'];
+        final teachers = List<Map<String, dynamic>>.from(item['teachers'])
+            .map((e) => e['name'])
+            .join(', ');
+        final lessonType = item['lesson_type']['name'];
+        final weeks = item['weeks'].toString();
+        final weekday = _getWeekdayByNum(item['weekday']);
 
-        final timeEndHour = int.parse(timeEnd.split(":")[0]);
-        final timeEndMinute = int.parse(timeEnd.split(":")[1]);
-
-        final timeStartDateTime = DateTime(
-          now.year,
-          now.month,
-          now.day,
-          timeStartHour,
-          timeStartMinute,
-        );
-
-        final timeEndDateTime = DateTime(
-          now.year,
-          now.month,
-          now.day,
-          timeEndHour,
-          timeEndMinute,
-        );
-
-        final isCurrentEvent =
-            now.isAfter(timeStartDateTime) && now.isBefore(timeEndDateTime);
-
-        return Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          decoration: BoxDecoration(
-            color: isCurrentEvent
-                ? AppTheme.colors.colorful01
-                : AppTheme.colors.background02,
-            borderRadius: BorderRadius.circular(12),
+        return Card(
+          shadowColor: Colors.transparent,
+          color: AppTheme.colors.background03,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12.0),
           ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                '${timeStart} - $timeEnd',
-                style: AppTextStyle.bodyL.copyWith(
-                  color: isCurrentEvent
-                      ? AppTheme.colors.background02
-                      : AppTheme.colors.white,
-                ),
-              ),
-              Text(
-                '${item['discipline']['name']}',
-                style: AppTextStyle.bodyL.copyWith(
-                  color: isCurrentEvent
-                      ? AppTheme.colors.background02
-                      : AppTheme.colors.white,
-                ),
-              ),
-              Text(
-                (item['teachers'] as List<Map<String, dynamic>>)
-                    .map((e) => e['name'])
-                    .join(', '),
-                style: AppTextStyle.bodyL.copyWith(
-                  color: isCurrentEvent
-                      ? AppTheme.colors.background02
-                      : AppTheme.colors.white,
-                ),
-              ),
-            ],
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        '$weekday, $timeStart - $timeEnd',
+                        style: AppTextStyle.titleS,
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(100),
+                            color: getColorByType(lessonType)),
+                        height: 24,
+                        // width: 10 * 7,
+                        child: Text(lessonType, style: AppTextStyle.chip),
+                      ),
+                    ]),
+                const SizedBox(height: 12),
+                Text(disciplineName, style: AppTextStyle.titleM),
+                const SizedBox(height: 12),
+                Text(teachers,
+                    style: AppTextStyle.titleS.copyWith(
+                      color: AppTheme.colors.deactive,
+                    )),
+                const SizedBox(height: 8),
+                Text(weeks,
+                    style: AppTextStyle.titleS.copyWith(
+                      color: AppTheme.colors.deactive,
+                    )),
+              ],
+            ),
           ),
         );
       },
@@ -351,85 +370,88 @@ class _RoomDataPageState extends State<RoomDataPage> {
         children: [
           _buildTabButtons(context),
           Expanded(
-            child: BlocBuilder<RoomsCubit, RoomsState>(
-              builder: (context, state) {
-                return state.maybeMap(
-                  loading: (value) => const Center(
-                    child: CircularProgressIndicator(),
-                  ),
-                  notFound: (value) => Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          "Данные аудитории не найдены",
-                          style: AppTextStyle.titleM,
-                        ),
-                        const SizedBox(height: 12),
-                        Text(
-                          "Попробуйте изменить название аудитории",
-                          style: AppTextStyle.bodyL,
-                        ),
-                      ],
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: BlocBuilder<RoomsCubit, RoomsState>(
+                builder: (context, state) {
+                  return state.maybeMap(
+                    loading: (value) => const Center(
+                      child: CircularProgressIndicator(),
                     ),
-                  ),
-                  error: (value) => Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          "Произошла ошибка при загрузке данных",
-                          style: AppTextStyle.titleM,
-                        ),
-                        const SizedBox(height: 12),
-                        PrimaryButton(
-                          onClick: () {
-                            context
-                                .read<RoomsCubit>()
-                                .loadRoomData(widget.roomName);
-                          },
-                          text: 'Повторить',
-                        ),
-                      ],
+                    notFound: (value) => Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            "Данные аудитории не найдены",
+                            style: AppTextStyle.titleM,
+                          ),
+                          const SizedBox(height: 12),
+                          Text(
+                            "Попробуйте изменить название аудитории",
+                            style: AppTextStyle.bodyL,
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                  loaded: (roomStateValue) {
-                    if (roomStateValue.data.isEmpty) {
-                      return Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              "Данные аудитории не найдены",
-                              style: AppTextStyle.titleM,
-                            ),
-                            const SizedBox(height: 12),
-                            PrimaryButton(
-                              onClick: () {
-                                context
-                                    .read<RoomsCubit>()
-                                    .loadRoomData(widget.roomName);
-                              },
-                              text: 'Повторить',
-                            ),
-                          ],
-                        ),
+                    error: (value) => Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            "Произошла ошибка при загрузке данных",
+                            style: AppTextStyle.titleM,
+                          ),
+                          const SizedBox(height: 12),
+                          PrimaryButton(
+                            onClick: () {
+                              context
+                                  .read<RoomsCubit>()
+                                  .loadRoomData(widget.roomName);
+                            },
+                            text: 'Повторить',
+                          ),
+                        ],
+                      ),
+                    ),
+                    loaded: (roomStateValue) {
+                      if (roomStateValue.data.isEmpty) {
+                        return Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                "Данные аудитории не найдены",
+                                style: AppTextStyle.titleM,
+                              ),
+                              const SizedBox(height: 12),
+                              PrimaryButton(
+                                onClick: () {
+                                  context
+                                      .read<RoomsCubit>()
+                                      .loadRoomData(widget.roomName);
+                                },
+                                text: 'Повторить',
+                              ),
+                            ],
+                          ),
+                        );
+                      }
+                      return ValueListenableBuilder(
+                        valueListenable: _tabValueNotifier,
+                        builder: (context, value, child) {
+                          if (value == 0) {
+                            return _buildInfo(roomStateValue.data);
+                          } else {
+                            return _buildSchedule(roomStateValue.data);
+                          }
+                        },
                       );
-                    }
-                    return ValueListenableBuilder(
-                      valueListenable: _tabValueNotifier,
-                      builder: (context, value, child) {
-                        if (value == 0) {
-                          return _buildInfo(roomStateValue.data);
-                        } else {
-                          return _buildSchedule(roomStateValue.data);
-                        }
-                      },
-                    );
-                  },
-                  orElse: () => const SizedBox(),
-                );
-              },
+                    },
+                    orElse: () => const SizedBox(),
+                  );
+                },
+              ),
             ),
           ),
         ],

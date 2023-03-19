@@ -4,6 +4,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:rtu_mirea_app/presentation/bloc/map_cubit/map_cubit.dart';
 import 'package:rtu_mirea_app/presentation/pages/map/cubit/rooms_cubit.dart';
+import 'package:rtu_mirea_app/presentation/pages/map/room_qr_scanner.dart';
 import 'package:rtu_mirea_app/presentation/pages/map/widgets/map_scaling_button.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'room_schedule.dart';
@@ -211,11 +212,8 @@ class _MapPageState extends State<MapPage> {
           icon: const Icon(Icons.qr_code_scanner),
           color: AppTheme.colors.white,
           onPressed: () {
-            BlocProvider.of<RoomsCubit>(context).loadRoomData('А-10');
             Navigator.of(context).push(MaterialPageRoute(
-                builder: (context) => const RoomDataPage(
-                      roomName: 'А-10',
-                    )));
+                builder: (context) => const RoomQrScannerPage()));
           },
         ),
       ),
