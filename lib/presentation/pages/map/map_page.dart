@@ -6,6 +6,7 @@ import 'package:rtu_mirea_app/presentation/bloc/map_cubit/map_cubit.dart';
 import 'package:rtu_mirea_app/presentation/pages/map/widgets/map_scaling_button.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'widgets/map_navigation_button.dart';
+import 'package:webview_flutter/webview_flutter.dart';
 
 class MapPage extends StatefulWidget {
   const MapPage({Key? key}) : super(key: key);
@@ -26,6 +27,29 @@ class _MapPageState extends State<MapPage> {
     );
     _controller.outputStateStream.listen((value) =>
         context.read<MapCubit>().setMapScale(value.scale ?? maxScale));
+
+    webViewController = WebViewController()
+      ..setJavaScriptMode(JavaScriptMode.unrestricted)
+      ..setBackgroundColor(AppTheme.colors.background01)
+      ..setNavigationDelegate(
+        NavigationDelegate(
+          onProgress: (int progress) {
+            // Update loading bar.
+          },
+          onPageStarted: (String url) {},
+          onPageFinished: (String url) {},
+          onWebResourceError: (WebResourceError error) {},
+          onNavigationRequest: (NavigationRequest request) {
+            if (request.url
+                .startsWith('https://mirea-ninja.github.io/MireaMap/')) {
+              return NavigationDecision.navigate;
+            } else {
+              return NavigationDecision.prevent;
+            }
+          },
+        ),
+      )
+      ..loadRequest(Uri.parse('https://mirea-ninja.github.io/MireaMap/'));
   }
 
   final _controller = PhotoViewController();
@@ -38,6 +62,8 @@ class _MapPageState extends State<MapPage> {
   Offset _dragGesturePositon = Offset.zero;
   bool _showMagnifier = false;
 
+  late final webViewController;
+
   final floors = [
     SvgPicture.asset('assets/map/floor_0.svg'),
     SvgPicture.asset('assets/map/floor_1.svg'),
@@ -49,64 +75,71 @@ class _MapPageState extends State<MapPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack(
-        children: [
-          Container(
-            height: double.infinity,
-            width: double.infinity,
-            color: AppTheme.colors.background01,
-          ),
-
-          Stack(
-            children: [
-              GestureDetector(
-                onLongPressMoveUpdate: (details) => setState(
-                  () {
-                    _dragGesturePositon = details.localPosition;
-                  },
-                ),
-                onLongPressStart: (_) => setState(() => _showMagnifier = true),
-                onLongPressEnd: (_) => setState(() => _showMagnifier = false),
-                child: _buildMap(),
-              ),
-              if (_showMagnifier)
-                Positioned(
-                  left: _dragGesturePositon.dx,
-                  top: _dragGesturePositon.dy,
-                  child: RawMagnifier(
-                    decoration: MagnifierDecoration(
-                      shape: CircleBorder(
-                        side: BorderSide(
-                          color: AppTheme.colors.deactive,
-                          width: 1,
-                        ),
-                      ),
-                    ),
-                    size: const Size(100, 100),
-                    magnificationScale: 2,
-                  ),
-                ),
-            ],
-          ),
-          Align(
-              alignment: Alignment.bottomLeft,
-              child: Padding(
-                padding: const EdgeInsets.only(left: 70, bottom: 16),
-                child: _buildScalingButton(),
-              )),
-          // uncomment when this is completed
-          //_buildSearchBar(),
-          Align(
-            alignment: Alignment.bottomLeft,
-            child: Padding(
-              padding: const EdgeInsets.only(left: 10, bottom: 16),
-              child: _buildNavigation(),
-            ),
-          ),
-        ],
-      ),
+      body: WebViewWidget(controller: webViewController),
     );
   }
+
+  // @override
+  // Widget build(BuildContext context) {
+  //   return Scaffold(
+  //     body: Stack(
+  //       children: [
+  //         Container(
+  //           height: double.infinity,
+  //           width: double.infinity,
+  //           color: AppTheme.colors.background01,
+  //         ),
+
+  //         Stack(
+  //           children: [
+  //             GestureDetector(
+  //               onLongPressMoveUpdate: (details) => setState(
+  //                 () {
+  //                   _dragGesturePositon = details.localPosition;
+  //                 },
+  //               ),
+  //               onLongPressStart: (_) => setState(() => _showMagnifier = true),
+  //               onLongPressEnd: (_) => setState(() => _showMagnifier = false),
+  //               child: _buildMap(),
+  //             ),
+  //             if (_showMagnifier)
+  //               Positioned(
+  //                 left: _dragGesturePositon.dx,
+  //                 top: _dragGesturePositon.dy,
+  //                 child: RawMagnifier(
+  //                   decoration: MagnifierDecoration(
+  //                     shape: CircleBorder(
+  //                       side: BorderSide(
+  //                         color: AppTheme.colors.deactive,
+  //                         width: 1,
+  //                       ),
+  //                     ),
+  //                   ),
+  //                   size: const Size(100, 100),
+  //                   magnificationScale: 2,
+  //                 ),
+  //               ),
+  //           ],
+  //         ),
+  //         Align(
+  //             alignment: Alignment.bottomLeft,
+  //             child: Padding(
+  //               padding: const EdgeInsets.only(left: 70, bottom: 16),
+  //               child: _buildScalingButton(),
+  //             )),
+  //         // uncomment when this is completed
+  //         //_buildSearchBar(),
+  //         Align(
+  //           alignment: Alignment.bottomLeft,
+  //           child: Padding(
+  //             padding: const EdgeInsets.only(left: 10, bottom: 16),
+  //             child: _buildNavigation(),
+  //           ),
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
 
   // TODO: implement search bar without using [ImplicitlyAnimatedList].
   // Package implicitly_animated_reorderable_list is DISCONTINUED and
