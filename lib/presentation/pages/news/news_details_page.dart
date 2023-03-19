@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_html/flutter_html.dart';
-import 'package:flutter_html_iframe/flutter_html_iframe.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:flutter_widget_from_html_core/flutter_widget_from_html_core.dart';
 import 'package:intl/intl.dart';
 import 'package:rtu_mirea_app/common/utils/strapi_utils.dart';
 import 'package:rtu_mirea_app/domain/entities/news_item.dart';
@@ -63,21 +62,32 @@ class NewsDetailsPage extends StatelessWidget {
                       Padding(
                         // News text content
                         padding: const EdgeInsets.symmetric(vertical: 16),
-                        child: Html(
-                          data: newsItem.text,
-                          style: {
-                            "body": Style(
-                                fontStyle: AppTextStyle.bodyRegular.fontStyle),
-                          },
-                          customRenders: {
-                            // iframeRenderer to display the YouTube video player
-                            iframeMatcher(): iframeRender(),
-                          },
-                          onLinkTap:
-                              (String? url, context, attributes, element) {
+                        // child: Html(
+                        //   data: newsItem.text,
+                        //   style: {
+                        //     "body": Style(
+                        //         fontStyle: AppTextStyle.bodyRegular.fontStyle),
+                        //   },
+                        //   customRenders: {
+                        //     // iframeRenderer to display the YouTube video player
+                        //     iframeMatcher(): iframeRender(),
+                        //   },
+                        //   onLinkTap:
+                        //       (String? url, context, attributes, element) {
+                        //     if (url != null) {
+                        //       launchUrlString(url);
+                        //     }
+                        //   },
+                        // ),
+                        child: HtmlWidget(
+                          newsItem.text,
+                          textStyle: AppTextStyle.bodyRegular,
+                          onTapUrl: (String? url) async {
                             if (url != null) {
-                              launchUrlString(url);
+                              await launchUrlString(url);
+                              return true;
                             }
+                            return false;
                           },
                         ),
                       ),
