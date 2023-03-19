@@ -74,6 +74,7 @@ import 'package:rtu_mirea_app/presentation/bloc/scores_bloc/scores_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/stories_bloc/stories_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/update_info_bloc/update_info_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/user_bloc/user_bloc.dart';
+import 'package:rtu_mirea_app/presentation/pages/map/cubit/rooms_cubit.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
@@ -89,6 +90,8 @@ Future<void> setup() async {
       setAppSettings: getIt(),
     ),
   );
+
+  getIt.registerFactory(() => RoomsCubit());
 
   // BloC / Cubit
   getIt.registerFactory(

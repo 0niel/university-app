@@ -3,10 +3,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:rtu_mirea_app/presentation/bloc/map_cubit/map_cubit.dart';
+import 'package:rtu_mirea_app/presentation/pages/map/cubit/rooms_cubit.dart';
 import 'package:rtu_mirea_app/presentation/pages/map/widgets/map_scaling_button.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
+import 'room_schedule.dart';
 import 'widgets/map_navigation_button.dart';
-import 'package:webview_flutter/webview_flutter.dart';
 
 class MapPage extends StatefulWidget {
   const MapPage({Key? key}) : super(key: key);
@@ -27,29 +28,6 @@ class _MapPageState extends State<MapPage> {
     );
     _controller.outputStateStream.listen((value) =>
         context.read<MapCubit>().setMapScale(value.scale ?? maxScale));
-
-    webViewController = WebViewController()
-      ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..setBackgroundColor(AppTheme.colors.background01)
-      ..setNavigationDelegate(
-        NavigationDelegate(
-          onProgress: (int progress) {
-            // Update loading bar.
-          },
-          onPageStarted: (String url) {},
-          onPageFinished: (String url) {},
-          onWebResourceError: (WebResourceError error) {},
-          onNavigationRequest: (NavigationRequest request) {
-            if (request.url
-                .startsWith('https://mirea-ninja.github.io/MireaMap/')) {
-              return NavigationDecision.navigate;
-            } else {
-              return NavigationDecision.prevent;
-            }
-          },
-        ),
-      )
-      ..loadRequest(Uri.parse('https://mirea-ninja.github.io/MireaMap/'));
   }
 
   final _controller = PhotoViewController();
@@ -62,8 +40,6 @@ class _MapPageState extends State<MapPage> {
   Offset _dragGesturePositon = Offset.zero;
   bool _showMagnifier = false;
 
-  late final webViewController;
-
   final floors = [
     SvgPicture.asset('assets/map/floor_0.svg'),
     SvgPicture.asset('assets/map/floor_1.svg'),
@@ -75,71 +51,72 @@ class _MapPageState extends State<MapPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: WebViewWidget(controller: webViewController),
+      body: Stack(
+        children: [
+          Container(
+            height: double.infinity,
+            width: double.infinity,
+            color: AppTheme.colors.background01,
+          ),
+
+          Stack(
+            children: [
+              GestureDetector(
+                onLongPressMoveUpdate: (details) => setState(
+                  () {
+                    _dragGesturePositon = details.localPosition;
+                  },
+                ),
+                onLongPressStart: (_) => setState(() => _showMagnifier = true),
+                onLongPressEnd: (_) => setState(() => _showMagnifier = false),
+                child: _buildMap(),
+              ),
+              if (_showMagnifier)
+                Positioned(
+                  left: _dragGesturePositon.dx,
+                  top: _dragGesturePositon.dy,
+                  child: RawMagnifier(
+                    decoration: MagnifierDecoration(
+                      shape: CircleBorder(
+                        side: BorderSide(
+                          color: AppTheme.colors.deactive,
+                          width: 1,
+                        ),
+                      ),
+                    ),
+                    size: const Size(100, 100),
+                    magnificationScale: 2,
+                  ),
+                ),
+            ],
+          ),
+          Align(
+              alignment: Alignment.bottomLeft,
+              child: Padding(
+                padding: const EdgeInsets.only(left: 70, bottom: 16),
+                child: _buildScalingButton(),
+              )),
+          // uncomment when this is completed
+          //_buildSearchBar(),
+          Align(
+            alignment: Alignment.bottomLeft,
+            child: Padding(
+              padding: const EdgeInsets.only(left: 10, bottom: 16),
+              child: _buildNavigation(),
+            ),
+          ),
+          // Кнопка скана QR-кода
+          Align(
+            alignment: Alignment.bottomRight,
+            child: Padding(
+              padding: const EdgeInsets.only(right: 10, bottom: 16),
+              child: _buildQRButton(),
+            ),
+          ),
+        ],
+      ),
     );
   }
-
-  // @override
-  // Widget build(BuildContext context) {
-  //   return Scaffold(
-  //     body: Stack(
-  //       children: [
-  //         Container(
-  //           height: double.infinity,
-  //           width: double.infinity,
-  //           color: AppTheme.colors.background01,
-  //         ),
-
-  //         Stack(
-  //           children: [
-  //             GestureDetector(
-  //               onLongPressMoveUpdate: (details) => setState(
-  //                 () {
-  //                   _dragGesturePositon = details.localPosition;
-  //                 },
-  //               ),
-  //               onLongPressStart: (_) => setState(() => _showMagnifier = true),
-  //               onLongPressEnd: (_) => setState(() => _showMagnifier = false),
-  //               child: _buildMap(),
-  //             ),
-  //             if (_showMagnifier)
-  //               Positioned(
-  //                 left: _dragGesturePositon.dx,
-  //                 top: _dragGesturePositon.dy,
-  //                 child: RawMagnifier(
-  //                   decoration: MagnifierDecoration(
-  //                     shape: CircleBorder(
-  //                       side: BorderSide(
-  //                         color: AppTheme.colors.deactive,
-  //                         width: 1,
-  //                       ),
-  //                     ),
-  //                   ),
-  //                   size: const Size(100, 100),
-  //                   magnificationScale: 2,
-  //                 ),
-  //               ),
-  //           ],
-  //         ),
-  //         Align(
-  //             alignment: Alignment.bottomLeft,
-  //             child: Padding(
-  //               padding: const EdgeInsets.only(left: 70, bottom: 16),
-  //               child: _buildScalingButton(),
-  //             )),
-  //         // uncomment when this is completed
-  //         //_buildSearchBar(),
-  //         Align(
-  //           alignment: Alignment.bottomLeft,
-  //           child: Padding(
-  //             padding: const EdgeInsets.only(left: 10, bottom: 16),
-  //             child: _buildNavigation(),
-  //           ),
-  //         ),
-  //       ],
-  //     ),
-  //   );
-  // }
 
   // TODO: implement search bar without using [ImplicitlyAnimatedList].
   // Package implicitly_animated_reorderable_list is DISCONTINUED and
@@ -217,6 +194,30 @@ class _MapPageState extends State<MapPage> {
         backgroundDecoration:
             BoxDecoration(color: AppTheme.colors.background01),
         child: floors[state.floor],
+      ),
+    );
+  }
+
+  Widget _buildQRButton() {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppTheme.colors.background02,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      width: 50,
+      height: 50,
+      child: Center(
+        child: IconButton(
+          icon: const Icon(Icons.qr_code_scanner),
+          color: AppTheme.colors.white,
+          onPressed: () {
+            BlocProvider.of<RoomsCubit>(context).loadRoomData('А-10');
+            Navigator.of(context).push(MaterialPageRoute(
+                builder: (context) => const RoomDataPage(
+                      roomName: 'А-10',
+                    )));
+          },
+        ),
       ),
     );
   }

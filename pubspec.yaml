@@ -143,6 +143,8 @@ dependencies:
 
   salomon_bottom_bar: ^3.2.0
 
+  mobile_scanner: ^3.0.0
+
   # Get version name in runtime
   # https://pub.dev/packages/package_info_plus
   package_info_plus: ^3.0.2
