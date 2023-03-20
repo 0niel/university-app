@@ -13,10 +13,11 @@ class RoomsCubit extends Cubit<RoomsState> {
 
   final apiUrl = 'https://timetable.mirea.ru/api';
 
-  Future<void> loadRoomData(String room) async {
+  Future<void> loadRoomData(String originalRoom) async {
     emit(const RoomsState.loading());
 
     try {
+      final room = originalRoom.split(' ')[1];
       final roomSearchResponse = await dio.get('$apiUrl/room/search/$room');
 
       final roomSearchData = List<Map<String, dynamic>>.from(
