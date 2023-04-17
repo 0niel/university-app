@@ -24,8 +24,16 @@ class _MapPageState extends State<MapPage> {
       rotationFocusPoint: _controller.rotationFocusPoint,
       scale: defaultScale,
     );
-    _controller.outputStateStream.listen((value) =>
-        context.read<MapCubit>().setMapScale(value.scale ?? maxScale));
+
+    _controller.outputStateStream.listen((value) {
+      double scale = value.scale ?? defaultScale;
+      if (scale > maxScale) {
+        _controller.scale = maxScale;
+      } else if (scale < minScale) {
+        _controller.scale = minScale;
+      }
+      context.read<MapCubit>().setMapScale(scale);
+    });
   }
 
   final _controller = PhotoViewController();
