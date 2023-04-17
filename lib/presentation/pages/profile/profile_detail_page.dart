@@ -62,30 +62,30 @@ class ProfileDetailPage extends StatelessWidget {
                         SizedBox(
                           width: 160,
                           child: BadgedContainer(
-                              label: 'Группа',
-                              text: student.academicGroup,
-                              onClick: () {}),
+                            label: 'Группа',
+                            text: student.academicGroup,
+                          ),
                         ),
                         SizedBox(
                           width: 160,
                           child: BadgedContainer(
-                              label: 'Личный номер',
-                              text: student.personalNumber,
-                              onClick: () {}),
+                            label: 'Личный номер',
+                            text: student.personalNumber,
+                          ),
                         ),
                         SizedBox(
                           width: 160,
                           child: BadgedContainer(
-                              label: 'Курс',
-                              text: student.course.toString(),
-                              onClick: () {}),
+                            label: 'Курс',
+                            text: student.course.toString(),
+                          ),
                         ),
                         SizedBox(
                           width: 160,
                           child: BadgedContainer(
-                              label: 'Состояние',
-                              text: student.status,
-                              onClick: () {}),
+                            label: 'Состояние',
+                            text: student.status,
+                          ),
                         ),
                       ]),
                 ),
