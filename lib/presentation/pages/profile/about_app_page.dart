@@ -1,3 +1,4 @@
+import 'package:unicons/unicons.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -177,8 +178,9 @@ class AboutAppPage extends StatelessWidget {
                       height: 40,
                       width: 90,
                       child: SocialIconButton(
-                          assetImage:
-                              const AssetImage('assets/icons/github.png'),
+                          icon: Icon(UniconsLine.github,
+                              color:
+                                  Theme.of(context).colorScheme.onBackground),
                           onClick: () {
                             launchUrlString(
                               'https://github.com/mirea-ninja/rtu-mirea-mobile',
@@ -203,8 +205,9 @@ class AboutAppPage extends StatelessWidget {
                       height: 40,
                       width: 90,
                       child: SocialIconButton(
-                          assetImage:
-                              const AssetImage('assets/icons/telegram.png'),
+                          icon: Icon(UniconsLine.telegram,
+                              color:
+                                  Theme.of(context).colorScheme.onBackground),
                           onClick: () {
                             launchUrlString(
                               'https://t.me/mirea_ninja_chat/1',
