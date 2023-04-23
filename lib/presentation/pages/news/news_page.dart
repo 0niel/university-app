@@ -275,12 +275,10 @@ class _NewsPageState extends State<NewsPage> {
 
   void _setupScrollController(ScrollController controller) {
     controller.addListener(() {
-      if (controller.position.atEdge) {
-        if (controller.position.pixels != 0) {
-          context
-              .read<NewsBloc>()
-              .add(NewsLoadEvent(isImportant: _tabValueNotifier.value == 1));
-        }
+      if (controller.position.pixels == controller.position.maxScrollExtent) {
+        context
+            .read<NewsBloc>()
+            .add(NewsLoadEvent(isImportant: _tabValueNotifier.value == 1));
       }
     });
   }
