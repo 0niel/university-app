@@ -198,6 +198,11 @@ dependencies:
   sentry_dio: ^6.20.1
   logging: ^1.0.2
 
+  # 1000+ beautiful icons to use in you dream project, with all the customization Flutter 
+  # provides
+  # See https://pub.dev/packages/unicons
+  unicons: any
+
 
 dev_dependencies:
   # The "flutter_lints" package below contains a set of recommended lints to
