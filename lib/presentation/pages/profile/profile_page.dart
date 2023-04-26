@@ -109,8 +109,8 @@ class _UserLoggedInView extends StatelessWidget {
           SizedBox(
             width: 146,
             height: 45,
-            child: SocialIconButton(
-              assetImage: const AssetImage('assets/icons/gerb.ico'),
+            child: SocialIconButton.asset(
+              assetPath: 'assets/icons/gerb.ico',
               onClick: () {
                 launchUrlString("https://lk.mirea.ru/auth",
                     mode: LaunchMode.externalApplication);

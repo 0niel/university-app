@@ -250,12 +250,16 @@ class UserRemoteDataImpl implements UserRemoteData {
       if (jsonResponse["ROWS"] != null) {
         Map<String, dynamic>.from(jsonResponse["ROWS"]).forEach((date, row) {
           if (row.containsKey("START")) {
-            attendance.add(
-                AttendanceModel.fromJson(row["START"]).copyWith(date: date));
+            if (row["START"] != null) {
+              attendance.add(
+                  AttendanceModel.fromJson(row["START"]).copyWith(date: date));
+            }
           }
           if (row.containsKey("END")) {
-            attendance
-                .add(AttendanceModel.fromJson(row["END"]).copyWith(date: date));
+            if (row["END"] != null) {
+              attendance.add(
+                  AttendanceModel.fromJson(row["END"]).copyWith(date: date));
+            }
           }
         });
       }
