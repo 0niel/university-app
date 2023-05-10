@@ -190,6 +190,7 @@ class _SchedulePageViewState extends State<SchedulePageView> {
         TableCalendar(
           // pageJumpingEnabled: true,
           weekendDays: const [DateTime.sunday],
+
           calendarBuilders: CalendarBuilders(
             markerBuilder: (context, day, events) {
               return Row(
@@ -231,6 +232,8 @@ class _SchedulePageViewState extends State<SchedulePageView> {
           ),
           calendarStyle: CalendarStyle(
             rangeHighlightColor: AppTheme.colors.secondary,
+            cellAlignment: Alignment.center,
+            cellMargin: const EdgeInsets.all(10),
           ),
           daysOfWeekStyle: DaysOfWeekStyle(
             weekdayStyle:
