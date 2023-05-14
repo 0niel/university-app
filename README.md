@@ -8,10 +8,16 @@
 
 # Скриншоты
 <p float="left">
-  <img src="https://user-images.githubusercontent.com/51058739/130845744-9cc1b085-cd9f-4e02-9a54-40c213b076a7.jpg" width="150" />
-  <img src="https://user-images.githubusercontent.com/51058739/130845737-15fe67ce-0893-4d42-86d7-f739aa981c14.jpg" width="150" />
-  <img src="https://user-images.githubusercontent.com/51058739/130845743-1d2fb68f-27d8-468d-ac1c-5249cc5bcbae.jpg" width="150" /> 
-  <img src="https://user-images.githubusercontent.com/51058739/130845914-5658f14a-e946-4f0e-ae05-fc10292643ca.jpg" width="150" /> 
+  <img src="https://github.com/mirea-ninja/rtu-mirea-mobile/assets/51058739/0306ec8f-c6cd-49c2-a3eb-043a3bf9e1ce" width="150" />
+  <img src="https://github.com/mirea-ninja/rtu-mirea-mobile/assets/51058739/e57e07fa-3e55-40fd-bac0-393b460f2925" width="150" />
+  <img src="https://github.com/mirea-ninja/rtu-mirea-mobile/assets/51058739/c1010e39-2eb5-4e9f-acba-81bd2368b174" width="150" />
+  <img src="https://github.com/mirea-ninja/rtu-mirea-mobile/assets/51058739/72f8fdf2-05b8-4cb0-8834-d3cef30fa899" width="150" />
+ </p>
+ <p float="left">
+  <img src="https://github.com/mirea-ninja/rtu-mirea-mobile/assets/51058739/2cb09f12-9185-47f5-9125-3f5afa1b52be" width="150" />
+  <img src="https://github.com/mirea-ninja/rtu-mirea-mobile/assets/51058739/f0df7fc8-f3f5-4706-84f8-6d16041f5337" width="150" />
+  <img src="https://github.com/mirea-ninja/rtu-mirea-mobile/assets/51058739/b8929457-b8b5-4a56-8e34-15afe6350de0" width="150" />
+  <img src="https://github.com/mirea-ninja/rtu-mirea-mobile/assets/51058739/a477c6c2-3082-49d3-ab65-dac371ab3b11" width="150" />
 </p>
 
 # Самостоятельная сборка проекта
