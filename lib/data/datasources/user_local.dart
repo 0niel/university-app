@@ -28,7 +28,7 @@ class UserLocalDataImpl implements UserLocalData {
 
   @override
   Future<String> getTokenFromCache() async {
-    var token = await oauthHelper.getToken();
+    var token = await oauthHelper.getTokenFromStorage();
     if (token == null) throw CacheException('Auth token are not set');
     return Future.value(token.accessToken);
   }
