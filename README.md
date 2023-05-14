@@ -12,12 +12,14 @@
   <img src="https://github.com/mirea-ninja/rtu-mirea-mobile/assets/51058739/e57e07fa-3e55-40fd-bac0-393b460f2925" width="150" />
   <img src="https://github.com/mirea-ninja/rtu-mirea-mobile/assets/51058739/c1010e39-2eb5-4e9f-acba-81bd2368b174" width="150" />
   <img src="https://github.com/mirea-ninja/rtu-mirea-mobile/assets/51058739/72f8fdf2-05b8-4cb0-8834-d3cef30fa899" width="150" />
+  <img src="https://github.com/mirea-ninja/rtu-mirea-mobile/assets/121052717/64ae1e7f-19e4-473c-a3f0-93ae64439551" width="150" />
  </p>
  <p float="left">
   <img src="https://github.com/mirea-ninja/rtu-mirea-mobile/assets/51058739/2cb09f12-9185-47f5-9125-3f5afa1b52be" width="150" />
   <img src="https://github.com/mirea-ninja/rtu-mirea-mobile/assets/51058739/f0df7fc8-f3f5-4706-84f8-6d16041f5337" width="150" />
   <img src="https://github.com/mirea-ninja/rtu-mirea-mobile/assets/51058739/b8929457-b8b5-4a56-8e34-15afe6350de0" width="150" />
   <img src="https://github.com/mirea-ninja/rtu-mirea-mobile/assets/51058739/a477c6c2-3082-49d3-ab65-dac371ab3b11" width="150" />
+  <img src="https://github.com/mirea-ninja/rtu-mirea-mobile/assets/121052717/73476d7c-eeda-47ef-8f81-80c4a95c0ca5" width="150" />
 </p>
 
 # Самостоятельная сборка проекта
