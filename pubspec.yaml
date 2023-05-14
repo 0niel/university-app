@@ -91,11 +91,11 @@ dependencies:
 
   # A Flutter widget rendering static HTML and CSS as Flutter widgets.
   # See https://pub.dev/packages/flutter_html
-  flutter_html: ^3.0.0-alpha.5
+  flutter_html: ^3.0.0-beta.1
 
   # Iframe widget for flutter_html
   # See https://pub.dev/packages/flutter_html_iframe
-  flutter_html_iframe: ^3.0.0-alpha.3
+  flutter_html_iframe: ^3.0.0-beta.1
 
   # The Font Awesome Icon pack available as Flutter Icons. 
   # Provides 1600 additional icons to use in your apps.
