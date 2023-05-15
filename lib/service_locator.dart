@@ -1,7 +1,6 @@
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
-import 'package:oauth2_client/oauth2_helper.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:rtu_mirea_app/common/oauth.dart';
 import 'package:rtu_mirea_app/common/utils/connection_checker.dart';
@@ -242,7 +241,7 @@ Future<void> setup() async {
   // Common / Core
 
   // External Dependency
-  final dio = Dio(BaseOptions(receiveTimeout: 20000));
+  final dio = Dio(BaseOptions(receiveTimeout: const Duration(seconds: 30)));
   getIt.registerLazySingleton(() => dio);
   final sharedPreferences = await SharedPreferences.getInstance();
   getIt.registerLazySingleton(() => sharedPreferences);

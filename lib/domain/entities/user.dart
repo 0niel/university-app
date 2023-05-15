@@ -4,7 +4,11 @@ import 'student.dart';
 
 class User extends Equatable {
   final int id;
+
+  /// Email in edu-mirea.ru domain
   final String login;
+
+  /// Personal email
   final String email;
   final String name;
   final String lastName;

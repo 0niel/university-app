@@ -61,8 +61,8 @@ class ProfileAnnouncesPage extends StatelessWidget {
                                 margin: Margins.all(0),
                               ),
                             },
-                            onLinkTap:
-                                (String? url, context, attributes, element) {
+                            onLinkTap: (String? url,
+                                Map<String, String> attributes, _) {
                               if (url != null) {
                                 launchUrlString(url);
                               }

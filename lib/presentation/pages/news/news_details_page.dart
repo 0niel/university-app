@@ -69,12 +69,12 @@ class NewsDetailsPage extends StatelessWidget {
                             "body": Style(
                                 fontStyle: AppTextStyle.bodyRegular.fontStyle),
                           },
-                          customRenders: {
-                            // iframeRenderer to display the YouTube video player
-                            iframeMatcher(): iframeRender(),
-                          },
+                          extensions: const [
+                            // to display the YouTube video player
+                            IframeHtmlExtension(),
+                          ],
                           onLinkTap:
-                              (String? url, context, attributes, element) {
+                              (String? url, Map<String, String> attributes, _) {
                             if (url != null) {
                               launchUrlString(url);
                             }

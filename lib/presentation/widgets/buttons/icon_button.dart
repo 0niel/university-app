@@ -5,13 +5,28 @@ import 'package:rtu_mirea_app/presentation/typography.dart';
 class SocialIconButton extends StatelessWidget {
   const SocialIconButton({
     Key? key,
-    required this.assetImage,
+    required this.icon,
     required this.onClick,
     this.text,
+    this.assetPath,
   }) : super(key: key);
-  final AssetImage assetImage;
+
+  final Icon icon;
   final Function onClick;
   final String? text;
+  final String? assetPath;
+
+  factory SocialIconButton.asset({
+    required String assetPath,
+    required Function onClick,
+    String? text,
+  }) =>
+      SocialIconButton(
+        icon: const Icon(Icons.add),
+        onClick: onClick,
+        text: text,
+        assetPath: assetPath,
+      );
 
   @override
   Widget build(BuildContext context) {
@@ -36,16 +51,14 @@ class SocialIconButton extends StatelessWidget {
                       .copyWith(color: AppTheme.colors.active),
                 ),
                 const SizedBox(width: 8),
-                Image(
-                  image: assetImage,
-                  height: 16.0,
-                ),
+                assetPath != null
+                    ? Image.asset(assetPath!, height: 16, width: 16)
+                    : icon,
               ],
             )
-          : Image(
-              image: assetImage,
-              height: 16.0,
-            ),
+          : assetPath != null
+              ? Image.asset(assetPath!, height: 16, width: 16)
+              : icon,
       onPressed: () {
         onClick();
       },
