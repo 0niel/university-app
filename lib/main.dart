@@ -8,8 +8,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:intl/intl.dart';
-
 import 'package:rtu_mirea_app/common/oauth.dart';
+
 import 'package:rtu_mirea_app/common/widget_data_init.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:rtu_mirea_app/presentation/bloc/about_app_bloc/about_app_bloc.dart';
@@ -103,8 +103,6 @@ Future<void> main() async {
       // Set tracesSampleRate to 0.2 to capture 20% of transactions for
       // performance monitoring.
       options.tracesSampleRate = 0.2;
-
-      options.enableAutoPerformanceTracking = true;
 
       options.attachScreenshot = true;
 

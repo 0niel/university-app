@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:get/get.dart';
 import 'package:rtu_mirea_app/domain/entities/attendance.dart';
 import 'package:rtu_mirea_app/presentation/bloc/attendance_bloc/attendance_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/user_bloc/user_bloc.dart';
@@ -72,10 +71,10 @@ class _ProfileAttendancePageState extends State<ProfileAttendancePage> {
       }
 
       if (entryAttendance != null) {
-        entryExitAttendance.add(entryAttendance!);
+        entryExitAttendance.add(entryAttendance);
       }
       if (exitAttendance != null) {
-        entryExitAttendance.add(exitAttendance!);
+        entryExitAttendance.add(exitAttendance);
       }
       result.add(entryExitAttendance);
     });

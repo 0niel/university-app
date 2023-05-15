@@ -86,9 +86,9 @@ class NewsItemWidget extends StatelessWidget {
 
                     case LoadState.failed:
                       return GestureDetector(
-                        child: Stack(
+                        child: const Stack(
                           fit: StackFit.expand,
-                          children: const <Widget>[
+                          children: <Widget>[
                             Positioned(
                               bottom: 0.0,
                               left: 0.0,

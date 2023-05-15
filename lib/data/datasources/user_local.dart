@@ -3,7 +3,6 @@ import 'dart:core';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:oauth2_client/oauth2_helper.dart';
 import 'package:rtu_mirea_app/common/errors/exceptions.dart';
-import 'package:rtu_mirea_app/common/oauth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 abstract class UserLocalData {

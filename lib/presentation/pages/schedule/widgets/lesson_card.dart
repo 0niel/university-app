@@ -89,7 +89,7 @@ class LessonCard extends StatelessWidget {
                 ],
               ),
             ),
-            SizedBox(
+            const SizedBox(
               width: 8,
             ),
             Container(
