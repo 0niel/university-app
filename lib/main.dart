@@ -67,7 +67,9 @@ Future<void> main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  await FirebaseAnalytics.instance.logAppOpen();
+  if (Platform.isAndroid || Platform.isIOS) {
+    await FirebaseAnalytics.instance.logAppOpen();
+  }
 
   if (kDebugMode) {
     // Clear Secure Storage

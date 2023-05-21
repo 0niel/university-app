@@ -14,21 +14,47 @@ class HomePage extends StatelessWidget {
     AutoRouter.of(context); // <-- this is needed to initialize the router
     return BlocConsumer<AppCubit, AppState>(builder: (context, state) {
       if (state is AppClean) {
-        return AutoTabsScaffold(
-          routes: const [
-            NewsRouter(),
-            ScheduleRouter(),
-            MapRoute(),
-            ProfileRouter()
-          ],
-          navigatorObservers: () => [
-            HeroController(),
-          ],
-          bottomNavigationBuilder: (context, tabsRouter) {
-            return AppBottomNavigationBar(
-              index: tabsRouter.activeIndex,
-              onClick: tabsRouter.setActiveIndex,
-            );
+        return LayoutBuilder(
+          builder: (context, constraints) {
+            if (constraints.maxWidth > 600) {
+              return Scaffold(
+                appBar: AppBar(title: const Text('RTU Mirea App')),
+                body: AutoTabsRouter(
+                  routes: const [
+                    NewsRouter(),
+                    ScheduleRouter(),
+                    MapRoute(),
+                    ProfileRouter()
+                  ],
+                  builder: (context, child, animation) {
+                    return Row(
+                      children: [
+                        _buildSidebar(context),
+                        Expanded(child: child),
+                      ],
+                    );
+                  },
+                ),
+              );
+            } else {
+              return AutoTabsScaffold(
+                routes: const [
+                  NewsRouter(),
+                  ScheduleRouter(),
+                  MapRoute(),
+                  ProfileRouter()
+                ],
+                navigatorObservers: () => [
+                  HeroController(),
+                ],
+                bottomNavigationBuilder: (context, tabsRouter) {
+                  return AppBottomNavigationBar(
+                    index: tabsRouter.activeIndex,
+                    onClick: tabsRouter.setActiveIndex,
+                  );
+                },
+              );
+            }
           },
         );
       }
@@ -40,6 +66,42 @@ class HomePage extends StatelessWidget {
         context.router.replace(const OnBoardingRoute());
       }
     });
+  }
+
+  Widget _buildSidebar(BuildContext context) {
+    final tabsRouter = AutoTabsRouter.of(context);
+    return Container(
+      width: 240,
+      color: AppTheme.colors.background01,
+      child: ListView(
+        children: [
+          ListTile(
+            leading: const Icon(Icons.library_books_rounded),
+            title: const Text("Новости"),
+            selected: tabsRouter.activeIndex == 0,
+            onTap: () => tabsRouter.setActiveIndex(0),
+          ),
+          ListTile(
+            leading: const Icon(Icons.calendar_today_rounded),
+            title: const Text("Расписание"),
+            selected: tabsRouter.activeIndex == 1,
+            onTap: () => tabsRouter.setActiveIndex(1),
+          ),
+          ListTile(
+            leading: const Icon(Icons.map_rounded),
+            title: const Text("Карта"),
+            selected: tabsRouter.activeIndex == 2,
+            onTap: () => tabsRouter.setActiveIndex(2),
+          ),
+          ListTile(
+            leading: const Icon(Icons.person),
+            title: const Text("Профиль"),
+            selected: tabsRouter.activeIndex == 3,
+            onTap: () => tabsRouter.setActiveIndex(3),
+          ),
+        ],
+      ),
+    );
   }
 }
 

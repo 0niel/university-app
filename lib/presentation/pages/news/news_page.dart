@@ -149,6 +149,27 @@ class _NewsPageState extends State<NewsPage> {
     );
   }
 
+  int _getColumnCount(double screenWidth) {
+    if (screenWidth < 900) {
+      return 1;
+    } else if (screenWidth < 1200) {
+      return 3;
+    } else {
+      return 4;
+    }
+  }
+
+  double _computeWidth(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+
+    // Compute view size for desktop with sidebar
+    final viewSize = screenWidth > 600 ? screenWidth - 240 : screenWidth;
+
+    final columnCount = _getColumnCount(viewSize);
+
+    return (viewSize - (columnCount - 1) * 10) / columnCount;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -242,22 +263,34 @@ class _NewsPageState extends State<NewsPage> {
                     }
                     return Expanded(
                       child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           const SizedBox(height: 12),
                           Expanded(
-                            child: ListView.builder(
-                              itemCount: news.length + (isLoading ? 1 : 0),
-                              itemBuilder: (context, index) {
-                                if (index < news.length) {
-                                  return NewsItemWidget(
-                                      newsItem: news[index],
-                                      onClickNewsTag: (tag) => _filterNewsByTag(
-                                          context.read<NewsBloc>(), tag));
-                                } else {
-                                  return const Center(
-                                      child: CircularProgressIndicator());
-                                }
-                              },
+                            child: SingleChildScrollView(
+                              child: Wrap(
+                                alignment: WrapAlignment.start,
+                                spacing: 0,
+                                runSpacing: 0,
+                                children: [
+                                  for (var index = 0;
+                                      index < news.length;
+                                      index++)
+                                    SizedBox(
+                                      width: _computeWidth(context),
+                                      child: NewsItemWidget(
+                                        newsItem: news[index],
+                                        onClickNewsTag: (tag) =>
+                                            _filterNewsByTag(
+                                                context.read<NewsBloc>(), tag),
+                                      ),
+                                    ),
+                                  if (isLoading)
+                                    const Center(
+                                      child: CircularProgressIndicator(),
+                                    ),
+                                ],
+                              ),
                             ),
                           ),
                         ],

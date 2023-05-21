@@ -29,7 +29,7 @@ class DefaultFirebaseOptions {
         case TargetPlatform.linux:
           break;
         case TargetPlatform.windows:
-          break;
+          return windows;
       }
     } catch (e) {
       // If we can't determine the platform, we'll just return the web options.
@@ -74,14 +74,13 @@ class DefaultFirebaseOptions {
     iosBundleId: 'mirea.ninja.mireaapp',
   );
 
-  static const FirebaseOptions macos = FirebaseOptions(
+  static const FirebaseOptions macos = ios;
+
+  static const FirebaseOptions windows = FirebaseOptions(
     apiKey: 'AIzaSyAYZ5JlWF94jBGrcds7fSi5uMN1zmuieec',
-    appId: '1:510978291920:ios:dd9496a1680c72828c46d5',
+    appId: '1:510978291920:windows:dd9496a1680c72828c46d5',
     messagingSenderId: '510978291920',
     projectId: 'rtu-mirea-app',
     storageBucket: 'rtu-mirea-app.appspot.com',
-    iosClientId:
-        '510978291920-31sgk97k4bifhc0ebpamk9m46om2e50r.apps.googleusercontent.com',
-    iosBundleId: 'mirea.ninja.mireaapp',
   );
 }
