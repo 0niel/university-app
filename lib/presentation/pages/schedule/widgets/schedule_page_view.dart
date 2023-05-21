@@ -183,219 +183,238 @@ class _SchedulePageViewState extends State<SchedulePageView> {
     }
   }
 
+  Widget _buildCalendar(bool isDesktop) {
+    return TableCalendar(
+      // pageJumpingEnabled: true,
+      weekendDays: const [DateTime.sunday],
+
+      calendarBuilders: CalendarBuilders(
+        markerBuilder: (context, day, events) {
+          return Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: List.generate(
+              events.length,
+              (index) => Container(
+                width: 6,
+                height: 6,
+                margin: const EdgeInsets.symmetric(horizontal: 0.3),
+                decoration: BoxDecoration(
+                  color: LessonCard.getColorByType(
+                      (events[index] as Lesson).types),
+                  shape: BoxShape.circle,
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+      calendarFormat: isDesktop ? CalendarFormat.month : _calendarFormat,
+      firstDay: _firstCalendarDay,
+      lastDay: _lastCalendarDay,
+      sixWeekMonthsEnforced: true,
+      startingDayOfWeek: StartingDayOfWeek.monday,
+      headerStyle: HeaderStyle(
+        formatButtonVisible: !isDesktop,
+        formatButtonShowsNext: false,
+        titleTextStyle: AppTextStyle.captionL,
+        formatButtonTextStyle: AppTextStyle.buttonS,
+        titleTextFormatter: (DateTime date, dynamic locale) {
+          String dateStr = DateFormat.yMMMM(locale).format(date);
+          String weekStr = _selectedWeek.toString();
+          return '$dateStr\nвыбрана $weekStr неделя';
+        },
+        formatButtonDecoration: BoxDecoration(
+            border: Border.fromBorderSide(
+                BorderSide(color: AppTheme.colors.deactive)),
+            borderRadius: const BorderRadius.all(Radius.circular(12.0))),
+      ),
+      calendarStyle: CalendarStyle(
+        rangeHighlightColor: AppTheme.colors.secondary,
+        cellAlignment: Alignment.center,
+        cellMargin: const EdgeInsets.all(10),
+      ),
+      daysOfWeekStyle: DaysOfWeekStyle(
+        weekdayStyle:
+            AppTextStyle.body.copyWith(color: AppTheme.colors.deactive),
+        weekendStyle:
+            AppTextStyle.body.copyWith(color: AppTheme.colors.deactiveDarker),
+      ),
+      focusedDay: _focusedDay,
+      availableCalendarFormats: const {
+        CalendarFormat.month: 'Месяц',
+        CalendarFormat.twoWeeks: '2 недели',
+        CalendarFormat.week: 'Неделя'
+      },
+      eventLoader: (day) {
+        final int week = CalendarUtils.getCurrentWeek(mCurrentDate: day);
+        final int weekday = day.weekday - 1;
+
+        var lessons = _getLessonsByWeek(week, widget.schedule);
+        if (weekday == 6) {
+          return [];
+        } else {
+          return lessons[weekday];
+        }
+      },
+      locale: 'ru_RU',
+      selectedDayPredicate: (day) {
+        // Use `selectedDayPredicate` to determine which day is currently selected.
+        // If this returns true, then `day` will be marked as selected.
+
+        // Using `isSameDay` is recommended to disregard
+        // the time-part of compared DateTime objects.
+        return isSameDay(_selectedDay, day);
+      },
+      onDaySelected: (selectedDay, focusedDay) {
+        if (!isSameDay(_selectedDay, selectedDay)) {
+          final int currentNewWeek =
+              CalendarUtils.getCurrentWeek(mCurrentDate: selectedDay);
+          // Call `setState()` when updating the selected day
+          setState(() {
+            _selectedWeek = currentNewWeek;
+            _selectedPage = selectedDay.difference(_firstCalendarDay).inDays;
+            _selectedDay = selectedDay;
+            _focusedDay = _validateDayInRange(focusedDay);
+            _controller.jumpToPage(_selectedPage);
+          });
+        }
+      },
+
+      onFormatChanged: (format) {
+        if (_calendarFormat != format) {
+          // update settings in local data
+          BlocProvider.of<ScheduleBloc>(context)
+              .add(ScheduleUpdateSettingsEvent(calendarFormat: format.index));
+
+          // Call `setState()` when updating calendar format
+          setState(() {
+            _calendarFormat = format;
+          });
+        }
+      },
+      onPageChanged: (focusedDay) {
+        // No need to call `setState()` here
+        _focusedDay = _validateDayInRange(focusedDay);
+      },
+      onHeaderTapped: (date) {
+        final currentDate = DateTime.now();
+        setState(() {
+          _focusedDay = _validateDayInRange(currentDate);
+          _selectedDay = currentDate;
+          _selectedPage = _selectedDay.difference(_firstCalendarDay).inDays;
+          _selectedWeek =
+              CalendarUtils.getCurrentWeek(mCurrentDate: _selectedDay);
+          _controller.jumpToPage(_selectedPage);
+        });
+      },
+      onHeaderLongPressed: (date) {
+        // set up the AlertDialog
+        AlertDialog alert = AlertDialog(
+          contentPadding: const EdgeInsets.fromLTRB(8.0, 20.0, 8.0, 8.0),
+          backgroundColor: AppTheme.colors.background02,
+          title: const Text("Выберите неделю"),
+          content: Wrap(
+            spacing: 4.0,
+            alignment: WrapAlignment.center,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            runAlignment: WrapAlignment.center,
+            children: [
+              for (int i = 1; i <= CalendarUtils.kMaxWeekInSemester; i++)
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    foregroundColor: Colors.white,
+                    backgroundColor: AppTheme.colors.primary,
+                    shadowColor: Colors.transparent,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      if (i == 1) {
+                        _selectedDay = CalendarUtils.getDaysInWeek(
+                            i)[CalendarUtils.getSemesterStart().weekday - 1];
+                      } else {
+                        _selectedDay = CalendarUtils.getDaysInWeek(i)[0];
+                      }
+
+                      _selectedDay = _selectedDay;
+                      _selectedPage =
+                          _selectedDay.difference(_firstCalendarDay).inDays;
+                      _selectedWeek = i;
+                      _focusedDay = _validateDayInRange(_selectedDay);
+                      _controller.jumpToPage(_selectedPage);
+                    });
+                  },
+                  child: Text(i.toString()),
+                ),
+            ],
+          ),
+        );
+
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return alert;
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildPageView() {
+    return PageView.builder(
+      controller: _controller,
+      physics: const ClampingScrollPhysics(),
+      onPageChanged: (value) {
+        setState(() {
+          // if the pages are moved by swipes
+          if ((value - _selectedPage).abs() == 1) {
+            if (value > _selectedPage) {
+              _selectedDay = _selectedDay.add(const Duration(days: 1));
+            } else if (value < _selectedPage) {
+              _selectedDay = _selectedDay.subtract(const Duration(days: 1));
+            }
+            final int currentNewWeek =
+                CalendarUtils.getCurrentWeek(mCurrentDate: _selectedDay);
+            _selectedWeek = currentNewWeek;
+          }
+          _focusedDay = _validateDayInRange(_selectedDay);
+          _selectedPage = value;
+        });
+      },
+      itemCount: _lastCalendarDay.difference(_firstCalendarDay).inDays,
+      itemBuilder: (context, index) {
+        final DateTime lessonDay = _firstCalendarDay.add(Duration(days: index));
+        final int week = CalendarUtils.getCurrentWeek(mCurrentDate: lessonDay);
+        final int lessonIndex =
+            week >= 1 && week <= CalendarUtils.kMaxWeekInSemester
+                ? lessonDay.weekday - 1
+                : 6;
+        return _buildPageViewContent(context, lessonIndex, week);
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        TableCalendar(
-          // pageJumpingEnabled: true,
-          weekendDays: const [DateTime.sunday],
-
-          calendarBuilders: CalendarBuilders(
-            markerBuilder: (context, day, events) {
-              return Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: List.generate(
-                  events.length,
-                  (index) => Container(
-                    width: 6,
-                    height: 6,
-                    margin: const EdgeInsets.symmetric(horizontal: 0.3),
-                    decoration: BoxDecoration(
-                      color: LessonCard.getColorByType(
-                          (events[index] as Lesson).types),
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                ),
-              );
-            },
-          ),
-          calendarFormat: _calendarFormat,
-          firstDay: _firstCalendarDay,
-          lastDay: _lastCalendarDay,
-          sixWeekMonthsEnforced: true,
-          startingDayOfWeek: StartingDayOfWeek.monday,
-          headerStyle: HeaderStyle(
-            formatButtonShowsNext: false,
-            titleTextStyle: AppTextStyle.captionL,
-            formatButtonTextStyle: AppTextStyle.buttonS,
-            titleTextFormatter: (DateTime date, dynamic locale) {
-              String dateStr = DateFormat.yMMMM(locale).format(date);
-              String weekStr = _selectedWeek.toString();
-              return '$dateStr\nвыбрана $weekStr неделя';
-            },
-            formatButtonDecoration: BoxDecoration(
-                border: Border.fromBorderSide(
-                    BorderSide(color: AppTheme.colors.deactive)),
-                borderRadius: const BorderRadius.all(Radius.circular(12.0))),
-          ),
-          calendarStyle: CalendarStyle(
-            rangeHighlightColor: AppTheme.colors.secondary,
-            cellAlignment: Alignment.center,
-            cellMargin: const EdgeInsets.all(10),
-          ),
-          daysOfWeekStyle: DaysOfWeekStyle(
-            weekdayStyle:
-                AppTextStyle.body.copyWith(color: AppTheme.colors.deactive),
-            weekendStyle: AppTextStyle.body
-                .copyWith(color: AppTheme.colors.deactiveDarker),
-          ),
-          focusedDay: _focusedDay,
-          availableCalendarFormats: const {
-            CalendarFormat.month: 'Месяц',
-            CalendarFormat.twoWeeks: '2 недели',
-            CalendarFormat.week: 'Неделя'
-          },
-          eventLoader: (day) {
-            final int week = CalendarUtils.getCurrentWeek(mCurrentDate: day);
-            final int weekday = day.weekday - 1;
-
-            var lessons = _getLessonsByWeek(week, widget.schedule);
-            if (weekday == 6) {
-              return [];
-            } else {
-              return lessons[weekday];
-            }
-          },
-          locale: 'ru_RU',
-          selectedDayPredicate: (day) {
-            // Use `selectedDayPredicate` to determine which day is currently selected.
-            // If this returns true, then `day` will be marked as selected.
-
-            // Using `isSameDay` is recommended to disregard
-            // the time-part of compared DateTime objects.
-            return isSameDay(_selectedDay, day);
-          },
-          onDaySelected: (selectedDay, focusedDay) {
-            if (!isSameDay(_selectedDay, selectedDay)) {
-              final int currentNewWeek =
-                  CalendarUtils.getCurrentWeek(mCurrentDate: selectedDay);
-              // Call `setState()` when updating the selected day
-              setState(() {
-                _selectedWeek = currentNewWeek;
-                _selectedPage =
-                    selectedDay.difference(_firstCalendarDay).inDays;
-                _selectedDay = selectedDay;
-                _focusedDay = _validateDayInRange(focusedDay);
-                _controller.jumpToPage(_selectedPage);
-              });
-            }
-          },
-          onFormatChanged: (format) {
-            if (_calendarFormat != format) {
-              // update settings in local data
-              BlocProvider.of<ScheduleBloc>(context).add(
-                  ScheduleUpdateSettingsEvent(calendarFormat: format.index));
-
-              // Call `setState()` when updating calendar format
-              setState(() {
-                _calendarFormat = format;
-              });
-            }
-          },
-          onPageChanged: (focusedDay) {
-            // No need to call `setState()` here
-            _focusedDay = _validateDayInRange(focusedDay);
-          },
-          onHeaderTapped: (date) {
-            final currentDate = DateTime.now();
-            setState(() {
-              _focusedDay = _validateDayInRange(currentDate);
-              _selectedDay = currentDate;
-              _selectedPage = _selectedDay.difference(_firstCalendarDay).inDays;
-              _selectedWeek =
-                  CalendarUtils.getCurrentWeek(mCurrentDate: _selectedDay);
-              _controller.jumpToPage(_selectedPage);
-            });
-          },
-          onHeaderLongPressed: (date) {
-            // set up the AlertDialog
-            AlertDialog alert = AlertDialog(
-                contentPadding: const EdgeInsets.fromLTRB(8.0, 20.0, 8.0, 8.0),
-                backgroundColor: AppTheme.colors.background02,
-                title: const Text("Выберите неделю"),
-                content: Wrap(
-                  spacing: 4.0,
-                  alignment: WrapAlignment.center,
-                  crossAxisAlignment: WrapCrossAlignment.center,
-                  runAlignment: WrapAlignment.center,
-                  children: [
-                    for (int i = 1; i <= CalendarUtils.kMaxWeekInSemester; i++)
-                      ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          foregroundColor: Colors.white,
-                          backgroundColor: AppTheme.colors.primary,
-                          shadowColor: Colors.transparent,
-                        ),
-                        onPressed: () {
-                          setState(() {
-                            if (i == 1) {
-                              _selectedDay = CalendarUtils.getDaysInWeek(i)[
-                                  CalendarUtils.getSemesterStart().weekday - 1];
-                            } else {
-                              _selectedDay = CalendarUtils.getDaysInWeek(i)[0];
-                            }
-
-                            _selectedDay = _selectedDay;
-                            _selectedPage = _selectedDay
-                                .difference(_firstCalendarDay)
-                                .inDays;
-                            _selectedWeek = i;
-                            _focusedDay = _validateDayInRange(_selectedDay);
-                            _controller.jumpToPage(_selectedPage);
-                          });
-                        },
-                        child: Text(i.toString()),
-                      ),
-                  ],
-                ));
-
-            // show the dialog
-            showDialog(
-                context: context,
-                builder: (BuildContext context) {
-                  return alert;
-                });
-          },
-        ),
-        const SizedBox(height: 25),
-        Expanded(
-          child: PageView.builder(
-              controller: _controller,
-              physics: const ClampingScrollPhysics(),
-              onPageChanged: (value) {
-                setState(() {
-                  // if the pages are moved by swipes
-                  if ((value - _selectedPage).abs() == 1) {
-                    if (value > _selectedPage) {
-                      _selectedDay = _selectedDay.add(const Duration(days: 1));
-                    } else if (value < _selectedPage) {
-                      _selectedDay =
-                          _selectedDay.subtract(const Duration(days: 1));
-                    }
-                    final int currentNewWeek = CalendarUtils.getCurrentWeek(
-                        mCurrentDate: _selectedDay);
-                    _selectedWeek = currentNewWeek;
-                  }
-                  _focusedDay = _validateDayInRange(_selectedDay);
-                  _selectedPage = value;
-                });
-              },
-              itemCount: _lastCalendarDay.difference(_firstCalendarDay).inDays,
-              itemBuilder: (context, index) {
-                final DateTime lessonDay =
-                    _firstCalendarDay.add(Duration(days: index));
-                final int week =
-                    CalendarUtils.getCurrentWeek(mCurrentDate: lessonDay);
-                final int lessonIndex =
-                    week >= 1 && week <= CalendarUtils.kMaxWeekInSemester
-                        ? lessonDay.weekday - 1
-                        : 6;
-                return _buildPageViewContent(context, lessonIndex, week);
-              }),
-        )
-      ],
+    return LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints constraints) {
+        final isDesktop = constraints.maxWidth > 750;
+        if (isDesktop) {
+          return Row(
+            children: [
+              Expanded(child: _buildPageView()),
+              Expanded(child: _buildCalendar(isDesktop)),
+            ],
+          );
+        } else {
+          return Column(
+            children: [
+              _buildCalendar(false),
+              const SizedBox(height: 25),
+              Expanded(child: _buildPageView()),
+            ],
+          );
+        }
+      },
     );
   }
 }
