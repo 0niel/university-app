@@ -251,11 +251,22 @@ class _SchedulePageViewState extends State<SchedulePageView> {
             final int week = CalendarUtils.getCurrentWeek(mCurrentDate: day);
             final int weekday = day.weekday - 1;
 
-            var lessons = _getLessonsByWeek(week, widget.schedule);
+            final lessons = _getLessonsByWeek(week, widget.schedule);
             if (weekday == 6) {
               return [];
             } else {
-              return lessons[weekday];
+              final Map<String, Lesson> uniqueLessonEvents = {};
+
+              for (var lesson in lessons[weekday]) {
+                final lessonNameAndTime = '${lesson.name}${lesson.timeStart}';
+                if (uniqueLessonEvents.containsKey(lessonNameAndTime)) {
+                  continue;
+                }
+
+                uniqueLessonEvents[lessonNameAndTime] = lesson;
+              }
+
+              return uniqueLessonEvents.values.toList();
             }
           },
           locale: 'ru_RU',
