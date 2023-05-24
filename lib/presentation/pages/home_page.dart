@@ -1,3 +1,4 @@
+import 'dart:io' show Platform;
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -13,6 +14,8 @@ import '../constants.dart';
 class HomePage extends StatelessWidget {
   const HomePage({Key? key}) : super(key: key);
 
+  static final isDesktop = !(Platform.isAndroid || Platform.isIOS);
+
   @override
   Widget build(BuildContext context) {
     AutoRouter.of(context); // <-- this is needed to initialize the router
@@ -24,11 +27,13 @@ class HomePage extends StatelessWidget {
               return Scaffold(
                 appBar: AppBar(title: const Text('RTU MIREA App')),
                 body: AutoTabsRouter(
-                  routes: const [
-                    NewsRouter(),
-                    ScheduleRouter(),
-                    MapRoute(),
-                    AboutAppDesktopRoute(),
+                  routes: [
+                    const NewsRouter(),
+                    const ScheduleRouter(),
+                    const MapRoute(),
+                    isDesktop
+                        ? const AboutAppDesktopRoute()
+                        : const ProfileRouter(),
                   ],
                   builder: (context, child, animation) {
                     return Row(
@@ -42,11 +47,13 @@ class HomePage extends StatelessWidget {
               );
             } else {
               return AutoTabsScaffold(
-                routes: const [
-                  NewsRouter(),
-                  ScheduleRouter(),
-                  MapRoute(),
-                  ProfileRouter()
+                routes: [
+                  const NewsRouter(),
+                  const ScheduleRouter(),
+                  const MapRoute(),
+                  isDesktop
+                      ? const AboutAppDesktopRoute()
+                      : const ProfileRouter(),
                 ],
                 navigatorObservers: () => [
                   HeroController(),
@@ -100,13 +107,21 @@ class HomePage extends StatelessWidget {
             onTap: () => tabsRouter.setActiveIndex(2),
             selectedColor: AppTheme.colors.primary,
           ),
-          ListTile(
-            leading: const Icon(UniconsLine.info_circle),
-            title: Text("О приложении", style: AppTextStyle.tab),
-            selected: tabsRouter.activeIndex == 3,
-            onTap: () => tabsRouter.setActiveIndex(3),
-            selectedColor: AppTheme.colors.primary,
-          ),
+          isDesktop
+              ? ListTile(
+                  leading: const Icon(UniconsLine.info_circle),
+                  title: Text("О приложении", style: AppTextStyle.tab),
+                  selected: tabsRouter.activeIndex == 3,
+                  onTap: () => tabsRouter.setActiveIndex(3),
+                  selectedColor: AppTheme.colors.primary,
+                )
+              : ListTile(
+                  leading: const Icon(Icons.person),
+                  title: Text("Профиль", style: AppTextStyle.tab),
+                  selected: tabsRouter.activeIndex == 3,
+                  onTap: () => tabsRouter.setActiveIndex(3),
+                  selectedColor: AppTheme.colors.primary,
+                ),
         ],
       ),
     );
@@ -148,11 +163,17 @@ class AppBottomNavigationBar extends StatelessWidget {
             title: const Text("Карта"),
             selectedColor: AppTheme.colors.primary,
           ),
-          SalomonBottomBarItem(
-            icon: const Icon(Icons.person),
-            title: const Text("Профиль"),
-            selectedColor: AppTheme.colors.primary,
-          ),
+          HomePage.isDesktop
+              ? SalomonBottomBarItem(
+                  icon: const Icon(UniconsLine.info_circle),
+                  title: const Text("О приложении"),
+                  selectedColor: AppTheme.colors.primary,
+                )
+              : SalomonBottomBarItem(
+                  icon: const Icon(Icons.person),
+                  title: const Text("Профиль"),
+                  selectedColor: AppTheme.colors.primary,
+                ),
         ],
       ),
     );
