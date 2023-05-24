@@ -95,8 +95,18 @@ flutter run --dart-define=SENTRY_DSN=YOUR_DSN --dart-define=LK_CLIENT_ID=YOUR_CL
 # Установка
 Следить за актуальностью приложения и скачать готовый билд вы можете на [странице релизов](https://github.com/Ninja-Official/rtu-mirea-mobile/releases) этого репозитория.
 
-# Примите участие
+# Ваше участие
 Это приложение и все относящиеся к нему сервисы являются **100% бесплатными** и **Open Source** продуктами. Мы с огромным удовольствием примем любые ваши предложения и сообщения, а также мы рады любому вашему участию в проекте! Перед тем как принять участие в развитии проекта:
 1. Ознакомьтесь с нашим [CONTRIBUTING.MD](https://github.com/Ninja-Official/rtu-mirea-mobile/blob/master/CONTRIBUTING.md), в котором описано то, как должны вести себя участники проекта.
 2. Уважайте других участников, обсуждайте идеи, а не личности, ознакомьтесь с [кодексом поведения](https://github.com/Ninja-Official/rtu-mirea-mobile/blob/master/CODE_OF_CONDUCT.md).
 3. Не знаете, над чем вы хотите работать? Ознакомьтесь с нашей [дорожной картой](https://github.com/Ninja-Official/rtu-mirea-mobile/projects/1).
+
+### Разработчики
+
+<a href="https://github.com/mirea-ninja/rtu-mirea-mobile/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=mirea-ninja/rtu-mirea-mobile" />
+</a>
+
+### Благодарности
+* Спасибо **Ивану Лаптеву**, заведующему [RTUITLab](https://rtuitlab.dev/), за его неоценимый вклад в развитие этого проекта
+* Спасибо **Анне Степушкиной**, заместителю председателя по работе со студентами ИПТИП, за её невероятную помощь в разработке карт зданий для нашего приложения
