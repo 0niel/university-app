@@ -78,7 +78,8 @@ class NewsBloc extends Bloc<NewsEvent, NewsState> {
     emit(news.fold((failure) => NewsLoadError(), (r) {
       List<NewsItem> newNews = List.from(oldNews)..addAll(r);
       _offset += r.length;
-      return NewsLoaded(news: newNews, tags: tagsList);
+      return NewsLoaded(
+          news: newNews, tags: tagsList, selectedTag: _selectedTag);
     }));
   }
 }
