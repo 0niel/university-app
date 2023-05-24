@@ -6,6 +6,7 @@ import 'package:rtu_mirea_app/presentation/core/routes/routes.gr.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:rtu_mirea_app/presentation/typography.dart';
 import 'package:salomon_bottom_bar/salomon_bottom_bar.dart';
+import 'package:unicons/unicons.dart';
 
 import '../constants.dart';
 
@@ -21,13 +22,13 @@ class HomePage extends StatelessWidget {
           builder: (context, constraints) {
             if (constraints.maxWidth > tabletBreakpoint) {
               return Scaffold(
-                appBar: AppBar(title: const Text('RTU Mirea App')),
+                appBar: AppBar(title: const Text('RTU MIREA App')),
                 body: AutoTabsRouter(
                   routes: const [
                     NewsRouter(),
                     ScheduleRouter(),
                     MapRoute(),
-                    ProfileRouter()
+                    AboutAppDesktopRoute(),
                   ],
                   builder: (context, child, animation) {
                     return Row(
@@ -100,8 +101,8 @@ class HomePage extends StatelessWidget {
             selectedColor: AppTheme.colors.primary,
           ),
           ListTile(
-            leading: const Icon(Icons.person),
-            title: Text("Профиль", style: AppTextStyle.tab),
+            leading: const Icon(UniconsLine.info_circle),
+            title: Text("О приложении", style: AppTextStyle.tab),
             selected: tabsRouter.activeIndex == 3,
             onTap: () => tabsRouter.setActiveIndex(3),
             selectedColor: AppTheme.colors.primary,

@@ -19,17 +19,17 @@ import 'package:rtu_mirea_app/domain/entities/story.dart' as _i23;
 import 'package:rtu_mirea_app/domain/entities/user.dart' as _i25;
 import 'package:rtu_mirea_app/presentation/core/routes/routes.dart' as _i22;
 import 'package:rtu_mirea_app/presentation/pages/home_page.dart' as _i1;
-import 'package:rtu_mirea_app/presentation/pages/login/login_page.dart' as _i11;
+import 'package:rtu_mirea_app/presentation/pages/login/login_page.dart' as _i12;
 import 'package:rtu_mirea_app/presentation/pages/map/map_page.dart' as _i5;
 import 'package:rtu_mirea_app/presentation/pages/news/news_details_page.dart'
-    as _i9;
-import 'package:rtu_mirea_app/presentation/pages/news/news_page.dart' as _i8;
+    as _i10;
+import 'package:rtu_mirea_app/presentation/pages/news/news_page.dart' as _i9;
 import 'package:rtu_mirea_app/presentation/pages/news/widgets/stories_wrapper.dart'
     as _i3;
 import 'package:rtu_mirea_app/presentation/pages/onboarding/onboarding_page.dart'
     as _i2;
 import 'package:rtu_mirea_app/presentation/pages/profile/about_app_page.dart'
-    as _i12;
+    as _i6;
 import 'package:rtu_mirea_app/presentation/pages/profile/profile_announces_page.dart'
     as _i13;
 import 'package:rtu_mirea_app/presentation/pages/profile/profile_attendance_page.dart'
@@ -41,15 +41,15 @@ import 'package:rtu_mirea_app/presentation/pages/profile/profile_lectors_page.da
 import 'package:rtu_mirea_app/presentation/pages/profile/profile_nfc_pass_page.dart'
     as _i19;
 import 'package:rtu_mirea_app/presentation/pages/profile/profile_page.dart'
-    as _i10;
+    as _i11;
 import 'package:rtu_mirea_app/presentation/pages/profile/profile_scores_page.dart'
     as _i17;
 import 'package:rtu_mirea_app/presentation/pages/profile/profile_settings_page.dart'
     as _i18;
 import 'package:rtu_mirea_app/presentation/pages/schedule/groups_select_page.dart'
-    as _i7;
+    as _i8;
 import 'package:rtu_mirea_app/presentation/pages/schedule/schedule_page.dart'
-    as _i6;
+    as _i7;
 
 class AppRouter extends _i20.RootStackRouter {
   AppRouter([_i21.GlobalKey<_i21.NavigatorState>? navigatorKey])
@@ -107,29 +107,35 @@ class AppRouter extends _i20.RootStackRouter {
         child: const _i4.EmptyRouterPage(),
       );
     },
+    AboutAppDesktopRoute.name: (routeData) {
+      return _i20.AdaptivePage<dynamic>(
+        routeData: routeData,
+        child: const _i6.AboutAppPage(),
+      );
+    },
     ScheduleRoute.name: (routeData) {
       return _i20.AdaptivePage<dynamic>(
         routeData: routeData,
-        child: const _i6.SchedulePage(),
+        child: const _i7.SchedulePage(),
       );
     },
     GroupsSelectRoute.name: (routeData) {
       return _i20.AdaptivePage<dynamic>(
         routeData: routeData,
-        child: const _i7.GroupsSelectPage(),
+        child: const _i8.GroupsSelectPage(),
       );
     },
     NewsRoute.name: (routeData) {
       return _i20.AdaptivePage<dynamic>(
         routeData: routeData,
-        child: const _i8.NewsPage(),
+        child: const _i9.NewsPage(),
       );
     },
     NewsDetailsRoute.name: (routeData) {
       final args = routeData.argsAs<NewsDetailsRouteArgs>();
       return _i20.AdaptivePage<dynamic>(
         routeData: routeData,
-        child: _i9.NewsDetailsPage(
+        child: _i10.NewsDetailsPage(
           key: args.key,
           newsItem: args.newsItem,
         ),
@@ -138,19 +144,19 @@ class AppRouter extends _i20.RootStackRouter {
     ProfileRoute.name: (routeData) {
       return _i20.AdaptivePage<dynamic>(
         routeData: routeData,
-        child: const _i10.ProfilePage(),
+        child: const _i11.ProfilePage(),
       );
     },
     LoginRoute.name: (routeData) {
       return _i20.AdaptivePage<dynamic>(
         routeData: routeData,
-        child: const _i11.LoginPage(),
+        child: const _i12.LoginPage(),
       );
     },
     AboutAppRoute.name: (routeData) {
       return _i20.AdaptivePage<dynamic>(
         routeData: routeData,
-        child: const _i12.AboutAppPage(),
+        child: const _i6.AboutAppPage(),
       );
     },
     ProfileAnnouncesRoute.name: (routeData) {
@@ -310,6 +316,11 @@ class AppRouter extends _i20.RootStackRouter {
                 ),
               ],
             ),
+            _i20.RouteConfig(
+              AboutAppDesktopRoute.name,
+              path: 'info',
+              parent: HomeRoute.name,
+            ),
           ],
         ),
         _i20.RouteConfig(
@@ -445,7 +456,19 @@ class ProfileRouter extends _i20.PageRouteInfo<void> {
 }
 
 /// generated route for
-/// [_i6.SchedulePage]
+/// [_i6.AboutAppPage]
+class AboutAppDesktopRoute extends _i20.PageRouteInfo<void> {
+  const AboutAppDesktopRoute()
+      : super(
+          AboutAppDesktopRoute.name,
+          path: 'info',
+        );
+
+  static const String name = 'AboutAppDesktopRoute';
+}
+
+/// generated route for
+/// [_i7.SchedulePage]
 class ScheduleRoute extends _i20.PageRouteInfo<void> {
   const ScheduleRoute()
       : super(
@@ -457,7 +480,7 @@ class ScheduleRoute extends _i20.PageRouteInfo<void> {
 }
 
 /// generated route for
-/// [_i7.GroupsSelectPage]
+/// [_i8.GroupsSelectPage]
 class GroupsSelectRoute extends _i20.PageRouteInfo<void> {
   const GroupsSelectRoute()
       : super(
@@ -469,7 +492,7 @@ class GroupsSelectRoute extends _i20.PageRouteInfo<void> {
 }
 
 /// generated route for
-/// [_i8.NewsPage]
+/// [_i9.NewsPage]
 class NewsRoute extends _i20.PageRouteInfo<void> {
   const NewsRoute()
       : super(
@@ -481,7 +504,7 @@ class NewsRoute extends _i20.PageRouteInfo<void> {
 }
 
 /// generated route for
-/// [_i9.NewsDetailsPage]
+/// [_i10.NewsDetailsPage]
 class NewsDetailsRoute extends _i20.PageRouteInfo<NewsDetailsRouteArgs> {
   NewsDetailsRoute({
     _i21.Key? key,
@@ -515,7 +538,7 @@ class NewsDetailsRouteArgs {
 }
 
 /// generated route for
-/// [_i10.ProfilePage]
+/// [_i11.ProfilePage]
 class ProfileRoute extends _i20.PageRouteInfo<void> {
   const ProfileRoute()
       : super(
@@ -527,7 +550,7 @@ class ProfileRoute extends _i20.PageRouteInfo<void> {
 }
 
 /// generated route for
-/// [_i11.LoginPage]
+/// [_i12.LoginPage]
 class LoginRoute extends _i20.PageRouteInfo<void> {
   const LoginRoute()
       : super(
@@ -539,7 +562,7 @@ class LoginRoute extends _i20.PageRouteInfo<void> {
 }
 
 /// generated route for
-/// [_i12.AboutAppPage]
+/// [_i6.AboutAppPage]
 class AboutAppRoute extends _i20.PageRouteInfo<void> {
   const AboutAppRoute()
       : super(
