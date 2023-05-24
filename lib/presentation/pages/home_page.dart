@@ -4,7 +4,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/app_cubit/app_cubit.dart';
 import 'package:rtu_mirea_app/presentation/core/routes/routes.gr.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
+import 'package:rtu_mirea_app/presentation/typography.dart';
 import 'package:salomon_bottom_bar/salomon_bottom_bar.dart';
+
+import '../constants.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -16,7 +19,7 @@ class HomePage extends StatelessWidget {
       if (state is AppClean) {
         return LayoutBuilder(
           builder: (context, constraints) {
-            if (constraints.maxWidth > 600) {
+            if (constraints.maxWidth > tabletBreakpoint) {
               return Scaffold(
                 appBar: AppBar(title: const Text('RTU Mirea App')),
                 body: AutoTabsRouter(
@@ -71,33 +74,37 @@ class HomePage extends StatelessWidget {
   Widget _buildSidebar(BuildContext context) {
     final tabsRouter = AutoTabsRouter.of(context);
     return Container(
-      width: 240,
+      width: sidebarWith,
       color: AppTheme.colors.background01,
       child: ListView(
         children: [
           ListTile(
             leading: const Icon(Icons.library_books_rounded),
-            title: const Text("Новости"),
+            title: Text("Новости", style: AppTextStyle.tab),
             selected: tabsRouter.activeIndex == 0,
             onTap: () => tabsRouter.setActiveIndex(0),
+            selectedColor: AppTheme.colors.primary,
           ),
           ListTile(
             leading: const Icon(Icons.calendar_today_rounded),
-            title: const Text("Расписание"),
+            title: Text("Расписание", style: AppTextStyle.tab),
             selected: tabsRouter.activeIndex == 1,
             onTap: () => tabsRouter.setActiveIndex(1),
+            selectedColor: AppTheme.colors.primary,
           ),
           ListTile(
             leading: const Icon(Icons.map_rounded),
-            title: const Text("Карта"),
+            title: Text("Карта", style: AppTextStyle.tab),
             selected: tabsRouter.activeIndex == 2,
             onTap: () => tabsRouter.setActiveIndex(2),
+            selectedColor: AppTheme.colors.primary,
           ),
           ListTile(
             leading: const Icon(Icons.person),
-            title: const Text("Профиль"),
+            title: Text("Профиль", style: AppTextStyle.tab),
             selected: tabsRouter.activeIndex == 3,
             onTap: () => tabsRouter.setActiveIndex(3),
+            selectedColor: AppTheme.colors.primary,
           ),
         ],
       ),

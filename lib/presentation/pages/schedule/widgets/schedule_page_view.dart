@@ -5,6 +5,7 @@ import 'package:rtu_mirea_app/domain/entities/lesson.dart';
 import 'package:rtu_mirea_app/domain/entities/schedule.dart';
 import 'package:rtu_mirea_app/domain/entities/schedule_settings.dart';
 import 'package:rtu_mirea_app/presentation/bloc/schedule_bloc/schedule_bloc.dart';
+import 'package:rtu_mirea_app/presentation/constants.dart';
 import 'package:rtu_mirea_app/presentation/pages/schedule/widgets/empty_lesson_card.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/intl.dart';
@@ -408,12 +409,12 @@ class _SchedulePageViewState extends State<SchedulePageView> {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
-        final isDesktop = constraints.maxWidth > 750;
+        final isDesktop = constraints.maxWidth > tabletBreakpoint + 150;
         if (isDesktop) {
           return Row(
             children: [
-              Expanded(child: _buildPageView()),
-              Expanded(child: _buildCalendar(isDesktop)),
+              Expanded(flex: 2, child: _buildPageView()),
+              Expanded(flex: 1, child: _buildCalendar(isDesktop)),
             ],
           );
         } else {
