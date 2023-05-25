@@ -24,8 +24,6 @@ import 'package:rtu_mirea_app/presentation/pages/map/map_page.dart' as _i5;
 import 'package:rtu_mirea_app/presentation/pages/news/news_details_page.dart'
     as _i10;
 import 'package:rtu_mirea_app/presentation/pages/news/news_page.dart' as _i9;
-import 'package:rtu_mirea_app/presentation/pages/news/widgets/stories_wrapper.dart'
-    as _i3;
 import 'package:rtu_mirea_app/presentation/pages/onboarding/onboarding_page.dart'
     as _i2;
 import 'package:rtu_mirea_app/presentation/pages/profile/about_app_page.dart'
@@ -50,6 +48,8 @@ import 'package:rtu_mirea_app/presentation/pages/schedule/groups_select_page.dar
     as _i8;
 import 'package:rtu_mirea_app/presentation/pages/schedule/schedule_page.dart'
     as _i7;
+import 'package:rtu_mirea_app/presentation/pages/schedule/widgets/stories_wrapper.dart'
+    as _i3;
 
 class AppRouter extends _i20.RootStackRouter {
   AppRouter([_i21.GlobalKey<_i21.NavigatorState>? navigatorKey])

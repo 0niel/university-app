@@ -1,3 +1,4 @@
+
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:rtu_mirea_app/domain/entities/story.dart';
@@ -46,7 +47,16 @@ class StoryWidget extends StatelessWidget {
             type: MaterialType.transparency,
             child: Text(
               stories[storyIndex].title,
-              style: AppTextStyle.chip,
+              style: AppTextStyle.chip.copyWith(
+                color: Colors.white,
+                shadows: [
+                  Shadow(
+                    color: Colors.black.withOpacity(0.5),
+                    offset: const Offset(0, 2),
+                    blurRadius: 4,
+                  ),
+                ],
+              ),
             ),
           ),
         ),
