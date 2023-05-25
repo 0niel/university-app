@@ -31,7 +31,6 @@ class NewsItemWidget extends StatelessWidget {
       },
       child: Container(
         margin: const EdgeInsets.only(bottom: 24, left: 16, right: 16),
-        width: MediaQuery.of(context).size.width,
         decoration: BoxDecoration(
           color: AppTheme.colors.background02,
           borderRadius: BorderRadius.circular(16),

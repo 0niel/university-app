@@ -110,6 +110,8 @@ import 'package:rtu_mirea_app/presentation/pages/schedule/schedule_page.dart';
             )
           ],
         ),
+        AutoRoute(
+            path: 'info', name: 'AboutAppDesktopRoute', page: AboutAppPage),
       ],
     ),
     AutoRoute(path: '/onboarding', page: OnBoardingPage),

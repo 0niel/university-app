@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'dart:io';
 
 import 'package:home_widget/home_widget.dart';
 import 'package:rtu_mirea_app/common/utils/calendar_utils.dart';
@@ -18,6 +19,10 @@ class WidgetDataProvider {
 
   /// initial settings
   static _init() async {
+    if (!(Platform.isIOS || Platform.isAndroid)) {
+      return;
+    }
+
     await _checkWeeks();
     await _checkSchedule();
     _update();
