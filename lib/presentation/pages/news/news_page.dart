@@ -11,7 +11,7 @@ import 'package:rtu_mirea_app/presentation/widgets/buttons/primary_tab_button.da
 import 'package:shimmer/shimmer.dart';
 import 'widgets/news_item.dart';
 import 'widgets/story_item.dart';
-import 'widgets/tags_widgets.dart';
+import 'widgets/tag_badge.dart';
 import 'package:rtu_mirea_app/presentation/typography.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 
@@ -40,29 +40,66 @@ class _NewsPageState extends State<NewsPage> {
   /// Show iOS-style bottom sheet with tags. When user taps on tag, news will be filtered by it.
   /// If user taps on "все", news filter will be reset.
   void _showTagsModalWindow(BuildContext context) {
-    showCupertinoModalPopup(
+    showModalBottomSheet(
+      isDismissible: true,
+      isScrollControlled: true,
+      backgroundColor: AppTheme.colors.background02,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(24),
+        ),
+      ),
       context: context,
-      builder: (ctx) => Material(
+      showDragHandle: true,
+      builder: (context) => SafeArea(
         child: Container(
-          padding: const EdgeInsets.all(8),
-          color: AppTheme.colors.background03,
-          child: Padding(
-            padding:
-                const EdgeInsets.only(top: 4, bottom: 16, left: 24, right: 24),
-            child: BlocConsumer<NewsBloc, NewsState>(
-              listener: (context, state) =>
-                  state.runtimeType != NewsLoaded ? context.router.pop() : null,
-              buildWhen: (previous, current) => (current is NewsLoaded),
-              builder: (context, state) {
-                return Tags(
-                  isClickable: true,
-                  withIcon: false,
-                  tags: ["все", ...(state as NewsLoaded).tags],
-                  onClick: (tag) =>
-                      _filterNewsByTag(context.read<NewsBloc>(), tag),
-                );
-              },
-            ),
+          height: 420 < MediaQuery.of(context).size.height * 0.6
+              ? 420
+              : MediaQuery.of(context).size.height * 0.6,
+          padding:
+              const EdgeInsets.only(top: 4, bottom: 16, left: 24, right: 24),
+          child: BlocConsumer<NewsBloc, NewsState>(
+            listener: (context, state) =>
+                state.runtimeType != NewsLoaded ? context.router.pop() : null,
+            buildWhen: (previous, current) => (current is NewsLoaded),
+            builder: (context, state) {
+              final loadedState = state as NewsLoaded;
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  TagBadge(
+                    tag: "все",
+                    onPressed: () =>
+                        _filterNewsByTag(context.read<NewsBloc>(), "все"),
+                  ),
+                  const SizedBox(height: 16),
+                  Expanded(
+                    child: Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: List.generate(loadedState.tags.length, (index) {
+                        if (loadedState.selectedTag ==
+                            loadedState.tags[index]) {
+                          return TagBadge(
+                            tag: loadedState.tags[index],
+                            color: AppTheme.colors.colorful04,
+                            onPressed: () => _filterNewsByTag(
+                                context.read<NewsBloc>(), "все"),
+                          );
+                        }
+                        return TagBadge(
+                          tag: loadedState.tags[index],
+                          onPressed: () => _filterNewsByTag(
+                              context.read<NewsBloc>(),
+                              loadedState.tags[index]),
+                        );
+                      }),
+                    ),
+                  ),
+                ],
+              );
+            },
           ),
         ),
       ),

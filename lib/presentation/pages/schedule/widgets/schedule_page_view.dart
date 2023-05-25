@@ -257,12 +257,11 @@ class _SchedulePageViewState extends State<SchedulePageView> {
           final Map<String, Lesson> uniqueLessonEvents = {};
 
           for (var lesson in lessons[weekday]) {
-            final lessonNameAndTime = '${lesson.name}${lesson.timeStart}';
-            if (uniqueLessonEvents.containsKey(lessonNameAndTime)) {
+            if (uniqueLessonEvents.containsKey(lesson.timeStart)) {
               continue;
             }
 
-            uniqueLessonEvents[lessonNameAndTime] = lesson;
+            uniqueLessonEvents[lesson.timeStart] = lesson;
           }
 
           return uniqueLessonEvents.values.toList();

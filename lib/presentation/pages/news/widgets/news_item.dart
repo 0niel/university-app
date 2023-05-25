@@ -6,7 +6,7 @@ import 'package:rtu_mirea_app/common/utils/strapi_utils.dart';
 import 'package:rtu_mirea_app/domain/entities/news_item.dart';
 import 'package:intl/intl.dart';
 import 'package:rtu_mirea_app/presentation/core/routes/routes.gr.dart';
-import 'package:rtu_mirea_app/presentation/pages/news/widgets/tags_widgets.dart';
+import 'package:rtu_mirea_app/presentation/pages/news/widgets/tag_badge.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:rtu_mirea_app/presentation/typography.dart';
@@ -119,9 +119,7 @@ class NewsItemWidget extends StatelessWidget {
               newsItem.tags.isNotEmpty
                   ? const SizedBox(height: 16)
                   : Container(),
-              Tags(
-                isClickable: true,
-                withIcon: false,
+              _Tags(
                 tags: newsItem.tags,
                 onClick: onClickNewsTag,
               ),
@@ -129,6 +127,37 @@ class NewsItemWidget extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _Tags extends StatelessWidget {
+  final List<String> tags;
+  final Function(String)? onClick;
+
+  const _Tags({
+    Key? key,
+    required this.tags,
+    required this.onClick,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Wrap(
+      spacing: 6,
+      runSpacing: 6,
+      children: tags
+          .map(
+            (element) => TagBadge(
+              tag: element,
+              onPressed: () {
+                if (onClick != null) {
+                  onClick!(element);
+                }
+              },
+            ),
+          )
+          .toList(),
     );
   }
 }
