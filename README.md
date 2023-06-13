@@ -57,9 +57,9 @@ flutter packages pub run build_runner build --delete-conflicting-outputs
 
 ## Конфигурация Firebase Analytics
 1. Зарегистрируйте приложение в [Firebase](https://console.firebase.google.com/).
-1. Выполните шаги для генерации `firebase_options.dart` файла с помощью [FlutterFire CLI](https://firebase.flutter.dev/docs/cli).
-2. Firebase Analytics для Android не поддерживает Dart-only конфигурацию. Как только ваше приложение для Android будет зарегистрировано в Firebase, загрузите файл конфигурации с консоли Firebase (файл называется `google-services.json`). Добавьте этот файл в каталог `android/app`.
-3. Проект готов для использования с Firebase Analytics и Crashlytics.
+2. Выполните шаги для генерации `firebase_options.dart` файла с помощью [FlutterFire CLI](https://firebase.flutter.dev/docs/cli).
+3. Firebase Analytics для Android не поддерживает Dart-only конфигурацию. Как только ваше приложение для Android будет зарегистрировано в Firebase, загрузите файл конфигурации с консоли Firebase (файл называется `google-services.json`). Добавьте этот файл в каталог `android/app`.
+4. Проект готов для использования с Firebase Analytics и Crashlytics.
 
 ## Переменные окружения
 Приложение использует переменные среды времени компиляции для хранения конфиденциальных данных, таких как ключи API и токены. 
