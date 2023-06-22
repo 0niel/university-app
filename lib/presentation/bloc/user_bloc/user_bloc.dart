@@ -29,6 +29,14 @@ class UserBloc extends Bloc<UserEvent, UserState> {
     on<_LogOut>(_onLogOutEvent);
     on<_Started>(_onGetUserDataEvent);
     on<_GetUserData>(_onGetUserDataEvent);
+    on<_SetAuntificatedData>(_onSetAuntificatedDataEvent);
+  }
+
+  void _onSetAuntificatedDataEvent(
+    _SetAuntificatedData event,
+    Emitter<UserState> emit,
+  ) async {
+    emit(_LogInSuccess(event.user));
   }
 
   void _setSentryUserIdentity(String id, String email, String group) {
@@ -40,6 +48,8 @@ class UserBloc extends Bloc<UserEvent, UserState> {
     UserEvent event,
     Emitter<UserState> emit,
   ) async {
+    if (state is _LogInSuccess) return;
+
     // We use oauth2 to get token. So we don't need to pass login and password
     // to the server. We just need to pass them to the oauth2 server.
 
@@ -87,6 +97,8 @@ class UserBloc extends Bloc<UserEvent, UserState> {
     UserEvent event,
     Emitter<UserState> emit,
   ) async {
+    if (state is _LogInSuccess) return;
+
     final token = await getAuthToken();
 
     bool loggedIn = token.isRight();
