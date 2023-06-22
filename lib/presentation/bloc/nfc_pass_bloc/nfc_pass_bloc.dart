@@ -13,6 +13,8 @@ import 'package:rtu_mirea_app/domain/usecases/get_auth_token.dart';
 import 'package:rtu_mirea_app/domain/usecases/get_nfc_passes.dart';
 import 'package:rtu_mirea_app/domain/usecases/get_user_data.dart';
 
+import '../user_bloc/user_bloc.dart';
+
 part 'nfc_pass_event.dart';
 part 'nfc_pass_state.dart';
 part 'nfc_pass_bloc.freezed.dart';
@@ -27,6 +29,7 @@ class NfcPassBloc extends Bloc<NfcPassEvent, NfcPassState> {
   final DeviceInfoPlugin deviceInfo;
   final FetchNfcCode fetchNfcCode;
   final GetUserData getUserData;
+  final UserBloc userBloc;
 
   NfcPassBloc({
     required this.getNfcPasses,
@@ -35,6 +38,7 @@ class NfcPassBloc extends Bloc<NfcPassEvent, NfcPassState> {
     required this.getAuthToken,
     required this.getUserData,
     required this.fetchNfcCode,
+    required this.userBloc,
   }) : super(const _Initial()) {
     if (Platform.isAndroid) {
       on<_Started>(_onStarted);
@@ -132,6 +136,9 @@ class NfcPassBloc extends Bloc<NfcPassEvent, NfcPassState> {
     userDataRes.fold(
       (failure) => studentId = null,
       (userData) {
+        // Prevent multiple fetches of user profile data
+        userBloc.add(UserEvent.setAuntificatedData(user: userData));
+
         var student = userData.students
             .firstWhereOrNull((element) => element.status == 'активный');
         student ??= userData.students.first;
