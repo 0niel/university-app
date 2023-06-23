@@ -57,7 +57,7 @@ class ProfileAnnouncesPage extends StatelessWidget {
                               "body": Style(
                                 fontStyle: AppTextStyle.bodyRegular.fontStyle,
                                 fontWeight: AppTextStyle.bodyRegular.fontWeight,
-                                padding: const EdgeInsets.all(0),
+                                padding: HtmlPaddings.zero,
                                 margin: Margins.all(0),
                               ),
                             },
