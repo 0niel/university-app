@@ -1,0 +1,67 @@
+name: Build and Deploy Web
+
+on:
+  push:
+    branches:
+      - feature/mirea_kios_ci_cd
+
+env:
+  JOB_STARTED_AT: ${{ github.event.created_at }}
+  CR_REGISTRY: ${{ secrets.CR_REGISTRY }}
+  CR_IMAGE_FRONTEND: ${{ secrets.CR_IMAGE_FRONTEND }}
+  SENTRY_URL: ${{ secrets.SENTRY_URL }}
+  AUTH_PROXY_BASE_URL:  ${{ secrets.AUTH_PROXY_BASE_URL }}
+  LK_CLIENT_ID:  ${{ secrets.LK_CLIENT_ID }}
+  LK_CLIENT_SECRET:  ${{ secrets.LK_CLIENT_SECRET }}
+
+jobs:
+  build-web:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Login to Registry
+        uses: yc-actions/yc-cr-login@v1
+        with:
+          yc-sa-json-credentials: ${{ secrets.YC_SA_JSON_CREDENTIALS }}
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+      - name: Get Dependencies
+        run: flutter pub get
+      - name: Build Web Application
+        run: |
+          flutter build web \
+            --release \
+            --dart-define=SENTRY_DSN=${{ env.SENTRY_DSN }} \
+            --dart-define=SENTRY_DSN=${{ env.AUTH_PROXY_BASE_URL }} \
+            --dart-define=SENTRY_DSN=${{ env.LK_CLIENT_ID }} \ 
+            --dart-define=SENTRY_DSN=${{ env.LK_CLIENT_SECRET }}
+      - name: Build and Push Image
+        run: |
+          docker build \
+          --pull \
+          --cache-from cr.yandex/${{ env.CR_REGISTRY }}/${{ env.CR_IMAGE_FRONTEND }}:latest \
+          --label "org.image.title=${{ github.repository }}" \
+          --label "org.image.url=${{ github.repositoryUrl }}" \
+          --label "org.image.created=${{ env.JOB_STARTED_AT }}" \
+          --label "org.image.revision=${{ github.ref_name }}" \
+          --label "org.image.version=${{ github.sha }}" \
+          --tag cr.yandex/${{ env.CR_REGISTRY }}/${{ env.CR_IMAGE_FRONTEND }}:${{ github.sha }} \
+          .
+          docker push cr.yandex/${{ env.CR_REGISTRY }}/${{ env.CR_IMAGE_FRONTEND }}:${{ github.sha }}
+          docker tag cr.yandex/${{ env.CR_REGISTRY }}/${{ env.CR_IMAGE_FRONTEND }}:${{ github.sha }} \
+            cr.yandex/${{ env.CR_REGISTRY }}/${{ env.CR_IMAGE_FRONTEND }}:latest
+          docker push cr.yandex/${{ env.CR_REGISTRY }}/${{ env.CR_IMAGE_FRONTEND }}:latest
+  deploy:
+    runs-on: mn-mobile-app-kiosk-runner
+    needs: [build-web]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Deploy
+        run: |
+          cd ${{ secrets.PRODUCTION_FOLDER }}
+          docker compose pull
+          docker compose up -d

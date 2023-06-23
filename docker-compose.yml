@@ -1,0 +1,59 @@
+version: '3.9'
+
+services:
+  traefik:
+    image: traefik:latest
+    command:
+      - --accesslog=true
+      - --log.level=INFO
+      - --providers.docker=true
+      - --providers.docker.exposedByDefault=false
+      - --providers.docker.constraints=Label(`traefik.constraint-label-stack`,`university-app-web`)
+      - --entrypoints.university_app_web.address=:80
+      - --entrypoints.university_app_websecure.address=:443
+      # LetsEncrypt Staging Server
+      # - --certificatesResolvers.letsencrypt.acme.caServer=https://acme-staging-v02.api.letsencrypt.org/directory
+      - --certificatesresolvers.letsencrypt.acme.httpchallenge=true
+      - --certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=university_app_web
+      - --certificatesresolvers.letsencrypt.acme.email=${EMAIL}
+      - --certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json
+    restart: unless-stopped
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./data/letsencrypt:/letsencrypt
+    depends_on:
+      - frontend
+    networks:
+      - gateway
+      - application
+
+  frontend:
+    image: ${IMAGE_FRONTEND}
+    restart: unless-stopped
+    networks:
+      - application
+    labels:
+      - traefik.enable=true
+      - traefik.constraint-label-stack=university-app-web
+      - traefik.docker.network=application
+      - traefik.http.services.university_app_web.loadbalancer.server.port=80
+      #http
+      - traefik.http.routers.university_app_web_http.entrypoints=university_app_web
+      - traefik.http.routers.university_app_web_http.rule=Host(`${DOMAIN}`)
+      - traefik.http.routers.university_app_web_http.service=university_app_web
+      - traefik.http.routers.university_app_web_http.middlewares=university_app_web_redirect_https
+      # https
+      - traefik.http.middlewares.university_app_web_redirect_https.redirectscheme.scheme=https
+      - traefik.http.middlewares.university_app_web_redirect_https.redirectscheme.permanent=true
+      - traefik.http.routers.university_app_web_https.entrypoints=university_app_websecure
+      - traefik.http.routers.university_app_web_https.rule=Host(`${DOMAIN}`)
+      - traefik.http.routers.university_app_web_https.service=university_app_web
+      - traefik.http.routers.university_app_web_https.tls=true
+      - traefik.http.routers.university_app_web_https.tls.certresolver=${CERT_RESOLVER}
+
+networks:
+  gateway:
+  application:
