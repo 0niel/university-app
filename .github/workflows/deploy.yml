@@ -32,12 +32,7 @@ jobs:
         run: flutter pub get
       - name: Build Web Application
         run: |
-          flutter build web \
-            --release \
-            --dart-define=SENTRY_DSN=${{ env.SENTRY_DSN }} \
-            --dart-define=SENTRY_DSN=${{ env.AUTH_PROXY_BASE_URL }} \
-            --dart-define=SENTRY_DSN=${{ env.LK_CLIENT_ID }} \ 
-            --dart-define=SENTRY_DSN=${{ env.LK_CLIENT_SECRET }}
+          flutter build web --release --dart-define=SENTRY_DSN=${{ env.SENTRY_DSN }} --dart-define=AUTH_PROXY_BASE_URL=${{ env.AUTH_PROXY_BASE_URL }} --dart-define=LK_CLIENT_ID=${{ env.LK_CLIENT_ID }} --dart-define=LK_CLIENT_SECRET=${{ env.LK_CLIENT_SECRET }}
       - name: Build and Push Image
         run: |
           docker build \
