@@ -35,6 +35,7 @@ import 'package:rtu_mirea_app/service_locator.dart' as dependency_injection;
 import 'package:sentry_dio/sentry_dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_strategy/url_strategy.dart';
+import 'common/constants.dart';
 import 'presentation/app_notifier.dart';
 import 'service_locator.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -99,8 +100,7 @@ Future<void> main() async {
 
   await SentryFlutter.init(
     (options) {
-      options.dsn =
-          const String.fromEnvironment('SENTRY_DSN', defaultValue: '');
+      options.dsn = sentryDsn;
 
       options.enableAutoPerformanceTracing = true;
 
