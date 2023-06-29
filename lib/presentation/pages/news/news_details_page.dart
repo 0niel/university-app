@@ -5,7 +5,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
 import 'package:rtu_mirea_app/common/utils/strapi_utils.dart';
 import 'package:rtu_mirea_app/domain/entities/news_item.dart';
-import 'package:rtu_mirea_app/presentation/pages/news/widgets/tags_widgets.dart';
+import 'package:rtu_mirea_app/presentation/pages/news/widgets/tag_badge.dart';
 import 'package:rtu_mirea_app/presentation/widgets/images_horizontal_slider.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 import 'package:rtu_mirea_app/presentation/typography.dart';
@@ -113,10 +113,15 @@ class _NewsItemInfo extends StatelessWidget {
       children: [
         tags.isNotEmpty
             ? Expanded(
-                child: Tags(
-                  isClickable: false,
-                  withIcon: true,
-                  tags: tags,
+                child: Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: List.generate(
+                    tags.length,
+                    (index) => TagBadge(
+                      tag: tags[index],
+                    ),
+                  ),
                 ),
               )
             : Container(),

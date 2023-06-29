@@ -29,7 +29,7 @@ abstract class UserRemoteData {
 }
 
 class UserRemoteDataImpl implements UserRemoteData {
-  static const _apiUrl = 'https://lks.mirea.ninja/api';
+  static const _apiUrl = 'https://auth-app.mirea.ru/api';
 
   final Dio httpClient;
   final LksOauth2 lksOauth2;

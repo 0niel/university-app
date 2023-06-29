@@ -105,7 +105,7 @@ Future<void> setup() async {
   getIt.registerFactory(
       () => AboutAppBloc(getContributors: getIt(), getForumPatrons: getIt()));
   getIt.registerFactory(() => MapCubit());
-  getIt.registerFactory(() => UserBloc(
+  getIt.registerLazySingleton(() => UserBloc(
       logIn: getIt(),
       logOut: getIt(),
       getUserData: getIt(),
@@ -135,6 +135,7 @@ Future<void> setup() async {
         fetchNfcCode: getIt(),
         getAuthToken: getIt(),
         getUserData: getIt(),
+        userBloc: getIt(),
       ));
   getIt
       .registerFactory(() => NfcFeedbackBloc(sendNfcNotExistFeedback: getIt()));

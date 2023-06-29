@@ -22,6 +22,7 @@ mixin _$UserEvent {
     required TResult Function() logIn,
     required TResult Function() logOut,
     required TResult Function() getUserData,
+    required TResult Function(User user) setAuntificatedData,
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
@@ -30,6 +31,7 @@ mixin _$UserEvent {
     TResult? Function()? logIn,
     TResult? Function()? logOut,
     TResult? Function()? getUserData,
+    TResult? Function(User user)? setAuntificatedData,
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
@@ -38,6 +40,7 @@ mixin _$UserEvent {
     TResult Function()? logIn,
     TResult Function()? logOut,
     TResult Function()? getUserData,
+    TResult Function(User user)? setAuntificatedData,
     required TResult orElse(),
   }) =>
       throw _privateConstructorUsedError;
@@ -47,6 +50,7 @@ mixin _$UserEvent {
     required TResult Function(_LogIn value) logIn,
     required TResult Function(_LogOut value) logOut,
     required TResult Function(_GetUserData value) getUserData,
+    required TResult Function(_SetAuntificatedData value) setAuntificatedData,
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
@@ -55,6 +59,7 @@ mixin _$UserEvent {
     TResult? Function(_LogIn value)? logIn,
     TResult? Function(_LogOut value)? logOut,
     TResult? Function(_GetUserData value)? getUserData,
+    TResult? Function(_SetAuntificatedData value)? setAuntificatedData,
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
@@ -63,6 +68,7 @@ mixin _$UserEvent {
     TResult Function(_LogIn value)? logIn,
     TResult Function(_LogOut value)? logOut,
     TResult Function(_GetUserData value)? getUserData,
+    TResult Function(_SetAuntificatedData value)? setAuntificatedData,
     required TResult orElse(),
   }) =>
       throw _privateConstructorUsedError;
@@ -126,6 +132,7 @@ class _$_Started implements _Started {
     required TResult Function() logIn,
     required TResult Function() logOut,
     required TResult Function() getUserData,
+    required TResult Function(User user) setAuntificatedData,
   }) {
     return started();
   }
@@ -137,6 +144,7 @@ class _$_Started implements _Started {
     TResult? Function()? logIn,
     TResult? Function()? logOut,
     TResult? Function()? getUserData,
+    TResult? Function(User user)? setAuntificatedData,
   }) {
     return started?.call();
   }
@@ -148,6 +156,7 @@ class _$_Started implements _Started {
     TResult Function()? logIn,
     TResult Function()? logOut,
     TResult Function()? getUserData,
+    TResult Function(User user)? setAuntificatedData,
     required TResult orElse(),
   }) {
     if (started != null) {
@@ -163,6 +172,7 @@ class _$_Started implements _Started {
     required TResult Function(_LogIn value) logIn,
     required TResult Function(_LogOut value) logOut,
     required TResult Function(_GetUserData value) getUserData,
+    required TResult Function(_SetAuntificatedData value) setAuntificatedData,
   }) {
     return started(this);
   }
@@ -174,6 +184,7 @@ class _$_Started implements _Started {
     TResult? Function(_LogIn value)? logIn,
     TResult? Function(_LogOut value)? logOut,
     TResult? Function(_GetUserData value)? getUserData,
+    TResult? Function(_SetAuntificatedData value)? setAuntificatedData,
   }) {
     return started?.call(this);
   }
@@ -185,6 +196,7 @@ class _$_Started implements _Started {
     TResult Function(_LogIn value)? logIn,
     TResult Function(_LogOut value)? logOut,
     TResult Function(_GetUserData value)? getUserData,
+    TResult Function(_SetAuntificatedData value)? setAuntificatedData,
     required TResult orElse(),
   }) {
     if (started != null) {
@@ -238,6 +250,7 @@ class _$_LogIn implements _LogIn {
     required TResult Function() logIn,
     required TResult Function() logOut,
     required TResult Function() getUserData,
+    required TResult Function(User user) setAuntificatedData,
   }) {
     return logIn();
   }
@@ -249,6 +262,7 @@ class _$_LogIn implements _LogIn {
     TResult? Function()? logIn,
     TResult? Function()? logOut,
     TResult? Function()? getUserData,
+    TResult? Function(User user)? setAuntificatedData,
   }) {
     return logIn?.call();
   }
@@ -260,6 +274,7 @@ class _$_LogIn implements _LogIn {
     TResult Function()? logIn,
     TResult Function()? logOut,
     TResult Function()? getUserData,
+    TResult Function(User user)? setAuntificatedData,
     required TResult orElse(),
   }) {
     if (logIn != null) {
@@ -275,6 +290,7 @@ class _$_LogIn implements _LogIn {
     required TResult Function(_LogIn value) logIn,
     required TResult Function(_LogOut value) logOut,
     required TResult Function(_GetUserData value) getUserData,
+    required TResult Function(_SetAuntificatedData value) setAuntificatedData,
   }) {
     return logIn(this);
   }
@@ -286,6 +302,7 @@ class _$_LogIn implements _LogIn {
     TResult? Function(_LogIn value)? logIn,
     TResult? Function(_LogOut value)? logOut,
     TResult? Function(_GetUserData value)? getUserData,
+    TResult? Function(_SetAuntificatedData value)? setAuntificatedData,
   }) {
     return logIn?.call(this);
   }
@@ -297,6 +314,7 @@ class _$_LogIn implements _LogIn {
     TResult Function(_LogIn value)? logIn,
     TResult Function(_LogOut value)? logOut,
     TResult Function(_GetUserData value)? getUserData,
+    TResult Function(_SetAuntificatedData value)? setAuntificatedData,
     required TResult orElse(),
   }) {
     if (logIn != null) {
@@ -350,6 +368,7 @@ class _$_LogOut implements _LogOut {
     required TResult Function() logIn,
     required TResult Function() logOut,
     required TResult Function() getUserData,
+    required TResult Function(User user) setAuntificatedData,
   }) {
     return logOut();
   }
@@ -361,6 +380,7 @@ class _$_LogOut implements _LogOut {
     TResult? Function()? logIn,
     TResult? Function()? logOut,
     TResult? Function()? getUserData,
+    TResult? Function(User user)? setAuntificatedData,
   }) {
     return logOut?.call();
   }
@@ -372,6 +392,7 @@ class _$_LogOut implements _LogOut {
     TResult Function()? logIn,
     TResult Function()? logOut,
     TResult Function()? getUserData,
+    TResult Function(User user)? setAuntificatedData,
     required TResult orElse(),
   }) {
     if (logOut != null) {
@@ -387,6 +408,7 @@ class _$_LogOut implements _LogOut {
     required TResult Function(_LogIn value) logIn,
     required TResult Function(_LogOut value) logOut,
     required TResult Function(_GetUserData value) getUserData,
+    required TResult Function(_SetAuntificatedData value) setAuntificatedData,
   }) {
     return logOut(this);
   }
@@ -398,6 +420,7 @@ class _$_LogOut implements _LogOut {
     TResult? Function(_LogIn value)? logIn,
     TResult? Function(_LogOut value)? logOut,
     TResult? Function(_GetUserData value)? getUserData,
+    TResult? Function(_SetAuntificatedData value)? setAuntificatedData,
   }) {
     return logOut?.call(this);
   }
@@ -409,6 +432,7 @@ class _$_LogOut implements _LogOut {
     TResult Function(_LogIn value)? logIn,
     TResult Function(_LogOut value)? logOut,
     TResult Function(_GetUserData value)? getUserData,
+    TResult Function(_SetAuntificatedData value)? setAuntificatedData,
     required TResult orElse(),
   }) {
     if (logOut != null) {
@@ -464,6 +488,7 @@ class _$_GetUserData implements _GetUserData {
     required TResult Function() logIn,
     required TResult Function() logOut,
     required TResult Function() getUserData,
+    required TResult Function(User user) setAuntificatedData,
   }) {
     return getUserData();
   }
@@ -475,6 +500,7 @@ class _$_GetUserData implements _GetUserData {
     TResult? Function()? logIn,
     TResult? Function()? logOut,
     TResult? Function()? getUserData,
+    TResult? Function(User user)? setAuntificatedData,
   }) {
     return getUserData?.call();
   }
@@ -486,6 +512,7 @@ class _$_GetUserData implements _GetUserData {
     TResult Function()? logIn,
     TResult Function()? logOut,
     TResult Function()? getUserData,
+    TResult Function(User user)? setAuntificatedData,
     required TResult orElse(),
   }) {
     if (getUserData != null) {
@@ -501,6 +528,7 @@ class _$_GetUserData implements _GetUserData {
     required TResult Function(_LogIn value) logIn,
     required TResult Function(_LogOut value) logOut,
     required TResult Function(_GetUserData value) getUserData,
+    required TResult Function(_SetAuntificatedData value) setAuntificatedData,
   }) {
     return getUserData(this);
   }
@@ -512,6 +540,7 @@ class _$_GetUserData implements _GetUserData {
     TResult? Function(_LogIn value)? logIn,
     TResult? Function(_LogOut value)? logOut,
     TResult? Function(_GetUserData value)? getUserData,
+    TResult? Function(_SetAuntificatedData value)? setAuntificatedData,
   }) {
     return getUserData?.call(this);
   }
@@ -523,6 +552,7 @@ class _$_GetUserData implements _GetUserData {
     TResult Function(_LogIn value)? logIn,
     TResult Function(_LogOut value)? logOut,
     TResult Function(_GetUserData value)? getUserData,
+    TResult Function(_SetAuntificatedData value)? setAuntificatedData,
     required TResult orElse(),
   }) {
     if (getUserData != null) {
@@ -534,6 +564,159 @@ class _$_GetUserData implements _GetUserData {
 
 abstract class _GetUserData implements UserEvent {
   const factory _GetUserData() = _$_GetUserData;
+}
+
+/// @nodoc
+abstract class _$$_SetAuntificatedDataCopyWith<$Res> {
+  factory _$$_SetAuntificatedDataCopyWith(_$_SetAuntificatedData value,
+          $Res Function(_$_SetAuntificatedData) then) =
+      __$$_SetAuntificatedDataCopyWithImpl<$Res>;
+  @useResult
+  $Res call({User user});
+}
+
+/// @nodoc
+class __$$_SetAuntificatedDataCopyWithImpl<$Res>
+    extends _$UserEventCopyWithImpl<$Res, _$_SetAuntificatedData>
+    implements _$$_SetAuntificatedDataCopyWith<$Res> {
+  __$$_SetAuntificatedDataCopyWithImpl(_$_SetAuntificatedData _value,
+      $Res Function(_$_SetAuntificatedData) _then)
+      : super(_value, _then);
+
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? user = null,
+  }) {
+    return _then(_$_SetAuntificatedData(
+      user: null == user
+          ? _value.user
+          : user // ignore: cast_nullable_to_non_nullable
+              as User,
+    ));
+  }
+}
+
+/// @nodoc
+
+class _$_SetAuntificatedData implements _SetAuntificatedData {
+  const _$_SetAuntificatedData({required this.user});
+
+  @override
+  final User user;
+
+  @override
+  String toString() {
+    return 'UserEvent.setAuntificatedData(user: $user)';
+  }
+
+  @override
+  bool operator ==(dynamic other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$_SetAuntificatedData &&
+            (identical(other.user, user) || other.user == user));
+  }
+
+  @override
+  int get hashCode => Object.hash(runtimeType, user);
+
+  @JsonKey(ignore: true)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$_SetAuntificatedDataCopyWith<_$_SetAuntificatedData> get copyWith =>
+      __$$_SetAuntificatedDataCopyWithImpl<_$_SetAuntificatedData>(
+          this, _$identity);
+
+  @override
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>({
+    required TResult Function() started,
+    required TResult Function() logIn,
+    required TResult Function() logOut,
+    required TResult Function() getUserData,
+    required TResult Function(User user) setAuntificatedData,
+  }) {
+    return setAuntificatedData(user);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult? Function()? started,
+    TResult? Function()? logIn,
+    TResult? Function()? logOut,
+    TResult? Function()? getUserData,
+    TResult? Function(User user)? setAuntificatedData,
+  }) {
+    return setAuntificatedData?.call(user);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>({
+    TResult Function()? started,
+    TResult Function()? logIn,
+    TResult Function()? logOut,
+    TResult Function()? getUserData,
+    TResult Function(User user)? setAuntificatedData,
+    required TResult orElse(),
+  }) {
+    if (setAuntificatedData != null) {
+      return setAuntificatedData(user);
+    }
+    return orElse();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>({
+    required TResult Function(_Started value) started,
+    required TResult Function(_LogIn value) logIn,
+    required TResult Function(_LogOut value) logOut,
+    required TResult Function(_GetUserData value) getUserData,
+    required TResult Function(_SetAuntificatedData value) setAuntificatedData,
+  }) {
+    return setAuntificatedData(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult? Function(_Started value)? started,
+    TResult? Function(_LogIn value)? logIn,
+    TResult? Function(_LogOut value)? logOut,
+    TResult? Function(_GetUserData value)? getUserData,
+    TResult? Function(_SetAuntificatedData value)? setAuntificatedData,
+  }) {
+    return setAuntificatedData?.call(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>({
+    TResult Function(_Started value)? started,
+    TResult Function(_LogIn value)? logIn,
+    TResult Function(_LogOut value)? logOut,
+    TResult Function(_GetUserData value)? getUserData,
+    TResult Function(_SetAuntificatedData value)? setAuntificatedData,
+    required TResult orElse(),
+  }) {
+    if (setAuntificatedData != null) {
+      return setAuntificatedData(this);
+    }
+    return orElse();
+  }
+}
+
+abstract class _SetAuntificatedData implements UserEvent {
+  const factory _SetAuntificatedData({required final User user}) =
+      _$_SetAuntificatedData;
+
+  User get user;
+  @JsonKey(ignore: true)
+  _$$_SetAuntificatedDataCopyWith<_$_SetAuntificatedData> get copyWith =>
+      throw _privateConstructorUsedError;
 }
 
 /// @nodoc

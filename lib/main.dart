@@ -33,12 +33,13 @@ import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:intl/intl_standalone.dart';
 import 'package:rtu_mirea_app/service_locator.dart' as dependency_injection;
 import 'package:sentry_dio/sentry_dio.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_strategy/url_strategy.dart';
+import 'common/constants.dart';
 import 'presentation/app_notifier.dart';
 import 'service_locator.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:provider/provider.dart';
 import 'package:sentry_logging/sentry_logging.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
@@ -67,7 +68,9 @@ Future<void> main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  await FirebaseAnalytics.instance.logAppOpen();
+  if (Platform.isAndroid || Platform.isIOS) {
+    await FirebaseAnalytics.instance.logAppOpen();
+  }
 
   if (kDebugMode) {
     // Clear Secure Storage
@@ -97,8 +100,9 @@ Future<void> main() async {
 
   await SentryFlutter.init(
     (options) {
-      options.dsn =
-          const String.fromEnvironment('SENTRY_DSN', defaultValue: '');
+      options.dsn = sentryDsn;
+
+      options.enableAutoPerformanceTracing = true;
 
       // Set tracesSampleRate to 0.2 to capture 20% of transactions for
       // performance monitoring.
@@ -154,10 +158,7 @@ class App extends StatelessWidget {
         BlocProvider<AboutAppBloc>(
             create: (context) =>
                 getIt<AboutAppBloc>()..add(AboutAppGetMembers())),
-        BlocProvider<UserBloc>(
-          create: (context) =>
-              getIt<UserBloc>()..add(const UserEvent.started()),
-        ),
+        BlocProvider<UserBloc>(create: (context) => getIt<UserBloc>()),
         BlocProvider<AnnouncesBloc>(
             create: (context) => getIt<AnnouncesBloc>()),
         BlocProvider<EmployeeBloc>(create: (context) => getIt<EmployeeBloc>()),
@@ -203,7 +204,9 @@ class App extends StatelessWidget {
                   analytics: FirebaseAnalytics.instance,
                 ),
                 AutoRouteObserver(),
-                SentryNavigatorObserver(),
+                SentryNavigatorObserver(
+                    autoFinishAfter: const Duration(seconds: 5),
+                    setRouteNameAsTransaction: true),
               ],
             ),
             routeInformationProvider: appRouter.routeInfoProvider(),

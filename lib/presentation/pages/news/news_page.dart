@@ -1,17 +1,14 @@
 import 'package:auto_route/auto_route.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:rtu_mirea_app/domain/entities/news_item.dart';
-import 'package:rtu_mirea_app/domain/entities/story.dart';
 import 'package:rtu_mirea_app/presentation/bloc/news_bloc/news_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/stories_bloc/stories_bloc.dart';
 import 'package:rtu_mirea_app/presentation/widgets/buttons/app_settings_button.dart';
 import 'package:rtu_mirea_app/presentation/widgets/buttons/primary_tab_button.dart';
 import 'package:shimmer/shimmer.dart';
 import 'widgets/news_item.dart';
-import 'widgets/story_item.dart';
-import 'widgets/tags_widgets.dart';
+import 'widgets/tag_badge.dart';
 import 'package:rtu_mirea_app/presentation/typography.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 
@@ -40,29 +37,66 @@ class _NewsPageState extends State<NewsPage> {
   /// Show iOS-style bottom sheet with tags. When user taps on tag, news will be filtered by it.
   /// If user taps on "все", news filter will be reset.
   void _showTagsModalWindow(BuildContext context) {
-    showCupertinoModalPopup(
+    showModalBottomSheet(
+      isDismissible: true,
+      isScrollControlled: true,
+      backgroundColor: AppTheme.colors.background02,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(24),
+        ),
+      ),
       context: context,
-      builder: (ctx) => Material(
+      showDragHandle: true,
+      builder: (context) => SafeArea(
         child: Container(
-          padding: const EdgeInsets.all(8),
-          color: AppTheme.colors.background03,
-          child: Padding(
-            padding:
-                const EdgeInsets.only(top: 4, bottom: 16, left: 24, right: 24),
-            child: BlocConsumer<NewsBloc, NewsState>(
-              listener: (context, state) =>
-                  state.runtimeType != NewsLoaded ? context.router.pop() : null,
-              buildWhen: (previous, current) => (current is NewsLoaded),
-              builder: (context, state) {
-                return Tags(
-                  isClickable: true,
-                  withIcon: false,
-                  tags: ["все", ...(state as NewsLoaded).tags],
-                  onClick: (tag) =>
-                      _filterNewsByTag(context.read<NewsBloc>(), tag),
-                );
-              },
-            ),
+          height: 420 < MediaQuery.of(context).size.height * 0.6
+              ? 420
+              : MediaQuery.of(context).size.height * 0.6,
+          padding:
+              const EdgeInsets.only(top: 4, bottom: 16, left: 24, right: 24),
+          child: BlocConsumer<NewsBloc, NewsState>(
+            listener: (context, state) =>
+                state.runtimeType != NewsLoaded ? context.router.pop() : null,
+            buildWhen: (previous, current) => (current is NewsLoaded),
+            builder: (context, state) {
+              final loadedState = state as NewsLoaded;
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  TagBadge(
+                    tag: "все",
+                    onPressed: () =>
+                        _filterNewsByTag(context.read<NewsBloc>(), "все"),
+                  ),
+                  const SizedBox(height: 16),
+                  Expanded(
+                    child: Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: List.generate(loadedState.tags.length, (index) {
+                        if (loadedState.selectedTag ==
+                            loadedState.tags[index]) {
+                          return TagBadge(
+                            tag: loadedState.tags[index],
+                            color: AppTheme.colors.colorful04,
+                            onPressed: () => _filterNewsByTag(
+                                context.read<NewsBloc>(), "все"),
+                          );
+                        }
+                        return TagBadge(
+                          tag: loadedState.tags[index],
+                          onPressed: () => _filterNewsByTag(
+                              context.read<NewsBloc>(),
+                              loadedState.tags[index]),
+                        );
+                      }),
+                    ),
+                  ),
+                ],
+              );
+            },
           ),
         ),
       ),
@@ -117,36 +151,25 @@ class _NewsPageState extends State<NewsPage> {
     );
   }
 
-  List<Story> _getActualStories(List<Story> stories) {
-    List<Story> actualStories = [];
-    for (final story in stories) {
-      if (DateTime.now().compareTo(story.stopShowDate) == -1) {
-        actualStories.add(story);
-      }
+  int _getColumnCount(double screenWidth) {
+    if (screenWidth < 900) {
+      return 1;
+    } else if (screenWidth < 1200) {
+      return 3;
+    } else {
+      return 4;
     }
-
-    return actualStories;
   }
 
-  Widget _buildFlexibleSpace(List<Story> stories) {
-    return SizedBox(
-      height: 120,
-      child: ListView.separated(
-        padding: const EdgeInsets.symmetric(horizontal: 20),
-        scrollDirection: Axis.horizontal,
-        itemBuilder: (_, int i) {
-          if (DateTime.now().compareTo(stories[i].stopShowDate) == -1) {
-            return StoryWidget(
-              stories: stories,
-              storyIndex: i,
-            );
-          }
-          return Container();
-        },
-        separatorBuilder: (_, int i) => const SizedBox(width: 10),
-        itemCount: stories.length,
-      ),
-    );
+  double _computeWidth(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+
+    // Compute view size for desktop with sidebar
+    final viewSize = screenWidth > 600 ? screenWidth - 240 : screenWidth;
+
+    final columnCount = _getColumnCount(viewSize);
+
+    return (viewSize - (columnCount - 1) * 10) / columnCount;
   }
 
   @override
@@ -160,28 +183,12 @@ class _NewsPageState extends State<NewsPage> {
         controller: _scrollController,
         headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
           return [
-            BlocBuilder<StoriesBloc, StoriesState>(
-              builder: (context, state) {
-                if (state is StoriesInitial) {
-                  context.read<StoriesBloc>().add(LoadStories());
-                } else if (state is StoriesLoaded) {
-                  final actualStories = _getActualStories(state.stories);
-                  if (actualStories.isNotEmpty) {
-                    return SliverAppBar(
-                        automaticallyImplyLeading: false,
-                        expandedHeight: 110,
-                        actionsIconTheme: const IconThemeData(opacity: 0.0),
-                        flexibleSpace: _buildFlexibleSpace(actualStories));
-                  }
-                }
-                return const SliverAppBar(
-                  automaticallyImplyLeading: false,
-                  toolbarHeight: 0,
-                  elevation: 0,
-                  primary: false,
-                  actionsIconTheme: IconThemeData(opacity: 0.0),
-                );
-              },
+            const SliverAppBar(
+              automaticallyImplyLeading: false,
+              toolbarHeight: 0,
+              elevation: 0,
+              primary: false,
+              actionsIconTheme: IconThemeData(opacity: 0.0),
             ),
           ];
         },
@@ -242,22 +249,34 @@ class _NewsPageState extends State<NewsPage> {
                     }
                     return Expanded(
                       child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           const SizedBox(height: 12),
                           Expanded(
-                            child: ListView.builder(
-                              itemCount: news.length + (isLoading ? 1 : 0),
-                              itemBuilder: (context, index) {
-                                if (index < news.length) {
-                                  return NewsItemWidget(
-                                      newsItem: news[index],
-                                      onClickNewsTag: (tag) => _filterNewsByTag(
-                                          context.read<NewsBloc>(), tag));
-                                } else {
-                                  return const Center(
-                                      child: CircularProgressIndicator());
-                                }
-                              },
+                            child: SingleChildScrollView(
+                              child: Wrap(
+                                alignment: WrapAlignment.start,
+                                spacing: 0,
+                                runSpacing: 0,
+                                children: [
+                                  for (var index = 0;
+                                      index < news.length;
+                                      index++)
+                                    SizedBox(
+                                      width: _computeWidth(context),
+                                      child: NewsItemWidget(
+                                        newsItem: news[index],
+                                        onClickNewsTag: (tag) =>
+                                            _filterNewsByTag(
+                                                context.read<NewsBloc>(), tag),
+                                      ),
+                                    ),
+                                  if (isLoading)
+                                    const Center(
+                                      child: CircularProgressIndicator(),
+                                    ),
+                                ],
+                              ),
                             ),
                           ),
                         ],

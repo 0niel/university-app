@@ -1,13 +1,14 @@
 import 'package:oauth2_client/oauth2_client.dart';
 import 'package:oauth2_client/oauth2_helper.dart';
+import 'package:rtu_mirea_app/common/constants.dart';
 
 class MireaNinjaOauth2Client extends OAuth2Client {
   MireaNinjaOauth2Client({
     required String redirectUri,
     required String customUriScheme,
   }) : super(
-          authorizeUrl: 'https://lks.mirea.ninja/oauth/authorize',
-          tokenUrl: 'https://lks.mirea.ninja/oauth/token',
+          authorizeUrl: 'https://auth-app.mirea.ru/oauth/authorize',
+          tokenUrl: 'https://auth-app.mirea.ru/oauth/token',
           redirectUri: redirectUri,
           customUriScheme: customUriScheme,
         );
@@ -29,9 +30,8 @@ class LksOauth2 {
     oauth2Helper = OAuth2Helper(
       oauth2Client,
       grantType: OAuth2Helper.authorizationCode,
-      clientId: const String.fromEnvironment('LK_CLIENT_ID', defaultValue: ''),
-      clientSecret:
-          const String.fromEnvironment('LK_CLIENT_SECRET', defaultValue: ''),
+      clientId: lkClientId,
+      clientSecret: lkClientSecret,
       scopes: ['profile', 'livestream', 'employees', 'attendance', 'scores'],
     );
   }

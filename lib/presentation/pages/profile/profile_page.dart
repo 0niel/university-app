@@ -39,7 +39,16 @@ class _ProfilePageState extends State<ProfilePage> {
             return SingleChildScrollView(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: BlocBuilder<UserBloc, UserState>(
+                child: BlocConsumer<UserBloc, UserState>(
+                  listener: (context, state) {
+                    state.maybeMap(
+                      unauthorized: (st) {
+                        BlocProvider.of<UserBloc>(context)
+                            .add(const UserEvent.logIn());
+                      },
+                      orElse: () {},
+                    );
+                  },
                   builder: (context, state) {
                     return state.map(
                       unauthorized: (_) => const _InitialProfileStatePage(),
