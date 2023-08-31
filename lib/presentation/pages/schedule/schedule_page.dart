@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -15,6 +17,7 @@ import 'package:rtu_mirea_app/presentation/widgets/settings_switch_button.dart';
 import '../../widgets/feedback_modal.dart';
 import 'widgets/schedule_page_view.dart';
 import 'package:rtu_mirea_app/presentation/typography.dart';
+import 'package:dio/dio.dart';
 
 class SchedulePage extends StatefulWidget {
   const SchedulePage({Key? key}) : super(key: key);
@@ -167,6 +170,27 @@ class _SchedulePageState extends State<SchedulePage> {
       ).whenComplete(() {
         _modalShown = false;
       });
+    }
+  }
+
+  Future<String> getScheduleImage(String groupName) async {
+    final dio = Dio();
+    final response = await dio.get(
+        'https://schedule-of.mirea.ru/schedule/api/search?limit=15&match=$groupName');
+
+    if (response.statusCode == 200) {
+      final data = response.data;
+      final groupList = data['data'];
+
+      if (groupList.isNotEmpty) {
+        final groupId = groupList[0]['id'];
+
+        return 'https://schedule-of.mirea.ru/Schedule/GenericSchedule?type=Group&id=$groupId&asImage=True';
+      } else {
+        throw Exception('Group not found');
+      }
+    } else {
+      throw Exception('Failed to load group list');
     }
   }
 
@@ -436,7 +460,48 @@ class _SchedulePageState extends State<SchedulePage> {
                   ),
                 );
               } else if (state is ScheduleLoaded) {
-                return SchedulePageView(schedule: state.schedule);
+                // return SchedulePageView(schedule: state.schedule);
+                return FutureBuilder(
+                  future: getScheduleImage(state.activeGroup),
+                  builder: (context, snapshot) {
+                    if (snapshot.hasData) {
+                      // Image from
+                      if (snapshot.data != null)
+                        return SizedBox(
+                          child:
+                              Image.network(snapshot.data!, fit: BoxFit.cover),
+                          width: double.infinity,
+                        );
+                      return Container();
+                    } else if (snapshot.hasError) {
+                      return Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              'Упс!',
+                              style: AppTextStyle.h3,
+                            ),
+                            const SizedBox(
+                              height: 24,
+                            ),
+                            Text(
+                              'Не удалось загрузить расписание',
+                              style: AppTextStyle.bodyBold,
+                            )
+                          ],
+                        ),
+                      );
+                    } else {
+                      return Center(
+                        child: CircularProgressIndicator(
+                          backgroundColor: AppTheme.colors.primary,
+                          strokeWidth: 5,
+                        ),
+                      );
+                    }
+                  },
+                );
               } else if (state is ScheduleLoadError) {
                 return Column(
                   children: [
