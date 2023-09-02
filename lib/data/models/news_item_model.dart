@@ -1,6 +1,5 @@
+import 'package:intl/intl.dart';
 import 'package:rtu_mirea_app/domain/entities/news_item.dart';
-
-import 'strapi_media_model.dart';
 
 class NewsItemModel extends NewsItem {
   const NewsItemModel({
@@ -9,29 +8,26 @@ class NewsItemModel extends NewsItem {
     required date,
     required images,
     required tags,
-    required isImportant,
   }) : super(
           title: title,
           text: text,
           date: date,
           images: images,
           tags: tags,
-          isImportant: isImportant,
         );
 
   factory NewsItemModel.fromJson(Map<String, dynamic> json) {
     return NewsItemModel(
-      title: json['title'],
-      text: json['text'],
-      date: DateTime.parse(json['date']),
-      images: List<StrapiMediaModel>.from(json["images"]["data"]
-          .map((x) => StrapiMediaModel.fromJson(x["attributes"]))),
+      title: json['NAME'],
+      text: json['DETAIL_TEXT'],
+      date: DateFormat("dd.MM.yyyy").parse(json['DATE_ACTIVE_FROM']),
+      images: List<String>.from(json['PROPERTY_MY_GALLERY_VALUE'] ?? [])
+        ..add(json['DETAIL_PICTURE']),
       tags: List<String>.from(
-          json["tags"]["data"].map((x) => x["attributes"]['name'])),
-      isImportant: json['isImportant'],
+          json['TAGS'].toString().split(',').map((x) => x.trim())),
     );
   }
 
   @override
-  List<Object?> get props => [title, text, date, images, tags, isImportant];
+  List<Object?> get props => [title, text, date, images, tags];
 }

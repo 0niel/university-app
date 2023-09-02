@@ -233,7 +233,6 @@ class _NewsPageState extends State<NewsPage> {
                         ),
                       );
                     } else if (state is NewsLoading) {
-                      news = state.oldNews;
                       isLoading = true;
                     } else if (state is NewsLoadError) {
                       return SingleChildScrollView(
@@ -272,8 +271,10 @@ class _NewsPageState extends State<NewsPage> {
                                       ),
                                     ),
                                   if (isLoading)
-                                    const Center(
-                                      child: CircularProgressIndicator(),
+                                    const Expanded(
+                                      child: Center(
+                                        child: CircularProgressIndicator(),
+                                      ),
                                     ),
                                 ],
                               ),
