@@ -121,7 +121,7 @@ dependencies:
   # Official extension image, support placeholder(loading)/ failed state,
   # cache network, zoom/pan, photo view, slide out page,
   # editor(crop,rotate,flip), painting etc.
-  extended_image: ^8.0.1
+  extended_image: ^8.1.0
 
   # A package provides an easy way to add shimmer effect in Flutter project
   # See https://pub.dev/packages/shimmer
@@ -149,7 +149,7 @@ dependencies:
 
   # Get version name in runtime
   # https://pub.dev/packages/package_info_plus
-  package_info_plus: ^3.0.2
+  package_info_plus: ^4.1.0
 
   # Encapsulates the notion of the "current time". Very useful for testing
   # See https://pub.dev/packages/clock
@@ -216,6 +216,7 @@ dev_dependencies:
   flutter_launcher_icons: ^0.13.1
   auto_route_generator: ^5.0.3
   build_runner:
+
   # https://pub.dev/packages/freezed
   freezed: ^2.1.0+1
   json_serializable:
