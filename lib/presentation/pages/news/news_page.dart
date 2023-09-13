@@ -3,11 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:rtu_mirea_app/domain/entities/news_item.dart';
 import 'package:rtu_mirea_app/presentation/bloc/news_bloc/news_bloc.dart';
-import 'package:rtu_mirea_app/presentation/bloc/stories_bloc/stories_bloc.dart';
 import 'package:rtu_mirea_app/presentation/widgets/buttons/app_settings_button.dart';
 import 'package:rtu_mirea_app/presentation/widgets/buttons/primary_tab_button.dart';
 import 'package:shimmer/shimmer.dart';
-import 'widgets/news_item.dart';
+import 'widgets/news_card.dart';
 import 'widgets/tag_badge.dart';
 import 'package:rtu_mirea_app/presentation/typography.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
@@ -20,7 +19,30 @@ class NewsPage extends StatefulWidget {
 }
 
 class _NewsPageState extends State<NewsPage> {
-  final _scrollController = ScrollController();
+  late final ScrollController _scrollController;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController = ScrollController()..addListener(_scrollListener);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.removeListener(_scrollListener);
+    super.dispose();
+  }
+
+  void _scrollListener() {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 200) {
+      if (context.read<NewsBloc>().state is! NewsLoading) {
+        context.read<NewsBloc>().add(NewsLoadEvent(
+              isImportant: _tabValueNotifier.value == 1,
+            ));
+      }
+    }
+  }
 
   final ValueNotifier<int> _tabValueNotifier = ValueNotifier(0);
 
@@ -179,58 +201,37 @@ class _NewsPageState extends State<NewsPage> {
       appBar: AppBar(
         title: const Text("Новости"),
       ),
-      body: NestedScrollView(
-        controller: _scrollController,
-        headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
-          return [
-            const SliverAppBar(
-              automaticallyImplyLeading: false,
-              toolbarHeight: 0,
-              elevation: 0,
-              primary: false,
-              actionsIconTheme: IconThemeData(opacity: 0.0),
-            ),
-          ];
-        },
-        body: Builder(
-          builder: (BuildContext context) {
-            final innerScrollController = PrimaryScrollController.of(context);
-            _setupScrollController(innerScrollController);
+      body: Builder(
+        builder: (BuildContext context) {
+          List<NewsItem> news = [];
+          bool isLoading = false;
 
-            return RefreshIndicator(
-              onRefresh: () async {
-                context.read<NewsBloc>().add(NewsLoadEvent(
-                    refresh: true, isImportant: _tabValueNotifier.value == 1));
-                context.read<StoriesBloc>().add(LoadStories());
-              },
-              child: Column(children: [
-                const SizedBox(height: 16),
-                _buildTabButtons(context),
-                BlocBuilder<NewsBloc, NewsState>(
+          return Column(
+            children: [
+              const SizedBox(height: 16),
+              _buildTabButtons(context),
+              Expanded(
+                child: BlocBuilder<NewsBloc, NewsState>(
                   builder: (context, state) {
-                    List<NewsItem> news = [];
-                    bool isLoading = false;
-
                     if (state is NewsInitial) {
                       context.read<NewsBloc>().add(NewsLoadEvent(
-                          isImportant: _tabValueNotifier.value == 1));
+                          isImportant: _tabValueNotifier.value == 1,
+                          refresh: true));
                     } else if (state is NewsLoaded) {
                       news = state.news;
                     } else if (state is NewsLoading && state.isFirstFetch) {
-                      return Expanded(
-                        child: Column(
-                          children: [
-                            const SizedBox(height: 12),
-                            Expanded(
-                              child: ListView.builder(
-                                physics: const NeverScrollableScrollPhysics(),
-                                itemCount: 3,
-                                itemBuilder: (context, index) =>
-                                    const _ShimmerNewsCardLoading(),
-                              ),
+                      return Column(
+                        children: [
+                          const SizedBox(height: 12),
+                          Expanded(
+                            child: ListView.builder(
+                              physics: const NeverScrollableScrollPhysics(),
+                              itemCount: 3,
+                              itemBuilder: (context, index) =>
+                                  const _ShimmerNewsCardLoading(),
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       );
                     } else if (state is NewsLoading) {
                       isLoading = true;
@@ -246,61 +247,41 @@ class _NewsPageState extends State<NewsPage> {
                         ),
                       );
                     }
-                    return Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                    return SingleChildScrollView(
+                      controller: _scrollController,
+                      child: Wrap(
+                        alignment: WrapAlignment.start,
+                        spacing: 0,
+                        runSpacing: 0,
                         children: [
-                          const SizedBox(height: 12),
-                          Expanded(
-                            child: SingleChildScrollView(
-                              child: Wrap(
-                                alignment: WrapAlignment.start,
-                                spacing: 0,
-                                runSpacing: 0,
-                                children: [
-                                  for (var index = 0;
-                                      index < news.length;
-                                      index++)
-                                    SizedBox(
-                                      width: _computeWidth(context),
-                                      child: NewsItemWidget(
-                                        newsItem: news[index],
-                                        onClickNewsTag: (tag) =>
-                                            _filterNewsByTag(
-                                                context.read<NewsBloc>(), tag),
-                                      ),
-                                    ),
-                                  if (isLoading)
-                                    const Expanded(
-                                      child: Center(
-                                        child: CircularProgressIndicator(),
-                                      ),
-                                    ),
-                                ],
+                          const SizedBox(
+                            width: double.infinity,
+                            height: 16,
+                          ),
+                          for (var index = 0; index < news.length; index++)
+                            SizedBox(
+                              width: _computeWidth(context),
+                              child: NewsCard(
+                                newsItem: news[index],
+                                onClickNewsTag: (tag) => _filterNewsByTag(
+                                    context.read<NewsBloc>(), tag),
                               ),
                             ),
-                          ),
+                          if (isLoading)
+                            const Center(
+                              child: CircularProgressIndicator(),
+                            ),
                         ],
                       ),
                     );
                   },
                 ),
-              ]),
-            );
-          },
-        ),
+              ),
+            ],
+          );
+        },
       ),
     );
-  }
-
-  void _setupScrollController(ScrollController controller) {
-    controller.addListener(() {
-      if (controller.position.pixels == controller.position.maxScrollExtent) {
-        context
-            .read<NewsBloc>()
-            .add(NewsLoadEvent(isImportant: _tabValueNotifier.value == 1));
-      }
-    });
   }
 }
 

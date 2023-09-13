@@ -10,12 +10,22 @@ import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:rtu_mirea_app/presentation/typography.dart';
 
-class NewsItemWidget extends StatelessWidget {
+class NewsCard extends StatelessWidget {
   final NewsItem newsItem;
   final Function(String)? onClickNewsTag;
 
-  const NewsItemWidget({Key? key, required this.newsItem, this.onClickNewsTag})
+  const NewsCard({Key? key, required this.newsItem, this.onClickNewsTag})
       : super(key: key);
+
+  bool isTagsNotEmpty() {
+    if (newsItem.tags.isEmpty) {
+      return false;
+    } else if (newsItem.tags.length == 1 && newsItem.tags[0].isEmpty) {
+      return false;
+    }
+
+    return true;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -113,13 +123,13 @@ class NewsItemWidget extends StatelessWidget {
                   textAlign: TextAlign.start,
                   style: AppTextStyle.captionL
                       .copyWith(color: AppTheme.colors.secondary)),
-              newsItem.tags.isNotEmpty
-                  ? const SizedBox(height: 16)
+              isTagsNotEmpty() ? const SizedBox(height: 16) : Container(),
+              isTagsNotEmpty()
+                  ? _Tags(
+                      tags: newsItem.tags,
+                      onClick: onClickNewsTag,
+                    )
                   : Container(),
-              _Tags(
-                tags: newsItem.tags,
-                onClick: onClickNewsTag,
-              ),
             ],
           ),
         ),
