@@ -690,7 +690,7 @@ class _NfcNotAviable extends StatelessWidget {
           TextOutlinedButton(
             content: "Включить NFC",
             onPressed: () {
-              AppSettings.openNFCSettings();
+              AppSettings.openAppSettings(type: AppSettingsType.nfc);
             },
           ),
       ],
