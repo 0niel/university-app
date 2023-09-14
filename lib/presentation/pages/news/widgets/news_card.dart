@@ -2,7 +2,6 @@ import 'package:auto_route/auto_route.dart';
 import 'package:extended_image/extended_image.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
-import 'package:rtu_mirea_app/common/utils/strapi_utils.dart';
 import 'package:rtu_mirea_app/domain/entities/news_item.dart';
 import 'package:intl/intl.dart';
 import 'package:rtu_mirea_app/presentation/core/routes/routes.gr.dart';
@@ -11,12 +10,22 @@ import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:rtu_mirea_app/presentation/typography.dart';
 
-class NewsItemWidget extends StatelessWidget {
+class NewsCard extends StatelessWidget {
   final NewsItem newsItem;
   final Function(String)? onClickNewsTag;
 
-  const NewsItemWidget({Key? key, required this.newsItem, this.onClickNewsTag})
+  const NewsCard({Key? key, required this.newsItem, this.onClickNewsTag})
       : super(key: key);
+
+  bool isTagsNotEmpty() {
+    if (newsItem.tags.isEmpty) {
+      return false;
+    } else if (newsItem.tags.length == 1 && newsItem.tags[0].isEmpty) {
+      return false;
+    }
+
+    return true;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -42,9 +51,7 @@ class NewsItemWidget extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               ExtendedImage.network(
-                newsItem.images[0].formats != null
-                    ? StrapiUtils.getMediumImageUrl(newsItem.images[0].formats!)
-                    : newsItem.images[0].url,
+                newsItem.images[0],
                 height: 175,
                 width: MediaQuery.of(context).size.width,
                 fit: BoxFit.cover,
@@ -116,13 +123,13 @@ class NewsItemWidget extends StatelessWidget {
                   textAlign: TextAlign.start,
                   style: AppTextStyle.captionL
                       .copyWith(color: AppTheme.colors.secondary)),
-              newsItem.tags.isNotEmpty
-                  ? const SizedBox(height: 16)
+              isTagsNotEmpty() ? const SizedBox(height: 16) : Container(),
+              isTagsNotEmpty()
+                  ? _Tags(
+                      tags: newsItem.tags,
+                      onClick: onClickNewsTag,
+                    )
                   : Container(),
-              _Tags(
-                tags: newsItem.tags,
-                onClick: onClickNewsTag,
-              ),
             ],
           ),
         ),

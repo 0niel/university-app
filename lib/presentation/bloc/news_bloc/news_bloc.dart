@@ -15,71 +15,74 @@ class NewsBloc extends Bloc<NewsEvent, NewsState> {
     on<NewsLoadEvent>(_onNewsLoadEvent);
   }
 
+  final pageSize = 10;
+
   final GetNews getNews;
   final GetNewsTags getNewsTags;
 
-  bool _isFirstFetch = true;
-  int _offset = 0;
-  String? _selectedTag;
+  String? _getTagOrNull(String? tag) {
+    if (tag == null) return null;
+
+    if (tag == 'все') return null;
+
+    return tag;
+  }
 
   void _onNewsLoadEvent(NewsLoadEvent event, Emitter<NewsState> emit) async {
-    if (state is NewsLoading) return;
+    if (state is NewsLoaded) {
+      final st = state as NewsLoaded;
 
-    final bool refresh = event.refresh ?? false;
-    if (refresh) {
-      _isFirstFetch = true;
-      _offset = 0;
-    }
+      emit(NewsLoading(isFirstFetch: event.refresh == true));
 
-    List<String> tagsList = [];
-    List<NewsItem> oldNews = [];
+      final newsEither = await getNews(
+        GetNewsParams(
+            page: event.refresh == true ? 1 : st.page + 1,
+            pageSize: pageSize,
+            isImportant: event.isImportant,
+            tag: _getTagOrNull(event.tag)),
+      );
 
-    // True if the tag list failed to load
-    bool hasFetchError = false;
-
-    if (_isFirstFetch) {
-      emit(NewsLoading(oldNews: oldNews, isFirstFetch: true));
-      _isFirstFetch = false;
-      final tags = await getNewsTags();
-      tags.fold((failure) {
-        hasFetchError = true;
-      }, (r) {
-        tagsList = r;
-      });
+      newsEither.fold(
+        (l) => emit(NewsLoadError()),
+        (r) {
+          emit(NewsLoaded(
+            news: event.refresh == true ? r : st.news + r,
+            tags: st.tags,
+            selectedTag: st.selectedTag,
+            page: st.page + 1,
+          ));
+        },
+      );
     } else {
-      if (state is NewsLoaded) {
-        tagsList = (state as NewsLoaded).tags;
-        oldNews = (state as NewsLoaded).news;
-      }
-      emit(NewsLoading(oldNews: oldNews, isFirstFetch: false));
-    }
+      emit(NewsLoading(isFirstFetch: event.refresh == true));
 
-    if (hasFetchError) {
-      emit(NewsLoadError());
-      return;
-    }
+      final newsEither = await getNews(
+        GetNewsParams(
+          page: 1,
+          pageSize: pageSize,
+          isImportant: event.isImportant,
+          tag: _getTagOrNull(event.tag),
+        ),
+      );
 
-    if (event.tag == "все") {
-      _selectedTag = null;
-    } else {
-      if ((event.tag != null)) {
-        if (_selectedTag == null ||
-            (_selectedTag != null && event.tag != _selectedTag)) {
-          _selectedTag = event.tag;
-        }
-      }
-    }
+      final tagsEither = await getNewsTags();
 
-    final news = await getNews(GetNewsParams(
-        offset: _offset,
-        limit: 10,
-        isImportant: event.isImportant,
-        tag: _selectedTag));
-    emit(news.fold((failure) => NewsLoadError(), (r) {
-      List<NewsItem> newNews = List.from(oldNews)..addAll(r);
-      _offset += r.length;
-      return NewsLoaded(
-          news: newNews, tags: tagsList, selectedTag: _selectedTag);
-    }));
+      newsEither.fold(
+        (l) => emit(NewsLoadError()),
+        (r) {
+          tagsEither.fold(
+            (l) => emit(NewsLoadError()),
+            (tags) {
+              emit(NewsLoaded(
+                news: r,
+                tags: tags,
+                selectedTag: event.tag,
+                page: 1,
+              ));
+            },
+          );
+        },
+      );
+    }
   }
 }
