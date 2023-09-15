@@ -1,4 +1,3 @@
-
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:rtu_mirea_app/domain/entities/story.dart';
@@ -23,8 +22,8 @@ class StoryWidget extends StatelessWidget {
       child: Hero(
         tag: stories[storyIndex].title,
         child: Container(
-          height: 120,
-          width: 88,
+          height: 80,
+          width: 68,
           padding: const EdgeInsets.all(8),
           clipBehavior: Clip.antiAlias,
           alignment: Alignment.bottomLeft,

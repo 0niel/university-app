@@ -28,6 +28,16 @@ class NewsBloc extends Bloc<NewsEvent, NewsState> {
     return tag;
   }
 
+  static bool isTagsNotEmpty(List<String> tags) {
+    if (tags.isEmpty) {
+      return false;
+    } else if (tags.length == 1 && tags[0].isEmpty) {
+      return false;
+    }
+
+    return true;
+  }
+
   void _onNewsLoadEvent(NewsLoadEvent event, Emitter<NewsState> emit) async {
     if (state is NewsLoaded) {
       final st = state as NewsLoaded;
@@ -48,7 +58,7 @@ class NewsBloc extends Bloc<NewsEvent, NewsState> {
           emit(NewsLoaded(
             news: event.refresh == true ? r : st.news + r,
             tags: st.tags,
-            selectedTag: st.selectedTag,
+            selectedTag: event.tag,
             page: st.page + 1,
           ));
         },

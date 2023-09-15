@@ -37,6 +37,8 @@ class _SchedulePageViewState extends State<SchedulePageView> {
   late int _selectedPage;
   late int _selectedWeek;
 
+  final _scrollNotifier = ValueNotifier<double>(0);
+
   @override
   void initState() {
     super.initState();
@@ -160,30 +162,38 @@ class _SchedulePageViewState extends State<SchedulePageView> {
         lessons = _getLessonsWithEmpty(lessons, state.activeGroup);
       }
 
-      return ListView.separated(
-        itemCount: lessons.length,
-        physics: const BouncingScrollPhysics(),
-        itemBuilder: (context, i) {
-          return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: lessons[i].name.replaceAll(' ', '') != ''
-                ? LessonCard(
-                    name: lessons[i].name,
-                    timeStart: lessons[i].timeStart,
-                    timeEnd: lessons[i].timeEnd,
-                    room: lessons[i].rooms.join(', '),
-                    type: lessons[i].types,
-                    teacher: lessons[i].teachers.join(', '),
-                  )
-                : EmptyLessonCard(
-                    timeStart: lessons[i].timeStart,
-                    timeEnd: lessons[i].timeEnd,
-                  ),
-          );
+      return NotificationListener<ScrollNotification>(
+        onNotification: (notification) {
+          if (notification is ScrollUpdateNotification) {
+            _scrollNotifier.value = notification.metrics.extentBefore;
+          }
+          return true;
         },
-        separatorBuilder: (context, index) {
-          return const SizedBox(height: 8);
-        },
+        child: ListView.separated(
+          itemCount: lessons.length,
+          physics: const BouncingScrollPhysics(),
+          itemBuilder: (context, i) {
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: lessons[i].name.replaceAll(' ', '') != ''
+                  ? LessonCard(
+                      name: lessons[i].name,
+                      timeStart: lessons[i].timeStart,
+                      timeEnd: lessons[i].timeEnd,
+                      room: lessons[i].rooms.join(', '),
+                      type: lessons[i].types,
+                      teacher: lessons[i].teachers.join(', '),
+                    )
+                  : EmptyLessonCard(
+                      timeStart: lessons[i].timeStart,
+                      timeEnd: lessons[i].timeEnd,
+                    ),
+            );
+          },
+          separatorBuilder: (context, index) {
+            return const SizedBox(height: 8);
+          },
+        ),
       );
     }
   }
@@ -420,35 +430,40 @@ class _SchedulePageViewState extends State<SchedulePageView> {
   }
 
   Widget _buildStories(List<Story> stories) {
-    return SizedBox(
-      height: 120,
-      child: ListView.separated(
-        padding: const EdgeInsets.symmetric(horizontal: 20),
-        scrollDirection: Axis.horizontal,
-        itemBuilder: (_, int i) {
-          if (DateTime.now().compareTo(stories[i].stopShowDate) == -1) {
-            return Container(
-              decoration: BoxDecoration(
-                boxShadow: [
-                  BoxShadow(
-                    color: Theme.of(context).shadowColor.withOpacity(
-                        AppTheme.themeMode == ThemeMode.dark ? 0.1 : 0.1),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
+    return ValueListenableBuilder<double>(
+      valueListenable: _scrollNotifier,
+      builder: (context, value, child) {
+        return SizedBox(
+          height: value > 80 ? 0 : 80 - value,
+          child: ListView.separated(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            scrollDirection: Axis.horizontal,
+            itemBuilder: (_, int i) {
+              if (DateTime.now().compareTo(stories[i].stopShowDate) == -1) {
+                return Container(
+                  decoration: BoxDecoration(
+                    boxShadow: [
+                      BoxShadow(
+                        color: Theme.of(context).shadowColor.withOpacity(
+                            AppTheme.themeMode == ThemeMode.dark ? 0.1 : 0.1),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
                   ),
-                ],
-              ),
-              child: StoryWidget(
-                stories: stories,
-                storyIndex: i,
-              ),
-            );
-          }
-          return Container();
-        },
-        separatorBuilder: (_, int i) => const SizedBox(width: 10),
-        itemCount: stories.length,
-      ),
+                  child: StoryWidget(
+                    stories: stories,
+                    storyIndex: i,
+                  ),
+                );
+              }
+              return Container();
+            },
+            separatorBuilder: (_, int i) => const SizedBox(width: 10),
+            itemCount: stories.length,
+          ),
+        );
+      },
     );
   }
 

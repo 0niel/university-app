@@ -4,6 +4,7 @@ import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:rtu_mirea_app/domain/entities/news_item.dart';
 import 'package:intl/intl.dart';
+import 'package:rtu_mirea_app/presentation/bloc/news_bloc/news_bloc.dart';
 import 'package:rtu_mirea_app/presentation/core/routes/routes.gr.dart';
 import 'package:rtu_mirea_app/presentation/pages/news/widgets/tag_badge.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
@@ -16,16 +17,6 @@ class NewsCard extends StatelessWidget {
 
   const NewsCard({Key? key, required this.newsItem, this.onClickNewsTag})
       : super(key: key);
-
-  bool isTagsNotEmpty() {
-    if (newsItem.tags.isEmpty) {
-      return false;
-    } else if (newsItem.tags.length == 1 && newsItem.tags[0].isEmpty) {
-      return false;
-    }
-
-    return true;
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -123,8 +114,10 @@ class NewsCard extends StatelessWidget {
                   textAlign: TextAlign.start,
                   style: AppTextStyle.captionL
                       .copyWith(color: AppTheme.colors.secondary)),
-              isTagsNotEmpty() ? const SizedBox(height: 16) : Container(),
-              isTagsNotEmpty()
+              NewsBloc.isTagsNotEmpty(newsItem.tags)
+                  ? const SizedBox(height: 16)
+                  : Container(),
+              NewsBloc.isTagsNotEmpty(newsItem.tags)
                   ? _Tags(
                       tags: newsItem.tags,
                       onClick: onClickNewsTag,
