@@ -4,6 +4,7 @@ import 'package:flutter_html_iframe/flutter_html_iframe.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
 import 'package:rtu_mirea_app/domain/entities/news_item.dart';
+import 'package:rtu_mirea_app/presentation/bloc/news_bloc/news_bloc.dart';
 import 'package:rtu_mirea_app/presentation/pages/news/widgets/tag_badge.dart';
 import 'package:rtu_mirea_app/presentation/widgets/images_horizontal_slider.dart';
 import 'package:url_launcher/url_launcher_string.dart';
@@ -103,11 +104,11 @@ class _NewsItemInfo extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisAlignment: tags.isNotEmpty
+      mainAxisAlignment: NewsBloc.isTagsNotEmpty(tags)
           ? MainAxisAlignment.spaceBetween
           : MainAxisAlignment.start,
       children: [
-        tags.isNotEmpty
+        NewsBloc.isTagsNotEmpty(tags)
             ? Expanded(
                 child: Wrap(
                   spacing: 8,

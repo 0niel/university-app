@@ -94,26 +94,30 @@ class _NewsPageState extends State<NewsPage> {
                   ),
                   const SizedBox(height: 16),
                   Expanded(
-                    child: Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: List.generate(loadedState.tags.length, (index) {
-                        if (loadedState.selectedTag ==
-                            loadedState.tags[index]) {
+                    child: SingleChildScrollView(
+                      physics: const BouncingScrollPhysics(),
+                      child: Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children:
+                            List.generate(loadedState.tags.length, (index) {
+                          if (loadedState.selectedTag ==
+                              loadedState.tags[index]) {
+                            return TagBadge(
+                              tag: loadedState.tags[index],
+                              color: AppTheme.colors.colorful04,
+                              onPressed: () => _filterNewsByTag(
+                                  context.read<NewsBloc>(), "все"),
+                            );
+                          }
                           return TagBadge(
                             tag: loadedState.tags[index],
-                            color: AppTheme.colors.colorful04,
                             onPressed: () => _filterNewsByTag(
-                                context.read<NewsBloc>(), "все"),
+                                context.read<NewsBloc>(),
+                                loadedState.tags[index]),
                           );
-                        }
-                        return TagBadge(
-                          tag: loadedState.tags[index],
-                          onPressed: () => _filterNewsByTag(
-                              context.read<NewsBloc>(),
-                              loadedState.tags[index]),
-                        );
-                      }),
+                        }),
+                      ),
                     ),
                   ),
                 ],
