@@ -52,7 +52,7 @@ class _OnBoardingPageState extends State<OnBoardingPage> {
   static const List titlesTexts = [
     'Добро пожаловать!',
     'Смотри расписание!',
-    'Будь в курсе, не надевая штаны!',
+    'Будь в курсе в любой момент!',
     // 'Ставь цели!',
     //'Коммуницируй!',
   ];
