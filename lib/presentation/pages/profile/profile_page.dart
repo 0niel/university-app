@@ -96,14 +96,10 @@ class _UserLoggedInView extends StatelessWidget {
             style: AppTextStyle.h5,
           ),
         ),
-        ShaderMask(
-          shaderCallback: (bounds) => AppTheme.colors.gradient07.createShader(
-            Rect.fromLTWH(0, 0, bounds.width, bounds.height),
-          ),
-          child: Text(
-            user.login,
-            style: AppTextStyle.titleS,
-          ),
+        Text(
+          user.login,
+          style:
+              AppTextStyle.titleS.copyWith(color: AppTheme.colors.colorful04),
         ),
         const SizedBox(height: 12),
         Row(mainAxisAlignment: MainAxisAlignment.center, children: [
