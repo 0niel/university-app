@@ -1,6 +1,5 @@
-import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
-import 'package:rtu_mirea_app/presentation/core/routes/routes.gr.dart';
+import 'package:go_router/go_router.dart';
 import 'package:rtu_mirea_app/presentation/widgets/keyboard_positioned.dart';
 import 'package:rtu_mirea_app/presentation/typography.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
@@ -78,7 +77,7 @@ class ScheduleSettingsModal extends StatelessWidget {
                       // Close modal
                       Navigator.of(context).pop();
 
-                      context.router.push(const GroupsSelectRoute());
+                      context.go('/schedule/select-group');
                     },
                     child: Text(
                       'Начать',

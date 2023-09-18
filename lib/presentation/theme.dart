@@ -1,4 +1,3 @@
-import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:rtu_mirea_app/presentation/colors.dart';
@@ -45,10 +44,6 @@ class AppTheme {
               selectedLabelStyle: AppTextStyle.captionL,
               unselectedLabelStyle: AppTextStyle.captionS,
             ),
-    pageTransitionsTheme: const PageTransitionsTheme(builders: {
-      TargetPlatform.iOS: NoShadowCupertinoPageTransitionsBuilder(),
-      TargetPlatform.android: FadeUpwardsPageTransitionsBuilder(),
-    }),
     colorScheme: ColorScheme(
       background: darkThemeColors.background01,
       brightness: Brightness.dark,
@@ -87,10 +82,6 @@ class AppTheme {
               selectedLabelStyle: AppTextStyle.captionL,
               unselectedLabelStyle: AppTextStyle.captionS,
             ),
-    pageTransitionsTheme: const PageTransitionsTheme(builders: {
-      TargetPlatform.iOS: NoShadowCupertinoPageTransitionsBuilder(),
-      TargetPlatform.android: FadeUpwardsPageTransitionsBuilder(),
-    }),
     colorScheme: ColorScheme(
       background: lightThemeColors.background01,
       brightness: Brightness.light,

@@ -1,7 +1,7 @@
-import 'package:auto_route/auto_route.dart';
 import 'package:dismissible_page/dismissible_page.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:rtu_mirea_app/common/utils/utils.dart';
 import 'package:rtu_mirea_app/domain/entities/story.dart';
 import 'package:rtu_mirea_app/presentation/widgets/buttons/primary_button.dart';
@@ -39,7 +39,7 @@ class _StoriesWrapperState extends State<StoriesWrapper> {
   @override
   Widget build(BuildContext context) {
     return DismissiblePage(
-      onDismissed: () => context.router.pop(),
+      onDismissed: () => context.pop(),
       isFullScreen: false,
       direction: DismissiblePageDismissDirection.vertical,
       child: Center(
@@ -168,7 +168,7 @@ class _StoriesWrapperState extends State<StoriesWrapper> {
                                   ),
                                 ),
                               ),
-                              onPressed: () => context.router.pop(),
+                              onPressed: () => context.pop(),
                             ),
                           ),
                         ),
@@ -202,7 +202,7 @@ class _StoriesWrapperState extends State<StoriesWrapper> {
                 storyLength: (int pageIndex) {
                   return widget.stories[pageIndex].pages.length;
                 },
-                onPageLimitReached: () => context.router.pop(),
+                onPageLimitReached: () => context.pop(),
               ),
             ),
           ),

@@ -1,11 +1,10 @@
-import 'package:auto_route/auto_route.dart';
 import 'package:extended_image/extended_image.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:rtu_mirea_app/domain/entities/news_item.dart';
 import 'package:intl/intl.dart';
 import 'package:rtu_mirea_app/presentation/bloc/news_bloc/news_bloc.dart';
-import 'package:rtu_mirea_app/presentation/core/routes/routes.gr.dart';
 import 'package:rtu_mirea_app/presentation/pages/news/widgets/tag_badge.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:shimmer/shimmer.dart';
@@ -22,9 +21,8 @@ class NewsCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        context.router.push(NewsDetailsRoute(
-          newsItem: newsItem,
-        ));
+        context.go('/news/details', extra: newsItem);
+
         FirebaseAnalytics.instance.logEvent(name: 'view_news', parameters: {
           'news_title': newsItem.title,
         });

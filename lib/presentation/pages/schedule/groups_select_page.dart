@@ -1,8 +1,8 @@
-import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:go_router/go_router.dart';
 import 'package:rtu_mirea_app/presentation/bloc/schedule_bloc/schedule_bloc.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:rtu_mirea_app/presentation/typography.dart';
@@ -159,7 +159,7 @@ class _GroupsSelectPageState extends State<GroupsSelectPage> {
                                       ScheduleSetActiveGroupEvent(
                                           group: _filteredGroups[index]),
                                     );
-                                context.router.pop();
+                                context.pop();
                               },
                             );
                           },
@@ -295,7 +295,7 @@ class _GroupListTile extends StatelessWidget {
             context
                 .read<ScheduleBloc>()
                 .add(ScheduleSetActiveGroupEvent(group: group));
-            context.router.pop();
+            context.pop();
           },
         ),
       ),

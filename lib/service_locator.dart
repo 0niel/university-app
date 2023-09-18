@@ -73,6 +73,7 @@ import 'package:rtu_mirea_app/presentation/bloc/scores_bloc/scores_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/stories_bloc/stories_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/update_info_bloc/update_info_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/user_bloc/user_bloc.dart';
+import 'package:rtu_mirea_app/presentation/core/routes/routes.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
@@ -257,4 +258,6 @@ Future<void> setup() async {
   getIt.registerLazySingleton(() => LksOauth2());
   final DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
   getIt.registerLazySingleton(() => deviceInfo);
+
+  getIt.registerLazySingleton(() => createRouter());
 }

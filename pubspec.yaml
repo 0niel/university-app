@@ -134,8 +134,6 @@ dependencies:
   syncfusion_flutter_charts: ^22.2.12
   syncfusion_flutter_gauges: ^22.2.12
 
-  auto_route: ^5.0.4
-  
   url_launcher: ^6.0.17
 
   flutter_markdown: ^0.6.9
@@ -199,6 +197,7 @@ dependencies:
   # provides
   # See https://pub.dev/packages/unicons
   unicons: any
+  go_router: ^10.1.2
 
 
 dev_dependencies:
@@ -211,7 +210,6 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_launcher_icons: ^0.13.1
-  auto_route_generator: ^5.0.3
   build_runner:
 
   # https://pub.dev/packages/freezed

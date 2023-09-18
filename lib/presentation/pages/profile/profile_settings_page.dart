@@ -1,37 +1,19 @@
-import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:rtu_mirea_app/presentation/app_notifier.dart';
-import 'package:rtu_mirea_app/presentation/core/routes/routes.gr.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:rtu_mirea_app/presentation/typography.dart';
+import 'package:rtu_mirea_app/service_locator.dart';
 
 class ProfileSettingsPage extends StatelessWidget {
   const ProfileSettingsPage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final router = AutoRouter.of(context);
-
-    void rebuildRouterStack(StackRouter router) {
-      final tabsRouter = AutoTabsRouter.of(context);
-
-      // Rebuild current router stack
-      router.popUntil((route) => false);
-      router.replaceAll([const ProfileRoute()]);
-
-      final currentTabIndex = tabsRouter.activeIndex;
-
-      // Rebuild tabs router stack
-      for (var i = 0; i < tabsRouter.pageCount; i++) {
-        if (i == currentTabIndex) continue;
-        final route = tabsRouter.stackRouterOfIndex(i);
-        final routeName = route?.current.name;
-        if (routeName == null) continue;
-
-        route?.popUntil((route) => false);
-        route?.pushNamed(routeName);
-      }
+    void rebuildRouterStack() {
+      final router = getIt<GoRouter>();
+      // Rebuild all routes if theme was changed
     }
 
     return Scaffold(
@@ -63,8 +45,8 @@ class ProfileSettingsPage extends StatelessWidget {
                               .read<AppNotifier>()
                               .updateTheme(AppThemeType.light);
                           // Close dialog
-                          Navigator.pop(context);
-                          rebuildRouterStack(router);
+                          context.pop();
+                          rebuildRouterStack();
                         },
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
@@ -82,8 +64,8 @@ class ProfileSettingsPage extends StatelessWidget {
                               .read<AppNotifier>()
                               .updateTheme(AppThemeType.dark);
                           // Close dialog
-                          Navigator.pop(context);
-                          rebuildRouterStack(router);
+                          context.pop();
+                          rebuildRouterStack();
                         },
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
