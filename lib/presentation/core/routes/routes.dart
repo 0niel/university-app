@@ -116,6 +116,12 @@ GoRouter createRouter() => GoRouter(
                     path: 'details',
                     builder: (context, state) =>
                         ProfileDetailPage(user: state.extra as User),
+                    redirect: (context, state) {
+                      if (state.extra == null) {
+                        return '/profile';
+                      }
+                      return null;
+                    },
                   ),
                   GoRoute(
                     path: 'lectors',
