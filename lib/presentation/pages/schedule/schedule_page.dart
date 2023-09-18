@@ -392,11 +392,8 @@ class SchedulePage extends PageWithThemeConsumer {
                 //   }
                 // });
 
-                return Center(
-                  child: CircularProgressIndicator(
-                    backgroundColor: AppTheme.colors.primary,
-                    strokeWidth: 5,
-                  ),
+                return const Center(
+                  child: CircularProgressIndicator(),
                 );
               } else if (state is ScheduleLoaded) {
                 return SchedulePageView(schedule: state.schedule);

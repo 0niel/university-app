@@ -217,7 +217,7 @@ class _PageIndicatorsState extends State<PageIndicators> {
               : InkWell(
                   onTap: () {
                     context.read<AppCubit>().closeOnboarding();
-                    context.replace('/schedule');
+                    context.go('/schedule');
                   },
                   child: Text(
                     "Пропустить",

@@ -21,7 +21,7 @@ class NextPageViewButton extends StatelessWidget {
       onPressed: () {
         if (isLastPage) {
           context.read<AppCubit>().closeOnboarding();
-          context.replace('/schedule');
+          context.go('/schedule');
         } else {
           onClick();
         }
