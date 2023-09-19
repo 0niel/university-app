@@ -1,0 +1,20 @@
+name: persistent_storage
+description: Storage that saves data in the device's persistent memory.
+publish_to: none
+
+environment:
+  sdk: '>=3.1.2 <4.0.0'
+  flutter: ">=1.17.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  shared_preferences: ^2.2.1
+  storage: 
+    path: ../storage
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  very_good_analysis: ^5.1.0

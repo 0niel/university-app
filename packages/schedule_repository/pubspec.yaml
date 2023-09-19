@@ -1,0 +1,17 @@
+name: schedule_repository
+description: A new Flutter package project.
+publish_to: none
+
+environment:
+  sdk: '>=3.1.2 <4.0.0'
+  flutter: ">=1.17.0"
+
+dependencies:
+  equatable: ^2.0.5
+  schedule_api_client:
+    path: ../schedule_api_client
+  storage:
+    path: ../storage/storage
+    
+dev_dependencies:
+    very_good_analysis: ^4.0.0
