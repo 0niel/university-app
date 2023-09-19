@@ -11,11 +11,6 @@ class ProfileSettingsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    void rebuildRouterStack() {
-      final router = getIt<GoRouter>();
-      // Rebuild all routes if theme was changed
-    }
-
     return Scaffold(
       appBar: AppBar(
         title: const Text("Настройки"),
@@ -46,7 +41,6 @@ class ProfileSettingsPage extends StatelessWidget {
                               .updateTheme(AppThemeType.light);
                           // Close dialog
                           context.pop();
-                          rebuildRouterStack();
                         },
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
@@ -65,7 +59,6 @@ class ProfileSettingsPage extends StatelessWidget {
                               .updateTheme(AppThemeType.dark);
                           // Close dialog
                           context.pop();
-                          rebuildRouterStack();
                         },
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
