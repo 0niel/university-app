@@ -65,5 +65,7 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>PermissionGroupNotification</key>
+	<string>Приложение запрашивает разрешение на отправку уведомлений</string>
 </dict>
 </plist>
