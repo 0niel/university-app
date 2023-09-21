@@ -15,6 +15,7 @@ import '../../widgets/feedback_modal.dart';
 import 'widgets/schedule_page_view.dart';
 import 'package:rtu_mirea_app/presentation/typography.dart';
 
+
 class SchedulePage extends PageWithThemeConsumer {
   const SchedulePage({Key? key}) : super(key: key);
 
@@ -134,154 +135,207 @@ class SchedulePage extends PageWithThemeConsumer {
 
   @override
   Widget buildPage(BuildContext context) {
-    return Scaffold(
-      endDrawer: ScheduleSettingsDrawer(
-        builder: (_) => Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Column(
-            children: [
-              BlocBuilder<ScheduleBloc, ScheduleState>(
-                  buildWhen: (prevState, currentState) {
-                if (currentState is ScheduleLoaded &&
-                    prevState is ScheduleLoaded) {
-                  if (prevState.activeGroup != currentState.activeGroup ||
-                      prevState.downloadedScheduleGroups !=
-                          currentState.downloadedScheduleGroups ||
-                      prevState.schedule.isRemote !=
-                          currentState.schedule.isRemote) return true;
-                }
-                if (currentState is ScheduleLoaded &&
-                    prevState.runtimeType != ScheduleLoaded) return true;
-                return false;
-              }, builder: (context, state) {
-                if (state is ScheduleLoaded ||
-                    state is ScheduleActiveGroupEmpty) {
-                  return Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        if (state is ScheduleLoaded)
-                          SettingsSwitchButton(
-                            initialValue:
-                                state.scheduleSettings.showEmptyLessons,
-                            svgPicture: SvgPicture.asset(
-                              'assets/icons/lessons.svg',
-                              height: 16,
-                              width: 16,
+    return BlocBuilder<ScheduleBloc, ScheduleState>(
+      builder: (context, state) => Scaffold(
+        endDrawer: ScheduleSettingsDrawer(
+          builder: (_) => Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Column(
+              children: [
+                BlocBuilder<ScheduleBloc, ScheduleState>(
+                    buildWhen: (prevState, currentState) {
+                  if (currentState is ScheduleLoaded &&
+                      prevState is ScheduleLoaded) {
+                    if (prevState.activeGroup != currentState.activeGroup ||
+                        prevState.downloadedScheduleGroups !=
+                            currentState.downloadedScheduleGroups ||
+                        prevState.schedule.isRemote !=
+                            currentState.schedule.isRemote) return true;
+                  }
+                  if (currentState is ScheduleLoaded &&
+                      prevState.runtimeType != ScheduleLoaded) return true;
+                  return false;
+                }, builder: (context, state) {
+                  if (state is ScheduleLoaded ||
+                      state is ScheduleActiveGroupEmpty) {
+                    return Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (state is ScheduleLoaded)
+                            SettingsSwitchButton(
+                              initialValue:
+                                  state.scheduleSettings.showEmptyLessons,
+                              svgPicture: SvgPicture.asset(
+                                'assets/icons/lessons.svg',
+                                height: 16,
+                                width: 16,
+                              ),
+                              text: "Пустые пары",
+                              onChanged: (value) {
+                                context.read<ScheduleBloc>().add(
+                                    ScheduleUpdateSettingsEvent(
+                                        showEmptyLessons: value));
+                              },
                             ),
-                            text: "Пустые пары",
-                            onChanged: (value) {
-                              context.read<ScheduleBloc>().add(
-                                  ScheduleUpdateSettingsEvent(
-                                      showEmptyLessons: value));
-                            },
-                          ),
-                        // SizedBox(height: 10),
-                        // SettingsSwitchButton(
-                        //   initialValue:
-                        //       state.scheduleSettings.showLessonsNumbers,
-                        //   svgPicture: SvgPicture.asset(
-                        //     'assets/icons/number.svg',
-                        //     height: 16,
-                        //     width: 16,
-                        //   ),
-                        //   text: "Номера пар",
-                        //   onChanged: (value) {
-                        //     context.read<ScheduleBloc>().add(
-                        //         ScheduleUpdateSettingsEvent(
-                        //             showLesonsNums: value));
-                        //   },
-                        // ),
-                        Material(
-                          color: Colors.transparent,
-                          child: InkWell(
-                            child: Column(
-                              children: [
-                                Padding(
-                                  padding:
-                                      const EdgeInsets.symmetric(vertical: 20),
-                                  child: Row(
-                                    children: [
-                                      SvgPicture.asset(
-                                        'assets/icons/add_group.svg',
-                                        height: 16,
-                                        width: 16,
-                                      ),
-                                      const SizedBox(width: 20),
-                                      Text("Добавить группу",
-                                          style: AppTextStyle.buttonL),
-                                    ],
+                          // SizedBox(height: 10),
+                          // SettingsSwitchButton(
+                          //   initialValue:
+                          //       state.scheduleSettings.showLessonsNumbers,
+                          //   svgPicture: SvgPicture.asset(
+                          //     'assets/icons/number.svg',
+                          //     height: 16,
+                          //     width: 16,
+                          //   ),
+                          //   text: "Номера пар",
+                          //   onChanged: (value) {
+                          //     context.read<ScheduleBloc>().add(
+                          //         ScheduleUpdateSettingsEvent(
+                          //             showLesonsNums: value));
+                          //   },
+                          // ),
+                          Material(
+                            color: Colors.transparent,
+                            child: InkWell(
+                              child: Column(
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 20),
+                                    child: Row(
+                                      children: [
+                                        SvgPicture.asset(
+                                          'assets/icons/add_group.svg',
+                                          height: 16,
+                                          width: 16,
+                                        ),
+                                        const SizedBox(width: 20),
+                                        Text("Добавить группу",
+                                            style: AppTextStyle.buttonL),
+                                      ],
+                                    ),
                                   ),
-                                ),
-                                Opacity(
-                                  opacity: 0.05,
-                                  child: Container(
-                                    width: double.infinity,
-                                    height: 1,
-                                    color: Colors.white,
+                                  Opacity(
+                                    opacity: 0.05,
+                                    child: Container(
+                                      width: double.infinity,
+                                      height: 1,
+                                      color: Colors.white,
+                                    ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
+                              // onTap: () => _showModal(isFirstRun: false),
+                              onTap: () => context.go('/schedule/select-group'),
                             ),
-                            // onTap: () => _showModal(isFirstRun: false),
-                            onTap: () => context.go('/schedule/select-group'),
                           ),
-                        ),
-                        Material(
-                          color: Colors.transparent,
-                          child: InkWell(
-                            child: Column(
-                              children: [
-                                Padding(
-                                  padding:
-                                      const EdgeInsets.symmetric(vertical: 20),
-                                  child: Row(
-                                    children: [
-                                      SvgPicture.asset(
-                                        'assets/icons/social-sharing.svg',
-                                        height: 16,
-                                        width: 16,
-                                      ),
-                                      const SizedBox(width: 20),
-                                      Text("Проблемы с расписанием",
-                                          style: AppTextStyle.buttonL),
-                                    ],
+                          Material(
+                            color: Colors.transparent,
+                            child: InkWell(
+                              child: Column(
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 20),
+                                    child: Row(
+                                      children: [
+                                        SvgPicture.asset(
+                                          'assets/icons/social-sharing.svg',
+                                          height: 16,
+                                          width: 16,
+                                        ),
+                                        const SizedBox(width: 20),
+                                        Text("Проблемы с расписанием",
+                                            style: AppTextStyle.buttonL),
+                                      ],
+                                    ),
                                   ),
-                                ),
-                                Opacity(
-                                  opacity: 0.05,
-                                  child: Container(
-                                    width: double.infinity,
-                                    height: 1,
-                                    color: Colors.white,
+                                  Opacity(
+                                    opacity: 0.05,
+                                    child: Container(
+                                      width: double.infinity,
+                                      height: 1,
+                                      color: Colors.white,
+                                    ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
+                              onTap: () {
+                                final defaultText = state is ScheduleLoaded
+                                    ? 'Возникла проблема с расписанием группы ${state.activeGroup}:\n\n'
+                                    : null;
+
+                                final userBloc = context.read<UserBloc>();
+
+                                userBloc.state.maybeMap(
+                                  logInSuccess: (value) =>
+                                      FeedbackBottomModalSheet.show(
+                                    context,
+                                    defaultText: defaultText,
+                                    defaultEmail: value.user.email,
+                                  ),
+                                  orElse: () => FeedbackBottomModalSheet.show(
+                                    context,
+                                    defaultText: defaultText,
+                                  ),
+                                );
+                              },
                             ),
-                            onTap: () {
-                              final defaultText = state is ScheduleLoaded
-                                  ? 'Возникла проблема с расписанием группы ${state.activeGroup}:\n\n'
-                                  : null;
-
-                              final userBloc = context.read<UserBloc>();
-
-                              userBloc.state.maybeMap(
-                                logInSuccess: (value) =>
-                                    FeedbackBottomModalSheet.show(
-                                  context,
-                                  defaultText: defaultText,
-                                  defaultEmail: value.user.email,
-                                ),
-                                orElse: () => FeedbackBottomModalSheet.show(
-                                  context,
-                                  defaultText: defaultText,
-                                ),
-                              );
-                            },
                           ),
-                        ),
 
-                        if (state is ScheduleLoaded)
+                          if (state is ScheduleLoaded)
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const SizedBox(height: 20),
+                                  Text(
+                                    "Группы".toUpperCase(),
+                                    style: AppTextStyle.chip.copyWith(
+                                        color: AppTheme.colors.deactiveDarker),
+                                    textAlign: TextAlign.left,
+                                  ),
+                                  const SizedBox(height: 10),
+                                  _buildGroupButton(
+                                    context,
+                                    state.activeGroup,
+                                    state.activeGroup,
+                                    true,
+                                    state.schedule,
+                                  ),
+                                  Expanded(
+                                    child: ListView.builder(
+                                      itemCount:
+                                          state.downloadedScheduleGroups.length,
+                                      itemBuilder: (context, index) {
+                                        if (state.downloadedScheduleGroups[
+                                                index] !=
+                                            state.activeGroup) {
+                                          return _buildGroupButton(
+                                            context,
+                                            state.downloadedScheduleGroups[
+                                                index],
+                                            state.activeGroup,
+                                            false,
+                                            state.schedule,
+                                          );
+                                        }
+                                        return Container();
+                                      },
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                        ],
+                      ),
+                    );
+                  } else {
+                    // Schedule not loaded info
+                    return Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -294,131 +348,72 @@ class SchedulePage extends PageWithThemeConsumer {
                                   textAlign: TextAlign.left,
                                 ),
                                 const SizedBox(height: 10),
-                                _buildGroupButton(
-                                  context,
-                                  state.activeGroup,
-                                  state.activeGroup,
-                                  true,
-                                  state.schedule,
-                                ),
-                                Expanded(
-                                  child: ListView.builder(
-                                    itemCount:
-                                        state.downloadedScheduleGroups.length,
-                                    itemBuilder: (context, index) {
-                                      if (state.downloadedScheduleGroups[
-                                              index] !=
-                                          state.activeGroup) {
-                                        return _buildGroupButton(
-                                          context,
-                                          state.downloadedScheduleGroups[index],
-                                          state.activeGroup,
-                                          false,
-                                          state.schedule,
-                                        );
-                                      }
-                                      return Container();
-                                    },
-                                  ),
-                                ),
                               ],
                             ),
                           ),
-                      ],
-                    ),
-                  );
-                } else {
-                  // Schedule not loaded info
-                  return Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const SizedBox(height: 20),
-                              Text(
-                                "Группы".toUpperCase(),
-                                style: AppTextStyle.chip.copyWith(
-                                    color: AppTheme.colors.deactiveDarker),
-                                textAlign: TextAlign.left,
-                              ),
-                              const SizedBox(height: 10),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-                }
-              }),
-            ],
+                        ],
+                      ),
+                    );
+                  }
+                }),
+              ],
+            ),
           ),
         ),
-      ),
-      appBar: AppBar(
-        title: const Text('Расписание'),
-      ),
-      body: Container(
-        color: AppTheme.colors.background01,
-        child: SafeArea(
-          child: BlocConsumer<ScheduleBloc, ScheduleState>(
-            listener: (context, state) {
-              // if (state is ScheduleActiveGroupEmpty) {
-              //   if (!_modalShown) {
-              //     // show after 300 ms
-              //     Future.delayed(
-              //       const Duration(milliseconds: 300),
-              //       () => _showModal(),
-              //     );
-              //   }
-              // }
-            },
-            buildWhen: (prevState, currentState) {
-              if (prevState is ScheduleLoaded &&
-                  currentState is ScheduleLoaded) {
-                return prevState != currentState;
-              }
-              return true;
-            },
-            builder: (context, state) {
-              if (state is ScheduleLoading) {
-                // Add post frame callback to hide modal after build
-                // WidgetsBinding.instance.addPostFrameCallback((_) {
-                //   if (_modalShown) {
-                //     _modalShown = false;
-                //     context.router.root.pop();
-                //   }
-                // });
+        appBar: BlocProvider.of<ScheduleBloc>(context).state is ScheduleLoaded
+            ? null
+            : AppBar(
+                title: const Text('Расписание'),
+              ),
+        body: Container(
+          color: AppTheme.colors.background01,
+          child: SafeArea(
+            child: BlocBuilder<ScheduleBloc, ScheduleState>(
+              buildWhen: (prevState, currentState) {
+                if (prevState is ScheduleLoaded &&
+                    currentState is ScheduleLoaded) {
+                  return prevState != currentState;
+                }
+                return true;
+              },
+              builder: (context, state) {
+                if (state is ScheduleLoading) {
+                  // Add post frame callback to hide modal after build
+                  // WidgetsBinding.instance.addPostFrameCallback((_) {
+                  //   if (_modalShown) {
+                  //     _modalShown = false;
+                  //     context.router.root.pop();
+                  //   }
+                  // });
 
-                return const Center(
-                  child: CircularProgressIndicator(),
-                );
-              } else if (state is ScheduleLoaded) {
-                return SchedulePageView(schedule: state.schedule);
-              } else if (state is ScheduleLoadError) {
-                return Column(
-                  children: [
-                    Text(
-                      'Упс!',
-                      style: AppTextStyle.h3,
-                    ),
-                    const SizedBox(
-                      height: 24,
-                    ),
-                    Text(
-                      state.errorMessage,
-                      style: AppTextStyle.bodyBold,
-                    )
-                  ],
-                );
-              } else {
-                // return _NoActiveGroupFoundMessage(onTap: () => _showModal());
-                return _NoActiveGroupFoundMessage(
-                    onTap: () => context.go('/schedule/select-group'));
-              }
-            },
+                  return const Center(
+                    child: CircularProgressIndicator(),
+                  );
+                } else if (state is ScheduleLoaded) {
+                  return SchedulePageView(schedule: state.schedule);
+                } else if (state is ScheduleLoadError) {
+                  return Column(
+                    children: [
+                      Text(
+                        'Упс!',
+                        style: AppTextStyle.h3,
+                      ),
+                      const SizedBox(
+                        height: 24,
+                      ),
+                      Text(
+                        state.errorMessage,
+                        style: AppTextStyle.bodyBold,
+                      )
+                    ],
+                  );
+                } else {
+                  // return _NoActiveGroupFoundMessage(onTap: () => _showModal());
+                  return _NoActiveGroupFoundMessage(
+                      onTap: () => context.go('/schedule/select-group'));
+                }
+              },
+            ),
           ),
         ),
       ),

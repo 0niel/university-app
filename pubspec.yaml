@@ -194,6 +194,8 @@ dependencies:
   sentry_logging: ^7.9.0
   logging: ^1.1.1
 
+  sliver_tools: ^0.2.12
+
   # 1000+ beautiful icons to use in you dream project, with all the customization Flutter 
   # provides
   # See https://pub.dev/packages/unicons
