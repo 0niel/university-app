@@ -57,23 +57,15 @@ class ProfilePage extends PageWithThemeConsumer {
                         ),
                       ),
                       logInError: (st) => const _InitialProfileStatePage(),
-                      logInSuccess: (st) => BlocBuilder<
-                          NotificationPreferencesBloc,
-                          NotificationPreferencesState>(
-                        builder: (BuildContext context,
-                            NotificationPreferencesState state) {
-                          if (state.categories.isEmpty) {
-                            BlocProvider.of<NotificationPreferencesBloc>(
-                                    context)
-                                .add(
-                              InitialCategoriesPreferencesRequested(
-                                  group: UserBloc.getActiveStudent(st.user)
-                                      .academicGroup),
-                            );
-                          }
-                          return _UserLoggedInView(user: st.user);
-                        },
-                      ),
+                      logInSuccess: (st) {
+                        BlocProvider.of<NotificationPreferencesBloc>(context)
+                            .add(
+                          InitialCategoriesPreferencesRequested(
+                              group: UserBloc.getActiveStudent(st.user)
+                                  .academicGroup),
+                        );
+                        return _UserLoggedInView(user: st.user);
+                      },
                     );
                   },
                 ),
