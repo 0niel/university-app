@@ -59,9 +59,7 @@ class _ProfileNfcPageState extends State<ProfileNfcPassPage> {
               return state.maybeMap(
                 logInSuccess: (state) {
                   final user = state.user;
-                  var student = user.students.firstWhereOrNull(
-                      (element) => element.status == 'активный');
-                  student ??= user.students.first;
+                  var student = UserBloc.getActiveStudent(user);
 
                   return ListView(
                     children: [
@@ -98,7 +96,7 @@ class _ProfileNfcPageState extends State<ProfileNfcPassPage> {
                                 initial: (_) {
                                   context.read<NfcPassBloc>().add(
                                         NfcPassEvent.getNfcPasses(
-                                          student!.code,
+                                          student.code,
                                           student.id,
                                           snapshot.data!.id,
                                         ),
@@ -122,7 +120,7 @@ class _ProfileNfcPageState extends State<ProfileNfcPassPage> {
                                       onPressed: () =>
                                           context.read<NfcPassBloc>().add(
                                                 NfcPassEvent.connectNfcPass(
-                                                  student!.code,
+                                                  student.code,
                                                   student.id,
                                                   snapshot.data!.id,
                                                   snapshot.data!.model,
@@ -177,7 +175,7 @@ class _ProfileNfcPageState extends State<ProfileNfcPassPage> {
                                             onClick: () {
                                               context.read<NfcPassBloc>().add(
                                                     NfcPassEvent.connectNfcPass(
-                                                      student!.code,
+                                                      student.code,
                                                       student.id,
                                                       snapshot.data!.id,
                                                       snapshot.data!.model,
@@ -222,7 +220,7 @@ class _ProfileNfcPageState extends State<ProfileNfcPassPage> {
                                             .add(
                                               NfcFeedbackEvent.sendFeedback(
                                                 fullName: fullName,
-                                                group: student!.academicGroup,
+                                                group: student.academicGroup,
                                                 personalNumber:
                                                     student.personalNumber,
                                                 studentId:
@@ -230,7 +228,7 @@ class _ProfileNfcPageState extends State<ProfileNfcPassPage> {
                                               ),
                                             ),
                                         fullName: fullName,
-                                        personalNumber: student!.personalNumber,
+                                        personalNumber: student.personalNumber,
                                       );
                                     },
                                     loading: (_) => const Center(

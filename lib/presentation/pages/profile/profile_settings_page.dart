@@ -4,7 +4,6 @@ import 'package:provider/provider.dart';
 import 'package:rtu_mirea_app/presentation/app_notifier.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:rtu_mirea_app/presentation/typography.dart';
-import 'package:rtu_mirea_app/service_locator.dart';
 
 class ProfileSettingsPage extends StatelessWidget {
   const ProfileSettingsPage({Key? key}) : super(key: key);
@@ -70,6 +69,14 @@ class ProfileSettingsPage extends StatelessWidget {
                     ],
                   ),
                 );
+              },
+            ),
+            const Divider(),
+            ListTile(
+              title: Text("Уведомления", style: AppTextStyle.body),
+              leading: Icon(Icons.notifications, color: AppTheme.colors.active),
+              onTap: () {
+                context.go("/profile/settings/notifications");
               },
             ),
             const Divider(),

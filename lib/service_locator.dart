@@ -1,7 +1,12 @@
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:dio/dio.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:firebase_notifications_client/firebase_notifications_client.dart';
 import 'package:get_it/get_it.dart';
+import 'package:notifications_repository/notifications_repository.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:permission_client/permission_client.dart';
+import 'package:persistent_storage/persistent_storage.dart';
 import 'package:rtu_mirea_app/common/oauth.dart';
 import 'package:rtu_mirea_app/common/utils/connection_checker.dart';
 import 'package:rtu_mirea_app/data/datasources/app_settings_local.dart';
@@ -68,6 +73,7 @@ import 'package:rtu_mirea_app/presentation/bloc/map_cubit/map_cubit.dart';
 import 'package:rtu_mirea_app/presentation/bloc/news_bloc/news_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/nfc_feedback_bloc/nfc_feedback_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/nfc_pass_bloc/nfc_pass_bloc.dart';
+import 'package:rtu_mirea_app/presentation/bloc/notification_preferences/notification_preferences_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/schedule_bloc/schedule_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/scores_bloc/scores_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/stories_bloc/stories_bloc.dart';
@@ -140,6 +146,8 @@ Future<void> setup() async {
       ));
   getIt
       .registerFactory(() => NfcFeedbackBloc(sendNfcNotExistFeedback: getIt()));
+  getIt.registerFactory(
+      () => NotificationPreferencesBloc(notificationsRepository: getIt()));
 
   // Usecases
   getIt.registerLazySingleton(() => GetStories(getIt()));
@@ -214,6 +222,13 @@ Future<void> setup() async {
             localDataSource: getIt(),
           ));
 
+  getIt.registerLazySingleton<NotificationsRepository>(
+      () => NotificationsRepository(
+            permissionClient: getIt(),
+            storage: getIt<NotificationsStorage>(),
+            notificationsClient: getIt<FirebaseNotificationsClient>(),
+          ));
+
   getIt.registerLazySingleton<UserLocalData>(() => UserLocalDataImpl(
       sharedPreferences: getIt(),
       secureStorage: getIt(),
@@ -260,4 +275,12 @@ Future<void> setup() async {
   getIt.registerLazySingleton(() => deviceInfo);
 
   getIt.registerLazySingleton(() => createRouter());
+  getIt.registerLazySingleton(() => FirebaseNotificationsClient(
+      firebaseMessaging: FirebaseMessaging.instance));
+  getIt.registerLazySingleton(() => const PermissionClient());
+  getIt.registerLazySingleton(
+      () => PersistentStorage(sharedPreferences: getIt()));
+  getIt.registerLazySingleton(() => NotificationsStorage(
+        storage: getIt<PersistentStorage>(),
+      ));
 }

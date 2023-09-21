@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:rtu_mirea_app/domain/entities/user.dart';
+import 'package:rtu_mirea_app/presentation/bloc/notification_preferences/notification_preferences_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/user_bloc/user_bloc.dart';
 import 'package:rtu_mirea_app/presentation/widgets/buttons/colorful_button.dart';
 import 'package:rtu_mirea_app/presentation/widgets/buttons/icon_button.dart';
@@ -56,7 +57,23 @@ class ProfilePage extends PageWithThemeConsumer {
                         ),
                       ),
                       logInError: (st) => const _InitialProfileStatePage(),
-                      logInSuccess: (st) => _UserLoggedInView(user: st.user),
+                      logInSuccess: (st) => BlocBuilder<
+                          NotificationPreferencesBloc,
+                          NotificationPreferencesState>(
+                        builder: (BuildContext context,
+                            NotificationPreferencesState state) {
+                          if (state.categories.isEmpty) {
+                            BlocProvider.of<NotificationPreferencesBloc>(
+                                    context)
+                                .add(
+                              InitialCategoriesPreferencesRequested(
+                                  group: UserBloc.getActiveStudent(st.user)
+                                      .academicGroup),
+                            );
+                          }
+                          return _UserLoggedInView(user: st.user);
+                        },
+                      ),
                     );
                   },
                 ),

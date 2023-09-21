@@ -22,6 +22,7 @@ import 'package:rtu_mirea_app/presentation/bloc/map_cubit/map_cubit.dart';
 import 'package:rtu_mirea_app/presentation/bloc/news_bloc/news_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/nfc_feedback_bloc/nfc_feedback_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/nfc_pass_bloc/nfc_pass_bloc.dart';
+import 'package:rtu_mirea_app/presentation/bloc/notification_preferences/notification_preferences_bloc.dart';
 
 import 'package:rtu_mirea_app/presentation/bloc/schedule_bloc/schedule_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/scores_bloc/scores_bloc.dart';
@@ -59,13 +60,13 @@ class GlobalBlocObserver extends BlocObserver {
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await dependency_injection.setup();
-
-  WidgetDataProvider.initData();
-
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+
+  await dependency_injection.setup();
+
+  WidgetDataProvider.initData();
 
   if (Platform.isAndroid || Platform.isIOS) {
     await FirebaseAnalytics.instance.logAppOpen();
@@ -180,6 +181,9 @@ class App extends StatelessWidget {
           ),
         BlocProvider<NfcFeedbackBloc>(
           create: (_) => getIt<NfcFeedbackBloc>(),
+        ),
+        BlocProvider<NotificationPreferencesBloc>(
+          create: (_) => getIt<NotificationPreferencesBloc>(),
         ),
       ],
       child: Consumer<AppNotifier>(

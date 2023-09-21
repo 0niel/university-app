@@ -146,7 +146,7 @@ class NewsApiClient {
         // Ключ 'CNT' - количество использований тега.
         rawTags
             .where(
-                (rawTag) => int.parse(rawTag['CNT'] as String) > tagUsageCount)
+                (rawTag) => int.parse(rawTag['CNT'] as String) > tagUsageCount,)
             .map((rawTag) => rawTag['NAME'] as String),
       );
     } catch (error, stackTrace) {

@@ -39,7 +39,7 @@ class NewsResponse extends Equatable {
 
   /// Дата публикации новости.
   @JsonKey(
-      name: 'DATE_ACTIVE_FROM', fromJson: _dateFromJson, toJson: _dateToJson)
+      name: 'DATE_ACTIVE_FROM', fromJson: _dateFromJson, toJson: _dateToJson,)
   final DateTime date;
 
   /// Ссылки на изображения новости.
