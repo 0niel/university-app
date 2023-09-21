@@ -122,11 +122,21 @@ class _NotificationsSwitch extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(name, style: AppTextStyle.buttonL),
-            const SizedBox(height: 4),
-            Text(description, style: AppTextStyle.body),
-          ]),
+          SizedBox(
+            width: MediaQuery.of(context).size.width - 120,
+            child:
+                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text(name, style: AppTextStyle.buttonL),
+              const SizedBox(height: 4),
+              Text(
+                description,
+                style: AppTextStyle.body,
+                maxLines: 2,
+                overflow: TextOverflow.clip,
+                softWrap: true,
+              ),
+            ]),
+          ),
           Padding(
             padding: const EdgeInsets.only(right: 8),
             child: CupertinoSwitch(
