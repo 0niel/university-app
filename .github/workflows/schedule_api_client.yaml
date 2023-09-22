@@ -1,0 +1,21 @@
+name: schedule_api_client
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  pull_request:
+    paths:
+      - "packages/schedule_api_client/**"
+      - ".github/workflows/schedule_api_client.yaml"
+    branches:
+      - main
+
+jobs:
+  build:
+    uses: VeryGoodOpenSource/very_good_workflows/.github/workflows/flutter_package.yml@v1
+    with:
+      coverage_excludes: "**/*.g.dart"
+      flutter_version: 3.13.5
+      working_directory: packages/schedule_api_client
