@@ -1,4 +1,5 @@
 # rtu-mirea-app
+[![Codemagic build status](https://api.codemagic.io/apps/650ddff0d58153d281f375fe/650ddff0d58153d281f375fd/status_badge.svg)](https://codemagic.io/apps/650ddff0d58153d281f375fe/650ddff0d58153d281f375fd/latest_build)
 
 Это мобильное приложение с полностью открытым исходным кодом для студентов и преподавателей РТУ МИРЭА.
 <p float="left">
