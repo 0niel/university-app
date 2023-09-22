@@ -9,7 +9,6 @@ import 'package:rtu_mirea_app/presentation/bloc/schedule_bloc/schedule_bloc.dart
 import 'package:rtu_mirea_app/presentation/bloc/stories_bloc/stories_bloc.dart';
 import 'package:rtu_mirea_app/presentation/constants.dart';
 import 'package:rtu_mirea_app/presentation/pages/schedule/widgets/empty_lesson_card.dart';
-import 'package:sliver_tools/sliver_tools.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/intl.dart';
 import 'lesson_card.dart';
@@ -261,17 +260,25 @@ class _SchedulePageViewState extends State<SchedulePageView> {
           headerStyle: HeaderStyle(
             formatButtonVisible: !isDesktop,
             formatButtonShowsNext: false,
-            titleTextStyle: AppTextStyle.captionL,
-            formatButtonTextStyle: AppTextStyle.buttonS,
+            titleTextStyle: AppTextStyle.captionL.copyWith(
+              color: AppTheme.colors.active,
+            ),
+            formatButtonTextStyle: AppTextStyle.buttonS.copyWith(
+              color: AppTheme.colors.active,
+            ),
             titleTextFormatter: (DateTime date, dynamic locale) {
               String dateStr = DateFormat.yMMMM(locale).format(date);
               String weekStr = _selectedWeek.toString();
               return '$dateStr\nвыбрана $weekStr неделя';
             },
+            leftChevronIcon:
+                Icon(Icons.chevron_left, color: AppTheme.colors.active),
+            rightChevronIcon:
+                Icon(Icons.chevron_right, color: AppTheme.colors.active),
             formatButtonDecoration: BoxDecoration(
                 border: Border.fromBorderSide(
                     BorderSide(color: AppTheme.colors.deactive)),
-                borderRadius: const BorderRadius.all(Radius.circular(12.0))),
+                borderRadius: const BorderRadius.all(Radius.circular(16.0))),
           ),
           calendarStyle: CalendarStyle(
             rangeHighlightColor: AppTheme.colors.secondary,
@@ -501,7 +508,7 @@ class _SchedulePageViewState extends State<SchedulePageView> {
                   child: _buildStoriesBuilder(),
                 ),
               ),
-              SliverPinnedHeader(
+              SliverToBoxAdapter(
                 child: _buildCalendar(false),
               ),
             ],
