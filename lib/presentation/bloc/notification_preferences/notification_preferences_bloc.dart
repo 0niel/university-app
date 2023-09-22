@@ -27,7 +27,7 @@ const visibleCategoryNames = {
 /// Транслитерирует название группы для использования в качестве названия
 /// категории уведомлений.
 String transletirateGroupName(String groupName) {
-  final transliteration = {
+  final mappings = {
     'А': 'A',
     'Б': 'B',
     'В': 'V',
@@ -50,23 +50,23 @@ String transletirateGroupName(String groupName) {
     'Т': 'T',
     'У': 'U',
     'Ф': 'F',
-    'Х': 'Kh',
+    'Х': 'H',
     'Ц': 'Ts',
     'Ч': 'Ch',
     'Ш': 'Sh',
-    'Щ': 'Shch',
+    'Щ': 'Sch',
     'Ъ': '',
     'Ы': 'Y',
     'Ь': '',
     'Э': 'E',
-    'Ю': 'Yu',
-    'Я': 'Ya',
+    'Ю': 'Ju',
+    'Я': 'Ja',
   };
 
   return groupName
       .split('-')
       .map((word) =>
-          word.split('').map((char) => transliteration[char] ?? char).join(''))
+          word.split('').map((char) => mappings[char] ?? char).join(''))
       .join('-');
 }
 
