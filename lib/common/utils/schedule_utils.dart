@@ -21,9 +21,9 @@ class ScheduleUtils {
         "14:20": 4,
         "16:20": 5,
         "18:00": 6,
-        "19:40": 7,
         "18:30": 7,
-        "20:10": 8,
+        "19:40": 8,
+        "20:10": 9,
       };
 
   static Map<String, int> get universityTimesEnd => const {
@@ -33,9 +33,9 @@ class ScheduleUtils {
         "15:50": 4,
         "17:50": 5,
         "19:30": 6,
-        "21:00": 7,
         "20:00": 7,
-        "21:40": 8,
+        "21:00": 8,
+        "21:40": 9,
       };
 
   static bool isCollegeGroup(String group) {
