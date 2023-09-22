@@ -1,48 +1,19 @@
-import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:rtu_mirea_app/domain/entities/news_item.dart';
 import 'package:rtu_mirea_app/presentation/bloc/news_bloc/news_bloc.dart';
 import 'package:rtu_mirea_app/presentation/widgets/buttons/app_settings_button.dart';
 import 'package:rtu_mirea_app/presentation/widgets/buttons/primary_tab_button.dart';
+import 'package:rtu_mirea_app/presentation/widgets/page_with_theme_consumer.dart';
 import 'package:shimmer/shimmer.dart';
 import 'widgets/news_card.dart';
 import 'widgets/tag_badge.dart';
 import 'package:rtu_mirea_app/presentation/typography.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 
-class NewsPage extends StatefulWidget {
-  const NewsPage({Key? key}) : super(key: key);
-
-  @override
-  State<NewsPage> createState() => _NewsPageState();
-}
-
-class _NewsPageState extends State<NewsPage> {
-  late final ScrollController _scrollController;
-
-  @override
-  void initState() {
-    super.initState();
-    _scrollController = ScrollController()..addListener(_scrollListener);
-  }
-
-  @override
-  void dispose() {
-    _scrollController.removeListener(_scrollListener);
-    super.dispose();
-  }
-
-  void _scrollListener() {
-    if (_scrollController.position.pixels >=
-        _scrollController.position.maxScrollExtent - 200) {
-      if (context.read<NewsBloc>().state is! NewsLoading) {
-        context.read<NewsBloc>().add(NewsLoadEvent(
-              isImportant: _tabValueNotifier.value == 1,
-            ));
-      }
-    }
-  }
+class NewsPage extends PageWithThemeConsumer {
+  NewsPage({super.key});
 
   final ValueNotifier<int> _tabValueNotifier = ValueNotifier(0);
 
@@ -79,7 +50,7 @@ class _NewsPageState extends State<NewsPage> {
               const EdgeInsets.only(top: 4, bottom: 16, left: 24, right: 24),
           child: BlocConsumer<NewsBloc, NewsState>(
             listener: (context, state) =>
-                state.runtimeType != NewsLoaded ? context.router.pop() : null,
+                state.runtimeType != NewsLoaded ? context.pop() : null,
             buildWhen: (previous, current) => (current is NewsLoaded),
             builder: (context, state) {
               final loadedState = state as NewsLoaded;
@@ -177,29 +148,8 @@ class _NewsPageState extends State<NewsPage> {
     );
   }
 
-  int _getColumnCount(double screenWidth) {
-    if (screenWidth < 900) {
-      return 1;
-    } else if (screenWidth < 1200) {
-      return 3;
-    } else {
-      return 4;
-    }
-  }
-
-  double _computeWidth(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-
-    // Compute view size for desktop with sidebar
-    final viewSize = screenWidth > 600 ? screenWidth - 240 : screenWidth;
-
-    final columnCount = _getColumnCount(viewSize);
-
-    return (viewSize - (columnCount - 1) * 10) / columnCount;
-  }
-
   @override
-  Widget build(BuildContext context) {
+  Widget buildPage(BuildContext context) {
     return Scaffold(
       backgroundColor: AppTheme.colors.background01,
       appBar: AppBar(
@@ -251,32 +201,10 @@ class _NewsPageState extends State<NewsPage> {
                         ),
                       );
                     }
-                    return SingleChildScrollView(
-                      controller: _scrollController,
-                      child: Wrap(
-                        alignment: WrapAlignment.start,
-                        spacing: 0,
-                        runSpacing: 0,
-                        children: [
-                          const SizedBox(
-                            width: double.infinity,
-                            height: 16,
-                          ),
-                          for (var index = 0; index < news.length; index++)
-                            SizedBox(
-                              width: _computeWidth(context),
-                              child: NewsCard(
-                                newsItem: news[index],
-                                onClickNewsTag: (tag) => _filterNewsByTag(
-                                    context.read<NewsBloc>(), tag),
-                              ),
-                            ),
-                          if (isLoading)
-                            const Center(
-                              child: CircularProgressIndicator(),
-                            ),
-                        ],
-                      ),
+                    return _NewsPageView(
+                      tabValueNotifier: _tabValueNotifier,
+                      news: news,
+                      isLoading: isLoading,
                     );
                   },
                 ),
@@ -284,6 +212,105 @@ class _NewsPageState extends State<NewsPage> {
             ],
           );
         },
+      ),
+    );
+  }
+}
+
+class _NewsPageView extends StatefulWidget {
+  const _NewsPageView({
+    Key? key,
+    required this.tabValueNotifier,
+    required this.news,
+    required this.isLoading,
+  }) : super(key: key);
+
+  final ValueNotifier<int> tabValueNotifier;
+  final List<NewsItem> news;
+  final bool isLoading;
+
+  @override
+  _NewsPageViewState createState() => _NewsPageViewState();
+}
+
+class _NewsPageViewState extends State<_NewsPageView> {
+  late final ScrollController _scrollController;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController = ScrollController()..addListener(_scrollListener);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.removeListener(_scrollListener);
+    super.dispose();
+  }
+
+  void _scrollListener() {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 200) {
+      if (context.read<NewsBloc>().state is! NewsLoading) {
+        context.read<NewsBloc>().add(NewsLoadEvent(
+              isImportant: widget.tabValueNotifier.value == 1,
+            ));
+      }
+    }
+  }
+
+  int _getColumnCount(double screenWidth) {
+    if (screenWidth < 900) {
+      return 1;
+    } else if (screenWidth < 1200) {
+      return 3;
+    } else {
+      return 4;
+    }
+  }
+
+  double _computeWidth(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+
+    // Compute view size for desktop with sidebar
+    final viewSize = screenWidth > 600 ? screenWidth - 240 : screenWidth;
+
+    final columnCount = _getColumnCount(viewSize);
+
+    return (viewSize - (columnCount - 1) * 10) / columnCount;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      controller: _scrollController,
+      child: Wrap(
+        alignment: WrapAlignment.start,
+        spacing: 0,
+        runSpacing: 0,
+        children: [
+          const SizedBox(
+            width: double.infinity,
+            height: 16,
+          ),
+          for (var index = 0; index < widget.news.length; index++)
+            SizedBox(
+              width: _computeWidth(context),
+              child: NewsCard(
+                  newsItem: widget.news[index],
+                  onClickNewsTag: (tag) => context.read<NewsBloc>().add(
+                        NewsLoadEvent(
+                          refresh: true,
+                          isImportant: widget.tabValueNotifier.value == 1,
+                          tag: tag,
+                        ),
+                      )),
+            ),
+          if (widget.isLoading)
+            const Center(
+              child: CircularProgressIndicator(),
+            ),
+        ],
       ),
     );
   }

@@ -1,9 +1,8 @@
-import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:rtu_mirea_app/presentation/bloc/app_cubit/app_cubit.dart';
-import 'package:rtu_mirea_app/presentation/core/routes/routes.gr.dart';
 import 'package:rtu_mirea_app/presentation/typography.dart';
 import 'widgets/indicator.dart';
 import 'widgets/next_button.dart';
@@ -218,7 +217,7 @@ class _PageIndicatorsState extends State<PageIndicators> {
               : InkWell(
                   onTap: () {
                     context.read<AppCubit>().closeOnboarding();
-                    context.router.replace(const HomeRoute());
+                    context.go('/schedule');
                   },
                   child: Text(
                     "Пропустить",

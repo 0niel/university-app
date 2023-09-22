@@ -1,7 +1,6 @@
-import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:rtu_mirea_app/domain/entities/story.dart';
-import 'package:rtu_mirea_app/presentation/core/routes/routes.gr.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:rtu_mirea_app/presentation/typography.dart';
 
@@ -16,8 +15,7 @@ class StoryWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        context.router.push(
-            StoriesWrapperRoute(stories: stories, storyIndex: storyIndex));
+        context.go('/schedule/story/$storyIndex', extra: stories);
       },
       child: Hero(
         tag: stories[storyIndex].title,

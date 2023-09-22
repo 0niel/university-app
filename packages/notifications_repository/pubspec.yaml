@@ -1,0 +1,25 @@
+name: notifications_repository
+description: A repository that manages notification permissions and topic subscriptions.
+version: 1.0.0+1
+publish_to: none
+
+environment:
+  sdk: '>=3.1.2 <4.0.0'
+
+dependencies:
+  equatable: ^2.0.5
+  flutter:
+    sdk: flutter
+  notifications_client:
+    path: ../notifications_client/notifications_client
+  permission_client:
+    path: ../permission_client
+  storage:
+    path: ../storage/storage
+  test: ^1.24.3
+
+dev_dependencies:
+  mocktail: ^1.0.0
+  flutter_test:
+    sdk: flutter
+  very_good_analysis: ^5.1.0

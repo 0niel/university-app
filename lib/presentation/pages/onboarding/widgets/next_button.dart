@@ -1,8 +1,7 @@
-import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/src/provider.dart';
 import 'package:rtu_mirea_app/presentation/bloc/app_cubit/app_cubit.dart';
-import 'package:rtu_mirea_app/presentation/core/routes/routes.gr.dart';
 import 'package:rtu_mirea_app/presentation/typography.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 
@@ -22,7 +21,7 @@ class NextPageViewButton extends StatelessWidget {
       onPressed: () {
         if (isLastPage) {
           context.read<AppCubit>().closeOnboarding();
-          context.router.replace(const HomeRoute());
+          context.go('/schedule');
         } else {
           onClick();
         }

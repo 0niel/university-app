@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:get/get.dart';
 import 'package:rtu_mirea_app/domain/entities/score.dart';
 import 'package:rtu_mirea_app/presentation/bloc/scores_bloc/scores_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/user_bloc/user_bloc.dart';
@@ -61,9 +60,7 @@ class _ProfileScoresPageState extends State<ProfileScoresPage> {
                   BlocBuilder<ScoresBloc, ScoresState>(
                 builder: (context, state) {
                   final user = userStateLoaded.user;
-                  var student = user.students.firstWhereOrNull(
-                      (element) => element.status == 'активный');
-                  student ??= user.students.first;
+                  var student = UserBloc.getActiveStudent(user);
 
                   if (state is ScoresInitial) {
                     context

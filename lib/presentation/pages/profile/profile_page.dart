@@ -1,14 +1,15 @@
 import 'dart:io';
 
-import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:rtu_mirea_app/domain/entities/user.dart';
+import 'package:rtu_mirea_app/presentation/bloc/notification_preferences/notification_preferences_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/user_bloc/user_bloc.dart';
 import 'package:rtu_mirea_app/presentation/widgets/buttons/colorful_button.dart';
 import 'package:rtu_mirea_app/presentation/widgets/buttons/icon_button.dart';
 import 'package:rtu_mirea_app/presentation/widgets/buttons/settings_button.dart';
-import 'package:rtu_mirea_app/presentation/core/routes/routes.gr.dart';
+import 'package:rtu_mirea_app/presentation/widgets/page_with_theme_consumer.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 import '../../bloc/announces_bloc/announces_bloc.dart';
@@ -17,16 +18,11 @@ import '../../widgets/container_label.dart';
 import 'package:rtu_mirea_app/presentation/typography.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 
-class ProfilePage extends StatefulWidget {
+class ProfilePage extends PageWithThemeConsumer {
   const ProfilePage({Key? key}) : super(key: key);
 
   @override
-  State<ProfilePage> createState() => _ProfilePageState();
-}
-
-class _ProfilePageState extends State<ProfilePage> {
-  @override
-  Widget build(BuildContext context) {
+  Widget buildPage(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Профиль"),
@@ -61,7 +57,15 @@ class _ProfilePageState extends State<ProfilePage> {
                         ),
                       ),
                       logInError: (st) => const _InitialProfileStatePage(),
-                      logInSuccess: (st) => _UserLoggedInView(user: st.user),
+                      logInSuccess: (st) {
+                        BlocProvider.of<NotificationPreferencesBloc>(context)
+                            .add(
+                          InitialCategoriesPreferencesRequested(
+                              group: UserBloc.getActiveStudent(st.user)
+                                  .academicGroup),
+                        );
+                        return _UserLoggedInView(user: st.user);
+                      },
                     );
                   },
                 ),
@@ -96,23 +100,17 @@ class _UserLoggedInView extends StatelessWidget {
             style: AppTextStyle.h5,
           ),
         ),
-        ShaderMask(
-          shaderCallback: (bounds) => AppTheme.colors.gradient07.createShader(
-            Rect.fromLTWH(0, 0, bounds.width, bounds.height),
-          ),
-          child: Text(
-            user.login,
-            style: AppTextStyle.titleS,
-          ),
+        Text(
+          user.login,
+          style:
+              AppTextStyle.titleS.copyWith(color: AppTheme.colors.colorful04),
         ),
         const SizedBox(height: 12),
         Row(mainAxisAlignment: MainAxisAlignment.center, children: [
           TextOutlinedButton(
             width: 160,
             content: "Профиль",
-            onPressed: () => context.router.push(
-              ProfileDetailRoute(user: user),
-            ),
+            onPressed: () => context.go('/profile/details', extra: user),
           ),
           const SizedBox(width: 12),
           SizedBox(
@@ -137,9 +135,7 @@ class _UserLoggedInView extends StatelessWidget {
             icon: Icons.message_rounded,
             onClick: () {
               context.read<AnnouncesBloc>().add(const LoadAnnounces());
-              context.router.push(
-                const ProfileAnnouncesRoute(),
-              );
+              context.go('/profile/announces');
             }),
         // const SizedBox(height: 8),
         // SettingsButton(
@@ -150,24 +146,24 @@ class _UserLoggedInView extends StatelessWidget {
         SettingsButton(
           text: 'Преподаватели',
           icon: Icons.people_alt_rounded,
-          onClick: () => context.router.push(const ProfileLectrosRoute()),
+          onClick: () => context.go('/profile/lectors'),
         ),
         const SizedBox(height: 8),
         SettingsButton(
           text: 'Посещения',
           icon: Icons.access_time_rounded,
-          onClick: () => context.router.push(const ProfileAttendanceRoute()),
+          onClick: () => context.go('/profile/attendance'),
         ),
         const SizedBox(height: 8),
         SettingsButton(
             text: 'Зачетная книжка',
             icon: Icons.menu_book_rounded,
-            onClick: () => context.router.push(const ProfileScoresRoute())),
+            onClick: () => context.go('/profile/scores')),
         const SizedBox(height: 8),
         SettingsButton(
           text: 'О приложении',
           icon: Icons.apps_rounded,
-          onClick: () => context.router.push(const AboutAppRoute()),
+          onClick: () => context.go('/profile/about'),
         ),
 
         // Display only for android devices because of
@@ -177,7 +173,7 @@ class _UserLoggedInView extends StatelessWidget {
           SettingsButton(
             text: 'NFC пропуск',
             icon: Icons.nfc_rounded,
-            onClick: () => context.router.push(const ProfileNfcPassRoute()),
+            onClick: () => context.go('/profile/nfc-pass'),
           ),
         ],
 
@@ -185,9 +181,7 @@ class _UserLoggedInView extends StatelessWidget {
         SettingsButton(
             text: 'Настройки',
             icon: Icons.settings_rounded,
-            onClick: () => {
-                  context.router.push(const ProfileSettingsRoute()),
-                }),
+            onClick: () => context.go('/profile/settings')),
         const SizedBox(height: 8),
         ColorfulButton(
             text: 'Выйти',
@@ -231,13 +225,13 @@ class _InitialProfileStatePage extends StatelessWidget {
         SettingsButton(
           text: 'О приложении',
           icon: Icons.apps_rounded,
-          onClick: () => context.router.push(const AboutAppRoute()),
+          onClick: () => context.go('/profile/about'),
         ),
         const SizedBox(height: 8),
         SettingsButton(
           text: 'Настройки',
           icon: Icons.settings_rounded,
-          onClick: () => context.router.push(const ProfileSettingsRoute()),
+          onClick: () => context.go('/profile/settings'),
         ),
       ],
     );

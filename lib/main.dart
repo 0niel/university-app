@@ -1,5 +1,4 @@
 import 'dart:io' show Platform;
-import 'package:auto_route/auto_route.dart';
 import 'package:dio/dio.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/foundation.dart';
@@ -7,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:rtu_mirea_app/common/oauth.dart';
 
@@ -22,13 +22,13 @@ import 'package:rtu_mirea_app/presentation/bloc/map_cubit/map_cubit.dart';
 import 'package:rtu_mirea_app/presentation/bloc/news_bloc/news_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/nfc_feedback_bloc/nfc_feedback_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/nfc_pass_bloc/nfc_pass_bloc.dart';
+import 'package:rtu_mirea_app/presentation/bloc/notification_preferences/notification_preferences_bloc.dart';
 
 import 'package:rtu_mirea_app/presentation/bloc/schedule_bloc/schedule_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/scores_bloc/scores_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/stories_bloc/stories_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/update_info_bloc/update_info_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/user_bloc/user_bloc.dart';
-import 'package:rtu_mirea_app/presentation/core/routes/routes.gr.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:intl/intl_standalone.dart';
 import 'package:rtu_mirea_app/service_locator.dart' as dependency_injection;
@@ -60,13 +60,13 @@ class GlobalBlocObserver extends BlocObserver {
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await dependency_injection.setup();
-
-  WidgetDataProvider.initData();
-
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+
+  await dependency_injection.setup();
+
+  WidgetDataProvider.initData();
 
   if (Platform.isAndroid || Platform.isIOS) {
     await FirebaseAnalytics.instance.logAppOpen();
@@ -137,10 +137,10 @@ Future<void> main() async {
 class App extends StatelessWidget {
   const App({Key? key}) : super(key: key);
 
-  static final appRouter = AppRouter();
-
   @override
   Widget build(BuildContext context) {
+    final router = getIt<GoRouter>();
+
     // blocking the orientation of the application to
     // vertical only
     SystemChrome.setPreferredOrientations([
@@ -182,6 +182,9 @@ class App extends StatelessWidget {
         BlocProvider<NfcFeedbackBloc>(
           create: (_) => getIt<NfcFeedbackBloc>(),
         ),
+        BlocProvider<NotificationPreferencesBloc>(
+          create: (_) => getIt<NotificationPreferencesBloc>(),
+        ),
       ],
       child: Consumer<AppNotifier>(
         builder: (BuildContext context, AppNotifier value, Widget? child) {
@@ -198,19 +201,7 @@ class App extends StatelessWidget {
             locale: const Locale('ru'),
             debugShowCheckedModeBanner: false,
             title: 'Приложение РТУ МИРЭА',
-            routerDelegate: appRouter.delegate(
-              navigatorObservers: () => [
-                FirebaseAnalyticsObserver(
-                  analytics: FirebaseAnalytics.instance,
-                ),
-                AutoRouteObserver(),
-                SentryNavigatorObserver(
-                    autoFinishAfter: const Duration(seconds: 5),
-                    setRouteNameAsTransaction: true),
-              ],
-            ),
-            routeInformationProvider: appRouter.routeInfoProvider(),
-            routeInformationParser: appRouter.defaultRouteParser(),
+            routerConfig: router,
             themeMode: AppTheme.themeMode,
             theme: AppTheme.theme,
             darkTheme: AppTheme.darkTheme,
