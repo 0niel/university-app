@@ -193,7 +193,6 @@ class _SchedulePageViewState extends State<SchedulePageView> {
 
   Widget _buildPageView() {
     return PageView.builder(
-      key: const PageStorageKey('pageView'),
       controller: _controller,
       onPageChanged: (value) {
         setState(() {
