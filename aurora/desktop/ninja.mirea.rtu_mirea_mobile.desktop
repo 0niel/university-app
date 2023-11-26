@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=Application
+Name=rtu_mirea_mobile
+Comment=A new Flutter project.
+Icon=ninja.mirea.rtu_mirea_mobile
+Exec=/usr/bin/ninja.mirea.rtu_mirea_mobile
+X-Nemo-Application-Type=silica-qt5
+
+[X-Application]
+Permissions=
+OrganizationName=ninja.mirea
+ApplicationName=rtu_mirea_mobile
