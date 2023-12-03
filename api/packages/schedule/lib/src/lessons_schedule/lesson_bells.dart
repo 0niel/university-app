@@ -38,12 +38,11 @@ class LessonBells extends Equatable {
   final TimeOfDay endTime;
 
   static TimeOfDay _timeFromJson(String time) {
-    final parts = time.split(':');
-    return TimeOfDay(hour: int.parse(parts[0]), minute: int.parse(parts[1]));
+    return TimeOfDay.fromString(time);
   }
 
   static String _timeToJson(TimeOfDay time) {
-    return '${time.hour}:${time.minute}';
+    return time.toString();
   }
 
   /// Converts the current instance to a `Map<String, dynamic>`.
