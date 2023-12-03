@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
-import 'package:university_app_server_api/src/models/models.dart';
+
+import 'package:university_app_server_api/src/models/news/news_item_response/news_item_response.dart';
 
 part 'news_feed_response.g.dart';
 

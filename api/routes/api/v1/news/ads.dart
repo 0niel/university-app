@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:dart_frog/dart_frog.dart';
 import 'package:university_app_server_api/api.dart';
-import 'package:university_app_server_api/src/models/news_feed_response/news_feed_response.dart';
+import 'package:university_app_server_api/src/models/models.dart';
 
 Future<Response> onRequest(RequestContext context) async {
   if (context.request.method != HttpMethod.get) {
@@ -19,8 +19,20 @@ Future<Response> onRequest(RequestContext context) async {
     offset: offset,
   );
 
-  final response =
-      NewsFeedResponse(news: news.map(NewsItemResponse.fromNewsItem).toList());
+  final response = NewsFeedResponse(
+    news: news
+        .map(
+          (article) => NewsItemResponse(
+            title: article.title,
+            htmlContent: article.htmlContent,
+            publishedAt: article.publishedAt,
+            imageUrls: article.imageUrls,
+            categories: article.categories,
+            url: article.url,
+          ),
+        )
+        .toList(),
+  );
 
   return Response.json(body: response);
 }

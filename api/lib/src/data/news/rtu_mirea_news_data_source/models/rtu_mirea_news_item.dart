@@ -2,23 +2,26 @@ import 'package:equatable/equatable.dart';
 import 'package:intl/intl.dart';
 import 'package:json_annotation/json_annotation.dart';
 
-part 'news_item.g.dart';
+import 'package:university_app_server_api/src/data/news/models/models.dart';
+
+part 'rtu_mirea_news_item.g.dart';
 
 @JsonSerializable()
-class NewsItem extends Equatable {
+class RtuMireaNewsItem extends Equatable {
   /// {@macro news_response}
-  const NewsItem({
+  const RtuMireaNewsItem({
     required this.title,
     required this.text,
     required this.date,
     required this.images,
     required this.tags,
     required this.coverImage,
+    required this.detailPageUrl,
   });
 
-  /// Конвертирует `Map<String, dynamic>` в [NewsItem]
-  factory NewsItem.fromJson(Map<String, dynamic> json) =>
-      _$NewsItemFromJson(json);
+  /// Конвертирует `Map<String, dynamic>` в [RtuMireaNewsItem]
+  factory RtuMireaNewsItem.fromJson(Map<String, dynamic> json) =>
+      _$RtuMireaNewsItemFromJson(json);
 
   /// Заголовок новости.
   @JsonKey(name: 'NAME')
@@ -60,9 +63,24 @@ class NewsItem extends Equatable {
   )
   final List<String> tags;
 
-  /// Конвертирует [NewsItem] в `Map<String, dynamic>`
-  Map<String, dynamic> toJson() => _$NewsItemToJson(this);
+  /// Ссылка на страницу новости.
+  @JsonKey(name: 'DETAIL_PAGE_URL')
+  final String detailPageUrl;
+
+  /// Конвертирует [RtuMireaNewsItem] в `Map<String, dynamic>`
+  Map<String, dynamic> toJson() => _$RtuMireaNewsItemToJson(this);
+
+  // to Article converter
+  Article toArticle() => Article(
+        title: title,
+        htmlContent: text,
+        publishedAt: date,
+        imageUrls: images,
+        categories: tags.where((element) => element.isNotEmpty).toList(),
+        url: detailPageUrl,
+      );
 
   @override
-  List<Object> get props => [title, text, date, images, tags];
+  List<Object> get props =>
+      [title, text, date, images, tags, coverImage, detailPageUrl];
 }

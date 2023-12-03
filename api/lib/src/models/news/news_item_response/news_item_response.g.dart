@@ -16,6 +16,7 @@ NewsItemResponse _$NewsItemResponseFromJson(Map<String, dynamic> json) =>
       categories: (json['categories'] as List<dynamic>)
           .map((e) => e as String)
           .toList(),
+      url: json['url'] as String?,
     );
 
 Map<String, dynamic> _$NewsItemResponseToJson(NewsItemResponse instance) =>
@@ -25,4 +26,5 @@ Map<String, dynamic> _$NewsItemResponseToJson(NewsItemResponse instance) =>
       'publishedAt': instance.publishedAt.toIso8601String(),
       'imageUrls': instance.imageUrls,
       'categories': instance.categories,
+      'url': instance.url,
     };

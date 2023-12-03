@@ -1,6 +1,5 @@
 import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
-import 'package:university_app_server_api/src/data/models/models.dart';
 
 part 'news_item_response.g.dart';
 
@@ -12,20 +11,11 @@ class NewsItemResponse extends Equatable {
     required this.publishedAt,
     required this.imageUrls,
     required this.categories,
+    this.url,
   });
 
   factory NewsItemResponse.fromJson(Map<String, dynamic> json) =>
       _$NewsItemResponseFromJson(json);
-
-  factory NewsItemResponse.fromNewsItem(NewsItem newsItem) => NewsItemResponse(
-        title: newsItem.title,
-        htmlContent: newsItem.text,
-        publishedAt: newsItem.date,
-        imageUrls: newsItem.images.isNotEmpty
-            ? newsItem.images
-            : [newsItem.coverImage],
-        categories: newsItem.tags,
-      );
 
   final String title;
 
@@ -36,6 +26,8 @@ class NewsItemResponse extends Equatable {
   final List<String> imageUrls;
 
   final List<String> categories;
+
+  final String? url;
 
   Map<String, dynamic> toJson() => _$NewsItemResponseToJson(this);
 

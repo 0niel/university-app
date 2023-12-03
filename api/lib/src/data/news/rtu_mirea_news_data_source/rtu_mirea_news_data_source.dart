@@ -4,6 +4,8 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:university_app_server_api/api.dart';
 
+import 'package:university_app_server_api/src/data/news/rtu_mirea_news_data_source/models/models.dart';
+
 class RtuMireaNewsDataSourceMalformedResponse implements Exception {
   const RtuMireaNewsDataSourceMalformedResponse({required this.error});
 
@@ -39,7 +41,7 @@ class RtuMireNewsDataSource implements NewsDataSource {
   final http.Client _httpClient;
 
   @override
-  Future<List<NewsItem>> getAds({int limit = 20, int offset = 0}) {
+  Future<List<Article>> getAds({int limit = 20, int offset = 0}) {
     return _fetchNews(
       limit: limit,
       offset: offset,
@@ -84,7 +86,7 @@ class RtuMireNewsDataSource implements NewsDataSource {
   }
 
   @override
-  Future<List<NewsItem>> getNews({
+  Future<List<Article>> getNews({
     int limit = 20,
     int offset = 0,
     String? category,
@@ -96,7 +98,7 @@ class RtuMireNewsDataSource implements NewsDataSource {
     );
   }
 
-  Future<List<NewsItem>> _fetchNews({
+  Future<List<Article>> _fetchNews({
     int limit = 20,
     int offset = 0,
     String? tag,
@@ -130,9 +132,10 @@ class RtuMireNewsDataSource implements NewsDataSource {
       final body = response.json();
       final rawNews = body['result'] as List<dynamic>;
 
-      return List<NewsItem>.from(
+      return List<Article>.from(
         rawNews.map((rawNewsItem) {
-          return NewsItem.fromJson(rawNewsItem as Map<String, dynamic>);
+          return RtuMireaNewsItem.fromJson(rawNewsItem as Map<String, dynamic>)
+              .toArticle();
         }),
       );
     } catch (error, stackTrace) {
