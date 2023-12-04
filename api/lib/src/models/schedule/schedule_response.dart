@@ -1,26 +1,23 @@
 import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
-import 'package:schedule/schedule_parts.dart';
+import 'package:schedule/schedule.dart';
 
 part 'schedule_response.g.dart';
 
 @JsonSerializable()
 class ScheduleResponse extends Equatable {
-  const ScheduleResponse({
-    required this.group,
-    required this.scheduleParts,
-  });
+  const ScheduleResponse({required this.data});
 
   factory ScheduleResponse.fromJson(Map<String, dynamic> json) =>
       _$ScheduleResponseFromJson(json);
 
-  /// The name of the group to which the schedule belongs.
-  final String group;
-
-  final List<SchedulePart> scheduleParts;
+  /// The schedule parts which are used to build the schedule. Each schedule
+  /// part represents a content-based component. For example, a lesson or a
+  /// holiday, or booking.
+  final List<SchedulePart> data;
 
   Map<String, dynamic> toJson() => _$ScheduleResponseToJson(this);
 
   @override
-  List<Object> get props => [];
+  List<Object> get props => [data];
 }

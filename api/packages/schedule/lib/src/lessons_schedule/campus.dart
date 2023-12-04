@@ -26,7 +26,7 @@ class Campus extends Equatable {
   /// Converts a `Map<String, dynamic>` into a [Campus] instance.
   factory Campus.fromJson(Map<String, dynamic> json) => _$CampusFromJson(json);
 
-  /// The name of the campus.
+  /// Campus location name.
   final String name;
 
   /// The short name of the campus.

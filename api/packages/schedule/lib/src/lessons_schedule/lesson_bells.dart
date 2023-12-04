@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:meta/meta.dart';
-import 'package:schedule/schedule_parts.dart';
+import 'package:schedule/schedule.dart';
 
 part 'lesson_bells.g.dart';
 

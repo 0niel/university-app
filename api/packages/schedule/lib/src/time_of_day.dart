@@ -4,14 +4,14 @@ import 'package:equatable/equatable.dart';
 /// A representation of time of day.
 /// {@endtemplate}
 class TimeOfDay extends Equatable {
+
+  /// {@macro time_of_day}
+  const TimeOfDay({required this.hour, required this.minute});
   /// Converts a [String] into a [TimeOfDay] instance.
   factory TimeOfDay.fromString(String time) {
     final parts = time.split(':');
     return TimeOfDay(hour: int.parse(parts[0]), minute: int.parse(parts[1]));
   }
-
-  /// {@macro time_of_day}
-  const TimeOfDay({required this.hour, required this.minute});
 
   /// Hour of the time-of-day representation.
   final int hour;

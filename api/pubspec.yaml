@@ -17,6 +17,9 @@ dependencies:
   schedule:
     path: packages/schedule
 
+  rtu_mirea_schedule_api_client:
+    path: packages/rtu_mirea_schedule_api_client
+
 dev_dependencies:
   build_runner: ^2.4.6
   json_serializable: ^6.7.1

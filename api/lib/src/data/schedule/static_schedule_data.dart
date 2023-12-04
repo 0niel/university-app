@@ -20,25 +20,27 @@ final schedules = <SchedulePart>[
     subject: 'Математический анализ',
     lessonType: LessonType.practice,
     teachers: [
-      const Teacher(name: 'Зуев Андрей Сергеевич', email: 'zuev_a@mirea.ru'),
+      const Teacher(name: 'Зуев Андрей Сергеевич', email: 'zuev_a@mirea.ru')
     ],
-    classroom: const Classroom(
-      name: 'А-401',
-      campus: campus,
-    ),
+    classrooms: [
+      const Classroom(
+        name: 'А-401',
+        campus: campus,
+      ),
+    ],
     lessonBells: LessonBells(
       number: 1,
       startTime: const TimeOfDay(hour: 9, minute: 0),
       endTime: const TimeOfDay(hour: 10, minute: 30),
     ),
     dates: [
-      DateTime(2023, 12),
+      DateTime(2023, 12, 1),
     ],
   ),
   HolidaySchedulePart(
     title: 'Новый год',
     dates: [
-      DateTime(2023),
+      DateTime(2023, 1, 1),
     ],
   ),
 ];

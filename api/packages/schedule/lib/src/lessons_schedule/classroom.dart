@@ -21,12 +21,11 @@ class Classroom extends Equatable {
   }) : url = null;
 
   /// Classroom for online lessons.
-  Classroom.online({
-    required this.url,
+  const Classroom.online({
+    this.url,
   })  : uid = null,
         campus = null,
-        name = 'Online',
-        assert(url != null && url.startsWith('http'), 'Invalid URL');
+        name = 'Online';
 
   /// Converts a `Map<String, dynamic>` into a [Classroom] instance.
   factory Classroom.fromJson(Map<String, dynamic> json) =>
@@ -50,6 +49,21 @@ class Classroom extends Equatable {
 
   /// Converts the current instance to a `Map<String, dynamic>`.
   Map<String, dynamic> toJson() => _$ClassroomToJson(this);
+
+  /// Creates a copy of the current instance with the specified fields replaced
+  /// with the new values.
+  Classroom copyWith({
+    String? uid,
+    String? name,
+    Campus? campus,
+    String? url,
+  }) {
+    return Classroom(
+      uid: uid ?? this.uid,
+      name: name ?? this.name,
+      campus: campus ?? this.campus,
+    );
+  }
 
   @override
   List<Object?> get props => [uid, name, campus, url];

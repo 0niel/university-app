@@ -22,12 +22,17 @@ LessonSchedulePart _$LessonSchedulePartFromJson(Map<String, dynamic> json) =>
               (v) => (v as List<dynamic>)
                   .map((e) => Teacher.fromJson(e as Map<String, dynamic>))
                   .toList()),
-          classroom: $checkedConvert('classroom',
-              (v) => Classroom.fromJson(v as Map<String, dynamic>)),
+          classrooms: $checkedConvert(
+              'classrooms',
+              (v) => (v as List<dynamic>)
+                  .map((e) => Classroom.fromJson(e as Map<String, dynamic>))
+                  .toList()),
           lessonBells: $checkedConvert('lesson_bells',
               (v) => LessonBells.fromJson(v as Map<String, dynamic>)),
           dates: $checkedConvert(
               'dates', (v) => const DatesConverter().fromJson(v as List)),
+          groups: $checkedConvert('groups',
+              (v) => (v as List<dynamic>?)?.map((e) => e as String).toList()),
           type: $checkedConvert(
               'type', (v) => v as String? ?? LessonSchedulePart.identifier),
         );
@@ -39,27 +44,37 @@ LessonSchedulePart _$LessonSchedulePartFromJson(Map<String, dynamic> json) =>
       },
     );
 
-Map<String, dynamic> _$LessonSchedulePartToJson(LessonSchedulePart instance) =>
-    <String, dynamic>{
-      'type': instance.type,
-      'subject': instance.subject,
-      'lesson_type': _$LessonTypeEnumMap[instance.lessonType]!,
-      'teachers': instance.teachers.map((e) => e.toJson()).toList(),
-      'classroom': instance.classroom.toJson(),
-      'lesson_bells': instance.lessonBells.toJson(),
-      'dates': const DatesConverter().toJson(instance.dates),
-    };
+Map<String, dynamic> _$LessonSchedulePartToJson(LessonSchedulePart instance) {
+  final val = <String, dynamic>{
+    'type': instance.type,
+    'subject': instance.subject,
+    'lesson_type': _$LessonTypeEnumMap[instance.lessonType]!,
+    'teachers': instance.teachers.map((e) => e.toJson()).toList(),
+    'classrooms': instance.classrooms.map((e) => e.toJson()).toList(),
+    'lesson_bells': instance.lessonBells.toJson(),
+  };
+
+  void writeNotNull(String key, dynamic value) {
+    if (value != null) {
+      val[key] = value;
+    }
+  }
+
+  writeNotNull('groups', instance.groups);
+  val['dates'] = const DatesConverter().toJson(instance.dates);
+  return val;
+}
 
 const _$LessonTypeEnumMap = {
   LessonType.practice: 'practice',
   LessonType.lecture: 'lecture',
-  LessonType.laboratory: 'laboratory',
-  LessonType.individual: 'individual',
+  LessonType.laboratoryWork: 'laboratoryWork',
+  LessonType.individualWork: 'individualWork',
   LessonType.physicalEducation: 'physicalEducation',
   LessonType.consultation: 'consultation',
   LessonType.exam: 'exam',
   LessonType.credit: 'credit',
   LessonType.courseWork: 'courseWork',
   LessonType.courseProject: 'courseProject',
-  LessonType.other: 'other',
+  LessonType.unknown: 'unknown',
 };

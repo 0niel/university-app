@@ -7,10 +7,10 @@ enum LessonType {
   lecture,
 
   /// Laboratory lesson in a special room.
-  laboratory,
+  laboratoryWork,
 
   /// Individual lesson.
-  individual,
+  individualWork,
 
   /// Physical education lesson (sport).
   physicalEducation,
@@ -31,5 +31,5 @@ enum LessonType {
   courseProject,
 
   /// Unknown lesson type.
-  other,
+  unknown,
 }

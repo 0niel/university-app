@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
-import 'package:schedule/schedule_parts.dart';
+import 'package:schedule/schedule.dart';
 import 'package:schedule/src/dates_converter.dart';
 
 part 'lesson_schedule_part.g.dart';
@@ -15,23 +15,20 @@ class LessonSchedulePart with EquatableMixin implements SchedulePart {
     required this.subject,
     required this.lessonType,
     required this.teachers,
-    required this.classroom,
+    required this.classrooms,
     required this.lessonBells,
     required this.dates,
+    this.groups,
     this.type = LessonSchedulePart.identifier,
   });
 
   /// Lesson for online lessons.
   LessonSchedulePart.online({
-    required this.subject,
-    required String url,
-    required this.lessonType,
-    required this.teachers,
-    required this.lessonBells,
-    required this.dates,
+    required this.subject, required this.lessonType, required this.teachers, required this.lessonBells, required this.dates, required this.groups, String? url,
     this.type = LessonSchedulePart.identifier,
-  })  : classroom = Classroom.online(url: url),
-        assert(url.startsWith('http'), 'Invalid URL');
+  }) : classrooms = [
+          Classroom.online(url: url),
+        ];
 
   /// Converts a `Map<String, dynamic>` into a [LessonSchedulePart] instance.
   factory LessonSchedulePart.fromJson(Map<String, dynamic> json) =>
@@ -53,14 +50,21 @@ class LessonSchedulePart with EquatableMixin implements SchedulePart {
   /// one teacher (for example, in a laboratory work).
   final List<Teacher> teachers;
 
-  /// The classroom where the lesson will take place.
-  final Classroom classroom;
+  /// The classrooms where the lesson takes place.
+  final List<Classroom> classrooms;
 
   /// When the lesson starts, it ends, as well as the lesson number.
   final LessonBells lessonBells;
 
+  /// Academic groups that attend the lesson.
+  ///
+  /// May be `null` if the lesson displays for specific group or List if the
+  /// lesson displays for classroom, teacher (for example, in a
+  /// lectures teacher has many groups).
+  final List<String>? groups;
+
   /// Is the lesson online.
-  bool get isOnline => classroom.isOnline;
+  bool get isOnline => classrooms.every((classroom) => classroom.isOnline);
 
   @override
   @DatesConverter()
@@ -75,7 +79,9 @@ class LessonSchedulePart with EquatableMixin implements SchedulePart {
         subject,
         lessonType,
         teachers,
-        classroom,
+        classrooms,
         lessonBells,
+        dates,
+        groups,
       ];
 }

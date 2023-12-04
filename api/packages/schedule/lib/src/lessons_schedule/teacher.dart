@@ -4,8 +4,12 @@ import 'package:json_annotation/json_annotation.dart';
 part 'teacher.g.dart';
 
 @JsonSerializable()
-class Teacher extends Equatable {
 
+/// {@template teacher}
+/// The teacher data.
+/// {@endtemplate}
+class Teacher extends Equatable {
+  /// {@macro teacher}
   const Teacher({
     required this.name,
     this.uid,
@@ -15,6 +19,7 @@ class Teacher extends Equatable {
     this.post,
     this.department,
   });
+
   /// Converts a `Map<String, dynamic>` into a [Teacher] instance.
   factory Teacher.fromJson(Map<String, dynamic> json) =>
       _$TeacherFromJson(json);

@@ -3,6 +3,7 @@ export 'src/lessons_schedule/lessons_schedule.dart'
     show
         Campus,
         Classroom,
+        Group,
         LessonBells,
         LessonSchedulePart,
         LessonType,
