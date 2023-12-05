@@ -87,16 +87,9 @@ class ICalParser {
 
       var location = data['location'] as String?;
 
-      if (location == null) {
-        throw const ICalendarParsingException(
-          error: 'The iCalendar data is invalid. The LOCATION field is '
-              'required.',
-        );
-      }
+      location = location?.replaceAll(RegExp(r'\\n'), '\n');
 
-      location = location.replaceAll(RegExp(r'\\n'), '\n');
-
-      final classrooms = parseClassroomsFromLocation(location);
+      final classrooms = parseClassroomsFromLocation(location ?? '');
 
       final summary = data['summary'] as String?;
 
@@ -117,9 +110,11 @@ class ICalParser {
         teachers: teachers.map((e) => Teacher(name: e)).toList(),
         classrooms: classrooms,
         lessonBells: defaultLessonsBells
-            .where((element) =>
-                element.startTime == datesAndTime.timeStart &&
-                element.endTime == datesAndTime.timeEnd,)
+            .where(
+              (element) =>
+                  element.startTime == datesAndTime.timeStart &&
+                  element.endTime == datesAndTime.timeEnd,
+            )
             .first,
         dates: datesAndTime.dates,
         groups: groups.isEmpty ? null : groups,
