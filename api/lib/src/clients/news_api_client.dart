@@ -21,39 +21,29 @@ class NewsApiRequestFailure implements Exception {
   final Map<String, dynamic> body;
 }
 
-typedef TokenProvider = Future<String?> Function();
-
 class NewsApiClient {
   NewsApiClient({
-    required TokenProvider tokenProvider,
     http.Client? httpClient,
   }) : this._(
           baseUrl: 'https://example-api.a.run.app',
           httpClient: httpClient,
-          tokenProvider: tokenProvider,
         );
 
   NewsApiClient.localhost({
-    required TokenProvider tokenProvider,
     http.Client? httpClient,
   }) : this._(
           baseUrl: 'http://localhost:8080',
           httpClient: httpClient,
-          tokenProvider: tokenProvider,
         );
 
   NewsApiClient._({
     required String baseUrl,
-    required TokenProvider tokenProvider,
     http.Client? httpClient,
   })  : _baseUrl = baseUrl,
-        _httpClient = httpClient ?? http.Client(),
-        _tokenProvider = tokenProvider;
+        _httpClient = httpClient ?? http.Client();
 
   final String _baseUrl;
   final http.Client _httpClient;
-  final TokenProvider _tokenProvider;
-
   Future<NewsFeedResponse> getNews({
     int? limit,
     int? offset,
@@ -130,11 +120,9 @@ class NewsApiClient {
   }
 
   Future<Map<String, String>> _getRequestHeaders() async {
-    final token = await _tokenProvider();
     return <String, String>{
       HttpHeaders.contentTypeHeader: ContentType.json.value,
       HttpHeaders.acceptHeader: ContentType.json.value,
-      if (token != null) HttpHeaders.authorizationHeader: 'Bearer $token',
     };
   }
 }

@@ -7,6 +7,7 @@ export 'src/lessons_schedule/lessons_schedule.dart'
         LessonBells,
         LessonSchedulePart,
         LessonType,
+        ScheduleTarget,
         Teacher;
 export 'src/schedule_part.dart' show SchedulePart;
 export 'src/time_of_day.dart' show TimeOfDay;

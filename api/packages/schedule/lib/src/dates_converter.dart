@@ -10,7 +10,9 @@ class DatesConverter implements JsonConverter<List<DateTime>, List<dynamic>> {
 
   @override
   List<DateTime> fromJson(List<dynamic> json) {
-    return json.map((e) => DateTime.parse(e as String)).toList();
+    return json
+        .map((e) => DateFormat('dd-MM-yyyy').parse(e as String))
+        .toList();
   }
 
   @override

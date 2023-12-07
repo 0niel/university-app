@@ -11,4 +11,3 @@ export 'src/ical_parser.dart'
         InvalidICalendarDataException;
 export 'src/models/models.dart';
 export 'src/rtu_mirea_schedule_api_client.dart';
-export 'src/schedule_targets.dart';

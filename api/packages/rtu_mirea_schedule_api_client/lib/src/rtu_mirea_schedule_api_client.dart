@@ -102,11 +102,11 @@ class RtuMireaScheduleApiClient {
 
   String _getApiPathNameByScheduleTarget(int scheduleTarget) {
     switch (scheduleTarget) {
-      case groupScheduleTargetIdentifier:
+      case 1:
         return 'Group';
-      case teacherScheduleTargetIdentifier:
+      case 2:
         return 'Teacher';
-      case classroomScheduleTargetIdentifier:
+      case 3:
         return 'Auditorium';
       default:
         throw ArgumentError.value(

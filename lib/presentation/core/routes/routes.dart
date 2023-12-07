@@ -23,8 +23,8 @@ import 'package:rtu_mirea_app/presentation/pages/profile/profile_nfc_pass_page.d
 import 'package:rtu_mirea_app/presentation/pages/profile/profile_scores_page.dart';
 import 'package:rtu_mirea_app/presentation/pages/profile/profile_page.dart';
 import 'package:rtu_mirea_app/presentation/pages/profile/profile_settings_page.dart';
-import 'package:rtu_mirea_app/presentation/pages/schedule/groups_select_page.dart';
-import 'package:rtu_mirea_app/presentation/pages/schedule/schedule_page.dart';
+import 'package:rtu_mirea_app/schedule/view/schedule_page.dart';
+import 'package:rtu_mirea_app/search/view/search_page.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 
 GoRouter createRouter() => GoRouter(
@@ -80,8 +80,8 @@ GoRouter createRouter() => GoRouter(
                     },
                   ),
                   GoRoute(
-                    path: 'select-group',
-                    builder: (context, state) => const GroupsSelectPage(),
+                    path: 'search',
+                    builder: (context, state) => const SearchPage(),
                   ),
                 ],
               ),

@@ -1,13 +1,14 @@
 import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
+import 'package:meta/meta.dart';
 
 part 'teacher.g.dart';
-
-@JsonSerializable()
 
 /// {@template teacher}
 /// The teacher data.
 /// {@endtemplate}
+@JsonSerializable()
+@immutable
 class Teacher extends Equatable {
   /// {@macro teacher}
   const Teacher({

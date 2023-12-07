@@ -2,11 +2,17 @@ import 'package:rtu_mirea_schedule_api_client/rtu_mirea_schedule_api_client.dart
 import 'package:schedule/schedule.dart';
 import 'package:university_app_server_api/src/data/schedule/schedule_data_source.dart';
 
+import 'package:university_app_server_api/src/data/schedule/static_holidays_data.dart';
+
 class RtuMireaScheduleDataSource implements ScheduleDataSource {
   /// {@macro in_memory_news_data_store}
   RtuMireaScheduleDataSource() : _apiClient = RtuMireaScheduleApiClient();
 
   final RtuMireaScheduleApiClient _apiClient;
+
+  static const groupScheduleTargetIdentifier = 1;
+  static const teacherScheduleTargetIdentifier = 2;
+  static const classroomScheduleTargetIdentifier = 3;
 
   @override
   Future<List<SchedulePart>> getSchedule({required String group}) async {
@@ -17,7 +23,12 @@ class RtuMireaScheduleDataSource implements ScheduleDataSource {
 
     final parser = ICalParser.fromString(icalData);
 
-    return parser.parse();
+    final data = parser.parse();
+
+    return [
+      ...data,
+      ...holidays,
+    ];
   }
 
   @override
@@ -63,9 +74,9 @@ class RtuMireaScheduleDataSource implements ScheduleDataSource {
         )
         .toList()
         .map(
-          (e) => parseClassroomsFromLocation(e.fullTitle).map(
-            (e) => e.copyWith(
-              uid: e.uid.toString(),
+          (searchItem) => parseClassroomsFromLocation(searchItem.fullTitle).map(
+            (classroom) => classroom.copyWith(
+              uid: searchItem.id.toString(),
             ),
           ),
         )
