@@ -85,6 +85,7 @@ class _CalendarState extends State<Calendar> {
               Calendar.firstCalendarDay.add(Duration(days: _selectedPage));
           _selectedWeek =
               CalendarUtils.getCurrentWeek(mCurrentDate: _selectedDay);
+          _focusedDay = Calendar.isDayInAvailableRange(_selectedDay);
         });
       }
     });

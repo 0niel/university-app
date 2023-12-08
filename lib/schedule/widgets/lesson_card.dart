@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:rtu_mirea_app/presentation/typography.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:university_app_server_api/client.dart';
@@ -97,7 +98,7 @@ class LessonCard extends StatelessWidget {
                     Text(
                       _getLessonTypeName(lesson.lessonType),
                       style: AppTextStyle.captionL.copyWith(
-                        color: AppTheme.colors.active.withOpacity(0.4),
+                        color: AppTheme.colors.deactive,
                       ),
                     )
                   ]),
@@ -118,7 +119,6 @@ class LessonCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Text(
-                        // lesson.lessonBells.number.toString(),
                         '${lesson.lessonBells.number} пара',
                         style: AppTextStyle.body
                             .copyWith(color: AppTheme.colors.colorful03),
@@ -132,7 +132,7 @@ class LessonCard extends StatelessWidget {
                     ],
                   ),
                   Divider(
-                    color: AppTheme.colors.deactive.withOpacity(0.2),
+                    color: AppTheme.colors.deactive.withOpacity(0.1),
                     thickness: 1,
                     height: 30,
                   ),
@@ -140,10 +140,27 @@ class LessonCard extends StatelessWidget {
                     const SizedBox(
                       height: 4,
                     ),
-                    Text(
-                      _getClassroomNames(lesson.classrooms),
-                      style: AppTextStyle.body
-                          .copyWith(color: AppTheme.colors.active),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        FaIcon(
+                          FontAwesomeIcons.mapLocation,
+                          size: 12,
+                          color: AppTheme.colors.deactive,
+                        ),
+                        const SizedBox(
+                          width: 6.5,
+                        ),
+                        Expanded(
+                          child: Text(
+                            _getClassroomNames(lesson.classrooms),
+                            style: AppTextStyle.body
+                                .copyWith(color: AppTheme.colors.active),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                   if (lesson.teachers.isNotEmpty) ...[
@@ -160,10 +177,24 @@ class LessonCard extends StatelessWidget {
                     const SizedBox(
                       height: 4,
                     ),
-                    Text(
-                      lesson.groups?.join(', ') ?? '',
-                      style: AppTextStyle.body
-                          .copyWith(color: AppTheme.colors.deactive),
+                    Row(
+                      children: [
+                        FaIcon(
+                          FontAwesomeIcons.users,
+                          size: 12,
+                          color: AppTheme.colors.deactive,
+                        ),
+                        const SizedBox(
+                          width: 6,
+                        ),
+                        Expanded(
+                          child: Text(
+                            lesson.groups?.join(', ') ?? '',
+                            style: AppTextStyle.body
+                                .copyWith(color: AppTheme.colors.deactive),
+                          ),
+                        ),
+                      ],
                     ),
                   ]
                 ],

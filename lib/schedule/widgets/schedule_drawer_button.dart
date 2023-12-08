@@ -18,16 +18,19 @@ class ScheduleDrawerButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        TextButton(
-          onPressed: onTap,
-          child: Row(
-            children: [
-              icon,
-              const SizedBox(width: 20),
-              Text(text,
-                  style: AppTextStyle.buttonL
-                      .copyWith(color: AppTheme.colors.active)),
-            ],
+        SizedBox(
+          height: 60,
+          child: TextButton(
+            onPressed: onTap,
+            child: Row(
+              children: [
+                icon,
+                const SizedBox(width: 20),
+                Text(text,
+                    style: AppTextStyle.buttonL
+                        .copyWith(color: AppTheme.colors.active)),
+              ],
+            ),
           ),
         ),
         Opacity(

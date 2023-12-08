@@ -46,8 +46,7 @@ class SchedulesList extends StatelessWidget {
           const SizedBox(height: 20),
           Text(
             "Сохранено".toUpperCase(),
-            style: AppTextStyle.chip
-                .copyWith(color: AppTheme.colors.deactiveDarker),
+            style: AppTextStyle.chip.copyWith(color: AppTheme.colors.deactive),
             textAlign: TextAlign.left,
           ),
           const SizedBox(height: 10),

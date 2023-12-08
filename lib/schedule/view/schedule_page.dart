@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
@@ -47,10 +48,21 @@ class _SchedulePageState extends State<SchedulePage> {
           );
         } else if (state.status == ScheduleStatus.loaded) {
           return Scaffold(
-            appBar: AppBar(
-              title: const Text('Расписание'),
-            ),
-            drawer: const SettingsDrawer(),
+            appBar: AppBar(title: const Text('Расписание'), actions: [
+              SizedBox(
+                width: 60,
+                height: 60,
+                child: IconButton(
+                  icon: FaIcon(
+                    FontAwesomeIcons.ellipsis,
+                    color: AppTheme.colors.active,
+                  ),
+                  onPressed: () {
+                    SettingsMenu.show(context);
+                  },
+                ),
+              ),
+            ]),
             backgroundColor: AppTheme.colors.background01,
             body: SafeArea(
               child: Column(
@@ -82,7 +94,13 @@ class _SchedulePageState extends State<SchedulePage> {
                           children: schedules
                               .whereType<LessonSchedulePart>()
                               .map(
-                                (e) => LessonCard(lesson: e),
+                                (e) => Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 16.0,
+                                    vertical: 8.0,
+                                  ),
+                                  child: LessonCard(lesson: e),
+                                ),
                               )
                               .toList(),
                         );
