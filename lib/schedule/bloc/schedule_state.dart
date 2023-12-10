@@ -14,6 +14,7 @@ class ScheduleState extends Equatable {
     this.classroomsSchedule = const [],
     this.teachersSchedule = const [],
     this.groupsSchedule = const [],
+    this.isMiniature = false,
     this.selectedSchedule,
   });
 
@@ -33,6 +34,9 @@ class ScheduleState extends Equatable {
 
   final List<(UID, Group, List<SchedulePart>)> groupsSchedule;
 
+  // Miniature display mode for lesson cards.
+  final bool isMiniature;
+
   @SelectedScheduleConverter()
   final SelectedSchedule? selectedSchedule;
 
@@ -42,6 +46,7 @@ class ScheduleState extends Equatable {
     List<(UID, Teacher, List<SchedulePart>)>? teachersSchedule,
     List<(UID, Group, List<SchedulePart>)>? groupsSchedule,
     SelectedSchedule? selectedSchedule,
+    bool? isMiniature,
   }) {
     return ScheduleState(
       status: status ?? this.status,
@@ -49,6 +54,7 @@ class ScheduleState extends Equatable {
       teachersSchedule: teachersSchedule ?? this.teachersSchedule,
       groupsSchedule: groupsSchedule ?? this.groupsSchedule,
       selectedSchedule: selectedSchedule ?? this.selectedSchedule,
+      isMiniature: isMiniature ?? this.isMiniature,
     );
   }
 
@@ -60,6 +66,7 @@ class ScheduleState extends Equatable {
         classroomsSchedule,
         teachersSchedule,
         groupsSchedule,
+        isMiniature,
       ];
 }
 

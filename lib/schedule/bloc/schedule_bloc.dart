@@ -28,17 +28,22 @@ class ScheduleBloc extends HydratedBloc<ScheduleEvent, ScheduleState> {
     on<ScheduleResumed>(_onScheduleResumed, transformer: droppable());
     on<ScheduleRefreshRequested>(_onScheduleRefreshRequested,
         transformer: sequential());
+    on<ScheduleSetDisplayMode>(_onScheduleSetDisplayMode);
   }
 
   final ScheduleRepository _scheduleRepository;
+
+  FutureOr<void> _onScheduleSetDisplayMode(
+    ScheduleSetDisplayMode event,
+    Emitter<ScheduleState> emit,
+  ) {
+    emit(state.copyWith(isMiniature: event.isMiniature));
+  }
 
   Future<void> _onScheduleRefreshRequested(
     ScheduleRefreshRequested event,
     Emitter<ScheduleState> emit,
   ) async {
-    final UID identifier = event.identifier;
-    final ScheduleTarget target = event.target;
-
     emit(state.copyWith(status: ScheduleStatus.loading));
 
     try {

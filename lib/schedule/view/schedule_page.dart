@@ -46,6 +46,10 @@ class _SchedulePageState extends State<SchedulePage> {
           return const Center(
             child: CircularProgressIndicator(),
           );
+        } else if (state.status == ScheduleStatus.failure) {
+          return LoadingErrorMessage(onTap: () {
+            context.go('/schedule/search');
+          });
         } else if (state.status == ScheduleStatus.loaded) {
           return Scaffold(
             appBar: AppBar(title: const Text('Расписание'), actions: [

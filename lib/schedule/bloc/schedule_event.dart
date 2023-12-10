@@ -56,3 +56,14 @@ class ScheduleResumed extends ScheduleEvent {
   @override
   List<Object> get props => [];
 }
+
+class ScheduleSetDisplayMode extends ScheduleEvent {
+  const ScheduleSetDisplayMode({
+    required this.isMiniature,
+  });
+
+  final bool isMiniature;
+
+  @override
+  List<Object> get props => [isMiniature];
+}

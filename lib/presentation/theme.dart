@@ -28,6 +28,7 @@ class AppTheme {
         ),
     scaffoldBackgroundColor: darkThemeColors.background01,
     appBarTheme: AppBarTheme(
+      surfaceTintColor: Colors.transparent,
       titleSpacing: 24,
       backgroundColor: darkThemeColors.background01,
       shadowColor: Colors.transparent,
@@ -66,6 +67,7 @@ class AppTheme {
         ),
     scaffoldBackgroundColor: lightThemeColors.background01,
     appBarTheme: AppBarTheme(
+      surfaceTintColor: Colors.transparent,
       titleSpacing: 24,
       backgroundColor: lightThemeColors.background01,
       shadowColor: Colors.transparent,
