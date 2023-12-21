@@ -44,7 +44,7 @@ class ScaffoldWithNavBar extends StatelessWidget {
                   builder: (_, value, child) => navigationShell,
                 ),
                 Positioned(
-                  bottom: 0,
+                  bottom: MediaQuery.of(context).padding.bottom + 16,
                   left: 0,
                   right: 0,
                   child: FloatingNavBar(
