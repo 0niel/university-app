@@ -1,6 +1,7 @@
 import 'dart:io' show Platform;
 
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:rtu_mirea_app/presentation/app_notifier.dart';
@@ -185,36 +186,41 @@ class FloatingNavBar extends StatelessWidget {
   }) {
     return GestureDetector(
       onTap: () => onClick(index),
-      child: AnimatedContainer(
+      child: Container(
         height: 60,
-        duration: const Duration(milliseconds: 200),
-        curve: Curves.easeInOut,
         padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(24),
-          color: index == this.index
-              ? AppTheme.colors.primary.withOpacity(0.1)
-              : Colors.transparent,
         ),
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Icon(
               icon,
               size: 18,
               color: index == this.index
-                  ? AppTheme.colors.active
+                  ? AppTheme.colors.primary
                   : AppTheme.colors.active.withOpacity(0.5),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              title,
-              style: AppTextStyle.tab.copyWith(
-                fontSize: 12,
-                color: index == this.index
-                    ? AppTheme.colors.active
-                    : AppTheme.colors.active.withOpacity(0.5),
-              ),
-            ),
+            ).animate().fadeIn(duration: const Duration(milliseconds: 150)),
+            if (index == this.index)
+              ...[
+                const SizedBox(height: 4),
+                Text(
+                  title,
+                  style: AppTextStyle.tab.copyWith(
+                    fontSize: 12,
+                    color: index == this.index
+                        ? AppTheme.colors.primary
+                        : AppTheme.colors.active.withOpacity(0.5),
+                  ),
+                ),
+              ]
+                  .animate()
+                  .fadeIn(duration: const Duration(milliseconds: 150))
+                  .move(
+                      begin: const Offset(0, 8),
+                      duration: const Duration(milliseconds: 150)),
           ],
         ),
       ),
