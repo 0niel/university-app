@@ -1,11 +1,11 @@
 import 'dart:io' show Platform;
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:rtu_mirea_app/presentation/app_notifier.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:rtu_mirea_app/presentation/typography.dart';
-import 'package:salomon_bottom_bar/salomon_bottom_bar.dart';
 import 'package:unicons/unicons.dart';
 
 import '../constants.dart';
@@ -29,18 +29,30 @@ class ScaffoldWithNavBar extends StatelessWidget {
               children: [
                 _buildSidebar(context),
                 Expanded(
-                    child: Consumer<AppNotifier>(
-                        builder: (context, value, child) => navigationShell)),
+                  child: Consumer<AppNotifier>(
+                    builder: (context, value, child) => navigationShell,
+                  ),
+                ),
               ],
             ),
           );
         } else {
           return Scaffold(
-            body: Consumer<AppNotifier>(
-                builder: (context, value, child) => navigationShell),
-            bottomNavigationBar: AppBottomNavigationBar(
-              index: navigationShell.currentIndex,
-              onClick: (index) => _setActiveIndex(index),
+            body: Stack(
+              children: [
+                Consumer<AppNotifier>(
+                  builder: (_, value, child) => navigationShell,
+                ),
+                Positioned(
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  child: FloatingNavBar(
+                    index: navigationShell.currentIndex,
+                    onClick: (index) => _setActiveIndex(index),
+                  ),
+                ),
+              ],
             ),
           );
         }
@@ -76,8 +88,8 @@ class ScaffoldWithNavBar extends StatelessWidget {
             selectedColor: AppTheme.colors.primary,
           ),
           ListTile(
-            leading: const Icon(Icons.map_rounded),
-            title: Text("Карта", style: AppTextStyle.tab),
+            leading: const Icon(Icons.widgets_rounded),
+            title: Text("Сервисы", style: AppTextStyle.tab),
             selected: navigationShell.currentIndex == 2,
             onTap: () => _setActiveIndex(2),
             selectedColor: AppTheme.colors.primary,
@@ -103,9 +115,8 @@ class ScaffoldWithNavBar extends StatelessWidget {
   }
 }
 
-class AppBottomNavigationBar extends StatelessWidget {
-  const AppBottomNavigationBar(
-      {Key? key, required this.index, required this.onClick})
+class FloatingNavBar extends StatelessWidget {
+  const FloatingNavBar({Key? key, required this.index, required this.onClick})
       : super(key: key);
 
   final Function(int) onClick;
@@ -114,42 +125,99 @@ class AppBottomNavigationBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: AppTheme.colors.background01,
-      child: SalomonBottomBar(
-        margin: const EdgeInsets.symmetric(
-          horizontal: 10,
-          vertical: 10,
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      height: 60,
+      decoration: BoxDecoration(
+        color: AppTheme.colors.background03,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            offset: const Offset(0, 4),
+            blurRadius: 12,
+          ),
+        ],
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(24),
+          topRight: Radius.circular(24),
+          bottomLeft: Radius.circular(18),
+          bottomRight: Radius.circular(18),
         ),
-        currentIndex: index,
-        onTap: onClick,
-        items: [
-          SalomonBottomBarItem(
-            icon: const Icon(Icons.library_books_rounded),
-            title: const Text("Новости"),
-            selectedColor: AppTheme.colors.primary,
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          _buildNavItem(
+            index: 0,
+            icon: Icons.library_books_rounded,
+            title: "Новости",
           ),
-          SalomonBottomBarItem(
-            icon: const Icon(Icons.calendar_today_rounded),
-            title: const Text("Расписание"),
-            selectedColor: AppTheme.colors.primary,
+          _buildNavItem(
+            index: 1,
+            icon: Icons.calendar_today_rounded,
+            title: "Расписание",
           ),
-          SalomonBottomBarItem(
-            icon: const Icon(Icons.map_rounded),
-            title: const Text("Карта"),
-            selectedColor: AppTheme.colors.primary,
+          _buildNavItem(
+            index: 2,
+            icon: Icons.widgets_rounded,
+            title: "Сервисы",
           ),
           ScaffoldWithNavBar.isDesktop
-              ? SalomonBottomBarItem(
-                  icon: const Icon(UniconsLine.info_circle),
-                  title: const Text("О приложении"),
-                  selectedColor: AppTheme.colors.primary,
+              ? _buildNavItem(
+                  index: 3,
+                  icon: UniconsLine.info_circle,
+                  title: "О приложении",
                 )
-              : SalomonBottomBarItem(
-                  icon: const Icon(Icons.person),
-                  title: const Text("Профиль"),
-                  selectedColor: AppTheme.colors.primary,
+              : _buildNavItem(
+                  index: 3,
+                  icon: Icons.person,
+                  title: "Профиль",
                 ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildNavItem({
+    required int index,
+    required IconData icon,
+    required String title,
+  }) {
+    /// With animated container
+    return GestureDetector(
+      onTap: () => onClick(index),
+      child: AnimatedContainer(
+        height: 60,
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeInOut,
+        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(24),
+          color: index == this.index
+              ? AppTheme.colors.primary.withOpacity(0.1)
+              : Colors.transparent,
+        ),
+        child: Column(
+          children: [
+            Icon(
+              icon,
+              size: 18,
+              color: index == this.index
+                  ? AppTheme.colors.active
+                  : AppTheme.colors.active.withOpacity(0.5),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              title,
+              style: AppTextStyle.tab.copyWith(
+                fontSize: 12,
+                color: index == this.index
+                    ? AppTheme.colors.active
+                    : AppTheme.colors.active.withOpacity(0.5),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

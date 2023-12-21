@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:icalendar_parser/icalendar_parser.dart';
 import 'package:rrule/rrule.dart';
 import 'package:rtu_mirea_schedule_api_client/src/fields_data_parsers.dart';
@@ -32,6 +33,32 @@ class ICalendarParsingException implements Exception {
 class ICalParser {
   ICalParser._(this._data) {
     try {
+      if (!ICalendar.objects.containsKey('RDATE')) {
+        ICalendar.registerField(
+          field: 'RDATE',
+          function: (value, params, event, lastEvent) {
+            try {
+              final datesString = value.split(',');
+
+              final dates = datesString.map((e) {
+                final date = IcsDateTime(dt: e);
+
+                return date;
+              }).toList();
+
+              lastEvent['RDATE'] = dates;
+
+              return lastEvent;
+            } catch (error, stackTrace) {
+              Error.throwWithStackTrace(
+                InvalidICalendarDataException(error: error),
+                stackTrace,
+              );
+            }
+          },
+        );
+      }
+
       _calendar = ICalendar.fromString(_data);
     } catch (error, stackTrace) {
       Error.throwWithStackTrace(
@@ -186,6 +213,13 @@ class ICalParser {
         timeStart,
         timeEnd,
       );
+    }
+
+    final rdate = data['rdate'] as List<IcsDateTime>?;
+    if (rdate != null) {
+      final dates = rdate.map((e) => e.toDateTime()).toList();
+
+      datesAndTime.dates.addAll(dates.whereNotNull());
     }
 
     return datesAndTime;

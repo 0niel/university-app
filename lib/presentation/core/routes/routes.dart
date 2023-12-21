@@ -25,6 +25,7 @@ import 'package:rtu_mirea_app/presentation/pages/profile/profile_page.dart';
 import 'package:rtu_mirea_app/presentation/pages/profile/profile_settings_page.dart';
 import 'package:rtu_mirea_app/schedule/view/schedule_page.dart';
 import 'package:rtu_mirea_app/search/view/search_page.dart';
+import 'package:rtu_mirea_app/services/view/view.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 
 GoRouter createRouter() => GoRouter(
@@ -88,8 +89,8 @@ GoRouter createRouter() => GoRouter(
             ]),
             StatefulShellBranch(routes: [
               GoRoute(
-                path: '/map',
-                builder: (context, state) => const MapPage(),
+                path: '/services',
+                builder: (context, state) => const ServicesPage(),
               ),
             ]),
             StatefulShellBranch(routes: [

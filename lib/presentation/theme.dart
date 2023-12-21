@@ -45,6 +45,18 @@ class AppTheme {
               selectedLabelStyle: AppTextStyle.captionL,
               unselectedLabelStyle: AppTextStyle.captionS,
             ),
+    listTileTheme: ListTileThemeData(
+      tileColor: darkThemeColors.background01,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
+    ),
+    dividerTheme: DividerThemeData(
+      color: darkThemeColors.background02,
+      thickness: 0.5,
+      space: 0,
+    ),
     colorScheme: ColorScheme(
       background: darkThemeColors.background01,
       brightness: Brightness.dark,
@@ -57,6 +69,7 @@ class AppTheme {
       onPrimary: lightThemeColors.white,
       onSecondary: darkThemeColors.active,
       error: darkThemeColors.colorful07,
+      surfaceTint: Colors.transparent,
     ),
   );
 
@@ -84,6 +97,18 @@ class AppTheme {
               selectedLabelStyle: AppTextStyle.captionL,
               unselectedLabelStyle: AppTextStyle.captionS,
             ),
+    listTileTheme: ListTileThemeData(
+      tileColor: lightThemeColors.background01,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
+    ),
+    dividerTheme: DividerThemeData(
+      color: lightThemeColors.background02,
+      thickness: 0.5,
+      space: 0,
+    ),
     colorScheme: ColorScheme(
       background: lightThemeColors.background01,
       brightness: Brightness.light,
@@ -96,6 +121,7 @@ class AppTheme {
       onPrimary: lightThemeColors.white,
       onSecondary: lightThemeColors.active,
       error: lightThemeColors.colorful07,
+      surfaceTint: Colors.transparent,
     ),
   );
 
