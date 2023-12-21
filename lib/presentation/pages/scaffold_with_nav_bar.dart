@@ -183,7 +183,6 @@ class FloatingNavBar extends StatelessWidget {
     required IconData icon,
     required String title,
   }) {
-    /// With animated container
     return GestureDetector(
       onTap: () => onClick(index),
       child: AnimatedContainer(

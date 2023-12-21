@@ -108,37 +108,35 @@ class _ServicesViewState extends State<ServicesView> {
           const SizedBox(height: 8),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: Expanded(
-              child: ListView(
-                shrinkWrap: true,
-                scrollDirection: Axis.vertical,
-                children: [
-                  CommunityCard(
-                    title: 'Mirea Ninja',
-                    url: 'https://forum.mirea.ru/',
-                    logo: CircleAvatar(
-                      // backgroundColor: AppTheme.colors.colorful01,
-                      foregroundImage: Image.network(
-                        'https://sun9-65.userapi.com/impg/bvdpBQYk7glRfRkmsR-GRMMWwK2Rw3lDIuGjzQ/l4qMdaR-HBA.jpg?size=1200x1200&quality=95&sign=427e8060dea18a64efc92e8ae7ab57da&type=album',
-                      ).image,
-                    ),
-                    launchMode: LaunchMode.externalApplication,
-                    description: 'Самый популярный неофициальный чат',
+            child: ListView(
+              shrinkWrap: true,
+              scrollDirection: Axis.vertical,
+              children: [
+                CommunityCard(
+                  title: 'Mirea Ninja',
+                  url: 'https://forum.mirea.ru/',
+                  logo: CircleAvatar(
+                    // backgroundColor: AppTheme.colors.colorful01,
+                    foregroundImage: Image.network(
+                      'https://sun9-65.userapi.com/impg/bvdpBQYk7glRfRkmsR-GRMMWwK2Rw3lDIuGjzQ/l4qMdaR-HBA.jpg?size=1200x1200&quality=95&sign=427e8060dea18a64efc92e8ae7ab57da&type=album',
+                    ).image,
                   ),
-                  CommunityCard(
-                    title: 'Кафедра КИС',
-                    url: 'https://vk.com/mirea',
-                    logo: CircleAvatar(
-                      // backgroundColor: AppTheme.colors.colorful01,
-                      foregroundImage: Image.network(
-                        'https://sun9-1.userapi.com/impg/JSVkx8BMQSKU2IR27bnX_yajk4Bvb_HMf530gg/QkoTZdc_2mM.jpg?size=500x500&quality=95&sign=6bfc16cfff772b175c927aae3e480aa8&type=album',
-                      ).image,
-                    ),
-                    launchMode: LaunchMode.externalApplication,
-                    description: 'Кафедра Корпоративных информационных систем',
+                  launchMode: LaunchMode.externalApplication,
+                  description: 'Самый популярный неофициальный чат',
+                ),
+                CommunityCard(
+                  title: 'Кафедра КИС',
+                  url: 'https://vk.com/mirea',
+                  logo: CircleAvatar(
+                    // backgroundColor: AppTheme.colors.colorful01,
+                    foregroundImage: Image.network(
+                      'https://sun9-1.userapi.com/impg/JSVkx8BMQSKU2IR27bnX_yajk4Bvb_HMf530gg/QkoTZdc_2mM.jpg?size=500x500&quality=95&sign=6bfc16cfff772b175c927aae3e480aa8&type=album',
+                    ).image,
                   ),
-                ],
-              ),
+                  launchMode: LaunchMode.externalApplication,
+                  description: 'Кафедра Корпоративных информационных систем',
+                ),
+              ],
             ),
           ),
           const SizedBox(height: 16),
