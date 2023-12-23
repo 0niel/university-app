@@ -4,16 +4,13 @@ import 'package:rtu_mirea_app/common/utils/utils.dart';
 import 'package:rtu_mirea_app/domain/entities/lesson.dart';
 import 'package:rtu_mirea_app/domain/entities/schedule.dart';
 import 'package:rtu_mirea_app/domain/entities/schedule_settings.dart';
-import 'package:rtu_mirea_app/domain/entities/story.dart';
 import 'package:rtu_mirea_app/presentation/bloc/schedule_bloc/schedule_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/stories_bloc/stories_bloc.dart';
 import 'package:rtu_mirea_app/presentation/constants.dart';
 import 'package:rtu_mirea_app/presentation/pages/schedule/widgets/empty_lesson_card.dart';
 import 'lesson_card.dart';
 import 'package:rtu_mirea_app/presentation/typography.dart';
-import 'package:rtu_mirea_app/presentation/theme.dart';
 
-import 'story_item.dart';
 
 class SchedulePageView extends StatefulWidget {
   const SchedulePageView({Key? key, required this.schedule}) : super(key: key);
@@ -149,50 +146,6 @@ class _SchedulePageViewState extends State<SchedulePageView> {
         },
       );
     }
-  }
-
-  List<Story> _getActualStories(List<Story> stories) {
-    List<Story> actualStories = [];
-    for (final story in stories) {
-      if (DateTime.now().compareTo(story.stopShowDate) == -1) {
-        actualStories.add(story);
-      }
-    }
-
-    return actualStories;
-  }
-
-  Widget _buildStories(List<Story> stories) {
-    return SizedBox(
-      height: 80,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 24),
-        itemBuilder: (_, int i) {
-          if (DateTime.now().compareTo(stories[i].stopShowDate) == -1) {
-            return Container(
-              decoration: BoxDecoration(
-                boxShadow: [
-                  BoxShadow(
-                    color: Theme.of(context).shadowColor.withOpacity(
-                        AppTheme.themeMode == ThemeMode.dark ? 0.1 : 0.1),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: StoryWidget(
-                stories: stories,
-                storyIndex: i,
-              ),
-            );
-          }
-          return Container();
-        },
-        separatorBuilder: (_, int i) => const SizedBox(width: 10),
-        itemCount: stories.length,
-      ),
-    );
   }
 
   Widget _buildStoriesBuilder() {

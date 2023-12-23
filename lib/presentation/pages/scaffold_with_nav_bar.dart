@@ -1,14 +1,13 @@
 import 'dart:io' show Platform;
 
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:rtu_mirea_app/presentation/app_notifier.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:rtu_mirea_app/presentation/typography.dart';
 import 'package:unicons/unicons.dart';
-
+import 'package:salomon_bottom_bar/salomon_bottom_bar.dart';
 import '../constants.dart';
 
 class ScaffoldWithNavBar extends StatelessWidget {
@@ -39,21 +38,13 @@ class ScaffoldWithNavBar extends StatelessWidget {
           );
         } else {
           return Scaffold(
-            body: Stack(
-              children: [
-                Consumer<AppNotifier>(
-                  builder: (_, value, child) => navigationShell,
-                ),
-                Positioned(
-                  bottom: MediaQuery.of(context).padding.bottom,
-                  left: 0,
-                  right: 0,
-                  child: FloatingNavBar(
-                    index: navigationShell.currentIndex,
-                    onClick: (index) => _setActiveIndex(index),
-                  ),
-                ),
-              ],
+            backgroundColor: AppTheme.colors.background03,
+            body: Consumer<AppNotifier>(
+              builder: (_, value, child) => navigationShell,
+            ),
+            bottomNavigationBar: AppBottomNavigationBar(
+              index: navigationShell.currentIndex,
+              onClick: (index) => _setActiveIndex(index),
             ),
           );
         }
@@ -116,8 +107,9 @@ class ScaffoldWithNavBar extends StatelessWidget {
   }
 }
 
-class FloatingNavBar extends StatelessWidget {
-  const FloatingNavBar({Key? key, required this.index, required this.onClick})
+class AppBottomNavigationBar extends StatelessWidget {
+  const AppBottomNavigationBar(
+      {Key? key, required this.index, required this.onClick})
       : super(key: key);
 
   final Function(int) onClick;
@@ -126,103 +118,42 @@ class FloatingNavBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      padding: const EdgeInsets.symmetric(horizontal: 8),
-      height: 60,
-      decoration: BoxDecoration(
-        color: AppTheme.colors.background03,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            offset: const Offset(0, 4),
-            blurRadius: 12,
-          ),
-        ],
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(24),
-          topRight: Radius.circular(24),
-          bottomLeft: Radius.circular(18),
-          bottomRight: Radius.circular(18),
+      color: AppTheme.colors.background01,
+      child: SalomonBottomBar(
+        margin: const EdgeInsets.symmetric(
+          horizontal: 10,
+          vertical: 10,
         ),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          _buildNavItem(
-            index: 0,
-            icon: Icons.library_books_rounded,
-            title: "Новости",
+        currentIndex: index,
+        onTap: onClick,
+        items: [
+          SalomonBottomBarItem(
+            icon: const Icon(Icons.library_books_rounded),
+            title: const Text("Новости"),
+            selectedColor: AppTheme.colors.primary,
           ),
-          _buildNavItem(
-            index: 1,
-            icon: Icons.calendar_today_rounded,
-            title: "Расписание",
+          SalomonBottomBarItem(
+            icon: const Icon(Icons.calendar_today_rounded),
+            title: const Text("Расписание"),
+            selectedColor: AppTheme.colors.primary,
           ),
-          _buildNavItem(
-            index: 2,
-            icon: Icons.widgets_rounded,
-            title: "Сервисы",
+          SalomonBottomBarItem(
+            icon: const Icon(Icons.widgets_rounded),
+            title: const Text("Сервисы"),
+            selectedColor: AppTheme.colors.primary,
           ),
           ScaffoldWithNavBar.isDesktop
-              ? _buildNavItem(
-                  index: 3,
-                  icon: UniconsLine.info_circle,
-                  title: "О приложении",
+              ? SalomonBottomBarItem(
+                  icon: const Icon(UniconsLine.info_circle),
+                  title: const Text("О приложении"),
+                  selectedColor: AppTheme.colors.primary,
                 )
-              : _buildNavItem(
-                  index: 3,
-                  icon: Icons.person,
-                  title: "Профиль",
+              : SalomonBottomBarItem(
+                  icon: const Icon(Icons.person),
+                  title: const Text("Профиль"),
+                  selectedColor: AppTheme.colors.primary,
                 ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildNavItem({
-    required int index,
-    required IconData icon,
-    required String title,
-  }) {
-    return GestureDetector(
-      onTap: () => onClick(index),
-      child: Container(
-        height: 60,
-        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(24),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Icon(
-              icon,
-              size: 18,
-              color: index == this.index
-                  ? AppTheme.colors.primary
-                  : AppTheme.colors.active.withOpacity(0.5),
-            ).animate().fadeIn(duration: const Duration(milliseconds: 150)),
-            if (index == this.index)
-              ...[
-                const SizedBox(height: 4),
-                Text(
-                  title,
-                  style: AppTextStyle.tab.copyWith(
-                    fontSize: 12,
-                    color: index == this.index
-                        ? AppTheme.colors.primary
-                        : AppTheme.colors.active.withOpacity(0.5),
-                  ),
-                ),
-              ]
-                  .animate()
-                  .fadeIn(duration: const Duration(milliseconds: 150))
-                  .move(
-                      begin: const Offset(0, 8),
-                      duration: const Duration(milliseconds: 150)),
-          ],
-        ),
       ),
     );
   }

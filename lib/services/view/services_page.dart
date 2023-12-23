@@ -96,7 +96,7 @@ class _ServicesViewState extends State<ServicesView> {
           ),
           const SizedBox(height: 24),
           const Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            padding: EdgeInsets.symmetric(horizontal: 16.0),
             child: Text(
               "Сообщества",
               style: TextStyle(
@@ -126,7 +126,7 @@ class _ServicesViewState extends State<ServicesView> {
                 ),
                 CommunityCard(
                   title: 'Кафедра КИС',
-                  url: 'https://vk.com/mirea',
+                  url: 'https://vk.com/kis_it_mirea',
                   logo: CircleAvatar(
                     // backgroundColor: AppTheme.colors.colorful01,
                     foregroundImage: Image.network(

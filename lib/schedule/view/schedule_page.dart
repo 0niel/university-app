@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:rtu_mirea_app/schedule/bloc/schedule_bloc.dart';
+import 'package:rtu_mirea_app/stories/view/stories_view.dart';
 import 'package:university_app_server_api/client.dart';
 
 import '../widgets/widgets.dart';
@@ -52,66 +53,73 @@ class _SchedulePageState extends State<SchedulePage> {
           });
         } else if (state.status == ScheduleStatus.loaded) {
           return Scaffold(
-            appBar: AppBar(title: const Text('Расписание'), actions: [
-              SizedBox(
-                width: 60,
-                height: 60,
-                child: IconButton(
-                  icon: FaIcon(
-                    FontAwesomeIcons.ellipsis,
-                    color: AppTheme.colors.active,
-                  ),
-                  onPressed: () {
-                    SettingsMenu.show(context);
-                  },
-                ),
-              ),
-            ]),
             backgroundColor: AppTheme.colors.background01,
-            body: SafeArea(
-              child: Column(
-                children: [
-                  Calendar(
+            body: NestedScrollView(
+              headerSliverBuilder: (_, __) => [
+                SliverAppBar(
+                  pinned: false,
+                  title: const Text(
+                    'Расписание',
+                  ),
+                  actions: [
+                    SizedBox(
+                      width: 60,
+                      height: 60,
+                      child: IconButton(
+                        icon: FaIcon(
+                          FontAwesomeIcons.ellipsis,
+                          color: AppTheme.colors.active,
+                        ),
+                        onPressed: () {
+                          SettingsMenu.show(context);
+                        },
+                      ),
+                    ),
+                  ],
+                  bottom: const PreferredSize(
+                    preferredSize: Size.fromHeight(80),
+                    child: StoriesView(),
+                  ),
+                ),
+                SliverToBoxAdapter(
+                  child: Calendar(
                     pageViewController: _schedulePageController,
                     schedule: state.selectedSchedule?.schedule ?? [],
                   ),
-                  Expanded(
-                    child: EventsPageView(
-                      controller: _schedulePageController,
-                      itemBuilder: (context, index) {
-                        final schedules = Calendar.getSchedulePartsByDay(
-                          schedule: state.selectedSchedule?.schedule ?? [],
-                          day: Calendar.firstCalendarDay
-                              .add(Duration(days: index)),
-                        );
+                ),
+              ],
+              body: EventsPageView(
+                controller: _schedulePageController,
+                itemBuilder: (context, index) {
+                  final schedules = Calendar.getSchedulePartsByDay(
+                    schedule: state.selectedSchedule?.schedule ?? [],
+                    day: Calendar.firstCalendarDay.add(Duration(days: index)),
+                  );
 
-                        final holiday = schedules.firstWhereOrNull(
-                          (element) => element is HolidaySchedulePart,
-                        );
+                  final holiday = schedules.firstWhereOrNull(
+                    (element) => element is HolidaySchedulePart,
+                  );
 
-                        if (holiday != null) {
-                          return HolidayPage(
-                              title: (holiday as HolidaySchedulePart).title);
-                        }
+                  if (holiday != null) {
+                    return HolidayPage(
+                        title: (holiday as HolidaySchedulePart).title);
+                  }
 
-                        return ListView(
-                          children: schedules
-                              .whereType<LessonSchedulePart>()
-                              .map(
-                                (e) => Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 16.0,
-                                    vertical: 8.0,
-                                  ),
-                                  child: LessonCard(lesson: e),
-                                ),
-                              )
-                              .toList(),
-                        );
-                      },
-                    ),
-                  ),
-                ],
+                  return ListView(
+                    children: schedules
+                        .whereType<LessonSchedulePart>()
+                        .map(
+                          (e) => Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16.0,
+                              vertical: 8.0,
+                            ),
+                            child: LessonCard(lesson: e),
+                          ),
+                        )
+                        .toList(),
+                  );
+                },
               ),
             ),
           );

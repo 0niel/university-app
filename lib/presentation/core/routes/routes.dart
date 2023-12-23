@@ -9,7 +9,6 @@ import 'package:rtu_mirea_app/presentation/pages/home_page.dart';
 import 'package:rtu_mirea_app/presentation/pages/profile/notifications_settings_page.dart';
 import 'package:rtu_mirea_app/presentation/pages/scaffold_with_nav_bar.dart';
 import 'package:rtu_mirea_app/presentation/pages/login/login_page.dart';
-import 'package:rtu_mirea_app/presentation/pages/map/map_page.dart';
 import 'package:rtu_mirea_app/presentation/pages/news/news_details_page.dart';
 import 'package:rtu_mirea_app/presentation/pages/news/news_page.dart';
 import 'package:rtu_mirea_app/presentation/pages/schedule/widgets/stories_wrapper.dart';

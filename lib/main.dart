@@ -14,6 +14,8 @@ import 'package:rtu_mirea_app/common/oauth.dart';
 
 import 'package:rtu_mirea_app/common/widget_data_init.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:rtu_mirea_app/data/datasources/strapi_remote.dart';
+import 'package:rtu_mirea_app/data/repositories/stories_repository_impl.dart';
 import 'package:rtu_mirea_app/presentation/bloc/about_app_bloc/about_app_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/announces_bloc/announces_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/app_cubit/app_cubit.dart';
@@ -27,13 +29,12 @@ import 'package:rtu_mirea_app/presentation/bloc/nfc_pass_bloc/nfc_pass_bloc.dart
 import 'package:rtu_mirea_app/presentation/bloc/notification_preferences/notification_preferences_bloc.dart';
 
 import 'package:rtu_mirea_app/presentation/bloc/scores_bloc/scores_bloc.dart';
-import 'package:rtu_mirea_app/presentation/bloc/stories_bloc/stories_bloc.dart';
-import 'package:rtu_mirea_app/presentation/bloc/update_info_bloc/update_info_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/user_bloc/user_bloc.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:intl/intl_standalone.dart';
 import 'package:rtu_mirea_app/schedule/bloc/schedule_bloc.dart';
 import 'package:rtu_mirea_app/service_locator.dart' as dependency_injection;
+import 'package:rtu_mirea_app/stories/bloc/stories_bloc.dart';
 import 'package:sentry_dio/sentry_dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:university_app_server_api/client.dart';
@@ -156,13 +157,17 @@ class App extends StatelessWidget {
       DeviceOrientation.portraitUp,
     ]);
 
-    final apiClient = ScheduleApiClient();
+    final apiClient = ScheduleApiClient.localhost();
 
     return MultiRepositoryProvider(
       providers: [
         RepositoryProvider.value(
             value:
                 schedule_repository.ScheduleRepository(apiClient: apiClient)),
+        RepositoryProvider.value(
+          value: StoriesRepositoryImpl(
+              remoteDataSource: getIt<StrapiRemoteData>()),
+        ),
       ],
       child: MultiBlocProvider(
         providers: [
@@ -171,6 +176,11 @@ class App extends StatelessWidget {
               scheduleRepository:
                   context.read<schedule_repository.ScheduleRepository>(),
             )..add(const ScheduleResumed()),
+          ),
+          BlocProvider<StoriesBloc>(
+            create: (context) => StoriesBloc(
+              storiesRepository: context.read<StoriesRepositoryImpl>(),
+            )..add(LoadStories()),
           ),
           BlocProvider<MapCubit>(create: (context) => getIt<MapCubit>()),
           BlocProvider<NewsBloc>(create: (context) => getIt<NewsBloc>()),
@@ -185,12 +195,7 @@ class App extends StatelessWidget {
           BlocProvider<ScoresBloc>(create: (context) => getIt<ScoresBloc>()),
           BlocProvider<AttendanceBloc>(
               create: (context) => getIt<AttendanceBloc>()),
-          BlocProvider<StoriesBloc>(create: (context) => getIt<StoriesBloc>()),
           BlocProvider<AppCubit>(create: (context) => getIt<AppCubit>()),
-          BlocProvider<UpdateInfoBloc>(
-            create: (_) => getIt<UpdateInfoBloc>(),
-            lazy: false, // We need to init it as soon as possible
-          ),
           if (Platform.isAndroid)
             BlocProvider<NfcPassBloc>(
               create: (_) => getIt<NfcPassBloc>()
