@@ -119,18 +119,37 @@ List<Classroom> parseClassroomsFromLocation(String location) {
 
   final match = exp.firstMatch(summary);
 
-  if (match == null) {
-    return ('', LessonType.unknown);
+  if (match != null) {
+    final lessonType = match.group(1);
+    final subject = match.group(2);
+
+    if (lessonType != null && subject != null) {
+      final parsedLessonType = _getLessonTypeByAbbreviation(lessonType.trim());
+
+      return (subject.trim(), parsedLessonType);
+    }
+  } else {
+    var subject = summary.trim();
+    var parsedLessonType = LessonType.unknown;
+
+    if (subject.contains('Экзамен')) {
+      subject = subject.replaceAll('Экзамен', '').trim();
+      parsedLessonType = LessonType.exam;
+    } else if (subject.contains('Зачет')) {
+      subject = subject.replaceAll('Зачет', '').trim();
+      parsedLessonType = LessonType.credit;
+    } else if (subject.contains('Консультация')) {
+      subject = subject.replaceAll('Консультация', '').trim();
+      parsedLessonType = LessonType.consultation;
+    } else if (subject.contains('Курсовая работа')) {
+      subject = subject.replaceAll('Курсовая работа', '').trim();
+      parsedLessonType = LessonType.courseWork;
+    }
+
+    return (subject, parsedLessonType);
   }
 
-  final lessonType = match.group(1);
-  final subject = match.group(2);
-
-  if (lessonType == null || subject == null) {
-    return ('', LessonType.unknown);
-  }
-
-  return (subject.trim(), _getLessonTypeByAbbreviation(lessonType.trim()));
+  return (summary, LessonType.unknown);
 }
 
 LessonType _getLessonTypeByAbbreviation(String abbreviation) {

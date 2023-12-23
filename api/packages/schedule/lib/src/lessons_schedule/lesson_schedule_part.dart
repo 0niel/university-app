@@ -24,7 +24,13 @@ class LessonSchedulePart with EquatableMixin implements SchedulePart {
 
   /// Lesson for online lessons.
   LessonSchedulePart.online({
-    required this.subject, required this.lessonType, required this.teachers, required this.lessonBells, required this.dates, required this.groups, String? url,
+    required this.subject,
+    required this.lessonType,
+    required this.teachers,
+    required this.lessonBells,
+    required this.dates,
+    required this.groups,
+    String? url,
     this.type = LessonSchedulePart.identifier,
   }) : classrooms = [
           Classroom.online(url: url),
@@ -72,6 +78,30 @@ class LessonSchedulePart with EquatableMixin implements SchedulePart {
 
   @override
   Map<String, dynamic> toJson() => _$LessonSchedulePartToJson(this);
+
+  /// Creates a copy of this [LessonSchedulePart] but with the given fields
+  /// replaced with the new values.
+  LessonSchedulePart copyWith({
+    String? subject,
+    LessonType? lessonType,
+    List<Teacher>? teachers,
+    List<Classroom>? classrooms,
+    LessonBells? lessonBells,
+    List<DateTime>? dates,
+    List<String>? groups,
+    String? type,
+  }) {
+    return LessonSchedulePart(
+      subject: subject ?? this.subject,
+      lessonType: lessonType ?? this.lessonType,
+      teachers: teachers ?? this.teachers,
+      classrooms: classrooms ?? this.classrooms,
+      lessonBells: lessonBells ?? this.lessonBells,
+      dates: dates ?? this.dates,
+      groups: groups ?? this.groups,
+      type: type ?? this.type,
+    );
+  }
 
   @override
   List<Object?> get props => [

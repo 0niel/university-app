@@ -150,7 +150,84 @@ class ICalParser {
       scheduleParts.add(schedulePart);
     }
 
-    return scheduleParts;
+    final exams = <SchedulePart>[];
+    var lessons = <SchedulePart>[];
+
+    for (final schedulePart in scheduleParts) {
+      if (_isSessionLesson(schedulePart)) {
+        exams.add(schedulePart);
+      } else {
+        lessons.add(schedulePart);
+      }
+    }
+
+    for (final exam in exams) {
+      final examDates = exam.dates;
+
+      lessons = lessons.map((lesson) {
+        if (lesson is LessonSchedulePart) {
+          final lessonDates = lesson.dates;
+
+          final dates = lessonDates.where((date) {
+            return !examDates.any((examDate) => date.isSameDate(examDate));
+          }).toList();
+
+          return lesson.copyWith(dates: dates);
+        } else {
+          return lesson;
+        }
+      }).toList();
+    }
+
+    final excludeDates = [
+      DateTime(2023, 12, 23),
+      DateTime(2023, 12, 24),
+      DateTime(2023, 12, 25),
+      DateTime(2023, 12, 26),
+      DateTime(2023, 12, 27),
+      DateTime(2023, 12, 28),
+      DateTime(2023, 12, 29),
+      DateTime(2023, 12, 30),
+      DateTime(2023, 12, 31),
+      DateTime(2024, 1, 1),
+      DateTime(2024, 1, 2),
+      DateTime(2024, 1, 3),
+      DateTime(2024, 1, 4),
+      DateTime(2024, 1, 5),
+      DateTime(2024, 1, 6),
+      DateTime(2024, 1, 7),
+      DateTime(2024, 1, 8),
+    ];
+
+    // исключаем занятия (не экзамены) в период с 23.12.2023 по 10.01.2024
+    lessons = lessons.map((lesson) {
+      if (lesson is LessonSchedulePart) {
+        final lessonDates = lesson.dates;
+
+        final dates = lessonDates.where((date) {
+          return !excludeDates
+              .any((excludeDate) => date.isSameDate(excludeDate));
+        }).toList();
+
+        return lesson.copyWith(dates: dates);
+      } else {
+        return lesson;
+      }
+    }).toList();
+
+    return lessons..addAll(exams);
+  }
+
+  bool _isSessionLesson(SchedulePart schedulePart) {
+    if (schedulePart is LessonSchedulePart) {
+      return schedulePart.lessonType == LessonType.exam ||
+          schedulePart.lessonType == LessonType.credit ||
+          schedulePart.lessonType == LessonType.courseWork ||
+          schedulePart.lessonType == LessonType.courseProject ||
+          schedulePart.lessonType == LessonType.consultation;
+    }
+
+    return false;
   }
 
   EventDatesAndTime _getEventDatesAndTime(Map<String, dynamic> data) {
@@ -254,4 +331,10 @@ class EventDatesAndTime {
 
   /// The time when the event ends in each day.
   final TimeOfDay timeEnd;
+}
+
+extension DateOnlyCompare on DateTime {
+  bool isSameDate(DateTime other) {
+    return year == other.year && month == other.month && day == other.day;
+  }
 }
