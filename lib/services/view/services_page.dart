@@ -136,6 +136,19 @@ class _ServicesViewState extends State<ServicesView> {
                   launchMode: LaunchMode.externalApplication,
                   description: 'Кафедра Корпоративных информационных систем',
                 ),
+                CommunityCard(
+                  title: 'Кафедра ИППО',
+                  url: 'https://vk.com/ippo_it',
+                  logo: CircleAvatar(
+                    // backgroundColor: AppTheme.colors.colorful01,
+                    foregroundImage: Image.network(
+                      'https://sun9-21.userapi.com/impg/Sk3d5lpXhoaiHj3QZz1tt8HQKPcEaoE27WgZAw/nig2y-fcRkU.jpg?size=500x600&quality=95&sign=fa26df3e73f398f91d10029134156e5d&type=album',
+                    ).image,
+                  ),
+                  launchMode: LaunchMode.externalApplication,
+                  description:
+                      'Кафедра Инструментального и прикладного программного обеспечения',
+                ),
               ],
             ),
           ),

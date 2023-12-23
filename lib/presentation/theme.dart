@@ -36,10 +36,18 @@ class AppTheme {
           AppTextStyle.title.copyWith(color: darkThemeColors.active),
       iconTheme: IconThemeData(color: blackThemeColors.active),
     ),
+    cardTheme: CardTheme(
+      color: darkThemeColors.background01,
+      elevation: 4,
+      shadowColor: darkThemeColors.background02.withOpacity(0.1),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
+    ),
     bottomNavigationBarTheme:
         ThemeData.dark().bottomNavigationBarTheme.copyWith(
               type: BottomNavigationBarType.shifting,
-              backgroundColor: darkThemeColors.background03,
+              backgroundColor: darkThemeColors.background01,
               selectedItemColor: darkThemeColors.active,
               unselectedItemColor: darkThemeColors.deactive,
               selectedLabelStyle: AppTextStyle.captionL,
@@ -108,6 +116,14 @@ class AppTheme {
       color: lightThemeColors.background02,
       thickness: 0.5,
       space: 0,
+    ),
+    cardTheme: CardTheme(
+      color: lightThemeColors.background01,
+      elevation: 4,
+      shadowColor: lightThemeColors.background02.withOpacity(0.1),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
     ),
     colorScheme: ColorScheme(
       background: lightThemeColors.background01,

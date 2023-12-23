@@ -82,12 +82,14 @@ class LessonCard extends StatelessWidget {
     final state = context.read<ScheduleBloc>().state;
 
     return Card(
-      shadowColor: Colors.transparent,
-      color: AppTheme.colors.background03,
+      margin: const EdgeInsets.all(0),
+      color: AppTheme.themeMode == ThemeMode.dark
+          ? AppTheme.colors.background03
+          : AppTheme.colors.background02,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12.0),
       ),
-      surfaceTintColor: AppTheme.colors.background03,
+      surfaceTintColor: Colors.transparent,
       child: Container(
         constraints: const BoxConstraints(minHeight: 75),
         padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
