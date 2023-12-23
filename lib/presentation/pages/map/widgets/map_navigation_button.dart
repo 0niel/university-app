@@ -17,20 +17,23 @@ class MapNavigationButton extends StatelessWidget {
     return BlocBuilder<MapCubit, MapState>(
       buildWhen: (prevState, currentState) =>
           prevState.floor != currentState.floor,
-      builder: (context, state) => ConstrainedBox(
-        constraints: const BoxConstraints.tightFor(width: 48, height: 48),
+      builder: (context, state) => SizedBox(
+        width: 48,
+        height: 48,
         child: ElevatedButton(
           style: ButtonStyle(
-              backgroundColor: MaterialStateProperty.all<Color>(
-                state.floor == floor
-                    ? AppTheme.colors.background03
-                    : AppTheme.colors.background02,
-              ),
-              shadowColor: MaterialStateProperty.all<Color>(Colors.transparent),
-              shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                  RoundedRectangleBorder(
+            backgroundColor: MaterialStateProperty.all<Color>(
+              state.floor == floor
+                  ? AppTheme.colors.background03
+                  : AppTheme.colors.background02,
+            ),
+            shadowColor: MaterialStateProperty.all<Color>(Colors.transparent),
+            shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+              RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12.0),
-              ))),
+              ),
+            ),
+          ),
           child: Text(
             floor.toString(),
             style: AppTextStyle.buttonS.copyWith(

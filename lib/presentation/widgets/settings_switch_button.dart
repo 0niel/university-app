@@ -33,7 +33,7 @@ class _SettingsSwitchButtonState extends State<SettingsSwitchButton> {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
+    return TextButton(
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -41,7 +41,9 @@ class _SettingsSwitchButtonState extends State<SettingsSwitchButton> {
               children: [
                 widget.svgPicture,
                 const SizedBox(width: 20),
-                Text(widget.text, style: AppTextStyle.buttonL),
+                Text(widget.text,
+                    style: AppTextStyle.buttonL
+                        .copyWith(color: AppTheme.colors.active)),
               ],
             ),
             Padding(
@@ -60,7 +62,7 @@ class _SettingsSwitchButtonState extends State<SettingsSwitchButton> {
             ),
           ],
         ),
-        onTap: () {
+        onPressed: () {
           _switchValueNotifier.value = !_switchValueNotifier.value;
         });
   }

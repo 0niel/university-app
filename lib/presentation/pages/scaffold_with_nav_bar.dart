@@ -1,13 +1,13 @@
 import 'dart:io' show Platform;
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:rtu_mirea_app/presentation/app_notifier.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:rtu_mirea_app/presentation/typography.dart';
-import 'package:salomon_bottom_bar/salomon_bottom_bar.dart';
 import 'package:unicons/unicons.dart';
-
+import 'package:salomon_bottom_bar/salomon_bottom_bar.dart';
 import '../constants.dart';
 
 class ScaffoldWithNavBar extends StatelessWidget {
@@ -29,15 +29,19 @@ class ScaffoldWithNavBar extends StatelessWidget {
               children: [
                 _buildSidebar(context),
                 Expanded(
-                    child: Consumer<AppNotifier>(
-                        builder: (context, value, child) => navigationShell)),
+                  child: Consumer<AppNotifier>(
+                    builder: (context, value, child) => navigationShell,
+                  ),
+                ),
               ],
             ),
           );
         } else {
           return Scaffold(
+            backgroundColor: AppTheme.colors.background03,
             body: Consumer<AppNotifier>(
-                builder: (context, value, child) => navigationShell),
+              builder: (_, value, child) => navigationShell,
+            ),
             bottomNavigationBar: AppBottomNavigationBar(
               index: navigationShell.currentIndex,
               onClick: (index) => _setActiveIndex(index),
@@ -76,8 +80,8 @@ class ScaffoldWithNavBar extends StatelessWidget {
             selectedColor: AppTheme.colors.primary,
           ),
           ListTile(
-            leading: const Icon(Icons.map_rounded),
-            title: Text("Карта", style: AppTextStyle.tab),
+            leading: const Icon(Icons.widgets_rounded),
+            title: Text("Сервисы", style: AppTextStyle.tab),
             selected: navigationShell.currentIndex == 2,
             onTap: () => _setActiveIndex(2),
             selectedColor: AppTheme.colors.primary,
@@ -134,8 +138,8 @@ class AppBottomNavigationBar extends StatelessWidget {
             selectedColor: AppTheme.colors.primary,
           ),
           SalomonBottomBarItem(
-            icon: const Icon(Icons.map_rounded),
-            title: const Text("Карта"),
+            icon: const Icon(Icons.widgets_rounded),
+            title: const Text("Сервисы"),
             selectedColor: AppTheme.colors.primary,
           ),
           ScaffoldWithNavBar.isDesktop

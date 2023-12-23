@@ -1,0 +1,21 @@
+name: rtu_mirea_lks_student_api_client
+description: A package that provides access to the remote Student data of the RTU MIREA
+version: 0.1.0+1
+publish_to: none
+
+environment:
+  sdk: ">=3.0.0 <4.0.0"
+
+dependencies:
+  equatable: ^2.0.3
+  json_annotation: ^4.6.0
+  meta: ^1.7.0
+  intl: ^0.18.1
+
+dev_dependencies:
+  build_runner: ^2.0.0
+  coverage: ^1.1.0
+  json_serializable: ^6.0.0
+  mocktail: ^1.0.0
+  test: ^1.21.4
+  very_good_analysis: ^5.1.0

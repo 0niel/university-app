@@ -1,0 +1,155 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "rtu_mirea_mobile",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "rtu_mirea_mobile (profile mode)",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "rtu_mirea_mobile (release mode)",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        },
+        {
+            "name": "news_api_client",
+            "cwd": "packages\\news_api_client",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "notifications_repository",
+            "cwd": "packages\\notifications_repository",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "notifications_repository (profile mode)",
+            "cwd": "packages\\notifications_repository",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "notifications_repository (release mode)",
+            "cwd": "packages\\notifications_repository",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        },
+        {
+            "name": "permission_client",
+            "cwd": "packages\\permission_client",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "permission_client (profile mode)",
+            "cwd": "packages\\permission_client",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "permission_client (release mode)",
+            "cwd": "packages\\permission_client",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        },
+        {
+            "name": "schedule_api_client",
+            "cwd": "packages\\schedule_api_client",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "schedule_repository",
+            "cwd": "packages\\schedule_repository",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "firebase_notifications_client",
+            "cwd": "packages\\notifications_client\\firebase_notifications_client",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "firebase_notifications_client (profile mode)",
+            "cwd": "packages\\notifications_client\\firebase_notifications_client",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "firebase_notifications_client (release mode)",
+            "cwd": "packages\\notifications_client\\firebase_notifications_client",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        },
+        {
+            "name": "notifications_client",
+            "cwd": "packages\\notifications_client\\notifications_client",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "persistent_storage",
+            "cwd": "packages\\storage\\persistent_storage",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "persistent_storage (profile mode)",
+            "cwd": "packages\\storage\\persistent_storage",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "persistent_storage (release mode)",
+            "cwd": "packages\\storage\\persistent_storage",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        },
+        {
+            "name": "secure_storage",
+            "cwd": "packages\\storage\\secure_storage",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "secure_storage (profile mode)",
+            "cwd": "packages\\storage\\secure_storage",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "secure_storage (release mode)",
+            "cwd": "packages\\storage\\secure_storage",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        },
+        {
+            "name": "storage",
+            "cwd": "packages\\storage\\storage",
+            "request": "launch",
+            "type": "dart"
+        }
+    ]
+}

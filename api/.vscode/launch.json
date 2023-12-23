@@ -1,0 +1,25 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "api",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "rtu_mirea_schedule_api_client",
+            "cwd": "packages\\rtu_mirea_schedule_api_client",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "schedule",
+            "cwd": "packages\\schedule",
+            "request": "launch",
+            "type": "dart"
+        }
+    ]
+}

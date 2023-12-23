@@ -77,20 +77,6 @@ class _FeedbackBottomModalSheetState extends State<FeedbackBottomModalSheet> {
     final email = _emailController.text;
     final text = _textController.text;
 
-    if (email == null) {
-      setState(() {
-        _emailErrorText = 'Введите email';
-      });
-      return;
-    }
-
-    if (text == null) {
-      setState(() {
-        _textErrorText = 'Введите текст';
-      });
-      return;
-    }
-
     if (!_reEmail.hasMatch(email)) {
       setState(() {
         _emailErrorText = 'Некорректный email';

@@ -39,7 +39,7 @@ class UserLocalDataImpl implements UserLocalData {
 
   @override
   Future<int> getNfcCodeFromCache() async {
-    String? value = await secureStorage.read(key: 'nfc_code');
+    String? value = sharedPreferences.getString('nfc_code');
 
     if (value == null) throw CacheException('NFC code are not set');
 
@@ -48,11 +48,11 @@ class UserLocalDataImpl implements UserLocalData {
 
   @override
   Future<void> setNfcCodeToCache(int code) async {
-    await secureStorage.write(key: 'nfc_code', value: code.toString());
+    await sharedPreferences.setString('nfc_code', code.toString());
   }
 
   @override
   Future<void> removeNfcCodeFromCache() async {
-    await secureStorage.delete(key: 'nfc_code');
+    await sharedPreferences.remove('nfc_code');
   }
 }

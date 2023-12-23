@@ -28,7 +28,7 @@ class PrimaryButton extends StatelessWidget {
         },
         child: Text(
           text,
-          style: AppTextStyle.buttonS,
+          style: AppTextStyle.buttonS.copyWith(color: Colors.white),
         ),
       ),
     );
