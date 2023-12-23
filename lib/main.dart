@@ -157,7 +157,7 @@ class App extends StatelessWidget {
       DeviceOrientation.portraitUp,
     ]);
 
-    final apiClient = ScheduleApiClient.localhost();
+    final apiClient = ScheduleApiClient();
 
     return MultiRepositoryProvider(
       providers: [
