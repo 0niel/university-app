@@ -67,3 +67,27 @@ class ScheduleSetDisplayMode extends ScheduleEvent {
   @override
   List<Object> get props => [isMiniature];
 }
+
+class SetSelectedSchedule extends ScheduleEvent {
+  const SetSelectedSchedule({
+    required this.selectedSchedule,
+  });
+
+  final SelectedSchedule selectedSchedule;
+
+  @override
+  List<Object> get props => [selectedSchedule];
+}
+
+class DeleteSchedule extends ScheduleEvent {
+  const DeleteSchedule({
+    required this.identifier,
+    required this.target,
+  });
+
+  final UID identifier;
+  final ScheduleTarget target;
+
+  @override
+  List<Object> get props => [identifier, target];
+}

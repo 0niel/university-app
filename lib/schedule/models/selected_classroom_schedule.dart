@@ -32,5 +32,5 @@ class SelectedClassroomSchedule
   Map<String, dynamic> toJson() => _$SelectedClassroomScheduleToJson(this);
 
   @override
-  List<Object> get props => [classroom, schedule];
+  List<Object> get props => [type, classroom, schedule];
 }

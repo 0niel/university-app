@@ -30,5 +30,5 @@ class SelectedTeacherSchedule with EquatableMixin implements SelectedSchedule {
       _$SelectedTeacherScheduleFromJson(json);
 
   @override
-  List<Object> get props => [teacher, schedule];
+  List<Object> get props => [type, teacher, schedule];
 }

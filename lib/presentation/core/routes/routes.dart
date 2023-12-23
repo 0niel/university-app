@@ -11,7 +11,6 @@ import 'package:rtu_mirea_app/presentation/pages/scaffold_with_nav_bar.dart';
 import 'package:rtu_mirea_app/presentation/pages/login/login_page.dart';
 import 'package:rtu_mirea_app/presentation/pages/news/news_details_page.dart';
 import 'package:rtu_mirea_app/presentation/pages/news/news_page.dart';
-import 'package:rtu_mirea_app/presentation/pages/schedule/widgets/stories_wrapper.dart';
 import 'package:rtu_mirea_app/presentation/pages/onboarding/onboarding_page.dart';
 import 'package:rtu_mirea_app/presentation/pages/profile/about_app_page.dart';
 import 'package:rtu_mirea_app/presentation/pages/profile/profile_announces_page.dart';
@@ -25,6 +24,7 @@ import 'package:rtu_mirea_app/presentation/pages/profile/profile_settings_page.d
 import 'package:rtu_mirea_app/schedule/view/schedule_page.dart';
 import 'package:rtu_mirea_app/search/view/search_page.dart';
 import 'package:rtu_mirea_app/services/view/view.dart';
+import 'package:rtu_mirea_app/stories/stories.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 
 GoRouter createRouter() => GoRouter(
@@ -66,7 +66,7 @@ GoRouter createRouter() => GoRouter(
                       fullscreenDialog: true,
                       opaque: false,
                       transitionsBuilder: (_, __, ___, child) => child,
-                      child: StoriesWrapper(
+                      child: StoriesPageView(
                         stories: state.extra as List<Story>,
                         storyIndex:
                             int.parse(state.pathParameters['index'] ?? '0'),

@@ -30,5 +30,5 @@ class SelectedGroupSchedule with EquatableMixin implements SelectedSchedule {
   Map<String, dynamic> toJson() => _$SelectedGroupScheduleToJson(this);
 
   @override
-  List<Object> get props => [group, schedule];
+  List<Object> get props => [type, group, schedule];
 }

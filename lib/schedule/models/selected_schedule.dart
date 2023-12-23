@@ -1,3 +1,4 @@
+import 'package:equatable/equatable.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:university_app_server_api/client.dart';
 
@@ -7,7 +8,7 @@ import 'selected_teacher_schedule.dart';
 
 @immutable
 @JsonSerializable()
-abstract class SelectedSchedule {
+abstract class SelectedSchedule extends Equatable {
   const SelectedSchedule({required this.schedule, required this.type});
 
   static SelectedSchedule fromJson(Map<String, dynamic> json) {
@@ -41,4 +42,7 @@ abstract class SelectedSchedule {
   final List<SchedulePart> schedule;
 
   Map<String, dynamic> toJson();
+
+  @override
+  List<Object?> get props => [type, schedule];
 }

@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -27,6 +26,17 @@ class LessonCard extends StatelessWidget {
         return AppTheme.colors.colorful03;
       case LessonType.individualWork:
         return AppTheme.colors.colorful07;
+      case LessonType.exam:
+        return AppTheme.colors.colorful06;
+      case LessonType.credit:
+        return AppTheme.colors.colorful07;
+      case LessonType.consultation:
+        return AppTheme.colors.colorful04;
+      case LessonType.courseWork:
+        return AppTheme.colors.colorful05;
+      case LessonType.courseProject:
+        return AppTheme.colors.colorful05;
+
       default:
         return AppTheme.colors.colorful01;
     }

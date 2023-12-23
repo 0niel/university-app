@@ -29,9 +29,55 @@ class ScheduleBloc extends HydratedBloc<ScheduleEvent, ScheduleState> {
     on<ScheduleRefreshRequested>(_onScheduleRefreshRequested,
         transformer: sequential());
     on<ScheduleSetDisplayMode>(_onScheduleSetDisplayMode);
+    on<SetSelectedSchedule>(_onSetSelectedSchedule);
+    on<DeleteSchedule>(_onRemoveSavedSchedule);
   }
 
   final ScheduleRepository _scheduleRepository;
+
+  Future<void> _onRemoveSavedSchedule(
+    DeleteSchedule event,
+    Emitter<ScheduleState> emit,
+  ) async {
+    if (event.target == ScheduleTarget.group) {
+      emit(
+        state.copyWith(
+          groupsSchedule: state.groupsSchedule
+              .where(
+                (element) => element.$1 != event.identifier,
+              )
+              .toList(),
+        ),
+      );
+    } else if (event.target == ScheduleTarget.teacher) {
+      emit(
+        state.copyWith(
+          teachersSchedule: state.teachersSchedule
+              .where(
+                (element) => element.$1 != event.identifier,
+              )
+              .toList(),
+        ),
+      );
+    } else if (event.target == ScheduleTarget.classroom) {
+      emit(
+        state.copyWith(
+          classroomsSchedule: state.classroomsSchedule
+              .where(
+                (element) => element.$1 != event.identifier,
+              )
+              .toList(),
+        ),
+      );
+    }
+  }
+
+  Future<void> _onSetSelectedSchedule(
+    SetSelectedSchedule event,
+    Emitter<ScheduleState> emit,
+  ) async {
+    emit(state.copyWith(selectedSchedule: event.selectedSchedule));
+  }
 
   FutureOr<void> _onScheduleSetDisplayMode(
     ScheduleSetDisplayMode event,
@@ -169,6 +215,7 @@ class ScheduleBloc extends HydratedBloc<ScheduleEvent, ScheduleState> {
     Emitter<ScheduleState> emit,
   ) async {
     emit(state.copyWith(status: ScheduleStatus.loading));
+
     try {
       final response = await _scheduleRepository.getSchedule(
         group: event.group.uid ?? event.group.name,
@@ -181,6 +228,18 @@ class ScheduleBloc extends HydratedBloc<ScheduleEvent, ScheduleState> {
             group: event.group,
             schedule: response.data,
           ),
+          groupsSchedule: state.groupsSchedule.contains(
+            (element) => element.$1 == (event.group.uid ?? event.group.name),
+          )
+              ? state.groupsSchedule
+              : [
+                  ...state.groupsSchedule,
+                  (
+                    event.group.uid ?? event.group.name,
+                    event.group,
+                    response.data,
+                  ),
+                ],
         ),
       );
     } catch (error, stackTrace) {
@@ -206,6 +265,19 @@ class ScheduleBloc extends HydratedBloc<ScheduleEvent, ScheduleState> {
             teacher: event.teacher,
             schedule: response.data,
           ),
+          teachersSchedule: state.teachersSchedule.contains(
+            (element) =>
+                element.$1 == (event.teacher.uid ?? event.teacher.name),
+          )
+              ? state.teachersSchedule
+              : [
+                  ...state.teachersSchedule,
+                  (
+                    event.teacher.uid ?? event.teacher.name,
+                    event.teacher,
+                    response.data,
+                  ),
+                ],
         ),
       );
     } catch (error, stackTrace) {
@@ -231,6 +303,19 @@ class ScheduleBloc extends HydratedBloc<ScheduleEvent, ScheduleState> {
             classroom: event.classroom,
             schedule: response.data,
           ),
+          classroomsSchedule: state.classroomsSchedule.contains(
+            (element) =>
+                element.$1 == (event.classroom.uid ?? event.classroom.name),
+          )
+              ? state.classroomsSchedule
+              : [
+                  ...state.classroomsSchedule,
+                  (
+                    event.classroom.uid ?? event.classroom.name,
+                    event.classroom,
+                    response.data,
+                  ),
+                ],
         ),
       );
     } catch (error, stackTrace) {

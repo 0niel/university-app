@@ -207,7 +207,6 @@ dependencies:
   sentry_dio: ^7.9.0
   sentry_logging: ^7.9.0
   logging: ^1.1.1
-
   sliver_tools: ^0.2.12
 
   # 1000+ beautiful icons to use in you dream project, with all the customization Flutter 
@@ -263,7 +262,6 @@ flutter:
   assets:
     - assets/images/
     - assets/icons/
-    - assets/map/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.
