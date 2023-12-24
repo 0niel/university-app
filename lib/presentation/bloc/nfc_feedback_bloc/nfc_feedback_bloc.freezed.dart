@@ -81,24 +81,25 @@ class _$NfcFeedbackEventCopyWithImpl<$Res, $Val extends NfcFeedbackEvent>
 }
 
 /// @nodoc
-abstract class _$$_StartedCopyWith<$Res> {
-  factory _$$_StartedCopyWith(
-          _$_Started value, $Res Function(_$_Started) then) =
-      __$$_StartedCopyWithImpl<$Res>;
+abstract class _$$StartedImplCopyWith<$Res> {
+  factory _$$StartedImplCopyWith(
+          _$StartedImpl value, $Res Function(_$StartedImpl) then) =
+      __$$StartedImplCopyWithImpl<$Res>;
 }
 
 /// @nodoc
-class __$$_StartedCopyWithImpl<$Res>
-    extends _$NfcFeedbackEventCopyWithImpl<$Res, _$_Started>
-    implements _$$_StartedCopyWith<$Res> {
-  __$$_StartedCopyWithImpl(_$_Started _value, $Res Function(_$_Started) _then)
+class __$$StartedImplCopyWithImpl<$Res>
+    extends _$NfcFeedbackEventCopyWithImpl<$Res, _$StartedImpl>
+    implements _$$StartedImplCopyWith<$Res> {
+  __$$StartedImplCopyWithImpl(
+      _$StartedImpl _value, $Res Function(_$StartedImpl) _then)
       : super(_value, _then);
 }
 
 /// @nodoc
 
-class _$_Started implements _Started {
-  const _$_Started();
+class _$StartedImpl implements _Started {
+  const _$StartedImpl();
 
   @override
   String toString() {
@@ -108,7 +109,7 @@ class _$_Started implements _Started {
   @override
   bool operator ==(dynamic other) {
     return identical(this, other) ||
-        (other.runtimeType == runtimeType && other is _$_Started);
+        (other.runtimeType == runtimeType && other is _$StartedImpl);
   }
 
   @override
@@ -184,25 +185,25 @@ class _$_Started implements _Started {
 }
 
 abstract class _Started implements NfcFeedbackEvent {
-  const factory _Started() = _$_Started;
+  const factory _Started() = _$StartedImpl;
 }
 
 /// @nodoc
-abstract class _$$_SendFeedbackCopyWith<$Res> {
-  factory _$$_SendFeedbackCopyWith(
-          _$_SendFeedback value, $Res Function(_$_SendFeedback) then) =
-      __$$_SendFeedbackCopyWithImpl<$Res>;
+abstract class _$$SendFeedbackImplCopyWith<$Res> {
+  factory _$$SendFeedbackImplCopyWith(
+          _$SendFeedbackImpl value, $Res Function(_$SendFeedbackImpl) then) =
+      __$$SendFeedbackImplCopyWithImpl<$Res>;
   @useResult
   $Res call(
       {String fullName, String group, String personalNumber, String studentId});
 }
 
 /// @nodoc
-class __$$_SendFeedbackCopyWithImpl<$Res>
-    extends _$NfcFeedbackEventCopyWithImpl<$Res, _$_SendFeedback>
-    implements _$$_SendFeedbackCopyWith<$Res> {
-  __$$_SendFeedbackCopyWithImpl(
-      _$_SendFeedback _value, $Res Function(_$_SendFeedback) _then)
+class __$$SendFeedbackImplCopyWithImpl<$Res>
+    extends _$NfcFeedbackEventCopyWithImpl<$Res, _$SendFeedbackImpl>
+    implements _$$SendFeedbackImplCopyWith<$Res> {
+  __$$SendFeedbackImplCopyWithImpl(
+      _$SendFeedbackImpl _value, $Res Function(_$SendFeedbackImpl) _then)
       : super(_value, _then);
 
   @pragma('vm:prefer-inline')
@@ -213,7 +214,7 @@ class __$$_SendFeedbackCopyWithImpl<$Res>
     Object? personalNumber = null,
     Object? studentId = null,
   }) {
-    return _then(_$_SendFeedback(
+    return _then(_$SendFeedbackImpl(
       fullName: null == fullName
           ? _value.fullName
           : fullName // ignore: cast_nullable_to_non_nullable
@@ -236,8 +237,8 @@ class __$$_SendFeedbackCopyWithImpl<$Res>
 
 /// @nodoc
 
-class _$_SendFeedback implements _SendFeedback {
-  const _$_SendFeedback(
+class _$SendFeedbackImpl implements _SendFeedback {
+  const _$SendFeedbackImpl(
       {required this.fullName,
       required this.group,
       required this.personalNumber,
@@ -261,7 +262,7 @@ class _$_SendFeedback implements _SendFeedback {
   bool operator ==(dynamic other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is _$_SendFeedback &&
+            other is _$SendFeedbackImpl &&
             (identical(other.fullName, fullName) ||
                 other.fullName == fullName) &&
             (identical(other.group, group) || other.group == group) &&
@@ -278,8 +279,8 @@ class _$_SendFeedback implements _SendFeedback {
   @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
-  _$$_SendFeedbackCopyWith<_$_SendFeedback> get copyWith =>
-      __$$_SendFeedbackCopyWithImpl<_$_SendFeedback>(this, _$identity);
+  _$$SendFeedbackImplCopyWith<_$SendFeedbackImpl> get copyWith =>
+      __$$SendFeedbackImplCopyWithImpl<_$SendFeedbackImpl>(this, _$identity);
 
   @override
   @optionalTypeArgs
@@ -355,14 +356,14 @@ abstract class _SendFeedback implements NfcFeedbackEvent {
       {required final String fullName,
       required final String group,
       required final String personalNumber,
-      required final String studentId}) = _$_SendFeedback;
+      required final String studentId}) = _$SendFeedbackImpl;
 
   String get fullName;
   String get group;
   String get personalNumber;
   String get studentId;
   @JsonKey(ignore: true)
-  _$$_SendFeedbackCopyWith<_$_SendFeedback> get copyWith =>
+  _$$SendFeedbackImplCopyWith<_$SendFeedbackImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }
 
@@ -439,24 +440,25 @@ class _$NfcFeedbackStateCopyWithImpl<$Res, $Val extends NfcFeedbackState>
 }
 
 /// @nodoc
-abstract class _$$_InitialCopyWith<$Res> {
-  factory _$$_InitialCopyWith(
-          _$_Initial value, $Res Function(_$_Initial) then) =
-      __$$_InitialCopyWithImpl<$Res>;
+abstract class _$$InitialImplCopyWith<$Res> {
+  factory _$$InitialImplCopyWith(
+          _$InitialImpl value, $Res Function(_$InitialImpl) then) =
+      __$$InitialImplCopyWithImpl<$Res>;
 }
 
 /// @nodoc
-class __$$_InitialCopyWithImpl<$Res>
-    extends _$NfcFeedbackStateCopyWithImpl<$Res, _$_Initial>
-    implements _$$_InitialCopyWith<$Res> {
-  __$$_InitialCopyWithImpl(_$_Initial _value, $Res Function(_$_Initial) _then)
+class __$$InitialImplCopyWithImpl<$Res>
+    extends _$NfcFeedbackStateCopyWithImpl<$Res, _$InitialImpl>
+    implements _$$InitialImplCopyWith<$Res> {
+  __$$InitialImplCopyWithImpl(
+      _$InitialImpl _value, $Res Function(_$InitialImpl) _then)
       : super(_value, _then);
 }
 
 /// @nodoc
 
-class _$_Initial implements _Initial {
-  const _$_Initial();
+class _$InitialImpl implements _Initial {
+  const _$InitialImpl();
 
   @override
   String toString() {
@@ -466,7 +468,7 @@ class _$_Initial implements _Initial {
   @override
   bool operator ==(dynamic other) {
     return identical(this, other) ||
-        (other.runtimeType == runtimeType && other is _$_Initial);
+        (other.runtimeType == runtimeType && other is _$InitialImpl);
   }
 
   @override
@@ -548,28 +550,29 @@ class _$_Initial implements _Initial {
 }
 
 abstract class _Initial implements NfcFeedbackState {
-  const factory _Initial() = _$_Initial;
+  const factory _Initial() = _$InitialImpl;
 }
 
 /// @nodoc
-abstract class _$$_LoadingCopyWith<$Res> {
-  factory _$$_LoadingCopyWith(
-          _$_Loading value, $Res Function(_$_Loading) then) =
-      __$$_LoadingCopyWithImpl<$Res>;
+abstract class _$$LoadingImplCopyWith<$Res> {
+  factory _$$LoadingImplCopyWith(
+          _$LoadingImpl value, $Res Function(_$LoadingImpl) then) =
+      __$$LoadingImplCopyWithImpl<$Res>;
 }
 
 /// @nodoc
-class __$$_LoadingCopyWithImpl<$Res>
-    extends _$NfcFeedbackStateCopyWithImpl<$Res, _$_Loading>
-    implements _$$_LoadingCopyWith<$Res> {
-  __$$_LoadingCopyWithImpl(_$_Loading _value, $Res Function(_$_Loading) _then)
+class __$$LoadingImplCopyWithImpl<$Res>
+    extends _$NfcFeedbackStateCopyWithImpl<$Res, _$LoadingImpl>
+    implements _$$LoadingImplCopyWith<$Res> {
+  __$$LoadingImplCopyWithImpl(
+      _$LoadingImpl _value, $Res Function(_$LoadingImpl) _then)
       : super(_value, _then);
 }
 
 /// @nodoc
 
-class _$_Loading implements _Loading {
-  const _$_Loading();
+class _$LoadingImpl implements _Loading {
+  const _$LoadingImpl();
 
   @override
   String toString() {
@@ -579,7 +582,7 @@ class _$_Loading implements _Loading {
   @override
   bool operator ==(dynamic other) {
     return identical(this, other) ||
-        (other.runtimeType == runtimeType && other is _$_Loading);
+        (other.runtimeType == runtimeType && other is _$LoadingImpl);
   }
 
   @override
@@ -661,28 +664,29 @@ class _$_Loading implements _Loading {
 }
 
 abstract class _Loading implements NfcFeedbackState {
-  const factory _Loading() = _$_Loading;
+  const factory _Loading() = _$LoadingImpl;
 }
 
 /// @nodoc
-abstract class _$$_SuccessCopyWith<$Res> {
-  factory _$$_SuccessCopyWith(
-          _$_Success value, $Res Function(_$_Success) then) =
-      __$$_SuccessCopyWithImpl<$Res>;
+abstract class _$$SuccessImplCopyWith<$Res> {
+  factory _$$SuccessImplCopyWith(
+          _$SuccessImpl value, $Res Function(_$SuccessImpl) then) =
+      __$$SuccessImplCopyWithImpl<$Res>;
 }
 
 /// @nodoc
-class __$$_SuccessCopyWithImpl<$Res>
-    extends _$NfcFeedbackStateCopyWithImpl<$Res, _$_Success>
-    implements _$$_SuccessCopyWith<$Res> {
-  __$$_SuccessCopyWithImpl(_$_Success _value, $Res Function(_$_Success) _then)
+class __$$SuccessImplCopyWithImpl<$Res>
+    extends _$NfcFeedbackStateCopyWithImpl<$Res, _$SuccessImpl>
+    implements _$$SuccessImplCopyWith<$Res> {
+  __$$SuccessImplCopyWithImpl(
+      _$SuccessImpl _value, $Res Function(_$SuccessImpl) _then)
       : super(_value, _then);
 }
 
 /// @nodoc
 
-class _$_Success implements _Success {
-  const _$_Success();
+class _$SuccessImpl implements _Success {
+  const _$SuccessImpl();
 
   @override
   String toString() {
@@ -692,7 +696,7 @@ class _$_Success implements _Success {
   @override
   bool operator ==(dynamic other) {
     return identical(this, other) ||
-        (other.runtimeType == runtimeType && other is _$_Success);
+        (other.runtimeType == runtimeType && other is _$SuccessImpl);
   }
 
   @override
@@ -774,23 +778,24 @@ class _$_Success implements _Success {
 }
 
 abstract class _Success implements NfcFeedbackState {
-  const factory _Success() = _$_Success;
+  const factory _Success() = _$SuccessImpl;
 }
 
 /// @nodoc
-abstract class _$$_FailureCopyWith<$Res> {
-  factory _$$_FailureCopyWith(
-          _$_Failure value, $Res Function(_$_Failure) then) =
-      __$$_FailureCopyWithImpl<$Res>;
+abstract class _$$FailureImplCopyWith<$Res> {
+  factory _$$FailureImplCopyWith(
+          _$FailureImpl value, $Res Function(_$FailureImpl) then) =
+      __$$FailureImplCopyWithImpl<$Res>;
   @useResult
   $Res call({String message});
 }
 
 /// @nodoc
-class __$$_FailureCopyWithImpl<$Res>
-    extends _$NfcFeedbackStateCopyWithImpl<$Res, _$_Failure>
-    implements _$$_FailureCopyWith<$Res> {
-  __$$_FailureCopyWithImpl(_$_Failure _value, $Res Function(_$_Failure) _then)
+class __$$FailureImplCopyWithImpl<$Res>
+    extends _$NfcFeedbackStateCopyWithImpl<$Res, _$FailureImpl>
+    implements _$$FailureImplCopyWith<$Res> {
+  __$$FailureImplCopyWithImpl(
+      _$FailureImpl _value, $Res Function(_$FailureImpl) _then)
       : super(_value, _then);
 
   @pragma('vm:prefer-inline')
@@ -798,7 +803,7 @@ class __$$_FailureCopyWithImpl<$Res>
   $Res call({
     Object? message = null,
   }) {
-    return _then(_$_Failure(
+    return _then(_$FailureImpl(
       null == message
           ? _value.message
           : message // ignore: cast_nullable_to_non_nullable
@@ -809,8 +814,8 @@ class __$$_FailureCopyWithImpl<$Res>
 
 /// @nodoc
 
-class _$_Failure implements _Failure {
-  const _$_Failure(this.message);
+class _$FailureImpl implements _Failure {
+  const _$FailureImpl(this.message);
 
   @override
   final String message;
@@ -824,7 +829,7 @@ class _$_Failure implements _Failure {
   bool operator ==(dynamic other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is _$_Failure &&
+            other is _$FailureImpl &&
             (identical(other.message, message) || other.message == message));
   }
 
@@ -834,8 +839,8 @@ class _$_Failure implements _Failure {
   @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
-  _$$_FailureCopyWith<_$_Failure> get copyWith =>
-      __$$_FailureCopyWithImpl<_$_Failure>(this, _$identity);
+  _$$FailureImplCopyWith<_$FailureImpl> get copyWith =>
+      __$$FailureImplCopyWithImpl<_$FailureImpl>(this, _$identity);
 
   @override
   @optionalTypeArgs
@@ -913,10 +918,10 @@ class _$_Failure implements _Failure {
 }
 
 abstract class _Failure implements NfcFeedbackState {
-  const factory _Failure(final String message) = _$_Failure;
+  const factory _Failure(final String message) = _$FailureImpl;
 
   String get message;
   @JsonKey(ignore: true)
-  _$$_FailureCopyWith<_$_Failure> get copyWith =>
+  _$$FailureImplCopyWith<_$FailureImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

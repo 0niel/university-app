@@ -7,11 +7,15 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:go_router/go_router.dart';
+import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:rtu_mirea_app/common/oauth.dart';
 
 import 'package:rtu_mirea_app/common/widget_data_init.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:rtu_mirea_app/data/datasources/strapi_remote.dart';
+import 'package:rtu_mirea_app/data/repositories/stories_repository_impl.dart';
 import 'package:rtu_mirea_app/presentation/bloc/about_app_bloc/about_app_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/announces_bloc/announces_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/app_cubit/app_cubit.dart';
@@ -24,16 +28,16 @@ import 'package:rtu_mirea_app/presentation/bloc/nfc_feedback_bloc/nfc_feedback_b
 import 'package:rtu_mirea_app/presentation/bloc/nfc_pass_bloc/nfc_pass_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/notification_preferences/notification_preferences_bloc.dart';
 
-import 'package:rtu_mirea_app/presentation/bloc/schedule_bloc/schedule_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/scores_bloc/scores_bloc.dart';
-import 'package:rtu_mirea_app/presentation/bloc/stories_bloc/stories_bloc.dart';
-import 'package:rtu_mirea_app/presentation/bloc/update_info_bloc/update_info_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/user_bloc/user_bloc.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:intl/intl_standalone.dart';
+import 'package:rtu_mirea_app/schedule/bloc/schedule_bloc.dart';
 import 'package:rtu_mirea_app/service_locator.dart' as dependency_injection;
+import 'package:rtu_mirea_app/stories/bloc/stories_bloc.dart';
 import 'package:sentry_dio/sentry_dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:university_app_server_api/client.dart';
 import 'package:url_strategy/url_strategy.dart';
 import 'common/constants.dart';
 import 'presentation/app_notifier.dart';
@@ -43,6 +47,8 @@ import 'firebase_options.dart';
 import 'package:provider/provider.dart';
 import 'package:sentry_logging/sentry_logging.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
+import 'package:schedule_repository/schedule_repository.dart'
+    as schedule_repository;
 
 class GlobalBlocObserver extends BlocObserver {
   @override
@@ -98,6 +104,9 @@ Future<void> main() async {
 
   Bloc.observer = GlobalBlocObserver();
 
+  HydratedBloc.storage = await HydratedStorage.build(
+    storageDirectory: await getApplicationSupportDirectory(),
+  );
   await SentryFlutter.init(
     (options) {
       options.dsn = sentryDsn;
@@ -148,65 +157,82 @@ class App extends StatelessWidget {
       DeviceOrientation.portraitUp,
     ]);
 
-    return MultiBlocProvider(
+    final apiClient = ScheduleApiClient();
+
+    return MultiRepositoryProvider(
       providers: [
-        BlocProvider<ScheduleBloc>(
-            create: (context) =>
-                getIt<ScheduleBloc>()..add(ScheduleOpenEvent())),
-        BlocProvider<MapCubit>(create: (context) => getIt<MapCubit>()),
-        BlocProvider<NewsBloc>(create: (context) => getIt<NewsBloc>()),
-        BlocProvider<AboutAppBloc>(
-            create: (context) =>
-                getIt<AboutAppBloc>()..add(AboutAppGetMembers())),
-        BlocProvider<UserBloc>(create: (context) => getIt<UserBloc>()),
-        BlocProvider<AnnouncesBloc>(
-            create: (context) => getIt<AnnouncesBloc>()),
-        BlocProvider<EmployeeBloc>(create: (context) => getIt<EmployeeBloc>()),
-        BlocProvider<ScoresBloc>(create: (context) => getIt<ScoresBloc>()),
-        BlocProvider<AttendanceBloc>(
-            create: (context) => getIt<AttendanceBloc>()),
-        BlocProvider<StoriesBloc>(create: (context) => getIt<StoriesBloc>()),
-        BlocProvider<AppCubit>(create: (context) => getIt<AppCubit>()),
-        BlocProvider<UpdateInfoBloc>(
-          create: (_) => getIt<UpdateInfoBloc>(),
-          lazy: false, // We need to init it as soon as possible
-        ),
-        if (Platform.isAndroid)
-          BlocProvider<NfcPassBloc>(
-            create: (_) => getIt<NfcPassBloc>()
-              ..add(
-                const NfcPassEvent.fetchNfcCode(),
-              ),
-            lazy: false,
-          ),
-        BlocProvider<NfcFeedbackBloc>(
-          create: (_) => getIt<NfcFeedbackBloc>(),
-        ),
-        BlocProvider<NotificationPreferencesBloc>(
-          create: (_) => getIt<NotificationPreferencesBloc>(),
+        RepositoryProvider.value(
+            value:
+                schedule_repository.ScheduleRepository(apiClient: apiClient)),
+        RepositoryProvider.value(
+          value: StoriesRepositoryImpl(
+              remoteDataSource: getIt<StrapiRemoteData>()),
         ),
       ],
-      child: Consumer<AppNotifier>(
-        builder: (BuildContext context, AppNotifier value, Widget? child) {
-          return MaterialApp.router(
-            localizationsDelegates: const [
-              GlobalMaterialLocalizations.delegate,
-              GlobalWidgetsLocalizations.delegate,
-              GlobalCupertinoLocalizations.delegate,
-            ],
-            supportedLocales: const [
-              Locale('en'),
-              Locale('ru'),
-            ],
-            locale: const Locale('ru'),
-            debugShowCheckedModeBanner: false,
-            title: 'Приложение РТУ МИРЭА',
-            routerConfig: router,
-            themeMode: AppTheme.themeMode,
-            theme: AppTheme.theme,
-            darkTheme: AppTheme.darkTheme,
-          );
-        },
+      child: MultiBlocProvider(
+        providers: [
+          BlocProvider<ScheduleBloc>(
+            create: (context) => ScheduleBloc(
+              scheduleRepository:
+                  context.read<schedule_repository.ScheduleRepository>(),
+            )..add(const ScheduleResumed()),
+          ),
+          BlocProvider<StoriesBloc>(
+            create: (context) => StoriesBloc(
+              storiesRepository: context.read<StoriesRepositoryImpl>(),
+            )..add(LoadStories()),
+          ),
+          BlocProvider<MapCubit>(create: (context) => getIt<MapCubit>()),
+          BlocProvider<NewsBloc>(create: (context) => getIt<NewsBloc>()),
+          BlocProvider<AboutAppBloc>(
+              create: (context) =>
+                  getIt<AboutAppBloc>()..add(AboutAppGetMembers())),
+          BlocProvider<UserBloc>(create: (context) => getIt<UserBloc>()),
+          BlocProvider<AnnouncesBloc>(
+              create: (context) => getIt<AnnouncesBloc>()),
+          BlocProvider<EmployeeBloc>(
+              create: (context) => getIt<EmployeeBloc>()),
+          BlocProvider<ScoresBloc>(create: (context) => getIt<ScoresBloc>()),
+          BlocProvider<AttendanceBloc>(
+              create: (context) => getIt<AttendanceBloc>()),
+          BlocProvider<AppCubit>(create: (context) => getIt<AppCubit>()),
+          if (Platform.isAndroid)
+            BlocProvider<NfcPassBloc>(
+              create: (_) => getIt<NfcPassBloc>()
+                ..add(
+                  const NfcPassEvent.fetchNfcCode(),
+                ),
+              lazy: false,
+            ),
+          BlocProvider<NfcFeedbackBloc>(
+            create: (_) => getIt<NfcFeedbackBloc>(),
+          ),
+          BlocProvider<NotificationPreferencesBloc>(
+            create: (_) => getIt<NotificationPreferencesBloc>(),
+          ),
+        ],
+        child: Consumer<AppNotifier>(
+          builder: (BuildContext context, AppNotifier value, Widget? child) {
+            return MaterialApp.router(
+              localizationsDelegates: const [
+                GlobalMaterialLocalizations.delegate,
+                GlobalWidgetsLocalizations.delegate,
+                GlobalCupertinoLocalizations.delegate,
+              ],
+              supportedLocales: const [
+                Locale('en'),
+                Locale('ru'),
+              ],
+              locale: const Locale('ru'),
+              debugShowCheckedModeBanner: false,
+              title: 'Приложение РТУ МИРЭА',
+              routerConfig: router,
+              themeMode: AppTheme.themeMode,
+              theme: AppTheme.theme,
+              darkTheme: AppTheme.darkTheme,
+            );
+          },
+        ),
       ),
     );
   }

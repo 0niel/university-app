@@ -1,4 +1,8 @@
-export 'package:schedule_api_client/api_client.dart'
-    show ScheduleResponse, LessonResponse;
+export 'package:university_app_server_api/client.dart'
+    show
+        ScheduleResponse,
+        SearchClassroomsResponse,
+        SearchGroupsResponse,
+        SearchTeachersResponse;
 
 export 'src/schedule_repository.dart';

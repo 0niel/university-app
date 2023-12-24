@@ -70,24 +70,26 @@ class NewsPage extends PageWithThemeConsumer {
                       child: Wrap(
                         spacing: 8,
                         runSpacing: 8,
-                        children:
-                            List.generate(loadedState.tags.length, (index) {
-                          if (loadedState.selectedTag ==
-                              loadedState.tags[index]) {
+                        children: List.generate(
+                          loadedState.tags.length,
+                          (index) {
+                            if (loadedState.selectedTag ==
+                                loadedState.tags[index]) {
+                              return TagBadge(
+                                tag: loadedState.tags[index],
+                                color: AppTheme.colors.colorful04,
+                                onPressed: () => _filterNewsByTag(
+                                    context.read<NewsBloc>(), "все"),
+                              );
+                            }
                             return TagBadge(
                               tag: loadedState.tags[index],
-                              color: AppTheme.colors.colorful04,
                               onPressed: () => _filterNewsByTag(
-                                  context.read<NewsBloc>(), "все"),
+                                  context.read<NewsBloc>(),
+                                  loadedState.tags[index]),
                             );
-                          }
-                          return TagBadge(
-                            tag: loadedState.tags[index],
-                            onPressed: () => _filterNewsByTag(
-                                context.read<NewsBloc>(),
-                                loadedState.tags[index]),
-                          );
-                        }),
+                          },
+                        ),
                       ),
                     ),
                   ),
@@ -102,7 +104,7 @@ class NewsPage extends PageWithThemeConsumer {
 
   Widget _buildTabButtons(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 16).copyWith(bottom: 16),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [

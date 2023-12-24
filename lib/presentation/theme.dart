@@ -28,6 +28,7 @@ class AppTheme {
         ),
     scaffoldBackgroundColor: darkThemeColors.background01,
     appBarTheme: AppBarTheme(
+      surfaceTintColor: Colors.transparent,
       titleSpacing: 24,
       backgroundColor: darkThemeColors.background01,
       shadowColor: Colors.transparent,
@@ -35,15 +36,35 @@ class AppTheme {
           AppTextStyle.title.copyWith(color: darkThemeColors.active),
       iconTheme: IconThemeData(color: blackThemeColors.active),
     ),
+    cardTheme: CardTheme(
+      color: darkThemeColors.background01,
+      elevation: 4,
+      shadowColor: darkThemeColors.background02.withOpacity(0.1),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
+    ),
     bottomNavigationBarTheme:
         ThemeData.dark().bottomNavigationBarTheme.copyWith(
               type: BottomNavigationBarType.shifting,
-              backgroundColor: darkThemeColors.background03,
+              backgroundColor: darkThemeColors.background01,
               selectedItemColor: darkThemeColors.active,
               unselectedItemColor: darkThemeColors.deactive,
               selectedLabelStyle: AppTextStyle.captionL,
               unselectedLabelStyle: AppTextStyle.captionS,
             ),
+    listTileTheme: ListTileThemeData(
+      tileColor: darkThemeColors.background01,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
+    ),
+    dividerTheme: DividerThemeData(
+      color: darkThemeColors.background02,
+      thickness: 0.5,
+      space: 0,
+    ),
     colorScheme: ColorScheme(
       background: darkThemeColors.background01,
       brightness: Brightness.dark,
@@ -56,6 +77,7 @@ class AppTheme {
       onPrimary: lightThemeColors.white,
       onSecondary: darkThemeColors.active,
       error: darkThemeColors.colorful07,
+      surfaceTint: Colors.transparent,
     ),
   );
 
@@ -66,6 +88,7 @@ class AppTheme {
         ),
     scaffoldBackgroundColor: lightThemeColors.background01,
     appBarTheme: AppBarTheme(
+      surfaceTintColor: Colors.transparent,
       titleSpacing: 24,
       backgroundColor: lightThemeColors.background01,
       shadowColor: Colors.transparent,
@@ -82,6 +105,26 @@ class AppTheme {
               selectedLabelStyle: AppTextStyle.captionL,
               unselectedLabelStyle: AppTextStyle.captionS,
             ),
+    listTileTheme: ListTileThemeData(
+      tileColor: lightThemeColors.background01,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
+    ),
+    dividerTheme: DividerThemeData(
+      color: lightThemeColors.background02,
+      thickness: 0.5,
+      space: 0,
+    ),
+    cardTheme: CardTheme(
+      color: lightThemeColors.background01,
+      elevation: 4,
+      shadowColor: lightThemeColors.background02.withOpacity(0.1),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
+    ),
     colorScheme: ColorScheme(
       background: lightThemeColors.background01,
       brightness: Brightness.light,
@@ -94,6 +137,7 @@ class AppTheme {
       onPrimary: lightThemeColors.white,
       onSecondary: lightThemeColors.active,
       error: lightThemeColors.colorful07,
+      surfaceTint: Colors.transparent,
     ),
   );
 

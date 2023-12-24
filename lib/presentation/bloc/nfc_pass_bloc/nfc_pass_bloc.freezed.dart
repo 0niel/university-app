@@ -96,24 +96,25 @@ class _$NfcPassEventCopyWithImpl<$Res, $Val extends NfcPassEvent>
 }
 
 /// @nodoc
-abstract class _$$_StartedCopyWith<$Res> {
-  factory _$$_StartedCopyWith(
-          _$_Started value, $Res Function(_$_Started) then) =
-      __$$_StartedCopyWithImpl<$Res>;
+abstract class _$$StartedImplCopyWith<$Res> {
+  factory _$$StartedImplCopyWith(
+          _$StartedImpl value, $Res Function(_$StartedImpl) then) =
+      __$$StartedImplCopyWithImpl<$Res>;
 }
 
 /// @nodoc
-class __$$_StartedCopyWithImpl<$Res>
-    extends _$NfcPassEventCopyWithImpl<$Res, _$_Started>
-    implements _$$_StartedCopyWith<$Res> {
-  __$$_StartedCopyWithImpl(_$_Started _value, $Res Function(_$_Started) _then)
+class __$$StartedImplCopyWithImpl<$Res>
+    extends _$NfcPassEventCopyWithImpl<$Res, _$StartedImpl>
+    implements _$$StartedImplCopyWith<$Res> {
+  __$$StartedImplCopyWithImpl(
+      _$StartedImpl _value, $Res Function(_$StartedImpl) _then)
       : super(_value, _then);
 }
 
 /// @nodoc
 
-class _$_Started with DiagnosticableTreeMixin implements _Started {
-  const _$_Started();
+class _$StartedImpl with DiagnosticableTreeMixin implements _Started {
+  const _$StartedImpl();
 
   @override
   String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
@@ -129,7 +130,7 @@ class _$_Started with DiagnosticableTreeMixin implements _Started {
   @override
   bool operator ==(dynamic other) {
     return identical(this, other) ||
-        (other.runtimeType == runtimeType && other is _$_Started);
+        (other.runtimeType == runtimeType && other is _$StartedImpl);
   }
 
   @override
@@ -220,25 +221,25 @@ class _$_Started with DiagnosticableTreeMixin implements _Started {
 }
 
 abstract class _Started implements NfcPassEvent {
-  const factory _Started() = _$_Started;
+  const factory _Started() = _$StartedImpl;
 }
 
 /// @nodoc
-abstract class _$$_ConnectNfcPassCopyWith<$Res> {
-  factory _$$_ConnectNfcPassCopyWith(
-          _$_ConnectNfcPass value, $Res Function(_$_ConnectNfcPass) then) =
-      __$$_ConnectNfcPassCopyWithImpl<$Res>;
+abstract class _$$ConnectNfcPassImplCopyWith<$Res> {
+  factory _$$ConnectNfcPassImplCopyWith(_$ConnectNfcPassImpl value,
+          $Res Function(_$ConnectNfcPassImpl) then) =
+      __$$ConnectNfcPassImplCopyWithImpl<$Res>;
   @useResult
   $Res call(
       {String code, String studentId, String deviceId, String deviceName});
 }
 
 /// @nodoc
-class __$$_ConnectNfcPassCopyWithImpl<$Res>
-    extends _$NfcPassEventCopyWithImpl<$Res, _$_ConnectNfcPass>
-    implements _$$_ConnectNfcPassCopyWith<$Res> {
-  __$$_ConnectNfcPassCopyWithImpl(
-      _$_ConnectNfcPass _value, $Res Function(_$_ConnectNfcPass) _then)
+class __$$ConnectNfcPassImplCopyWithImpl<$Res>
+    extends _$NfcPassEventCopyWithImpl<$Res, _$ConnectNfcPassImpl>
+    implements _$$ConnectNfcPassImplCopyWith<$Res> {
+  __$$ConnectNfcPassImplCopyWithImpl(
+      _$ConnectNfcPassImpl _value, $Res Function(_$ConnectNfcPassImpl) _then)
       : super(_value, _then);
 
   @pragma('vm:prefer-inline')
@@ -249,7 +250,7 @@ class __$$_ConnectNfcPassCopyWithImpl<$Res>
     Object? deviceId = null,
     Object? deviceName = null,
   }) {
-    return _then(_$_ConnectNfcPass(
+    return _then(_$ConnectNfcPassImpl(
       null == code
           ? _value.code
           : code // ignore: cast_nullable_to_non_nullable
@@ -272,10 +273,10 @@ class __$$_ConnectNfcPassCopyWithImpl<$Res>
 
 /// @nodoc
 
-class _$_ConnectNfcPass
+class _$ConnectNfcPassImpl
     with DiagnosticableTreeMixin
     implements _ConnectNfcPass {
-  const _$_ConnectNfcPass(
+  const _$ConnectNfcPassImpl(
       this.code, this.studentId, this.deviceId, this.deviceName);
 
   @override
@@ -307,7 +308,7 @@ class _$_ConnectNfcPass
   bool operator ==(dynamic other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is _$_ConnectNfcPass &&
+            other is _$ConnectNfcPassImpl &&
             (identical(other.code, code) || other.code == code) &&
             (identical(other.studentId, studentId) ||
                 other.studentId == studentId) &&
@@ -324,8 +325,9 @@ class _$_ConnectNfcPass
   @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
-  _$$_ConnectNfcPassCopyWith<_$_ConnectNfcPass> get copyWith =>
-      __$$_ConnectNfcPassCopyWithImpl<_$_ConnectNfcPass>(this, _$identity);
+  _$$ConnectNfcPassImplCopyWith<_$ConnectNfcPassImpl> get copyWith =>
+      __$$ConnectNfcPassImplCopyWithImpl<_$ConnectNfcPassImpl>(
+          this, _$identity);
 
   @override
   @optionalTypeArgs
@@ -413,32 +415,32 @@ class _$_ConnectNfcPass
 
 abstract class _ConnectNfcPass implements NfcPassEvent {
   const factory _ConnectNfcPass(final String code, final String studentId,
-      final String deviceId, final String deviceName) = _$_ConnectNfcPass;
+      final String deviceId, final String deviceName) = _$ConnectNfcPassImpl;
 
   String get code;
   String get studentId;
   String get deviceId;
   String get deviceName;
   @JsonKey(ignore: true)
-  _$$_ConnectNfcPassCopyWith<_$_ConnectNfcPass> get copyWith =>
+  _$$ConnectNfcPassImplCopyWith<_$ConnectNfcPassImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }
 
 /// @nodoc
-abstract class _$$_GetNfcPassesCopyWith<$Res> {
-  factory _$$_GetNfcPassesCopyWith(
-          _$_GetNfcPasses value, $Res Function(_$_GetNfcPasses) then) =
-      __$$_GetNfcPassesCopyWithImpl<$Res>;
+abstract class _$$GetNfcPassesImplCopyWith<$Res> {
+  factory _$$GetNfcPassesImplCopyWith(
+          _$GetNfcPassesImpl value, $Res Function(_$GetNfcPassesImpl) then) =
+      __$$GetNfcPassesImplCopyWithImpl<$Res>;
   @useResult
   $Res call({String code, String studentId, String deviceId});
 }
 
 /// @nodoc
-class __$$_GetNfcPassesCopyWithImpl<$Res>
-    extends _$NfcPassEventCopyWithImpl<$Res, _$_GetNfcPasses>
-    implements _$$_GetNfcPassesCopyWith<$Res> {
-  __$$_GetNfcPassesCopyWithImpl(
-      _$_GetNfcPasses _value, $Res Function(_$_GetNfcPasses) _then)
+class __$$GetNfcPassesImplCopyWithImpl<$Res>
+    extends _$NfcPassEventCopyWithImpl<$Res, _$GetNfcPassesImpl>
+    implements _$$GetNfcPassesImplCopyWith<$Res> {
+  __$$GetNfcPassesImplCopyWithImpl(
+      _$GetNfcPassesImpl _value, $Res Function(_$GetNfcPassesImpl) _then)
       : super(_value, _then);
 
   @pragma('vm:prefer-inline')
@@ -448,7 +450,7 @@ class __$$_GetNfcPassesCopyWithImpl<$Res>
     Object? studentId = null,
     Object? deviceId = null,
   }) {
-    return _then(_$_GetNfcPasses(
+    return _then(_$GetNfcPassesImpl(
       null == code
           ? _value.code
           : code // ignore: cast_nullable_to_non_nullable
@@ -467,8 +469,8 @@ class __$$_GetNfcPassesCopyWithImpl<$Res>
 
 /// @nodoc
 
-class _$_GetNfcPasses with DiagnosticableTreeMixin implements _GetNfcPasses {
-  const _$_GetNfcPasses(this.code, this.studentId, this.deviceId);
+class _$GetNfcPassesImpl with DiagnosticableTreeMixin implements _GetNfcPasses {
+  const _$GetNfcPassesImpl(this.code, this.studentId, this.deviceId);
 
   @override
   final String code;
@@ -496,7 +498,7 @@ class _$_GetNfcPasses with DiagnosticableTreeMixin implements _GetNfcPasses {
   bool operator ==(dynamic other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is _$_GetNfcPasses &&
+            other is _$GetNfcPassesImpl &&
             (identical(other.code, code) || other.code == code) &&
             (identical(other.studentId, studentId) ||
                 other.studentId == studentId) &&
@@ -510,8 +512,8 @@ class _$_GetNfcPasses with DiagnosticableTreeMixin implements _GetNfcPasses {
   @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
-  _$$_GetNfcPassesCopyWith<_$_GetNfcPasses> get copyWith =>
-      __$$_GetNfcPassesCopyWithImpl<_$_GetNfcPasses>(this, _$identity);
+  _$$GetNfcPassesImplCopyWith<_$GetNfcPassesImpl> get copyWith =>
+      __$$GetNfcPassesImplCopyWithImpl<_$GetNfcPassesImpl>(this, _$identity);
 
   @override
   @optionalTypeArgs
@@ -600,36 +602,36 @@ class _$_GetNfcPasses with DiagnosticableTreeMixin implements _GetNfcPasses {
 abstract class _GetNfcPasses implements NfcPassEvent {
   const factory _GetNfcPasses(
           final String code, final String studentId, final String deviceId) =
-      _$_GetNfcPasses;
+      _$GetNfcPassesImpl;
 
   String get code;
   String get studentId;
   String get deviceId;
   @JsonKey(ignore: true)
-  _$$_GetNfcPassesCopyWith<_$_GetNfcPasses> get copyWith =>
+  _$$GetNfcPassesImplCopyWith<_$GetNfcPassesImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }
 
 /// @nodoc
-abstract class _$$_FetchNfcCodeCopyWith<$Res> {
-  factory _$$_FetchNfcCodeCopyWith(
-          _$_FetchNfcCode value, $Res Function(_$_FetchNfcCode) then) =
-      __$$_FetchNfcCodeCopyWithImpl<$Res>;
+abstract class _$$FetchNfcCodeImplCopyWith<$Res> {
+  factory _$$FetchNfcCodeImplCopyWith(
+          _$FetchNfcCodeImpl value, $Res Function(_$FetchNfcCodeImpl) then) =
+      __$$FetchNfcCodeImplCopyWithImpl<$Res>;
 }
 
 /// @nodoc
-class __$$_FetchNfcCodeCopyWithImpl<$Res>
-    extends _$NfcPassEventCopyWithImpl<$Res, _$_FetchNfcCode>
-    implements _$$_FetchNfcCodeCopyWith<$Res> {
-  __$$_FetchNfcCodeCopyWithImpl(
-      _$_FetchNfcCode _value, $Res Function(_$_FetchNfcCode) _then)
+class __$$FetchNfcCodeImplCopyWithImpl<$Res>
+    extends _$NfcPassEventCopyWithImpl<$Res, _$FetchNfcCodeImpl>
+    implements _$$FetchNfcCodeImplCopyWith<$Res> {
+  __$$FetchNfcCodeImplCopyWithImpl(
+      _$FetchNfcCodeImpl _value, $Res Function(_$FetchNfcCodeImpl) _then)
       : super(_value, _then);
 }
 
 /// @nodoc
 
-class _$_FetchNfcCode with DiagnosticableTreeMixin implements _FetchNfcCode {
-  const _$_FetchNfcCode();
+class _$FetchNfcCodeImpl with DiagnosticableTreeMixin implements _FetchNfcCode {
+  const _$FetchNfcCodeImpl();
 
   @override
   String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
@@ -645,7 +647,7 @@ class _$_FetchNfcCode with DiagnosticableTreeMixin implements _FetchNfcCode {
   @override
   bool operator ==(dynamic other) {
     return identical(this, other) ||
-        (other.runtimeType == runtimeType && other is _$_FetchNfcCode);
+        (other.runtimeType == runtimeType && other is _$FetchNfcCodeImpl);
   }
 
   @override
@@ -736,7 +738,7 @@ class _$_FetchNfcCode with DiagnosticableTreeMixin implements _FetchNfcCode {
 }
 
 abstract class _FetchNfcCode implements NfcPassEvent {
-  const factory _FetchNfcCode() = _$_FetchNfcCode;
+  const factory _FetchNfcCode() = _$FetchNfcCodeImpl;
 }
 
 /// @nodoc
@@ -830,24 +832,25 @@ class _$NfcPassStateCopyWithImpl<$Res, $Val extends NfcPassState>
 }
 
 /// @nodoc
-abstract class _$$_InitialCopyWith<$Res> {
-  factory _$$_InitialCopyWith(
-          _$_Initial value, $Res Function(_$_Initial) then) =
-      __$$_InitialCopyWithImpl<$Res>;
+abstract class _$$InitialImplCopyWith<$Res> {
+  factory _$$InitialImplCopyWith(
+          _$InitialImpl value, $Res Function(_$InitialImpl) then) =
+      __$$InitialImplCopyWithImpl<$Res>;
 }
 
 /// @nodoc
-class __$$_InitialCopyWithImpl<$Res>
-    extends _$NfcPassStateCopyWithImpl<$Res, _$_Initial>
-    implements _$$_InitialCopyWith<$Res> {
-  __$$_InitialCopyWithImpl(_$_Initial _value, $Res Function(_$_Initial) _then)
+class __$$InitialImplCopyWithImpl<$Res>
+    extends _$NfcPassStateCopyWithImpl<$Res, _$InitialImpl>
+    implements _$$InitialImplCopyWith<$Res> {
+  __$$InitialImplCopyWithImpl(
+      _$InitialImpl _value, $Res Function(_$InitialImpl) _then)
       : super(_value, _then);
 }
 
 /// @nodoc
 
-class _$_Initial with DiagnosticableTreeMixin implements _Initial {
-  const _$_Initial();
+class _$InitialImpl with DiagnosticableTreeMixin implements _Initial {
+  const _$InitialImpl();
 
   @override
   String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
@@ -863,7 +866,7 @@ class _$_Initial with DiagnosticableTreeMixin implements _Initial {
   @override
   bool operator ==(dynamic other) {
     return identical(this, other) ||
-        (other.runtimeType == runtimeType && other is _$_Initial);
+        (other.runtimeType == runtimeType && other is _$InitialImpl);
   }
 
   @override
@@ -963,28 +966,29 @@ class _$_Initial with DiagnosticableTreeMixin implements _Initial {
 }
 
 abstract class _Initial implements NfcPassState {
-  const factory _Initial() = _$_Initial;
+  const factory _Initial() = _$InitialImpl;
 }
 
 /// @nodoc
-abstract class _$$_LoadingCopyWith<$Res> {
-  factory _$$_LoadingCopyWith(
-          _$_Loading value, $Res Function(_$_Loading) then) =
-      __$$_LoadingCopyWithImpl<$Res>;
+abstract class _$$LoadingImplCopyWith<$Res> {
+  factory _$$LoadingImplCopyWith(
+          _$LoadingImpl value, $Res Function(_$LoadingImpl) then) =
+      __$$LoadingImplCopyWithImpl<$Res>;
 }
 
 /// @nodoc
-class __$$_LoadingCopyWithImpl<$Res>
-    extends _$NfcPassStateCopyWithImpl<$Res, _$_Loading>
-    implements _$$_LoadingCopyWith<$Res> {
-  __$$_LoadingCopyWithImpl(_$_Loading _value, $Res Function(_$_Loading) _then)
+class __$$LoadingImplCopyWithImpl<$Res>
+    extends _$NfcPassStateCopyWithImpl<$Res, _$LoadingImpl>
+    implements _$$LoadingImplCopyWith<$Res> {
+  __$$LoadingImplCopyWithImpl(
+      _$LoadingImpl _value, $Res Function(_$LoadingImpl) _then)
       : super(_value, _then);
 }
 
 /// @nodoc
 
-class _$_Loading with DiagnosticableTreeMixin implements _Loading {
-  const _$_Loading();
+class _$LoadingImpl with DiagnosticableTreeMixin implements _Loading {
+  const _$LoadingImpl();
 
   @override
   String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
@@ -1000,7 +1004,7 @@ class _$_Loading with DiagnosticableTreeMixin implements _Loading {
   @override
   bool operator ==(dynamic other) {
     return identical(this, other) ||
-        (other.runtimeType == runtimeType && other is _$_Loading);
+        (other.runtimeType == runtimeType && other is _$LoadingImpl);
   }
 
   @override
@@ -1100,22 +1104,24 @@ class _$_Loading with DiagnosticableTreeMixin implements _Loading {
 }
 
 abstract class _Loading implements NfcPassState {
-  const factory _Loading() = _$_Loading;
+  const factory _Loading() = _$LoadingImpl;
 }
 
 /// @nodoc
-abstract class _$$_LoadedCopyWith<$Res> {
-  factory _$$_LoadedCopyWith(_$_Loaded value, $Res Function(_$_Loaded) then) =
-      __$$_LoadedCopyWithImpl<$Res>;
+abstract class _$$LoadedImplCopyWith<$Res> {
+  factory _$$LoadedImplCopyWith(
+          _$LoadedImpl value, $Res Function(_$LoadedImpl) then) =
+      __$$LoadedImplCopyWithImpl<$Res>;
   @useResult
   $Res call({List<NfcPass> nfcPasses});
 }
 
 /// @nodoc
-class __$$_LoadedCopyWithImpl<$Res>
-    extends _$NfcPassStateCopyWithImpl<$Res, _$_Loaded>
-    implements _$$_LoadedCopyWith<$Res> {
-  __$$_LoadedCopyWithImpl(_$_Loaded _value, $Res Function(_$_Loaded) _then)
+class __$$LoadedImplCopyWithImpl<$Res>
+    extends _$NfcPassStateCopyWithImpl<$Res, _$LoadedImpl>
+    implements _$$LoadedImplCopyWith<$Res> {
+  __$$LoadedImplCopyWithImpl(
+      _$LoadedImpl _value, $Res Function(_$LoadedImpl) _then)
       : super(_value, _then);
 
   @pragma('vm:prefer-inline')
@@ -1123,7 +1129,7 @@ class __$$_LoadedCopyWithImpl<$Res>
   $Res call({
     Object? nfcPasses = null,
   }) {
-    return _then(_$_Loaded(
+    return _then(_$LoadedImpl(
       null == nfcPasses
           ? _value._nfcPasses
           : nfcPasses // ignore: cast_nullable_to_non_nullable
@@ -1134,8 +1140,8 @@ class __$$_LoadedCopyWithImpl<$Res>
 
 /// @nodoc
 
-class _$_Loaded with DiagnosticableTreeMixin implements _Loaded {
-  const _$_Loaded(final List<NfcPass> nfcPasses) : _nfcPasses = nfcPasses;
+class _$LoadedImpl with DiagnosticableTreeMixin implements _Loaded {
+  const _$LoadedImpl(final List<NfcPass> nfcPasses) : _nfcPasses = nfcPasses;
 
   final List<NfcPass> _nfcPasses;
   @override
@@ -1162,7 +1168,7 @@ class _$_Loaded with DiagnosticableTreeMixin implements _Loaded {
   bool operator ==(dynamic other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is _$_Loaded &&
+            other is _$LoadedImpl &&
             const DeepCollectionEquality()
                 .equals(other._nfcPasses, _nfcPasses));
   }
@@ -1174,8 +1180,8 @@ class _$_Loaded with DiagnosticableTreeMixin implements _Loaded {
   @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
-  _$$_LoadedCopyWith<_$_Loaded> get copyWith =>
-      __$$_LoadedCopyWithImpl<_$_Loaded>(this, _$identity);
+  _$$LoadedImplCopyWith<_$LoadedImpl> get copyWith =>
+      __$$LoadedImplCopyWithImpl<_$LoadedImpl>(this, _$identity);
 
   @override
   @optionalTypeArgs
@@ -1271,34 +1277,34 @@ class _$_Loaded with DiagnosticableTreeMixin implements _Loaded {
 }
 
 abstract class _Loaded implements NfcPassState {
-  const factory _Loaded(final List<NfcPass> nfcPasses) = _$_Loaded;
+  const factory _Loaded(final List<NfcPass> nfcPasses) = _$LoadedImpl;
 
   List<NfcPass> get nfcPasses;
   @JsonKey(ignore: true)
-  _$$_LoadedCopyWith<_$_Loaded> get copyWith =>
+  _$$LoadedImplCopyWith<_$LoadedImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }
 
 /// @nodoc
-abstract class _$$_NfcNotExistCopyWith<$Res> {
-  factory _$$_NfcNotExistCopyWith(
-          _$_NfcNotExist value, $Res Function(_$_NfcNotExist) then) =
-      __$$_NfcNotExistCopyWithImpl<$Res>;
+abstract class _$$NfcNotExistImplCopyWith<$Res> {
+  factory _$$NfcNotExistImplCopyWith(
+          _$NfcNotExistImpl value, $Res Function(_$NfcNotExistImpl) then) =
+      __$$NfcNotExistImplCopyWithImpl<$Res>;
 }
 
 /// @nodoc
-class __$$_NfcNotExistCopyWithImpl<$Res>
-    extends _$NfcPassStateCopyWithImpl<$Res, _$_NfcNotExist>
-    implements _$$_NfcNotExistCopyWith<$Res> {
-  __$$_NfcNotExistCopyWithImpl(
-      _$_NfcNotExist _value, $Res Function(_$_NfcNotExist) _then)
+class __$$NfcNotExistImplCopyWithImpl<$Res>
+    extends _$NfcPassStateCopyWithImpl<$Res, _$NfcNotExistImpl>
+    implements _$$NfcNotExistImplCopyWith<$Res> {
+  __$$NfcNotExistImplCopyWithImpl(
+      _$NfcNotExistImpl _value, $Res Function(_$NfcNotExistImpl) _then)
       : super(_value, _then);
 }
 
 /// @nodoc
 
-class _$_NfcNotExist with DiagnosticableTreeMixin implements _NfcNotExist {
-  const _$_NfcNotExist();
+class _$NfcNotExistImpl with DiagnosticableTreeMixin implements _NfcNotExist {
+  const _$NfcNotExistImpl();
 
   @override
   String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
@@ -1314,7 +1320,7 @@ class _$_NfcNotExist with DiagnosticableTreeMixin implements _NfcNotExist {
   @override
   bool operator ==(dynamic other) {
     return identical(this, other) ||
-        (other.runtimeType == runtimeType && other is _$_NfcNotExist);
+        (other.runtimeType == runtimeType && other is _$NfcNotExistImpl);
   }
 
   @override
@@ -1414,22 +1420,24 @@ class _$_NfcNotExist with DiagnosticableTreeMixin implements _NfcNotExist {
 }
 
 abstract class _NfcNotExist implements NfcPassState {
-  const factory _NfcNotExist() = _$_NfcNotExist;
+  const factory _NfcNotExist() = _$NfcNotExistImpl;
 }
 
 /// @nodoc
-abstract class _$$_ErrorCopyWith<$Res> {
-  factory _$$_ErrorCopyWith(_$_Error value, $Res Function(_$_Error) then) =
-      __$$_ErrorCopyWithImpl<$Res>;
+abstract class _$$ErrorImplCopyWith<$Res> {
+  factory _$$ErrorImplCopyWith(
+          _$ErrorImpl value, $Res Function(_$ErrorImpl) then) =
+      __$$ErrorImplCopyWithImpl<$Res>;
   @useResult
   $Res call({String cause});
 }
 
 /// @nodoc
-class __$$_ErrorCopyWithImpl<$Res>
-    extends _$NfcPassStateCopyWithImpl<$Res, _$_Error>
-    implements _$$_ErrorCopyWith<$Res> {
-  __$$_ErrorCopyWithImpl(_$_Error _value, $Res Function(_$_Error) _then)
+class __$$ErrorImplCopyWithImpl<$Res>
+    extends _$NfcPassStateCopyWithImpl<$Res, _$ErrorImpl>
+    implements _$$ErrorImplCopyWith<$Res> {
+  __$$ErrorImplCopyWithImpl(
+      _$ErrorImpl _value, $Res Function(_$ErrorImpl) _then)
       : super(_value, _then);
 
   @pragma('vm:prefer-inline')
@@ -1437,7 +1445,7 @@ class __$$_ErrorCopyWithImpl<$Res>
   $Res call({
     Object? cause = null,
   }) {
-    return _then(_$_Error(
+    return _then(_$ErrorImpl(
       null == cause
           ? _value.cause
           : cause // ignore: cast_nullable_to_non_nullable
@@ -1448,8 +1456,8 @@ class __$$_ErrorCopyWithImpl<$Res>
 
 /// @nodoc
 
-class _$_Error with DiagnosticableTreeMixin implements _Error {
-  const _$_Error(this.cause);
+class _$ErrorImpl with DiagnosticableTreeMixin implements _Error {
+  const _$ErrorImpl(this.cause);
 
   @override
   final String cause;
@@ -1471,7 +1479,7 @@ class _$_Error with DiagnosticableTreeMixin implements _Error {
   bool operator ==(dynamic other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is _$_Error &&
+            other is _$ErrorImpl &&
             (identical(other.cause, cause) || other.cause == cause));
   }
 
@@ -1481,8 +1489,8 @@ class _$_Error with DiagnosticableTreeMixin implements _Error {
   @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
-  _$$_ErrorCopyWith<_$_Error> get copyWith =>
-      __$$_ErrorCopyWithImpl<_$_Error>(this, _$identity);
+  _$$ErrorImplCopyWith<_$ErrorImpl> get copyWith =>
+      __$$ErrorImplCopyWithImpl<_$ErrorImpl>(this, _$identity);
 
   @override
   @optionalTypeArgs
@@ -1578,34 +1586,34 @@ class _$_Error with DiagnosticableTreeMixin implements _Error {
 }
 
 abstract class _Error implements NfcPassState {
-  const factory _Error(final String cause) = _$_Error;
+  const factory _Error(final String cause) = _$ErrorImpl;
 
   String get cause;
   @JsonKey(ignore: true)
-  _$$_ErrorCopyWith<_$_Error> get copyWith =>
+  _$$ErrorImplCopyWith<_$ErrorImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }
 
 /// @nodoc
-abstract class _$$_NfcDisabledCopyWith<$Res> {
-  factory _$$_NfcDisabledCopyWith(
-          _$_NfcDisabled value, $Res Function(_$_NfcDisabled) then) =
-      __$$_NfcDisabledCopyWithImpl<$Res>;
+abstract class _$$NfcDisabledImplCopyWith<$Res> {
+  factory _$$NfcDisabledImplCopyWith(
+          _$NfcDisabledImpl value, $Res Function(_$NfcDisabledImpl) then) =
+      __$$NfcDisabledImplCopyWithImpl<$Res>;
 }
 
 /// @nodoc
-class __$$_NfcDisabledCopyWithImpl<$Res>
-    extends _$NfcPassStateCopyWithImpl<$Res, _$_NfcDisabled>
-    implements _$$_NfcDisabledCopyWith<$Res> {
-  __$$_NfcDisabledCopyWithImpl(
-      _$_NfcDisabled _value, $Res Function(_$_NfcDisabled) _then)
+class __$$NfcDisabledImplCopyWithImpl<$Res>
+    extends _$NfcPassStateCopyWithImpl<$Res, _$NfcDisabledImpl>
+    implements _$$NfcDisabledImplCopyWith<$Res> {
+  __$$NfcDisabledImplCopyWithImpl(
+      _$NfcDisabledImpl _value, $Res Function(_$NfcDisabledImpl) _then)
       : super(_value, _then);
 }
 
 /// @nodoc
 
-class _$_NfcDisabled with DiagnosticableTreeMixin implements _NfcDisabled {
-  const _$_NfcDisabled();
+class _$NfcDisabledImpl with DiagnosticableTreeMixin implements _NfcDisabled {
+  const _$NfcDisabledImpl();
 
   @override
   String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
@@ -1621,7 +1629,7 @@ class _$_NfcDisabled with DiagnosticableTreeMixin implements _NfcDisabled {
   @override
   bool operator ==(dynamic other) {
     return identical(this, other) ||
-        (other.runtimeType == runtimeType && other is _$_NfcDisabled);
+        (other.runtimeType == runtimeType && other is _$NfcDisabledImpl);
   }
 
   @override
@@ -1721,31 +1729,31 @@ class _$_NfcDisabled with DiagnosticableTreeMixin implements _NfcDisabled {
 }
 
 abstract class _NfcDisabled implements NfcPassState {
-  const factory _NfcDisabled() = _$_NfcDisabled;
+  const factory _NfcDisabled() = _$NfcDisabledImpl;
 }
 
 /// @nodoc
-abstract class _$$_NfcNotSupportedCopyWith<$Res> {
-  factory _$$_NfcNotSupportedCopyWith(
-          _$_NfcNotSupported value, $Res Function(_$_NfcNotSupported) then) =
-      __$$_NfcNotSupportedCopyWithImpl<$Res>;
+abstract class _$$NfcNotSupportedImplCopyWith<$Res> {
+  factory _$$NfcNotSupportedImplCopyWith(_$NfcNotSupportedImpl value,
+          $Res Function(_$NfcNotSupportedImpl) then) =
+      __$$NfcNotSupportedImplCopyWithImpl<$Res>;
 }
 
 /// @nodoc
-class __$$_NfcNotSupportedCopyWithImpl<$Res>
-    extends _$NfcPassStateCopyWithImpl<$Res, _$_NfcNotSupported>
-    implements _$$_NfcNotSupportedCopyWith<$Res> {
-  __$$_NfcNotSupportedCopyWithImpl(
-      _$_NfcNotSupported _value, $Res Function(_$_NfcNotSupported) _then)
+class __$$NfcNotSupportedImplCopyWithImpl<$Res>
+    extends _$NfcPassStateCopyWithImpl<$Res, _$NfcNotSupportedImpl>
+    implements _$$NfcNotSupportedImplCopyWith<$Res> {
+  __$$NfcNotSupportedImplCopyWithImpl(
+      _$NfcNotSupportedImpl _value, $Res Function(_$NfcNotSupportedImpl) _then)
       : super(_value, _then);
 }
 
 /// @nodoc
 
-class _$_NfcNotSupported
+class _$NfcNotSupportedImpl
     with DiagnosticableTreeMixin
     implements _NfcNotSupported {
-  const _$_NfcNotSupported();
+  const _$NfcNotSupportedImpl();
 
   @override
   String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
@@ -1761,7 +1769,7 @@ class _$_NfcNotSupported
   @override
   bool operator ==(dynamic other) {
     return identical(this, other) ||
-        (other.runtimeType == runtimeType && other is _$_NfcNotSupported);
+        (other.runtimeType == runtimeType && other is _$NfcNotSupportedImpl);
   }
 
   @override
@@ -1861,5 +1869,5 @@ class _$_NfcNotSupported
 }
 
 abstract class _NfcNotSupported implements NfcPassState {
-  const factory _NfcNotSupported() = _$_NfcNotSupported;
+  const factory _NfcNotSupported() = _$NfcNotSupportedImpl;
 }
