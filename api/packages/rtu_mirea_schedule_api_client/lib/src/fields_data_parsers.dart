@@ -107,49 +107,25 @@ List<Classroom> parseClassroomsFromLocation(String location) {
       .toList();
 }
 
-/// The SUMMARY field contains the subject name and the lesson type.
-/// First comes the abbreviated lesson type, followed by the name of the item
-/// separated by a space.
-///
-/// For example: "ЛК Информатика" or "СР Ознакомительная практика".
-(String, LessonType) parseSubjectAndLessonTypeFromSummary(String summary) {
-  final exp = RegExp(
-    r'([\wА-Я]+)\s([\wА-Яа-яёЁ\s\-]+)',
-  );
+/// Parse the lesson type by the lesson type abbreviation.
+LessonType parseSubjectAndLessonTypeFromSummary(String lessonType) {
+  final parsedLessonType = _getLessonTypeByAbbreviation(lessonType.trim());
 
-  final match = exp.firstMatch(summary);
-
-  if (match != null) {
-    final lessonType = match.group(1);
-    final subject = match.group(2);
-
-    if (lessonType != null && subject != null) {
-      final parsedLessonType = _getLessonTypeByAbbreviation(lessonType.trim());
-
-      return (subject.trim(), parsedLessonType);
-    }
-  } else {
-    var subject = summary.trim();
-    var parsedLessonType = LessonType.unknown;
-
-    if (subject.contains('Экзамен')) {
-      subject = subject.replaceAll('Экзамен', '').trim();
-      parsedLessonType = LessonType.exam;
-    } else if (subject.contains('Зачет')) {
-      subject = subject.replaceAll('Зачет', '').trim();
-      parsedLessonType = LessonType.credit;
-    } else if (subject.contains('Консультация')) {
-      subject = subject.replaceAll('Консультация', '').trim();
-      parsedLessonType = LessonType.consultation;
-    } else if (subject.contains('Курсовая работа')) {
-      subject = subject.replaceAll('Курсовая работа', '').trim();
-      parsedLessonType = LessonType.courseWork;
-    }
-
-    return (subject, parsedLessonType);
+  if (parsedLessonType != LessonType.unknown) {
+    return parsedLessonType;
   }
 
-  return (summary, LessonType.unknown);
+  if (lessonType.contains('Экзамен')) {
+    return LessonType.exam;
+  } else if (lessonType.contains('Зачет')) {
+    return LessonType.credit;
+  } else if (lessonType.contains('Консультация')) {
+    return LessonType.consultation;
+  } else if (lessonType.contains('Курсовая работа')) {
+    return LessonType.courseWork;
+  }
+
+  return LessonType.unknown;
 }
 
 LessonType _getLessonTypeByAbbreviation(String abbreviation) {

@@ -80,7 +80,7 @@ class RtuMireaScheduleApiClient {
     required int scheduleTargetId,
   }) async {
     final uri = Uri.parse(
-      '$_baseUrl/schedule/api/ical/${_getApiPathNameByScheduleTarget(scheduleTargetId)}/$itemId',
+      '$_baseUrl/schedule/api/ical/${_getApiPathNameByScheduleTarget(scheduleTargetId)}/$itemId?includeMeta=true',
     );
 
     final response = await _httpClient.get(

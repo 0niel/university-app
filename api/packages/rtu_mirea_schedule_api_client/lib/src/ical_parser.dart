@@ -31,33 +31,13 @@ class ICalendarParsingException implements Exception {
 /// Parses the iCalendar data into the [SchedulePart]s.
 /// {@endtemplate}
 class ICalParser {
+  /// Creates a new instance of the [ICalParser] from the iCalendar string data.
+  ///
+  /// Throws [InvalidICalendarDataException] if the iCalendar data is invalid.
+  factory ICalParser.fromString(String data) => ICalParser._(data);
   ICalParser._(this._data) {
     try {
-      if (!ICalendar.objects.containsKey('RDATE')) {
-        ICalendar.registerField(
-          field: 'RDATE',
-          function: (value, params, event, lastEvent) {
-            try {
-              final datesString = value.split(',');
-
-              final dates = datesString.map((e) {
-                final date = IcsDateTime(dt: e);
-
-                return date;
-              }).toList();
-
-              lastEvent['RDATE'] = dates;
-
-              return lastEvent;
-            } catch (error, stackTrace) {
-              Error.throwWithStackTrace(
-                InvalidICalendarDataException(error: error),
-                stackTrace,
-              );
-            }
-          },
-        );
-      }
+      _registerCustomFields();
 
       _calendar = ICalendar.fromString(_data);
     } catch (error, stackTrace) {
@@ -68,10 +48,132 @@ class ICalParser {
     }
   }
 
-  /// Creates a new instance of the [ICalParser] from the iCalendar string data.
-  ///
-  /// Throws [InvalidICalendarDataException] if the iCalendar data is invalid.
-  factory ICalParser.fromString(String data) => ICalParser._(data);
+  void _registerCustomFields() {
+    if (!ICalendar.objects.containsKey('RDATE')) {
+      ICalendar.registerField(
+        field: 'RDATE',
+        function: (value, params, event, lastEvent) {
+          try {
+            final datesString = value.split(',');
+
+            final dates = datesString.map((e) {
+              final date = IcsDateTime(dt: e);
+
+              return date;
+            }).toList();
+
+            lastEvent['RDATE'] = dates;
+
+            return lastEvent;
+          } catch (error, stackTrace) {
+            Error.throwWithStackTrace(
+              InvalidICalendarDataException(error: error),
+              stackTrace,
+            );
+          }
+        },
+      );
+    }
+
+    if (!ICalendar.objects.containsKey('X-META-AUDITORIUM')) {
+      ICalendar.registerField(
+        field: 'X-META-AUDITORIUM',
+        function: (value, params, event, lastEvent) {
+          try {
+            lastEvent['X-META-AUDITORIUM'] = [
+              ...(lastEvent['X-META-AUDITORIUM'] ?? []) as Iterable,
+              value,
+            ];
+
+            return lastEvent;
+          } catch (error, stackTrace) {
+            Error.throwWithStackTrace(
+              InvalidICalendarDataException(error: error),
+              stackTrace,
+            );
+          }
+        },
+      );
+    }
+
+    if (!ICalendar.objects.containsKey('X-META-DISCIPLINE')) {
+      ICalendar.registerField(
+        field: 'X-META-DISCIPLINE',
+        function: (value, params, event, lastEvent) {
+          try {
+            lastEvent['X-META-DISCIPLINE'] = value;
+
+            return lastEvent;
+          } catch (error, stackTrace) {
+            Error.throwWithStackTrace(
+              InvalidICalendarDataException(error: error),
+              stackTrace,
+            );
+          }
+        },
+      );
+    }
+
+    if (!ICalendar.objects.containsKey('X-META-GROUP')) {
+      ICalendar.registerField(
+        field: 'X-META-GROUP',
+        function: (value, params, event, lastEvent) {
+          try {
+            lastEvent['X-META-GROUP'] = [
+              ...(lastEvent['X-META-GROUP'] ?? []) as Iterable,
+              value,
+            ];
+
+            return lastEvent;
+          } catch (error, stackTrace) {
+            Error.throwWithStackTrace(
+              InvalidICalendarDataException(error: error),
+              stackTrace,
+            );
+          }
+        },
+      );
+    }
+
+    if (!ICalendar.objects.containsKey('X-META-LESSON_TYPE')) {
+      ICalendar.registerField(
+        field: 'X-META-LESSON_TYPE',
+        function: (value, params, event, lastEvent) {
+          try {
+            lastEvent['X-META-LESSON_TYPE'] = value;
+
+            return lastEvent;
+          } catch (error, stackTrace) {
+            Error.throwWithStackTrace(
+              InvalidICalendarDataException(error: error),
+              stackTrace,
+            );
+          }
+        },
+      );
+    }
+
+    if (!ICalendar.objects.containsKey('X-META-TEACHER')) {
+      ICalendar.registerField(
+        field: 'X-META-TEACHER',
+        function: (value, params, event, lastEvent) {
+          try {
+            lastEvent['X-META-TEACHER'] = [
+              ...(lastEvent['X-META-TEACHER'] ?? []) as Iterable,
+              value,
+            ];
+
+            return lastEvent;
+          } catch (error, stackTrace) {
+            Error.throwWithStackTrace(
+              InvalidICalendarDataException(error: error),
+              stackTrace,
+            );
+          }
+        },
+      );
+    }
+  }
 
   final String _data;
 
@@ -98,41 +200,34 @@ class ICalParser {
 
       final datesAndTime = _getEventDatesAndTime(data);
 
-      var description = data['description'] as String?;
+      final discipline = data['x-meta-discipline'] as String?;
 
-      if (description == null) {
+      if (discipline == null) {
         throw const ICalendarParsingException(
-          error: 'The iCalendar data is invalid. The DESCRIPTION field is '
-              'required.',
+          error: 'The iCalendar data is invalid. The X-META-DISCIPLINE field '
+              'is required.',
         );
       }
 
-      description = description.replaceAll(RegExp(r'\\n'), '\n');
+      final teachers =
+          List<String>.from(data['x-meta-teacher'] as Iterable<dynamic>? ?? []);
 
-      final teachers = parseTeachersFromDescription(description);
-      final groups = parseGroupsFromDescription(description);
+      final groups =
+          List<String>.from(data['x-meta-group'] as Iterable<dynamic>? ?? []);
 
-      var location = data['location'] as String?;
-
-      location = location?.replaceAll(RegExp(r'\\n'), '\n');
-
-      final classrooms = parseClassroomsFromLocation(location ?? '');
-
-      final summary = data['summary'] as String?;
-
-      if (summary == null) {
-        throw const ICalendarParsingException(
-          error: 'The iCalendar data is invalid. The SUMMARY field is '
-              'required.',
-        );
-      }
-
-      final (subject, lessonType) = parseSubjectAndLessonTypeFromSummary(
-        summary,
+      final location = List<String>.from(
+        data['x-meta-auditorium'] as Iterable<dynamic>? ?? [],
       );
 
+      final classrooms =
+          location.map(parseClassroomsFromLocation).flattened.toList();
+
+      final type = data['x-meta-lesson_type'] as String?;
+
+      final lessonType = parseSubjectAndLessonTypeFromSummary(type ?? '');
+
       final schedulePart = LessonSchedulePart(
-        subject: subject,
+        subject: discipline,
         lessonType: lessonType,
         teachers: teachers.map((e) => Teacher(name: e)).toList(),
         classrooms: classrooms,
@@ -144,7 +239,7 @@ class ICalParser {
             )
             .first,
         dates: datesAndTime.dates,
-        groups: groups.isEmpty ? null : groups,
+        groups: groups,
       );
 
       scheduleParts.add(schedulePart);
@@ -161,24 +256,6 @@ class ICalParser {
       }
     }
 
-    for (final exam in exams) {
-      final examDates = exam.dates;
-
-      lessons = lessons.map((lesson) {
-        if (lesson is LessonSchedulePart) {
-          final lessonDates = lesson.dates;
-
-          final dates = lessonDates.where((date) {
-            return !examDates.any((examDate) => date.isSameDate(examDate));
-          }).toList();
-
-          return lesson.copyWith(dates: dates);
-        } else {
-          return lesson;
-        }
-      }).toList();
-    }
-
     final excludeDates = [
       DateTime(2023, 12, 23),
       DateTime(2023, 12, 24),
@@ -189,7 +266,7 @@ class ICalParser {
       DateTime(2023, 12, 29),
       DateTime(2023, 12, 30),
       DateTime(2023, 12, 31),
-      DateTime(2024, 1, 1),
+      DateTime(2024),
       DateTime(2024, 1, 2),
       DateTime(2024, 1, 3),
       DateTime(2024, 1, 4),
@@ -199,7 +276,6 @@ class ICalParser {
       DateTime(2024, 1, 8),
     ];
 
-    // исключаем занятия (не экзамены) в период с 23.12.2023 по 10.01.2024
     lessons = lessons.map((lesson) {
       if (lesson is LessonSchedulePart) {
         final lessonDates = lesson.dates;
