@@ -163,7 +163,7 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
               ScheduleLoadError(errorMessage: _mapFailureToMessage(failure)),
           (schedule) {
         // Set home widget info
-        WidgetDataProvider.setSchedule(schedule);
+        // WidgetDataProvider.setSchedule(schedule);
 
         // Set app info
         return ScheduleLoaded(

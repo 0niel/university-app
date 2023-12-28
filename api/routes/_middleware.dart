@@ -7,5 +7,6 @@ Handler middleware(Handler handler) {
       .use(requestLogger())
       .use(userProvider())
       .use(newsDataSourceProvider())
-      .use(scheduleDataSourceProvider());
+      .use(scheduleDataSourceProvider())
+      .use(communityDataSourceProvider());
 }

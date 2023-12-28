@@ -1,4 +1,5 @@
 import 'dart:io' show Platform;
+import 'package:community_repository/community_repository.dart';
 import 'package:dio/dio.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/foundation.dart';
@@ -14,9 +15,9 @@ import 'package:rtu_mirea_app/common/oauth.dart';
 
 import 'package:rtu_mirea_app/common/widget_data_init.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:rtu_mirea_app/contributors/bloc/contributors_bloc.dart';
 import 'package:rtu_mirea_app/data/datasources/strapi_remote.dart';
 import 'package:rtu_mirea_app/data/repositories/stories_repository_impl.dart';
-import 'package:rtu_mirea_app/presentation/bloc/about_app_bloc/about_app_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/announces_bloc/announces_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/app_cubit/app_cubit.dart';
 import 'package:rtu_mirea_app/presentation/bloc/attendance_bloc/attendance_bloc.dart';
@@ -107,6 +108,7 @@ Future<void> main() async {
   HydratedBloc.storage = await HydratedStorage.build(
     storageDirectory: await getApplicationSupportDirectory(),
   );
+
   await SentryFlutter.init(
     (options) {
       options.dsn = sentryDsn;
@@ -157,13 +159,15 @@ class App extends StatelessWidget {
       DeviceOrientation.portraitUp,
     ]);
 
-    final apiClient = ScheduleApiClient();
+    final apiClient = ApiClient();
 
     return MultiRepositoryProvider(
       providers: [
         RepositoryProvider.value(
             value:
                 schedule_repository.ScheduleRepository(apiClient: apiClient)),
+        RepositoryProvider.value(
+            value: CommunityRepository(apiClient: apiClient)),
         RepositoryProvider.value(
           value: StoriesRepositoryImpl(
               remoteDataSource: getIt<StrapiRemoteData>()),
@@ -184,9 +188,6 @@ class App extends StatelessWidget {
           ),
           BlocProvider<MapCubit>(create: (context) => getIt<MapCubit>()),
           BlocProvider<NewsBloc>(create: (context) => getIt<NewsBloc>()),
-          BlocProvider<AboutAppBloc>(
-              create: (context) =>
-                  getIt<AboutAppBloc>()..add(AboutAppGetMembers())),
           BlocProvider<UserBloc>(create: (context) => getIt<UserBloc>()),
           BlocProvider<AnnouncesBloc>(
               create: (context) => getIt<AnnouncesBloc>()),

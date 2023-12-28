@@ -7,17 +7,19 @@ class ServiceCard extends StatelessWidget {
   const ServiceCard({
     Key? key,
     required this.title,
-    required this.url,
     required this.icon,
+    this.onTap,
+    this.url,
     this.description,
     this.launchMode = LaunchMode.externalApplication,
   }) : super(key: key);
 
   final String title;
-  final String url;
+  final String? url;
   final Widget icon;
   final LaunchMode launchMode;
   final String? description;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -30,8 +32,15 @@ class ServiceCard extends StatelessWidget {
         ),
         child: InkWell(
           onTap: () {
-            final Uri url = Uri.parse(this.url);
-            launchUrl(url, mode: launchMode);
+            if (onTap != null) {
+              onTap!();
+              return;
+            }
+            if (this.url == null) {
+              return;
+            }
+            final Uri url = Uri.parse(this.url!);
+            launchUrl(url, mode: launchMode!);
           },
           borderRadius: BorderRadius.circular(12),
           child: Padding(

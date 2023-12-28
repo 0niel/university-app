@@ -17,6 +17,9 @@ dependencies:
   schedule:
     path: packages/schedule
 
+  github:
+    path: packages/github
+
   rtu_mirea_schedule_api_client:
     path: packages/rtu_mirea_schedule_api_client
 

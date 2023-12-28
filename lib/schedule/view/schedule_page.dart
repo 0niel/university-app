@@ -38,7 +38,6 @@ class _SchedulePageState extends State<SchedulePage> {
   Widget build(BuildContext context) {
     return BlocBuilder<ScheduleBloc, ScheduleState>(
       builder: (context, state) {
-        print(state);
         if (state.selectedSchedule == null &&
             state.status != ScheduleStatus.loading) {
           return NoSelectedScheduleMessage(onTap: () {

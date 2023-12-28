@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
@@ -68,6 +69,18 @@ class _ServicesViewState extends State<ServicesView> {
                   ),
                   launchMode: LaunchMode.inAppBrowserView,
                   description: 'Найди нужный кабинет',
+                ),
+                // Калькулятор БРС
+                ServiceCard(
+                  title: 'Калькулятор БРС',
+                  onTap: () {
+                    context.go('/services/rating-system-calculator');
+                  },
+                  icon: ServiceIcon(
+                    color: AppTheme.colors.colorful02,
+                    iconColor: AppTheme.colors.background01,
+                    icon: Icons.calculate,
+                  ),
                 ),
                 ServiceCard(
                   title: 'Бюро находок',

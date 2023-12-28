@@ -209,6 +209,13 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.2.0"
+  github:
+    dependency: "direct main"
+    description:
+      path: "packages/github"
+      relative: true
+    source: path
+    version: "1.0.0+1"
   glob:
     dependency: transitive
     description:
