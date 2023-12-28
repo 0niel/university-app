@@ -15,7 +15,6 @@ import 'package:rtu_mirea_app/common/oauth.dart';
 
 import 'package:rtu_mirea_app/common/widget_data_init.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:rtu_mirea_app/contributors/bloc/contributors_bloc.dart';
 import 'package:rtu_mirea_app/data/datasources/strapi_remote.dart';
 import 'package:rtu_mirea_app/data/repositories/stories_repository_impl.dart';
 import 'package:rtu_mirea_app/presentation/bloc/announces_bloc/announces_bloc.dart';

@@ -32,6 +32,10 @@ dependencies:
   schedule_repository:
     path: packages/schedule_repository
 
+  community_repository:
+    path: packages/community_repository
+
+
   flutter_animate: ^4.3.0
 
   hydrated_bloc: ^9.1.2
@@ -173,8 +177,7 @@ dependencies:
   get:
   get_storage:
 
-  # https://pub.dev/packages/home_widget
-  home_widget: ^0.3.0
+  home_widget: ^0.4.1
   
   freezed_annotation: ^2.1.0
 

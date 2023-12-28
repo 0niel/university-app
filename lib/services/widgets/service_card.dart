@@ -40,7 +40,7 @@ class ServiceCard extends StatelessWidget {
               return;
             }
             final Uri url = Uri.parse(this.url!);
-            launchUrl(url, mode: launchMode!);
+            launchUrl(url, mode: launchMode);
           },
           borderRadius: BorderRadius.circular(12),
           child: Padding(

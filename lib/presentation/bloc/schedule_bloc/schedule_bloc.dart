@@ -5,7 +5,6 @@ import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/services.dart';
 import 'package:rtu_mirea_app/common/errors/failures.dart';
-import 'package:rtu_mirea_app/common/widget_data_init.dart';
 import 'package:rtu_mirea_app/domain/entities/schedule.dart';
 import 'package:rtu_mirea_app/domain/entities/schedule_settings.dart';
 import 'package:rtu_mirea_app/domain/usecases/delete_schedule.dart';

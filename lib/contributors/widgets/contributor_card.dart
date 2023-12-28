@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:rtu_mirea_app/presentation/typography.dart';
-import 'package:shimmer/shimmer.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class ContributorCard extends StatelessWidget {

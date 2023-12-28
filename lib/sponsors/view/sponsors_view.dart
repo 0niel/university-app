@@ -1,13 +1,8 @@
-import 'dart:ffi';
 
 import 'package:community_repository/community_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:rtu_mirea_app/presentation/theme.dart';
-import 'package:rtu_mirea_app/presentation/typography.dart';
 import 'package:rtu_mirea_app/sponsors/sponsors.dart';
-import 'package:rtu_mirea_app/sponsors/widgets/sponsor_card.dart';
-import '../widgets/widgets.dart';
 
 class SponsorsView extends StatelessWidget {
   const SponsorsView({super.key});
