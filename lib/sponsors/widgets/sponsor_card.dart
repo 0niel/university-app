@@ -2,6 +2,7 @@ import 'package:community_repository/community_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:rtu_mirea_app/presentation/typography.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class SponsorCard extends StatelessWidget {
   const SponsorCard({Key? key, required this.sponsor}) : super(key: key);
@@ -36,7 +37,12 @@ class SponsorCard extends StatelessWidget {
             color: Theme.of(context).colorScheme.background,
             child: InkWell(
               borderRadius: BorderRadius.circular(16),
-              onTap: () {},
+              onTap: sponsor.url != null
+                  ? () {
+                      launchUrl(Uri.parse(sponsor.url!),
+                          mode: LaunchMode.externalApplication);
+                    }
+                  : null,
               child: Container(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(16),
