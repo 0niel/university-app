@@ -2,6 +2,7 @@ import 'package:community_repository/community_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:rtu_mirea_app/presentation/typography.dart';
+import 'package:unicons/unicons.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class SponsorCard extends StatelessWidget {
@@ -48,40 +49,62 @@ class SponsorCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(16),
                 ),
                 padding: const EdgeInsets.all(16),
-                child: Row(
+                child: Stack(
                   children: [
-                    CircleAvatar(
-                      radius: 20,
-                      backgroundColor: AppTheme.colors.deactive,
-                      backgroundImage: sponsor.avatarUrl != null
-                          ? NetworkImage(sponsor.avatarUrl!)
-                          : null,
-                      child: sponsor.avatarUrl == null
-                          ? Text(sponsor.username[0])
-                          : null,
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            sponsor.username,
-                            style: AppTextStyle.titleM,
-                          ),
-                          if (sponsor.about != null)
-                            Text(
-                              sponsor.about.toString(),
-                              style: AppTextStyle.captionL.copyWith(
-                                color: AppTheme.colors.deactive,
+                    Row(
+                      children: [
+                        CircleAvatar(
+                          radius: 20,
+                          backgroundColor: AppTheme.colors.deactive,
+                          backgroundImage: sponsor.avatarUrl != null
+                              ? NetworkImage(sponsor.avatarUrl!)
+                              : null,
+                          child: sponsor.avatarUrl == null
+                              ? Text(sponsor.username[0])
+                              : null,
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                sponsor.username,
+                                style: AppTextStyle.titleM,
                               ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                        ],
-                      ),
+                              if (sponsor.about != null)
+                                Text(
+                                  sponsor.about.toString(),
+                                  style: AppTextStyle.captionL.copyWith(
+                                    color: AppTheme.colors.deactive,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
+                    if (sponsor.url != null)
+                      Positioned(
+                        top: 0,
+                        right: 0,
+                        child: Container(
+                          height: 24,
+                          width: 24,
+                          decoration: BoxDecoration(
+                            color: AppTheme.colors.colorful01,
+                            borderRadius: BorderRadius.circular(24),
+                          ),
+                          child: Icon(
+                            UniconsLine.link,
+                            color: AppTheme.colors.active,
+                            size: 16,
+                          ),
+                        ),
+                      ),
                   ],
                 ),
               ),
