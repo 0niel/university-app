@@ -214,8 +214,8 @@ class _PageIndicatorsState extends State<PageIndicators> {
         children: [
           widget.dotsNum - 1 == _currentPage
               ? Container()
-              : InkWell(
-                  onTap: () {
+              : TextButton(
+                  onPressed: () {
                     context.read<AppCubit>().closeOnboarding();
                     context.go('/schedule');
                   },
