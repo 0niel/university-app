@@ -31,9 +31,17 @@ class ScheduleBloc extends HydratedBloc<ScheduleEvent, ScheduleState> {
     on<ScheduleSetDisplayMode>(_onScheduleSetDisplayMode);
     on<SetSelectedSchedule>(_onSetSelectedSchedule);
     on<DeleteSchedule>(_onRemoveSavedSchedule);
+    on<ScheduleSetEmptyLessonsDisplaying>(_onSetEmptyLessonsDisplaying);
   }
 
   final ScheduleRepository _scheduleRepository;
+
+  Future<void> _onSetEmptyLessonsDisplaying(
+    ScheduleSetEmptyLessonsDisplaying event,
+    Emitter<ScheduleState> emit,
+  ) async {
+    emit(state.copyWith(showEmptyLessons: event.showEmptyLessons));
+  }
 
   Future<void> _onRemoveSavedSchedule(
     DeleteSchedule event,

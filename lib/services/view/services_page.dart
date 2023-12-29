@@ -70,18 +70,17 @@ class _ServicesViewState extends State<ServicesView> {
                   launchMode: LaunchMode.inAppBrowserView,
                   description: 'Найди нужный кабинет',
                 ),
-                // Калькулятор БРС
-                ServiceCard(
-                  title: 'Калькулятор БРС',
-                  onTap: () {
-                    context.go('/services/rating-system-calculator');
-                  },
-                  icon: ServiceIcon(
-                    color: AppTheme.colors.colorful02,
-                    iconColor: AppTheme.colors.background01,
-                    icon: Icons.calculate,
-                  ),
-                ),
+                // ServiceCard(
+                //   title: 'Калькулятор БРС',
+                //   onTap: () {
+                //     context.go('/services/rating-system-calculator');
+                //   },
+                //   icon: ServiceIcon(
+                //     color: AppTheme.colors.colorful02,
+                //     iconColor: AppTheme.colors.background01,
+                //     icon: Icons.calculate,
+                //   ),
+                // ),
                 ServiceCard(
                   title: 'Бюро находок',
                   url: 'https://finds.mirea.ru/',
@@ -127,7 +126,7 @@ class _ServicesViewState extends State<ServicesView> {
               children: [
                 CommunityCard(
                   title: 'Mirea Ninja',
-                  url: 'https://forum.mirea.ru/',
+                  url: 'https://t.me/mirea_ninja_chat',
                   logo: CircleAvatar(
                     // backgroundColor: AppTheme.colors.colorful01,
                     foregroundImage: Image.network(

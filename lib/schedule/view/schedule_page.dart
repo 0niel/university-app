@@ -4,6 +4,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
+import 'package:rtu_mirea_app/presentation/widgets/bottom_modal_sheet.dart';
 import 'package:rtu_mirea_app/schedule/bloc/schedule_bloc.dart';
 import 'package:rtu_mirea_app/stories/view/stories_view.dart';
 import 'package:university_app_server_api/client.dart';
@@ -71,7 +72,14 @@ class _SchedulePageState extends State<SchedulePage> {
                           color: AppTheme.colors.active,
                         ),
                         onPressed: () {
-                          SettingsMenu.show(context);
+                          BottomModalSheet.show(
+                            context,
+                            child: const SettingsMenu(),
+                            title: 'Управление расписанием',
+                            description:
+                                'Редактирование сохраненных расписаний и добавление новых, а также настройки отображения расписания.',
+                            backgroundColor: AppTheme.colors.background03,
+                          );
                         },
                       ),
                     ),
@@ -103,6 +111,38 @@ class _SchedulePageState extends State<SchedulePage> {
                   if (holiday != null) {
                     return HolidayPage(
                         title: (holiday as HolidaySchedulePart).title);
+                  }
+
+                  final lessons =
+                      schedules.whereType<LessonSchedulePart>().toList();
+
+                  if (state.showEmptyLessons) {
+                    return ListView.builder(
+                      itemCount: 6,
+                      itemBuilder: (context, index) {
+                        final lesson = lessons.firstWhereOrNull(
+                          (element) => element.lessonBells.number == index + 1,
+                        );
+
+                        if (lesson != null) {
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16.0,
+                              vertical: 8.0,
+                            ),
+                            child: LessonCard(lesson: lesson),
+                          );
+                        }
+
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16.0,
+                            vertical: 8.0,
+                          ),
+                          child: EmptyLessonCard(lessonNumber: index + 1),
+                        );
+                      },
+                    );
                   }
 
                   return ListView(

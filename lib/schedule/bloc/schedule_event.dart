@@ -68,6 +68,17 @@ class ScheduleSetDisplayMode extends ScheduleEvent {
   List<Object> get props => [isMiniature];
 }
 
+class ScheduleSetEmptyLessonsDisplaying extends ScheduleEvent {
+  const ScheduleSetEmptyLessonsDisplaying({
+    required this.showEmptyLessons,
+  });
+
+  final bool showEmptyLessons;
+
+  @override
+  List<Object> get props => [showEmptyLessons];
+}
+
 class SetSelectedSchedule extends ScheduleEvent {
   const SetSelectedSchedule({
     required this.selectedSchedule,

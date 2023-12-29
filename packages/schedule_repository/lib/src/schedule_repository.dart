@@ -45,10 +45,10 @@ class GetClassroomScheduleFailure extends ScheduleFailure {
 class ScheduleRepository {
   /// {@macro news_repository}
   const ScheduleRepository({
-    required ScheduleApiClient apiClient,
+    required ApiClient apiClient,
   }) : _apiClient = apiClient;
 
-  final ScheduleApiClient _apiClient;
+  final ApiClient _apiClient;
 
   /// Requests schedule for the provided [group]. Group is a unique name.
   Future<ScheduleResponse> getSchedule({
