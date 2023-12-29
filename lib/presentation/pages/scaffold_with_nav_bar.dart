@@ -42,10 +42,13 @@ class ScaffoldWithNavBar extends StatelessWidget {
             body: Consumer<AppNotifier>(
               builder: (_, value, child) => navigationShell,
             ),
-            bottomNavigationBar: AppBottomNavigationBar(
-              index: navigationShell.currentIndex,
-              onClick: (index) => _setActiveIndex(index),
-            ),
+            bottomNavigationBar:
+                navigationShell.route.toString().contains('home')
+                    ? null
+                    : AppBottomNavigationBar(
+                        index: navigationShell.currentIndex,
+                        onClick: (index) => _setActiveIndex(index),
+                      ),
           );
         }
       },

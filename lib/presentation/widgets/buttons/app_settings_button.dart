@@ -11,10 +11,9 @@ class AppSettingsButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      borderRadius: BorderRadius.circular(5),
-      onTap: onClick,
-      child: Container(
+    return IconButton(
+      onPressed: onClick,
+      icon: Container(
         padding: const EdgeInsets.all(4),
         child: SvgPicture.asset(
           'assets/icons/filter.svg',

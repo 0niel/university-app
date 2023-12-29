@@ -64,7 +64,31 @@ class NewsDetailsPage extends StatelessWidget {
                           data: newsItem.text,
                           style: {
                             "body": Style(
-                                fontStyle: AppTextStyle.bodyRegular.fontStyle),
+                              color: AppTheme.colors.active,
+                              fontStyle: AppTextStyle.bodyRegular
+                                  .copyWith(
+                                    color: AppTheme.colors.active,
+                                  )
+                                  .fontStyle,
+                              fontSize: FontSize(16),
+                              lineHeight: const LineHeight(1.5),
+                            ),
+                            "a": Style(
+                              color: AppTheme.colors.colorful02,
+                              fontStyle: AppTextStyle.bodyRegular.fontStyle,
+                              fontSize: FontSize(16),
+                              lineHeight: const LineHeight(1.5),
+                            ),
+                            "p": Style(
+                              color: AppTheme.colors.active,
+                              fontStyle: AppTextStyle.bodyRegular
+                                  .copyWith(
+                                    color: AppTheme.colors.active,
+                                  )
+                                  .fontStyle,
+                              fontSize: FontSize(16),
+                              lineHeight: const LineHeight(1.5),
+                            ),
                           },
                           extensions: const [
                             // to display the YouTube video player
@@ -137,7 +161,6 @@ class _NewsItemInfo extends StatelessWidget {
                     style: AppTextStyle.body
                         .copyWith(color: AppTheme.colors.deactive),
                   ),
-                  const SizedBox(height: 4),
                   Text(
                     DateFormat.MMMd('ru_RU').format(date).toString(),
                     style: AppTextStyle.titleM

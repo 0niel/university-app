@@ -15,7 +15,7 @@ class StoryItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        context.go('/schedule/story/$storyIndex', extra: stories);
+        context.push('/story/$storyIndex', extra: stories);
       },
       child: Hero(
         tag: stories[storyIndex].title,

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
-import 'fullscreen_image.dart';
 
 class ImagesHorizontalSlider extends StatelessWidget {
   const ImagesHorizontalSlider({Key? key, required this.images})
@@ -20,14 +20,7 @@ class ImagesHorizontalSlider extends StatelessWidget {
           (index) {
             return GestureDetector(
               onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => FullScreenImage(
-                      imageUrl: images[index],
-                    ),
-                  ),
-                );
+                context.push('/image', extra: images);
               },
               child: Padding(
                 padding: const EdgeInsets.only(left: 24),
@@ -43,8 +36,9 @@ class ImagesHorizontalSlider extends StatelessWidget {
               ),
             );
           },
-        )..add(const SizedBox(
-            width: 18)), // Right padding for the outermost element
+        )..add(
+            const SizedBox(width: 18),
+          ), // Right padding for the outermost element
       ),
     );
   }
