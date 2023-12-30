@@ -207,8 +207,8 @@ class _CalendarState extends State<Calendar> {
                       _selectedWeek = currentNewWeek;
                       _selectedDay = selectedDay;
                       _focusedDay = Calendar.getDayInAvailableRange(focusedDay);
+                      _selectedPage = Calendar.getPageIndex(_selectedDay);
                     });
-                    _selectedPage = Calendar.getPageIndex(_selectedDay);
                     if (widget.pageViewController.hasClients) {
                       widget.pageViewController.jumpToPage(_selectedPage);
                     }
@@ -235,10 +235,10 @@ class _CalendarState extends State<Calendar> {
                     _selectedDay = currentDate;
                     _selectedWeek = CalendarUtils.getCurrentWeek(
                         mCurrentDate: _selectedDay);
+                    _selectedPage = Calendar.getPageIndex(_selectedDay);
                   });
-                  _selectedPage = Calendar.getPageIndex(_selectedDay);
                   if (widget.pageViewController.hasClients) {
-                    widget.pageViewController.jumpToPage(_selectedPage);
+                    widget.pageViewController.jumpToPage(_selectedPage - 1);
                   }
                 }
               },

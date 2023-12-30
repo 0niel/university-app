@@ -1,6 +1,6 @@
-
 import 'package:community_repository/community_repository.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:rtu_mirea_app/sponsors/sponsors.dart';
 
@@ -52,7 +52,7 @@ class _SponsorsView extends StatelessWidget {
 
                 return SponsorCard(sponsor: sponsor);
               },
-            ),
+            ).animate(interval: 80.ms).fade(duration: 200.ms),
           );
         } else {
           return const SizedBox.shrink();

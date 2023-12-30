@@ -99,9 +99,11 @@ class _SchedulePageState extends State<SchedulePage> {
               body: EventsPageView(
                 controller: _schedulePageController,
                 itemBuilder: (context, index) {
+                  final day =
+                      Calendar.firstCalendarDay.add(Duration(days: index));
                   final schedules = Calendar.getSchedulePartsByDay(
                     schedule: state.selectedSchedule?.schedule ?? [],
-                    day: Calendar.firstCalendarDay.add(Duration(days: index)),
+                    day: day,
                   );
 
                   final holiday = schedules.firstWhereOrNull(
@@ -111,6 +113,10 @@ class _SchedulePageState extends State<SchedulePage> {
                   if (holiday != null) {
                     return HolidayPage(
                         title: (holiday as HolidaySchedulePart).title);
+                  }
+
+                  if (day.weekday == DateTime.sunday) {
+                    return const HolidayPage(title: 'Выходной');
                   }
 
                   final lessons =
