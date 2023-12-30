@@ -1,4 +1,5 @@
 import 'package:bloc/bloc.dart';
+import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:equatable/equatable.dart';
 import 'package:rtu_mirea_app/domain/entities/news_item.dart';
 import 'package:rtu_mirea_app/domain/usecases/get_news.dart';
@@ -12,7 +13,13 @@ class NewsBloc extends Bloc<NewsEvent, NewsState> {
     required this.getNews,
     required this.getNewsTags,
   }) : super(NewsInitial()) {
-    on<NewsLoadEvent>(_onNewsLoadEvent);
+    on<NewsLoadEvent>(
+      _onNewsLoadEvent,
+
+      // This transformer allows process only the latest event and cancel
+      // previous event handlers
+      transformer: restartable(),
+    );
   }
 
   final pageSize = 10;
