@@ -32,7 +32,8 @@ class Calendar extends StatefulWidget {
 
   /// Get page index by date. Used to set up [PageController.initialPage].
   static int getPageIndex(DateTime date) {
-    return date.difference(Calendar.firstCalendarDay).inDays + 1;
+    // +1 because first day is 1, not 0
+    return date.difference(firstCalendarDay).inDays + 1;
   }
 
   /// First day of calendar. Used to set up [TableCalendar.firstDay].
@@ -47,7 +48,7 @@ class Calendar extends StatefulWidget {
 
   /// Check if the day is in range from [Calendar.firstCalendarDay] to
   /// [Calendar.lastCalendarDay]. If not, return first or last day in range.
-  static DateTime isDayInAvailableRange(DateTime newDate) {
+  static DateTime getDayInAvailableRange(DateTime newDate) {
     if (newDate.isAfter(Calendar.lastCalendarDay)) {
       return Calendar.firstCalendarDay;
     } else if (newDate.isBefore(Calendar.firstCalendarDay)) {
@@ -73,24 +74,28 @@ class _CalendarState extends State<Calendar> {
   void initState() {
     super.initState();
 
-    _focusedDay = Calendar.isDayInAvailableRange(DateTime.now());
+    _focusedDay = Calendar.getDayInAvailableRange(DateTime.now());
 
     _selectedPage = Calendar.getPageIndex(_focusedDay);
 
     widget.pageViewController.addListener(() {
       if (mounted) {
         setState(() {
+          if (_selectedPage == widget.pageViewController.page!.round()) {
+            return;
+          }
+
           _selectedPage = widget.pageViewController.page!.round();
           _selectedDay =
               Calendar.firstCalendarDay.add(Duration(days: _selectedPage));
           _selectedWeek =
               CalendarUtils.getCurrentWeek(mCurrentDate: _selectedDay);
-          _focusedDay = Calendar.isDayInAvailableRange(_selectedDay);
+          _focusedDay = Calendar.getDayInAvailableRange(_selectedDay);
         });
       }
     });
 
-    _selectedDay = Calendar.isDayInAvailableRange(DateTime.now());
+    _selectedDay = Calendar.getDayInAvailableRange(DateTime.now());
     _selectedWeek = CalendarUtils.getCurrentWeek();
   }
 
@@ -201,12 +206,12 @@ class _CalendarState extends State<Calendar> {
                     setState(() {
                       _selectedWeek = currentNewWeek;
                       _selectedDay = selectedDay;
-                      _focusedDay = Calendar.isDayInAvailableRange(focusedDay);
-                      _selectedPage = Calendar.getPageIndex(_selectedDay);
-                      if (widget.pageViewController.hasClients) {
-                        widget.pageViewController.jumpToPage(_selectedPage);
-                      }
+                      _focusedDay = Calendar.getDayInAvailableRange(focusedDay);
                     });
+                    _selectedPage = Calendar.getPageIndex(_selectedDay);
+                    if (widget.pageViewController.hasClients) {
+                      widget.pageViewController.jumpToPage(_selectedPage);
+                    }
                   }
                 }
               },
@@ -220,21 +225,21 @@ class _CalendarState extends State<Calendar> {
               },
               onPageChanged: (focusedDay) {
                 // No need to call `setState()` here
-                _focusedDay = Calendar.isDayInAvailableRange(focusedDay);
+                _focusedDay = Calendar.getDayInAvailableRange(focusedDay);
               },
               onHeaderTapped: (date) {
                 final currentDate = DateTime.now();
                 if (mounted) {
                   setState(() {
-                    _focusedDay = Calendar.isDayInAvailableRange(currentDate);
+                    _focusedDay = Calendar.getDayInAvailableRange(currentDate);
                     _selectedDay = currentDate;
                     _selectedWeek = CalendarUtils.getCurrentWeek(
                         mCurrentDate: _selectedDay);
-                    _selectedPage = Calendar.getPageIndex(_selectedDay);
-                    if (widget.pageViewController.hasClients) {
-                      widget.pageViewController.jumpToPage(_selectedPage);
-                    }
                   });
+                  _selectedPage = Calendar.getPageIndex(_selectedDay);
+                  if (widget.pageViewController.hasClients) {
+                    widget.pageViewController.jumpToPage(_selectedPage);
+                  }
                 }
               },
             ),
