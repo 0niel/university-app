@@ -36,6 +36,20 @@ class AppTheme {
           AppTextStyle.title.copyWith(color: darkThemeColors.active),
       iconTheme: IconThemeData(color: blackThemeColors.active),
     ),
+    chipTheme: ChipThemeData(
+      backgroundColor: darkThemeColors.background02,
+      disabledColor: darkThemeColors.background02,
+      selectedColor: darkThemeColors.background02,
+      secondarySelectedColor: darkThemeColors.background02,
+      padding: const EdgeInsets.all(8),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
+      labelStyle: AppTextStyle.chip.copyWith(color: darkThemeColors.active),
+      secondaryLabelStyle:
+          AppTextStyle.chip.copyWith(color: darkThemeColors.active),
+      brightness: Brightness.dark,
+    ),
     cardTheme: CardTheme(
       color: darkThemeColors.background01,
       elevation: 4,
@@ -55,15 +69,31 @@ class AppTheme {
             ),
     listTileTheme: ListTileThemeData(
       tileColor: darkThemeColors.background01,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
+      contentPadding: EdgeInsets.zero,
+      leadingAndTrailingTextStyle: AppTextStyle.chip.copyWith(
+        color: AppTheme.colors.active,
+      ),
+      titleTextStyle: AppTextStyle.chip.copyWith(
+        color: AppTheme.colors.deactive,
+      ),
+      visualDensity: const VisualDensity(vertical: 4),
+      subtitleTextStyle: AppTextStyle.titleM.copyWith(
+        color: darkThemeColors.active,
       ),
     ),
     dividerTheme: DividerThemeData(
       color: darkThemeColors.background02,
       thickness: 0.5,
       space: 0,
+    ),
+    snackBarTheme: SnackBarThemeData(
+      backgroundColor: darkThemeColors.background02,
+      contentTextStyle: AppTextStyle.bodyBold.copyWith(
+        color: darkThemeColors.active,
+      ),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
     ),
     colorScheme: ColorScheme(
       background: darkThemeColors.background01,
@@ -105,15 +135,45 @@ class AppTheme {
               selectedLabelStyle: AppTextStyle.captionL,
               unselectedLabelStyle: AppTextStyle.captionS,
             ),
+    chipTheme: ChipThemeData(
+      backgroundColor: lightThemeColors.background02,
+      disabledColor: lightThemeColors.background02,
+      selectedColor: lightThemeColors.background02,
+      secondarySelectedColor: lightThemeColors.background02,
+      padding: const EdgeInsets.all(8),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
+      labelStyle: AppTextStyle.chip.copyWith(color: lightThemeColors.active),
+      secondaryLabelStyle:
+          AppTextStyle.chip.copyWith(color: lightThemeColors.active),
+      brightness: Brightness.light,
+    ),
     listTileTheme: ListTileThemeData(
       tileColor: lightThemeColors.background01,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+      contentPadding: EdgeInsets.zero,
+      leadingAndTrailingTextStyle: AppTextStyle.chip.copyWith(
+        color: AppTheme.colors.active,
+      ),
+      titleTextStyle: AppTextStyle.chip.copyWith(
+        color: AppTheme.colors.deactive,
+      ),
+      visualDensity: const VisualDensity(vertical: 4),
+      subtitleTextStyle: AppTextStyle.titleM.copyWith(
+        color: lightThemeColors.active,
+      ),
+    ),
+    snackBarTheme: SnackBarThemeData(
+      backgroundColor: lightThemeColors.background02,
+      contentTextStyle: AppTextStyle.bodyBold.copyWith(
+        color: lightThemeColors.active,
+      ),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
       ),
     ),
     dividerTheme: DividerThemeData(
-      color: lightThemeColors.background02,
+      color: lightThemeColors.deactiveDarker.withOpacity(0.25),
       thickness: 0.5,
       space: 0,
     ),

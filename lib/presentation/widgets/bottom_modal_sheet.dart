@@ -35,14 +35,12 @@ class BottomModalSheet extends StatelessWidget {
         ),
       ),
       context: context,
-      builder: (context) => SafeArea(
-        child: SizedBox(
-          height: MediaQuery.of(context).size.height * 0.6,
-          child: BottomModalSheet(
-            title: title,
-            description: description,
-            child: child,
-          ),
+      builder: (context) => SizedBox(
+        height: MediaQuery.of(context).size.height * 0.6,
+        child: BottomModalSheet(
+          title: title,
+          description: description,
+          child: child,
         ),
       ),
     );
