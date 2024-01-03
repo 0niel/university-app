@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
@@ -74,16 +75,17 @@ class _StoriesPageViewState extends State<StoriesPageView> {
                           width: MediaQuery.of(context).size.width,
                           height: MediaQuery.of(context).size.height,
                           child: page.media.formats != null
-                              ? Image.network(
-                                  MediaQuery.of(context).size.width > 580
-                                      ? StrapiUtils.getLargestImageUrl(
-                                          page.media.formats!)
-                                      : StrapiUtils.getMediumImageUrl(
-                                          page.media.formats!),
+                              ? CachedNetworkImage(
+                                  imageUrl:
+                                      MediaQuery.of(context).size.width > 580
+                                          ? StrapiUtils.getLargestImageUrl(
+                                              page.media.formats!)
+                                          : StrapiUtils.getMediumImageUrl(
+                                              page.media.formats!),
                                   fit: BoxFit.cover,
                                 )
-                              : Image.network(
-                                  page.media.url,
+                              : CachedNetworkImage(
+                                  imageUrl: page.media.url,
                                   fit: BoxFit.cover,
                                 ),
                         ),

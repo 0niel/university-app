@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:rtu_mirea_app/domain/entities/story.dart';
@@ -30,11 +31,11 @@ class StoryItem extends StatelessWidget {
             image: DecorationImage(
               fit: BoxFit.cover,
               image: stories[storyIndex].preview.formats != null
-                  ? NetworkImage(
+                  ? CachedNetworkImageProvider(
                       stories[storyIndex].preview.formats!.small != null
                           ? stories[storyIndex].preview.formats!.small!.url
                           : stories[storyIndex].preview.formats!.thumbnail.url)
-                  : NetworkImage(stories[storyIndex].preview.url),
+                  : CachedNetworkImageProvider(stories[storyIndex].preview.url),
               colorFilter: ColorFilter.mode(
                   AppTheme.colors.background02.withOpacity(0.15),
                   BlendMode.dstOut),
