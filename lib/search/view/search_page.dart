@@ -9,14 +9,16 @@ import '../bloc/search_bloc.dart';
 import '../widgets/widgets.dart';
 
 class SearchPage extends StatelessWidget {
-  const SearchPage({super.key});
+  const SearchPage({super.key, this.query});
+
+  final String? query;
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider<SearchBloc>(
       create: (context) => SearchBloc(
         scheduleRepository: context.read<ScheduleRepository>(),
-      )..add(const SearchQueryChanged()),
+      )..add(SearchQueryChanged(searchQuery: query ?? '')),
       child: Scaffold(
         backgroundColor: AppTheme.colors.background01,
         appBar: AppBar(
@@ -26,8 +28,13 @@ class SearchPage extends StatelessWidget {
             "Поиск",
           ),
         ),
-        body: const SafeArea(
-          child: Padding(padding: EdgeInsets.all(16), child: SearchView()),
+        body: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: SearchView(
+              query: query,
+            ),
+          ),
         ),
       ),
     );
@@ -35,14 +42,17 @@ class SearchPage extends StatelessWidget {
 }
 
 class SearchView extends StatefulWidget {
-  const SearchView({super.key});
+  const SearchView({super.key, this.query});
+
+  final String? query;
 
   @override
   State<SearchView> createState() => _SearchViewState();
 }
 
 class _SearchViewState extends State<SearchView> {
-  final TextEditingController _controller = TextEditingController();
+  late final TextEditingController _controller =
+      TextEditingController(text: widget.query);
 
   @override
   void initState() {
@@ -147,7 +157,10 @@ class _SearchViewState extends State<SearchView> {
                         ],
                   if (state.status == SearchStatus.loading)
                     const Center(
-                      child: CircularProgressIndicator(),
+                      child: Padding(
+                        padding: EdgeInsets.all(8.0),
+                        child: CircularProgressIndicator(),
+                      ),
                     ),
                 ],
               ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:go_router/go_router.dart';
 import 'package:rtu_mirea_app/presentation/typography.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:university_app_server_api/client.dart';
@@ -42,7 +43,7 @@ class LessonCard extends StatelessWidget {
     }
   }
 
-  String _getLessonTypeName(LessonType lessonType) {
+  static String getLessonTypeName(LessonType lessonType) {
     switch (lessonType) {
       case LessonType.lecture:
         return 'Лекция';
@@ -90,164 +91,175 @@ class LessonCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(12.0),
       ),
       surfaceTintColor: Colors.transparent,
-      child: Container(
-        constraints: const BoxConstraints(minHeight: 75),
-        padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12),
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(4),
-                          color: getColorByType(lesson.lessonType),
-                        ),
-                        height: 7,
-                        width: 7,
-                      ),
-                      const SizedBox(
-                        width: 8,
-                      ),
-                      Animate(autoPlay: false).toggle(
-                        duration: const Duration(milliseconds: 150),
-                        builder: (_, value, __) => Text(
-                          state.isMiniature
-                              ? '${_getLessonTypeName(lesson.lessonType)} в ${lesson.classrooms.map((e) => e.name).join(', ')}'
-                              : _getLessonTypeName(lesson.lessonType),
-                          style: AppTextStyle.captionL.copyWith(
-                            color: AppTheme.colors.deactive,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(
-                    height: 4,
-                  ),
-                  Text(
-                    lesson.subject,
-                    style: AppTextStyle.titleM,
-                    maxLines: 8,
-                    overflow: TextOverflow.visible,
-                  ),
-                  const SizedBox(
-                    height: 4,
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Text(
-                        '${lesson.lessonBells.number} пара',
-                        style: AppTextStyle.body
-                            .copyWith(color: AppTheme.colors.colorful03),
-                      ),
-                      Text(
-                        'в ${lesson.lessonBells.startTime} - ${lesson.lessonBells.endTime}',
-                        style: AppTextStyle.body.copyWith(
-                          color: AppTheme.colors.colorful03,
-                        ),
-                      ),
-                    ],
-                  ),
-                  Column(
+      child: Theme(
+        data: Theme.of(context).copyWith(
+          splashColor: Colors.transparent,
+          highlightColor: Colors.transparent,
+        ),
+        child: InkWell(
+          onTap: () {
+            context.go('/schedule/details', extra: lesson);
+          },
+          child: Container(
+            constraints: const BoxConstraints(minHeight: 75),
+            padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Divider(
-                        color: AppTheme.colors.deactive.withOpacity(0.1),
-                        thickness: 1,
-                        height: 30,
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 12),
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(4),
+                              color: getColorByType(lesson.lessonType),
+                            ),
+                            height: 7,
+                            width: 7,
+                          ),
+                          const SizedBox(
+                            width: 8,
+                          ),
+                          Animate(autoPlay: false).toggle(
+                            duration: const Duration(milliseconds: 150),
+                            builder: (_, value, __) => Text(
+                              state.isMiniature
+                                  ? '${getLessonTypeName(lesson.lessonType)} в ${lesson.classrooms.map((e) => e.name).join(', ')}'
+                                  : getLessonTypeName(lesson.lessonType),
+                              style: AppTextStyle.captionL.copyWith(
+                                color: AppTheme.colors.deactive,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                      if (lesson.classrooms.isNotEmpty) ...[
-                        const SizedBox(
-                          height: 4,
-                        ),
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            FaIcon(
-                              FontAwesomeIcons.mapLocation,
-                              size: 12,
-                              color: AppTheme.colors.deactive,
+                      const SizedBox(
+                        height: 4,
+                      ),
+                      Text(
+                        lesson.subject,
+                        style: AppTextStyle.titleM,
+                        maxLines: 8,
+                        overflow: TextOverflow.visible,
+                      ),
+                      const SizedBox(
+                        height: 4,
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Text(
+                            '${lesson.lessonBells.number} пара',
+                            style: AppTextStyle.body
+                                .copyWith(color: AppTheme.colors.colorful03),
+                          ),
+                          Text(
+                            'в ${lesson.lessonBells.startTime} - ${lesson.lessonBells.endTime}',
+                            style: AppTextStyle.body.copyWith(
+                              color: AppTheme.colors.colorful03,
                             ),
+                          ),
+                        ],
+                      ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Divider(
+                            color: AppTheme.colors.deactive.withOpacity(0.1),
+                            thickness: 1,
+                            height: 30,
+                          ),
+                          if (lesson.classrooms.isNotEmpty) ...[
                             const SizedBox(
-                              width: 6.5,
+                              height: 4,
                             ),
-                            Expanded(
-                              child: Text(
-                                _getClassroomNames(lesson.classrooms),
-                                style: AppTextStyle.body
-                                    .copyWith(color: AppTheme.colors.active),
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                              ),
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                FaIcon(
+                                  FontAwesomeIcons.mapLocation,
+                                  size: 12,
+                                  color: AppTheme.colors.deactive,
+                                ),
+                                const SizedBox(
+                                  width: 6.5,
+                                ),
+                                Expanded(
+                                  child: Text(
+                                    _getClassroomNames(lesson.classrooms),
+                                    style: AppTextStyle.body.copyWith(
+                                        color: AppTheme.colors.active),
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
                             ),
                           ],
-                        ),
-                      ],
-                      if (lesson.groups != null &&
-                          lesson.groups!.length > 1) ...[
-                        const SizedBox(
-                          height: 4,
-                        ),
-                        Row(
-                          children: [
-                            FaIcon(
-                              FontAwesomeIcons.users,
-                              size: 12,
-                              color: AppTheme.colors.deactive,
-                            ),
+                          if (lesson.groups != null &&
+                              lesson.groups!.length > 1) ...[
                             const SizedBox(
-                              width: 6,
+                              height: 4,
                             ),
-                            Expanded(
-                              child: Text(
-                                lesson.groups?.join(', ') ?? '',
-                                style: AppTextStyle.body
-                                    .copyWith(color: AppTheme.colors.deactive),
-                              ),
+                            Row(
+                              children: [
+                                FaIcon(
+                                  FontAwesomeIcons.users,
+                                  size: 12,
+                                  color: AppTheme.colors.deactive,
+                                ),
+                                const SizedBox(
+                                  width: 6,
+                                ),
+                                Expanded(
+                                  child: Text(
+                                    lesson.groups?.join(', ') ?? '',
+                                    style: AppTextStyle.body.copyWith(
+                                        color: AppTheme.colors.deactive),
+                                  ),
+                                ),
+                              ],
                             ),
                           ],
-                        ),
-                      ],
-                      if (lesson.teachers.isNotEmpty) ...[
-                        const SizedBox(
-                          height: 4,
-                        ),
-                        Text(
-                          lesson.teachers.map((e) => e.name).join(', '),
-                          style: AppTextStyle.body
-                              .copyWith(color: AppTheme.colors.deactive),
-                        ),
-                      ],
+                          if (lesson.teachers.isNotEmpty) ...[
+                            const SizedBox(
+                              height: 4,
+                            ),
+                            Text(
+                              lesson.teachers.map((e) => e.name).join(', '),
+                              style: AppTextStyle.body
+                                  .copyWith(color: AppTheme.colors.deactive),
+                            ),
+                          ],
+                        ],
+                      )
+                          .animate(
+                        autoPlay: false,
+                      )
+                          .toggle(
+                        builder: (_, value, child) {
+                          final ch = AnimatedSize(
+                            duration: const Duration(milliseconds: 150),
+                            child: state.isMiniature ? const SizedBox() : child,
+                          );
+                          return ch;
+                        },
+                      ),
                     ],
-                  )
-                      .animate(
-                    autoPlay: false,
-                  )
-                      .toggle(
-                    builder: (_, value, child) {
-                      final ch = AnimatedSize(
-                        duration: const Duration(milliseconds: 150),
-                        child: state.isMiniature ? const SizedBox() : child,
-                      );
-                      return ch;
-                    },
                   ),
-                ],
-              ),
+                ),
+                const SizedBox(
+                  width: 8,
+                ),
+              ],
             ),
-            const SizedBox(
-              width: 8,
-            ),
-          ],
+          ),
         ),
       ),
     );

@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:rtu_mirea_app/presentation/widgets/bottom_modal_sheet.dart';
 import 'package:rtu_mirea_app/schedule/bloc/schedule_bloc.dart';
+import 'package:rtu_mirea_app/schedule/models/models.dart';
 import 'package:rtu_mirea_app/stories/view/stories_view.dart';
 import 'package:university_app_server_api/client.dart';
 
@@ -35,6 +36,20 @@ class _SchedulePageState extends State<SchedulePage> {
     super.dispose();
   }
 
+  String get _getAppBarTitle {
+    final schedule = context.read<ScheduleBloc>().state.selectedSchedule;
+
+    if (schedule is SelectedGroupSchedule) {
+      return 'Расписание ${schedule.group.name}';
+    } else if (schedule is SelectedTeacherSchedule) {
+      return 'Расписание ${schedule.teacher.name}';
+    } else if (schedule is SelectedClassroomSchedule) {
+      return 'Расписание ${schedule.classroom.name}';
+    } else {
+      return 'Расписание';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<ScheduleBloc, ScheduleState>(
@@ -59,8 +74,8 @@ class _SchedulePageState extends State<SchedulePage> {
               headerSliverBuilder: (_, __) => [
                 SliverAppBar(
                   pinned: false,
-                  title: const Text(
-                    'Расписание',
+                  title: Text(
+                    _getAppBarTitle,
                   ),
                   actions: [
                     SizedBox(

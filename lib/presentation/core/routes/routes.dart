@@ -22,12 +22,14 @@ import 'package:rtu_mirea_app/presentation/pages/profile/profile_scores_page.dar
 import 'package:rtu_mirea_app/presentation/pages/profile/profile_page.dart';
 import 'package:rtu_mirea_app/presentation/pages/profile/profile_settings_page.dart';
 import 'package:rtu_mirea_app/presentation/widgets/images_view_gallery.dart';
+import 'package:rtu_mirea_app/schedule/view/schedule_details_page.dart';
 // import 'package:rtu_mirea_app/rating_system_calculator/view/rating_system_calculator_page.dart';
 import 'package:rtu_mirea_app/schedule/view/schedule_page.dart';
 import 'package:rtu_mirea_app/search/view/search_page.dart';
 import 'package:rtu_mirea_app/services/view/view.dart';
 import 'package:rtu_mirea_app/stories/stories.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
+import 'package:university_app_server_api/client.dart';
 
 final GlobalKey<NavigatorState> _rootNavigatorKey =
     GlobalKey<NavigatorState>(debugLabel: 'root');
@@ -79,7 +81,16 @@ GoRouter createRouter() => GoRouter(
                 routes: [
                   GoRoute(
                     path: 'search',
-                    builder: (context, state) => const SearchPage(),
+                    builder: (context, state) =>
+                        SearchPage(query: state.extra as String?),
+                  ),
+                  GoRoute(
+                    path: 'details',
+                    builder: (context, state) {
+                      return ScheduleDetailsPage(
+                        lesson: state.extra as LessonSchedulePart,
+                      );
+                    },
                   ),
                 ],
               ),
