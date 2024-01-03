@@ -34,13 +34,10 @@ class _ScheduleDetailsPageState extends State<ScheduleDetailsPage> {
           'Предмет',
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(24),
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: _buildPageContent(),
-          ),
+      body: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: _buildPageContent(),
         ),
       ),
     );
@@ -199,7 +196,14 @@ class _ScheduleDetailsPageState extends State<ScheduleDetailsPage> {
   // Build the teachers
   ListTile _buildTeachers() {
     return ListTile(
-      title: Text('Преподаватели'.toUpperCase()),
+      title: Padding(
+        padding: EdgeInsets.symmetric(
+          horizontal:
+              Theme.of(context).listTileTheme.contentPadding!.horizontal / 2,
+        ),
+        child: Text('Преподаватели'.toUpperCase()),
+      ),
+      contentPadding: EdgeInsets.zero,
       subtitle: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: widget.lesson.teachers.map((teacher) {
@@ -219,7 +223,6 @@ class _ScheduleDetailsPageState extends State<ScheduleDetailsPage> {
                   )
                 : null,
             dense: true,
-            contentPadding: EdgeInsets.zero,
             visualDensity: VisualDensity.compact,
             trailing: const Icon(
               Icons.chevron_right_sharp,

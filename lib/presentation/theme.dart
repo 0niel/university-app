@@ -69,7 +69,7 @@ class AppTheme {
             ),
     listTileTheme: ListTileThemeData(
       tileColor: darkThemeColors.background01,
-      contentPadding: EdgeInsets.zero,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 24),
       leadingAndTrailingTextStyle: AppTextStyle.chip.copyWith(
         color: AppTheme.colors.active,
       ),
@@ -151,7 +151,7 @@ class AppTheme {
     ),
     listTileTheme: ListTileThemeData(
       tileColor: lightThemeColors.background01,
-      contentPadding: EdgeInsets.zero,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 24),
       leadingAndTrailingTextStyle: AppTextStyle.chip.copyWith(
         color: AppTheme.colors.active,
       ),
