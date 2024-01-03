@@ -180,12 +180,15 @@ class LessonCard extends StatelessWidget {
                               height: 4,
                             ),
                             Row(
-                              crossAxisAlignment: CrossAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                FaIcon(
-                                  FontAwesomeIcons.mapLocation,
-                                  size: 12,
-                                  color: AppTheme.colors.deactive,
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 2),
+                                  child: FaIcon(
+                                    FontAwesomeIcons.mapLocation,
+                                    size: 12,
+                                    color: AppTheme.colors.deactive,
+                                  ),
                                 ),
                                 const SizedBox(
                                   width: 6.5,
@@ -208,11 +211,15 @@ class LessonCard extends StatelessWidget {
                               height: 4,
                             ),
                             Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                FaIcon(
-                                  FontAwesomeIcons.users,
-                                  size: 12,
-                                  color: AppTheme.colors.deactive,
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 2),
+                                  child: FaIcon(
+                                    FontAwesomeIcons.users,
+                                    size: 12,
+                                    color: AppTheme.colors.deactive,
+                                  ),
                                 ),
                                 const SizedBox(
                                   width: 6,
@@ -231,10 +238,22 @@ class LessonCard extends StatelessWidget {
                             const SizedBox(
                               height: 4,
                             ),
-                            Text(
-                              lesson.teachers.map((e) => e.name).join(', '),
-                              style: AppTextStyle.body
-                                  .copyWith(color: AppTheme.colors.deactive),
+                            Row(
+                              children: [
+                                FaIcon(
+                                  FontAwesomeIcons.userTie,
+                                  size: 12,
+                                  color: AppTheme.colors.deactive,
+                                ),
+                                const SizedBox(
+                                  width: 9,
+                                ),
+                                Text(
+                                  lesson.teachers.map((e) => e.name).join(', '),
+                                  style: AppTextStyle.body.copyWith(
+                                      color: AppTheme.colors.deactive),
+                                ),
+                              ],
                             ),
                           ],
                         ],
