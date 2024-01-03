@@ -42,7 +42,14 @@ class _SchedulePageState extends State<SchedulePage> {
     if (schedule is SelectedGroupSchedule) {
       return 'Расписание ${schedule.group.name}';
     } else if (schedule is SelectedTeacherSchedule) {
-      return 'Расписание ${schedule.teacher.name}';
+      var splittedName = schedule.teacher.name.split(' ');
+      if (splittedName.length == 3) {
+        return 'Расписание ${splittedName[0]} ${splittedName[1][0]}. ${splittedName[2][0]}.';
+      } else if (splittedName.length == 2) {
+        return 'Расписание ${splittedName[0]} ${splittedName[1][0]}.';
+      } else {
+        return 'Расписание ${schedule.teacher.name}';
+      }
     } else if (schedule is SelectedClassroomSchedule) {
       return 'Расписание ${schedule.classroom.name}';
     } else {
