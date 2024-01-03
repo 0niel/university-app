@@ -87,9 +87,16 @@ GoRouter createRouter() => GoRouter(
                   GoRoute(
                     path: 'details',
                     builder: (context, state) {
-                      return ScheduleDetailsPage(
-                        lesson: state.extra as LessonSchedulePart,
-                      );
+                      try {
+                        final json = state.extra as Map<String, dynamic>;
+                        return ScheduleDetailsPage(
+                          lesson: LessonSchedulePart.fromJson(json),
+                        );
+                      } catch (e) {
+                        return ScheduleDetailsPage(
+                          lesson: state.extra as LessonSchedulePart,
+                        );
+                      }
                     },
                   ),
                 ],
