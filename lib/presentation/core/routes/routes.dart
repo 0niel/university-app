@@ -88,13 +88,18 @@ GoRouter createRouter() => GoRouter(
                     path: 'details',
                     builder: (context, state) {
                       try {
-                        final json = state.extra as Map<String, dynamic>;
+                        final extra =
+                            state.extra as (Map<String, dynamic>, DateTime);
                         return ScheduleDetailsPage(
-                          lesson: LessonSchedulePart.fromJson(json),
+                          lesson: LessonSchedulePart.fromJson(extra.$1),
+                          selectedDate: extra.$2,
                         );
                       } catch (e) {
+                        final extra =
+                            state.extra as (LessonSchedulePart, DateTime);
                         return ScheduleDetailsPage(
-                          lesson: state.extra as LessonSchedulePart,
+                          lesson: extra.$1,
+                          selectedDate: extra.$2,
                         );
                       }
                     },

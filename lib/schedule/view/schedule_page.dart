@@ -26,7 +26,7 @@ class _SchedulePageState extends State<SchedulePage> {
   void initState() {
     super.initState();
     _schedulePageController = PageController(
-      initialPage: Calendar.getPageIndex(DateTime.now()),
+      initialPage: Calendar.getPageIndex(Calendar.getNowWithoutTime()),
     );
   }
 
@@ -158,7 +158,15 @@ class _SchedulePageState extends State<SchedulePage> {
                               horizontal: 16.0,
                               vertical: 8.0,
                             ),
-                            child: LessonCard(lesson: lesson),
+                            child: LessonCard(
+                              lesson: lesson,
+                              onTap: (lesson) {
+                                context.go(
+                                  '/schedule/details',
+                                  extra: (lesson, day),
+                                );
+                              },
+                            ),
                           );
                         }
 
@@ -182,7 +190,15 @@ class _SchedulePageState extends State<SchedulePage> {
                               horizontal: 16.0,
                               vertical: 8.0,
                             ),
-                            child: LessonCard(lesson: e),
+                            child: LessonCard(
+                              lesson: e,
+                              onTap: (lesson) {
+                                context.go(
+                                  '/schedule/details',
+                                  extra: (lesson, day),
+                                );
+                              },
+                            ),
                           ),
                         )
                         .toList(),

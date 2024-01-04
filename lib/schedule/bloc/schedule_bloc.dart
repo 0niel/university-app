@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:equatable/equatable.dart';
+import 'package:get/get.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:schedule_repository/schedule_repository.dart';
@@ -32,9 +33,43 @@ class ScheduleBloc extends HydratedBloc<ScheduleEvent, ScheduleState> {
     on<SetSelectedSchedule>(_onSetSelectedSchedule);
     on<DeleteSchedule>(_onRemoveSavedSchedule);
     on<ScheduleSetEmptyLessonsDisplaying>(_onSetEmptyLessonsDisplaying);
+    on<SetLessonComment>(_onSetLessonComment);
   }
 
   final ScheduleRepository _scheduleRepository;
+
+  Future<void> _onSetLessonComment(
+    SetLessonComment event,
+    Emitter<ScheduleState> emit,
+  ) async {
+    final comment = state.comments.firstWhereOrNull(
+      (comment) =>
+          event.comment.lessonDate == comment.lessonDate &&
+          event.comment.lessonBells == comment.lessonBells,
+    );
+
+    if (event.comment.text.isEmpty && comment == null) {
+      return;
+    }
+
+    List<ScheduleComment> updatedComments = state.comments
+        .where(
+          (element) =>
+              element.lessonDate != event.comment.lessonDate ||
+              element.lessonBells != event.comment.lessonBells,
+        )
+        .toList();
+
+    if (event.comment.text.isNotEmpty) {
+      updatedComments.add(event.comment);
+    }
+
+    emit(
+      state.copyWith(
+        comments: updatedComments,
+      ),
+    );
+  }
 
   Future<void> _onSetEmptyLessonsDisplaying(
     ScheduleSetEmptyLessonsDisplaying event,

@@ -2,20 +2,23 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:go_router/go_router.dart';
+import 'package:get/get.dart';
 import 'package:rtu_mirea_app/presentation/typography.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
+import 'package:rtu_mirea_app/schedule/models/models.dart';
 import 'package:university_app_server_api/client.dart';
 
 import '../schedule.dart';
 
 class LessonCard extends StatelessWidget {
-  final LessonSchedulePart lesson;
-
   const LessonCard({
     Key? key,
     required this.lesson,
+    this.onTap,
   }) : super(key: key);
+
+  final LessonSchedulePart lesson;
+  final void Function(LessonSchedulePart)? onTap;
 
   static Color getColorByType(LessonType lessonType) {
     switch (lessonType) {
@@ -78,6 +81,46 @@ class LessonCard extends StatelessWidget {
         .join(', ');
   }
 
+  Widget _buildCommentAlert(List<ScheduleComment> comments) {
+    final comment = comments.firstWhereOrNull(
+      (comment) =>
+          lesson.dates.contains(comment.lessonDate) &&
+          comment.lessonBells == lesson.lessonBells,
+    );
+
+    if (comment == null) {
+      return const SizedBox();
+    }
+
+    return Container(
+      margin: const EdgeInsets.only(top: 8),
+      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+      decoration: BoxDecoration(
+        color: AppTheme.colors.colorful01.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          const FaIcon(
+            FontAwesomeIcons.comment,
+            size: 16,
+          ),
+          const SizedBox(
+            width: 8,
+          ),
+          Expanded(
+            child: Text(
+              comment.text,
+              style: AppTextStyle.body,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final state = context.read<ScheduleBloc>().state;
@@ -98,7 +141,7 @@ class LessonCard extends StatelessWidget {
         ),
         child: InkWell(
           onTap: () {
-            context.go('/schedule/details', extra: lesson);
+            onTap?.call(lesson);
           },
           child: Container(
             constraints: const BoxConstraints(minHeight: 75),
@@ -239,19 +282,25 @@ class LessonCard extends StatelessWidget {
                               height: 4,
                             ),
                             Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                FaIcon(
-                                  FontAwesomeIcons.userTie,
-                                  size: 12,
-                                  color: AppTheme.colors.deactive,
+                                Padding(
+                                  padding: const EdgeInsets.only(
+                                      left: 2, right: 7, top: 3),
+                                  child: FaIcon(
+                                    FontAwesomeIcons.userTie,
+                                    size: 12,
+                                    color: AppTheme.colors.deactive,
+                                  ),
                                 ),
-                                const SizedBox(
-                                  width: 9,
-                                ),
-                                Text(
-                                  lesson.teachers.map((e) => e.name).join(', '),
-                                  style: AppTextStyle.body.copyWith(
-                                      color: AppTheme.colors.deactive),
+                                Expanded(
+                                  child: Text(
+                                    lesson.teachers
+                                        .map((e) => e.name)
+                                        .join(', '),
+                                    style: AppTextStyle.body.copyWith(
+                                        color: AppTheme.colors.deactive),
+                                  ),
                                 ),
                               ],
                             ),
@@ -270,6 +319,7 @@ class LessonCard extends StatelessWidget {
                           return ch;
                         },
                       ),
+                      _buildCommentAlert(state.comments),
                     ],
                   ),
                 ),

@@ -4,6 +4,17 @@ abstract class ScheduleEvent extends Equatable {
   const ScheduleEvent();
 }
 
+class SetLessonComment extends ScheduleEvent {
+  const SetLessonComment({
+    required this.comment,
+  });
+
+  final ScheduleComment comment;
+
+  @override
+  List<Object> get props => [comment];
+}
+
 class ScheduleRequested extends ScheduleEvent {
   const ScheduleRequested({
     required this.group,

@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:rtu_mirea_app/presentation/typography.dart';
+import 'package:rtu_mirea_app/presentation/widgets/forms/text_input.dart';
+import 'package:rtu_mirea_app/schedule/models/models.dart';
 import 'package:rtu_mirea_app/schedule/schedule.dart';
 import 'package:university_app_server_api/client.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -10,9 +14,17 @@ import 'package:flutter_map_cancellable_tile_provider/flutter_map_cancellable_ti
 import 'package:url_launcher/url_launcher_string.dart';
 
 class ScheduleDetailsPage extends StatefulWidget {
-  const ScheduleDetailsPage({super.key, required this.lesson});
+  const ScheduleDetailsPage({
+    super.key,
+    required this.lesson,
+    required this.selectedDate,
+  });
 
   final LessonSchedulePart lesson;
+
+  /// The date in the [Calendar] where the lesson was selected to display the
+  /// details.
+  final DateTime selectedDate;
 
   @override
   State<ScheduleDetailsPage> createState() => _ScheduleDetailsPageState();
@@ -24,6 +36,63 @@ class _ScheduleDetailsPageState extends State<ScheduleDetailsPage> {
     userAgentPackageName: 'ninja.mirea.mireaapp',
     tileProvider: CancellableNetworkTileProvider(),
   );
+
+  late final TextEditingController _textController;
+
+  @override
+  void initState() {
+    super.initState();
+    _textController = TextEditingController();
+
+    final comment = _getComment();
+
+    if (comment != null) {
+      _textController.text = comment.text;
+    }
+
+    _textController.addListener(() {
+      if (_textController.text.length > 500 && _textErrorText == null) {
+        setState(() {
+          _textErrorText = 'Слишком длинный комментарий';
+        });
+      } else if (_textController.text.length <= 500 && _textErrorText != null) {
+        setState(() {
+          _textErrorText = null;
+        });
+      }
+
+      final bloc = context.read<ScheduleBloc>();
+
+      bloc.add(
+        SetLessonComment(
+          comment: ScheduleComment(
+            subjectName: widget.lesson.subject,
+            lessonDate: widget.lesson.dates.first,
+            lessonBells: widget.lesson.lessonBells,
+            text: _textController.text,
+          ),
+        ),
+      );
+    });
+  }
+
+  ScheduleComment? _getComment() {
+    final bloc = context.read<ScheduleBloc>();
+
+    return bloc.state.comments.firstWhereOrNull(
+      (comment) =>
+          widget.lesson.dates.contains(comment.lessonDate) &&
+          comment.lessonBells == widget.lesson.lessonBells,
+    );
+  }
+
+  @override
+  void dispose() {
+    _textController.dispose();
+    super.dispose();
+  }
+
+  String? _textErrorText;
 
   @override
   Widget build(BuildContext context) {
@@ -57,15 +126,33 @@ class _ScheduleDetailsPageState extends State<ScheduleDetailsPage> {
     if (widget.lesson.groups != null && widget.lesson.groups!.isNotEmpty) {
       content.addAll([
         _buildGroups(),
-        const Divider(),
+        const Divider(height: 16),
       ]);
     }
 
     if (widget.lesson.teachers.isNotEmpty) {
       content.addAll([
         _buildTeachers(),
+        const Divider(height: 8),
       ]);
     }
+
+    content.addAll([
+      ListTile(
+        title: Text('Комментарий'.toUpperCase()),
+        subtitle: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: TextInput(
+            hintText: 'Введите комментарий',
+            controller: _textController,
+            errorText: _textErrorText,
+            maxLines: 5,
+            fillColor: AppTheme.colors.background03,
+          ),
+        ),
+      ),
+      const Divider(),
+    ]);
 
     return content;
   }
@@ -79,7 +166,6 @@ class _ScheduleDetailsPageState extends State<ScheduleDetailsPage> {
     );
   }
 
-  // Build the lesson type
   ListTile _buildLessonType() {
     return ListTile(
       title: Text('Тип занятия'.toUpperCase()),
@@ -103,7 +189,6 @@ class _ScheduleDetailsPageState extends State<ScheduleDetailsPage> {
     );
   }
 
-  // Build the classroom details
   List<Widget> _buildClassroomDetails() {
     return widget.lesson.classrooms.map((classroom) {
       return Column(
@@ -135,7 +220,6 @@ class _ScheduleDetailsPageState extends State<ScheduleDetailsPage> {
     }).toList();
   }
 
-  // Build the map for the classroom
   SizedBox _buildClassroomMap(Classroom classroom) {
     return SizedBox(
       height: 200,
@@ -175,7 +259,6 @@ class _ScheduleDetailsPageState extends State<ScheduleDetailsPage> {
     );
   }
 
-  // Build the groups
   ListTile _buildGroups() {
     return ListTile(
       title: Text('Группы'.toUpperCase()),
@@ -193,7 +276,6 @@ class _ScheduleDetailsPageState extends State<ScheduleDetailsPage> {
     );
   }
 
-  // Build the teachers
   ListTile _buildTeachers() {
     return ListTile(
       title: Padding(

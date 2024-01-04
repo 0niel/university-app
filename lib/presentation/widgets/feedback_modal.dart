@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:rtu_mirea_app/presentation/widgets/forms/text_input.dart';
 import 'package:sentry/sentry.dart';
 
 import '../theme.dart';
@@ -125,47 +126,11 @@ class _FeedbackBottomModalSheetState extends State<FeedbackBottomModalSheet> {
           ),
         ),
         const SizedBox(height: 8),
-        TextField(
-          decoration: InputDecoration(
-            errorText: _emailErrorText,
-            errorStyle: AppTextStyle.captionL.copyWith(
-              color: AppTheme.colors.colorful07,
-            ),
-            hintText: 'Введите email',
-            hintStyle: AppTextStyle.titleS.copyWith(
-              color: AppTheme.colors.deactive,
-            ),
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 12,
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(
-                color: AppTheme.colors.primary,
-              ),
-            ),
-            focusedErrorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(
-                color: AppTheme.colors.colorful07,
-              ),
-            ),
-            disabledBorder: border,
-            enabledBorder: border,
-            errorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(
-                color: AppTheme.colors.colorful07,
-              ),
-            ),
-            fillColor: AppTheme.colors.background01,
-            filled: true,
-          ),
-          keyboardType: TextInputType.emailAddress,
-          textInputAction: TextInputAction.done,
-          style: AppTextStyle.titleS,
+        TextInput(
+          hintText: 'Введите email',
           controller: _emailController,
+          errorText: _emailErrorText,
+          keyboardType: TextInputType.emailAddress,
         ),
         const SizedBox(height: 24),
         Text(
@@ -175,48 +140,11 @@ class _FeedbackBottomModalSheetState extends State<FeedbackBottomModalSheet> {
           ),
         ),
         const SizedBox(height: 8),
-        TextField(
-          keyboardType: TextInputType.multiline,
-          maxLines: 5,
+        TextInput(
+          hintText: 'Когда я нажимаю "Х" происходит "У"',
           controller: _textController,
-          decoration: InputDecoration(
-            hintText: 'Когда я нажимаю "Х" происходит "У"',
-            hintStyle: AppTextStyle.bodyL.copyWith(
-              color: AppTheme.colors.deactive,
-            ),
-            errorText: _textErrorText,
-            errorStyle: AppTextStyle.captionS.copyWith(
-              color: AppTheme.colors.colorful07,
-            ),
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 12,
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(
-                color: AppTheme.colors.primary,
-              ),
-            ),
-            focusedErrorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(
-                color: AppTheme.colors.colorful07,
-              ),
-            ),
-            disabledBorder: border,
-            enabledBorder: border,
-            errorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(
-                color: AppTheme.colors.colorful07,
-              ),
-            ),
-            fillColor: AppTheme.colors.background01,
-            filled: true,
-          ),
-          textInputAction: TextInputAction.done,
-          style: AppTextStyle.bodyL,
+          errorText: _textErrorText,
+          maxLines: 5,
         ),
         const SizedBox(height: 24),
         PrimaryButton(

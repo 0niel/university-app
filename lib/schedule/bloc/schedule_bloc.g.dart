@@ -54,6 +54,10 @@ ScheduleState _$ScheduleStateFromJson(Map<String, dynamic> json) =>
               .toList() ??
           const [],
       isMiniature: json['isMiniature'] as bool? ?? false,
+      comments: (json['comments'] as List<dynamic>?)
+              ?.map((e) => ScheduleComment.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          const [],
       showEmptyLessons: json['showEmptyLessons'] as bool? ?? false,
       selectedSchedule: const SelectedScheduleConverter()
           .fromJson(json['selectedSchedule'] as Map<String, dynamic>?),
@@ -83,6 +87,7 @@ Map<String, dynamic> _$ScheduleStateToJson(ScheduleState instance) =>
                 r'$3': e.$3,
               })
           .toList(),
+      'comments': instance.comments,
       'isMiniature': instance.isMiniature,
       'showEmptyLessons': instance.showEmptyLessons,
       'selectedSchedule':

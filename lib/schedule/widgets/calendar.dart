@@ -30,19 +30,24 @@ class Calendar extends StatefulWidget {
     }).toList();
   }
 
+  static DateTime getNowWithoutTime() {
+    final now = DateTime.now();
+    return DateTime(now.year, now.month, now.day);
+  }
+
   /// Get page index by date. Used to set up [PageController.initialPage].
   static int getPageIndex(DateTime date) {
     // +1 because first day is 1, not 0
-    return date.difference(firstCalendarDay).inDays + 1;
+    return date.difference(firstCalendarDay).inDays;
   }
 
   /// First day of calendar. Used to set up [TableCalendar.firstDay].
-  static final DateTime firstCalendarDay = DateTime.now().subtract(
+  static final DateTime firstCalendarDay = getNowWithoutTime().subtract(
     const Duration(days: 365),
   );
 
   /// Last day of calendar. Used to set up [TableCalendar.lastDay].
-  static final DateTime lastCalendarDay = DateTime.now().add(
+  static final DateTime lastCalendarDay = getNowWithoutTime().add(
     const Duration(days: 365),
   );
 
@@ -74,7 +79,7 @@ class _CalendarState extends State<Calendar> {
   void initState() {
     super.initState();
 
-    _focusedDay = Calendar.getDayInAvailableRange(DateTime.now());
+    _focusedDay = Calendar.getDayInAvailableRange(Calendar.getNowWithoutTime());
 
     _selectedPage = Calendar.getPageIndex(_focusedDay);
 
@@ -95,7 +100,8 @@ class _CalendarState extends State<Calendar> {
       }
     });
 
-    _selectedDay = Calendar.getDayInAvailableRange(DateTime.now());
+    _selectedDay =
+        Calendar.getDayInAvailableRange(Calendar.getNowWithoutTime());
     _selectedWeek = CalendarUtils.getCurrentWeek();
   }
 
@@ -228,7 +234,7 @@ class _CalendarState extends State<Calendar> {
                 _focusedDay = Calendar.getDayInAvailableRange(focusedDay);
               },
               onHeaderTapped: (date) {
-                final currentDate = DateTime.now();
+                final currentDate = Calendar.getNowWithoutTime();
                 if (mounted) {
                   setState(() {
                     _focusedDay = Calendar.getDayInAvailableRange(currentDate);
@@ -238,7 +244,7 @@ class _CalendarState extends State<Calendar> {
                     _selectedPage = Calendar.getPageIndex(_selectedDay);
                   });
                   if (widget.pageViewController.hasClients) {
-                    widget.pageViewController.jumpToPage(_selectedPage - 1);
+                    widget.pageViewController.jumpToPage(_selectedPage);
                   }
                 }
               },
