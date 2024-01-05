@@ -5,14 +5,13 @@ import 'package:rtu_mirea_app/domain/entities/news_item.dart';
 import 'package:rtu_mirea_app/presentation/bloc/news_bloc/news_bloc.dart';
 import 'package:rtu_mirea_app/presentation/widgets/buttons/app_settings_button.dart';
 import 'package:rtu_mirea_app/presentation/widgets/buttons/primary_tab_button.dart';
-import 'package:rtu_mirea_app/presentation/widgets/page_with_theme_consumer.dart';
 import 'package:shimmer/shimmer.dart';
 import 'widgets/news_card.dart';
 import 'widgets/tag_badge.dart';
 import 'package:rtu_mirea_app/presentation/typography.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 
-class NewsPage extends PageWithThemeConsumer {
+class NewsPage extends StatelessWidget {
   NewsPage({super.key});
 
   final ValueNotifier<int> _tabValueNotifier = ValueNotifier(0);
@@ -151,7 +150,7 @@ class NewsPage extends PageWithThemeConsumer {
   }
 
   @override
-  Widget buildPage(BuildContext context) {
+  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppTheme.colors.background01,
       appBar: AppBar(

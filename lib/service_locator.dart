@@ -59,7 +59,6 @@ import 'package:rtu_mirea_app/presentation/bloc/news_bloc/news_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/nfc_feedback_bloc/nfc_feedback_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/nfc_pass_bloc/nfc_pass_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/notification_preferences/notification_preferences_bloc.dart';
-import 'package:rtu_mirea_app/presentation/bloc/schedule_bloc/schedule_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/scores_bloc/scores_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/user_bloc/user_bloc.dart';
 import 'package:rtu_mirea_app/presentation/core/routes/routes.dart';
@@ -78,17 +77,6 @@ Future<void> setup() async {
   );
 
   // BloC / Cubit
-  getIt.registerFactory(
-    () => ScheduleBloc(
-        getSchedule: getIt(),
-        getActiveGroup: getIt(),
-        getGroups: getIt(),
-        setActiveGroup: getIt(),
-        getDownloadedSchedules: getIt(),
-        deleteSchedule: getIt(),
-        getScheduleSettings: getIt(),
-        setScheduleSettings: getIt()),
-  );
   getIt.registerFactory(() => NewsBloc(getNews: getIt(), getNewsTags: getIt()));
   getIt.registerFactory(() => MapCubit());
   getIt.registerLazySingleton(() => UserBloc(

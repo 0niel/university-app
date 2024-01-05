@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_html/flutter_html.dart';
+import 'package:flutter_html_svg/flutter_html_svg.dart';
+import 'package:flutter_html_video/flutter_html_video.dart';
 import 'package:rtu_mirea_app/presentation/bloc/announces_bloc/announces_bloc.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 import 'package:rtu_mirea_app/presentation/typography.dart';
@@ -67,6 +69,10 @@ class ProfileAnnouncesPage extends StatelessWidget {
                                 launchUrlString(url);
                               }
                             },
+                            extensions: const [
+                              VideoHtmlExtension(),
+                              SvgHtmlExtension(),
+                            ],
                           ),
                         ],
                       ),

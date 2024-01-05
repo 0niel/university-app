@@ -12,7 +12,7 @@ publish_to: 'none'
 # In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-version: 1.4.2+52
+version: 1.4.2+53
 
 environment:
   sdk: ">=3.1.1"
@@ -119,6 +119,8 @@ dependencies:
   # Iframe widget for flutter_html
   # See https://pub.dev/packages/flutter_html_iframe
   flutter_html_iframe: ^3.0.0-beta.2
+  flutter_html_video: ^3.0.0-beta.2
+  flutter_html_svg: ^3.0.0-beta.2
 
   # The Font Awesome Icon pack available as Flutter Icons. 
   # Provides 1600 additional icons to use in your apps.
