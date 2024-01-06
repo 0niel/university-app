@@ -12,7 +12,7 @@ publish_to: 'none'
 # In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-version: 1.4.2+53
+version: 1.4.2+54
 
 environment:
   sdk: ">=3.1.1"
@@ -46,6 +46,7 @@ dependencies:
   hydrated_bloc: ^9.1.2
 
   bloc_concurrency: ^0.2.2
+  dot_navigation_bar: ^1.0.2
 
   # A wrapper around InheritedWidget to make them easier to use and more reusable.
   # See https://pub.dev/packages/provider

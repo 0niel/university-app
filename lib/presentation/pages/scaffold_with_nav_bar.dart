@@ -7,6 +7,7 @@ import 'package:rtu_mirea_app/presentation/app_notifier.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:rtu_mirea_app/presentation/typography.dart';
 import 'package:unicons/unicons.dart';
+import 'package:dot_navigation_bar/dot_navigation_bar.dart';
 import 'package:salomon_bottom_bar/salomon_bottom_bar.dart';
 import '../constants.dart';
 
@@ -42,13 +43,45 @@ class ScaffoldWithNavBar extends StatelessWidget {
             body: Consumer<AppNotifier>(
               builder: (_, value, child) => navigationShell,
             ),
-            bottomNavigationBar:
-                navigationShell.route.toString().contains('home')
-                    ? null
-                    : AppBottomNavigationBar(
-                        index: navigationShell.currentIndex,
-                        onClick: (index) => _setActiveIndex(index),
+            extendBody: true,
+            bottomNavigationBar: DotNavigationBar(
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 8,
+                ),
+              ],
+              marginR: const EdgeInsets.symmetric(horizontal: 16),
+              paddingR:
+                  const EdgeInsets.only(bottom: 5, top: 7, right: 8, left: 8),
+              backgroundColor: AppTheme.colors.background03,
+              splashBorderRadius: 30,
+              currentIndex: navigationShell.currentIndex,
+              onTap: (index) => _setActiveIndex(index),
+              items: [
+                DotNavigationBarItem(
+                  icon: const Icon(Icons.library_books_rounded),
+                  selectedColor: AppTheme.colors.colorful02,
+                ),
+                DotNavigationBarItem(
+                  icon: const Icon(Icons.calendar_today_rounded),
+                  selectedColor: AppTheme.colors.colorful03,
+                ),
+                DotNavigationBarItem(
+                  icon: const Icon(Icons.widgets_rounded),
+                  selectedColor: AppTheme.colors.colorful04,
+                ),
+                isDesktop
+                    ? DotNavigationBarItem(
+                        icon: const Icon(UniconsLine.info_circle),
+                        selectedColor: AppTheme.colors.colorful06,
+                      )
+                    : DotNavigationBarItem(
+                        icon: const Icon(Icons.person),
+                        selectedColor: AppTheme.colors.colorful06,
                       ),
+              ],
+            ),
           );
         }
       },
