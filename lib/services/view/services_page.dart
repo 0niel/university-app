@@ -70,17 +70,17 @@ class _ServicesViewState extends State<ServicesView> {
                   launchMode: LaunchMode.inAppBrowserView,
                   description: 'Найди нужный кабинет',
                 ),
-                ServiceCard(
-                  title: 'Калькулятор БРС',
-                  onTap: () {
-                    context.go('/services/rating-system-calculator');
-                  },
-                  icon: ServiceIcon(
-                    color: AppTheme.colors.colorful02,
-                    iconColor: AppTheme.colors.background01,
-                    icon: Icons.calculate,
-                  ),
-                ),
+                // ServiceCard(
+                //   title: 'Калькулятор БРС',
+                //   onTap: () {
+                //     context.go('/services/rating-system-calculator');
+                //   },
+                //   icon: ServiceIcon(
+                //     color: AppTheme.colors.colorful02,
+                //     iconColor: AppTheme.colors.background01,
+                //     icon: Icons.calculate,
+                //   ),
+                // ),
                 ServiceCard(
                   title: 'Бюро находок',
                   url: 'https://finds.mirea.ru/',

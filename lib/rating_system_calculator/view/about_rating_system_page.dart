@@ -1,11 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:rtu_mirea_app/presentation/typography.dart';
-import 'package:rtu_mirea_app/presentation/widgets/buttons/primary_button.dart';
 import 'package:rtu_mirea_app/rating_system_calculator/rating_system_calculator.dart';
-import 'package:rtu_mirea_app/rating_system_calculator/widgets/scores_table.dart';
 import 'package:unicons/unicons.dart';
 
 class AboutRatingSystemPage extends StatelessWidget {

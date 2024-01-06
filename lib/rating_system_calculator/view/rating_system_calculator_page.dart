@@ -6,8 +6,12 @@ import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:rtu_mirea_app/presentation/typography.dart';
 import 'package:rtu_mirea_app/presentation/widgets/buttons/primary_button.dart';
 import 'package:rtu_mirea_app/presentation/widgets/buttons/text_outlined_button.dart';
+import 'package:rtu_mirea_app/rating_system_calculator/bloc/rating_system_bloc.dart';
+import 'package:rtu_mirea_app/rating_system_calculator/models/models.dart';
+import 'package:rtu_mirea_app/rating_system_calculator/widgets/widgets.dart';
 import 'package:rtu_mirea_app/schedule/bloc/schedule_bloc.dart';
 import 'package:rtu_mirea_app/schedule/models/models.dart';
+import 'package:university_app_server_api/client.dart';
 
 class RatingSystemCalculatorPage extends StatelessWidget {
   const RatingSystemCalculatorPage({super.key});
@@ -23,10 +27,11 @@ class RatingSystemCalculatorPage extends StatelessWidget {
           "Бально-рейтинговая система",
         ),
       ),
-      body: const SafeArea(
-        child: Padding(
-          padding: EdgeInsets.all(16),
-          child: RatingSystemCalculatorView(),
+      body: Padding(
+        padding: const EdgeInsets.all(16),
+        child: BlocProvider(
+          create: (context) => RatingSystemBloc(),
+          child: const RatingSystemCalculatorView(),
         ),
       ),
     );
@@ -53,9 +58,59 @@ class _RatingSystemCalculatorViewState
     super.dispose();
   }
 
+  (String, List<Subject>)? _getSubjectsByCurrentScheduleState(
+    ScheduleBloc scheduleBloc,
+  ) {
+    final selectedSchedule = scheduleBloc.state.selectedSchedule;
+
+    if (selectedSchedule is SelectedGroupSchedule) {
+      final subjectNames = selectedSchedule.schedule
+          .whereType<LessonSchedulePart>()
+          .map((e) => e.subject)
+          .toSet();
+
+      final selectedGroup = selectedSchedule.group.name;
+
+      List<DateTime> getDatesBySubjectName(String subjectName) {
+        return selectedSchedule.schedule
+            .whereType<LessonSchedulePart>()
+            .where((e) => e.subject == subjectName)
+            .map((e) => e.dates)
+            .expand((element) => element)
+            .toList();
+      }
+
+      return (
+        selectedGroup,
+        subjectNames
+            .map(
+              (e) => Subject(
+                name: e,
+                dates: getDatesBySubjectName(e),
+              ),
+            )
+            .toList(),
+      );
+    } else {
+      return null;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final scheduleBloc = context.watch<ScheduleBloc>();
+    final ratingSystemBloc = context.watch<RatingSystemBloc>();
+
+    final subjects = _getSubjectsByCurrentScheduleState(scheduleBloc);
+
+    if (subjects != null) {
+      ratingSystemBloc.add(
+        UpdateSubjectsByCurrentSchedule(
+          group: subjects.$1,
+          subjects: subjects.$2,
+        ),
+      );
+    }
 
     return CustomScrollView(
       slivers: [
@@ -122,9 +177,7 @@ class _RatingSystemCalculatorViewState
                     end: 0,
                   ),
               const SizedBox(height: 32),
-              SubjectsListView(
-                selectedSchedule: scheduleBloc.state.selectedSchedule,
-              ),
+              const SubjectsListView(),
             ],
           ),
         ),
@@ -134,109 +187,32 @@ class _RatingSystemCalculatorViewState
 }
 
 class SubjectsListView extends StatelessWidget {
-  const SubjectsListView({Key? key, this.selectedSchedule}) : super(key: key);
-
-  final SelectedSchedule? selectedSchedule;
+  const SubjectsListView({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final selectedSchedule =
+        context.watch<ScheduleBloc>().state.selectedSchedule;
+
     if (selectedSchedule is SelectedGroupSchedule) {
-      return Column(
-        children: [
-          Card(
-            color: AppTheme.colors.background02,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Container(
-                    width: 48,
-                    height: 48,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(16),
-                      gradient: const LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [
-                          Color(0xFF9ADB7F),
-                          Color(0xFF6EA95C),
-                        ],
-                      ),
-                    ),
-                    child: const Icon(
-                      Icons.school,
-                      color: Colors.white,
-                    ),
+      return BlocBuilder<RatingSystemBloc, RatingSystemState>(
+        builder: (context, state) {
+          return Column(
+            children: state.subjects
+                .map(
+                  (e) => SubjectCard(
+                    subject: e.$2,
+                    onTap: (subject) {
+                      context.go(
+                        '/services/rating-system-calculator/subject',
+                        extra: subject,
+                      );
+                    },
                   ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Text(
-                      "Математический анализ",
-                      style: AppTextStyle.buttonL.copyWith(),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(right: 18.0),
-                    child: Text(
-                      "32",
-                      style: AppTextStyle.buttonL.copyWith(
-                        color: AppTheme.colors.colorful05,
-                      ),
-                    ),
-                  ),
-                  const Icon(Icons.arrow_forward_ios),
-                ],
-              ),
-            ),
-          ),
-          Card(
-            color: AppTheme.colors.background02,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Container(
-                    width: 48,
-                    height: 48,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(16),
-                      color: AppTheme.colors.colorful02,
-                    ),
-                    child: Icon(
-                      Icons.school,
-                      color: AppTheme.colors.activeLightMode,
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Text(
-                      "Линейная алгебра",
-                      style: AppTextStyle.buttonL.copyWith(),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(right: 18.0),
-                    child: Text(
-                      "8",
-                      style: AppTextStyle.buttonL.copyWith(
-                        color: AppTheme.colors.colorful02,
-                      ),
-                    ),
-                  ),
-                  const Icon(Icons.arrow_forward_ios),
-                ],
-              ),
-            ),
-          )
-        ],
+                )
+                .toList(),
+          );
+        },
       );
     } else {
       return Padding(

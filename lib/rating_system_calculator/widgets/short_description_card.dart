@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:rtu_mirea_app/presentation/typography.dart';
-import 'package:unicons/unicons.dart';
 
 class ShortDescriptionCard extends StatelessWidget {
   const ShortDescriptionCard({

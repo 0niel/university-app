@@ -22,7 +22,9 @@ import 'package:rtu_mirea_app/presentation/pages/profile/profile_scores_page.dar
 import 'package:rtu_mirea_app/presentation/pages/profile/profile_page.dart';
 import 'package:rtu_mirea_app/presentation/pages/profile/profile_settings_page.dart';
 import 'package:rtu_mirea_app/presentation/widgets/images_view_gallery.dart';
+import 'package:rtu_mirea_app/rating_system_calculator/models/models.dart';
 import 'package:rtu_mirea_app/rating_system_calculator/view/about_rating_system_page.dart';
+import 'package:rtu_mirea_app/rating_system_calculator/view/subject_page.dart';
 import 'package:rtu_mirea_app/schedule/view/schedule_details_page.dart';
 import 'package:rtu_mirea_app/rating_system_calculator/view/rating_system_calculator_page.dart';
 import 'package:rtu_mirea_app/schedule/view/schedule_page.dart';
@@ -108,25 +110,34 @@ GoRouter createRouter() => GoRouter(
                 ],
               ),
             ]),
-            StatefulShellBranch(navigatorKey: _servicesNavigatorKey, routes: [
-              GoRoute(
-                path: '/services',
-                builder: (context, state) => const ServicesPage(),
-                routes: [
-                  GoRoute(
-                      path: 'rating-system-calculator',
-                      builder: (context, state) =>
-                          const RatingSystemCalculatorPage(),
-                      routes: [
-                        GoRoute(
-                          path: 'about',
-                          builder: (context, state) =>
-                              const AboutRatingSystemPage(),
-                        ),
-                      ]),
-                ],
-              ),
-            ]),
+            StatefulShellBranch(
+              navigatorKey: _servicesNavigatorKey,
+              routes: [
+                GoRoute(
+                  path: '/services',
+                  builder: (context, state) => const ServicesPage(),
+                  routes: [
+                    GoRoute(
+                        path: 'rating-system-calculator',
+                        builder: (context, state) =>
+                            const RatingSystemCalculatorPage(),
+                        routes: [
+                          GoRoute(
+                            path: 'about',
+                            builder: (context, state) =>
+                                const AboutRatingSystemPage(),
+                          ),
+                          GoRoute(
+                            path: 'subject',
+                            builder: (context, state) => SubjectPage(
+                              subject: state.extra as Subject,
+                            ),
+                          ),
+                        ]),
+                  ],
+                ),
+              ],
+            ),
             StatefulShellBranch(navigatorKey: _profileNavigatorKey, routes: [
               GoRoute(
                 path: '/profile',
