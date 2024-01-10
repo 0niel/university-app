@@ -152,7 +152,7 @@ class App extends StatelessWidget {
       DeviceOrientation.portraitUp,
     ]);
 
-    final apiClient = ApiClient.localhost();
+    final apiClient = ApiClient();
 
     return MultiRepositoryProvider(
       providers: [
