@@ -27,6 +27,36 @@ class ProfileNfcPassPage extends StatefulWidget {
 }
 
 class _ProfileNfcPageState extends State<ProfileNfcPassPage> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("NFC-пропуск"),
+      ),
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Center(
+            child: Text(
+              'Раздел больше недоступен. Мы понимаем, как удобно использовать NFC-пропуск, но мы больше не можем предоставлять эту возможность. NFC-пропуск был отключён по требованию администрации, а этот раздел будет скоро удалён. Пожалуйста, носите с собой студенческий билет, чтобы пройти на территорию университета.',
+              style: AppTextStyle.body,
+              textAlign: TextAlign.center,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _NfcPassPageView extends StatefulWidget {
+  const _NfcPassPageView({Key? key}) : super(key: key);
+
+  @override
+  State<_NfcPassPageView> createState() => _NfcPassPageViewState();
+}
+
+class _NfcPassPageViewState extends State<_NfcPassPageView> {
   DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
 
   void _showSnackBarLoadInfo() {
@@ -41,264 +71,244 @@ class _ProfileNfcPageState extends State<ProfileNfcPassPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("NFC-пропуск"),
-      ),
-      body: SafeArea(
-        bottom: false,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: BlocBuilder<UserBloc, UserState>(
-            builder: (context, state) {
-              state.whenOrNull(
-                  logInSuccess: (user) => context
-                      .read<NfcPassBloc>()
-                      .add(const NfcPassEvent.started()));
+    return BlocBuilder<UserBloc, UserState>(
+      builder: (context, state) {
+        state.whenOrNull(
+            logInSuccess: (user) =>
+                context.read<NfcPassBloc>().add(const NfcPassEvent.started()));
 
-              return state.maybeMap(
-                logInSuccess: (state) {
-                  final user = state.user;
-                  var student = UserBloc.getActiveStudent(user);
+        return state.maybeMap(
+          logInSuccess: (state) {
+            final user = state.user;
+            var student = UserBloc.getActiveStudent(user);
 
-                  return ListView(
-                    children: [
-                      const SizedBox(height: 24),
-                      FutureBuilder<AndroidDeviceInfo>(
-                        future: deviceInfo.androidInfo,
-                        builder: (context, snapshot) {
-                          if (snapshot.hasData) {
-                            if (snapshot.data == null) {
-                              return const _ErrorAndroidDataFetch();
-                            }
-                            return BlocConsumer<NfcPassBloc, NfcPassState>(
-                              listener: (context, state) {
-                                state.whenOrNull(
-                                  loaded: (nfcPasses) {
-                                    if (!NfcPassBloc.isNfcFetched) {
-                                      // If current device is not connected to
-                                      // any nfc pass
-                                      if (!nfcPasses.any((element) =>
-                                          element.connected &&
-                                          element.deviceId ==
-                                              snapshot.data!.id)) {
-                                        return;
-                                      }
+            return ListView(
+              children: [
+                const SizedBox(height: 24),
+                FutureBuilder<AndroidDeviceInfo>(
+                  future: deviceInfo.androidInfo,
+                  builder: (context, snapshot) {
+                    if (snapshot.hasData) {
+                      if (snapshot.data == null) {
+                        return const _ErrorAndroidDataFetch();
+                      }
+                      return BlocConsumer<NfcPassBloc, NfcPassState>(
+                        listener: (context, state) {
+                          state.whenOrNull(
+                            loaded: (nfcPasses) {
+                              if (!NfcPassBloc.isNfcFetched) {
+                                // If current device is not connected to
+                                // any nfc pass
+                                if (!nfcPasses.any((element) =>
+                                    element.connected &&
+                                    element.deviceId == snapshot.data!.id)) {
+                                  return;
+                                }
 
-                                      _showSnackBarLoadInfo();
-                                      context.read<NfcPassBloc>().add(
-                                          const NfcPassEvent.fetchNfcCode());
-                                    }
-                                  },
+                                _showSnackBarLoadInfo();
+                                context
+                                    .read<NfcPassBloc>()
+                                    .add(const NfcPassEvent.fetchNfcCode());
+                              }
+                            },
+                          );
+                        },
+                        builder: (context, state) => state.map(
+                          initial: (_) {
+                            context.read<NfcPassBloc>().add(
+                                  NfcPassEvent.getNfcPasses(
+                                    student.code,
+                                    student.id,
+                                    snapshot.data!.id,
+                                  ),
                                 );
-                              },
-                              builder: (context, state) => state.map(
-                                initial: (_) {
-                                  context.read<NfcPassBloc>().add(
-                                        NfcPassEvent.getNfcPasses(
-                                          student.code,
-                                          student.id,
-                                          snapshot.data!.id,
-                                        ),
-                                      );
-                                  return const Center(
-                                    child: CircularProgressIndicator(),
-                                  );
-                                },
-                                loading: (_) => const Center(
-                                  child: CircularProgressIndicator(),
-                                ),
-                                loaded: (state) {
-                                  final connectedDevice = state.nfcPasses
-                                      .firstWhereOrNull((element) =>
-                                          element.connected &&
-                                          element.deviceId ==
-                                              snapshot.data!.id);
-
-                                  if (state.nfcPasses.isEmpty) {
-                                    return _NfcNotConnected(
-                                      onPressed: () =>
-                                          context.read<NfcPassBloc>().add(
-                                                NfcPassEvent.connectNfcPass(
-                                                  student.code,
-                                                  student.id,
-                                                  snapshot.data!.id,
-                                                  snapshot.data!.model,
-                                                ),
-                                              ),
-                                    );
-                                  }
-                                  if (!_showMyDevices &&
-                                      connectedDevice != null) {
-                                    return _NfcPassCard(
-                                      deviceId: connectedDevice.deviceId,
-                                      deviceName: connectedDevice.deviceName,
-                                      onClick: () {
-                                        setState(() {
-                                          _showMyDevices = true;
-                                        });
-                                      },
-                                    );
-                                  } else {
-                                    return Column(
-                                      children: [
-                                        Text(
-                                          "Подключенные устройства",
-                                          style: AppTextStyle.title,
-                                        ),
-                                        const SizedBox(height: 16),
-                                        // Сначала подключенные устройства
-                                        for (final nfcPass in state.nfcPasses)
-                                          if (nfcPass.connected)
-                                            _NfcPassDeviceCard(
-                                              nfcPass: nfcPass,
-                                            ),
-                                        // Потом остальные
-                                        for (final nfcPass in state.nfcPasses)
-                                          if (!nfcPass.connected)
-                                            _NfcPassDeviceCard(
-                                              nfcPass: nfcPass,
-                                            ),
-                                        const SizedBox(height: 16),
-                                        // Если нет ни одного подключенного или подключенное устройство не текущее
-                                        if (state.nfcPasses.every((element) =>
-                                                !element.connected) ||
-                                            state.nfcPasses.any((element) =>
-                                                element.connected &&
-                                                element.deviceId !=
-                                                    snapshot.data!.id))
-                                          ColorfulButton(
-                                            text:
-                                                "Привязать пропуск к этому устройству",
-                                            backgroundColor:
-                                                AppTheme.colors.primary,
-                                            onClick: () {
-                                              context.read<NfcPassBloc>().add(
-                                                    NfcPassEvent.connectNfcPass(
-                                                      student.code,
-                                                      student.id,
-                                                      snapshot.data!.id,
-                                                      snapshot.data!.model,
-                                                    ),
-                                                  );
-                                            },
-                                          ),
-                                      ],
-                                    );
-                                  }
-                                },
-                                nfcDisabled: (_) =>
-                                    const _NfcNotAviable(disabled: true),
-                                nfcNotSupported: (_) =>
-                                    const _NfcNotAviable(disabled: false),
-                                error: (st) => Center(
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Text(
-                                        "Произошла ошибка:",
-                                        style: AppTextStyle.titleM,
-                                      ),
-                                      const SizedBox(height: 16),
-                                      Text(
-                                        st.cause,
-                                        style: AppTextStyle.body,
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                nfcNotExist: (_) => BlocBuilder<NfcFeedbackBloc,
-                                    NfcFeedbackState>(
-                                  builder: (context, state) => state.map(
-                                    initial: (_) {
-                                      final fullName =
-                                          "${user.name} ${user.secondName.replaceAll(" ", "").isNotEmpty ? "${user.secondName} " : ""}${user.lastName}";
-
-                                      return _NfcPassNotExistOnAccount(
-                                        onClick: () => context
-                                            .read<NfcFeedbackBloc>()
-                                            .add(
-                                              NfcFeedbackEvent.sendFeedback(
-                                                fullName: fullName,
-                                                group: student.academicGroup,
-                                                personalNumber:
-                                                    student.personalNumber,
-                                                studentId:
-                                                    student.id.toString(),
-                                              ),
-                                            ),
-                                        fullName: fullName,
-                                        personalNumber: student.personalNumber,
-                                      );
-                                    },
-                                    loading: (_) => const Center(
-                                      child: CircularProgressIndicator(),
-                                    ),
-                                    success: (state) =>
-                                        // Сообщение о том что заявка на привязку пропуска отправлена
-                                        Column(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Icon(
-                                          Icons.check_circle,
-                                          color: AppTheme.colors.colorful04,
-                                          size: 48,
-                                        ),
-                                        const SizedBox(height: 16),
-                                        Text(
-                                          "Заявка на привязку пропуска отправлена",
-                                          style: AppTextStyle.title,
-                                        ),
-                                        const SizedBox(height: 16),
-                                        Text(
-                                          "Подождите, пока администратор подтвердит вашу заявку. "
-                                          "Время ожидания может занять до 7 рабочих дней",
-                                          style: AppTextStyle.body,
-                                        ),
-                                      ],
-                                    ),
-                                    failure: (st) => Center(
-                                      child: Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          Text(
-                                            "Произошла ошибка:",
-                                            style: AppTextStyle.titleM,
-                                          ),
-                                          const SizedBox(height: 16),
-                                          Text(
-                                            st.message,
-                                            style: AppTextStyle.body,
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            );
-                          } else {
                             return const Center(
                               child: CircularProgressIndicator(),
                             );
-                          }
-                        },
-                      )
-                    ],
-                  );
-                },
-                orElse: () => const Center(
-                  child: CircularProgressIndicator(),
-                ),
-              );
-            },
+                          },
+                          loading: (_) => const Center(
+                            child: CircularProgressIndicator(),
+                          ),
+                          loaded: (state) {
+                            final connectedDevice = state.nfcPasses
+                                .firstWhereOrNull((element) =>
+                                    element.connected &&
+                                    element.deviceId == snapshot.data!.id);
+
+                            if (state.nfcPasses.isEmpty) {
+                              return _NfcNotConnected(
+                                onPressed: () =>
+                                    context.read<NfcPassBloc>().add(
+                                          NfcPassEvent.connectNfcPass(
+                                            student.code,
+                                            student.id,
+                                            snapshot.data!.id,
+                                            snapshot.data!.model,
+                                          ),
+                                        ),
+                              );
+                            }
+                            if (!_showMyDevices && connectedDevice != null) {
+                              return _NfcPassCard(
+                                deviceId: connectedDevice.deviceId,
+                                deviceName: connectedDevice.deviceName,
+                                onClick: () {
+                                  setState(() {
+                                    _showMyDevices = true;
+                                  });
+                                },
+                              );
+                            } else {
+                              return Column(
+                                children: [
+                                  Text(
+                                    "Подключенные устройства",
+                                    style: AppTextStyle.title,
+                                  ),
+                                  const SizedBox(height: 16),
+                                  // Сначала подключенные устройства
+                                  for (final nfcPass in state.nfcPasses)
+                                    if (nfcPass.connected)
+                                      _NfcPassDeviceCard(
+                                        nfcPass: nfcPass,
+                                      ),
+                                  // Потом остальные
+                                  for (final nfcPass in state.nfcPasses)
+                                    if (!nfcPass.connected)
+                                      _NfcPassDeviceCard(
+                                        nfcPass: nfcPass,
+                                      ),
+                                  const SizedBox(height: 16),
+                                  // Если нет ни одного подключенного или подключенное устройство не текущее
+                                  if (state.nfcPasses.every(
+                                          (element) => !element.connected) ||
+                                      state.nfcPasses.any((element) =>
+                                          element.connected &&
+                                          element.deviceId !=
+                                              snapshot.data!.id))
+                                    ColorfulButton(
+                                      text:
+                                          "Привязать пропуск к этому устройству",
+                                      backgroundColor: AppTheme.colors.primary,
+                                      onClick: () {
+                                        context.read<NfcPassBloc>().add(
+                                              NfcPassEvent.connectNfcPass(
+                                                student.code,
+                                                student.id,
+                                                snapshot.data!.id,
+                                                snapshot.data!.model,
+                                              ),
+                                            );
+                                      },
+                                    ),
+                                ],
+                              );
+                            }
+                          },
+                          nfcDisabled: (_) =>
+                              const _NfcNotAviable(disabled: true),
+                          nfcNotSupported: (_) =>
+                              const _NfcNotAviable(disabled: false),
+                          error: (st) => Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  "Произошла ошибка:",
+                                  style: AppTextStyle.titleM,
+                                ),
+                                const SizedBox(height: 16),
+                                Text(
+                                  st.cause,
+                                  style: AppTextStyle.body,
+                                ),
+                              ],
+                            ),
+                          ),
+                          nfcNotExist: (_) =>
+                              BlocBuilder<NfcFeedbackBloc, NfcFeedbackState>(
+                            builder: (context, state) => state.map(
+                              initial: (_) {
+                                final fullName =
+                                    "${user.name} ${user.secondName.replaceAll(" ", "").isNotEmpty ? "${user.secondName} " : ""}${user.lastName}";
+
+                                return _NfcPassNotExistOnAccount(
+                                  onClick: () =>
+                                      context.read<NfcFeedbackBloc>().add(
+                                            NfcFeedbackEvent.sendFeedback(
+                                              fullName: fullName,
+                                              group: student.academicGroup,
+                                              personalNumber:
+                                                  student.personalNumber,
+                                              studentId: student.id.toString(),
+                                            ),
+                                          ),
+                                  fullName: fullName,
+                                  personalNumber: student.personalNumber,
+                                );
+                              },
+                              loading: (_) => const Center(
+                                child: CircularProgressIndicator(),
+                              ),
+                              success: (state) =>
+                                  // Сообщение о том что заявка на привязку пропуска отправлена
+                                  Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Icon(
+                                    Icons.check_circle,
+                                    color: AppTheme.colors.colorful04,
+                                    size: 48,
+                                  ),
+                                  const SizedBox(height: 16),
+                                  Text(
+                                    "Заявка на привязку пропуска отправлена",
+                                    style: AppTextStyle.title,
+                                  ),
+                                  const SizedBox(height: 16),
+                                  Text(
+                                    "Подождите, пока администратор подтвердит вашу заявку. "
+                                    "Время ожидания может занять до 7 рабочих дней",
+                                    style: AppTextStyle.body,
+                                  ),
+                                ],
+                              ),
+                              failure: (st) => Center(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      "Произошла ошибка:",
+                                      style: AppTextStyle.titleM,
+                                    ),
+                                    const SizedBox(height: 16),
+                                    Text(
+                                      st.message,
+                                      style: AppTextStyle.body,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      );
+                    } else {
+                      return const Center(
+                        child: CircularProgressIndicator(),
+                      );
+                    }
+                  },
+                )
+              ],
+            );
+          },
+          orElse: () => const Center(
+            child: CircularProgressIndicator(),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }
