@@ -59,7 +59,19 @@ class _SchedulePageState extends State<SchedulePage> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<ScheduleBloc, ScheduleState>(
+    return BlocConsumer<ScheduleBloc, ScheduleState>(
+      listener: (context, state) {
+        if (state.status == ScheduleStatus.failure) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Ошибка при загрузке расписания'),
+            ),
+          );
+        }
+      },
+      buildWhen: (previous, current) =>
+          current.status != ScheduleStatus.failure &&
+          current.selectedSchedule != null,
       builder: (context, state) {
         if (state.selectedSchedule == null &&
             state.status != ScheduleStatus.loading) {
@@ -70,11 +82,12 @@ class _SchedulePageState extends State<SchedulePage> {
           return const Center(
             child: CircularProgressIndicator(),
           );
-        } else if (state.status == ScheduleStatus.failure) {
+        } else if (state.status == ScheduleStatus.failure &&
+            state.selectedSchedule == null) {
           return LoadingErrorMessage(onTap: () {
             context.go('/schedule/search');
           });
-        } else if (state.status == ScheduleStatus.loaded) {
+        } else if (state.selectedSchedule != null) {
           return Scaffold(
             backgroundColor: AppTheme.colors.background01,
             body: NestedScrollView(
@@ -207,9 +220,11 @@ class _SchedulePageState extends State<SchedulePage> {
               ),
             ),
           );
+        } else {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
         }
-
-        return Container();
       },
     );
   }
