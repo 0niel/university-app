@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
