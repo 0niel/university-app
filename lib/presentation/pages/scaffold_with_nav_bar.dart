@@ -2,8 +2,6 @@ import 'dart:io' show Platform;
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
-import 'package:rtu_mirea_app/presentation/app_notifier.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:rtu_mirea_app/presentation/typography.dart';
 import 'package:unicons/unicons.dart';
@@ -29,9 +27,7 @@ class ScaffoldWithNavBar extends StatelessWidget {
               children: [
                 _buildSidebar(context),
                 Expanded(
-                  child: Consumer<AppNotifier>(
-                    builder: (context, value, child) => navigationShell,
-                  ),
+                  child: navigationShell,
                 ),
               ],
             ),
@@ -39,9 +35,7 @@ class ScaffoldWithNavBar extends StatelessWidget {
         } else {
           return Scaffold(
             backgroundColor: AppTheme.colors.background03,
-            body: Consumer<AppNotifier>(
-              builder: (_, value, child) => navigationShell,
-            ),
+            body: navigationShell,
             bottomNavigationBar:
                 navigationShell.route.toString().contains('home')
                     ? null

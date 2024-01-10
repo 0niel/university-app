@@ -94,6 +94,7 @@ class AppTheme {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
       ),
+      insetPadding: const EdgeInsets.all(16),
     ),
     colorScheme: ColorScheme(
       background: darkThemeColors.background01,
@@ -171,6 +172,7 @@ class AppTheme {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
       ),
+      insetPadding: const EdgeInsets.all(16),
     ),
     dividerTheme: DividerThemeData(
       color: lightThemeColors.deactiveDarker.withOpacity(0.25),

@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-import 'package:rtu_mirea_app/presentation/app_notifier.dart';
+import 'package:rtu_mirea_app/presentation/app_theme_cubit.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:rtu_mirea_app/presentation/typography.dart';
 
@@ -42,10 +43,11 @@ class ProfileSettingsPage extends StatelessWidget {
                             : null,
                         onTap: () {
                           context
-                              .read<AppNotifier>()
+                              .read<AppThemeCubit>()
                               .updateTheme(AppThemeType.light);
 
                           context.pop();
+                          SystemNavigator.pop();
                         },
                       ),
                       const SizedBox(height: 8),
@@ -56,10 +58,11 @@ class ProfileSettingsPage extends StatelessWidget {
                             : null,
                         onTap: () {
                           context
-                              .read<AppNotifier>()
+                              .read<AppThemeCubit>()
                               .updateTheme(AppThemeType.dark);
 
                           context.pop();
+                          SystemNavigator.pop();
                         },
                       ),
                     ],

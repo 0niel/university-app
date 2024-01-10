@@ -48,7 +48,7 @@ import 'package:rtu_mirea_app/domain/usecases/send_nfc_not_exist_feedback.dart';
 import 'package:rtu_mirea_app/domain/usecases/set_active_group.dart';
 import 'package:rtu_mirea_app/domain/usecases/set_app_settings.dart';
 import 'package:rtu_mirea_app/domain/usecases/set_schedule_settings.dart';
-import 'package:rtu_mirea_app/presentation/app_notifier.dart';
+import 'package:rtu_mirea_app/presentation/app_theme_cubit.dart';
 import 'package:rtu_mirea_app/presentation/bloc/announces_bloc/announces_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/app_cubit/app_cubit.dart';
 import 'package:rtu_mirea_app/presentation/bloc/attendance_bloc/attendance_bloc.dart';
@@ -70,7 +70,7 @@ final getIt = GetIt.instance;
 Future<void> setup() async {
   // Global app notifier
   getIt.registerFactory(
-    () => AppNotifier(
+    () => AppThemeCubit(
       getAppSettings: getIt(),
       setAppSettings: getIt(),
     ),
