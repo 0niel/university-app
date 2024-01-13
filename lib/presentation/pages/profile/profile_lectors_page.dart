@@ -46,8 +46,9 @@ class _ProfileLectrosPageState extends State<ProfileLectrosPage> {
         bottom: false,
         child: BlocBuilder<UserBloc, UserState>(
           builder: (context, userState) {
-            return userState.maybeMap(
-              logInSuccess: (value) => BlocBuilder<EmployeeBloc, EmployeeState>(
+            if (userState.status == UserStatus.authorized &&
+                userState.user != null) {
+              return BlocBuilder<EmployeeBloc, EmployeeState>(
                 builder: (context, state) {
                   return FloatingSearchBar(
                     key: _searchBarKey,
@@ -127,9 +128,10 @@ class _ProfileLectrosPageState extends State<ProfileLectrosPage> {
                     },
                   );
                 },
-              ),
-              orElse: () => Container(),
-            );
+              );
+            }
+
+            return Container();
           },
         ),
       ),

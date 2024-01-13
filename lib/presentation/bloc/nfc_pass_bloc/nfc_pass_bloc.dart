@@ -137,7 +137,7 @@ class NfcPassBloc extends Bloc<NfcPassEvent, NfcPassState> {
       (failure) => studentId = null,
       (userData) {
         // Prevent multiple fetches of user profile data
-        userBloc.add(UserEvent.setAuntificatedData(user: userData));
+        userBloc.add(SetAuthenticatedData(user: userData));
 
         var student = userData.students
             .firstWhereOrNull((element) => element.status == 'активный');

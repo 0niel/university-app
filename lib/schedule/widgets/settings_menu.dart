@@ -34,17 +34,18 @@ class SettingsMenu extends StatelessWidget {
 
     final userBloc = context.read<UserBloc>();
 
-    userBloc.state.maybeMap(
-      logInSuccess: (value) => FeedbackBottomModalSheet.show(
+    if (userBloc.state.status == UserStatus.authorized) {
+      FeedbackBottomModalSheet.show(
         context,
         defaultText: defaultText,
-        defaultEmail: value.user.email,
-      ),
-      orElse: () => FeedbackBottomModalSheet.show(
+        defaultEmail: userBloc.state.user!.email,
+      );
+    } else {
+      FeedbackBottomModalSheet.show(
         context,
         defaultText: defaultText,
-      ),
-    );
+      );
+    }
   }
 
   @override

@@ -8,7 +8,6 @@ import 'package:rtu_mirea_app/domain/entities/user.dart';
 import 'package:rtu_mirea_app/presentation/pages/home_page.dart';
 import 'package:rtu_mirea_app/presentation/pages/profile/notifications_settings_page.dart';
 import 'package:rtu_mirea_app/presentation/pages/scaffold_with_nav_bar.dart';
-import 'package:rtu_mirea_app/presentation/pages/login/login_page.dart';
 import 'package:rtu_mirea_app/presentation/pages/news/news_details_page.dart';
 import 'package:rtu_mirea_app/presentation/pages/news/news_page.dart';
 import 'package:rtu_mirea_app/presentation/pages/onboarding/onboarding_page.dart';
@@ -143,10 +142,6 @@ GoRouter createRouter() => GoRouter(
                 path: '/profile',
                 builder: (context, state) => const ProfilePage(),
                 routes: [
-                  GoRoute(
-                    path: 'login',
-                    builder: (context, state) => const LoginPage(),
-                  ),
                   GoRoute(
                     path: 'about',
                     builder: (context, state) => const AboutAppPage(),

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -47,7 +46,6 @@ class ProfileSettingsPage extends StatelessWidget {
                               .updateTheme(AppThemeType.light);
 
                           context.pop();
-                          SystemNavigator.pop();
                         },
                       ),
                       const SizedBox(height: 8),
@@ -62,7 +60,6 @@ class ProfileSettingsPage extends StatelessWidget {
                               .updateTheme(AppThemeType.dark);
 
                           context.pop();
-                          SystemNavigator.pop();
                         },
                       ),
                     ],

@@ -36,36 +36,35 @@ class ProfilePage extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 24),
                 child: BlocConsumer<UserBloc, UserState>(
                   listener: (context, state) {
-                    state.maybeMap(
-                      unauthorized: (st) {
-                        BlocProvider.of<UserBloc>(context)
-                            .add(const UserEvent.logIn());
-                      },
-                      orElse: () {},
-                    );
+                    if (state.status == UserStatus.unauthorized) {
+                      BlocProvider.of<UserBloc>(context).add(LogInEvent());
+                    }
                   },
                   builder: (context, state) {
-                    return state.map(
-                      unauthorized: (_) => const _InitialProfileStatePage(),
-                      loading: (_) => ConstrainedBox(
+                    if (state.status == UserStatus.unauthorized) {
+                      return const _InitialProfileStatePage();
+                    } else if (state.status == UserStatus.loading) {
+                      return ConstrainedBox(
                         constraints: BoxConstraints(
                           minHeight: viewportConstraints.maxHeight,
                         ),
                         child: const Center(
                           child: CircularProgressIndicator(),
                         ),
-                      ),
-                      logInError: (st) => const _InitialProfileStatePage(),
-                      logInSuccess: (st) {
-                        BlocProvider.of<NotificationPreferencesBloc>(context)
-                            .add(
-                          InitialCategoriesPreferencesRequested(
-                              group: UserBloc.getActiveStudent(st.user)
-                                  .academicGroup),
-                        );
-                        return _UserLoggedInView(user: st.user);
-                      },
-                    );
+                      );
+                    } else if (state.status == UserStatus.authorizeError) {
+                      return const _InitialProfileStatePage();
+                    } else if (state.status == UserStatus.authorized &&
+                        state.user != null) {
+                      BlocProvider.of<NotificationPreferencesBloc>(context).add(
+                        InitialCategoriesPreferencesRequested(
+                            group: UserBloc.getActiveStudent(state.user!)
+                                .academicGroup),
+                      );
+                      return _UserLoggedInView(user: state.user!);
+                    } else {
+                      return const _InitialProfileStatePage();
+                    }
                   },
                 ),
               ),
@@ -128,7 +127,7 @@ class _UserLoggedInView extends StatelessWidget {
 
         const SizedBox(height: 40),
         const ContainerLabel(label: "Информация"),
-        const SizedBox(height: 20),
+        const SizedBox(height: 8),
         SettingsButton(
             text: 'Объявления',
             icon: Icons.message_rounded,
@@ -184,8 +183,7 @@ class _UserLoggedInView extends StatelessWidget {
         const SizedBox(height: 8),
         ColorfulButton(
             text: 'Выйти',
-            onClick: () =>
-                context.read<UserBloc>().add(const UserEvent.logOut()),
+            onClick: () => context.read<UserBloc>().add(LogOutEvent()),
             backgroundColor: AppTheme.colors.colorful07),
       ],
     );
@@ -206,7 +204,7 @@ class _InitialProfileStatePage extends StatelessWidget {
               // вместо того, чтобы открывать страницу с логином и паролем,
               // мы просто вызываем событие авторизации, которое откроет
               // страницу авторизации в браузере.
-              context.read<UserBloc>().add(const UserEvent.logIn());
+              context.read<UserBloc>().add(LogInEvent());
 
               // Страница с вводом логина и пароля:
               // context.router.push(const LoginRoute());

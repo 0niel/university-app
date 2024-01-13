@@ -20,12 +20,13 @@ class NotificationsSettingsPage extends StatelessWidget {
         bottom: false,
         child: BlocBuilder<UserBloc, UserState>(
           builder: (context, state) {
-            return state.maybeMap(
-              logInSuccess: (st) => _NotificationPreferencesView(user: st.user),
-              orElse: () => const Center(
+            if (state.status == UserStatus.authorized && state.user != null) {
+              return _NotificationPreferencesView(user: state.user!);
+            } else {
+              return const Center(
                 child: Text("Необходимо авторизоваться"),
-              ),
-            );
+              );
+            }
           },
         ),
       ),

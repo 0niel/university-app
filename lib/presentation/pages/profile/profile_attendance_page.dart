@@ -133,9 +133,9 @@ class _ProfileAttendancePageState extends State<ProfileAttendancePage> {
         bottom: false,
         child: BlocBuilder<UserBloc, UserState>(
           builder: (context, userState) {
-            return userState.maybeMap(
-              logInSuccess: (value) =>
-                  BlocBuilder<AttendanceBloc, AttendanceState>(
+            if (userState.status == UserStatus.authorized &&
+                userState.user != null) {
+              return BlocBuilder<AttendanceBloc, AttendanceState>(
                 builder: (context, state) {
                   if (state is AttendanceInitial) {
                     context.read<AttendanceBloc>().add(LoadAttendance(
@@ -198,9 +198,12 @@ class _ProfileAttendancePageState extends State<ProfileAttendancePage> {
                     ],
                   );
                 },
-              ),
-              orElse: () => const Center(child: Text("Ошибка")),
-            );
+              );
+            } else {
+              return const Center(
+                child: Text("Необходимо авторизоваться"),
+              );
+            }
           },
         ),
       ),

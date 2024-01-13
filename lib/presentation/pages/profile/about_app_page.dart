@@ -216,13 +216,14 @@ class AboutAppPage extends StatelessWidget {
                     onClick: () {
                       final userBloc = context.read<UserBloc>();
 
-                      userBloc.state.maybeMap(
-                        logInSuccess: (value) => FeedbackBottomModalSheet.show(
+                      if (userBloc.state.status == UserStatus.authorized) {
+                        FeedbackBottomModalSheet.show(
                           context,
-                          defaultEmail: value.user.email,
-                        ),
-                        orElse: () => FeedbackBottomModalSheet.show(context),
-                      );
+                          defaultEmail: userBloc.state.user!.email,
+                        );
+                      } else {
+                        FeedbackBottomModalSheet.show(context);
+                      }
                     },
                   ),
                 ),
