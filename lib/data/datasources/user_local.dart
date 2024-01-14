@@ -8,10 +8,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 abstract class UserLocalData {
   Future<String> getTokenFromCache();
   Future<void> removeTokenFromCache();
-
-  Future<int> getNfcCodeFromCache();
-  Future<void> setNfcCodeToCache(int code);
-  Future<void> removeNfcCodeFromCache();
 }
 
 class UserLocalDataImpl implements UserLocalData {
@@ -35,24 +31,5 @@ class UserLocalDataImpl implements UserLocalData {
   @override
   Future<void> removeTokenFromCache() {
     return oauthHelper.removeAllTokens();
-  }
-
-  @override
-  Future<int> getNfcCodeFromCache() async {
-    String? value = sharedPreferences.getString('nfc_code');
-
-    if (value == null) throw CacheException('NFC code are not set');
-
-    return Future.value(int.parse(value));
-  }
-
-  @override
-  Future<void> setNfcCodeToCache(int code) async {
-    await sharedPreferences.setString('nfc_code', code.toString());
-  }
-
-  @override
-  Future<void> removeNfcCodeFromCache() async {
-    await sharedPreferences.remove('nfc_code');
   }
 }

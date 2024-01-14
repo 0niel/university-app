@@ -184,10 +184,6 @@ GoRouter createRouter() => GoRouter(
                       ),
                     ],
                   ),
-                  GoRoute(
-                    path: 'nfc-pass',
-                    builder: (context, state) => const ProfileNfcPassPage(),
-                  )
                 ],
               ),
             ]),

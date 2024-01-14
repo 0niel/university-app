@@ -164,17 +164,6 @@ class _UserLoggedInView extends StatelessWidget {
           onClick: () => context.go('/profile/about'),
         ),
 
-        // Display only for android devices because of
-        // NFC support only for android
-        if (Platform.isAndroid) ...[
-          const SizedBox(height: 8),
-          SettingsButton(
-            text: 'NFC пропуск',
-            icon: Icons.nfc_rounded,
-            onClick: () => context.go('/profile/nfc-pass'),
-          ),
-        ],
-
         const SizedBox(height: 8),
         SettingsButton(
             text: 'Настройки',

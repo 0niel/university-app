@@ -6,12 +6,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:rtu_mirea_app/common/oauth.dart';
 
 import 'package:rtu_mirea_app/common/widget_data_init.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -24,8 +22,6 @@ import 'package:rtu_mirea_app/presentation/bloc/attendance_bloc/attendance_bloc.
 import 'package:rtu_mirea_app/presentation/bloc/employee_bloc/employee_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/map_cubit/map_cubit.dart';
 import 'package:rtu_mirea_app/presentation/bloc/news_bloc/news_bloc.dart';
-import 'package:rtu_mirea_app/presentation/bloc/nfc_feedback_bloc/nfc_feedback_bloc.dart';
-import 'package:rtu_mirea_app/presentation/bloc/nfc_pass_bloc/nfc_pass_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/notification_preferences/notification_preferences_bloc.dart';
 
 import 'package:rtu_mirea_app/presentation/bloc/scores_bloc/scores_bloc.dart';
@@ -36,7 +32,6 @@ import 'package:rtu_mirea_app/schedule/bloc/schedule_bloc.dart';
 import 'package:rtu_mirea_app/service_locator.dart' as dependency_injection;
 import 'package:rtu_mirea_app/stories/bloc/stories_bloc.dart';
 import 'package:sentry_dio/sentry_dio.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:university_app_server_api/client.dart';
 import 'package:url_strategy/url_strategy.dart';
 import 'common/constants.dart';
@@ -79,16 +74,16 @@ Future<void> main() async {
 
   if (kDebugMode) {
     // Clear Secure Storage
-    var secureStorage = getIt<FlutterSecureStorage>();
-    await secureStorage.deleteAll();
+    // var secureStorage = getIt<FlutterSecureStorage>();
+    // await secureStorage.deleteAll();
 
-    // Clear local dota
-    var prefs = getIt<SharedPreferences>();
-    await prefs.clear();
+    // // Clear local dota
+    // var prefs = getIt<SharedPreferences>();
+    // await prefs.clear();
 
-    // Clear oauth tokens
-    var lksOauth2 = getIt<LksOauth2>();
-    await lksOauth2.oauth2Helper.removeAllTokens();
+    // // Clear oauth tokens
+    // var lksOauth2 = getIt<LksOauth2>();
+    // await lksOauth2.oauth2Helper.removeAllTokens();
   }
 
   setPathUrlStrategy();
@@ -193,17 +188,6 @@ class App extends StatelessWidget {
           BlocProvider<AttendanceBloc>(
               create: (context) => getIt<AttendanceBloc>()),
           BlocProvider<AppCubit>(create: (context) => getIt<AppCubit>()),
-          if (Platform.isAndroid)
-            BlocProvider<NfcPassBloc>(
-              create: (_) => getIt<NfcPassBloc>()
-                ..add(
-                  const NfcPassEvent.fetchNfcCode(),
-                ),
-              lazy: false,
-            ),
-          BlocProvider<NfcFeedbackBloc>(
-            create: (_) => getIt<NfcFeedbackBloc>(),
-          ),
           BlocProvider<NotificationPreferencesBloc>(
             create: (_) => getIt<NotificationPreferencesBloc>(),
           ),

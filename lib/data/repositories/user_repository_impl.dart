@@ -7,7 +7,6 @@ import 'package:rtu_mirea_app/data/datasources/user_remote.dart';
 import 'package:rtu_mirea_app/domain/entities/announce.dart';
 import 'package:rtu_mirea_app/domain/entities/attendance.dart';
 import 'package:rtu_mirea_app/domain/entities/employee.dart';
-import 'package:rtu_mirea_app/domain/entities/nfc_pass.dart';
 import 'package:rtu_mirea_app/domain/entities/score.dart';
 import 'package:rtu_mirea_app/domain/entities/user.dart';
 import 'package:rtu_mirea_app/domain/repositories/user_repository.dart';
@@ -109,70 +108,6 @@ class UserRepositoryImpl implements UserRepository {
       return Right(attendance);
     } on ServerException {
       return Future.value(const Left(ServerFailure()));
-    }
-  }
-
-  @override
-  Future<Either<Failure, List<NfcPass>>> getNfcPasses(
-      String code, String studentId, String deviceId) async {
-    try {
-      final nfcPasses =
-          await remoteDataSource.getNfcPasses(code, studentId, deviceId);
-      return Right(nfcPasses);
-    } on ServerException {
-      return Future.value(const Left(ServerFailure()));
-    }
-  }
-
-  @override
-  Future<Either<Failure, void>> connectNfcPass(
-      String code, String studentId, String deviceId, String deviceName) {
-    try {
-      remoteDataSource.connectNfcPass(code, studentId, deviceId, deviceName);
-      return Future.value(const Right(null));
-    } on ServerException {
-      return Future.value(const Left(ServerFailure()));
-    }
-  }
-
-  @override
-  Future<Either<Failure, void>> fetchNfcCode(
-      String code, String studentId, String deviceId, String deviceName) async {
-    final isLoggedIn = await getAuthToken().then((value) => value.isRight());
-
-    if (!isLoggedIn) {
-      return const Left(ServerFailure("Пользователь не авторизован"));
-    }
-
-    if (await connectionChecker.hasConnection) {
-      try {
-        final nfcCode =
-            await remoteDataSource.getNfcCode(code, studentId, deviceId);
-        await localDataSource.setNfcCodeToCache(nfcCode);
-        return const Right(null);
-      } on ServerException catch (e) {
-        if (e is NfcStaffnodeNotExistException) {
-          return const Left(NfcStaffnodeNotExistFailure());
-        }
-
-        await localDataSource.removeNfcCodeFromCache();
-
-        return Left(ServerFailure(e.cause));
-      }
-    } else {
-      return const Left(ServerFailure("Отсутсвует соединение с интернетом"));
-    }
-  }
-
-  @override
-  Future<Either<Failure, void>> sendNfcNotExistFeedback(
-      String fullName, String group, String personalNumber, String studentId) {
-    try {
-      remoteDataSource.sendNfcNotExistFeedback(
-          fullName, group, personalNumber, studentId);
-      return Future.value(const Right(null));
-    } on ServerException catch (e) {
-      return Future.value(Left(ServerFailure(e.cause)));
     }
   }
 }

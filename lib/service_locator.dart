@@ -23,10 +23,7 @@ import 'package:rtu_mirea_app/data/repositories/user_repository_impl.dart';
 import 'package:rtu_mirea_app/domain/repositories/app_settings_repository.dart';
 import 'package:rtu_mirea_app/domain/repositories/news_repository.dart';
 import 'package:rtu_mirea_app/domain/repositories/user_repository.dart';
-import 'package:rtu_mirea_app/domain/usecases/connect_nfc_pass.dart';
 import 'package:rtu_mirea_app/domain/usecases/delete_schedule.dart';
-import 'package:rtu_mirea_app/domain/usecases/fetch_nfc_code.dart';
-import 'package:rtu_mirea_app/domain/usecases/get_active_group.dart';
 import 'package:rtu_mirea_app/domain/usecases/get_announces.dart';
 import 'package:rtu_mirea_app/domain/usecases/get_app_settings.dart';
 import 'package:rtu_mirea_app/domain/usecases/get_attendance.dart';
@@ -36,7 +33,6 @@ import 'package:rtu_mirea_app/domain/usecases/get_employees.dart';
 import 'package:rtu_mirea_app/domain/usecases/get_groups.dart';
 import 'package:rtu_mirea_app/domain/usecases/get_news.dart';
 import 'package:rtu_mirea_app/domain/usecases/get_news_tags.dart';
-import 'package:rtu_mirea_app/domain/usecases/get_nfc_passes.dart';
 import 'package:rtu_mirea_app/domain/usecases/get_patrons.dart';
 import 'package:rtu_mirea_app/domain/usecases/get_schedule.dart';
 import 'package:rtu_mirea_app/domain/usecases/get_schedule_settings.dart';
@@ -44,8 +40,6 @@ import 'package:rtu_mirea_app/domain/usecases/get_scores.dart';
 import 'package:rtu_mirea_app/domain/usecases/get_user_data.dart';
 import 'package:rtu_mirea_app/domain/usecases/log_in.dart';
 import 'package:rtu_mirea_app/domain/usecases/log_out.dart';
-import 'package:rtu_mirea_app/domain/usecases/send_nfc_not_exist_feedback.dart';
-import 'package:rtu_mirea_app/domain/usecases/set_active_group.dart';
 import 'package:rtu_mirea_app/domain/usecases/set_app_settings.dart';
 import 'package:rtu_mirea_app/domain/usecases/set_schedule_settings.dart';
 import 'package:rtu_mirea_app/presentation/app_theme_cubit.dart';
@@ -56,8 +50,6 @@ import 'package:rtu_mirea_app/presentation/bloc/attendance_bloc/attendance_bloc.
 import 'package:rtu_mirea_app/presentation/bloc/employee_bloc/employee_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/map_cubit/map_cubit.dart';
 import 'package:rtu_mirea_app/presentation/bloc/news_bloc/news_bloc.dart';
-import 'package:rtu_mirea_app/presentation/bloc/nfc_feedback_bloc/nfc_feedback_bloc.dart';
-import 'package:rtu_mirea_app/presentation/bloc/nfc_pass_bloc/nfc_pass_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/notification_preferences/notification_preferences_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/scores_bloc/scores_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/user_bloc/user_bloc.dart';
@@ -95,17 +87,6 @@ Future<void> setup() async {
       setAppSettings: getIt(),
     ),
   );
-  getIt.registerFactory(() => NfcPassBloc(
-        getNfcPasses: getIt(),
-        connectNfcPass: getIt(),
-        deviceInfo: getIt(),
-        fetchNfcCode: getIt(),
-        getAuthToken: getIt(),
-        getUserData: getIt(),
-        userBloc: getIt(),
-      ));
-  getIt
-      .registerFactory(() => NfcFeedbackBloc(sendNfcNotExistFeedback: getIt()));
   getIt.registerFactory(
       () => NotificationPreferencesBloc(notificationsRepository: getIt()));
 
@@ -120,8 +101,6 @@ Future<void> setup() async {
   getIt.registerLazySingleton(() => LogIn(getIt()));
   getIt.registerLazySingleton(() => GetGroups(getIt()));
   getIt.registerLazySingleton(() => GetSchedule(getIt()));
-  getIt.registerLazySingleton(() => SetActiveGroup(getIt()));
-  getIt.registerLazySingleton(() => GetActiveGroup(getIt()));
   getIt.registerLazySingleton(() => GetDownloadedSchedules(getIt()));
   getIt.registerLazySingleton(() => DeleteSchedule(getIt()));
   getIt.registerLazySingleton(() => GetNews(getIt()));
@@ -131,10 +110,6 @@ Future<void> setup() async {
   getIt.registerLazySingleton(() => SetScheduleSettings(getIt()));
   getIt.registerLazySingleton(() => SetAppSettings(getIt()));
   getIt.registerLazySingleton(() => GetAppSettings(getIt()));
-  getIt.registerLazySingleton(() => GetNfcPasses(getIt()));
-  getIt.registerLazySingleton(() => ConnectNfcPass(getIt()));
-  getIt.registerLazySingleton(() => FetchNfcCode(getIt()));
-  getIt.registerLazySingleton(() => SendNfcNotExistFeedback(getIt()));
 
   // Repositories
   getIt.registerLazySingleton<NewsRepository>(
