@@ -12,7 +12,7 @@ publish_to: 'none'
 # In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-version: 1.4.4+57
+version: 1.4.4+58
 
 environment:
   sdk: ">=3.1.1"
@@ -106,11 +106,7 @@ dependencies:
   # See https://pub.dev/packages/flutter_typeahead
   flutter_typeahead: ^4.0.0
 
-  # The Flutter Date Range Picker widget allows users to easily select 
-  # dates or a range of dates. It has four built-in views that allow quick 
-  # navigation to the desired date.
-  # See https://pub.dev/packages/syncfusion_flutter_datepicker
-  syncfusion_flutter_datepicker: ^22.2.12
+  calendar_date_picker2: ^0.5.3
 
   # A Flutter widget rendering static HTML and CSS as Flutter widgets.
   # See https://pub.dev/packages/flutter_html

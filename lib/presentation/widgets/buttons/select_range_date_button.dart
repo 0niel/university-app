@@ -1,6 +1,6 @@
+import 'package:calendar_date_picker2/calendar_date_picker2.dart';
 import 'package:flutter/material.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
-import 'package:syncfusion_flutter_datepicker/datepicker.dart';
 import 'package:intl/intl.dart';
 import 'package:rtu_mirea_app/presentation/typography.dart';
 
@@ -8,16 +8,16 @@ class SelectRangeDateButton extends StatefulWidget {
   const SelectRangeDateButton({
     Key? key,
     required this.onDateSelected,
+    required this.initialValue,
     this.firstDate,
     this.lastDate,
     this.text,
-    this.initialRange,
   }) : super(key: key);
 
   final Function(List<DateTime> dates) onDateSelected;
   final DateTime? firstDate;
   final DateTime? lastDate;
-  final PickerDateRange? initialRange;
+  final List<DateTime?> initialValue;
   final String? text;
 
   @override
@@ -26,22 +26,17 @@ class SelectRangeDateButton extends StatefulWidget {
 
 class _SelectRangeDateButtonState extends State<SelectRangeDateButton> {
   late String _selectedTextDate;
-  late PickerDateRange? _initialRange;
 
   @override
   void initState() {
     _selectedTextDate = widget.text ?? 'Выберите даты';
-    _initialRange = widget.initialRange;
     super.initState();
   }
 
-  void _formatDatesRange(DateRangePickerSelectionChangedArgs args) {
+  void _updateSelectedText(DateTime? startDate, DateTime? endDate) {
     setState(() {
-      final firstDate =
-          DateFormat('dd.MM.yyyy').format(args.value.startDate).toString();
-      final lastDate = DateFormat('dd.MM.yyyy')
-          .format(args.value.endDate ?? args.value.startDate)
-          .toString();
+      final firstDate = DateFormat('dd.MM.yyyy').format(startDate!).toString();
+      final lastDate = DateFormat('dd.MM.yyyy').format(endDate!).toString();
 
       _selectedTextDate = "с $firstDate по $lastDate";
     });
@@ -50,7 +45,7 @@ class _SelectRangeDateButtonState extends State<SelectRangeDateButton> {
   void _onSelectionChanged(DateTime? startDate, DateTime? endDate) {
     if (startDate != null && endDate != null) {
       widget.onDateSelected([startDate, endDate]);
-      _initialRange = PickerDateRange(startDate, endDate);
+      _updateSelectedText(startDate, endDate);
     }
   }
 
@@ -91,58 +86,25 @@ class _SelectRangeDateButtonState extends State<SelectRangeDateButton> {
         context: context,
         builder: (context) {
           return Dialog(
+            backgroundColor: AppTheme.colors.background02,
             shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(20.0)),
             child: Container(
               constraints: const BoxConstraints(maxHeight: 360),
-              child: SfDateRangePicker(
-                monthViewSettings: DateRangePickerMonthViewSettings(
-                  firstDayOfWeek: 1,
-                  viewHeaderStyle: DateRangePickerViewHeaderStyle(
-                    backgroundColor: AppTheme.colors.background02,
-                    textStyle: AppTextStyle.bodyBold.copyWith(
-                      color: AppTheme.colors.deactive,
-                    ),
-                  ),
+              child: CalendarDatePicker2(
+                config: CalendarDatePicker2Config(
+                  calendarType: CalendarDatePicker2Type.range,
+                  selectedDayHighlightColor: AppTheme.colors.primary,
+                  dayTextStyle: AppTextStyle.body,
+                  controlsTextStyle: AppTextStyle.buttonS,
+                  rangeBidirectional: true,
                 ),
-                view: DateRangePickerView.month,
-                headerHeight: 60,
-                rangeSelectionColor:
-                    AppTheme.colors.colorful03.withOpacity(0.7),
-                headerStyle: DateRangePickerHeaderStyle(
-                  textStyle: AppTextStyle.titleS
-                      .copyWith(color: AppTheme.colors.active),
-                ),
-                monthCellStyle: DateRangePickerMonthCellStyle(
-                  textStyle: AppTextStyle.body.copyWith(
-                    color: AppTheme.colors.deactive,
-                  ),
-                  todayTextStyle: AppTextStyle.body
-                      .copyWith(color: AppTheme.colors.colorful03),
-                ),
-                selectionTextStyle: AppTextStyle.bodyBold,
-                rangeTextStyle: AppTextStyle.body,
-                todayHighlightColor: AppTheme.colors.colorful03,
-                startRangeSelectionColor: AppTheme.colors.colorful03,
-                endRangeSelectionColor: AppTheme.colors.colorful03,
-                selectionColor: AppTheme.colors.primary,
-                toggleDaySelection: true,
-                showActionButtons: true,
-                initialSelectedRange: _initialRange,
-                cancelText: 'ОТМЕНА',
-                onCancel: () => Navigator.of(context).pop(),
-                onSubmit: (Object? value) {
-                  if (value is PickerDateRange) {
-                    _onSelectionChanged(value.startDate, value.endDate);
-                    Navigator.of(context).pop();
+                value: widget.initialValue,
+                onValueChanged: (value) {
+                  if (value.length == 2) {
+                    _onSelectionChanged(value[0], value[1]);
                   }
                 },
-                backgroundColor: AppTheme.colors.background02,
-                showNavigationArrow: true,
-                minDate: widget.firstDate,
-                maxDate: widget.lastDate,
-                onSelectionChanged: _formatDatesRange,
-                selectionMode: DateRangePickerSelectionMode.range,
               ),
             ),
           );

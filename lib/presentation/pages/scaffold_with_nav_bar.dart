@@ -36,13 +36,10 @@ class ScaffoldWithNavBar extends StatelessWidget {
           return Scaffold(
             backgroundColor: AppTheme.colors.background03,
             body: navigationShell,
-            bottomNavigationBar:
-                navigationShell.route.toString().contains('home')
-                    ? null
-                    : AppBottomNavigationBar(
-                        index: navigationShell.currentIndex,
-                        onClick: (index) => _setActiveIndex(index),
-                      ),
+            bottomNavigationBar: AppBottomNavigationBar(
+              index: navigationShell.currentIndex,
+              onClick: (index) => _setActiveIndex(index),
+            ),
           );
         }
       },

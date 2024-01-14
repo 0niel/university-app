@@ -6,7 +6,6 @@ import 'package:rtu_mirea_app/presentation/bloc/user_bloc/user_bloc.dart';
 import 'package:rtu_mirea_app/presentation/pages/profile/widgets/attendance_card.dart';
 import 'package:intl/intl.dart';
 import 'package:rtu_mirea_app/presentation/widgets/buttons/select_range_date_button.dart';
-import 'package:syncfusion_flutter_datepicker/datepicker.dart';
 import 'package:rtu_mirea_app/presentation/typography.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 
@@ -18,21 +17,17 @@ class ProfileAttendancePage extends StatefulWidget {
 }
 
 class _ProfileAttendancePageState extends State<ProfileAttendancePage> {
-  List<DateTime> _getFirstAndLastWeekDaysText() {
+  (DateTime, DateTime) _getFirstAndLastWeekDays() {
     final DateTime now = DateTime.now();
     final int currentDay = now.weekday;
     final DateTime firstDayOfWeek =
         now.subtract(Duration(days: currentDay)).add(const Duration(days: 1));
     final DateTime lastDayOfWeek = firstDayOfWeek.add(const Duration(days: 6));
-    return [firstDayOfWeek, lastDayOfWeek];
+    return (firstDayOfWeek, lastDayOfWeek);
   }
 
-  List<String> _getTextDates(List<DateTime> dates) {
-    final List<String> res = [];
-    for (var element in dates) {
-      res.add(DateFormat('dd.MM.yyyy').format(element).toString());
-    }
-    return res;
+  String _formatDateTime(DateTime date) {
+    return DateFormat('dd.MM.yyyy').format(date).toString();
   }
 
   List<List<Attendance>> _groupAttendanceByDate(List<Attendance> attendance) {
@@ -140,9 +135,9 @@ class _ProfileAttendancePageState extends State<ProfileAttendancePage> {
                   if (state is AttendanceInitial) {
                     context.read<AttendanceBloc>().add(LoadAttendance(
                         startDate:
-                            _getTextDates(_getFirstAndLastWeekDaysText())[0],
+                            _formatDateTime(_getFirstAndLastWeekDays().$1),
                         endDate:
-                            _getTextDates(_getFirstAndLastWeekDaysText())[1]));
+                            _formatDateTime(_getFirstAndLastWeekDays().$2)));
                   } else if (state is AttendanceLoadError) {
                     return Center(
                       child: Text(
@@ -155,21 +150,21 @@ class _ProfileAttendancePageState extends State<ProfileAttendancePage> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text('Промежуток: ',
+                          Text('Период:',
                               style: AppTextStyle.body
                                   .copyWith(color: AppTheme.colors.active)),
                           const SizedBox(width: 16),
                           SelectRangeDateButton(
-                            initialRange: PickerDateRange(
-                                _getFirstAndLastWeekDaysText()[0],
-                                _getFirstAndLastWeekDaysText()[1]),
-                            text:
-                                "с ${_getTextDates(_getFirstAndLastWeekDaysText())[0]} по ${_getTextDates(_getFirstAndLastWeekDaysText())[1]}",
+                            initialValue: [
+                              _getFirstAndLastWeekDays().$1,
+                              _getFirstAndLastWeekDays().$2
+                            ],
+                            text: 'Выберите период',
                             onDateSelected: (date) {
                               context.read<AttendanceBloc>().add(
                                     LoadAttendance(
-                                        startDate: _getTextDates(date)[0],
-                                        endDate: _getTextDates(date)[1]),
+                                        startDate: _formatDateTime(date[0]),
+                                        endDate: _formatDateTime(date[1])),
                                   );
                             },
                           ),
