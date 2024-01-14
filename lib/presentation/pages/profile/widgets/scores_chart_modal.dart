@@ -5,9 +5,12 @@ import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 
 class ScoresChartModal extends StatefulWidget {
-  const ScoresChartModal({Key? key, required this.scores}) : super(key: key);
+  const ScoresChartModal(
+      {Key? key, required this.scores, required this.averageRating})
+      : super(key: key);
 
   final Map<String, List<Score>> scores;
+  final Map<int, double> averageRating;
 
   @override
   State<ScoresChartModal> createState() => _ScoresChartModalState();
@@ -46,52 +49,11 @@ class _ScoresChartModalState extends State<ScoresChartModal> {
     return TrendlineType.linear;
   }
 
-  int _getScoreByName(String name) {
-    switch (name.toLowerCase()) {
-      case "отлично":
-        return 5;
-      case "хорошо":
-        return 4;
-      case "удовлетворительно":
-        return 3;
-      case "зачтено":
-        return -1;
-      default:
-        return 0;
-    }
-  }
-
-  Map<int, double> _getAverageRating(Map<String, List<Score>> fullScores) {
-    Map<int, double> rating = {};
-
-    for (final scoresKey in fullScores.keys.toList()) {
-      final scores = fullScores[scoresKey]!;
-      final semester = int.parse(scoresKey.split(' ')[0]);
-
-      int count = 0;
-      double average = 0;
-      for (final score in scores) {
-        final scoreValue = _getScoreByName(score.result);
-
-        if (scoreValue != -1) {
-          count++;
-          average += scoreValue;
-        }
-      }
-
-      average = average / count;
-      rating[semester] = double.parse(average.toStringAsFixed(2));
-    }
-
-    return rating;
-  }
-
   @override
   void initState() {
-    final Map<int, double> averageRating = _getAverageRating(widget.scores);
     chartData = [];
-    for (final key in averageRating.keys.toList()) {
-      chartData.add(_ChartData(key, averageRating[key]!));
+    for (final key in widget.averageRating.keys.toList()) {
+      chartData.add(_ChartData(key, widget.averageRating[key]!));
     }
     super.initState();
   }

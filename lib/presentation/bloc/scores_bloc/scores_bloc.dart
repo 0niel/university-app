@@ -9,7 +9,22 @@ part 'scores_state.dart';
 class ScoresBloc extends Bloc<ScoresEvent, ScoresState> {
   final GetScores getScores;
 
-  ScoresBloc({required this.getScores}) : super(ScoresInitial()) {
+  static int getScoreByName(String name) {
+    switch (name.toLowerCase()) {
+      case "отлично":
+        return 5;
+      case "хорошо":
+        return 4;
+      case "удовлетворительно":
+        return 3;
+      case "зачтено":
+        return -1;
+      default:
+        return 0;
+    }
+  }
+
+  ScoresBloc({required this.getScores}) : super(const ScoresState()) {
     on<LoadScores>(_onLoadScores);
     on<ChangeSelectedScoresSemester>(_onChangeSelectedScoresSemester);
   }
@@ -18,9 +33,8 @@ class ScoresBloc extends Bloc<ScoresEvent, ScoresState> {
     ChangeSelectedScoresSemester event,
     Emitter<ScoresState> emit,
   ) async {
-    if (state is ScoresLoaded) {
-      final scores = (state as ScoresLoaded).scores;
-      emit(ScoresLoaded(scores: scores, selectedSemester: event.semester));
+    if (state.status == ScoresStatus.loaded) {
+      emit(state.copyWith(selectedSemester: event.semester));
     }
   }
 
@@ -42,22 +56,28 @@ class ScoresBloc extends Bloc<ScoresEvent, ScoresState> {
     LoadScores event,
     Emitter<ScoresState> emit,
   ) async {
-    if (state.runtimeType != ScoresLoaded) {
-      emit(ScoresLoading());
+    if (state.status != ScoresStatus.loaded) {
+      emit(state.copyWith(status: ScoresStatus.loading));
 
       final scores = await getScores();
       final studentCode = event.studentCode;
 
-      scores.fold((failure) => emit(ScoresLoadError()), (result) {
+      scores.fold((failure) => emit(state.copyWith(status: ScoresStatus.error)),
+          (result) {
         final scores = result[studentCode];
 
         if (scores == null) {
-          emit(ScoresLoadError());
+          emit(state.copyWith(status: ScoresStatus.error));
           return;
         }
 
-        emit(ScoresLoaded(
-            scores: _sortScores(scores), selectedSemester: scores.keys.last));
+        emit(
+          state.copyWith(
+            scores: _sortScores(scores),
+            selectedSemester: scores.keys.last,
+            status: ScoresStatus.loaded,
+          ),
+        );
       });
     }
   }

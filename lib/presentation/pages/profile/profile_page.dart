@@ -1,4 +1,3 @@
-import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -7,9 +6,7 @@ import 'package:rtu_mirea_app/domain/entities/user.dart';
 import 'package:rtu_mirea_app/presentation/bloc/notification_preferences/notification_preferences_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/user_bloc/user_bloc.dart';
 import 'package:rtu_mirea_app/presentation/widgets/buttons/colorful_button.dart';
-import 'package:rtu_mirea_app/presentation/widgets/buttons/icon_button.dart';
 import 'package:rtu_mirea_app/presentation/widgets/buttons/settings_button.dart';
-import 'package:url_launcher/url_launcher_string.dart';
 
 import '../../bloc/announces_bloc/announces_bloc.dart';
 import '../../widgets/buttons/text_outlined_button.dart';

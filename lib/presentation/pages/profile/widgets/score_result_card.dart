@@ -2,19 +2,27 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:rtu_mirea_app/domain/entities/score.dart';
+import 'package:rtu_mirea_app/presentation/bloc/scores_bloc/scores_bloc.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:rtu_mirea_app/presentation/typography.dart';
 
 class ScoreResultCard extends StatefulWidget {
-  const ScoreResultCard({Key? key, required this.score}) : super(key: key);
+  const ScoreResultCard({
+    Key? key,
+    required this.score,
+    required this.thisSubjectPrevSemestersScores,
+  }) : super(key: key);
 
   final Score score;
+  final List<Score> thisSubjectPrevSemestersScores;
 
   @override
   State<ScoreResultCard> createState() => _ScoreResultCardState();
 }
 
 enum ViewType { minify, expanded }
+
+enum ScoreTrend { decrease, increase, none }
 
 class _ScoreResultCardState extends State<ScoreResultCard> {
   var _viewType = ViewType.minify;
@@ -48,6 +56,27 @@ class _ScoreResultCardState extends State<ScoreResultCard> {
     );
   }
 
+  ScoreTrend _getScoreTrend() {
+    final thisScore = widget.score.result;
+    final prevScores = widget.thisSubjectPrevSemestersScores;
+
+    if (prevScores.isEmpty) return ScoreTrend.none;
+
+    final prevScore = prevScores.first.result;
+
+    if (thisScore.equalsIgnoreCase(prevScore)) return ScoreTrend.none;
+
+    final thisScoreValue = ScoresBloc.getScoreByName(thisScore);
+    final prevScoreValue = ScoresBloc.getScoreByName(prevScore);
+
+    if (thisScoreValue == -1 || prevScoreValue == -1) return ScoreTrend.none;
+
+    if (thisScoreValue > prevScoreValue) return ScoreTrend.increase;
+    if (thisScoreValue < prevScoreValue) return ScoreTrend.decrease;
+
+    return ScoreTrend.none;
+  }
+
   Widget _buildCard(bool expand) {
     return Card(
       color: AppTheme.themeMode == ThemeMode.dark
@@ -59,24 +88,50 @@ class _ScoreResultCardState extends State<ScoreResultCard> {
       surfaceTintColor: Colors.transparent,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 13),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: Row(
           children: [
-            _buildScore(widget.score.type, widget.score.result),
-            const SizedBox(height: 9),
-            _buildScoreName(widget.score.subjectName),
-            if (expand) ...[
-              const Divider(height: 24),
-              const SizedBox(height: 4),
-              _buildTeacherName(widget.score.comission),
-              const SizedBox(height: 12),
-              _buildYear(widget.score.year),
-              const SizedBox(height: 12),
-              _buildDate(widget.score.date),
-            ],
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildScore(widget.score.type, widget.score.result),
+                  const SizedBox(height: 9),
+                  _buildSubjectName(widget.score.subjectName),
+                  if (expand) ...[
+                    const Divider(height: 24),
+                    const SizedBox(height: 4),
+                    _buildTeacherName(widget.score.comission),
+                    const SizedBox(height: 12),
+                    _buildYear(widget.score.year),
+                    const SizedBox(height: 12),
+                    _buildDate(widget.score.date),
+                  ],
+                ],
+              ),
+            ),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildScoreTrendIcon() {
+    final trend = _getScoreTrend();
+    final icon = trend == ScoreTrend.increase
+        ? Icons.arrow_upward_rounded
+        : trend == ScoreTrend.decrease
+            ? Icons.arrow_downward_rounded
+            : null;
+
+    if (icon == null) return const SizedBox();
+
+    return Icon(
+      icon,
+      color: trend == ScoreTrend.increase
+          ? Colors.green
+          : trend == ScoreTrend.decrease
+              ? AppTheme.colors.colorful07
+              : Colors.transparent,
     );
   }
 
@@ -95,8 +150,21 @@ class _ScoreResultCardState extends State<ScoreResultCard> {
     );
   }
 
-  Widget _buildScoreName(String name) {
-    return Text(name, style: AppTextStyle.titleM);
+  Widget _buildSubjectName(String name) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          child: Text(
+            name,
+            style: AppTextStyle.titleM,
+            maxLines: 3,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+        _buildScoreTrendIcon(),
+      ],
+    );
   }
 
   Widget _buildScoreResult(String result) {
@@ -131,10 +199,20 @@ class _ScoreResultCardState extends State<ScoreResultCard> {
       children: [
         Icon(icon),
         const SizedBox(width: 10),
-        Expanded(child: Text(text, style: AppTextStyle.body)),
+        text.isNotEmpty
+            ? Expanded(child: Text(text, style: AppTextStyle.body))
+            : _buildEmtyDataLine(),
       ],
     );
   }
+}
+
+Widget _buildEmtyDataLine() {
+  return Container(
+    height: 1,
+    width: 48,
+    color: AppTheme.colors.deactiveDarker,
+  );
 }
 
 Color getColorByResult(String result) {

@@ -55,16 +55,16 @@ class _ProfileScoresPageState extends State<ProfileScoresPage> {
         final user = userStateLoaded.user!;
         final student = UserBloc.getActiveStudent(user);
 
-        if (state is ScoresInitial) {
+        if (state.status == ScoresStatus.initial) {
           context.read<ScoresBloc>().add(LoadScores(studentCode: student.code));
-        } else if (state is ScoresLoaded) {
+        } else if (state.status == ScoresStatus.loaded) {
           _tabValueNotifier.value =
-              (int.tryParse(state.selectedSemester) ?? 1) - 1;
+              (int.tryParse(state.selectedSemester ?? '') ?? 1) - 1;
 
           return _buildScoresLoadedLayout(state);
-        } else if (state is ScoresLoading) {
+        } else if (state.status == ScoresStatus.loading) {
           return const Center(child: CircularProgressIndicator());
-        } else if (state is ScoresLoadError) {
+        } else if (state.status == ScoresStatus.error) {
           return _buildErrorText();
         }
         return Container();
@@ -72,7 +72,7 @@ class _ProfileScoresPageState extends State<ProfileScoresPage> {
     );
   }
 
-  Widget _buildScoresLoadedLayout(ScoresLoaded state) {
+  Widget _buildScoresLoadedLayout(ScoresState state) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -81,13 +81,15 @@ class _ProfileScoresPageState extends State<ProfileScoresPage> {
         _buildChartButtonRow(state),
         Expanded(
           child: _ScoresCardListView(
-              scores: state.scores[state.selectedSemester] ?? []),
+            scores: state.scores!,
+            selectedSemester: state.selectedSemester!,
+          ),
         ),
       ],
     );
   }
 
-  Widget _buildSemesterTabs(ScoresLoaded state) {
+  Widget _buildSemesterTabs(ScoresState state) {
     return SizedBox(
       height: 32,
       width: double.infinity,
@@ -95,7 +97,7 @@ class _ProfileScoresPageState extends State<ProfileScoresPage> {
         padding: const EdgeInsets.symmetric(horizontal: 12),
         scrollDirection: Axis.horizontal,
         itemBuilder: (context, index) {
-          final semester = state.scores.keys.elementAt(index);
+          final semester = state.scores!.keys.elementAt(index);
           return PrimaryTabButton(
             text: '$semester семестр',
             itemIndex: index,
@@ -103,19 +105,19 @@ class _ProfileScoresPageState extends State<ProfileScoresPage> {
             onClick: () => _onTabClicked(context, index, semester),
           );
         },
-        itemCount: state.scores.length,
+        itemCount: state.scores!.length,
       ),
     );
   }
 
-  Widget _buildChartButtonRow(ScoresLoaded state) {
+  Widget _buildChartButtonRow(ScoresState state) {
     return Padding(
       padding: const EdgeInsets.only(left: 24, right: 12, top: 4),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
-            "Всего предметов: ${state.scores[state.selectedSemester]?.length}",
+            "Всего предметов: ${state.scores![state.selectedSemester]?.length}",
             style: AppTextStyle.chip,
           ),
           _buildViewTypeToggleButton(),
@@ -150,8 +152,11 @@ class _ProfileScoresPageState extends State<ProfileScoresPage> {
       context: context,
       builder: (context) => BlocBuilder<ScoresBloc, ScoresState>(
         builder: (context, state) {
-          if (state is ScoresLoaded) {
-            return ScoresChartModal(scores: state.scores);
+          if (state.status == ScoresStatus.loaded) {
+            return ScoresChartModal(
+              scores: state.scores!,
+              averageRating: state.averageRating!,
+            );
           }
           return Container();
         },
@@ -170,19 +175,121 @@ class _ProfileScoresPageState extends State<ProfileScoresPage> {
 }
 
 class _ScoresCardListView extends StatelessWidget {
-  const _ScoresCardListView({Key? key, required this.scores}) : super(key: key);
+  const _ScoresCardListView({
+    Key? key,
+    required this.scores,
+    required this.selectedSemester,
+  }) : super(key: key);
 
-  final List<Score> scores;
+  final Map<String, List<Score>> scores;
+  final String selectedSemester;
 
   @override
   Widget build(BuildContext context) {
+    final scores = this.scores[selectedSemester] ?? [];
+    final prevSemesters = List.generate(
+      int.parse(selectedSemester) - 1,
+      (index) => this.scores[(index + 1).toString()] ?? [],
+    );
+    final cards = List.generate(
+      scores.length,
+      (index) {
+        final score = scores[index];
+        final prevSemestersScores = prevSemesters
+            .expand((element) => element)
+            .where((element) => element.subjectName == score.subjectName)
+            .toList();
+        return ScoreResultCard(
+          score: score,
+          thisSubjectPrevSemestersScores: prevSemestersScores,
+        );
+      },
+    );
+
     return ListView.builder(
       padding: const EdgeInsets.symmetric(horizontal: 12),
+      itemCount: cards.length + 1,
       itemBuilder: (context, index) {
-        final score = scores[index];
-        return ScoreResultCard(score: score);
+        if (index == 0) {
+          return const _AverageRatingCard();
+        }
+        return cards[index - 1];
       },
-      itemCount: scores.length,
+    );
+  }
+}
+
+class _AverageRatingCard extends StatelessWidget {
+  const _AverageRatingCard({Key? key}) : super(key: key);
+
+  Color _getAverageRatingColor(double averageRating) {
+    if (averageRating >= 4.5) {
+      return Colors.green;
+    }
+    if (averageRating >= 4.0) {
+      return AppTheme.colors.colorful05;
+    }
+    if (averageRating >= 3.0) {
+      return AppTheme.colors.colorful06;
+    } else {
+      return AppTheme.colors.colorful07;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<ScoresBloc, ScoresState>(
+      builder: (context, state) {
+        final averageRating = state.averageRating;
+        final selectedSemester =
+            int.tryParse(state.selectedSemester ?? '') ?? 1;
+
+        if (state.status == ScoresStatus.loaded) {
+          return Card(
+            margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+            color: AppTheme.colors.background02,
+            elevation: 6,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  CircleAvatar(
+                    radius: 24,
+                    backgroundColor: _getAverageRatingColor(
+                      averageRating![selectedSemester] ?? 0,
+                    ),
+                    child: Text(
+                      averageRating[selectedSemester].toString(),
+                      style: AppTextStyle.h6.copyWith(
+                        color: AppTheme.colors.background01,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "Средний балл",
+                          style: AppTextStyle.bodyBold,
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          "За $selectedSemester семестр",
+                          style: AppTextStyle.body,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+        return Container();
+      },
     );
   }
 }
