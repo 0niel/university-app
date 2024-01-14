@@ -14,69 +14,68 @@ class AttendanceCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      height: 80,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        color: AppTheme.colors.background02,
-      ),
-      padding: const EdgeInsets.all(20),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: AppTheme.colors.background03,
-            ),
-            alignment: Alignment.center,
-            child: Container(
-              width: 24,
-              height: 24,
-              decoration: type == "Вход"
-                  ? const BoxDecoration(
-                      shape: BoxShape.circle,
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [Color(0xff99db7e), Color(0xff6da95b)],
-                      ),
-                    )
-                  : BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: AppTheme.colors.colorful02,
-                    ),
+    return Card(
+      color: AppTheme.colors.background02,
+      child: Container(
+        width: double.infinity,
+        height: 80,
+        padding: const EdgeInsets.all(20),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: AppTheme.colors.background03,
+              ),
               alignment: Alignment.center,
-              child: type == "Вход"
-                  ? const Icon(FontAwesomeIcons.rightToBracket, size: 15)
-                  : const Icon(FontAwesomeIcons.rightFromBracket, size: 15),
+              child: Container(
+                width: 24,
+                height: 24,
+                decoration: type == "Вход"
+                    ? const BoxDecoration(
+                        shape: BoxShape.circle,
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [Color(0xff99db7e), Color(0xff6da95b)],
+                        ),
+                      )
+                    : BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: AppTheme.colors.colorful02,
+                      ),
+                alignment: Alignment.center,
+                child: type == "Вход"
+                    ? const Icon(FontAwesomeIcons.rightToBracket, size: 15)
+                    : const Icon(FontAwesomeIcons.rightFromBracket, size: 15),
+              ),
             ),
-          ),
-          const SizedBox(width: 55.50),
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                type,
-                style: AppTextStyle.bodyBold,
-              ),
-              Text(
-                '$date, $time',
-                style: AppTextStyle.captionL.copyWith(
-                    color: type == "Вход"
-                        ? AppTheme.colors.colorful05
-                        : AppTheme.colors.colorful02),
-              ),
-            ],
-          ),
-        ],
+            const SizedBox(width: 55.50),
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  type,
+                  style: AppTextStyle.bodyBold,
+                ),
+                Text(
+                  '$date, $time',
+                  style: AppTextStyle.captionL.copyWith(
+                      color: type == "Вход"
+                          ? AppTheme.colors.colorful05
+                          : AppTheme.colors.colorful02),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
