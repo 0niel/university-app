@@ -110,22 +110,9 @@ class _UserLoggedInView extends StatelessWidget {
             content: "Профиль",
             onPressed: () => context.go('/profile/details', extra: user),
           ),
-          const SizedBox(width: 12),
-          SizedBox(
-            width: 146,
-            height: 45,
-            child: SocialIconButton.asset(
-              assetPath: 'assets/icons/gerb.ico',
-              onClick: () {
-                launchUrlString("https://lk.mirea.ru/auth",
-                    mode: LaunchMode.externalApplication);
-              },
-              text: "Вход в ЛКС",
-            ),
-          ),
         ]),
 
-        const SizedBox(height: 40),
+        const SizedBox(height: 24),
         const ContainerLabel(label: "Информация"),
         const SizedBox(height: 8),
         SettingsButton(
