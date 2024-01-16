@@ -217,6 +217,7 @@ Widget _buildEmtyDataLine() {
 
 Color getColorByResult(String result) {
   final resultLookup = {
+    "не зачтено": AppTheme.colors.colorful07,
     "неуваж": AppTheme.colors.colorful07,
     "зач": Colors.green,
     "зачет": Colors.green,
@@ -226,7 +227,6 @@ Color getColorByResult(String result) {
     "хорошо": AppTheme.colors.colorful05,
     "удовл": AppTheme.colors.colorful06,
     "удовлетворительно": AppTheme.colors.colorful06,
-    "не зачтено": AppTheme.colors.colorful07,
   };
 
   for (var entry in resultLookup.entries) {

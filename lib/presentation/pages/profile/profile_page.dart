@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -7,6 +6,7 @@ import 'package:rtu_mirea_app/presentation/bloc/notification_preferences/notific
 import 'package:rtu_mirea_app/presentation/bloc/user_bloc/user_bloc.dart';
 import 'package:rtu_mirea_app/presentation/widgets/buttons/colorful_button.dart';
 import 'package:rtu_mirea_app/presentation/widgets/buttons/settings_button.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 import '../../bloc/announces_bloc/announces_bloc.dart';
 import '../../widgets/buttons/text_outlined_button.dart';
@@ -22,6 +22,14 @@ class ProfilePage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Профиль"),
+        actions: [
+          IconButton(
+            onPressed: () => launchUrlString('https://lk.mirea.ru'),
+            icon: Image.asset(
+              'assets/images/logo.png',
+            ),
+          ),
+        ],
       ),
       backgroundColor: AppTheme.colors.background01,
       body: SafeArea(
@@ -33,14 +41,22 @@ class ProfilePage extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 24),
                 child: BlocConsumer<UserBloc, UserState>(
                   listener: (context, state) {
-                    if (state.status == UserStatus.unauthorized) {
-                      BlocProvider.of<UserBloc>(context).add(LogInEvent());
+                    if (state.status == UserStatus.authorizeError) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text(
+                            'Ошибка авторизации. Попробуйте еще раз.',
+                          ),
+                        ),
+                      );
                     }
                   },
+                  bloc: context.read<UserBloc>()..add(Started()),
                   builder: (context, state) {
                     if (state.status == UserStatus.unauthorized) {
                       return const _InitialProfileStatePage();
-                    } else if (state.status == UserStatus.loading) {
+                    } else if (state.status == UserStatus.loading ||
+                        state.status == UserStatus.initial) {
                       return ConstrainedBox(
                         constraints: BoxConstraints(
                           minHeight: viewportConstraints.maxHeight,
@@ -108,7 +124,6 @@ class _UserLoggedInView extends StatelessWidget {
             onPressed: () => context.go('/profile/details', extra: user),
           ),
         ]),
-
         const SizedBox(height: 24),
         const ContainerLabel(label: "Информация"),
         const SizedBox(height: 8),
@@ -119,11 +134,6 @@ class _UserLoggedInView extends StatelessWidget {
               context.read<AnnouncesBloc>().add(const LoadAnnounces());
               context.go('/profile/announces');
             }),
-        // const SizedBox(height: 8),
-        // SettingsButton(
-        //     text: 'Адреса',
-        //     icon: Icons.map_rounded,
-        //     onClick: () {}),
         const SizedBox(height: 8),
         SettingsButton(
           text: 'Преподаватели',
@@ -147,7 +157,6 @@ class _UserLoggedInView extends StatelessWidget {
           icon: Icons.apps_rounded,
           onClick: () => context.go('/profile/about'),
         ),
-
         const SizedBox(height: 8),
         SettingsButton(
             text: 'Настройки',
@@ -170,27 +179,32 @@ class _InitialProfileStatePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(0, 24, 0, 24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Привет! 👋',
+                style: AppTextStyle.h4,
+                textAlign: TextAlign.left,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Войдите в аккаунт и быстрый доступ к своему Личному Кабинету Студента МИРЭА. Это безопасно!',
+                style: AppTextStyle.body,
+                textAlign: TextAlign.left,
+              ),
+            ],
+          ),
+        ),
         ColorfulButton(
-            text: 'Войти',
-            onClick: () {
-              // Мы используем oauth2 для авторизации, поэтому
-              // вместо того, чтобы открывать страницу с логином и паролем,
-              // мы просто вызываем событие авторизации, которое откроет
-              // страницу авторизации в браузере.
-              context.read<UserBloc>().add(LogInEvent());
-
-              // Страница с вводом логина и пароля:
-              // context.router.push(const LoginRoute());
-
-              // Страница с ошибкой:
-              // showModalBottomSheet(
-              //   context: context,
-              //   isScrollControlled: true,
-              //   backgroundColor: Colors.transparent,
-              //   builder: (context) => const BottomErrorInfo(),
-              // );
-            },
-            backgroundColor: AppTheme.colors.colorful03),
+          text: 'Войти',
+          onClick: () {
+            context.read<UserBloc>().add(LogInEvent());
+          },
+          backgroundColor: AppTheme.colors.colorful03,
+        ),
         const SizedBox(height: 8),
         SettingsButton(
           text: 'О приложении',

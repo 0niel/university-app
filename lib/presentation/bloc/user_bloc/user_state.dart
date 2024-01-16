@@ -1,6 +1,7 @@
 part of 'user_bloc.dart';
 
 enum UserStatus {
+  initial,
   unauthorized,
   loading,
   authorized,
@@ -10,7 +11,7 @@ enum UserStatus {
 class UserState extends Equatable {
   const UserState({
     this.user,
-    this.status = UserStatus.unauthorized,
+    this.status = UserStatus.initial,
   });
 
   final User? user;

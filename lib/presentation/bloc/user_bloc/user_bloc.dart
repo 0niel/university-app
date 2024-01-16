@@ -87,7 +87,15 @@ class UserBloc extends Bloc<UserEvent, UserState> {
     Emitter<UserState> emit,
   ) async {
     final res = await logOut();
-    res.fold((failure) => null, (r) => emit(state.copyWith()));
+    res.fold(
+      (failure) => null,
+      (r) => emit(
+        state.copyWith(
+          status: UserStatus.unauthorized,
+          user: null,
+        ),
+      ),
+    );
   }
 
   static Student getActiveStudent(User user) {
@@ -107,7 +115,10 @@ class UserBloc extends Bloc<UserEvent, UserState> {
 
     bool loggedIn = token.isRight();
 
-    if (!loggedIn) return;
+    if (!loggedIn) {
+      emit(state.copyWith(status: UserStatus.unauthorized));
+      return;
+    }
 
     // If token in the storage, user is authorized at least once and we can
     // try to get user data
