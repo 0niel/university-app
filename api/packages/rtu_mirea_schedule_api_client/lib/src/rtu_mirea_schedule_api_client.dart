@@ -121,7 +121,7 @@ class RtuMireaScheduleApiClient {
     return <String, String>{
       HttpHeaders.contentTypeHeader: ContentType.json.value,
       HttpHeaders.acceptHeader: ContentType.json.value,
-      'x-client-name': 'mobile-backend'
+      'client-name': 'mobile-backend'
     };
   }
 }
