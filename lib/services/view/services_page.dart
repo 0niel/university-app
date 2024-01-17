@@ -92,6 +92,16 @@ class _ServicesViewState extends State<ServicesView> {
                   description: 'Найди свои вещи',
                 ),
                 ServiceCard(
+                  title: 'Траектория обучения',
+                  url: 'https://t.me/learning_roadmap_bot',
+                  icon: ServiceIcon(
+                    color: AppTheme.colors.colorful05,
+                    iconColor: AppTheme.colors.background01,
+                    icon: Icons.timeline,
+                  ),
+                  launchMode: LaunchMode.externalApplication,
+                ),
+                ServiceCard(
                   title: 'Форум',
                   url: 'https://mirea.ninja/',
                   icon: ServiceIcon(
