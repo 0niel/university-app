@@ -1,5 +1,9 @@
 import 'package:equatable/equatable.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 
+part 'score.g.dart';
+
+@JsonSerializable()
 class Score extends Equatable {
   final String subjectName;
   final String result;
@@ -55,4 +59,8 @@ class Score extends Equatable {
       year: year ?? this.year,
     );
   }
+
+  factory Score.fromJson(Map<String, dynamic> json) => _$ScoreFromJson(json);
+
+  Map<String, dynamic> toJson() => _$ScoreToJson(this);
 }

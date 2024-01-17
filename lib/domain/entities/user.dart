@@ -1,7 +1,11 @@
 import 'package:equatable/equatable.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 
 import 'student.dart';
 
+part 'user.g.dart';
+
+@JsonSerializable()
 class User extends Equatable {
   final int id;
 
@@ -33,6 +37,10 @@ class User extends Equatable {
     required this.lastLoginDate,
     required this.students,
   });
+
+  factory User.fromJson(Map<String, dynamic> json) => _$UserFromJson(json);
+
+  Map<String, dynamic> toJson() => _$UserToJson(this);
 
   @override
   List<Object?> get props => [

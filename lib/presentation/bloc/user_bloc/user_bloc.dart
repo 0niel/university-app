@@ -1,7 +1,8 @@
-import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:get/get.dart';
+import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:rtu_mirea_app/domain/entities/student.dart';
 import 'package:rtu_mirea_app/domain/entities/user.dart';
 import 'package:rtu_mirea_app/domain/usecases/get_auth_token.dart';
@@ -12,8 +13,9 @@ import 'package:sentry_flutter/sentry_flutter.dart';
 
 part 'user_event.dart';
 part 'user_state.dart';
+part 'user_bloc.g.dart';
 
-class UserBloc extends Bloc<UserEvent, UserState> {
+class UserBloc extends HydratedBloc<UserEvent, UserState> {
   final LogIn logIn;
   final LogOut logOut;
   final GetUserData getUserData;
@@ -86,16 +88,8 @@ class UserBloc extends Bloc<UserEvent, UserState> {
     UserEvent event,
     Emitter<UserState> emit,
   ) async {
-    final res = await logOut();
-    res.fold(
-      (failure) => null,
-      (r) => emit(
-        state.copyWith(
-          status: UserStatus.unauthorized,
-          user: null,
-        ),
-      ),
-    );
+    await logOut();
+    emit(const UserState(status: UserStatus.unauthorized));
   }
 
   static Student getActiveStudent(User user) {
@@ -134,4 +128,10 @@ class UserBloc extends Bloc<UserEvent, UserState> {
       emit(state.copyWith(status: UserStatus.authorized, user: r));
     });
   }
+
+  @override
+  UserState? fromJson(Map<String, dynamic> json) => UserState.fromJson(json);
+
+  @override
+  Map<String, dynamic>? toJson(UserState state) => state.toJson();
 }

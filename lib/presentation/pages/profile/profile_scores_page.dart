@@ -50,22 +50,30 @@ class _ProfileScoresPageState extends State<ProfileScoresPage> {
   }
 
   Widget _buildScoresBloc(UserState userStateLoaded) {
-    return BlocBuilder<ScoresBloc, ScoresState>(
-      builder: (context, state) {
-        final user = userStateLoaded.user!;
-        final student = UserBloc.getActiveStudent(user);
+    final user = userStateLoaded.user!;
+    final student = UserBloc.getActiveStudent(user);
 
-        if (state.status == ScoresStatus.initial) {
-          context.read<ScoresBloc>().add(LoadScores(studentCode: student.code));
-        } else if (state.status == ScoresStatus.loaded) {
+    context.read<ScoresBloc>().add(LoadScores(studentCode: student.code));
+
+    return BlocConsumer<ScoresBloc, ScoresState>(
+      bloc: context.read<ScoresBloc>(),
+      listener: (context, state) {
+        if (state.status == ScoresStatus.error) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text("Произошла ошибка при загрузке оценок"),
+            ),
+          );
+        }
+      },
+      builder: (context, state) {
+        if (state.scores != null && state.selectedSemester != null) {
           _tabValueNotifier.value =
               (int.tryParse(state.selectedSemester ?? '') ?? 1) - 1;
 
           return _buildScoresLoadedLayout(state);
         } else if (state.status == ScoresStatus.loading) {
           return const Center(child: CircularProgressIndicator());
-        } else if (state.status == ScoresStatus.error) {
-          return _buildErrorText();
         }
         return Container();
       },

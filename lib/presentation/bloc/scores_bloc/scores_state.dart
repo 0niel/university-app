@@ -2,6 +2,7 @@ part of 'scores_bloc.dart';
 
 enum ScoresStatus { initial, loading, loaded, error }
 
+@JsonSerializable()
 class ScoresState extends Equatable {
   const ScoresState({
     this.scores,
@@ -50,6 +51,11 @@ class ScoresState extends Equatable {
       status: status ?? this.status,
     );
   }
+
+  factory ScoresState.fromJson(Map<String, dynamic> json) =>
+      _$ScoresStateFromJson(json);
+
+  Map<String, dynamic> toJson() => _$ScoresStateToJson(this);
 
   @override
   List<Object?> get props => [scores, selectedSemester, status];

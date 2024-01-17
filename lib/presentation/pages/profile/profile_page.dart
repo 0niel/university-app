@@ -53,7 +53,8 @@ class ProfilePage extends StatelessWidget {
                   },
                   bloc: context.read<UserBloc>()..add(Started()),
                   builder: (context, state) {
-                    if (state.status == UserStatus.unauthorized) {
+                    if (state.status == UserStatus.unauthorized &&
+                        state.user == null) {
                       return const _InitialProfileStatePage();
                     } else if (state.status == UserStatus.loading ||
                         state.status == UserStatus.initial) {
@@ -65,10 +66,7 @@ class ProfilePage extends StatelessWidget {
                           child: CircularProgressIndicator(),
                         ),
                       );
-                    } else if (state.status == UserStatus.authorizeError) {
-                      return const _InitialProfileStatePage();
-                    } else if (state.status == UserStatus.authorized &&
-                        state.user != null) {
+                    } else if (state.user != null) {
                       BlocProvider.of<NotificationPreferencesBloc>(context).add(
                         InitialCategoriesPreferencesRequested(
                             group: UserBloc.getActiveStudent(state.user!)

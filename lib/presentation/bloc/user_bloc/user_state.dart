@@ -8,6 +8,7 @@ enum UserStatus {
   authorizeError,
 }
 
+@JsonSerializable()
 class UserState extends Equatable {
   const UserState({
     this.user,
@@ -28,6 +29,11 @@ class UserState extends Equatable {
       status: status ?? this.status,
     );
   }
+
+  factory UserState.fromJson(Map<String, dynamic> json) =>
+      _$UserStateFromJson(json);
+
+  Map<String, dynamic> toJson() => _$UserStateToJson(this);
 
   @override
   List<Object?> get props => [user, status];

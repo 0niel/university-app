@@ -1,5 +1,9 @@
 import 'package:equatable/equatable.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 
+part 'edu_program.g.dart';
+
+@JsonSerializable()
 class EduProgram extends Equatable {
   final String eduProgram;
   final String eduProgramCode;
@@ -14,6 +18,11 @@ class EduProgram extends Equatable {
     required this.prodDepartment,
     required this.type,
   });
+
+  factory EduProgram.fromJson(Map<String, dynamic> json) =>
+      _$EduProgramFromJson(json);
+
+  Map<String, dynamic> toJson() => _$EduProgramToJson(this);
 
   @override
   List<Object?> get props => [

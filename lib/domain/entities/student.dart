@@ -1,7 +1,11 @@
 import 'package:equatable/equatable.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 
 import 'edu_program.dart';
 
+part 'student.g.dart';
+
+@JsonSerializable()
 class Student extends Equatable {
   final String id;
   final bool isActive;
@@ -26,6 +30,11 @@ class Student extends Equatable {
     required this.eduProgram,
     required this.status,
   });
+
+  factory Student.fromJson(Map<String, dynamic> json) =>
+      _$StudentFromJson(json);
+
+  Map<String, dynamic> toJson() => _$StudentToJson(this);
 
   @override
   List<Object?> get props => [

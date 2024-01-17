@@ -1,12 +1,14 @@
-import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:rtu_mirea_app/domain/entities/score.dart';
 import 'package:rtu_mirea_app/domain/usecases/get_scores.dart';
 
 part 'scores_event.dart';
 part 'scores_state.dart';
+part 'scores_bloc.g.dart';
 
-class ScoresBloc extends Bloc<ScoresEvent, ScoresState> {
+class ScoresBloc extends HydratedBloc<ScoresEvent, ScoresState> {
   final GetScores getScores;
 
   static int getScoreByName(String name) {
@@ -81,4 +83,11 @@ class ScoresBloc extends Bloc<ScoresEvent, ScoresState> {
       });
     }
   }
+
+  @override
+  ScoresState? fromJson(Map<String, dynamic> json) =>
+      ScoresState.fromJson(json);
+
+  @override
+  Map<String, dynamic>? toJson(ScoresState state) => state.toJson();
 }
