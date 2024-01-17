@@ -127,50 +127,52 @@ class _ServicesViewState extends State<ServicesView> {
             ),
           ),
           const SizedBox(height: 8),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: ListView(
-              shrinkWrap: true,
-              scrollDirection: Axis.vertical,
-              children: [
-                CommunityCard(
-                  title: 'Mirea Ninja',
-                  url: 'https://t.me/mirea_ninja_chat',
-                  logo: CircleAvatar(
-                    // backgroundColor: AppTheme.colors.colorful01,
-                    foregroundImage: Image.network(
-                      'https://sun9-65.userapi.com/impg/bvdpBQYk7glRfRkmsR-GRMMWwK2Rw3lDIuGjzQ/l4qMdaR-HBA.jpg?size=1200x1200&quality=95&sign=427e8060dea18a64efc92e8ae7ab57da&type=album',
-                    ).image,
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: ListView(
+                shrinkWrap: true,
+                scrollDirection: Axis.vertical,
+                children: [
+                  CommunityCard(
+                    title: 'Mirea Ninja',
+                    url: 'https://t.me/mirea_ninja_chat',
+                    logo: CircleAvatar(
+                      // backgroundColor: AppTheme.colors.colorful01,
+                      foregroundImage: Image.network(
+                        'https://sun9-65.userapi.com/impg/bvdpBQYk7glRfRkmsR-GRMMWwK2Rw3lDIuGjzQ/l4qMdaR-HBA.jpg?size=1200x1200&quality=95&sign=427e8060dea18a64efc92e8ae7ab57da&type=album',
+                      ).image,
+                    ),
+                    launchMode: LaunchMode.externalApplication,
+                    description: 'Самый популярный неофициальный чат',
                   ),
-                  launchMode: LaunchMode.externalApplication,
-                  description: 'Самый популярный неофициальный чат',
-                ),
-                CommunityCard(
-                  title: 'Кафедра КИС',
-                  url: 'https://vk.com/kis_it_mirea',
-                  logo: CircleAvatar(
-                    // backgroundColor: AppTheme.colors.colorful01,
-                    foregroundImage: Image.network(
-                      'https://sun9-1.userapi.com/impg/JSVkx8BMQSKU2IR27bnX_yajk4Bvb_HMf530gg/QkoTZdc_2mM.jpg?size=500x500&quality=95&sign=6bfc16cfff772b175c927aae3e480aa8&type=album',
-                    ).image,
+                  CommunityCard(
+                    title: 'Кафедра КИС',
+                    url: 'https://vk.com/kis_it_mirea',
+                    logo: CircleAvatar(
+                      // backgroundColor: AppTheme.colors.colorful01,
+                      foregroundImage: Image.network(
+                        'https://sun9-1.userapi.com/impg/JSVkx8BMQSKU2IR27bnX_yajk4Bvb_HMf530gg/QkoTZdc_2mM.jpg?size=500x500&quality=95&sign=6bfc16cfff772b175c927aae3e480aa8&type=album',
+                      ).image,
+                    ),
+                    launchMode: LaunchMode.externalApplication,
+                    description: 'Кафедра Корпоративных информационных систем',
                   ),
-                  launchMode: LaunchMode.externalApplication,
-                  description: 'Кафедра Корпоративных информационных систем',
-                ),
-                CommunityCard(
-                  title: 'Кафедра ИППО',
-                  url: 'https://vk.com/ippo_it',
-                  logo: CircleAvatar(
-                    // backgroundColor: AppTheme.colors.colorful01,
-                    foregroundImage: Image.network(
-                      'https://sun9-21.userapi.com/impg/Sk3d5lpXhoaiHj3QZz1tt8HQKPcEaoE27WgZAw/nig2y-fcRkU.jpg?size=500x600&quality=95&sign=fa26df3e73f398f91d10029134156e5d&type=album',
-                    ).image,
+                  CommunityCard(
+                    title: 'Кафедра ИППО',
+                    url: 'https://vk.com/ippo_it',
+                    logo: CircleAvatar(
+                      // backgroundColor: AppTheme.colors.colorful01,
+                      foregroundImage: Image.network(
+                        'https://sun9-21.userapi.com/impg/Sk3d5lpXhoaiHj3QZz1tt8HQKPcEaoE27WgZAw/nig2y-fcRkU.jpg?size=500x600&quality=95&sign=fa26df3e73f398f91d10029134156e5d&type=album',
+                      ).image,
+                    ),
+                    launchMode: LaunchMode.externalApplication,
+                    description:
+                        'Кафедра Инструментального и прикладного программного обеспечения',
                   ),
-                  launchMode: LaunchMode.externalApplication,
-                  description:
-                      'Кафедра Инструментального и прикладного программного обеспечения',
-                ),
-              ],
+                ],
+              ),
             ),
           ),
           const SizedBox(height: 16),
