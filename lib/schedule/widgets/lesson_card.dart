@@ -248,8 +248,16 @@ class LessonCard extends StatelessWidget {
                               ],
                             ),
                           ],
+                          // Dont show groups if there is only one group for
+                          // SelectedGroupSchedule because this is the group
+                          // that was selected.
                           if (lesson.groups != null &&
-                              lesson.groups!.length > 1) ...[
+                              ((state.selectedSchedule
+                                          is! SelectedGroupSchedule &&
+                                      lesson.groups!.isNotEmpty) ||
+                                  (state.selectedSchedule
+                                          is SelectedGroupSchedule &&
+                                      lesson.groups!.length > 1))) ...[
                             const SizedBox(
                               height: 4,
                             ),
