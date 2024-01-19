@@ -97,7 +97,6 @@ class _ScheduleDetailsPageState extends State<ScheduleDetailsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.colors.background01,
       appBar: AppBar(
         title: const Text(
           'Предмет',

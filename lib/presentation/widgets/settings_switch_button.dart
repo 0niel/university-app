@@ -43,7 +43,7 @@ class _SettingsSwitchButtonState extends State<SettingsSwitchButton> {
                 const SizedBox(width: 20),
                 Text(widget.text,
                     style: AppTextStyle.buttonL
-                        .copyWith(color: AppTheme.colors.active)),
+                        .copyWith(color: AppTheme.colorsOf(context).active)),
               ],
             ),
             Padding(
@@ -51,7 +51,7 @@ class _SettingsSwitchButtonState extends State<SettingsSwitchButton> {
               child: ValueListenableBuilder(
                 valueListenable: _switchValueNotifier,
                 builder: (context, hasError, child) => CupertinoSwitch(
-                  activeColor: AppTheme.colors.primary,
+                  activeColor: AppTheme.colorsOf(context).primary,
                   value: _switchValueNotifier.value,
                   onChanged: (value) {
                     _switchValueNotifier.value = value;

@@ -28,7 +28,8 @@ class BottomModalSheet extends StatelessWidget {
       showDragHandle: true,
       isDismissible: true,
       isScrollControlled: true,
-      backgroundColor: backgroundColor ?? AppTheme.colors.background02,
+      backgroundColor:
+          backgroundColor ?? AppTheme.colorsOf(context).background02,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(
           top: Radius.circular(24),
@@ -55,14 +56,16 @@ class BottomModalSheet extends StatelessWidget {
           Column(crossAxisAlignment: CrossAxisAlignment.center, children: [
             Text(
               title,
-              style: AppTextStyle.h5,
+              style: AppTextStyle.h5.copyWith(
+                color: AppTheme.colorsOf(context).active,
+              ),
             ),
             const SizedBox(height: 8),
             if (description != null)
               Text(
                 description!,
                 style: AppTextStyle.captionL.copyWith(
-                  color: AppTheme.colors.deactive,
+                  color: AppTheme.colorsOf(context).deactive,
                 ),
                 textAlign: TextAlign.center,
               ),

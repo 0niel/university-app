@@ -151,8 +151,8 @@ class _ProfileAttendancePageState extends State<ProfileAttendancePage> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text('Период:',
-                              style: AppTextStyle.body
-                                  .copyWith(color: AppTheme.colors.active)),
+                              style: AppTextStyle.body.copyWith(
+                                  color: AppTheme.colorsOf(context).active)),
                           const SizedBox(width: 16),
                           SelectRangeDateButton(
                             initialValue: [

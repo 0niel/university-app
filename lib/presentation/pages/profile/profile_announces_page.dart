@@ -16,9 +16,7 @@ class ProfileAnnouncesPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Объявления"),
-        backgroundColor: AppTheme.colors.background01,
       ),
-      backgroundColor: AppTheme.colors.background01,
       body: SafeArea(
         bottom: false,
         child: BlocBuilder<AnnouncesBloc, AnnouncesState>(
@@ -35,8 +33,6 @@ class ProfileAnnouncesPage extends StatelessWidget {
                 itemBuilder: (context, index) => Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Card(
-                    color: AppTheme.colors.background03,
-                    elevation: 0,
                     child: Padding(
                       padding: const EdgeInsets.all(16),
                       child: Column(

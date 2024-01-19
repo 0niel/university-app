@@ -13,9 +13,9 @@ class BottomErrorInfo extends StatelessWidget {
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [
-              AppTheme.colors.secondary,
-              AppTheme.colors.deactive,
-              AppTheme.colors.background01
+              AppTheme.colorsOf(context).secondary,
+              AppTheme.colorsOf(context).deactive,
+              AppTheme.colorsOf(context).background01
             ],
             begin: const Alignment(-1, -1),
             end: const Alignment(-1, 1),
@@ -30,7 +30,7 @@ class BottomErrorInfo extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 24),
             decoration: BoxDecoration(
-              color: AppTheme.colors.background01,
+              color: AppTheme.colorsOf(context).background01,
               borderRadius: const BorderRadius.only(
                   topLeft: Radius.circular(25.0),
                   topRight: Radius.circular(25.0)),
@@ -55,7 +55,7 @@ class BottomErrorInfo extends StatelessWidget {
                 Text(
                   "Разработчики, отвечающие за API ЛКС, отключили возможность производить аутентификацию и получать данные своего аккаунта. Пожалуйста, используйте lk.mirea.ru",
                   style: AppTextStyle.captionL
-                      .copyWith(color: AppTheme.colors.deactive),
+                      .copyWith(color: AppTheme.colorsOf(context).deactive),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 32),
@@ -64,8 +64,8 @@ class BottomErrorInfo extends StatelessWidget {
                       width: double.infinity, height: 48),
                   child: ElevatedButton(
                     style: ButtonStyle(
-                      backgroundColor:
-                          MaterialStateProperty.all(AppTheme.colors.primary),
+                      backgroundColor: MaterialStateProperty.all(
+                          AppTheme.colorsOf(context).primary),
                       shape: MaterialStateProperty.all<RoundedRectangleBorder>(
                         RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(24.0),

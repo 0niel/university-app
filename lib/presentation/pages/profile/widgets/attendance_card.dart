@@ -15,7 +15,7 @@ class AttendanceCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      color: AppTheme.colors.background02,
+      color: AppTheme.colorsOf(context).background02,
       child: Container(
         width: double.infinity,
         height: 80,
@@ -30,7 +30,7 @@ class AttendanceCard extends StatelessWidget {
               height: 40,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: AppTheme.colors.background03,
+                color: AppTheme.colorsOf(context).background03,
               ),
               alignment: Alignment.center,
               child: Container(
@@ -47,7 +47,7 @@ class AttendanceCard extends StatelessWidget {
                       )
                     : BoxDecoration(
                         shape: BoxShape.circle,
-                        color: AppTheme.colors.colorful02,
+                        color: AppTheme.colorsOf(context).colorful02,
                       ),
                 alignment: Alignment.center,
                 child: type == "Вход"
@@ -69,8 +69,8 @@ class AttendanceCard extends StatelessWidget {
                   '$date, $time',
                   style: AppTextStyle.captionL.copyWith(
                       color: type == "Вход"
-                          ? AppTheme.colors.colorful05
-                          : AppTheme.colors.colorful02),
+                          ? AppTheme.colorsOf(context).colorful05
+                          : AppTheme.colorsOf(context).colorful02),
                 ),
               ],
             ),

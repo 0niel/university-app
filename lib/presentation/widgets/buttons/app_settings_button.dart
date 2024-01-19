@@ -19,7 +19,7 @@ class AppSettingsButton extends StatelessWidget {
           'assets/icons/filter.svg',
           width: 20,
           height: 20,
-          color: AppTheme.colors.active,
+          color: AppTheme.colorsOf(context).active,
         ),
       ),
     );

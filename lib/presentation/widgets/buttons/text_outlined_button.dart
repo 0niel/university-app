@@ -18,18 +18,20 @@ class TextOutlinedButton extends StatelessWidget {
       child: ElevatedButton(
         onPressed: onPressed,
         style: ButtonStyle(
-          backgroundColor:
-              MaterialStateProperty.all(AppTheme.colors.background01),
+          backgroundColor: MaterialStateProperty.all(
+              AppTheme.colorsOf(context).background01),
           shape: MaterialStateProperty.all<RoundedRectangleBorder>(
             RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(50.0),
-                side: BorderSide(color: AppTheme.colors.primary, width: 2)),
+                side: BorderSide(
+                    color: AppTheme.colorsOf(context).primary, width: 2)),
           ),
         ),
         child: Center(
           child: Text(
             content,
-            style: AppTextStyle.buttonS.copyWith(color: AppTheme.colors.active),
+            style: AppTextStyle.buttonS
+                .copyWith(color: AppTheme.colorsOf(context).active),
           ),
         ),
       ),

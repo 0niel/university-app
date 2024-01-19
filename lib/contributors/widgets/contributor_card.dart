@@ -14,7 +14,7 @@ class ContributorCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      color: AppTheme.colors.background02,
+      color: AppTheme.colorsOf(context).background02,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
       ),
@@ -28,7 +28,7 @@ class ContributorCard extends StatelessWidget {
             children: [
               CircleAvatar(
                 radius: 37,
-                backgroundColor: AppTheme.colors.deactive,
+                backgroundColor: AppTheme.colorsOf(context).deactive,
                 backgroundImage: NetworkImage(contributor.avatarUrl),
               ),
               const SizedBox(height: 16),

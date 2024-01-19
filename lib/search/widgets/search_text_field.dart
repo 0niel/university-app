@@ -13,13 +13,13 @@ class SearchTextField extends StatelessWidget {
     return Container(
       height: 48,
       decoration: BoxDecoration(
-        color: AppTheme.colors.background02,
+        color: AppTheme.colorsOf(context).background02,
         borderRadius: BorderRadius.circular(12),
       ),
       child: TextField(
         controller: controller,
         style: AppTextStyle.titleS.copyWith(
-          color: AppTheme.colors.active,
+          color: AppTheme.colorsOf(context).active,
         ),
         decoration: InputDecoration(
           contentPadding: const EdgeInsets.symmetric(
@@ -29,13 +29,13 @@ class SearchTextField extends StatelessWidget {
           border: InputBorder.none,
           hintText: 'Поиск',
           hintStyle: AppTextStyle.titleS.copyWith(
-            color: AppTheme.colors.deactive,
+            color: AppTheme.colorsOf(context).deactive,
           ),
           prefixIcon: Padding(
             padding: const EdgeInsets.only(right: 8, left: 16),
             child: SvgPicture.asset(
               'assets/icons/search.svg',
-              color: AppTheme.colors.active,
+              color: AppTheme.colorsOf(context).active,
               width: 24,
               height: 24,
             ),

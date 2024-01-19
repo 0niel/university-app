@@ -20,21 +20,21 @@ class SearchResultItem extends StatelessWidget {
   final ItemType type;
   final void Function() onPressed;
 
-  Widget _buildTeacherItem() {
+  Widget _buildTeacherItem(BuildContext context) {
     return Row(
       children: [
         Container(
           width: 32,
           height: 32,
           decoration: BoxDecoration(
-            color: AppTheme.colors.colorful03,
+            color: AppTheme.colorsOf(context).colorful03,
             borderRadius: BorderRadius.circular(20),
           ),
           child: Center(
             child: Text(
               name.split(' ').map((e) => e[0]).take(2).join().toUpperCase(),
               style: AppTextStyle.bodyBold.copyWith(
-                color: AppTheme.colors.active,
+                color: AppTheme.colorsOf(context).active,
               ),
             ),
           ),
@@ -43,7 +43,7 @@ class SearchResultItem extends StatelessWidget {
         Text(
           name,
           style: AppTextStyle.titleS.copyWith(
-            color: AppTheme.colors.active,
+            color: AppTheme.colorsOf(context).active,
           ),
         ),
       ],
@@ -57,13 +57,13 @@ class SearchResultItem extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 5),
         child: type == ItemType.teacher
-            ? _buildTeacherItem()
+            ? _buildTeacherItem(context)
             : Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
                   name,
                   style: AppTextStyle.titleS.copyWith(
-                    color: AppTheme.colors.active,
+                    color: AppTheme.colorsOf(context).active,
                   ),
                 ),
               ),

@@ -20,9 +20,9 @@ class SearchPage extends StatelessWidget {
         scheduleRepository: context.read<ScheduleRepository>(),
       )..add(SearchQueryChanged(searchQuery: query ?? '')),
       child: Scaffold(
-        backgroundColor: AppTheme.colors.background01,
+        backgroundColor: AppTheme.colorsOf(context).background01,
         appBar: AppBar(
-          backgroundColor: AppTheme.colors.background01,
+          backgroundColor: AppTheme.colorsOf(context).background01,
           elevation: 0,
           title: const Text(
             "Поиск",

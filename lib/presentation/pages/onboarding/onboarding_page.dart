@@ -145,7 +145,7 @@ class _OnBoardingPageState extends State<OnBoardingPage> {
     );
 
     return Scaffold(
-      backgroundColor: AppTheme.colors.background01,
+      backgroundColor: AppTheme.colorsOf(context).background01,
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -222,7 +222,7 @@ class _PageIndicatorsState extends State<PageIndicators> {
                   child: Text(
                     "Пропустить",
                     style: AppTextStyle.buttonS.copyWith(
-                      color: AppTheme.colors.active,
+                      color: AppTheme.colorsOf(context).active,
                     ),
                   ),
                 ),

@@ -57,7 +57,7 @@ class _SelectDateButtonState extends State<SelectDateButton> {
         shape: MaterialStateProperty.all<RoundedRectangleBorder>(
           RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(24.0),
-            side: BorderSide(color: AppTheme.colors.deactive),
+            side: BorderSide(color: AppTheme.colorsOf(context).deactive),
           ),
         ),
       ),

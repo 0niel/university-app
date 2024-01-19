@@ -27,11 +27,11 @@ class TextInput extends StatelessWidget {
       decoration: InputDecoration(
         errorText: errorText,
         errorStyle: AppTextStyle.captionL.copyWith(
-          color: AppTheme.colors.colorful07,
+          color: AppTheme.colorsOf(context).colorful07,
         ),
         hintText: hintText,
         hintStyle: AppTextStyle.titleS.copyWith(
-          color: AppTheme.colors.deactive,
+          color: AppTheme.colorsOf(context).deactive,
         ),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 16,
@@ -40,13 +40,13 @@ class TextInput extends StatelessWidget {
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(
-            color: AppTheme.colors.primary,
+            color: AppTheme.colorsOf(context).primary,
           ),
         ),
         focusedErrorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(
-            color: AppTheme.colors.colorful07,
+            color: AppTheme.colorsOf(context).colorful07,
           ),
         ),
         disabledBorder: OutlineInputBorder(
@@ -66,10 +66,10 @@ class TextInput extends StatelessWidget {
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(
-            color: AppTheme.colors.colorful07,
+            color: AppTheme.colorsOf(context).colorful07,
           ),
         ),
-        fillColor: fillColor ?? AppTheme.colors.background01,
+        fillColor: fillColor ?? AppTheme.colorsOf(context).background01,
         filled: true,
       ),
       keyboardType: keyboardType,

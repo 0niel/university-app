@@ -1,5 +1,5 @@
+import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:rtu_mirea_app/presentation/colors.dart';
 import 'package:rtu_mirea_app/presentation/typography.dart';
 
@@ -12,14 +12,10 @@ enum AppThemeType { light, dark, black }
 /// To change the theme, use [AppTheme.changeThemeType] method and pass the new
 /// theme type ([AppThemeType]) as an argument.
 class AppTheme {
+  static ThemeColors colors = ThemeColors();
   static ThemeColors darkThemeColors = ThemeColors();
   static ThemeColors lightThemeColors = LightThemeColors();
   static ThemeColors blackThemeColors = AmoledDarkThemeColors();
-
-  static AppThemeType defaultThemeType = AppThemeType.dark;
-  static ThemeMode defaultThemeMode = ThemeMode.dark;
-
-  static ThemeData theme = AppTheme.getDataByThemeType();
 
   static final darkTheme = ThemeData.dark().copyWith(
     textTheme: ThemeData.dark().textTheme.apply(
@@ -51,7 +47,7 @@ class AppTheme {
       brightness: Brightness.dark,
     ),
     cardTheme: CardTheme(
-      color: darkThemeColors.background01,
+      color: darkThemeColors.background03,
       elevation: 4,
       shadowColor: darkThemeColors.background02.withOpacity(0.1),
       shape: RoundedRectangleBorder(
@@ -119,6 +115,7 @@ class AppTheme {
         ),
     scaffoldBackgroundColor: lightThemeColors.background01,
     appBarTheme: AppBarTheme(
+      elevation: 0,
       surfaceTintColor: Colors.transparent,
       titleSpacing: 24,
       backgroundColor: lightThemeColors.background01,
@@ -180,7 +177,7 @@ class AppTheme {
       space: 0,
     ),
     cardTheme: CardTheme(
-      color: lightThemeColors.background01,
+      color: lightThemeColors.background02,
       elevation: 4,
       shadowColor: lightThemeColors.background02.withOpacity(0.1),
       shape: RoundedRectangleBorder(
@@ -203,62 +200,21 @@ class AppTheme {
     ),
   );
 
-  static ThemeData getDataByThemeType({AppThemeType? themeType}) {
-    themeType ??= defaultThemeType;
+  static ThemeColors colorsOf(BuildContext context) {
+    final theme = AdaptiveTheme.of(context).mode;
 
-    switch (themeType) {
-      case AppThemeType.light:
-        return lightTheme;
-      case AppThemeType.dark:
-        return darkTheme;
-      default:
-        return darkTheme;
+    switch (theme) {
+      case AdaptiveThemeMode.dark:
+        return darkThemeColors;
+      case AdaptiveThemeMode.light:
+        return lightThemeColors;
+
+      case AdaptiveThemeMode.system:
+        if (MediaQuery.of(context).platformBrightness == Brightness.dark) {
+          return darkThemeColors;
+        } else {
+          return lightThemeColors;
+        }
     }
   }
-
-  static ThemeMode getThemeModeByType({AppThemeType? themeType}) {
-    themeType ??= defaultThemeType;
-
-    switch (themeType) {
-      case AppThemeType.light:
-        return ThemeMode.light;
-      case AppThemeType.black:
-        return ThemeMode.dark;
-      default:
-        return ThemeMode.dark;
-    }
-  }
-
-  static void changeThemeType(AppThemeType? themeType) {
-    defaultThemeType = themeType ?? AppThemeType.light;
-    defaultThemeMode = getThemeModeByType(themeType: defaultThemeType);
-    theme = AppTheme.getDataByThemeType();
-
-    // deleting the system status bar color and updating navigation bar color
-    // overlay
-    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
-        statusBarColor: Colors.transparent,
-        systemNavigationBarColor: AppTheme.colors.background01));
-  }
-
-  static ThemeColors getColorsByMode({AppThemeType? themeType}) {
-    themeType ??= defaultThemeType;
-
-    switch (themeType) {
-      case AppThemeType.light:
-        return LightThemeColors();
-      case AppThemeType.black:
-        return AmoledDarkThemeColors();
-      default:
-        return ThemeColors();
-    }
-  }
-
-  /// Returns the current theme data. If the theme is changed, the data will be
-  /// updated.
-  static ThemeMode get themeMode => getThemeModeByType();
-
-  /// Returns the current theme colors. If the theme is changed, the colors
-  /// will be updated.
-  static ThemeColors get colors => getColorsByMode();
 }

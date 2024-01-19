@@ -15,7 +15,7 @@ class LectorSearchCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(8),
       width: double.infinity,
-      color: AppTheme.colors.background02,
+      color: AppTheme.colorsOf(context).background02,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.start,
@@ -42,7 +42,7 @@ class LectorSearchCard extends StatelessWidget {
               child: Text(
                 employee.email,
                 style: AppTextStyle.bodyRegular
-                    .copyWith(color: AppTheme.colors.colorful02),
+                    .copyWith(color: AppTheme.colorsOf(context).colorful02),
               ),
             ),
           ),

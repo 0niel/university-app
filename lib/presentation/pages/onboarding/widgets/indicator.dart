@@ -14,7 +14,7 @@ class IndicatorPageView extends StatelessWidget {
       height: isActive ? 15.0 : 11.0,
       width: isActive ? 15.0 : 11.0,
       decoration: BoxDecoration(
-        color: isActive ? Colors.white : AppTheme.colors.active,
+        color: isActive ? Colors.white : AppTheme.colorsOf(context).active,
         borderRadius: const BorderRadius.all(Radius.circular(12.0)),
         boxShadow: <BoxShadow>[
           isActive

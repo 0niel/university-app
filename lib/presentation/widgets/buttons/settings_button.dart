@@ -19,7 +19,7 @@ class SettingsButton extends StatelessWidget {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12.0),
         ),
-        color: AppTheme.colors.background02,
+        color: AppTheme.colorsOf(context).background02,
         shadowColor: Colors.transparent,
         child: InkWell(
           borderRadius: BorderRadius.circular(12),

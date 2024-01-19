@@ -26,7 +26,7 @@ class ServiceCard extends StatelessWidget {
     return ConstrainedBox(
       constraints: const BoxConstraints(maxWidth: 156, maxHeight: 192),
       child: Card(
-        color: AppTheme.colors.background02,
+        color: AppTheme.colorsOf(context).background02,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
         ),
@@ -53,7 +53,7 @@ class ServiceCard extends StatelessWidget {
                 Text(
                   title,
                   style: AppTextStyle.bodyBold.copyWith(
-                    color: AppTheme.colors.active,
+                    color: AppTheme.colorsOf(context).active,
                   ),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
@@ -64,7 +64,7 @@ class ServiceCard extends StatelessWidget {
                     child: Text(
                       description!,
                       style: AppTextStyle.body.copyWith(
-                        color: AppTheme.colors.deactive,
+                        color: AppTheme.colorsOf(context).deactive,
                         height: 1.1,
                       ),
                       maxLines: 2,

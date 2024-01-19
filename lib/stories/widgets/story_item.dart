@@ -37,7 +37,7 @@ class StoryItem extends StatelessWidget {
                           : stories[storyIndex].preview.formats!.thumbnail.url)
                   : CachedNetworkImageProvider(stories[storyIndex].preview.url),
               colorFilter: ColorFilter.mode(
-                  AppTheme.colors.background02.withOpacity(0.15),
+                  AppTheme.colorsOf(context).background02.withOpacity(0.15),
                   BlendMode.dstOut),
             ),
           ),

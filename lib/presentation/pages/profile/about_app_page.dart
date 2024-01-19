@@ -22,9 +22,7 @@ class AboutAppPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text("О приложении"),
-        backgroundColor: AppTheme.colors.background01,
       ),
-      backgroundColor: AppTheme.colors.background01,
       body: SafeArea(
         bottom: false,
         child: SingleChildScrollView(
@@ -42,7 +40,7 @@ class AboutAppPage extends StatelessWidget {
                       children: [
                         Text('Open Source', style: AppTextStyle.h4),
                         PopupMenuButton<String>(
-                          color: AppTheme.colors.background03,
+                          color: AppTheme.colorsOf(context).background03,
                           onSelected: (value) {},
                           itemBuilder: (BuildContext context) {
                             return [
@@ -87,7 +85,7 @@ class AboutAppPage extends StatelessWidget {
                             decoration: BoxDecoration(
                               borderRadius:
                                   const BorderRadius.all(Radius.circular(4)),
-                              color: AppTheme.colors.primary,
+                              color: AppTheme.colorsOf(context).primary,
                             ),
                             child: Text(
                               getIt<PackageInfo>().version,
@@ -112,13 +110,13 @@ class AboutAppPage extends StatelessWidget {
                           TextSpan(
                             text: 'Приложение разработано командой ',
                             style: AppTextStyle.bodyRegular.copyWith(
-                              color: AppTheme.colors.active,
+                              color: AppTheme.colorsOf(context).active,
                             ),
                           ),
                           TextSpan(
                             text: 'Mirea Ninja.',
-                            style: AppTextStyle.bodyRegular
-                                .copyWith(color: AppTheme.colors.primary),
+                            style: AppTextStyle.bodyRegular.copyWith(
+                                color: AppTheme.colorsOf(context).primary),
                             recognizer: TapGestureRecognizer()
                               ..onTap = () {
                                 launchUrlString("https://mirea.ninja/");
@@ -185,7 +183,7 @@ class AboutAppPage extends StatelessWidget {
                       child: Text(
                         'Стать спонсором',
                         style: AppTextStyle.buttonS.copyWith(
-                          color: AppTheme.colors.primary,
+                          color: AppTheme.colorsOf(context).primary,
                         ),
                       ),
                     ),
@@ -212,7 +210,8 @@ class AboutAppPage extends StatelessWidget {
                   width: double.infinity,
                   child: ColorfulButton(
                     text: 'Сообщить об ошибке',
-                    backgroundColor: AppTheme.colors.colorful07.withBlue(180),
+                    backgroundColor:
+                        AppTheme.colorsOf(context).colorful07.withBlue(180),
                     onClick: () {
                       final userBloc = context.read<UserBloc>();
 

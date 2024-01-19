@@ -31,7 +31,6 @@ class ProfilePage extends StatelessWidget {
           ),
         ],
       ),
-      backgroundColor: AppTheme.colors.background01,
       body: SafeArea(
         bottom: false,
         child: LayoutBuilder(

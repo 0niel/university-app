@@ -58,7 +58,7 @@ class _SelectRangeDateButtonState extends State<SelectRangeDateButton> {
         shape: MaterialStateProperty.all<RoundedRectangleBorder>(
           RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(24.0),
-            side: BorderSide(color: AppTheme.colors.deactive),
+            side: BorderSide(color: AppTheme.colorsOf(context).deactive),
           ),
         ),
       ),
@@ -70,14 +70,14 @@ class _SelectRangeDateButtonState extends State<SelectRangeDateButton> {
             Text(
               _selectedTextDate,
               style: AppTextStyle.captionL.copyWith(
-                color: AppTheme.colors.deactive,
+                color: AppTheme.colorsOf(context).deactive,
               ),
             ),
             const SizedBox(width: 8),
             Icon(
               Icons.calendar_today_rounded,
               size: 18,
-              color: AppTheme.colors.deactive,
+              color: AppTheme.colorsOf(context).deactive,
             ),
           ],
         ),
@@ -86,7 +86,7 @@ class _SelectRangeDateButtonState extends State<SelectRangeDateButton> {
         context: context,
         builder: (context) {
           return Dialog(
-            backgroundColor: AppTheme.colors.background02,
+            backgroundColor: AppTheme.colorsOf(context).background02,
             shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(20.0)),
             child: Container(
@@ -94,7 +94,7 @@ class _SelectRangeDateButtonState extends State<SelectRangeDateButton> {
               child: CalendarDatePicker2(
                 config: CalendarDatePicker2Config(
                   calendarType: CalendarDatePicker2Type.range,
-                  selectedDayHighlightColor: AppTheme.colors.primary,
+                  selectedDayHighlightColor: AppTheme.colorsOf(context).primary,
                   dayTextStyle: AppTextStyle.body,
                   controlsTextStyle: AppTextStyle.buttonS,
                   rangeBidirectional: true,

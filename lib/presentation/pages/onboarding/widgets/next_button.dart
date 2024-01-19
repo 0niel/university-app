@@ -27,9 +27,9 @@ class NextPageViewButton extends StatelessWidget {
         }
       },
       style: ElevatedButton.styleFrom(
-        foregroundColor: AppTheme.colors.primary.withOpacity(0.25),
+        foregroundColor: AppTheme.colorsOf(context).primary.withOpacity(0.25),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        backgroundColor: AppTheme.colors.primary,
+        backgroundColor: AppTheme.colorsOf(context).primary,
         shadowColor: const Color(0x7f000000),
         elevation: 8.0,
       ),
@@ -42,10 +42,11 @@ class NextPageViewButton extends StatelessWidget {
             ? Text(
                 "Начать!",
                 style: AppTextStyle.buttonS.copyWith(
-                  color: AppTheme.colors.white,
+                  color: AppTheme.colorsOf(context).white,
                 ),
               )
-            : Icon(Icons.arrow_forward_ios, color: AppTheme.colors.active),
+            : Icon(Icons.arrow_forward_ios,
+                color: AppTheme.colorsOf(context).active),
       ),
     );
   }

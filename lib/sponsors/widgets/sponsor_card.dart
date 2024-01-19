@@ -27,8 +27,8 @@ class SponsorCard extends StatelessWidget {
               end: Alignment.bottomRight,
               transform: const GradientRotation(2.35619),
               colors: [
-                AppTheme.colors.colorful02,
-                AppTheme.colors.colorful03,
+                AppTheme.colorsOf(context).colorful02,
+                AppTheme.colorsOf(context).colorful03,
               ],
             ),
           ),
@@ -55,7 +55,7 @@ class SponsorCard extends StatelessWidget {
                       children: [
                         CircleAvatar(
                           radius: 20,
-                          backgroundColor: AppTheme.colors.deactive,
+                          backgroundColor: AppTheme.colorsOf(context).deactive,
                           backgroundImage: sponsor.avatarUrl != null
                               ? NetworkImage(sponsor.avatarUrl!)
                               : null,
@@ -77,7 +77,7 @@ class SponsorCard extends StatelessWidget {
                                 Text(
                                   sponsor.about.toString(),
                                   style: AppTextStyle.captionL.copyWith(
-                                    color: AppTheme.colors.deactive,
+                                    color: AppTheme.colorsOf(context).deactive,
                                   ),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
@@ -95,12 +95,12 @@ class SponsorCard extends StatelessWidget {
                           height: 24,
                           width: 24,
                           decoration: BoxDecoration(
-                            color: AppTheme.colors.colorful01,
+                            color: AppTheme.colorsOf(context).colorful01,
                             borderRadius: BorderRadius.circular(24),
                           ),
                           child: Icon(
                             UniconsLine.link,
-                            color: AppTheme.colors.active,
+                            color: AppTheme.colorsOf(context).active,
                             size: 16,
                           ),
                         ),

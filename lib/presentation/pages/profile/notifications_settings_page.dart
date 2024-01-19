@@ -141,7 +141,7 @@ class _NotificationsSwitch extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.only(right: 8),
             child: CupertinoSwitch(
-              activeColor: AppTheme.colors.primary,
+              activeColor: AppTheme.colorsOf(context).primary,
               value: value,
               onChanged: onChanged,
             ),

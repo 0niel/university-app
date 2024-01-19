@@ -32,7 +32,7 @@ class NewsPage extends StatelessWidget {
     showModalBottomSheet(
       isDismissible: true,
       isScrollControlled: true,
-      backgroundColor: AppTheme.colors.background02,
+      backgroundColor: AppTheme.colorsOf(context).background02,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(
           top: Radius.circular(24),
@@ -76,7 +76,7 @@ class NewsPage extends StatelessWidget {
                                 loadedState.tags[index]) {
                               return TagBadge(
                                 tag: loadedState.tags[index],
-                                color: AppTheme.colors.colorful04,
+                                color: AppTheme.colorsOf(context).colorful04,
                                 onPressed: () => _filterNewsByTag(
                                     context.read<NewsBloc>(), "все"),
                               );
@@ -152,7 +152,6 @@ class NewsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.colors.background01,
       appBar: AppBar(
         title: const Text("Новости"),
       ),
@@ -327,7 +326,7 @@ class _ShimmerNewsCardLoading extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 24, left: 16, right: 16),
       decoration: BoxDecoration(
-        color: AppTheme.colors.background02,
+        color: AppTheme.colorsOf(context).background02,
         borderRadius: BorderRadius.circular(16),
       ),
       child: Padding(
@@ -337,12 +336,12 @@ class _ShimmerNewsCardLoading extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             Shimmer.fromColors(
-              baseColor: AppTheme.colors.background01,
-              highlightColor: AppTheme.colors.background02,
+              baseColor: AppTheme.colorsOf(context).background01,
+              highlightColor: AppTheme.colorsOf(context).background02,
               child: Container(
                 height: 175,
                 decoration: BoxDecoration(
-                  color: AppTheme.colors.background02,
+                  color: AppTheme.colorsOf(context).background02,
                   borderRadius: BorderRadius.circular(16),
                 ),
               ),
@@ -353,25 +352,25 @@ class _ShimmerNewsCardLoading extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Shimmer.fromColors(
-                    baseColor: AppTheme.colors.background01,
-                    highlightColor: AppTheme.colors.background02,
+                    baseColor: AppTheme.colorsOf(context).background01,
+                    highlightColor: AppTheme.colorsOf(context).background02,
                     child: Container(
                       height: 18,
                       decoration: BoxDecoration(
-                        color: AppTheme.colors.background02,
+                        color: AppTheme.colorsOf(context).background02,
                         borderRadius: BorderRadius.circular(16),
                       ),
                     ),
                   ),
                   const SizedBox(height: 4),
                   Shimmer.fromColors(
-                    baseColor: AppTheme.colors.background01,
-                    highlightColor: AppTheme.colors.background02,
+                    baseColor: AppTheme.colorsOf(context).background01,
+                    highlightColor: AppTheme.colorsOf(context).background02,
                     child: Container(
                       height: 18,
                       width: MediaQuery.of(context).size.width * 0.4,
                       decoration: BoxDecoration(
-                        color: AppTheme.colors.background02,
+                        color: AppTheme.colorsOf(context).background02,
                         borderRadius: BorderRadius.circular(16),
                       ),
                     ),

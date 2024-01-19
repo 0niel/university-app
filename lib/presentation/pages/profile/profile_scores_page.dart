@@ -24,9 +24,7 @@ class _ProfileScoresPageState extends State<ProfileScoresPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Зачётная книжка"),
-        backgroundColor: AppTheme.colors.background01,
       ),
-      backgroundColor: AppTheme.colors.background01,
       body: SafeArea(
         bottom: false,
         child: _buildUserBlocBuilder(),
@@ -156,7 +154,7 @@ class _ProfileScoresPageState extends State<ProfileScoresPage> {
     showModalBottomSheet(
       shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
-      backgroundColor: AppTheme.colors.background02,
+      backgroundColor: AppTheme.colorsOf(context).background02,
       context: context,
       builder: (context) => BlocBuilder<ScoresBloc, ScoresState>(
         builder: (context, state) {
@@ -255,7 +253,7 @@ class _AverageRatingCard extends StatelessWidget {
         if (state.status == ScoresStatus.loaded) {
           return Card(
             margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
-            color: AppTheme.colors.background02,
+            color: AppTheme.colorsOf(context).background02,
             elevation: 6,
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -270,7 +268,7 @@ class _AverageRatingCard extends StatelessWidget {
                     child: Text(
                       averageRating[selectedSemester].toString(),
                       style: AppTextStyle.h6.copyWith(
-                        color: AppTheme.colors.background01,
+                        color: AppTheme.colorsOf(context).background01,
                       ),
                     ),
                   ),

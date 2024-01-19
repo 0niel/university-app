@@ -8,10 +8,10 @@ class SkeletonSponsorCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Shimmer.fromColors(
-      baseColor: AppTheme.colors.background03,
-      highlightColor: AppTheme.colors.background02,
+      baseColor: AppTheme.colorsOf(context).background03,
+      highlightColor: AppTheme.colorsOf(context).background02,
       child: Card(
-        color: AppTheme.colors.background02,
+        color: AppTheme.colorsOf(context).background02,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
         ),

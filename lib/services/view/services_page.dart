@@ -10,9 +10,7 @@ class ServicesPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.colors.background01,
       appBar: AppBar(
-        backgroundColor: AppTheme.colors.background01,
         elevation: 0,
         title: const Text(
           "Сервисы",
@@ -62,8 +60,8 @@ class _ServicesViewState extends State<ServicesView> {
                   title: 'Карта МИРЭА',
                   url: 'https://map.mirea.ru/',
                   icon: ServiceIcon(
-                    color: AppTheme.colors.colorful07,
-                    iconColor: AppTheme.colors.active,
+                    color: AppTheme.colorsOf(context).colorful07,
+                    iconColor: AppTheme.colorsOf(context).active,
                     icon: Icons.map,
                   ),
                   launchMode: LaunchMode.inAppBrowserView,
@@ -84,8 +82,8 @@ class _ServicesViewState extends State<ServicesView> {
                   title: 'Бюро находок',
                   url: 'https://finds.mirea.ru/',
                   icon: ServiceIcon(
-                    color: AppTheme.colors.colorful06,
-                    iconColor: AppTheme.colors.background01,
+                    color: AppTheme.colorsOf(context).colorful06,
+                    iconColor: AppTheme.colorsOf(context).background01,
                     icon: Icons.search,
                   ),
                   launchMode: LaunchMode.externalApplication,
@@ -95,8 +93,8 @@ class _ServicesViewState extends State<ServicesView> {
                   title: 'Траектория обучения',
                   url: 'https://t.me/learning_roadmap_bot',
                   icon: ServiceIcon(
-                    color: AppTheme.colors.colorful05,
-                    iconColor: AppTheme.colors.background01,
+                    color: AppTheme.colorsOf(context).colorful05,
+                    iconColor: AppTheme.colorsOf(context).background01,
                     icon: Icons.timeline,
                   ),
                   launchMode: LaunchMode.externalApplication,
@@ -105,8 +103,8 @@ class _ServicesViewState extends State<ServicesView> {
                   title: 'Форум',
                   url: 'https://mirea.ninja/',
                   icon: ServiceIcon(
-                    color: AppTheme.colors.colorful01,
-                    iconColor: AppTheme.colors.background01,
+                    color: AppTheme.colorsOf(context).colorful01,
+                    iconColor: AppTheme.colorsOf(context).background01,
                     icon: Icons.forum,
                   ),
                   launchMode: LaunchMode.externalApplication,

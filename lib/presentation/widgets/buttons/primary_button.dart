@@ -16,7 +16,8 @@ class PrimaryButton extends StatelessWidget {
           const BoxConstraints.tightFor(width: double.infinity, height: 48),
       child: ElevatedButton(
         style: ButtonStyle(
-          backgroundColor: MaterialStateProperty.all(AppTheme.colors.primary),
+          backgroundColor:
+              MaterialStateProperty.all(AppTheme.colorsOf(context).primary),
           shape: MaterialStateProperty.all<RoundedRectangleBorder>(
             RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(24.0),

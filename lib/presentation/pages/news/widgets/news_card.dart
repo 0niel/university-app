@@ -30,7 +30,7 @@ class NewsCard extends StatelessWidget {
       child: Container(
         margin: const EdgeInsets.only(bottom: 24, left: 16, right: 16),
         decoration: BoxDecoration(
-          color: AppTheme.colors.background02,
+          color: AppTheme.colorsOf(context).background02,
           borderRadius: BorderRadius.circular(16),
         ),
         child: Padding(
@@ -55,13 +55,14 @@ class NewsCard extends StatelessWidget {
                           borderRadius: BorderRadius.circular(16),
                         ),
                         child: Shimmer.fromColors(
-                          baseColor: AppTheme.colors.background03,
-                          highlightColor:
-                              AppTheme.colors.background03.withOpacity(0.5),
+                          baseColor: AppTheme.colorsOf(context).background03,
+                          highlightColor: AppTheme.colorsOf(context)
+                              .background03
+                              .withOpacity(0.5),
                           child: Container(
                             height: double.infinity,
                             width: double.infinity,
-                            color: AppTheme.colors.background03,
+                            color: AppTheme.colorsOf(context).background03,
                           ),
                         ),
                       );

@@ -31,9 +31,10 @@ class PrimaryTabButton extends StatelessWidget {
             },
             style: ButtonStyle(
               backgroundColor: notifier.value == itemIndex
-                  ? MaterialStateProperty.all<Color>(AppTheme.colors.primary)
+                  ? MaterialStateProperty.all<Color>(
+                      AppTheme.colorsOf(context).primary)
                   : MaterialStateProperty.all<Color>(
-                      AppTheme.colors.background01),
+                      AppTheme.colorsOf(context).background01),
               shape: MaterialStateProperty.all<RoundedRectangleBorder>(
                 RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(50.0),
@@ -41,12 +42,14 @@ class PrimaryTabButton extends StatelessWidget {
               ),
               shadowColor: MaterialStateProperty.all<Color>(Colors.transparent),
             ),
-            child: Text(text,
-                style: AppTextStyle.tab.copyWith(
-                  color: notifier.value == itemIndex
-                      ? AppTheme.colors.active
-                      : AppTheme.colors.deactive,
-                )),
+            child: Text(
+              text,
+              style: AppTextStyle.tab.copyWith(
+                color: notifier.value == itemIndex
+                    ? AppTheme.colorsOf(context).active
+                    : AppTheme.colorsOf(context).deactive,
+              ),
+            ),
           );
         },
       ),

@@ -14,9 +14,9 @@ class EmptyLessonCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       margin: const EdgeInsets.all(0),
-      color: AppTheme.themeMode == ThemeMode.dark
-          ? AppTheme.colors.background03
-          : AppTheme.colors.background02,
+      color: Theme.of(context).brightness == Brightness.dark
+          ? AppTheme.colorsOf(context).background03
+          : AppTheme.colorsOf(context).background02,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12.0),
       ),
@@ -28,8 +28,8 @@ class EmptyLessonCard extends StatelessWidget {
           children: [
             Text(
               '$lessonNumber пара',
-              style:
-                  AppTextStyle.body.copyWith(color: AppTheme.colors.colorful03),
+              style: AppTextStyle.body
+                  .copyWith(color: AppTheme.colorsOf(context).colorful03),
             ),
           ],
         ),

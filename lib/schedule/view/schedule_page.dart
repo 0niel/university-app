@@ -89,7 +89,6 @@ class _SchedulePageState extends State<SchedulePage> {
           });
         } else if (state.selectedSchedule != null) {
           return Scaffold(
-            backgroundColor: AppTheme.colors.background01,
             body: NestedScrollView(
               headerSliverBuilder: (_, __) => [
                 SliverAppBar(
@@ -104,7 +103,7 @@ class _SchedulePageState extends State<SchedulePage> {
                       child: IconButton(
                         icon: FaIcon(
                           FontAwesomeIcons.ellipsis,
-                          color: AppTheme.colors.active,
+                          color: AppTheme.colorsOf(context).active,
                         ),
                         onPressed: () {
                           BottomModalSheet.show(

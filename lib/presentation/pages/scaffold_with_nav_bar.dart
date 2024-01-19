@@ -114,6 +114,7 @@ class AppBottomNavigationBar extends StatelessWidget {
     return Container(
       color: AppTheme.colors.background01,
       child: SalomonBottomBar(
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         margin: const EdgeInsets.symmetric(
           horizontal: 10,
           vertical: 10,

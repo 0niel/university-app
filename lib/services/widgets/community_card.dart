@@ -22,7 +22,7 @@ class CommunityCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      color: AppTheme.colors.background02,
+      color: AppTheme.colorsOf(context).background02,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
       ),
@@ -47,7 +47,7 @@ class CommunityCard extends StatelessWidget {
                     Text(
                       title,
                       style: AppTextStyle.titleM.copyWith(
-                        color: AppTheme.colors.active,
+                        color: AppTheme.colorsOf(context).active,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -56,7 +56,7 @@ class CommunityCard extends StatelessWidget {
                       Text(
                         description!,
                         style: AppTextStyle.captionL.copyWith(
-                          color: AppTheme.colors.deactive,
+                          color: AppTheme.colorsOf(context).deactive,
                           height: 1.1,
                         ),
                         maxLines: 3,

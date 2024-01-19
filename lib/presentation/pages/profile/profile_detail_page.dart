@@ -5,7 +5,6 @@ import 'package:rtu_mirea_app/domain/entities/user.dart';
 import 'package:rtu_mirea_app/presentation/widgets/badged_container.dart';
 import 'package:rtu_mirea_app/presentation/widgets/copy_text_block.dart';
 import 'package:rtu_mirea_app/presentation/typography.dart';
-import 'package:rtu_mirea_app/presentation/theme.dart';
 
 class ProfileDetailPage extends StatelessWidget {
   const ProfileDetailPage({
@@ -23,9 +22,7 @@ class ProfileDetailPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Детали профиля"),
-        backgroundColor: AppTheme.colors.background01,
       ),
-      backgroundColor: AppTheme.colors.background01,
       body: SafeArea(
         bottom: false,
         child: SingleChildScrollView(

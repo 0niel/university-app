@@ -127,9 +127,6 @@ class LessonCard extends StatelessWidget {
 
     return Card(
       margin: const EdgeInsets.all(0),
-      color: AppTheme.themeMode == ThemeMode.dark
-          ? AppTheme.colors.background03
-          : AppTheme.colors.background02,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12.0),
       ),
@@ -175,7 +172,7 @@ class LessonCard extends StatelessWidget {
                                   ? '${getLessonTypeName(lesson.lessonType)} в ${lesson.classrooms.map((e) => e.name).join(', ')}'
                                   : getLessonTypeName(lesson.lessonType),
                               style: AppTextStyle.captionL.copyWith(
-                                color: AppTheme.colors.deactive,
+                                color: AppTheme.colorsOf(context).deactive,
                               ),
                             ),
                           ),
@@ -199,13 +196,13 @@ class LessonCard extends StatelessWidget {
                         children: [
                           Text(
                             '${lesson.lessonBells.number} пара',
-                            style: AppTextStyle.body
-                                .copyWith(color: AppTheme.colors.colorful03),
+                            style: AppTextStyle.body.copyWith(
+                                color: AppTheme.colorsOf(context).colorful03),
                           ),
                           Text(
                             'в ${lesson.lessonBells.startTime} - ${lesson.lessonBells.endTime}',
                             style: AppTextStyle.body.copyWith(
-                              color: AppTheme.colors.colorful03,
+                              color: AppTheme.colorsOf(context).colorful03,
                             ),
                           ),
                         ],
@@ -214,7 +211,9 @@ class LessonCard extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Divider(
-                            color: AppTheme.colors.deactive.withOpacity(0.1),
+                            color: AppTheme.colorsOf(context)
+                                .deactive
+                                .withOpacity(0.1),
                             thickness: 1,
                             height: 30,
                           ),
@@ -230,7 +229,7 @@ class LessonCard extends StatelessWidget {
                                   child: FaIcon(
                                     FontAwesomeIcons.mapLocation,
                                     size: 12,
-                                    color: AppTheme.colors.deactive,
+                                    color: AppTheme.colorsOf(context).deactive,
                                   ),
                                 ),
                                 const SizedBox(
@@ -240,7 +239,8 @@ class LessonCard extends StatelessWidget {
                                   child: Text(
                                     _getClassroomNames(lesson.classrooms),
                                     style: AppTextStyle.body.copyWith(
-                                        color: AppTheme.colors.active),
+                                        color:
+                                            AppTheme.colorsOf(context).active),
                                     maxLines: 2,
                                     overflow: TextOverflow.ellipsis,
                                   ),
@@ -269,7 +269,7 @@ class LessonCard extends StatelessWidget {
                                   child: FaIcon(
                                     FontAwesomeIcons.users,
                                     size: 12,
-                                    color: AppTheme.colors.deactive,
+                                    color: AppTheme.colorsOf(context).deactive,
                                   ),
                                 ),
                                 const SizedBox(
@@ -279,7 +279,8 @@ class LessonCard extends StatelessWidget {
                                   child: Text(
                                     lesson.groups?.join(', ') ?? '',
                                     style: AppTextStyle.body.copyWith(
-                                        color: AppTheme.colors.deactive),
+                                        color: AppTheme.colorsOf(context)
+                                            .deactive),
                                   ),
                                 ),
                               ],
@@ -298,7 +299,7 @@ class LessonCard extends StatelessWidget {
                                   child: FaIcon(
                                     FontAwesomeIcons.userTie,
                                     size: 12,
-                                    color: AppTheme.colors.deactive,
+                                    color: AppTheme.colorsOf(context).deactive,
                                   ),
                                 ),
                                 Expanded(
@@ -307,7 +308,8 @@ class LessonCard extends StatelessWidget {
                                         .map((e) => e.name)
                                         .join(', '),
                                     style: AppTextStyle.body.copyWith(
-                                        color: AppTheme.colors.deactive),
+                                        color: AppTheme.colorsOf(context)
+                                            .deactive),
                                   ),
                                 ),
                               ],

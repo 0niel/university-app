@@ -15,7 +15,7 @@ class BadgedContainer extends StatelessWidget {
       width: 160,
       height: 90,
       child: Card(
-        color: AppTheme.colors.background02,
+        color: AppTheme.colorsOf(context).background02,
         margin: const EdgeInsets.all(0),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         child: Padding(
@@ -32,7 +32,7 @@ class BadgedContainer extends StatelessWidget {
                     Text(
                       label,
                       style: AppTextStyle.bodyBold.copyWith(
-                        color: AppTheme.colors.deactive,
+                        color: AppTheme.colorsOf(context).deactive,
                       ),
                     ),
                     const SizedBox(height: 5),

@@ -6,7 +6,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
@@ -26,6 +25,7 @@ import 'package:rtu_mirea_app/presentation/bloc/notification_preferences/notific
 
 import 'package:rtu_mirea_app/presentation/bloc/scores_bloc/scores_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/user_bloc/user_bloc.dart';
+import 'package:rtu_mirea_app/presentation/core/routes/routes.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:intl/intl_standalone.dart';
 import 'package:rtu_mirea_app/schedule/bloc/schedule_bloc.dart';
@@ -35,7 +35,6 @@ import 'package:sentry_dio/sentry_dio.dart';
 import 'package:university_app_server_api/client.dart';
 import 'package:url_strategy/url_strategy.dart';
 import 'common/constants.dart';
-import 'presentation/app_theme_cubit.dart';
 import 'service_locator.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
@@ -43,6 +42,7 @@ import 'package:sentry_logging/sentry_logging.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:schedule_repository/schedule_repository.dart'
     as schedule_repository;
+import 'package:adaptive_theme/adaptive_theme.dart';
 
 class GlobalBlocObserver extends BlocObserver {
   @override
@@ -163,9 +163,6 @@ class App extends StatelessWidget {
       ],
       child: MultiBlocProvider(
         providers: [
-          BlocProvider<AppThemeCubit>(
-            create: (context) => getIt<AppThemeCubit>(),
-          ),
           BlocProvider<ScheduleBloc>(
             create: (context) => ScheduleBloc(
               scheduleRepository:
@@ -192,14 +189,7 @@ class App extends StatelessWidget {
             create: (_) => getIt<NotificationPreferencesBloc>(),
           ),
         ],
-        child: BlocBuilder<AppThemeCubit, AppThemeState>(
-          builder: (context, state) {
-            return _MaterialApp(
-              themeMode: AppTheme.themeMode,
-              theme: AppTheme.theme,
-            );
-          },
-        ),
+        child: const _MaterialApp(),
       ),
     );
   }
@@ -208,36 +198,50 @@ class App extends StatelessWidget {
 class _MaterialApp extends StatefulWidget {
   const _MaterialApp({
     Key? key,
-    required this.themeMode,
-    required this.theme,
   }) : super(key: key);
-
-  final ThemeMode themeMode;
-  final ThemeData theme;
 
   @override
   State<_MaterialApp> createState() => _MaterialAppState();
 }
 
 class _MaterialAppState extends State<_MaterialApp> {
+  final router = createRouter();
   @override
   Widget build(BuildContext context) {
-    return MaterialApp.router(
-      localizationsDelegates: const [
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
-      supportedLocales: const [
-        Locale('en'),
-        Locale('ru'),
-      ],
-      locale: const Locale('ru'),
-      debugShowCheckedModeBanner: false,
-      title: 'Приложение РТУ МИРЭА',
-      routerConfig: getIt<GoRouter>(),
-      themeMode: widget.themeMode,
-      theme: widget.theme,
+    return AdaptiveTheme(
+      light: AppTheme.lightTheme,
+      dark: AppTheme.darkTheme,
+      initial: AdaptiveThemeMode.dark,
+      builder: (theme, darkTheme) {
+        SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+            systemNavigationBarColor: theme.scaffoldBackgroundColor,
+            statusBarColor: theme.scaffoldBackgroundColor,
+            statusBarIconBrightness: theme.brightness == Brightness.light
+                ? Brightness.dark
+                : Brightness.light,
+            systemNavigationBarIconBrightness:
+                theme.brightness == Brightness.light
+                    ? Brightness.dark
+                    : Brightness.light));
+
+        return MaterialApp.router(
+          localizationsDelegates: const [
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: const [
+            Locale('en'),
+            Locale('ru'),
+          ],
+          locale: const Locale('ru'),
+          debugShowCheckedModeBanner: false,
+          title: 'Приложение РТУ МИРЭА',
+          routerConfig: router,
+          theme: theme,
+          darkTheme: darkTheme,
+        );
+      },
     );
   }
 }

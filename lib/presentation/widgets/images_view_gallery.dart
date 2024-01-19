@@ -83,7 +83,8 @@ class _ImagesViewGalleryState extends State<ImagesViewGallery> {
                 ),
               ),
               backgroundDecoration: widget.imageUrls.length == 1
-                  ? BoxDecoration(color: AppTheme.colors.background01)
+                  ? BoxDecoration(
+                      color: AppTheme.colorsOf(context).background01)
                   : null,
               pageController: _pageController,
             ),

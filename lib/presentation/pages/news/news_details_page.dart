@@ -18,7 +18,7 @@ class NewsDetailsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.colors.background01,
+      backgroundColor: AppTheme.colorsOf(context).background01,
       body: NestedScrollView(
         headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
           return [
@@ -41,7 +41,7 @@ class NewsDetailsPage extends StatelessWidget {
         body: SafeArea(
           bottom: false,
           child: Container(
-            color: AppTheme.colors.background01,
+            color: AppTheme.colorsOf(context).background01,
             child: ListView(
               padding: EdgeInsets.zero,
               children: [
@@ -64,26 +64,26 @@ class NewsDetailsPage extends StatelessWidget {
                           data: newsItem.text,
                           style: {
                             "body": Style(
-                              color: AppTheme.colors.active,
+                              color: AppTheme.colorsOf(context).active,
                               fontStyle: AppTextStyle.bodyRegular
                                   .copyWith(
-                                    color: AppTheme.colors.active,
+                                    color: AppTheme.colorsOf(context).active,
                                   )
                                   .fontStyle,
                               fontSize: FontSize(16),
                               lineHeight: const LineHeight(1.5),
                             ),
                             "a": Style(
-                              color: AppTheme.colors.colorful02,
+                              color: AppTheme.colorsOf(context).colorful02,
                               fontStyle: AppTextStyle.bodyRegular.fontStyle,
                               fontSize: FontSize(16),
                               lineHeight: const LineHeight(1.5),
                             ),
                             "p": Style(
-                              color: AppTheme.colors.active,
+                              color: AppTheme.colorsOf(context).active,
                               fontStyle: AppTextStyle.bodyRegular
                                   .copyWith(
-                                    color: AppTheme.colors.active,
+                                    color: AppTheme.colorsOf(context).active,
                                   )
                                   .fontStyle,
                               fontSize: FontSize(16),
@@ -159,12 +159,12 @@ class _NewsItemInfo extends StatelessWidget {
                   Text(
                     "Дата",
                     style: AppTextStyle.body
-                        .copyWith(color: AppTheme.colors.deactive),
+                        .copyWith(color: AppTheme.colorsOf(context).deactive),
                   ),
                   Text(
                     DateFormat.MMMd('ru_RU').format(date).toString(),
                     style: AppTextStyle.titleM
-                        .copyWith(color: AppTheme.colors.colorful02),
+                        .copyWith(color: AppTheme.colorsOf(context).colorful02),
                   ),
                 ],
               ),

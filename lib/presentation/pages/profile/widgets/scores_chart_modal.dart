@@ -72,14 +72,15 @@ class _ScoresChartModalState extends State<ScoresChartModal> {
     return ClipRRect(
       borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
       child: SfCartesianChart(
-        backgroundColor: AppTheme.colors.background02,
+        backgroundColor: AppTheme.colorsOf(context).background02,
         plotAreaBorderWidth: 0,
         title: ChartTitle(
           text: 'Успеваемость',
           textStyle: AppTextStyle.titleS,
           alignment: ChartAlignment.center,
         ),
-        plotAreaBorderColor: AppTheme.colors.active.withOpacity(0.05),
+        plotAreaBorderColor:
+            AppTheme.colorsOf(context).active.withOpacity(0.05),
         borderWidth: 0,
         legend: Legend(
           isVisible: true,
@@ -109,7 +110,7 @@ class _ScoresChartModalState extends State<ScoresChartModal> {
                   Text(
                     legendText,
                     style: AppTextStyle.bodyBold.copyWith(
-                      color: AppTheme.colors.active.withOpacity(0.8),
+                      color: AppTheme.colorsOf(context).active.withOpacity(0.8),
                     ),
                   ),
                 ]),
@@ -128,21 +129,23 @@ class _ScoresChartModalState extends State<ScoresChartModal> {
                       width: 20,
                       height: 20,
                       decoration: BoxDecoration(
-                        color: AppTheme.colors.active.withOpacity(0.1),
+                        color:
+                            AppTheme.colorsOf(context).active.withOpacity(0.1),
                         borderRadius:
                             const BorderRadius.all(Radius.circular(10)),
                       ),
                       child: Icon(
                         Icons.trending_up,
                         size: 16,
-                        color: AppTheme.colors.active,
+                        color: AppTheme.colorsOf(context).active,
                       ),
                     ),
                     const SizedBox(width: 8),
                     Text(
                       _trendlineType.toString().split('.').last,
                       style: AppTextStyle.bodyBold.copyWith(
-                        color: AppTheme.colors.active.withOpacity(0.8),
+                        color:
+                            AppTheme.colorsOf(context).active.withOpacity(0.8),
                       ),
                     ),
                   ]),
@@ -155,8 +158,8 @@ class _ScoresChartModalState extends State<ScoresChartModal> {
           labelFormat: '{value} сем.',
           interval: 0.5,
           axisLine: const AxisLine(width: 0),
-          labelStyle:
-              AppTextStyle.chip.copyWith(color: AppTheme.colors.deactive),
+          labelStyle: AppTextStyle.chip
+              .copyWith(color: AppTheme.colorsOf(context).deactive),
           minimum: 0.5,
           majorTickLines: const MajorTickLines(color: Colors.transparent),
           edgeLabelPlacement: EdgeLabelPlacement.shift,
@@ -164,15 +167,15 @@ class _ScoresChartModalState extends State<ScoresChartModal> {
           axisLabelFormatter: (axisLabelRenderArgs) => ChartAxisLabel(
             axisLabelRenderArgs.value % 1 == 0 ? axisLabelRenderArgs.text : '',
             AppTextStyle.chip.copyWith(
-              color: AppTheme.colors.deactive,
+              color: AppTheme.colorsOf(context).deactive,
             ),
           ),
         ),
         primaryYAxis: NumericAxis(
           labelFormat: '{value}',
           axisLine: const AxisLine(width: 0),
-          labelStyle:
-              AppTextStyle.chip.copyWith(color: AppTheme.colors.deactive),
+          labelStyle: AppTextStyle.chip
+              .copyWith(color: AppTheme.colorsOf(context).deactive),
           maximum: 5,
           majorTickLines: const MajorTickLines(color: Colors.transparent),
         ),
@@ -182,7 +185,7 @@ class _ScoresChartModalState extends State<ScoresChartModal> {
               if (_trendlineType != _TrendlineTypeCustom.none)
                 Trendline(
                   type: _getTrendlineType(_trendlineType),
-                  color: AppTheme.colors.colorful01.withOpacity(0.2),
+                  color: AppTheme.colorsOf(context).colorful01.withOpacity(0.2),
                   dashArray: [5, 5],
                   width: 2,
                 ),
@@ -193,13 +196,13 @@ class _ScoresChartModalState extends State<ScoresChartModal> {
             xValueMapper: (_ChartData sales, _) => sales.x,
             yValueMapper: (_ChartData sales, _) => sales.y,
             width: 0.08,
-            color: AppTheme.colors.colorful01,
+            color: AppTheme.colorsOf(context).colorful01,
             name: 'Средний балл',
             markerSettings: const MarkerSettings(isVisible: false),
             dataLabelSettings: DataLabelSettings(
               isVisible: true,
               textStyle: AppTextStyle.bodyBold.copyWith(
-                color: AppTheme.colors.active.withOpacity(0.8),
+                color: AppTheme.colorsOf(context).active.withOpacity(0.8),
               ),
             ),
           ),

@@ -20,16 +20,16 @@ class TagBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     return ChoiceChip(
       backgroundColor: isSelected
-          ? color ?? AppTheme.colors.colorful05
-          : AppTheme.colors.background02,
+          ? color ?? AppTheme.colorsOf(context).colorful05
+          : AppTheme.colorsOf(context).background02,
       shape: RoundedRectangleBorder(
         side: BorderSide(
-          color: color ?? AppTheme.colors.colorful05,
+          color: color ?? AppTheme.colorsOf(context).colorful05,
           width: 2,
         ),
         borderRadius: BorderRadius.circular(16),
       ),
-      disabledColor: AppTheme.colors.background01,
+      disabledColor: AppTheme.colorsOf(context).background01,
       surfaceTintColor: Colors.transparent,
       shadowColor: Colors.transparent,
       visualDensity: VisualDensity.compact,
@@ -38,12 +38,15 @@ class TagBadge extends StatelessWidget {
       label: Text(
         tag,
         style: AppTextStyle.body.copyWith(
-          color:
-              isSelected ? Colors.white : color ?? AppTheme.colors.colorful05,
+          color: isSelected
+              ? Colors.white
+              : color ?? AppTheme.colorsOf(context).colorful05,
         ),
       ),
       iconTheme: IconThemeData(
-        color: isSelected ? Colors.white : color ?? AppTheme.colors.colorful05,
+        color: isSelected
+            ? Colors.white
+            : color ?? AppTheme.colorsOf(context).colorful05,
       ),
       onSelected: onPressed != null ? (_) => onPressed!() : null,
       selected: isSelected,

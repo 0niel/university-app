@@ -79,9 +79,6 @@ class _ScoreResultCardState extends State<ScoreResultCard> {
 
   Widget _buildCard(bool expand) {
     return Card(
-      color: AppTheme.themeMode == ThemeMode.dark
-          ? AppTheme.colors.background03
-          : AppTheme.colors.background02,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12.0),
       ),
@@ -130,7 +127,7 @@ class _ScoreResultCardState extends State<ScoreResultCard> {
       color: trend == ScoreTrend.increase
           ? Colors.green
           : trend == ScoreTrend.decrease
-              ? AppTheme.colors.colorful07
+              ? AppTheme.colorsOf(context).colorful07
               : Colors.transparent,
     );
   }
@@ -141,7 +138,7 @@ class _ScoreResultCardState extends State<ScoreResultCard> {
         Text(
           type,
           style: AppTextStyle.body.copyWith(
-            color: AppTheme.colors.colorful03,
+            color: AppTheme.colorsOf(context).colorful03,
           ),
         ),
         const SizedBox(width: 10),
@@ -201,17 +198,17 @@ class _ScoreResultCardState extends State<ScoreResultCard> {
         const SizedBox(width: 10),
         text.isNotEmpty
             ? Expanded(child: Text(text, style: AppTextStyle.body))
-            : _buildEmtyDataLine(),
+            : _buildEmtyDataLine(context),
       ],
     );
   }
 }
 
-Widget _buildEmtyDataLine() {
+Widget _buildEmtyDataLine(BuildContext context) {
   return Container(
     height: 1,
     width: 48,
-    color: AppTheme.colors.deactiveDarker,
+    color: AppTheme.colorsOf(context).deactiveDarker,
   );
 }
 

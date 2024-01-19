@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:rtu_mirea_app/domain/entities/story.dart';
-import 'package:rtu_mirea_app/presentation/theme.dart';
 
 import 'widgets.dart';
 
@@ -25,8 +24,7 @@ class StoriesList extends StatelessWidget {
               decoration: BoxDecoration(
                 boxShadow: [
                   BoxShadow(
-                    color: Theme.of(context).shadowColor.withOpacity(
-                        AppTheme.themeMode == ThemeMode.dark ? 0.1 : 0.1),
+                    color: Theme.of(context).shadowColor.withOpacity(0.1),
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),
