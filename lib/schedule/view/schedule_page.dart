@@ -112,7 +112,8 @@ class _SchedulePageState extends State<SchedulePage> {
                             title: 'Управление расписанием',
                             description:
                                 'Редактирование сохраненных расписаний и добавление новых, а также настройки отображения расписания.',
-                            backgroundColor: AppTheme.colors.background03,
+                            backgroundColor:
+                                AppTheme.colorsOf(context).background03,
                           );
                         },
                       ),

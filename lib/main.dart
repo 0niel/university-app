@@ -217,12 +217,12 @@ class _MaterialAppState extends State<_MaterialApp> {
             systemNavigationBarColor: theme.scaffoldBackgroundColor,
             statusBarColor: theme.scaffoldBackgroundColor,
             statusBarIconBrightness: theme.brightness == Brightness.light
-                ? Brightness.dark
-                : Brightness.light,
+                ? Brightness.light
+                : Brightness.dark,
             systemNavigationBarIconBrightness:
                 theme.brightness == Brightness.light
-                    ? Brightness.dark
-                    : Brightness.light));
+                    ? Brightness.light
+                    : Brightness.dark));
 
         return MaterialApp.router(
           localizationsDelegates: const [

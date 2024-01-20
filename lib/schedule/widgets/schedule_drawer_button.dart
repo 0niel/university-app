@@ -28,7 +28,7 @@ class ScheduleDrawerButton extends StatelessWidget {
                 const SizedBox(width: 20),
                 Text(text,
                     style: AppTextStyle.buttonL
-                        .copyWith(color: AppTheme.colors.active)),
+                        .copyWith(color: AppTheme.colorsOf(context).active)),
               ],
             ),
           ),

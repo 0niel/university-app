@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:rtu_mirea_app/presentation/bloc/user_bloc/user_bloc.dart';
+import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:rtu_mirea_app/presentation/widgets/feedback_modal.dart';
 import 'package:rtu_mirea_app/presentation/widgets/settings_switch_button.dart';
 import 'package:rtu_mirea_app/schedule/bloc/schedule_bloc.dart';
@@ -71,6 +72,10 @@ class SettingsMenu extends StatelessWidget {
             'assets/icons/social-sharing.svg',
             height: 16,
             width: 16,
+            colorFilter: ColorFilter.mode(
+              AppTheme.colorsOf(context).active,
+              BlendMode.srcIn,
+            ),
           ),
           onTap: () => _onFeedbackTap(context),
         ),

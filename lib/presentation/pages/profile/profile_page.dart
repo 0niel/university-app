@@ -1,3 +1,4 @@
+import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -110,8 +111,11 @@ class _UserLoggedInView extends StatelessWidget {
         ),
         Text(
           user.login,
-          style:
-              AppTextStyle.titleS.copyWith(color: AppTheme.colors.colorful04),
+          style: AppTextStyle.titleS.copyWith(
+            color: AdaptiveTheme.of(context).mode.isDark
+                ? AppTheme.colors.colorful04
+                : AppTheme.colors.primary,
+          ),
         ),
         const SizedBox(height: 12),
         Row(mainAxisAlignment: MainAxisAlignment.center, children: [

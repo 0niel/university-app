@@ -1,3 +1,4 @@
+import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
@@ -142,12 +143,13 @@ class _ScheduleDetailsPageState extends State<ScheduleDetailsPage> {
         subtitle: Padding(
           padding: const EdgeInsets.symmetric(vertical: 8),
           child: TextInput(
-            hintText: 'Введите комментарий',
-            controller: _textController,
-            errorText: _textErrorText,
-            maxLines: 5,
-            fillColor: AppTheme.colors.background03,
-          ),
+              hintText: 'Введите комментарий',
+              controller: _textController,
+              errorText: _textErrorText,
+              maxLines: 5,
+              fillColor: AdaptiveTheme.of(context).mode.isDark
+                  ? AppTheme.colorsOf(context).background03
+                  : Colors.white),
         ),
       ),
       const Divider(),
@@ -292,14 +294,14 @@ class _ScheduleDetailsPageState extends State<ScheduleDetailsPage> {
             title: Text(
               teacher.name,
               style: AppTextStyle.titleM.copyWith(
-                color: AppTheme.colors.active,
+                color: AppTheme.colorsOf(context).active,
               ),
             ),
             subtitle: teacher.post != null
                 ? Text(
                     teacher.post!,
                     style: AppTextStyle.captionS.copyWith(
-                      color: AppTheme.colors.deactive,
+                      color: AppTheme.colorsOf(context).deactive,
                     ),
                   )
                 : null,

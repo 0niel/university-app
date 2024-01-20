@@ -30,44 +30,41 @@ class _StoriesPageViewState extends State<StoriesPageView> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(top: 22),
-      child: DismissiblePage(
-        onDismissed: () => context.pop(),
-        isFullScreen: false,
-        direction: DismissiblePageDismissDirection.vertical,
-        backgroundColor: Colors.transparent,
-        child: OverflowBox(
-          child: Center(
-            child: Material(
-              color: Colors.transparent,
-              child: Hero(
-                tag: widget.stories[widget.storyIndex].title,
-                child: StoryPageView(
-                  indicatorDuration:
-                      const Duration(seconds: 6, milliseconds: 500),
-                  initialPage: widget.storyIndex,
-                  itemBuilder: (context, pageIndex, storyIndex) {
-                    if (pageIndex != _prevStoryIndex) {
-                      _prevStoryIndex = pageIndex;
-                      FirebaseAnalytics.instance
-                          .logEvent(name: 'view_story', parameters: {
-                        'story_title': widget.stories[pageIndex].title,
-                      });
-                    }
-                    final author = widget.stories[pageIndex].author;
-                    final page = widget.stories[pageIndex].pages[storyIndex];
-                    return _buildStoryPage(author, page);
-                  },
-                  gestureItemBuilder: (context, pageIndex, storyIndex) {
-                    return _buildGestureItems(pageIndex, storyIndex);
-                  },
-                  pageLength: widget.stories.length,
-                  storyLength: (int pageIndex) {
-                    return widget.stories[pageIndex].pages.length;
-                  },
-                  onPageLimitReached: () => context.pop(),
-                ),
+    return DismissiblePage(
+      onDismissed: () => context.pop(),
+      isFullScreen: false,
+      direction: DismissiblePageDismissDirection.vertical,
+      backgroundColor: Colors.transparent,
+      child: OverflowBox(
+        child: Center(
+          child: Material(
+            color: Colors.transparent,
+            child: Hero(
+              tag: widget.stories[widget.storyIndex].title,
+              child: StoryPageView(
+                indicatorDuration:
+                    const Duration(seconds: 6, milliseconds: 500),
+                initialPage: widget.storyIndex,
+                itemBuilder: (context, pageIndex, storyIndex) {
+                  if (pageIndex != _prevStoryIndex) {
+                    _prevStoryIndex = pageIndex;
+                    FirebaseAnalytics.instance
+                        .logEvent(name: 'view_story', parameters: {
+                      'story_title': widget.stories[pageIndex].title,
+                    });
+                  }
+                  final author = widget.stories[pageIndex].author;
+                  final page = widget.stories[pageIndex].pages[storyIndex];
+                  return _buildStoryPage(author, page);
+                },
+                gestureItemBuilder: (context, pageIndex, storyIndex) {
+                  return _buildGestureItems(pageIndex, storyIndex);
+                },
+                pageLength: widget.stories.length,
+                storyLength: (int pageIndex) {
+                  return widget.stories[pageIndex].pages.length;
+                },
+                onPageLimitReached: () => context.pop(),
               ),
             ),
           ),
