@@ -41,7 +41,7 @@ class NoSelectedScheduleMessage extends StatelessWidget {
             Text(
               "Скачайте расписание по крайней мере для одной группы, чтобы отобразить календарь.",
               style: AppTextStyle.captionL.copyWith(
-                color: AppTheme.colors.deactive,
+                color: AppTheme.colorsOf(context).deactive,
               ),
             ),
             const SizedBox(
@@ -52,7 +52,7 @@ class NoSelectedScheduleMessage extends StatelessWidget {
               child: ColorfulButton(
                 text: "Настроить",
                 onClick: onTap,
-                backgroundColor: AppTheme.colors.primary,
+                backgroundColor: AppTheme.colorsOf(context).primary,
               ),
             ),
           ],

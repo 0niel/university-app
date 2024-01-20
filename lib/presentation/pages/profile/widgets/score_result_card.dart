@@ -166,16 +166,24 @@ class _ScoreResultCardState extends State<ScoreResultCard> {
 
   Widget _buildScoreResult(String result) {
     final resultColor = getColorByResult(result);
-    return Row(
-      children: [
-        Icon(FontAwesomeIcons.solidStar, size: 12, color: resultColor),
-        const SizedBox(width: 6),
-        Padding(
-          padding: const EdgeInsets.only(top: 2),
-          child: Text(result,
-              style: AppTextStyle.body.copyWith(color: resultColor)),
-        ),
-      ],
+    return Expanded(
+      child: Row(
+        children: [
+          Icon(FontAwesomeIcons.solidStar, size: 12, color: resultColor),
+          const SizedBox(width: 6),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.only(top: 2),
+              child: Text(
+                result,
+                style: AppTextStyle.body.copyWith(color: resultColor),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
