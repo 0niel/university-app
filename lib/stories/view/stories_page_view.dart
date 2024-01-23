@@ -35,37 +35,34 @@ class _StoriesPageViewState extends State<StoriesPageView> {
       isFullScreen: false,
       direction: DismissiblePageDismissDirection.vertical,
       backgroundColor: Colors.transparent,
-      child: OverflowBox(
-        child: Center(
-          child: Material(
-            color: Colors.transparent,
-            child: Hero(
-              tag: widget.stories[widget.storyIndex].title,
-              child: StoryPageView(
-                indicatorDuration:
-                    const Duration(seconds: 6, milliseconds: 500),
-                initialPage: widget.storyIndex,
-                itemBuilder: (context, pageIndex, storyIndex) {
-                  if (pageIndex != _prevStoryIndex) {
-                    _prevStoryIndex = pageIndex;
-                    FirebaseAnalytics.instance
-                        .logEvent(name: 'view_story', parameters: {
-                      'story_title': widget.stories[pageIndex].title,
-                    });
-                  }
-                  final author = widget.stories[pageIndex].author;
-                  final page = widget.stories[pageIndex].pages[storyIndex];
-                  return _buildStoryPage(author, page);
-                },
-                gestureItemBuilder: (context, pageIndex, storyIndex) {
-                  return _buildGestureItems(pageIndex, storyIndex);
-                },
-                pageLength: widget.stories.length,
-                storyLength: (int pageIndex) {
-                  return widget.stories[pageIndex].pages.length;
-                },
-                onPageLimitReached: () => context.pop(),
-              ),
+      child: Center(
+        child: Material(
+          color: Colors.transparent,
+          child: Hero(
+            tag: widget.stories[widget.storyIndex].title,
+            child: StoryPageView(
+              indicatorDuration: const Duration(seconds: 6, milliseconds: 500),
+              initialPage: widget.storyIndex,
+              itemBuilder: (context, pageIndex, storyIndex) {
+                if (pageIndex != _prevStoryIndex) {
+                  _prevStoryIndex = pageIndex;
+                  FirebaseAnalytics.instance
+                      .logEvent(name: 'view_story', parameters: {
+                    'story_title': widget.stories[pageIndex].title,
+                  });
+                }
+                final author = widget.stories[pageIndex].author;
+                final page = widget.stories[pageIndex].pages[storyIndex];
+                return _buildStoryPage(author, page);
+              },
+              gestureItemBuilder: (context, pageIndex, storyIndex) {
+                return _buildGestureItems(pageIndex, storyIndex);
+              },
+              pageLength: widget.stories.length,
+              storyLength: (int pageIndex) {
+                return widget.stories[pageIndex].pages.length;
+              },
+              onPageLimitReached: () => context.pop(),
             ),
           ),
         ),
@@ -108,11 +105,6 @@ class _StoriesPageViewState extends State<StoriesPageView> {
                             : author.logo.formats!.thumbnail.url)
                         : NetworkImage(author.logo.url),
                     fit: BoxFit.cover,
-                    colorFilter: ColorFilter.mode(
-                      Colors.black
-                          .withOpacity(0.5), // Adjust the opacity as needed
-                      BlendMode.srcATop,
-                    ),
                   ),
                   shape: BoxShape.circle,
                 ),
@@ -122,29 +114,9 @@ class _StoriesPageViewState extends State<StoriesPageView> {
               ),
               Material(
                 type: MaterialType.transparency,
-                child: ShaderMask(
-                  shaderCallback: (rect) {
-                    return LinearGradient(
-                      begin: Alignment.centerLeft,
-                      end: Alignment.centerRight,
-                      colors: [
-                        Colors.black.withOpacity(0.5),
-                        Colors.black.withOpacity(0.5),
-                      ],
-                    ).createShader(
-                      Rect.fromLTRB(
-                        0,
-                        0,
-                        rect.width,
-                        rect.height,
-                      ),
-                    );
-                  },
-                  blendMode: BlendMode.srcATop,
-                  child: Text(
-                    author.name,
-                    style: AppTextStyle.bodyBold,
-                  ),
+                child: Text(
+                  author.name,
+                  style: AppTextStyle.bodyBold,
                 ),
               ),
             ],
@@ -160,14 +132,20 @@ class _StoriesPageViewState extends State<StoriesPageView> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 if (page.title != null)
-                  Column(
-                    children: [
-                      Text(
-                        page.title!,
-                        style: AppTextStyle.h4,
-                      ),
-                      const SizedBox(height: 16)
-                    ],
+                  Expanded(
+                    child: Column(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            page.title!,
+                            style: AppTextStyle.h4,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        const SizedBox(height: 16)
+                      ],
+                    ),
                   ),
                 if (page.text != null)
                   Text(
@@ -183,6 +161,10 @@ class _StoriesPageViewState extends State<StoriesPageView> {
   }
 
   Widget _buildGestureItems(int pageIndex, int storyIndex) {
+    final height = MediaQuery.of(context).size.height;
+    final contentHeigth = height * (9 / 16);
+    final buttonSpaceHeight = (height - contentHeigth) / 2.2;
+
     return Column(
       children: [
         Align(
@@ -207,9 +189,9 @@ class _StoriesPageViewState extends State<StoriesPageView> {
             ),
           ),
         ),
-        const Spacer(),
+        SizedBox(height: contentHeigth),
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+          padding: EdgeInsets.only(left: 24, right: 24, top: buttonSpaceHeight),
           child: Column(
             children: List.generate(
               widget.stories[pageIndex].pages[storyIndex].actions.length,
@@ -219,8 +201,11 @@ class _StoriesPageViewState extends State<StoriesPageView> {
                   text: widget.stories[pageIndex].pages[storyIndex]
                       .actions[index].title,
                   onClick: () {
-                    launchUrlString(widget.stories[pageIndex].pages[storyIndex]
-                        .actions[index].url);
+                    launchUrlString(
+                      widget.stories[pageIndex].pages[storyIndex].actions[index]
+                          .url,
+                      mode: LaunchMode.externalApplication,
+                    );
                   },
                 ),
               ),
