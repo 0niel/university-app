@@ -161,9 +161,11 @@ class _StoriesPageViewState extends State<StoriesPageView> {
   }
 
   Widget _buildGestureItems(int pageIndex, int storyIndex) {
-    final height = MediaQuery.of(context).size.height;
+    final height = MediaQuery.of(context).size.height -
+        MediaQuery.of(context).padding.bottom -
+        MediaQuery.of(context).padding.top;
     final contentHeigth = height * (9 / 16);
-    final buttonSpaceHeight = (height - contentHeigth) / 2.2;
+    final buttonSpaceHeight = (height - contentHeigth) / 2;
 
     return Column(
       children: [
