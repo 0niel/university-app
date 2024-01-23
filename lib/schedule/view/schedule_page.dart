@@ -128,6 +128,8 @@ class _SchedulePageState extends State<SchedulePage> {
                   child: Calendar(
                     pageViewController: _schedulePageController,
                     schedule: state.selectedSchedule?.schedule ?? [],
+                    comments: state.comments,
+                    showCommentsIndicators: state.showCommentsIndicators,
                   ),
                 ),
               ],

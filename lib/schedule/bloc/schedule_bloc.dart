@@ -34,9 +34,17 @@ class ScheduleBloc extends HydratedBloc<ScheduleEvent, ScheduleState> {
     on<DeleteSchedule>(_onRemoveSavedSchedule);
     on<ScheduleSetEmptyLessonsDisplaying>(_onSetEmptyLessonsDisplaying);
     on<SetLessonComment>(_onSetLessonComment);
+    on<ScheduleSetShowCommentsIndicator>(_onSetShowCommentsIndicator);
   }
 
   final ScheduleRepository _scheduleRepository;
+
+  Future<void> _onSetShowCommentsIndicator(
+    ScheduleSetShowCommentsIndicator event,
+    Emitter<ScheduleState> emit,
+  ) async {
+    emit(state.copyWith(showCommentsIndicators: event.showCommentsIndicators));
+  }
 
   Future<void> _onSetLessonComment(
     SetLessonComment event,

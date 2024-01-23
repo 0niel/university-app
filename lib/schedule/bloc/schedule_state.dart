@@ -17,6 +17,7 @@ class ScheduleState extends Equatable {
     this.isMiniature = false,
     this.comments = const [],
     this.showEmptyLessons = false,
+    this.showCommentsIndicators = true,
     this.selectedSchedule,
   });
 
@@ -43,6 +44,10 @@ class ScheduleState extends Equatable {
   /// Miniature display mode for lesson cards.
   final bool isMiniature;
 
+  /// Show comments indicators in calendar. If true, then calendar days with
+  /// comments will be displayed with a special text color.
+  final bool showCommentsIndicators;
+
   /// Show empty lessons in schedule. If true, then cards from 1 to 6 lessons
   /// number will be displayed, even if there is no lesson in this time.
   final bool showEmptyLessons;
@@ -59,6 +64,7 @@ class ScheduleState extends Equatable {
     bool? isMiniature,
     bool? showEmptyLessons,
     List<ScheduleComment>? comments,
+    bool? showCommentsIndicators,
   }) {
     return ScheduleState(
       status: status ?? this.status,
@@ -68,6 +74,8 @@ class ScheduleState extends Equatable {
       selectedSchedule: selectedSchedule ?? this.selectedSchedule,
       isMiniature: isMiniature ?? this.isMiniature,
       showEmptyLessons: showEmptyLessons ?? this.showEmptyLessons,
+      showCommentsIndicators:
+          showCommentsIndicators ?? this.showCommentsIndicators,
       comments: comments ?? this.comments,
     );
   }
@@ -84,6 +92,7 @@ class ScheduleState extends Equatable {
         selectedSchedule,
         showEmptyLessons,
         comments,
+        showCommentsIndicators,
       ];
 }
 

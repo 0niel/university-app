@@ -5,6 +5,7 @@ import 'package:rtu_mirea_app/common/utils/calendar_utils.dart';
 import 'package:rtu_mirea_app/presentation/constants.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:rtu_mirea_app/presentation/typography.dart';
+import 'package:rtu_mirea_app/schedule/models/models.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:university_app_server_api/client.dart';
 
@@ -15,11 +16,14 @@ class Calendar extends StatefulWidget {
     Key? key,
     required this.pageViewController,
     required this.schedule,
+    required this.comments,
+    required this.showCommentsIndicators,
   }) : super(key: key);
 
   final PageController pageViewController;
-
   final List<SchedulePart> schedule;
+  final List<ScheduleComment> comments;
+  final bool showCommentsIndicators;
 
   static List<SchedulePart> getSchedulePartsByDay({
     required List<SchedulePart> schedule,
@@ -134,6 +138,25 @@ class _CalendarState extends State<Calendar> {
                             (events[index] as LessonSchedulePart).lessonType),
                         shape: BoxShape.circle,
                       ),
+                    ),
+                  ),
+                );
+              },
+              defaultBuilder: (context, day, focusedDay) {
+                final comments = widget.comments
+                    .where((element) => isSameDay(element.lessonDate, day))
+                    .toList();
+
+                return Center(
+                  child: Text(
+                    day.day.toString(),
+                    style: AppTextStyle.body.copyWith(
+                      color:
+                          comments.isNotEmpty && widget.showCommentsIndicators
+                              ? AppTheme.colorsOf(context).colorful02
+                              : (day.weekday == DateTime.sunday
+                                  ? AppTheme.colorsOf(context).deactiveDarker
+                                  : AppTheme.colorsOf(context).active),
                     ),
                   ),
                 );

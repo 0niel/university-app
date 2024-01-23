@@ -112,6 +112,22 @@ class SettingsMenu extends StatelessWidget {
             },
           ),
         ),
+        SizedBox(
+          height: 60,
+          child: SettingsSwitchButton(
+            initialValue: state.showCommentsIndicators,
+            icon: Icon(
+              Icons.circle,
+              color: AppTheme.colorsOf(context).active,
+              size: 16,
+            ),
+            text: "Ииндикатор заметок",
+            onChanged: (value) {
+              context.read<ScheduleBloc>().add(ScheduleSetShowCommentsIndicator(
+                  showCommentsIndicators: value));
+            },
+          ),
+        ),
         const SchedulesList(),
       ],
     );

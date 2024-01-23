@@ -90,6 +90,17 @@ class ScheduleSetEmptyLessonsDisplaying extends ScheduleEvent {
   List<Object> get props => [showEmptyLessons];
 }
 
+class ScheduleSetShowCommentsIndicator extends ScheduleEvent {
+  const ScheduleSetShowCommentsIndicator({
+    required this.showCommentsIndicators,
+  });
+
+  final bool showCommentsIndicators;
+
+  @override
+  List<Object> get props => [showCommentsIndicators];
+}
+
 class SetSelectedSchedule extends ScheduleEvent {
   const SetSelectedSchedule({
     required this.selectedSchedule,
