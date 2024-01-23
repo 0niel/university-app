@@ -173,7 +173,7 @@ class _CalendarState extends State<Calendar> {
               titleTextStyle: AppTextStyle.captionL.copyWith(
                 color: AppTheme.colorsOf(context).active,
               ),
-              formatButtonTextStyle: AppTextStyle.buttonS.copyWith(
+              formatButtonTextStyle: AppTextStyle.captionL.copyWith(
                 color: AppTheme.colorsOf(context).active,
               ),
               titleTextFormatter: (DateTime date, dynamic locale) {
@@ -186,9 +186,11 @@ class _CalendarState extends State<Calendar> {
               rightChevronIcon: Icon(Icons.chevron_right,
                   color: AppTheme.colorsOf(context).active),
               formatButtonDecoration: BoxDecoration(
-                  border: Border.fromBorderSide(
-                      BorderSide(color: AppTheme.colorsOf(context).deactive)),
-                  borderRadius: const BorderRadius.all(Radius.circular(16.0))),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: AppTheme.colorsOf(context).deactiveDarker,
+                ),
+              ),
             ),
             calendarStyle: CalendarStyle(
               rangeHighlightColor: AppTheme.colorsOf(context).secondary,
