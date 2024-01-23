@@ -1,12 +1,14 @@
 import 'dart:async';
 
 import 'package:equatable/equatable.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:schedule_repository/schedule_repository.dart';
 import 'package:stream_transform/stream_transform.dart';
 
 part 'search_event.dart';
 part 'search_state.dart';
+part 'search_bloc.g.dart';
 
 const _duration = Duration(milliseconds: 300);
 
@@ -21,7 +23,7 @@ EventTransformer<Event> restartableDebounce<Event>(
   };
 }
 
-class SearchBloc extends Bloc<SearchEvent, SearchState> {
+class SearchBloc extends HydratedBloc<SearchEvent, SearchState> {
   SearchBloc({
     required ScheduleRepository scheduleRepository,
   })  : _scheduleRepository = scheduleRepository,
@@ -36,6 +38,31 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
         _duration,
         isDebounced: (event) => event.searchQuery.isNotEmpty,
       ),
+    );
+    on<AddQueryToSearchHistory>(
+      (event, emit) {
+        if (state.searchHisoty.contains(event.query)) return;
+
+        emit(state.copyWith(
+          searchHisoty: [
+            event.query,
+            ...state.searchHisoty.take(4),
+          ],
+        ));
+      },
+    );
+    on<ClearSearchHistory>(
+      (event, emit) {
+        emit(state.copyWith(searchHisoty: const []));
+      },
+    );
+    on<RemoveQueryFromSearchHistory>(
+      (event, emit) {
+        emit(state.copyWith(
+          searchHisoty:
+              state.searchHisoty.where((e) => e != event.query).toList(),
+        ));
+      },
     );
   }
 
@@ -70,4 +97,11 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
       addError(error, stackTrace);
     }
   }
+
+  @override
+  SearchState? fromJson(Map<String, dynamic> json) =>
+      SearchState.fromJson(json);
+
+  @override
+  Map<String, dynamic>? toJson(SearchState state) => state.toJson();
 }
