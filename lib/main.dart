@@ -99,7 +99,9 @@ Future<void> main() async {
   Bloc.observer = GlobalBlocObserver();
 
   HydratedBloc.storage = await HydratedStorage.build(
-    storageDirectory: await getApplicationCacheDirectory(),
+    storageDirectory: kIsWeb
+        ? HydratedStorage.webStorageDirectory
+        : await getApplicationDocumentsDirectory(),
   );
 
   await SentryFlutter.init(
