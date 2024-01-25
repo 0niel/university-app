@@ -24,10 +24,10 @@ class GetUserDataEvent extends UserEvent with AnalyticsEventMixin {
   AnalyticsEvent get event => const AnalyticsEvent('GetUserData');
 }
 
-class SetAuthenticatedData extends UserEvent with EquatableMixin {
+class SetAuthenticatedData extends UserEvent {
   final User user;
 
-  SetAuthenticatedData({required this.user});
+  const SetAuthenticatedData({required this.user});
 
   @override
   List<Object?> get props => [user];

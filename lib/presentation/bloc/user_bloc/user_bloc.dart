@@ -1,5 +1,5 @@
+import 'package:analytics_repository/analytics_repository.dart';
 import 'package:equatable/equatable.dart';
-import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:get/get.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
@@ -73,7 +73,6 @@ class UserBloc extends HydratedBloc<UserEvent, UserState> {
       user.fold(
         (failure) => emit(state.copyWith(status: UserStatus.unauthorized)),
         (user) {
-          FirebaseAnalytics.instance.logLogin();
           var student = getActiveStudent(user);
 
           _setSentryUserIdentity(

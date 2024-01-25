@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:analytics_repository/analytics_repository.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:equatable/equatable.dart';
 import 'package:get/get.dart';
@@ -10,9 +11,9 @@ import 'package:university_app_server_api/client.dart';
 
 import '../models/models.dart';
 
-part 'schedule_bloc.g.dart';
 part 'schedule_event.dart';
 part 'schedule_state.dart';
+part 'schedule_bloc.g.dart';
 
 typedef UID = String;
 

@@ -1,5 +1,6 @@
-import 'package:bloc/bloc.dart';
+import 'package:analytics_repository/analytics_repository.dart';
 import 'package:equatable/equatable.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:rtu_mirea_app/domain/entities/employee.dart';
 import 'package:rtu_mirea_app/domain/usecases/get_employees.dart';
 

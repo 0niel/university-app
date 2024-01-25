@@ -2,9 +2,6 @@ part of 'scores_bloc.dart';
 
 abstract class ScoresEvent extends Equatable {
   const ScoresEvent();
-
-  @override
-  List<Object> get props => [];
 }
 
 class LoadScores extends ScoresEvent with AnalyticsEventMixin {
