@@ -130,7 +130,7 @@ class ScheduleSetShowCommentsIndicator extends ScheduleEvent {
   List<Object> get props => [showCommentsIndicators];
 }
 
-class SetSelectedSchedule extends ScheduleEvent {
+class SetSelectedSchedule extends ScheduleEvent with AnalyticsEventMixin {
   const SetSelectedSchedule({
     required this.selectedSchedule,
   });
@@ -139,6 +139,30 @@ class SetSelectedSchedule extends ScheduleEvent {
 
   @override
   List<Object> get props => [selectedSchedule];
+
+  @override
+  AnalyticsEvent get event {
+    if (selectedSchedule is SelectedGroupSchedule) {
+      final group = (selectedSchedule as SelectedGroupSchedule).group;
+      return AnalyticsEvent('SetSelectedGroupSchedule', properties: {
+        'group': group.name,
+      });
+    } else if (selectedSchedule is SelectedClassroomSchedule) {
+      final classroom =
+          (selectedSchedule as SelectedClassroomSchedule).classroom;
+      return AnalyticsEvent('SetSelectedClassroomSchedule', properties: {
+        'classroom': classroom.name,
+        'campus': classroom.campus?.name,
+      });
+    } else if (selectedSchedule is SelectedTeacherSchedule) {
+      final teacher = (selectedSchedule as SelectedTeacherSchedule).teacher;
+      return AnalyticsEvent('SetSelectedTeacherSchedule', properties: {
+        'teacher': teacher.name,
+      });
+    }
+
+    return const AnalyticsEvent('SetSelectedSchedule');
+  }
 }
 
 class DeleteSchedule extends ScheduleEvent {

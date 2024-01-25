@@ -1,3 +1,4 @@
+import 'package:analytics_repository/analytics_repository.dart';
 import 'package:bloc/bloc.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:equatable/equatable.dart';
@@ -53,17 +54,18 @@ class NewsBloc extends Bloc<NewsEvent, NewsState> {
 
       final newsEither = await getNews(
         GetNewsParams(
-            page: event.refresh == true ? 1 : st.page + 1,
-            pageSize: pageSize,
-            isImportant: event.isImportant,
-            tag: _getTagOrNull(event.tag)),
+          page: event.refresh == true ? 1 : st.page + 1,
+          pageSize: pageSize,
+          isImportant: event.isImportant,
+          tag: _getTagOrNull(event.tag),
+        ),
       );
 
       newsEither.fold(
         (l) => emit(NewsLoadError()),
         (r) {
           emit(NewsLoaded(
-            news: event.refresh == true ? r : st.news + r,
+            news: event.refresh == true ? r : (st.news + r).toSet().toList(),
             tags: st.tags,
             selectedTag: event.tag,
             page: st.page + 1,
