@@ -7,13 +7,16 @@ abstract class ScoresEvent extends Equatable {
   List<Object> get props => [];
 }
 
-class LoadScores extends ScoresEvent {
+class LoadScores extends ScoresEvent with AnalyticsEventMixin {
   const LoadScores({required this.studentCode});
 
   final String studentCode;
 
   @override
-  List<Object> get props => [];
+  List<Object> get props => [studentCode];
+
+  @override
+  AnalyticsEvent get event => const AnalyticsEvent('LoadScores');
 }
 
 class ChangeSelectedScoresSemester extends ScoresEvent {

@@ -1,4 +1,5 @@
 import 'dart:io' show Platform;
+import 'package:analytics_repository/analytics_repository.dart';
 import 'package:community_repository/community_repository.dart';
 import 'package:dio/dio.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
@@ -9,6 +10,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:rtu_mirea_app/analytics/bloc/analytics_bloc.dart';
+import 'package:rtu_mirea_app/app_bloc_observer.dart';
 
 import 'package:rtu_mirea_app/common/widget_data_init.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -19,7 +22,6 @@ import 'package:rtu_mirea_app/presentation/bloc/app_cubit/app_cubit.dart';
 import 'package:rtu_mirea_app/presentation/bloc/attendance_bloc/attendance_bloc.dart';
 
 import 'package:rtu_mirea_app/presentation/bloc/employee_bloc/employee_bloc.dart';
-import 'package:rtu_mirea_app/presentation/bloc/map_cubit/map_cubit.dart';
 import 'package:rtu_mirea_app/presentation/bloc/news_bloc/news_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/notification_preferences/notification_preferences_bloc.dart';
 
@@ -43,19 +45,6 @@ import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:schedule_repository/schedule_repository.dart'
     as schedule_repository;
 import 'package:adaptive_theme/adaptive_theme.dart';
-
-class GlobalBlocObserver extends BlocObserver {
-  @override
-  void onError(BlocBase bloc, Object error, StackTrace stackTrace) {
-    Sentry.captureException(error, stackTrace: stackTrace);
-
-    if (kDebugMode) {
-      print(stackTrace);
-    }
-
-    super.onError(bloc, error, stackTrace);
-  }
-}
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -96,7 +85,9 @@ Future<void> main() async {
     Intl.systemLocale = await findSystemLocale();
   }
 
-  Bloc.observer = GlobalBlocObserver();
+  final analyticsRepository = AnalyticsRepository(FirebaseAnalytics.instance);
+
+  Bloc.observer = AppBlocObserver(analyticsRepository: analyticsRepository);
 
   HydratedBloc.storage = await HydratedStorage.build(
     storageDirectory: kIsWeb
@@ -127,7 +118,9 @@ Future<void> main() async {
           /// The AssetBundle instrumentation provides insight into how long
           /// app takes to load its assets, such as files
           bundle: SentryAssetBundle(),
-          child: const App(),
+          child: App(
+            analyticsRepository: analyticsRepository,
+          ),
         ),
       ),
     ),
@@ -138,7 +131,12 @@ Future<void> main() async {
 }
 
 class App extends StatelessWidget {
-  const App({Key? key}) : super(key: key);
+  const App({
+    required AnalyticsRepository analyticsRepository,
+    super.key,
+  }) : _analyticsRepository = analyticsRepository;
+
+  final AnalyticsRepository _analyticsRepository;
 
   @override
   Widget build(BuildContext context) {
@@ -153,6 +151,7 @@ class App extends StatelessWidget {
 
     return MultiRepositoryProvider(
       providers: [
+        RepositoryProvider.value(value: _analyticsRepository),
         RepositoryProvider.value(
             value:
                 schedule_repository.ScheduleRepository(apiClient: apiClient)),
@@ -165,6 +164,12 @@ class App extends StatelessWidget {
       ],
       child: MultiBlocProvider(
         providers: [
+          BlocProvider(
+            create: (context) => AnalyticsBloc(
+              analyticsRepository: _analyticsRepository,
+            ),
+            lazy: false,
+          ),
           BlocProvider<ScheduleBloc>(
             create: (context) => ScheduleBloc(
               scheduleRepository:
@@ -176,7 +181,6 @@ class App extends StatelessWidget {
               storiesRepository: context.read<StoriesRepositoryImpl>(),
             )..add(LoadStories()),
           ),
-          BlocProvider<MapCubit>(create: (context) => getIt<MapCubit>()),
           BlocProvider<NewsBloc>(create: (context) => getIt<NewsBloc>()),
           BlocProvider<UserBloc>(create: (context) => getIt<UserBloc>()),
           BlocProvider<AnnouncesBloc>(

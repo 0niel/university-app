@@ -47,7 +47,6 @@ import 'package:rtu_mirea_app/presentation/bloc/app_cubit/app_cubit.dart';
 import 'package:rtu_mirea_app/presentation/bloc/attendance_bloc/attendance_bloc.dart';
 
 import 'package:rtu_mirea_app/presentation/bloc/employee_bloc/employee_bloc.dart';
-import 'package:rtu_mirea_app/presentation/bloc/map_cubit/map_cubit.dart';
 import 'package:rtu_mirea_app/presentation/bloc/news_bloc/news_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/notification_preferences/notification_preferences_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/scores_bloc/scores_bloc.dart';
@@ -60,7 +59,6 @@ final getIt = GetIt.instance;
 Future<void> setup() async {
   // BloC / Cubit
   getIt.registerFactory(() => NewsBloc(getNews: getIt(), getNewsTags: getIt()));
-  getIt.registerFactory(() => MapCubit());
   getIt.registerLazySingleton(() => UserBloc(
       logIn: getIt(),
       logOut: getIt(),

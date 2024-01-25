@@ -4,7 +4,7 @@ abstract class ScheduleEvent extends Equatable {
   const ScheduleEvent();
 }
 
-class SetLessonComment extends ScheduleEvent {
+class SetLessonComment extends ScheduleEvent with AnalyticsEventMixin {
   const SetLessonComment({
     required this.comment,
   });
@@ -12,10 +12,13 @@ class SetLessonComment extends ScheduleEvent {
   final ScheduleComment comment;
 
   @override
+  AnalyticsEvent get event => const AnalyticsEvent('SetLessonComment');
+
+  @override
   List<Object> get props => [comment];
 }
 
-class ScheduleRequested extends ScheduleEvent {
+class ScheduleRequested extends ScheduleEvent with AnalyticsEventMixin {
   const ScheduleRequested({
     required this.group,
   });
@@ -23,10 +26,19 @@ class ScheduleRequested extends ScheduleEvent {
   final Group group;
 
   @override
+  AnalyticsEvent get event => AnalyticsEvent(
+        'ScheduleRequested',
+        properties: {
+          'group': group.name,
+        },
+      );
+
+  @override
   List<Object> get props => [group];
 }
 
-class ClassroomScheduleRequested extends ScheduleEvent {
+class ClassroomScheduleRequested extends ScheduleEvent
+    with AnalyticsEventMixin {
   const ClassroomScheduleRequested({
     required this.classroom,
   });
@@ -34,15 +46,32 @@ class ClassroomScheduleRequested extends ScheduleEvent {
   final Classroom classroom;
 
   @override
+  AnalyticsEvent get event => AnalyticsEvent(
+        'ClassroomScheduleRequested',
+        properties: {
+          'classroom': classroom.name,
+          'campus': classroom.campus?.name,
+        },
+      );
+
+  @override
   List<Object> get props => [classroom];
 }
 
-class TeacherScheduleRequested extends ScheduleEvent {
+class TeacherScheduleRequested extends ScheduleEvent with AnalyticsEventMixin {
   const TeacherScheduleRequested({
     required this.teacher,
   });
 
   final Teacher teacher;
+
+  @override
+  AnalyticsEvent get event => AnalyticsEvent(
+        'TeacherScheduleRequested',
+        properties: {
+          'teacher': teacher.name,
+        },
+      );
 
   @override
   List<Object> get props => [teacher];

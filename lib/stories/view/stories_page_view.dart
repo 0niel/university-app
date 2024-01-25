@@ -1,9 +1,11 @@
+import 'package:analytics_repository/analytics_repository.dart';
 import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:rtu_mirea_app/analytics/bloc/analytics_bloc.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 import 'package:dismissible_page/dismissible_page.dart';
-import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:go_router/go_router.dart';
 import 'package:rtu_mirea_app/common/utils/utils.dart';
 import 'package:rtu_mirea_app/domain/entities/story.dart';
@@ -46,10 +48,13 @@ class _StoriesPageViewState extends State<StoriesPageView> {
               itemBuilder: (context, pageIndex, storyIndex) {
                 if (pageIndex != _prevStoryIndex) {
                   _prevStoryIndex = pageIndex;
-                  FirebaseAnalytics.instance
-                      .logEvent(name: 'view_story', parameters: {
-                    'story_title': widget.stories[pageIndex].title,
-                  });
+                  context.read<AnalyticsBloc>().add(
+                        TrackAnalyticsEvent(
+                          ViewStory(
+                            storyTitle: widget.stories[pageIndex].title,
+                          ),
+                        ),
+                      );
                 }
                 final author = widget.stories[pageIndex].author;
                 final page = widget.stories[pageIndex].pages[storyIndex];
