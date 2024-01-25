@@ -121,7 +121,7 @@ class SettingsMenu extends StatelessWidget {
               color: AppTheme.colorsOf(context).active,
               size: 16,
             ),
-            text: "Ииндикатор заметок",
+            text: "Индикатор заметок",
             onChanged: (value) {
               context.read<ScheduleBloc>().add(ScheduleSetShowCommentsIndicator(
                   showCommentsIndicators: value));
