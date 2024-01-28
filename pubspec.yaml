@@ -12,7 +12,7 @@ publish_to: 'none'
 # In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-version: 1.4.9+72
+version: 1.5.0+73
 
 environment:
   sdk: ">=3.1.1"
@@ -22,7 +22,7 @@ dependencies:
     sdk: flutter
 
   path_provider: ^2.1.1
-
+  
   flutter_localizations:
     sdk: flutter
 
@@ -169,7 +169,7 @@ dependencies:
 
   # Get version name in runtime
   # https://pub.dev/packages/package_info_plus
-  package_info_plus: ^4.1.0
+  package_info_plus: ^5.0.1
 
   # Encapsulates the notion of the "current time". Very useful for testing
   # See https://pub.dev/packages/clock
@@ -223,7 +223,7 @@ dependencies:
   # provides
   # See https://pub.dev/packages/unicons
   unicons: any
-  go_router: ^10.1.2
+  go_router: ^13.0.1
 
   notifications_repository:
     path: packages/notifications_repository
@@ -250,6 +250,7 @@ dev_dependencies:
   # https://pub.dev/packages/freezed
   freezed: ^2.4.5
   json_serializable:
+  melos: ^4.0.0
 
 flutter_icons:
   android: false

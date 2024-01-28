@@ -1,0 +1,38 @@
+name: neon
+repository: https://github.com/nextcloud/neon
+
+bootstrap:
+  # It seems so that running "pub get" in parallel has some issues (like
+  # https://github.com/dart-lang/pub/issues/3404). Disabling this feature
+  # makes the CI much more stable.
+  runPubGetInParallel: false
+
+packages:
+  - packages/neon/packages/*
+  - packages/neon/packages/dynamite/*
+  - packages/neon/packages/neon/*
+  - packages/neon/packages/**/example
+
+ide:
+  intellij:
+    enabled: false
+
+command:
+  bootstrap:
+    hooks:
+      post: melos run format
+  version:
+    hooks:
+      preCommit: |
+        melos bootstrap
+        git add packages/app/pubspec.lock
+
+scripts:
+  format: dart format --fix --line-length 120 .
+  format:check: dart format --output=none --set-exit-if-changed --line-length 120 .
+  analyze: dart analyze --fatal-infos .
+  test: >
+    melos exec --no-flutter --concurrency=1 --fail-fast --dir-exists=test -- "dart test --concurrency=$(nproc --all) --fail-fast" &&
+    melos exec --flutter --concurrency=1 --fail-fast --dir-exists=test -- "flutter test --concurrency=$(nproc --all) --fail-fast"
+  generate:neon:build_runner: melos exec --scope="neon*" --file-exists="build.yaml" -- dart run build_runner build --delete-conflicting-outputs && melos run format
+  generate:neon:l10n: melos exec --flutter --dir-exists="lib/l10n" flutter gen-l10n && melos run format
