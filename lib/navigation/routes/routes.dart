@@ -37,19 +37,13 @@ import 'package:neon_framework/src/blocs/accounts.dart';
 import 'package:neon_framework/src/utils/provider.dart';
 import 'package:neon_framework/src/router.dart' as neon;
 
-final GlobalKey<NavigatorState> _rootNavigatorKey =
-    GlobalKey<NavigatorState>(debugLabel: 'root');
+final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'root');
 
-final GlobalKey<NavigatorState> _newsNavigatorKey =
-    GlobalKey<NavigatorState>(debugLabel: 'news');
-final GlobalKey<NavigatorState> _scheduleNavigatorKey =
-    GlobalKey<NavigatorState>(debugLabel: 'schedule');
-final GlobalKey<NavigatorState> _servicesNavigatorKey =
-    GlobalKey<NavigatorState>(debugLabel: 'services');
-final GlobalKey<NavigatorState> _profileNavigatorKey =
-    GlobalKey<NavigatorState>(debugLabel: 'profile');
-final GlobalKey<NavigatorState> _infoNavigatorKey =
-    GlobalKey<NavigatorState>(debugLabel: 'info');
+final GlobalKey<NavigatorState> _newsNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'news');
+final GlobalKey<NavigatorState> _scheduleNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'schedule');
+final GlobalKey<NavigatorState> _servicesNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'services');
+final GlobalKey<NavigatorState> _profileNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'profile');
+final GlobalKey<NavigatorState> _infoNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'info');
 
 GoRouter createRouter() => GoRouter(
       navigatorKey: _rootNavigatorKey,
@@ -71,8 +65,7 @@ GoRouter createRouter() => GoRouter(
       routes: [
         GoRoute(path: '/', redirect: (_, __) => '/schedule'),
         StatefulShellRoute.indexedStack(
-          builder: (BuildContext context, GoRouterState state,
-              StatefulNavigationShell navigationShell) {
+          builder: (BuildContext context, GoRouterState state, StatefulNavigationShell navigationShell) {
             return ScaffoldNavigationShell(navigationShell: navigationShell);
           },
           branches: [
@@ -83,8 +76,7 @@ GoRouter createRouter() => GoRouter(
                 routes: [
                   GoRoute(
                     path: 'details',
-                    builder: (context, state) =>
-                        NewsDetailsPage(newsItem: state.extra as NewsItem),
+                    builder: (context, state) => NewsDetailsPage(newsItem: state.extra as NewsItem),
                     redirect: (context, state) {
                       if (state.extra == null) {
                         return '/news';
@@ -102,8 +94,7 @@ GoRouter createRouter() => GoRouter(
                 routes: [
                   GoRoute(
                     path: 'search',
-                    builder: (context, state) =>
-                        SearchPage(query: state.extra as String?),
+                    builder: (context, state) => SearchPage(query: state.extra as String?),
                   ),
                   GoRoute(
                     path: 'details',
@@ -116,8 +107,7 @@ GoRouter createRouter() => GoRouter(
                       }
                     },
                     builder: (context, state) {
-                      final extra =
-                          state.extra as (LessonSchedulePart, DateTime);
+                      final extra = state.extra as (LessonSchedulePart, DateTime);
 
                       return ScheduleDetailsPage(
                         lesson: extra.$1,
@@ -137,13 +127,11 @@ GoRouter createRouter() => GoRouter(
                   routes: [
                     GoRoute(
                       path: 'rating-system-calculator',
-                      builder: (context, state) =>
-                          const RatingSystemCalculatorPage(),
+                      builder: (context, state) => const RatingSystemCalculatorPage(),
                       routes: [
                         GoRoute(
                           path: 'about',
-                          builder: (context, state) =>
-                              const AboutRatingSystemPage(),
+                          builder: (context, state) => const AboutRatingSystemPage(),
                         ),
                         GoRoute(
                           path: 'subject',
@@ -177,8 +165,7 @@ GoRouter createRouter() => GoRouter(
                   ),
                   GoRoute(
                     path: 'details',
-                    builder: (context, state) =>
-                        ProfileDetailPage(user: state.extra as User),
+                    builder: (context, state) => ProfileDetailPage(user: state.extra as User),
                     redirect: (context, state) {
                       if (state.extra == null) {
                         return '/profile';
@@ -200,8 +187,7 @@ GoRouter createRouter() => GoRouter(
                     routes: [
                       GoRoute(
                         path: 'notifications',
-                        builder: (context, state) =>
-                            const NotificationsSettingsPage(),
+                        builder: (context, state) => const NotificationsSettingsPage(),
                       ),
                     ],
                   ),
@@ -209,9 +195,7 @@ GoRouter createRouter() => GoRouter(
               ),
             ]),
             StatefulShellBranch(navigatorKey: _infoNavigatorKey, routes: [
-              GoRoute(
-                  path: '/info',
-                  builder: (context, state) => const AboutAppPage()),
+              GoRoute(path: '/info', builder: (context, state) => const AboutAppPage()),
             ]),
           ],
         ),
@@ -238,10 +222,7 @@ GoRouter createRouter() => GoRouter(
             parentNavigatorKey: _rootNavigatorKey,
             path: '/onboarding',
             builder: (context, state) => const OnBoardingPage()),
-        GoRoute(
-            parentNavigatorKey: _rootNavigatorKey,
-            path: '/home',
-            builder: (context, state) => const HomePage()),
+        GoRoute(parentNavigatorKey: _rootNavigatorKey, path: '/home', builder: (context, state) => const HomePage()),
         GoRoute(
           parentNavigatorKey: _rootNavigatorKey,
           path: '/image',

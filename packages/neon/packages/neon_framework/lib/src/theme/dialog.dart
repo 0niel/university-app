@@ -43,8 +43,7 @@ class NeonDialogTheme {
 
   /// The data from the closest [NeonDialogTheme] instance given the build context.
   static NeonDialogTheme of(BuildContext context) =>
-      Theme.of(context).extension<NeonTheme>()?.dialogTheme ??
-      const NeonDialogTheme();
+      Theme.of(context).extension<NeonTheme>()?.dialogTheme ?? const NeonDialogTheme();
 
   /// Linearly interpolate between two [NeonDialogTheme]s.
   ///
@@ -72,8 +71,6 @@ class NeonDialogTheme {
       return true;
     }
 
-    return other is NeonDialogTheme &&
-        other.constraints == constraints &&
-        other.padding == padding;
+    return other is NeonDialogTheme && other.constraints == constraints && other.padding == padding;
   }
 }

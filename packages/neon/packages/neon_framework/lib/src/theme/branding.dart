@@ -72,9 +72,6 @@ class Branding {
       return true;
     }
 
-    return other is Branding &&
-        name == other.name &&
-        logo == other.logo &&
-        legalese == other.legalese;
+    return other is Branding && name == other.name && logo == other.logo && legalese == other.legalese;
   }
 }

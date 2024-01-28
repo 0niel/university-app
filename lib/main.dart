@@ -60,6 +60,9 @@ import 'package:neon_framework/l10n/localizations.dart' as neon_localizations;
 import 'package:neon_framework/theme.dart' as neon_theme;
 import 'package:neon_framework/src/theme/theme.dart' as app_neon_theme;
 import 'package:neon_framework/src/theme/server.dart' as neon_server_theme;
+import 'package:neon_framework/src/platform/platform.dart';
+import 'package:quick_actions/quick_actions.dart';
+import 'package:neon_framework/src/utils/localizations.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -223,7 +226,11 @@ class App extends StatelessWidget {
           child: _NeonProvider(
             key: _neonWrapperKey,
             neonTheme: neonTheme,
-            child: const _MaterialApp(),
+            builder: (theme) {
+              return _MaterialApp(
+                appTheme: theme,
+              );
+            },
           ),
         ),
       ),
@@ -236,11 +243,11 @@ final _neonWrapperKey = GlobalKey<_NeonProviderState>();
 class _NeonProvider extends StatefulWidget {
   const _NeonProvider({
     Key? key,
-    required this.child,
+    required this.builder,
     required this.neonTheme,
   }) : super(key: key);
 
-  final Widget child;
+  final Widget Function(app_neon_theme.AppTheme) builder;
   final neon_theme.NeonTheme neonTheme;
 
   @override
@@ -271,18 +278,6 @@ class _NeonProviderState extends State<_NeonProvider> {
 
   @override
   Widget build(BuildContext context) {
-    final appTheme = app_neon_theme.AppTheme(
-      serverTheme: const neon_server_theme.ServerTheme(
-        nextcloudTheme: null,
-      ),
-      useNextcloudTheme: false,
-      deviceThemeLight: null,
-      deviceThemeDark: null,
-      appThemes:
-          _appImplementations.map((a) => a.theme).whereType<ThemeExtension>(),
-      neonTheme: widget.neonTheme,
-    );
-
     return OptionsCollectionBuilder(
       valueListenable: _globalOptions,
       builder: (context, options, _) => StreamBuilder<neon_models.Account?>(
@@ -296,7 +291,23 @@ class _NeonProviderState extends State<_NeonProvider> {
                     .getCapabilitiesBlocFor(activeAccountSnapshot.data!)
                     .capabilities
                 : null,
-            builder: (context, capabilitiesSnapshot) => widget.child,
+            builder: (context, capabilitiesSnapshot) {
+              final appTheme = app_neon_theme.AppTheme(
+                serverTheme: neon_server_theme.ServerTheme(
+                  nextcloudTheme: capabilitiesSnapshot
+                      .data?.capabilities.themingPublicCapabilities?.theming,
+                ),
+                useNextcloudTheme: false,
+                deviceThemeLight: AppTheme.lightTheme.colorScheme,
+                deviceThemeDark: AppTheme.darkTheme.colorScheme,
+                appThemes: _appImplementations
+                    .map((a) => a.theme)
+                    .whereType<ThemeExtension>(),
+                neonTheme: widget.neonTheme,
+              );
+
+              return widget.builder(appTheme);
+            },
           );
         },
       ),
@@ -307,7 +318,10 @@ class _NeonProviderState extends State<_NeonProvider> {
 class _MaterialApp extends StatefulWidget {
   const _MaterialApp({
     Key? key,
+    required this.appTheme,
   }) : super(key: key);
+
+  final app_neon_theme.AppTheme appTheme;
 
   @override
   State<_MaterialApp> createState() => _MaterialAppState();
@@ -330,8 +344,12 @@ class _MaterialAppState extends State<_MaterialApp> {
   @override
   Widget build(BuildContext context) {
     return AdaptiveTheme(
-      light: AppTheme.lightTheme,
-      dark: AppTheme.darkTheme,
+      light: AppTheme.lightTheme.copyWith(extensions: [
+        widget.appTheme.serverTheme,
+      ]),
+      dark: AppTheme.darkTheme.copyWith(extensions: [
+        widget.appTheme.serverTheme,
+      ]),
       initial: AdaptiveThemeMode.dark,
       builder: (theme, darkTheme) {
         SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(

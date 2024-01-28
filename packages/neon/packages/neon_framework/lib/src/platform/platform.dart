@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
 import 'package:neon_framework/src/platform/android.dart';
+import 'package:neon_framework/src/platform/ios.dart';
 import 'package:neon_framework/src/platform/linux.dart';
 import 'package:universal_io/io.dart';
 
@@ -33,8 +34,11 @@ abstract interface class NeonPlatform {
       _platform = const AndroidNeonPlatform();
     } else if (Platform.isLinux) {
       _platform = const LinuxNeonPlatform();
+    } else if (Platform.isIOS) {
+      _platform = const IosNeonPlatform();
     } else {
-      throw UnimplementedError('No implementation for platform ${Platform.operatingSystem} found');
+      throw UnimplementedError(
+          'No implementation for platform ${Platform.operatingSystem} found');
     }
 
     await _platform!.init();

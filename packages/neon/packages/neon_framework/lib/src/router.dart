@@ -50,8 +50,7 @@ final NeonRedirectFunction redirect = (accountsBloc, context, state) {
 
   // Redirect to login screen when no account is logged in
   // We only check the prefix of the current location as we also don't want to redirect on any of the other login routes.
-  if (!accountsBloc.hasAccounts &&
-      !state.matchedLocation.contains(const LoginRoute().location)) {
+  if (!accountsBloc.hasAccounts && !state.matchedLocation.contains(const LoginRoute().location)) {
     return const LoginRoute().location;
   }
 
@@ -73,8 +72,7 @@ GoRouter buildAppRouter({
       routes: $appRoutes,
     );
 
-Page<void> _buildErrorPage(BuildContext context, GoRouterState state) =>
-    MaterialPage(
+Page<void> _buildErrorPage(BuildContext context, GoRouterState state) => MaterialPage(
       child: RouteNotFoundPage(
         uri: state.uri,
       ),
@@ -237,8 +235,7 @@ class LoginFlowRoute extends GoRouteData {
   final Uri serverUrl;
 
   @override
-  Widget build(BuildContext context, GoRouterState state) =>
-      LoginFlowPage(serverURL: serverUrl);
+  Widget build(BuildContext context, GoRouterState state) => LoginFlowPage(serverURL: serverUrl);
 
   @override
   FutureOr<String?> redirect(BuildContext context, GoRouterState state) {
@@ -264,8 +261,7 @@ class LoginQRcodeRoute extends GoRouteData {
   const LoginQRcodeRoute();
 
   @override
-  Widget build(BuildContext context, GoRouterState state) =>
-      const LoginQRcodePage();
+  Widget build(BuildContext context, GoRouterState state) => const LoginQRcodePage();
 
   @override
   FutureOr<String?> redirect(BuildContext context, GoRouterState state) {
@@ -384,8 +380,7 @@ class LoginCheckAccountRoute extends GoRouteData {
   final String password;
 
   @override
-  Widget build(BuildContext context, GoRouterState state) =>
-      LoginCheckAccountPage(
+  Widget build(BuildContext context, GoRouterState state) => LoginCheckAccountPage(
         serverURL: serverUrl,
         loginName: loginName,
         password: password,
@@ -478,8 +473,7 @@ class AppImplementationSettingsRoute extends GoRouteData {
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
-    final appImplementations =
-        NeonProvider.of<Iterable<AppImplementation>>(context);
+    final appImplementations = NeonProvider.of<Iterable<AppImplementation>>(context);
     final appImplementation = appImplementations.tryFind(appid)!;
 
     return AppImplementationSettingsPage(appImplementation: appImplementation);
@@ -500,6 +494,5 @@ class SettingsRoute extends GoRouteData {
   final SettingsCategories? initialCategory;
 
   @override
-  Widget build(BuildContext context, GoRouterState state) =>
-      SettingsPage(initialCategory: initialCategory);
+  Widget build(BuildContext context, GoRouterState state) => SettingsPage(initialCategory: initialCategory);
 }

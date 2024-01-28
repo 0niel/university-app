@@ -6,6 +6,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:intl/intl.dart' as intl;
 
 import 'localizations_en.dart';
+import 'localizations_ru.dart';
 
 /// Callers can lookup localized strings with an instance of DashboardLocalizations
 /// returned by `DashboardLocalizations.of(context)`.
@@ -87,7 +88,7 @@ abstract class DashboardLocalizations {
   ];
 
   /// A list of this localizations delegate's supported locales.
-  static const List<Locale> supportedLocales = <Locale>[Locale('en')];
+  static const List<Locale> supportedLocales = <Locale>[Locale('en'), Locale('ru')];
 
   /// No description provided for @noEntries.
   ///
@@ -105,7 +106,7 @@ class _DashboardLocalizationsDelegate extends LocalizationsDelegate<DashboardLoc
   }
 
   @override
-  bool isSupported(Locale locale) => <String>['en'].contains(locale.languageCode);
+  bool isSupported(Locale locale) => <String>['en', 'ru'].contains(locale.languageCode);
 
   @override
   bool shouldReload(_DashboardLocalizationsDelegate old) => false;
@@ -116,6 +117,8 @@ DashboardLocalizations lookupDashboardLocalizations(Locale locale) {
   switch (locale.languageCode) {
     case 'en':
       return DashboardLocalizationsEn();
+    case 'ru':
+      return DashboardLocalizationsRu();
   }
 
   throw FlutterError('DashboardLocalizations.delegate failed to load unsupported locale "$locale". This is likely '

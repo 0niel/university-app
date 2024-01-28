@@ -178,8 +178,7 @@ class _ServicesViewState extends State<ServicesView> {
                       ).image,
                     ),
                     launchMode: LaunchMode.externalApplication,
-                    description:
-                        'Кафедра Инструментального и прикладного программного обеспечения',
+                    description: 'Кафедра Инструментального и прикладного программного обеспечения',
                   ),
                 ],
               ),

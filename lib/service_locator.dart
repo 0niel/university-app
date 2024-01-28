@@ -59,11 +59,8 @@ final getIt = GetIt.instance;
 Future<void> setup() async {
   // BloC / Cubit
   getIt.registerFactory(() => NewsBloc(getNews: getIt(), getNewsTags: getIt()));
-  getIt.registerLazySingleton(() => UserBloc(
-      logIn: getIt(),
-      logOut: getIt(),
-      getUserData: getIt(),
-      getAuthToken: getIt()));
+  getIt.registerLazySingleton(
+      () => UserBloc(logIn: getIt(), logOut: getIt(), getUserData: getIt(), getAuthToken: getIt()));
   getIt.registerFactory(() => AnnouncesBloc(getAnnounces: getIt()));
   getIt.registerFactory(() => EmployeeBloc(getEmployees: getIt()));
   getIt.registerFactory(() => ScoresBloc(getScores: getIt()));
@@ -75,8 +72,7 @@ Future<void> setup() async {
       setAppSettings: getIt(),
     ),
   );
-  getIt.registerFactory(
-      () => NotificationPreferencesBloc(notificationsRepository: getIt()));
+  getIt.registerFactory(() => NotificationPreferencesBloc(notificationsRepository: getIt()));
 
   // Usecases
   getIt.registerLazySingleton(() => GetAttendance(getIt()));
@@ -113,34 +109,24 @@ Future<void> setup() async {
         connectionChecker: getIt(),
       ));
 
-  getIt.registerLazySingleton<AppSettingsRepository>(
-      () => AppSettingsRepositoryImpl(
-            localDataSource: getIt(),
-          ));
+  getIt.registerLazySingleton<AppSettingsRepository>(() => AppSettingsRepositoryImpl(
+        localDataSource: getIt(),
+      ));
 
-  getIt.registerLazySingleton<NotificationsRepository>(
-      () => NotificationsRepository(
-            permissionClient: getIt(),
-            storage: getIt<NotificationsStorage>(),
-            notificationsClient: getIt<FirebaseNotificationsClient>(),
-          ));
+  getIt.registerLazySingleton<NotificationsRepository>(() => NotificationsRepository(
+        permissionClient: getIt(),
+        storage: getIt<NotificationsStorage>(),
+        notificationsClient: getIt<FirebaseNotificationsClient>(),
+      ));
 
   getIt.registerLazySingleton<UserLocalData>(() => UserLocalDataImpl(
-      sharedPreferences: getIt(),
-      secureStorage: getIt(),
-      oauthHelper: getIt<LksOauth2>().oauth2Helper));
-  getIt.registerLazySingleton<UserRemoteData>(
-      () => UserRemoteDataImpl(httpClient: getIt(), lksOauth2: getIt()));
-  getIt.registerLazySingleton<NewsRemoteData>(
-      () => NewsRemoteDataImpl(httpClient: getIt()));
-  getIt.registerLazySingleton<ForumRemoteData>(
-      () => ForumRemoteDataImpl(httpClient: getIt()));
-  getIt.registerLazySingleton<ForumLocalData>(
-      () => ForumLocalDataImpl(sharedPreferences: getIt()));
-  getIt.registerLazySingleton<StrapiRemoteData>(
-      () => StrapiRemoteDataImpl(httpClient: getIt()));
-  getIt.registerLazySingleton<AppSettingsLocal>(
-      () => AppSettingsLocalImpl(sharedPreferences: getIt()));
+      sharedPreferences: getIt(), secureStorage: getIt(), oauthHelper: getIt<LksOauth2>().oauth2Helper));
+  getIt.registerLazySingleton<UserRemoteData>(() => UserRemoteDataImpl(httpClient: getIt(), lksOauth2: getIt()));
+  getIt.registerLazySingleton<NewsRemoteData>(() => NewsRemoteDataImpl(httpClient: getIt()));
+  getIt.registerLazySingleton<ForumRemoteData>(() => ForumRemoteDataImpl(httpClient: getIt()));
+  getIt.registerLazySingleton<ForumLocalData>(() => ForumLocalDataImpl(sharedPreferences: getIt()));
+  getIt.registerLazySingleton<StrapiRemoteData>(() => StrapiRemoteDataImpl(httpClient: getIt()));
+  getIt.registerLazySingleton<AppSettingsLocal>(() => AppSettingsLocalImpl(sharedPreferences: getIt()));
   getIt.registerLazySingleton<WidgetData>(() => WidgetDataImpl());
 
   // Common / Core
@@ -162,11 +148,9 @@ Future<void> setup() async {
   final DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
   getIt.registerLazySingleton(() => deviceInfo);
 
-  getIt.registerLazySingleton(() => FirebaseNotificationsClient(
-      firebaseMessaging: FirebaseMessaging.instance));
+  getIt.registerLazySingleton(() => FirebaseNotificationsClient(firebaseMessaging: FirebaseMessaging.instance));
   getIt.registerLazySingleton(() => const PermissionClient());
-  getIt.registerLazySingleton(
-      () => PersistentStorage(sharedPreferences: getIt()));
+  getIt.registerLazySingleton(() => PersistentStorage(sharedPreferences: getIt()));
   getIt.registerLazySingleton(() => NotificationsStorage(
         storage: getIt<PersistentStorage>(),
       ));

@@ -1,0 +1,79 @@
+{
+    "@@locale": "ru",
+    "actionDelete": "Удалить",
+    "actionRename": "Переименовать",
+    "actionMove": "Переместить",
+    "general": "Общее",
+    "folder": "Папка",
+    "folders": "Папки",
+    "folderRoot": "Корневая папка",
+    "folderCreate": "Создать папку",
+    "folderCreateName": "Имя папки",
+    "folderDeleteConfirm": "Вы уверены, что хотите удалить папку '{name}'?",
+    "@folderDeleteConfirm": {
+        "placeholders": {
+            "name": {
+                "type": "String"
+            }
+        }
+    },
+    "actionDeleteTitle": "Удалить навсегда?",
+    "folderRename": "Переименовать папку",
+    "feeds": "Ленты",
+    "feedAdd": "Добавить ленту",
+    "feedRemoveConfirm": "Вы уверены, что хотите удалить ленту '{name}'?",
+    "@feedRemoveConfirm": {
+        "placeholders": {
+            "name": {
+                "type": "String"
+            }
+        }
+    },
+    "feedMove": "Переместить ленту",
+    "feedRename": "Переименовать ленту",
+    "feedShowURL": "Показать URL",
+    "feedCopyURL": "Скопировать URL",
+    "feedCopiedURL": "URL скопирован в буфер обмена",
+    "feedShowErrorMessage": "Показать сообщение об ошибке",
+    "feedCopyErrorMessage": "Скопировать сообщение об ошибке",
+    "feedCopiedErrorMessage": "Сообщение об ошибке скопировано в буфер обмена",
+    "articles": "Статьи",
+    "articlesUnread": "{count} непрочитанных",
+    "@articlesUnread": {
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "articlesFilterAll": "Все",
+    "articlesFilterUnread": "Непрочитанные",
+    "articlesFilterStarred": "Избранные",
+    "articleStar": "Добавить статью в избранное",
+    "articleUnstar": "Убрать статью из избранного",
+    "articleMarkRead": "Отметить статью как прочитанную",
+    "articleMarkUnread": "Отметить статью как непрочитанную",
+    "articleOpenLink": "Открыть в браузере",
+    "articleShare": "Поделиться",
+    "optionsDefaultCategory": "Категория для отображения по умолчанию",
+    "optionsArticleViewType": "Как открывать статью",
+    "optionsArticleViewTypeDirect": "Показать текст напрямую",
+    "optionsArticleViewTypeInternalBrowser": "Открыть во внутреннем браузере",
+    "optionsArticleViewTypeExternalBrowser": "Открыть во внешнем браузере",
+    "optionsArticleDisableMarkAsReadTimeout": "Отмечать статьи прочитанными немедленно",
+    "optionsDefaultArticlesFilter": "Статьи для отображения по умолчанию",
+    "optionsArticlesSortProperty": "Как сортировать статьи",
+    "optionsArticlesSortPropertyPublishDate": "Дата публикации",
+    "optionsArticlesSortPropertyAlphabetical": "По алфавиту",
+    "optionsArticlesSortPropertyFeed": "Лента",
+    "optionsArticlesSortOrder": "Порядок сортировки статей",
+    "optionsFeedsSortProperty": "Как сортировать ленты",
+    "optionsFeedsSortPropertyAlphabetical": "По алфавиту",
+    "optionsFeedsSortPropertyUnreadCount": "Количество непрочитанных",
+    "optionsFeedsSortOrder": "Порядок стировки лент",
+    "optionsFoldersSortProperty": "Как сортировать папки",
+    "optionsFoldersSortPropertyAlphabetical": "По алфавиту",
+    "optionsFoldersSortPropertyUnreadCount": "Количество непрочитх",
+    "optionsFoldersSortOrder": "Порядок сортировки папок",
+    "optionsDefaultFolderViewType": "Что отображать вначале при открытии папки"
+}
