@@ -1,0 +1,60 @@
+{
+  "version": "0.2",
+  "language": "en",
+  "useGitignore": true,
+  "enableGlobDot": false,
+  "words": [
+    "OpenAPI"
+  ],
+  "ignorePaths": [
+    "**.svg",
+    "**.mocks.dart",
+    "**/assets",
+    "**/l10n/!(en.arb)",
+    "**.openapi.dart",
+    "**.openapi.json",
+    "external",
+    "packages/dynamite/dynamite/example/lib",
+    "packages/file_icons/lib/src/data.dart",
+    "packages/neon_lints/lib",
+    "packages/nextcloud/test/fixtures",
+    "packages/nextcloud_test/docker/static"
+  ],
+  "dictionaries": [
+    "bash",
+    "dart_flutter",
+    "en_US",
+    "misc",
+    "neon",
+    "nextcloud",
+    "softwareTerms",
+    "tools",
+    "webdav"
+  ],
+  "dictionaryDefinitions": [
+    {
+      "name": "dart_flutter",
+      "path": ".cspell/dart_flutter.txt"
+    },
+    {
+      "name": "misc",
+      "path": ".cspell/misc.txt"
+    },
+    {
+      "name": "neon",
+      "path": ".cspell/neon.txt"
+    },
+    {
+      "name": "nextcloud",
+      "path": ".cspell/nextcloud.txt"
+    },
+    {
+      "name": "tools",
+      "path": ".cspell/tools.txt"
+    },
+    {
+      "name": "webdav",
+      "path": ".cspell/webdav.txt"
+    }
+  ]
+}

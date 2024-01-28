@@ -1,0 +1,22 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Tags test",
+    "version": "0.0.1"
+  },
+  "paths": {
+    "/": {
+      "get": {
+        "tags": [
+          "first",
+          "second"
+        ],
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    }
+  }
+}

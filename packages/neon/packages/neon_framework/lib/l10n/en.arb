@@ -1,0 +1,237 @@
+{
+  "@@locale": "en",
+  "nextcloud": "Nextcloud",
+  "nextcloudLogo": "Nextcloud logo",
+  "appImplementationName": "{app, select, nextcloud{Nextcloud} core{Server} dashboard{Dashboard} files{Files} news{News} notes{Notes} notifications{Notifications} other{}}",
+  "@appImplementationName": {
+    "placeholders": {
+      "app": {}
+    }
+  },
+  "loginAgain": "Login again",
+  "loginOpenAgain": "Open again",
+  "loginSwitchToBrowserWindow": "Please switch to the browser window that just opened and proceed there",
+  "loginWorksWith": "works with",
+  "loginUsingQRcode": "Login using a QR code",
+  "loginUsingServerAddress": "Login using the server address",
+  "loginCheckingServerVersion": "Checking server version",
+  "loginSupportedServerVersion": "Supported server version: {version}",
+  "@loginSupportedServerVersion": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "loginUnsupportedServerVersion": "Unsupported server version: {version}",
+  "@loginUnsupportedServerVersion": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "loginCheckingMaintenanceMode": "Checking maintenance mode",
+  "loginMaintenanceModeEnabled": "Maintenance mode enabled",
+  "loginMaintenanceModeDisabled": "Maintenance mode disabled",
+  "loginCheckingAccount": "Checking account",
+  "errorCredentialsForAccountNoLongerMatch": "The credentials for this account no longer match",
+  "errorServerHadAProblemProcessingYourRequest": "The server had a problem while processing your request. You might want to try again",
+  "errorSomethingWentWrongTryAgainLater": "Something went wrong. Please try again later",
+  "errorUnableToReachServer": "Unable to reach the server",
+  "errorUnableToReachServerAt": "Unable to reach the server at {url}",
+  "@errorUnableToReachServerAt": {
+    "placeholders": {
+      "url": {
+        "type": "String"
+      }
+    }
+  },
+  "errorConnectionTimedOut": "Connection has timed out",
+  "errorNoCompatibleNextcloudAppsFound": "No compatible Nextcloud apps could be found.\nWe are working hard to implement more and more apps!",
+  "errorServerInMaintenanceMode": "The server is in maintenance mode. Please try again later or contact the server admin.",
+  "errorMissingPermission": "Permission for {name} is missing",
+  "@errorMissingPermission": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "errorUnsupportedAppVersions": "Sorry, the version of the following apps on your Nextcloud instance are not supported. \n {names} \n Please contact your administrator to resolve the issues.",
+  "@errorUnsupportedAppVersions": {
+    "placeholders": {
+      "names": {
+        "type": "String"
+      }
+    }
+  },
+  "errorEmptyField": "This field can not be empty",
+  "errorInvalidURL": "Invalid URL provided",
+  "errorInvalidQRcode": "Invalid QR-Code provided",
+  "errorRouteNotFound": "Route not found: {route}",
+  "@errorRouteNotFound": {
+    "placeholders": {
+      "route": {
+        "type": "String"
+      }
+    }
+  },
+  "errorDialog": "An error has occurred",
+  "actionYes": "Yes",
+  "actionNo": "No",
+  "actionClose": "Close",
+  "actionRetry": "Retry",
+  "actionShowSlashHide": "Show/Hide",
+  "actionExit": "Exit",
+  "actionContinue": "Continue",
+  "actionCancel": "Cancel",
+  "firstLaunchGoToSettingsToEnablePushNotifications": "Go to the settings to enable push notifications",
+  "nextPushSupported": "NextPush is supported!",
+  "nextPushSupportedText": "NextPush is a FOSS way of receiving push notifications using the UnifiedPush protocol via a Nextcloud instance.\nYou can install NextPush from the F-Droid app store.",
+  "nextPushSupportedInstall": "Install NextPush",
+  "search": "Search",
+  "searchCancel": "Cancel search",
+  "searchNoResults": "No search results",
+  "settings": "Settings",
+  "settingsApps": "Apps",
+  "settingsAccount": "Account",
+  "settingsAccountManage": "Manage accounts",
+  "settingsExport": "Export settings",
+  "settingsImport": "Import settings",
+  "settingsReset": "Reset settings?",
+  "settingsImportWrongFileExtension": "Settings import has wrong file extension (has to be .json.base64)",
+  "settingsResetAll": "Reset all settings",
+  "settingsResetAllConfirmation": "Do you want to reset all settings?",
+  "settingsResetAllExplanation": "This will reset all preferences back to their default settings.",
+  "settingsResetFor": "Reset all settings for {name}",
+  "@settingsResetFor": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsResetForExplanation": "This will reset your account preferences back to their default settings.",
+  "settingsResetForClientExplanation": "This will reset all preferences for the app back to their default settings.",
+  "settingsResetForConfirmation": "Do you want to reset all settings for {name}?",
+  "@settingsResetForConfirmation": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "optionsCategoryGeneral": "General",
+  "optionsCategoryTheme": "Theme",
+  "optionsCategoryPushNotifications": "Push notifications",
+  "optionsCategoryOther": "Other",
+  "optionsCategoryAccounts": "Accounts",
+  "optionsCategoryStartup": "Startup",
+  "optionsCategoryNavigation": "Navigation",
+  "optionsSortOrderAscending": "Ascending",
+  "optionsSortOrderDescending": "Descending",
+  "globalOptionsThemeMode": "Theme mode",
+  "globalOptionsThemeModeLight": "Light",
+  "globalOptionsThemeModeDark": "Dark",
+  "globalOptionsThemeModeAutomatic": "Automatic",
+  "globalOptionsThemeOLEDAsDark": "OLED theme as dark theme",
+  "globalOptionsThemeUseNextcloudTheme": "Use Nextcloud theme",
+  "globalOptionsThemeCustomBackground": "Custom background",
+  "globalOptionsPushNotificationsEnabled": "Enabled",
+  "globalOptionsPushNotificationsEnabledDisabledNotice": "No UnifiedPush distributor could be found or you denied the permission for showing notifications. Please go to the app settings and allow notifications and go to https://unifiedpush.org/users/distributors and setup any of the listed distributors. Then re-open this app and you should be able to enable notifications",
+  "globalOptionsPushNotificationsDistributor": "UnifiedPush Distributor",
+  "globalOptionsPushNotificationsDistributorGotifyUP": "Gotify-UP (FOSS)",
+  "globalOptionsPushNotificationsDistributorFirebaseEmbedded": "Firebase (proprietary)",
+  "globalOptionsPushNotificationsDistributorNtfy": "ntfy (FOSS)",
+  "globalOptionsPushNotificationsDistributorFCMUP": "FCM-UP (proprietary)",
+  "globalOptionsPushNotificationsDistributorNextPush": "NextPush (FOSS)",
+  "globalOptionsPushNotificationsDistributorNoProvider2Push": "NoProvider2Push (FOSS)",
+  "globalOptionsPushNotificationsDistributorConversations": "Conversations",
+  "globalOptionsStartupMinimized": "Start minimized",
+  "globalOptionsStartupMinimizeInsteadOfExit": "Minimize instead of exit",
+  "globalOptionsAccountsRememberLastUsedAccount": "Remember last used account",
+  "globalOptionsAccountsInitialAccount": "Initial account",
+  "globalOptionsAccountsAdd": "Add account",
+  "globalOptionsNavigationMode": "Navigation mode",
+  "globalOptionsNavigationModeDrawer": "Drawer",
+  "globalOptionsNavigationModeDrawerAlwaysVisible": "Drawer always visible",
+  "accountOptionsRemove": "Remove account",
+  "accountOptionsRemoveConfirm": "Are you sure you want to remove the account {id}?",
+  "@accountOptionsRemoveConfirm": {
+    "placeholders": {
+      "id": {
+        "type": "String"
+      }
+    }
+  },
+  "accountOptionsCategoryStorageInfo": "Storage info",
+  "accountOptionsQuotaUsedOf": "{used} used of {total} ({relative}%)",
+  "@accountOptionsQuotaUsedOf": {
+    "placeholders": {
+      "used": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      },
+      "relative": {
+        "type": "String"
+      }
+    }
+  },
+  "accountOptionsInitialApp": "App to show initially",
+  "accountOptionsAutomatic": "Automatic",
+  "licenses": "Licenses",
+  "sourceCode": "Source code",
+  "issueTracker": "Report a bug or request a feature",
+  "relativeTimeNow": "now",
+  "relativeTimePast": "{time} ago",
+  "@relativeTimePast": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "relativeTimeFuture": "in {time}",
+  "@relativeTimeFuture": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "relativeTimeMinutes": "{time} {time,plural, =1{minute}other{minutes}}",
+  "@relativeTimeMinutes": {
+    "placeholders": {
+      "time": {
+        "type": "int"
+      }
+    }
+  },
+  "relativeTimeHours": "{time} {time,plural, =1{hour}other{hours}}",
+  "@relativeTimeHours": {
+    "placeholders": {
+      "time": {
+        "type": "int"
+      }
+    }
+  },
+  "relativeTimeDays": "{time} {time,plural, =1{day}other{days}}",
+  "@relativeTimeDays": {
+    "placeholders": {
+      "time": {
+        "type": "int"
+      }
+    }
+  },
+  "relativeTimeYears": "{time} {time,plural, =1{year}other{years}}",
+  "@relativeTimeYears": {
+    "placeholders": {
+      "time": {
+        "type": "int"
+      }
+    }
+  }
+}

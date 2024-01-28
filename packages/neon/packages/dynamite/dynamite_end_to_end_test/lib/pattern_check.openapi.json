@@ -1,0 +1,36 @@
+{
+    "openapi": "3.1.0",
+    "info": {
+        "title": "Pattern check test",
+        "version": "0.0.1"
+    },
+    "components": {
+        "schemas": {
+            "TestObject": {
+                "type": "object",
+                "properties": {
+                    "only-numbers": {
+                        "type": "string",
+                        "pattern": "^[0-9]*$"
+                    },
+                    "min-length": {
+                        "type": "string",
+                        "minLength": 3
+                    },
+                    "max-length": {
+                        "type": "string",
+                        "maxLength": 20
+                    },
+                    "multiple-checks": {
+                        "type": "string",
+                        "pattern": "^[0-9]*$",
+                        "minLength": 3,
+                        "maxLength": 20
+                    }
+                }
+            }
+        }
+    },
+    "paths": {},
+    "tags": []
+}

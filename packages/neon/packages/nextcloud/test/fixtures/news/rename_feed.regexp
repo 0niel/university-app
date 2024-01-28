@@ -1,0 +1,8 @@
+POST http://localhost/index\.php/apps/news/api/v1-3/feeds\?url=http%3A%2F%2Flocalhost%2Fstatic%2Fwikipedia\.xml
+accept: application/json
+authorization: Basic mock
+POST http://localhost/index\.php/apps/news/api/v1-3/feeds/1/rename\?feedTitle=test1
+authorization: Basic mock
+GET http://localhost/index\.php/apps/news/api/v1-3/feeds
+accept: application/json
+authorization: Basic mock

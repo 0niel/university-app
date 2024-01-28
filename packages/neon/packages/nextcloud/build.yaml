@@ -1,0 +1,27 @@
+targets:
+  $default:
+    builders:
+      built_value_generator|built_value:
+        enabled: true
+      dynamite:
+        options:
+          pageWidth: 120
+          analyzer_ignores:
+            - camel_case_types
+            - discarded_futures
+            - public_member_api_docs
+            - unreachable_switch_case
+            - camel_case_extensions
+            - no_leading_underscores_for_local_identifiers
+          coverage_ignores:
+            - 'const .*\._\(\);'
+            - 'factory .*\.fromJson\(Map<String, dynamic> json\) => _\$jsonSerializers\.deserializeWith\(serializer, json\)!;'
+            - 'Map<String, dynamic> toJson\(\) => _\$jsonSerializers\.serializeWith\(serializer, this\)! as Map<String, dynamic>;'
+            - 'static BuiltSet<.*> get values => _\$.*Values;'
+          overrides:
+            lib/src/api/news.openapi.json:
+              experimental: true
+            lib/src/api/notes.openapi.json:
+              experimental: true
+            lib/src/api/uppush.openapi.json:
+              experimental: true

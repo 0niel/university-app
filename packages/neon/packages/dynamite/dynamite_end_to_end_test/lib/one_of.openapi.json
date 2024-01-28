@@ -1,0 +1,164 @@
+{
+    "openapi": "3.1.0",
+    "info": {
+        "title": "one of test",
+        "version": "0.0.1"
+    },
+    "components": {
+        "schemas": {
+            "ObjectOneOf": {
+                "description": "One of with objects only.",
+                "oneOf": [
+                    {
+                        "type": "object",
+                        "required": [
+                            "attribute1-oneOf"
+                        ],
+                        "properties": {
+                            "attribute1-oneOf": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    {
+                        "type": "object",
+                        "required": [
+                            "attribute2-oneOf"
+                        ],
+                        "properties": {
+                            "attribute2-oneOf": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                ]
+            },
+            "MixedOneOf": {
+                "description": "One of with object and primitive value.",
+                "oneOf": [
+                    {
+                        "type": "string"
+                    },
+                    {
+                        "type": "object",
+                        "required": [
+                            "attribute-oneOf"
+                        ],
+                        "properties": {
+                            "attribute-oneOf": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                ]
+            },
+            "OneObjectOneOf": {
+                "description": "One of with one object value.",
+                "oneOf": [
+                    {
+                        "type": "object",
+                        "required": [
+                            "attribute-oneOf"
+                        ],
+                        "properties": {
+                            "attribute-oneOf": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                ]
+            },
+            "OneValueOneOf": {
+                "description": "One of with one primitive value.",
+                "oneOf": [
+                    {
+                        "type": "string"
+                    }
+                ]
+            },
+            "OneOfIntDouble": {
+                "description": "One of with an integer and double.",
+                "oneOf": [
+                    {
+                        "type": "integer"
+                    },
+                    {
+                        "type": "number",
+                        "format": "float"
+                    }
+                ]
+            },
+            "OneOfIntDoubleNum": {
+                "description": "One of with an integer, double and number.",
+                "oneOf": [
+                    {
+                        "type": "integer"
+                    },
+                    {
+                        "type": "number",
+                        "format": "float"
+                    },
+                    {
+                        "type": "number"
+                    }
+                ]
+            },
+            "OneOfIntDoubleOther": {
+                "description": "One of with an integer, double and other value.",
+                "oneOf": [
+                    {
+                        "type": "integer"
+                    },
+                    {
+                        "type": "number",
+                        "format": "float"
+                    },
+                    {
+                        "type": "string"
+                    }
+                ]
+            },
+            "OneOfUnspecifiedArray": {
+                "oneOf": [
+                    {
+                        "type": "object",
+                        "required": [
+                            "attribute-oneOf"
+                        ],
+                        "properties": {
+                            "attribute-oneOf": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    {
+                        "type": "array"
+                    }
+                ]
+            },
+            "OneOfStringArray": {
+                "oneOf": [
+                    {
+                        "type": "object",
+                        "required": [
+                            "attribute-oneOf"
+                        ],
+                        "properties": {
+                            "attribute-oneOf": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                ]
+            }
+        }
+    },
+    "paths": {},
+    "tags": []
+}

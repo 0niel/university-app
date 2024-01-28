@@ -1,0 +1,13 @@
+name: neon_workspace
+publish_to: none
+
+environment:
+  sdk: '>=3.1.0 <4.0.0'
+dev_dependencies:
+  commitlint_cli: ^0.7.1
+  fvm: ^2.4.1
+  husky: ^0.1.6
+  melos: ^4.0.0
+
+dependency_overrides:
+  cli_util: ^0.4.1

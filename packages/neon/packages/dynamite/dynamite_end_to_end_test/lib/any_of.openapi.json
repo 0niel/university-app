@@ -1,0 +1,125 @@
+{
+    "openapi": "3.1.0",
+    "info": {
+        "title": "any of test",
+        "version": "0.0.1"
+    },
+    "components": {
+        "schemas": {
+            "ObjectAnyOf": {
+                "description": "Any of with objects only.",
+                "anyOf": [
+                    {
+                        "type": "object",
+                        "required": [
+                            "attribute1-anyOf"
+                        ],
+                        "properties": {
+                            "attribute1-anyOf": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    {
+                        "type": "object",
+                        "required": [
+                            "attribute2-anyOf"
+                        ],
+                        "properties": {
+                            "attribute2-anyOf": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                ]
+            },
+            "MixedAnyOf": {
+                "description": "Any of with object and primitive value.",
+                "anyOf": [
+                    {
+                        "type": "string"
+                    },
+                    {
+                        "type": "object",
+                        "required": [
+                            "attribute-anyOf"
+                        ],
+                        "properties": {
+                            "attribute-anyOf": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                ]
+            },
+            "OneObjectAnyOf": {
+                "description": "Any of with one object value.",
+                "anyOf": [
+                    {
+                        "type": "object",
+                        "required": [
+                            "attribute-anyOf"
+                        ],
+                        "properties": {
+                            "attribute-anyOf": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                ]
+            },
+            "OneValueAnyOf": {
+                "description": "Any of with one primitive value.",
+                "anyOf": [
+                    {
+                        "type": "string"
+                    }
+                ]
+            },
+            "AnyOfIntDouble": {
+                "description": "Any of with an integer and double.",
+                "anyOf": [
+                    {
+                        "type": "integer"
+                    },
+                    {
+                        "type": "number",
+                        "format": "float"
+                    }
+                ]
+            },
+            "AnyOfIntDoubleNum": {
+                "description": "Any of with an integer, double and number.",
+                "oneOf": [
+                    {
+                        "type": "integer"
+                    },
+                    {
+                        "type": "number",
+                        "format": "float"
+                    },
+                    {
+                        "type": "number"
+                    }
+                ]
+            },
+            "AnyOfIntDoubleOther": {
+                "description": "Any of with an integer, double and other value.",
+                "anyOf": [
+                    {
+                        "type": "integer"
+                    },
+                    {
+                        "type": "number",
+                        "format": "float"
+                    },
+                    {
+                        "type": "string"
+                    }
+                ]
+            }
+        }
+    },
+    "paths": {},
+    "tags": []
+}

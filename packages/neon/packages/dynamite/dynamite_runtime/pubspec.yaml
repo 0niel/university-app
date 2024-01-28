@@ -1,0 +1,38 @@
+name: dynamite_runtime
+description: The helper package used at runtime by code generated with the OpenAPI generator dynamite.
+version: 0.1.0
+homepage: https://github.com/nextcloud/neon
+repository: https://github.com/nextcloud/neon/tree/main/packages/dynamite/dynamite_runtime
+topics:
+  - openapi
+  - codegen
+  - build-runner
+
+environment:
+  sdk: '>=3.1.0 <4.0.0'
+
+dependencies:
+  built_collection: ^5.0.0
+  built_value: ^8.9.0
+  collection: ^1.0.0
+  cookie_jar: ^4.0.7
+  http: ^1.2.0
+  meta: ^1.0.0
+  xml: ^6.0.0
+
+dev_dependencies:
+  build_runner: ^2.4.8
+  built_value_generator: ^8.9.0
+  neon_lints:
+    git:
+      url: https://github.com/nextcloud/neon
+      path: packages/neon_lints
+  test: ^1.25.2
+
+platforms:
+  windows:
+  linux:
+  macos:
+  android:
+  ios:
+  web:

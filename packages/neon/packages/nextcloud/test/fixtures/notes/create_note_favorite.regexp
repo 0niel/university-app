@@ -1,0 +1,9 @@
+GET http://localhost/index\.php/apps/notes/api/v1/notes\?exclude=&pruneBefore=0&chunkSize=0
+accept: application/json
+authorization: Basic mock(
+DELETE http://localhost/index\.php/apps/notes/api/v1/notes/[0-9]+
+accept: application/json
+authorization: Basic mock)*
+POST http://localhost/index\.php/apps/notes/api/v1/notes\?category=c&title=a&content=b&modified=0&favorite=1
+accept: application/json
+authorization: Basic mock

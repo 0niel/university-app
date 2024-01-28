@@ -1,0 +1,84 @@
+{
+    "openapi": "3.1.0",
+    "info": {
+        "title": "oneOf and anyOf test with the same record type",
+        "version": "0.0.1"
+    },
+    "components": {
+        "schemas": {
+            "OneOfIntDoubleOther": {
+                "description": "One of with an integer, double and other value.",
+                "oneOf": [
+                    {
+                        "type": "integer"
+                    },
+                    {
+                        "type": "number",
+                        "format": "float"
+                    },
+                    {
+                        "type": "string"
+                    }
+                ]
+            },
+            "AnyOfIntDoubleOther": {
+                "description": "One of with an integer, double and other value.",
+                "anyOf": [
+                    {
+                        "type": "integer"
+                    },
+                    {
+                        "type": "number",
+                        "format": "float"
+                    },
+                    {
+                        "type": "string"
+                    }
+                ]
+            },
+            "OneValueSomeOfInObject": {
+                "description": "Object with someOfs that only contain a single value (or are optimized to such).\n Should use the single member directly.",
+                "type": "object",
+                "required": [
+                    "someOf"
+                ],
+                "properties": {
+                    "OneValue": {
+                        "oneOf": [
+                            {
+                                "type": "integer"
+                            }
+                        ]
+                    },
+                    "IntDouble": {
+                        "oneOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "number",
+                                "format": "float"
+                            }
+                        ]
+                    },
+                    "IntDoubleString": {
+                        "oneOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "number",
+                                "format": "float"
+                            },
+                            {
+                                "type": "string"
+                            }
+                        ]
+                    }
+                }
+            }
+        }
+    },
+    "paths": {},
+    "tags": []
+}

@@ -1,0 +1,80 @@
+{
+    "openapi": "3.1.0",
+    "info": {
+        "title": "Test type resolving",
+        "version": "0.0.1"
+    },
+    "components": {
+        "schemas": {
+            "Base": {
+                "type": "object",
+                "properties": {
+                    "bool": {
+                        "type": "boolean"
+                    },
+                    "integer": {
+                        "type": "integer"
+                    },
+                    "double": {
+                        "type": "number",
+                        "format": "float"
+                    },
+                    "num": {
+                        "type": "number"
+                    },
+                    "string": {
+                        "type": "string"
+                    },
+                    "content-string": {
+                        "type": "string",
+                        "nullable": true,
+                        "contentMediaType": "application/json",
+                        "contentSchema": {
+                            "type": "integer"
+                        }
+                    },
+                    "string-binary": {
+                        "type": "string",
+                        "format": "binary"
+                    },
+                    "list": {
+                        "type": "array"
+                    },
+                    "list-never": {
+                        "type": "array",
+                        "maxLength": 0
+                    },
+                    "list-string": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "Object": {
+                "type": "object"
+            },
+            "String": {
+                "type": "object"
+            },
+            "Uri": {
+                "type": "object"
+            },
+            "Uint8List": {
+                "type": "object"
+            },
+            "List": {
+                "type": "object"
+            },
+            "Map": {
+                "type": "object"
+            },
+            "RegExp": {
+                "type": "object"
+            }
+        }
+    },
+    "paths": {},
+    "tags": []
+}

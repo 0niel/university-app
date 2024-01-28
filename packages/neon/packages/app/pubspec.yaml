@@ -1,0 +1,56 @@
+name: app
+version: 1.0.0
+publish_to: 'none'
+
+environment:
+  sdk: '>=3.2.0 <4.0.0'
+  flutter: '>=3.16.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  neon_dashboard:
+    git:
+      url: https://github.com/nextcloud/neon
+      path: packages/neon/neon_dashboard
+  neon_files:
+    git:
+      url: https://github.com/nextcloud/neon
+      path: packages/neon/neon_files
+  neon_framework:
+    git:
+      url: https://github.com/nextcloud/neon
+      path: packages/neon_framework
+  neon_news:
+    git:
+      url: https://github.com/nextcloud/neon
+      path: packages/neon/neon_news
+  neon_notes:
+    git:
+      url: https://github.com/nextcloud/neon
+      path: packages/neon/neon_notes
+  neon_notifications:
+    git:
+      url: https://github.com/nextcloud/neon
+      path: packages/neon/neon_notifications
+  universal_io: any
+  vector_graphics: any
+
+dev_dependencies:
+  flutter_material_design_icons: any
+  flutter_test:
+    sdk: flutter
+  integration_test:
+    sdk: flutter
+  neon_lints:
+    git:
+      url: https://github.com/nextcloud/neon
+      path: packages/neon_lints
+  nextcloud: ^4.0.0
+  shared_preferences: any
+  vector_graphics_compiler: any
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/

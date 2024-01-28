@@ -1,0 +1,47 @@
+{
+    "openapi": "3.1.0",
+    "info": {
+        "title": "comments",
+        "version": "0.0.1",
+        "description": "Files app plugin to add comments to files",
+        "license": {
+            "name": "agpl",
+            "identifier": "AGPL-3.0-only"
+        }
+    },
+    "components": {
+        "securitySchemes": {
+            "basic_auth": {
+                "type": "http",
+                "scheme": "basic"
+            },
+            "bearer_auth": {
+                "type": "http",
+                "scheme": "bearer"
+            }
+        },
+        "schemas": {
+            "Capabilities": {
+                "type": "object",
+                "required": [
+                    "files"
+                ],
+                "properties": {
+                    "files": {
+                        "type": "object",
+                        "required": [
+                            "comments"
+                        ],
+                        "properties": {
+                            "comments": {
+                                "type": "boolean"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "paths": {},
+    "tags": []
+}

@@ -1,0 +1,5 @@
+SERVER_VERSION=26.0.11
+NEWS_URL=https://github.com/nextcloud/news/releases/download/21.0.0/news.tar.gz
+NOTES_URL=https://github.com/nextcloud-releases/notes/releases/download/v4.9.2/notes.tar.gz
+SPREED_URL=https://github.com/nextcloud-releases/spreed/releases/download/v16.0.10/spreed-v16.0.10.tar.gz
+UPPUSH_URL=https://codeberg.org/NextPush/uppush/archive/1.4.2.tar.gz

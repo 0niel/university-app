@@ -1,0 +1,20 @@
+PUT http://localhost/ocs/v2\.php/apps/user_status/api/v1/user_status/status\?statusType=online
+accept: application/json
+authorization: Bearer mock
+ocs-apirequest: true
+DELETE http://localhost/ocs/v2\.php/apps/user_status/api/v1/user_status/message
+accept: application/json
+authorization: Bearer mock
+ocs-apirequest: true
+PUT http://localhost/ocs/v2\.php/apps/user_status/api/v1/user_status/message/custom\?statusIcon=%F0%9F%98%80&message=bla&clearAt=[0-9]+
+accept: application/json
+authorization: Bearer mock
+ocs-apirequest: true
+DELETE http://localhost/ocs/v2\.php/apps/user_status/api/v1/user_status/message
+accept: application/json
+authorization: Bearer mock
+ocs-apirequest: true
+GET http://localhost/ocs/v2\.php/apps/user_status/api/v1/user_status
+accept: application/json
+authorization: Bearer mock
+ocs-apirequest: true

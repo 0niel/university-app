@@ -1,0 +1,4 @@
+PUT http://localhost/remote\.php/webdav/409me/noparent\.txt
+authorization: Bearer mock
+content-length: 0
+content-type: application/xml

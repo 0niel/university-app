@@ -1,0 +1,4 @@
+GET http://localhost/ocs/v2\.php/cloud/user
+accept: application/json
+authorization: Bearer mock
+ocs-apirequest: true

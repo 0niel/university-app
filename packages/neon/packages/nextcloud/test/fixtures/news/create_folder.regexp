@@ -1,0 +1,9 @@
+GET http://localhost/index\.php/apps/news/api/v1-3/folders
+accept: application/json
+authorization: Basic mock
+POST http://localhost/index\.php/apps/news/api/v1-3/folders\?name=test1
+accept: application/json
+authorization: Basic mock
+GET http://localhost/index\.php/apps/news/api/v1-3/folders
+accept: application/json
+authorization: Basic mock

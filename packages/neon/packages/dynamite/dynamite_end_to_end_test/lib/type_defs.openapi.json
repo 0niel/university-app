@@ -1,0 +1,61 @@
+{
+    "openapi": "3.1.0",
+    "info": {
+        "title": "some ofs test",
+        "version": "0.0.1"
+    },
+    "components": {
+        "schemas": {
+            "Base": {
+                "type": "object",
+                "properties": {
+                    "attribute": {
+                        "type": "string"
+                    }
+                }
+            },
+            "TypeResultBase": {
+                "type": "integer"
+            },
+            "EmptySchema": {},
+            "Redirect": {
+                "$ref": "#/components/schemas/Base"
+            },
+            "RedirectBaseType": {
+                "$ref": "#/components/schemas/TypeResultBase"
+            },
+            "RedirectEmptyType": {
+                "$ref": "#/components/schemas/EmptySchema"
+            },
+            "NestedRedirect": {
+                "type": "object",
+                "properties": {
+                    "redirect": {
+                        "$ref": "#/components/schemas/Base"
+                    },
+                    "redirectBaseType": {
+                        "$ref": "#/components/schemas/TypeResultBase"
+                    },
+                    "redirectEmptyType": {
+                        "$ref": "#/components/schemas/EmptySchema"
+                    }
+                }
+            },
+            "SomeOfRedirect": {
+                "oneOf": [
+                    {
+                        "$ref": "#/components/schemas/Base"
+                    },
+                    {
+                        "$ref": "#/components/schemas/TypeResultBase"
+                    },
+                    {
+                        "$ref": "#/components/schemas/EmptySchema"
+                    }
+                ]
+            }
+        }
+    },
+    "paths": {},
+    "tags": []
+}

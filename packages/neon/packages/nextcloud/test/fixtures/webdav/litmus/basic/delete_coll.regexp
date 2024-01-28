@@ -1,0 +1,6 @@
+MKCOL http://localhost/remote\.php/webdav/delete-coll
+authorization: Bearer mock
+content-type: application/xml
+DELETE http://localhost/remote\.php/webdav/delete-coll
+authorization: Bearer mock
+content-type: application/xml

@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8" ?> <rss version="2.0" xml:base="http://www.nasa.gov/" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd" xmlns:media="http://search.yahoo.com/mrss/"> <channel> <title>NASA Breaking News</title>
+ <description>A RSS news feed containing the latest NASA news articles and press releases.</description>
+ <link>http://www.nasa.gov/</link>
+ <atom:link rel="self" href="http://www.nasa.gov/rss/dyn/breaking_news.rss" />
+ <language>en-us</language>
+ <managingEditor>jim.wilson@nasa.gov</managingEditor>
+ <webMaster>brian.dunbar@nasa.gov</webMaster>
+ <docs>http://blogs.harvard.edu/tech/rss</docs>
+ <item> <title>NASA Expands Options for Spacewalking, Moonwalking Suits, Services</title>
+ <link>http://www.nasa.gov/press-release/nasa-expands-options-for-spacewalking-moonwalking-suits-services</link>
+ <description>NASA has awarded Axiom Space and Collins Aerospace task orders under existing contracts to advance spacewalking capabilities in low Earth orbit, as well as moonwalking services for Artemis missions.</description>
+ <enclosure url="http://www.nasa.gov/sites/default/files/styles/1x1_cardfeed/public/thumbnails/image/iss068e027836orig.jpg?itok=ucNUaaGx" length="1032272" type="image/jpeg" />
+ <guid isPermaLink="false">http://www.nasa.gov/press-release/nasa-expands-options-for-spacewalking-moonwalking-suits-services</guid>
+ <pubDate>Mon, 10 Jul 2023 14:14 EDT</pubDate>
+ <source url="http://www.nasa.gov/rss/dyn/breaking_news.rss">NASA Breaking News</source>
+ <dc:identifier>487989</dc:identifier>
+</item>
+ <item> <title>Join NASA to Celebrate Webb Space Telescope’s First Year of Science</title>
+ <link>http://www.nasa.gov/press-release/join-nasa-to-celebrate-webb-space-telescope-s-first-year-of-science</link>
+ <description>NASA is commemorating the first year of science and discoveries from the agency’s James Webb Space Telescope, the largest, most powerful, and most complex space telescope ever built. To celebrate the anniversary, multiple events will take place online and live across the U.S.</description>
+ <enclosure url="http://www.nasa.gov/sites/default/files/styles/1x1_cardfeed/public/thumbnails/image/50489833002_218bac543f_k_0.jpg?itok=pAT1bvNI" length="642970" type="image/jpeg" />
+ <guid isPermaLink="false">http://www.nasa.gov/press-release/join-nasa-to-celebrate-webb-space-telescope-s-first-year-of-science</guid>
+ <pubDate>Fri, 07 Jul 2023 13:31 EDT</pubDate>
+ <source url="http://www.nasa.gov/rss/dyn/breaking_news.rss">NASA Breaking News</source>
+ <dc:identifier>487930</dc:identifier>
+</item>
+ <item> <title>NASA Invites Media to Next SpaceX Commercial Crew Space Station Launch</title>
+ <link>http://www.nasa.gov/press-release/nasa-invites-media-to-next-spacex-commercial-crew-space-station-launch-3</link>
+ <description>Media accreditation now is open for the launch of NASA’s seventh rotational mission of a SpaceX Dragon crew spacecraft and Falcon 9 rocket to the International Space Station.</description>
+ <enclosure url="http://www.nasa.gov/sites/default/files/styles/1x1_cardfeed/public/thumbnails/image/53013215244_dce77cbd51_o.jpg?itok=U9oMJGX6" length="6771780" type="image/jpeg" />
+ <guid isPermaLink="false">http://www.nasa.gov/press-release/nasa-invites-media-to-next-spacex-commercial-crew-space-station-launch-3</guid>
+ <pubDate>Wed, 05 Jul 2023 11:49 EDT</pubDate>
+ <source url="http://www.nasa.gov/rss/dyn/breaking_news.rss">NASA Breaking News</source>
+ <dc:identifier>487890</dc:identifier>
+</item>
+ <item> <title>NASA Hosts OSIRIS-REx Sample Lab Media Day in Houston</title>
+ <link>http://www.nasa.gov/press-release/nasa-hosts-osiris-rex-sample-lab-media-day-in-houston</link>
+ <description>Ahead of the first asteroid sample collected by the U.S. arriving on Earth in September, media are invited on Monday, July 24, to see NASA’s newly-built OSIRIS-REx Sample Curation Laboratory where the agency will study the sample at its Johnson Space Center in Houston.</description>
+ <enclosure url="http://www.nasa.gov/sites/default/files/styles/1x1_cardfeed/public/thumbnails/image/2nd_osiris_rex.jpg?itok=eYrSqRDM" length="5548637" type="image/jpeg" />
+ <guid isPermaLink="false">http://www.nasa.gov/press-release/nasa-hosts-osiris-rex-sample-lab-media-day-in-houston</guid>
+ <pubDate>Fri, 30 Jun 2023 14:40 EDT</pubDate>
+ <source url="http://www.nasa.gov/rss/dyn/breaking_news.rss">NASA Breaking News</source>
+ <dc:identifier>487858</dc:identifier>
+</item>
+ <item> <title>NASA Offers Media Interviews in Utah on Asteroid Sample Return</title>
+ <link>http://www.nasa.gov/press-release/nasa-offers-media-interviews-in-utah-on-asteroid-sample-return</link>
+ <description>NASA invites media to the U.S. Army’s Dugway Proving Ground about 80 miles southwest of Salt Lake City on Thursday, July 20, before the agency’s first asteroid sample collected in space is returned to Earth.</description>
+ <enclosure url="http://www.nasa.gov/sites/default/files/styles/1x1_cardfeed/public/thumbnails/image/osiris-rex-sample-return-capsule-artist-concept.jpg?itok=Kz2oiP6w" length="2097098" type="image/jpeg" />
+ <guid isPermaLink="false">http://www.nasa.gov/press-release/nasa-offers-media-interviews-in-utah-on-asteroid-sample-return</guid>
+ <pubDate>Wed, 28 Jun 2023 13:20 EDT</pubDate>
+ <source url="http://www.nasa.gov/rss/dyn/breaking_news.rss">NASA Breaking News</source>
+ <dc:identifier>487823</dc:identifier>
+</item>
+ <item> <title>NASA to Provide Coverage as Dragon Departs Station with Science</title>
+ <link>http://www.nasa.gov/press-release/nasa-to-provide-coverage-as-dragon-departs-station-with-science</link>
+ <description>NASA is set to receive scientific research samples and hardware as a SpaceX Dragon cargo resupply spacecraft departs the International Space Station on Thursday, June 29.</description>
+ <enclosure url="http://www.nasa.gov/sites/default/files/styles/1x1_cardfeed/public/thumbnails/image/spacex_dragon_june_29.jpg?itok=nIYlBLme" length="269866" type="image/jpeg" />
+ <guid isPermaLink="false">http://www.nasa.gov/press-release/nasa-to-provide-coverage-as-dragon-departs-station-with-science</guid>
+ <pubDate>Mon, 26 Jun 2023 12:45 EDT</pubDate>
+ <source url="http://www.nasa.gov/rss/dyn/breaking_news.rss">NASA Breaking News</source>
+ <dc:identifier>487800</dc:identifier>
+</item>
+ <item> <title>NASA to Provide Coverage for Launch of ESA ‘Dark Universe’ Mission</title>
+ <link>http://www.nasa.gov/press-release/nasa-to-provide-coverage-for-launch-of-esa-dark-universe-mission</link>
+ <description>The ESA (European Space Agency) and SpaceX are targeting no earlier than 11:11 a.m. EDT Saturday, July 1, to launch the Euclid spacecraft. Euclid is an ESA mission with contributions from NASA that will shed light on the nature of dark matter and dark energy, two of the biggest modern mysteries about the universe.</description>
+ <enclosure url="http://www.nasa.gov/sites/default/files/styles/1x1_cardfeed/public/thumbnails/image/euclid_looking_into_the_universe.jpg?itok=gFDU8Z7i" length="11990187" type="image/jpeg" />
+ <guid isPermaLink="false">http://www.nasa.gov/press-release/nasa-to-provide-coverage-for-launch-of-esa-dark-universe-mission</guid>
+ <pubDate>Mon, 26 Jun 2023 11:47 EDT</pubDate>
+ <source url="http://www.nasa.gov/rss/dyn/breaking_news.rss">NASA Breaking News</source>
+ <dc:identifier>487795</dc:identifier>
+</item>
+ <item> <title>NASA Welcomes India as 27th Artemis Accords Signatory</title>
+ <link>http://www.nasa.gov/press-release/nasa-welcomes-india-as-27th-artemis-accords-signatory</link>
+ <description>During a ceremony at the Willard InterContinental Hotel in Washington on Wednesday, June 21, India became the 27th country to sign the Artemis Accords. NASA Administrator Bill Nelson participated in the signing ceremony for the agency and Taranjit Singh Sandhu, India’s ambassador to the United States, signed on behalf of India.</description>
+ <enclosure url="http://www.nasa.gov/sites/default/files/styles/1x1_cardfeed/public/thumbnails/image/nhq202306210053.jpg?itok=VWed5mYx" length="2898690" type="image/jpeg" />
+ <guid isPermaLink="false">http://www.nasa.gov/press-release/nasa-welcomes-india-as-27th-artemis-accords-signatory</guid>
+ <pubDate>Fri, 23 Jun 2023 16:41 EDT</pubDate>
+ <source url="http://www.nasa.gov/rss/dyn/breaking_news.rss">NASA Breaking News</source>
+ <dc:identifier>487781</dc:identifier>
+</item>
+ <item> <title>NASA Awards Millions in STEM Research Grants</title>
+ <link>http://www.nasa.gov/press-release/nasa-awards-millions-in-stem-research-grants</link>
+ <description>NASA announced the recipients of its annual STEM grants, providing nearly $4 million in total funding, to support scientific and technical research that aligns with the agency’s strategic research and technology development priorities. By providing resources to support cutting-edge research in STEM, NASA helps create a stronger and more vibrant sci</description>
+ <enclosure url="http://www.nasa.gov/sites/default/files/styles/1x1_cardfeed/public/thumbnails/image/48838041088_cf9e4b301c_o.jpg?itok=AuAD30ct" length="18372684" type="image/jpeg" />
+ <guid isPermaLink="false">http://www.nasa.gov/press-release/nasa-awards-millions-in-stem-research-grants</guid>
+ <pubDate>Fri, 23 Jun 2023 14:52 EDT</pubDate>
+ <source url="http://www.nasa.gov/rss/dyn/breaking_news.rss">NASA Breaking News</source>
+ <dc:identifier>487778</dc:identifier>
+</item>
+ <item> <title>NASA Invites Media to Cover Asteroid Sample Return, Logistics Call</title>
+ <link>http://www.nasa.gov/press-release/nasa-invites-media-to-cover-asteroid-sample-return-logistics-call</link>
+ <description>NASA’s OSIRIS-REx (Origins, Spectral Interpretation, Resource Identification and Security – Regolith Explorer) mission will deliver the agency’s first asteroid sample collected in space to Earth on Sept. 24, 2023. Media interested in covering the landing, as well as mission activities leading up to and following the return, are invited to register</description>
+ <enclosure url="http://www.nasa.gov/sites/default/files/styles/1x1_cardfeed/public/thumbnails/image/tag_beauty_shot.png?itok=dIIHqL5I" length="6178094" type="image/png" />
+ <guid isPermaLink="false">http://www.nasa.gov/press-release/nasa-invites-media-to-cover-asteroid-sample-return-logistics-call</guid>
+ <pubDate>Fri, 23 Jun 2023 09:46 EDT</pubDate>
+ <source url="http://www.nasa.gov/rss/dyn/breaking_news.rss">NASA Breaking News</source>
+ <dc:identifier>487768</dc:identifier>
+</item>
+</channel>
+</rss>

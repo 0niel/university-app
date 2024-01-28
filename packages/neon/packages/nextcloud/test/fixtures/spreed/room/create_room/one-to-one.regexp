@@ -1,0 +1,4 @@
+POST http://localhost/ocs/v2\.php/apps/spreed/api/v4/room\?roomType=1&invite=user2&roomName=&source=&objectType=&objectId=
+accept: application/json
+authorization: Bearer mock
+ocs-apirequest: true

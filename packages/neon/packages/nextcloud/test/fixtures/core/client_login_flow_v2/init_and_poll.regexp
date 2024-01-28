@@ -1,0 +1,6 @@
+POST http://localhost/index\.php/login/v2
+accept: application/json
+authorization: Bearer mock
+POST http://localhost/index\.php/login/v2/poll\?token=[a-zA-Z0-9]{128}
+accept: application/json
+authorization: Bearer mock

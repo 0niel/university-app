@@ -1,0 +1,72 @@
+{
+    "openapi": "3.1.0",
+    "info": {
+        "title": "Enum tests",
+        "version": "0.0.1"
+    },
+    "components": {
+        "schemas": {
+            "enum-string": {
+                "type": "string",
+                "enum": [
+                    "test",
+                    "default",
+                    "$dollar$"
+                ]
+            },
+            "enum-int": {
+                "type": "integer",
+                "enum": [
+                    0,
+                    1,
+                    2
+                ]
+            },
+            "enum-dynamic": {
+                "type": "object",
+                "enum": [
+                    0,
+                    "string",
+                    false
+                ]
+            },
+            "wrapped-enum": {
+                "type": "object",
+                "required": [
+                    "String",
+                    "integer"
+                ],
+                "properties": {
+                    "String": {
+                        "type": "string",
+                        "enum": [
+                            "test",
+                            "default"
+                        ]
+                    },
+                    "integer": {
+                        "type": "integer",
+                        "enum": [
+                            0,
+                            1,
+                            2
+                        ]
+                    }
+                }
+            },
+            "enum-reference": {
+                "type": "object",
+                "required": [
+                    "string"
+                ],
+                "properties": {
+                    "string": {
+                        "$ref": "#/components/schemas/enum-string"
+                    }
+                }
+            }
+        }
+    },
+    "paths": {},
+    "tags": []
+}

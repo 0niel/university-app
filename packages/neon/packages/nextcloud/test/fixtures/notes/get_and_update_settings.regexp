@@ -1,0 +1,11 @@
+GET http://localhost/index\.php/apps/notes/api/v1/settings
+accept: application/json
+authorization: Basic mock
+PUT http://localhost/index\.php/apps/notes/api/v1/settings
+accept: application/json
+authorization: Basic mock
+content-type: application/json
+\{"notesPath":"Test Notes","fileSuffix":"\.txt","noteMode":"preview"\}
+GET http://localhost/index\.php/apps/notes/api/v1/settings
+accept: application/json
+authorization: Basic mock

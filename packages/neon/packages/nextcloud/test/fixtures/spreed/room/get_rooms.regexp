@@ -1,0 +1,4 @@
+GET http://localhost/ocs/v2\.php/apps/spreed/api/v4/room\?noStatusUpdate=0&includeStatus=0&modifiedSince=0
+accept: application/json
+authorization: Bearer mock
+ocs-apirequest: true

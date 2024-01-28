@@ -1,0 +1,16 @@
+DELETE http://localhost/ocs/v2\.php/apps/notifications/api/v2/notifications
+accept: application/json
+authorization: Bearer mock
+ocs-apirequest: true
+POST http://localhost/ocs/v2\.php/apps/notifications/api/v2/admin_notifications/admin\?shortMessage=123&longMessage=456
+accept: application/json
+authorization: Bearer mock
+ocs-apirequest: true
+GET http://localhost/ocs/v2\.php/apps/notifications/api/v2/notifications
+accept: application/json
+authorization: Bearer mock
+ocs-apirequest: true
+GET http://localhost/ocs/v2\.php/apps/notifications/api/v2/notifications/[0-9]+
+accept: application/json
+authorization: Bearer mock
+ocs-apirequest: true

@@ -1,0 +1,67 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "headers test",
+        "version": "0.0.1"
+    },
+    "paths": {
+        "/": {
+            "get": {
+                "responses": {
+                    "200": {
+                        "description": "Returns a header only",
+                        "headers": {
+                            "My-Header": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/with_content/operation_id": {
+            "get": {
+                "operationId": "with_content-operation_id",
+                "responses": {
+                    "200": {
+                        "description": "Returns a header only",
+                        "headers": {
+                            "My-Header": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/with_content": {
+            "get": {
+                "responses": {
+                    "200": {
+                        "description": "Returns both a header and a body.",
+                        "headers": {
+                            "My-Header": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "content": {
+                            "application/octet-stream": {
+                                "schema": {
+                                    "type": "string",
+                                    "format": "binary"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "tags": []
+}

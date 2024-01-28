@@ -1,0 +1,4 @@
+GET http://localhost/ocs/v2\.php/core/autocomplete/get\?search=&itemType=call&itemId=new&shareTypes%5B%5D=1&limit=10
+accept: application/json
+authorization: Bearer mock
+ocs-apirequest: true

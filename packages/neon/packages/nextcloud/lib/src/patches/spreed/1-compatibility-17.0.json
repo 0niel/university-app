@@ -1,0 +1,22 @@
+[
+  {
+    "op": "replace",
+    "path": "/components/schemas/ChatMessage/required",
+    "value": [
+      "actorDisplayName",
+      "actorId",
+      "actorType",
+      "expirationTimestamp",
+      "id",
+      "isReplyable",
+      "message",
+      "messageParameters",
+      "messageType",
+      "reactions",
+      "referenceId",
+      "systemMessage",
+      "timestamp",
+      "token"
+    ]
+  }
+]

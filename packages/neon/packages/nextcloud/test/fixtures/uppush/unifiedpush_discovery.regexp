@@ -1,0 +1,3 @@
+GET http://localhost/index\.php/apps/uppush/push/example
+accept: application/json
+authorization: Basic mock

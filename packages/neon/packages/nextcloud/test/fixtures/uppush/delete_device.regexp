@@ -1,0 +1,6 @@
+PUT http://localhost/index\.php/apps/uppush/device\?deviceName=Test
+accept: application/json
+authorization: Basic mock
+DELETE http://localhost/index\.php/apps/uppush/device/[a-zA-Z0-9-_]+
+accept: application/json
+authorization: Basic mock

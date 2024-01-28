@@ -1,0 +1,8 @@
+PUT http://localhost/remote\.php/webdav/res-%25e2%2582%25ac
+authorization: Bearer mock
+content-length: 19
+content-type: application/xml
+This is a test file
+GET http://localhost/remote\.php/webdav/res-%25e2%2582%25ac
+authorization: Bearer mock
+content-type: application/xml

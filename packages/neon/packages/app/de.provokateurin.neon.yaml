@@ -1,0 +1,64 @@
+app-id: de.provokateurin.neon
+runtime: org.freedesktop.Platform
+runtime-version: '22.08'
+sdk: org.freedesktop.Sdk
+command: nextcloud-neon
+finish-args:
+  - --share=ipc
+  - --socket=fallback-x11
+  - --socket=wayland
+  - --share=network
+  - --device=dri
+  - --env=LD_LIBRARY_PATH=/app/lib/:/app/nextcloud-neon/lib/
+modules:
+  - ../../external/flathub-shared-modules/libappindicator/libappindicator-gtk3-12.10.json
+  - name: aarch64-quirks
+    only-arches: [aarch64]
+    buildsystem: simple
+    build-commands:
+      - mkdir -p /app/nextcloud-neon/lib
+      - ln -s /usr/lib/aarch64-linux-gnu/libsqlite3.so.0 /app/nextcloud-neon/lib/libsqlite3.so
+      - ln -s /app/lib/libappindicator3.so /app/lib/libayatana-appindicator3.so.1
+      - ln -s /app/lib/libappindicator3.so /app/lib/libayatana-appindicator3.so.7
+      - ln -s /app/lib/libindicator3.so /app/lib/libayatana-indicator3.so.7
+      - ln -s /app/lib/libindicator3.so /app/lib/libayatana-ido3-0.4.so.0
+      - mkdir -p /app/bin
+  - name: x86_64-quirks
+    only-arches: [x86_64]
+    buildsystem: simple
+    build-commands:
+      - mkdir -p /app/nextcloud-neon/lib
+      - ln -s /usr/lib/x86_64-linux-gnu/libsqlite3.so.0 /app/nextcloud-neon/lib/libsqlite3.so
+  - name: nextcloud-neon
+    buildsystem: simple
+    build-commands:
+      - mkdir -p /app/nextcloud-neon/{data,lib}
+      - cp nextcloud-neon /app/nextcloud-neon/
+      - cp *.so /app/nextcloud-neon/lib/
+      - cp -r flutter_assets icudtl.dat /app/nextcloud-neon/data/
+      - ln -sf /app/nextcloud-neon/nextcloud-neon /app/bin/nextcloud-neon
+      - install -Dm644 de.provokateurin.neon.desktop /app/share/applications/de.provokateurin.neon.desktop
+      - install -Dm644 logo.svg /app/share/icons/hicolor/scalable/apps/de.provokateurin.neon.svg
+    sources:
+      - type: file
+        path: de.provokateurin.neon.desktop
+      - type: file
+        path: assets/logo.svg
+      - type: file
+        only-arches: [x86_64]
+        path: build/linux/x64/release/bundle/nextcloud-neon
+      - type: dir
+        only-arches: [x86_64]
+        path: build/linux/x64/release/bundle/lib/
+      - type: dir
+        only-arches: [x86_64]
+        path: build/linux/x64/release/bundle/data/
+      - type: file
+        only-arches: [aarch64]
+        path: build/linux/arm64/release/bundle/nextcloud-neon
+      - type: dir
+        only-arches: [aarch64]
+        path: build/linux/arm64/release/bundle/lib/
+      - type: dir
+        only-arches: [aarch64]
+        path: build/linux/arm64/release/bundle/data/

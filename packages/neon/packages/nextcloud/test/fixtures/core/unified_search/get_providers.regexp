@@ -1,0 +1,4 @@
+GET http://localhost/ocs/v2\.php/search/providers\?from=
+accept: application/json
+authorization: Bearer mock
+ocs-apirequest: true

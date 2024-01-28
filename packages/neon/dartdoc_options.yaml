@@ -1,0 +1,35 @@
+include: package:neon_lints/dartdoc_options.yaml
+
+dartdoc:
+  nodoc: ['lib/l10n/*.dart']
+  showUndocumentedCategories: true
+  ignore:
+    ## Errors that are ignored:
+    ## Warnings that are ignored:
+    - reexported-private-api-across-packages
+    ## Default ignores for dartdoc:
+  errors:
+    ## Default errors of dartdoc:
+    - duplicate-file
+    - invalid-parameter
+    - tool-error
+    - unresolved-export
+    ## Warnings that are elevated to errors:
+    - ambiguous-doc-reference
+    - ambiguous-reexport
+    - broken-link
+    - category-order-gives-missing-package-name
+    - deprecated
+    - ignored-canonical-for
+    - missing-from-search-index
+    - no-canonical-found
+    - no-documentable-libraries
+    - no-library-level-docs
+    - orphaned-file
+    - unknown-file
+    - unknown-macro
+    - unresolved-doc-reference
+    ## Ignores that are elevated to errors:
+    # - type-as-html # broken, https://github.com/dart-lang/dartdoc/issues/3545
+    - missing-constant-constructor
+    - missing-code-block-language

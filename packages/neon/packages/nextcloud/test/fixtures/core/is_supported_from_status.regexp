@@ -1,0 +1,2 @@
+GET http://localhost/status\.php
+accept: application/json

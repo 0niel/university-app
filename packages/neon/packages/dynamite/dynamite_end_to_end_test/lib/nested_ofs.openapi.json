@@ -1,0 +1,150 @@
+{
+    "openapi": "3.1.0",
+    "info": {
+        "title": "nested ofs test",
+        "version": "0.0.1"
+    },
+    "components": {
+        "schemas": {
+            "BaseAllOf": {
+                "allOf": [
+                    {
+                        "type": "string"
+                    },
+                    {
+                        "type": "object",
+                        "required": [
+                            "attribute-allOf"
+                        ],
+                        "properties": {
+                            "attribute-allOf": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                ]
+            },
+            "BaseOneOf": {
+                "oneOf": [
+                    {
+                        "type": "number",
+                        "format": "float"
+                    },
+                    {
+                        "type": "object",
+                        "required": [
+                            "attribute-oneOf"
+                        ],
+                        "properties": {
+                            "attribute-oneOf": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                ]
+            },
+            "BaseAnyOf": {
+                "anyOf": [
+                    {
+                        "type": "integer"
+                    },
+                    {
+                        "type": "object",
+                        "required": [
+                            "attribute-anyOf"
+                        ],
+                        "properties": {
+                            "attribute-anyOf": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                ]
+            },
+            "BaseNestedAllOf": {
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/BaseAllOf"
+                    },
+                    {
+                        "$ref": "#/components/schemas/BaseOneOf"
+                    },
+                    {
+                        "$ref": "#/components/schemas/BaseAnyOf"
+                    },
+                    {
+                        "type": "object",
+                        "required": [
+                            "attribute-nested-allOf"
+                        ],
+                        "properties": {
+                            "attribute-nested-allOf": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                ]
+            },
+            "BaseNestedOneOf": {
+                "oneOf": [
+                    {
+                        "$ref": "#/components/schemas/BaseAllOf"
+                    },
+                    {
+                        "$ref": "#/components/schemas/BaseOneOf"
+                    },
+                    {
+                        "$ref": "#/components/schemas/BaseAnyOf"
+                    },
+                    {
+                        "type": "object",
+                        "required": [
+                            "attribute-nested-oneOf"
+                        ],
+                        "properties": {
+                            "attribute-nested-oneOf": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                ]
+            },
+            "BaseNestedAnyOf": {
+                "anyOf": [
+                    {
+                        "$ref": "#/components/schemas/BaseAllOf"
+                    },
+                    {
+                        "$ref": "#/components/schemas/BaseOneOf"
+                    },
+                    {
+                        "$ref": "#/components/schemas/BaseAnyOf"
+                    },
+                    {
+                        "type": "object",
+                        "required": [
+                            "attribute-nested-anyOf"
+                        ],
+                        "properties": {
+                            "attribute-nested-anyOf": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                ]
+            },
+            "NestedOptimizedOneOf": {
+                "oneOf": [
+                    {
+                        "type": "integer"
+                    },
+                    {
+                        "$ref": "#/components/schemas/BaseOneOf"
+                    }
+                ]
+            }
+        }
+    },
+    "paths": {},
+    "tags": []
+}

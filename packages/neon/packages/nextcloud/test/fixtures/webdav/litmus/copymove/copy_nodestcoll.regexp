@@ -1,0 +1,8 @@
+MKCOL http://localhost/remote\.php/webdav/copy-nodestcoll-src
+authorization: Bearer mock
+content-type: application/xml
+COPY http://localhost/remote\.php/webdav/copy-nodestcoll-src
+authorization: Bearer mock
+content-type: application/xml
+destination: http://localhost/remote\.php/webdav/nonesuch/dst
+overwrite: F

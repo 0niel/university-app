@@ -1,0 +1,15 @@
+PUT http://localhost/remote\.php/webdav/set-props\.txt
+authorization: Bearer mock
+content-length: 4
+content-type: application/xml
+x-oc-ctime: 34214400
+x-oc-mtime: 68256000
+test
+PROPPATCH http://localhost/remote\.php/webdav/set-props\.txt
+authorization: Bearer mock
+content-type: application/xml
+<d:propertyupdate xmlns:d="DAV:" xmlns:oc="http://owncloud\.org/ns" xmlns:nc="http://nextcloud\.org/ns" xmlns:ocs="http://open-collaboration-services\.org/ns" xmlns:ocm="http://open-cloud-mesh\.org/ns"><d:set><d:prop><oc:favorite>1</oc:favorite></d:prop></d:set></d:propertyupdate>
+PROPFIND http://localhost/remote\.php/webdav/set-props\.txt
+authorization: Bearer mock
+content-type: application/xml
+<d:propfind xmlns:d="DAV:" xmlns:oc="http://owncloud\.org/ns" xmlns:nc="http://nextcloud\.org/ns" xmlns:ocs="http://open-collaboration-services\.org/ns" xmlns:ocm="http://open-cloud-mesh\.org/ns"><d:prop><d:getlastmodified/><oc:favorite/><nc:upload_time/><nc:creation_time/></d:prop></d:propfind>

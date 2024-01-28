@@ -1,0 +1,26 @@
+PUT http://localhost/remote\.php/webdav/move-src1\.txt
+authorization: Bearer mock
+content-length: 0
+content-type: application/xml
+PUT http://localhost/remote\.php/webdav/move-src2\.txt
+authorization: Bearer mock
+content-length: 0
+content-type: application/xml
+MKCOL http://localhost/remote\.php/webdav/move-coll
+authorization: Bearer mock
+content-type: application/xml
+MOVE http://localhost/remote\.php/webdav/move-src1\.txt
+authorization: Bearer mock
+content-type: application/xml
+destination: http://localhost/remote\.php/webdav/move-dst\.txt
+overwrite: F
+MOVE http://localhost/remote\.php/webdav/move-src2\.txt
+authorization: Bearer mock
+content-type: application/xml
+destination: http://localhost/remote\.php/webdav/move-dst\.txt
+overwrite: F
+MOVE http://localhost/remote\.php/webdav/move-src2\.txt
+authorization: Bearer mock
+content-type: application/xml
+destination: http://localhost/remote\.php/webdav/move-dst\.txt
+overwrite: T

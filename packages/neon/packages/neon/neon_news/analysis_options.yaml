@@ -1,0 +1,9 @@
+include: package:neon_lints/flutter.yaml
+
+linter:
+  rules:
+    public_member_api_docs: false
+
+analyzer:
+  exclude:
+    - lib/l10n/**

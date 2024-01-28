@@ -1,0 +1,88 @@
+{
+  "@@locale": "en",
+  "actionDelete": "Delete",
+  "actionRename": "Rename",
+  "actionMove": "Move",
+  "actionCopy": "Copy",
+  "actionShare": "Share",
+  "errorUnableToOpenFile": "Unable to open the file",
+  "general": "General",
+  "goToPath": "Go to /{path}",
+  "@goToPath": {
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    }
+  },
+  "uploadFiles": "Upload files",
+  "uploadImages": "Upload images",
+  "uploadCamera": "Upload from camera",
+  "uploadConfirmSizeWarning": "Are you sure you want to upload a file that is bigger than {warningSize} ({actualSize})?",
+  "@uploadConfirmSizeWarning": {
+    "placeholders": {
+      "warningSize": {
+        "type": "String"
+      },
+      "actualSize": {
+        "type": "String"
+      }
+    }
+  },
+  "downloadConfirmSizeWarning": "Are you sure you want to download a file that is bigger than {warningSize} ({actualSize})?",
+  "@downloadConfirmSizeWarning": {
+    "placeholders": {
+      "warningSize": {
+        "type": "String"
+      },
+      "actualSize": {
+        "type": "String"
+      }
+    }
+  },
+  "actionDeleteTitle": "Permanently delete?",
+  "filesChooseCreate": "Add to Nextcloud",
+  "folderCreate": "Create folder",
+  "folderName": "Folder name",
+  "folderRename": "Rename folder",
+  "folderChoose": "Choose folder",
+  "folderDeleteConfirm": "Are you sure you want to delete the folder '{name}'?",
+  "@folderDeleteConfirm": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "fileRename": "Rename file",
+  "fileDeleteConfirm": "Are you sure you want to delete the file '{name}'?",
+  "@fileDeleteConfirm": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "addToFavorites": "Add to favorites",
+  "removeFromFavorites": "Remove from favorites",
+  "details": "Details",
+  "detailsFileName": "File name",
+  "detailsFolderName": "Folder name",
+  "detailsParentFolder": "Parent folder",
+  "detailsFileSize": "File size",
+  "detailsFolderSize": "Folder size",
+  "detailsLastModified": "Last modified",
+  "detailsIsFavorite": "Is favorite",
+  "optionsFilesSortProperty": "How to sort files",
+  "optionsFilesSortPropertyName": "Name",
+  "optionsFilesSortPropertyModifiedDate": "Last modified",
+  "optionsFilesSortPropertySize": "Size",
+  "optionsFilesSortOrder": "Sort order of files",
+  "optionsShowHiddenFiles": "Show hidden files",
+  "optionsShowPreviews": "Show previews for files",
+  "optionsUploadQueueParallelism": "Upload queue parallelism",
+  "optionsDownloadQueueParallelism": "Download queue parallelism",
+  "optionsUploadSizeWarning": "Upload size warning",
+  "optionsDownloadSizeWarning": "Download size warning",
+  "optionsSizeWarningDisabled": "Disabled"
+}

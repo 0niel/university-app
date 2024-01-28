@@ -1,0 +1,88 @@
+{
+    "@@locale": "ru",
+    "actionDelete": "Удалить",
+    "actionRename": "Переименовать",
+    "actionMove": "Переместить",
+    "actionCopy": "Копировать",
+    "actionShare": "Поделиться",
+    "errorUnableToOpenFile": "Невозможно открыть файл",
+    "general": "Общее",
+    "goToPath": "Перейти к /{path}",
+    "@goToPath": {
+      "placeholders": {
+        "path": {
+          "type": "String"
+        }
+      }
+    },
+    "uploadFiles": "Загрузить файлы",
+    "uploadImages": "Загрузить изображения",
+    "uploadCamera": "Загрузить с камеры",
+    "uploadConfirmSizeWarning": "Вы уверены, что хотите загрузить файл, размер которого превышает {warningSize} ({actualSize})?",
+    "@uploadConfirmSizeWarning": {
+      "placeholders": {
+        "warningSize": {
+          "type": "String"
+        },
+        "actualSize": {
+          "type": "String"
+        }
+      }
+    },
+    "downloadConfirmSizeWarning": "Вы уверены, что хотите скачать файл, размер которого превышает {warningSize} ({actualSize})?",
+    "@downloadConfirmSizeWarning": {
+      "placeholders": {
+        "warningSize": {
+          "type": "String"
+        },
+        "actualSize": {
+          "type": "String"
+        }
+      }
+    },
+    "actionDeleteTitle": "Удалить навсегда?",
+    "filesChooseCreate": "Добавить в Nextcloud",
+    "folderCreate": "Создать папку",
+    "folderName": "Имя папки",
+    "folderRename": "Переименовать папку",
+    "folderChoose": "Выбрать папку",
+    "folderDeleteConfirm": "Вы уверены, что хотите удалить папку '{name}'?",
+    "@folderDeleteConfirm": {
+      "placeholders": {
+        "name": {
+          "type": "String"
+        }
+      }
+    },
+    "fileRename": "Переименовать файл",
+    "fileDeleteConfirm": "Вы уверены, что хотите удалить файл '{name}'?",
+    "@fileDeleteConfirm": {
+      "placeholders": {
+        "name": {
+          "type": "String"
+        }
+      }
+    },
+    "addToFavorites": "Добавить в избранное",
+    "removeFromFavorites": "Убрать из избранного",
+    "details": "Детали",
+    "detailsFileName": "Имя файла",
+    "detailsFolderName": "Имя папки",
+    "detailsParentFolder": "Родительская папка",
+    "detailsFileSize": "Размер файла",
+    "detailsFolderSize": "Размер папки",
+    "detailsLastModified": "Последнее изменение",
+    "detailsIsFavorite": "В избранном",
+    "optionsFilesSortProperty": "Способ сортировки файлов",
+    "optionsFilesSortPropertyName": "Имя",
+    "optionsFilesSortPropertyModifiedDate": "Последнее изменение",
+    "optionsFilesSortPropertySize": "Размер",
+    "optionsFilesSortOrder": "Порядок сортировки файлов",
+    "optionsShowHiddenFiles": "Показывать скрытые файлы",
+    "optionsShowPreviews": "Показывать предпросмотры файлов",
+    "optionsUploadQueueParallelism": "Параллелизм очереди загрузки",
+    "optionsDownloadQueueParallelism": "Параллелизм очереди скачивания",
+    "optionsUploadSizeWarning": "Предупреждение о размере загрузки",
+    "optionsDownloadSizeWarning": "Предупреждение о размере скачивания",
+    "optionsSizeWarningDisabled": "Отключено"
+  }

@@ -1,0 +1,73 @@
+[
+  {
+    "op": "replace",
+    "path": "/components/schemas/PublicCapabilities/oneOf/0/properties/spreed/properties/config/properties/call/required",
+    "value": [
+      "enabled",
+      "breakout-rooms",
+      "recording"
+    ]
+  },
+  {
+    "op": "replace",
+    "path": "/components/schemas/PublicCapabilities/oneOf/0/properties/spreed/properties/config/properties/chat/required",
+    "value": [
+      "max-length",
+      "read-privacy"
+    ]
+  },
+  {
+    "op": "replace",
+    "path": "/components/schemas/Room/required",
+    "value": [
+      "actorId",
+      "actorType",
+      "attendeeId",
+      "attendeePermissions",
+      "attendeePin",
+      "avatarVersion",
+      "breakoutRoomMode",
+      "breakoutRoomStatus",
+      "callFlag",
+      "callPermissions",
+      "callRecording",
+      "callStartTime",
+      "canDeleteConversation",
+      "canEnableSIP",
+      "canLeaveConversation",
+      "canStartCall",
+      "defaultPermissions",
+      "description",
+      "displayName",
+      "hasCall",
+      "hasPassword",
+      "id",
+      "isFavorite",
+      "lastActivity",
+      "lastCommonReadMessage",
+      "lastMessage",
+      "lastPing",
+      "lastReadMessage",
+      "listable",
+      "lobbyState",
+      "lobbyTimer",
+      "messageExpiration",
+      "name",
+      "notificationCalls",
+      "notificationLevel",
+      "objectId",
+      "objectType",
+      "participantFlags",
+      "participantType",
+      "permissions",
+      "readOnly",
+      "sessionId",
+      "sipEnabled",
+      "token",
+      "type",
+      "unreadMention",
+      "unreadMentionDirect",
+      "unreadMessages"
+    ]
+  }
+]

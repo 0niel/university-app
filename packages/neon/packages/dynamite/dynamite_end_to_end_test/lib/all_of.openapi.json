@@ -1,0 +1,94 @@
+{
+    "openapi": "3.1.0",
+    "info": {
+        "title": "all of test",
+        "version": "0.0.1"
+    },
+    "components": {
+        "schemas": {
+            "ObjectAllOf": {
+                "description": "All of with objects only.",
+                "allOf": [
+                    {
+                        "type": "object",
+                        "required": [
+                            "attribute1-allOf"
+                        ],
+                        "properties": {
+                            "attribute1-allOf": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    {
+                        "type": "object",
+                        "required": [
+                            "attribute2-allOf"
+                        ],
+                        "properties": {
+                            "attribute2-allOf": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                ]
+            },
+            "OneObjectAllOf": {
+                "description": "All of with one object value.",
+                "allOf": [
+                    {
+                        "type": "object",
+                        "required": [
+                            "attribute-allOf"
+                        ],
+                        "properties": {
+                            "attribute-allOf": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                ]
+            },
+            "PrimitiveAllOf": {
+                "description": "All of with an primitive values.",
+                "allOf": [
+                    {
+                        "type": "integer"
+                    },
+                    {
+                        "type": "string"
+                    }
+                ]
+            },
+            "MixedAllOf": {
+                "description": "All of with object and primitive value.",
+                "allOf": [
+                    {
+                        "type": "string"
+                    },
+                    {
+                        "type": "object",
+                        "required": [
+                            "attribute-allOf"
+                        ],
+                        "properties": {
+                            "attribute-allOf": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                ]
+            },
+            "OneValueAllOf": {
+                "description": "All of with one primitive value.",
+                "allOf": [
+                    {
+                        "type": "string"
+                    }
+                ]
+            }
+        }
+    },
+    "paths": {},
+    "tags": []
+}

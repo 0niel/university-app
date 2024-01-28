@@ -1,0 +1,8 @@
+POST http://localhost/ocs/v2\.php/apps/notifications/api/v2/push\?pushTokenHash=[a-z0-9]{128}&devicePublicKey=-----BEGIN%20PUBLIC%20KEY-----[a-zA-Z0-9%]+-----END%20PUBLIC%20KEY-----&proxyServer=https%3A%2F%2Fexample\.com%2F
+accept: application/json
+authorization: Bearer mock
+ocs-apirequest: true
+DELETE http://localhost/ocs/v2\.php/apps/notifications/api/v2/push
+accept: application/json
+authorization: Bearer mock
+ocs-apirequest: true

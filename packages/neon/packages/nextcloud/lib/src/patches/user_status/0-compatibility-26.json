@@ -1,0 +1,10 @@
+[
+  {
+    "op": "replace",
+    "path": "/components/schemas/Capabilities/properties/user_status/required",
+    "value": [
+      "enabled",
+      "supports_emoji"
+    ]
+  }
+]

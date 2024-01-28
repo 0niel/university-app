@@ -1,0 +1,19 @@
+targets:
+  $default:
+    builders:
+      built_value_generator|built_value:
+        enabled: true
+      dynamite:
+        options:
+          pageWidth: 120
+          analyzer_ignores:
+            - camel_case_types
+            - discarded_futures
+            - public_member_api_docs
+            - unreachable_switch_case
+            - no_leading_underscores_for_local_identifiers
+          coverage_ignores:
+            - 'const .*\._\(\);'
+            - 'factory .*\.fromJson\(Map<String, dynamic> json\) => jsonSerializers\.deserializeWith\(serializer, json\)!;'
+            - 'Map<String, dynamic> toJson\(\) => jsonSerializers\.serializeWith\(serializer, this\)! as Map<String, dynamic>;'
+            - 'static BuiltSet<.*> get values => _\$.*Values;'

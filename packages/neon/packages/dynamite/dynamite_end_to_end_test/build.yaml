@@ -1,0 +1,25 @@
+targets:
+  $default:
+    builders:
+      built_value_generator|built_value:
+        enabled: true
+      dynamite:
+        options:
+          pageWidth: 120
+          analyzer_ignores:
+            - camel_case_types
+            - camel_case_extensions
+            - discarded_futures
+            - public_member_api_docs
+            - unreachable_switch_case
+            - unused_element
+            - no_leading_underscores_for_local_identifiers
+          overrides:
+            lib/documentation.openapi.json:
+              analyzer_ignores:
+                - camel_case_types
+                - camel_case_extensions
+                - discarded_futures
+                - unreachable_switch_case
+                - unused_element
+                - no_leading_underscores_for_local_identifiers

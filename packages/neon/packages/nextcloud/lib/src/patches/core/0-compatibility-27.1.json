@@ -1,0 +1,11 @@
+[
+  {
+    "op": "replace",
+    "path": "/components/schemas/UnifiedSearchProvider/required",
+    "value": [
+      "id",
+      "name",
+      "order"
+    ]
+  }
+]

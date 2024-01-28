@@ -1,0 +1,58 @@
+name: nextcloud
+version: 4.0.0
+description: A Nextcloud API client written in Dart supporting all maintained Nextcloud server versions.
+homepage: https://github.com/nextcloud/neon
+repository: https://github.com/nextcloud/neon/tree/main/packages/nextcloud
+topics:
+  - nextcloud
+  - openapi
+  - webdav
+
+environment:
+  sdk: '>=3.1.0 <4.0.0'
+
+dependencies:
+  built_collection: ^5.0.0
+  built_value: ^8.9.0
+  collection: ^1.0.0
+  crypto: ^3.0.0
+  crypton: ^2.0.0
+  dynamite_runtime: ^0.1.0
+  http: ^1.2.0
+  intl: '>=0.17.0 <=0.19.0'
+  json_annotation: ^4.8.1
+  meta: ^1.0.0
+  universal_io: ^2.0.0
+  uri: ^1.0.0
+  version: ^3.0.0
+  xml: ^6.0.0
+  xml_annotation: ^2.1.0
+
+dev_dependencies:
+  build_runner: ^2.4.8
+  built_value_generator: ^8.9.0
+  coverage: ^1.7.2
+  dynamite: ^0.1.0
+  json_serializable: ^6.7.1
+  mocktail: ^1.0.3
+  neon_lints:
+    git:
+      url: https://github.com/nextcloud/neon
+      path: packages/neon_lints
+  nextcloud_test:
+    git:
+      url: https://github.com/nextcloud/neon
+      path: packages/nextcloud_test
+  path: ^1.9.0
+  process_run: ^0.14.1
+  test: ^1.25.2
+  test_api: ^0.7.0
+  xml_serializable: ^2.4.1
+
+platforms:
+  windows:
+  linux:
+  macos:
+  android:
+  ios:
+  web:

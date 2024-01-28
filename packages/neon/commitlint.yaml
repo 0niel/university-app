@@ -1,0 +1,29 @@
+include: package:commitlint_cli/commitlint.yaml
+
+rules:
+  scope-empty:
+    - 1
+    - never
+  scope-enum:
+    - 2
+    - always
+    - - app
+      - ci
+      - deps
+      - docs
+      - dynamite
+      - dynamite_end_to_end_test
+      - dynamite_runtime
+      - file_icons
+      - neon_dashboard
+      - neon_files
+      - neon_framework
+      - neon_lints
+      - neon_news
+      - neon_notes
+      - neon_notifications
+      - nextcloud
+      - nextcloud_test
+      - release
+      - sort_box
+      - tool

@@ -1,0 +1,9 @@
+builders:
+  dynamite:
+    import: "package:dynamite/builder.dart"
+    builder_factories: ["openAPIBuilder"]
+    build_extensions: {'.openapi.json': ['openapi.dart']}
+    auto_apply: root_package
+    build_to: source
+    runs_before: ["built_value_generator|built_value"]
+    applies_builders: ["built_value_generator|built_value"]

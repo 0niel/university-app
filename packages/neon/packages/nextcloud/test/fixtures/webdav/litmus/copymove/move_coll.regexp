@@ -1,0 +1,113 @@
+MKCOL http://localhost/remote\.php/webdav/move-coll-src
+authorization: Bearer mock
+content-type: application/xml
+MKCOL http://localhost/remote\.php/webdav/move-coll-src/sub
+authorization: Bearer mock
+content-type: application/xml
+PUT http://localhost/remote\.php/webdav/move-coll-src/0\.txt
+authorization: Bearer mock
+content-length: 0
+content-type: application/xml
+PUT http://localhost/remote\.php/webdav/move-coll-src/1\.txt
+authorization: Bearer mock
+content-length: 0
+content-type: application/xml
+PUT http://localhost/remote\.php/webdav/move-coll-src/2\.txt
+authorization: Bearer mock
+content-length: 0
+content-type: application/xml
+PUT http://localhost/remote\.php/webdav/move-coll-src/3\.txt
+authorization: Bearer mock
+content-length: 0
+content-type: application/xml
+PUT http://localhost/remote\.php/webdav/move-coll-src/4\.txt
+authorization: Bearer mock
+content-length: 0
+content-type: application/xml
+PUT http://localhost/remote\.php/webdav/move-coll-src/5\.txt
+authorization: Bearer mock
+content-length: 0
+content-type: application/xml
+PUT http://localhost/remote\.php/webdav/move-coll-src/6\.txt
+authorization: Bearer mock
+content-length: 0
+content-type: application/xml
+PUT http://localhost/remote\.php/webdav/move-coll-src/7\.txt
+authorization: Bearer mock
+content-length: 0
+content-type: application/xml
+PUT http://localhost/remote\.php/webdav/move-coll-src/8\.txt
+authorization: Bearer mock
+content-length: 0
+content-type: application/xml
+PUT http://localhost/remote\.php/webdav/move-coll-src/9\.txt
+authorization: Bearer mock
+content-length: 0
+content-type: application/xml
+PUT http://localhost/remote\.php/webdav/move-coll-noncoll
+authorization: Bearer mock
+content-length: 0
+content-type: application/xml
+COPY http://localhost/remote\.php/webdav/move-coll-src
+authorization: Bearer mock
+content-type: application/xml
+destination: http://localhost/remote\.php/webdav/move-coll-dst2
+overwrite: F
+MOVE http://localhost/remote\.php/webdav/move-coll-src
+authorization: Bearer mock
+content-type: application/xml
+destination: http://localhost/remote\.php/webdav/move-coll-dst1
+overwrite: F
+MOVE http://localhost/remote\.php/webdav/move-coll-dst1
+authorization: Bearer mock
+content-type: application/xml
+destination: http://localhost/remote\.php/webdav/move-coll-dst2
+overwrite: F
+MOVE http://localhost/remote\.php/webdav/move-coll-dst2
+authorization: Bearer mock
+content-type: application/xml
+destination: http://localhost/remote\.php/webdav/move-coll-dst1
+overwrite: T
+COPY http://localhost/remote\.php/webdav/move-coll-dst1
+authorization: Bearer mock
+content-type: application/xml
+destination: http://localhost/remote\.php/webdav/move-coll-dst2
+overwrite: F
+DELETE http://localhost/remote\.php/webdav/move-coll-dst1/0\.txt
+authorization: Bearer mock
+content-type: application/xml
+DELETE http://localhost/remote\.php/webdav/move-coll-dst1/1\.txt
+authorization: Bearer mock
+content-type: application/xml
+DELETE http://localhost/remote\.php/webdav/move-coll-dst1/2\.txt
+authorization: Bearer mock
+content-type: application/xml
+DELETE http://localhost/remote\.php/webdav/move-coll-dst1/3\.txt
+authorization: Bearer mock
+content-type: application/xml
+DELETE http://localhost/remote\.php/webdav/move-coll-dst1/4\.txt
+authorization: Bearer mock
+content-type: application/xml
+DELETE http://localhost/remote\.php/webdav/move-coll-dst1/5\.txt
+authorization: Bearer mock
+content-type: application/xml
+DELETE http://localhost/remote\.php/webdav/move-coll-dst1/6\.txt
+authorization: Bearer mock
+content-type: application/xml
+DELETE http://localhost/remote\.php/webdav/move-coll-dst1/7\.txt
+authorization: Bearer mock
+content-type: application/xml
+DELETE http://localhost/remote\.php/webdav/move-coll-dst1/8\.txt
+authorization: Bearer mock
+content-type: application/xml
+DELETE http://localhost/remote\.php/webdav/move-coll-dst1/9\.txt
+authorization: Bearer mock
+content-type: application/xml
+DELETE http://localhost/remote\.php/webdav/move-coll-dst1/sub
+authorization: Bearer mock
+content-type: application/xml
+MOVE http://localhost/remote\.php/webdav/move-coll-dst2
+authorization: Bearer mock
+content-type: application/xml
+destination: http://localhost/remote\.php/webdav/move-coll-noncoll
+overwrite: F

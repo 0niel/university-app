@@ -1,0 +1,9 @@
+include: package:neon_lints/dart.yaml
+
+linter:
+  rules:
+    public_member_api_docs: false
+
+analyzer:
+  exclude:
+    - '**.g.dart'

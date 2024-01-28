@@ -1,0 +1,3 @@
+MKCOL http://localhost/remote\.php/webdav/409me/noparent
+authorization: Bearer mock
+content-type: application/xml

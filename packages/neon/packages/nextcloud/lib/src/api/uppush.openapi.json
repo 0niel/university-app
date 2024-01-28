@@ -1,0 +1,412 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "uppush",
+    "description": "Use Nextcloud as a push provider for mobile phones' notifications",
+    "license": {
+      "name": "agpl"
+    },
+    "version": "1.4.0"
+  },
+  "tags": [],
+  "paths": {
+    "/index.php/apps/uppush": {
+      "get": {
+        "summary": "Check if the UnifiedPush provider is present",
+        "operationId": "check",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "required": [
+                    "success"
+                  ],
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/index.php/apps/uppush/keepalive": {
+      "put": {
+        "summary": "Set keepalive interval",
+        "description": "This endpoint requires admin access",
+        "operationId": "set-keepalive",
+        "parameters": [
+          {
+            "name": "keepalive",
+            "in": "query",
+            "description": "Keep alive value in seconds",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "required": [
+                    "success"
+                  ],
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/index.php/apps/uppush/device": {
+      "put": {
+        "summary": "Request to create a new deviceId",
+        "operationId": "create-device",
+        "parameters": [
+          {
+            "name": "deviceName",
+            "in": "query",
+            "description": "Name of the device",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "required": [
+                    "success",
+                    "deviceId"
+                  ],
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "deviceId": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/index.php/apps/uppush/device/{deviceId}": {
+      "parameters": [
+        {
+          "name": "deviceId",
+          "in": "path",
+          "description": "ID of the device",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "get": {
+        "summary": "Request to get push messages",
+        "description": "This is a public page since it has to be handle by the non-connected app (NextPush app and not Nextcloud-app)",
+        "operationId": "sync-device",
+        "responses": {
+          "401": {
+            "description": "Missing permissions to sync device",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "required": [
+                    "success"
+                  ],
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete a device",
+        "operationId": "delete-device",
+        "responses": {
+          "200": {
+            "description": "Device deleted successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "required": [
+                    "success"
+                  ],
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/index.php/apps/uppush/app": {
+      "put": {
+        "summary": "Create an authorization token for a new 3rd party service",
+        "operationId": "create-app",
+        "parameters": [
+          {
+            "name": "deviceId",
+            "in": "query",
+            "description": "ID of the device",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "appName",
+            "in": "query",
+            "description": "Name of the app",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "App created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "required": [
+                    "success",
+                    "token"
+                  ],
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "token": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/index.php/apps/uppush/app/{token}": {
+      "parameters": [
+        {
+          "name": "token",
+          "in": "path",
+          "description": "Token of the app",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "delete": {
+        "summary": "Delete an authorization token",
+        "operationId": "delete-app",
+        "responses": {
+          "200": {
+            "description": "App deleted successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "required": [
+                    "success"
+                  ],
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/index.php/apps/uppush/push/{token}": {
+      "parameters": [
+        {
+          "name": "token",
+          "in": "path",
+          "description": "Token of the app to push to",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "post": {
+        "summary": "Receive notifications from 3rd parties",
+        "operationId": "push",
+        "responses": {
+          "201": {
+            "description": "Notification pushed successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "required": [
+                    "success"
+                  ],
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "summary": "Unifiedpush discovery Following specifications",
+        "operationId": "unifiedpush-discovery",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "required": [
+                    "unifiedpush"
+                  ],
+                  "type": "object",
+                  "properties": {
+                    "unifiedpush": {
+                      "required": [
+                        "version"
+                      ],
+                      "type": "object",
+                      "properties": {
+                        "version": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/index.php/apps/uppush/gateway/matrix": {
+      "get": {
+        "summary": "Matrix Gateway discovery",
+        "operationId": "gateway-matrix-discovery",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "required": [
+                    "unifiedpush"
+                  ],
+                  "type": "object",
+                  "properties": {
+                    "unifiedpush": {
+                      "required": [
+                        "gateway"
+                      ],
+                      "type": "object",
+                      "properties": {
+                        "gateway": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Matrix Gateway",
+        "operationId": "gateway-matrix",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "required": [
+                    "rejected"
+                  ],
+                  "type": "object",
+                  "properties": {
+                    "rejected": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {},
+    "securitySchemes": {
+      "basic_auth": {
+        "type": "http",
+        "scheme": "basic"
+      }
+    }
+  },
+  "security": [
+    {
+      "basic_auth": []
+    }
+  ]
+}

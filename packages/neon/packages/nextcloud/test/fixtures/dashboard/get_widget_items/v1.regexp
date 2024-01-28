@@ -1,0 +1,4 @@
+GET http://localhost/ocs/v2\.php/apps/dashboard/api/v1/widget-items\?limit=7
+accept: application/json
+authorization: Bearer mock
+ocs-apirequest: true

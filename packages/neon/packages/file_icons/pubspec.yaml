@@ -1,0 +1,24 @@
+name: file_icons
+version: 1.0.0
+publish_to: none
+
+environment:
+  sdk: '>=3.1.0 <4.0.0'
+  flutter: '>=3.13.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  path: ^1.0.0
+
+dev_dependencies:
+  neon_lints:
+    git:
+      url: https://github.com/nextcloud/neon
+      path: packages/neon_lints
+
+flutter:
+  fonts:
+    - family: Seti
+      fonts:
+        - asset: assets/seti.ttf

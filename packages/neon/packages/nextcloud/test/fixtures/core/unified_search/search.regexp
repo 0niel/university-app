@@ -1,0 +1,4 @@
+GET http://localhost/ocs/v2\.php/search/providers/settings/search\?term=Personal%20info&from=
+accept: application/json
+authorization: Bearer mock
+ocs-apirequest: true

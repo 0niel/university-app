@@ -1,0 +1,7 @@
+arb-dir: lib/l10n
+template-arb-file: en.arb
+output-localization-file: localizations.dart
+synthetic-package: false
+output-class: NeonLocalizations
+output-dir: lib/l10n
+nullable-getter: false

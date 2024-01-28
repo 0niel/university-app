@@ -1,0 +1,41 @@
+name: neon_dashboard
+version: 1.0.0
+publish_to: 'none'
+
+environment:
+  sdk: '>=3.1.0 <4.0.0'
+  flutter: '>=3.13.0'
+
+dependencies:
+  built_collection: ^5.0.0
+  collection: ^1.0.0
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  go_router: ^13.0.0
+  meta: ^1.0.0
+  neon_framework:
+    git:
+      url: https://github.com/nextcloud/neon
+      path: packages/neon_framework
+  nextcloud: ^4.0.0
+  rxdart: ^0.27.0
+
+dev_dependencies:
+  build_runner: ^2.4.8
+  flutter_cache_manager: ^3.3.1
+  flutter_test:
+    sdk: flutter
+  go_router_builder: ^2.4.1
+  mocktail: ^1.0.3
+  neon_lints:
+    git:
+      url: https://github.com/nextcloud/neon
+      path: packages/neon_lints
+  vector_graphics_compiler: ^1.1.9
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/

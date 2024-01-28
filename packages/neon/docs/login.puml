@@ -1,0 +1,36 @@
+@startuml login
+
+(*) if "Started from QR code scanner?" then
+-[#red]->[Yes] "Validate server details"
+else
+    ->[No] if "Has account?" then
+        -->[Yes] (*)
+    else
+        -->[No] "Login page"
+    endif
+endif
+
+if "Selected login method?" then
+    -[#blue]->[Login flow] "Validate server details"
+    -[#blue]-> "Open login flow page"
+    -[#blue]-> "Initiate login flow"
+    -[#blue]-> "Open web browser"
+    -[#blue]-> "Wait for login flow result"
+    -[#blue]-> "Validate login details"
+else
+    -[#red]->[QR code] "Open QR scan page"
+    -[#red]-> "Scan QR code"
+    -[#red]-> "Validate server details"
+    -[#red]-> "Validate login details"
+endif
+
+-->[Login success] (*)
+
+
+legend left
+    |Color  | Login method |
+    |<#red> | QR Code      |
+    |<#blue>| Login flow   |
+endlegend
+
+@enduml

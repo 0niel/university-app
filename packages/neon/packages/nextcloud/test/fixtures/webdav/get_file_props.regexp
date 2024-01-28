@@ -1,0 +1,4 @@
+PROPFIND http://localhost/remote\.php/webdav/Nextcloud\.png
+authorization: Bearer mock
+content-type: application/xml
+<d:propfind xmlns:d="DAV:" xmlns:oc="http://owncloud\.org/ns" xmlns:nc="http://nextcloud\.org/ns" xmlns:ocs="http://open-collaboration-services\.org/ns" xmlns:ocm="http://open-cloud-mesh\.org/ns"><d:prop><d:getlastmodified/><d:getetag/><d:getcontenttype/><d:getcontentlength/><d:resourcetype/><oc:id/><oc:fileid/><oc:favorite/><oc:comments-href/><oc:comments-count/><oc:comments-unread/><oc:downloadURL/><oc:owner-id/><oc:owner-display-name/><oc:size/><oc:permissions/><nc:note/><nc:data-fingerprint/><nc:has-preview/><nc:mount-type/><nc:is-encrypted/><nc:metadata_etag/><nc:upload_time/><nc:creation_time/><nc:rich-workspace/><ocs:share-permissions/><ocm:share-permissions/></d:prop></d:propfind>

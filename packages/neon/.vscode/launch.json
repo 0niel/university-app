@@ -1,0 +1,25 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "app",
+      "cwd": "packages/app",
+      "request": "launch",
+      "type": "dart"
+    },
+    {
+      "name": "app (profile mode)",
+      "cwd": "packages/app",
+      "request": "launch",
+      "type": "dart",
+      "flutterMode": "profile"
+    },
+    {
+      "name": "app (release mode)",
+      "cwd": "packages/app",
+      "request": "launch",
+      "type": "dart",
+      "flutterMode": "release"
+    }
+  ]
+}

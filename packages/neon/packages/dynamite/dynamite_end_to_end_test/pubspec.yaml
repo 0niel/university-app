@@ -1,0 +1,26 @@
+name: dynamite_end_to_end_test
+publish_to: none
+description: Tests for dynamite. Not meant for publishing.
+version: 1.0.0
+
+environment:
+  sdk: '>=3.1.0 <4.0.0'
+
+dependencies:
+  built_collection: ^5.0.0
+  built_value: ^8.9.0
+  collection: ^1.0.0
+  dynamite_runtime: ^0.1.0
+  http: ^1.2.0
+  meta: ^1.0.0
+  uri: ^1.0.0
+
+dev_dependencies:
+  build_runner: ^2.4.8
+  built_value_generator: ^8.9.0
+  dynamite: ^0.1.0
+  neon_lints:
+    git:
+      url: https://github.com/nextcloud/neon
+      path: packages/neon_lints
+  test: ^1.25.2

@@ -1,0 +1,24 @@
+name: nextcloud_test
+version: 1.0.0
+publish_to: none
+
+environment:
+  sdk: '>=3.1.0 <4.0.0'
+
+dependencies:
+  built_collection: ^5.0.0
+  dynamite_runtime: ^0.1.0
+  http: ^1.2.0
+  meta: ^1.0.0
+  nextcloud: ^4.0.0
+  process_run: ^0.14.0+1
+  test: ^1.24.0
+  test_api: ^0.7.0
+  universal_io: ^2.0.0
+  version: ^3.0.0
+
+dev_dependencies:
+  neon_lints:
+    git:
+      url: https://github.com/nextcloud/neon
+      path: packages/neon_lints
