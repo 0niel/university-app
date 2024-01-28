@@ -103,7 +103,12 @@ class AccountSettingsPage extends StatelessWidget {
     final body = SettingsList(
       categories: [
         SettingsCategory(
-          title: Text(NeonLocalizations.of(context).accountOptionsCategoryStorageInfo),
+          title: Text(
+            NeonLocalizations.of(context).accountOptionsCategoryStorageInfo,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+          ),
           tiles: [
             ResultBuilder<provisioning_api.UserDetails>.behaviorSubject(
               subject: userDetailsBloc.userDetails,
@@ -147,7 +152,12 @@ class AccountSettingsPage extends StatelessWidget {
           ],
         ),
         SettingsCategory(
-          title: Text(NeonLocalizations.of(context).optionsCategoryGeneral),
+          title: Text(
+            NeonLocalizations.of(context).optionsCategoryGeneral,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+          ),
           tiles: [
             SelectSettingsTile(
               option: options.initialApp,

@@ -36,6 +36,7 @@ import 'package:university_app_server_api/client.dart';
 import 'package:neon_framework/src/blocs/accounts.dart';
 import 'package:neon_framework/src/utils/provider.dart';
 import 'package:neon_framework/src/router.dart' as neon;
+import 'package:url_launcher/url_launcher_string.dart';
 
 final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'root');
 
@@ -60,6 +61,10 @@ GoRouter createRouter() => GoRouter(
             return '/services/${state.uri}';
           }
         }
+        if (state.uri.scheme == 'http' || state.uri.scheme == 'https') {
+          launchUrlString(state.uri.toString());
+        }
+
         return null;
       },
       routes: [

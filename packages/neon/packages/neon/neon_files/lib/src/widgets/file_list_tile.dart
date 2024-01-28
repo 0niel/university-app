@@ -46,23 +46,20 @@ class FileListTile extends StatelessWidget {
         title: Text(
           details.name,
           overflow: TextOverflow.ellipsis,
+          style: Theme.of(context).listTileTheme.subtitleTextStyle,
         ),
         subtitle: Row(
           children: [
             if (details.lastModified != null)
               RelativeTime(
                 date: details.lastModified!,
+                style: Theme.of(context).listTileTheme.subtitleTextStyle?.copyWith(fontSize: 12),
               ),
             if (details.size != null && details.size! > 0) ...[
               const SizedBox(
                 width: 10,
               ),
-              Text(
-                filesize(details.size, 1),
-                style: DefaultTextStyle.of(context).style.copyWith(
-                      color: Colors.grey,
-                    ),
-              ),
+              Text(filesize(details.size, 1), style: Theme.of(context).listTileTheme.titleTextStyle),
             ],
           ],
         ),

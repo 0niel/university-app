@@ -81,7 +81,7 @@ class _LoginCheckAccountPageState extends State<LoginCheckAccountPage> {
                       _buildAccountTile(state),
                       Align(
                         alignment: Alignment.bottomRight,
-                        child: ElevatedButton(
+                        child: TextButton(
                           onPressed: state.hasData
                               ? () {
                                   NeonProvider.of<AccountsBloc>(context)

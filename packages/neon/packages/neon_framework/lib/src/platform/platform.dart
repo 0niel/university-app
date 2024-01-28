@@ -37,8 +37,7 @@ abstract interface class NeonPlatform {
     } else if (Platform.isIOS) {
       _platform = const IosNeonPlatform();
     } else {
-      throw UnimplementedError(
-          'No implementation for platform ${Platform.operatingSystem} found');
+      throw UnimplementedError('No implementation for platform ${Platform.operatingSystem} found');
     }
 
     await _platform!.init();

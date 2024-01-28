@@ -84,8 +84,7 @@ class _SettingsPageState extends State<SettingsPage> {
   Widget build(BuildContext context) {
     final globalOptions = NeonProvider.of<GlobalOptions>(context);
     final accountsBloc = NeonProvider.of<AccountsBloc>(context);
-    final appImplementations =
-        NeonProvider.of<Iterable<AppImplementation>>(context);
+    final appImplementations = NeonProvider.of<Iterable<AppImplementation>>(context);
     final branding = Branding.of(context);
 
     final appBar = AppBar(
@@ -126,7 +125,12 @@ class _SettingsPageState extends State<SettingsPage> {
       categories: [
         SettingsCategory(
           hasLeading: true,
-          title: Text(NeonLocalizations.of(context).settingsApps),
+          title: Text(
+            NeonLocalizations.of(context).settingsApps,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+          ),
           key: ValueKey(SettingsCategories.apps.name),
           tiles: <SettingsTile>[
             for (final appImplementation in appImplementations) ...[
@@ -135,8 +139,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   leading: appImplementation.buildIcon(),
                   title: Text(appImplementation.name(context)),
                   onTap: () {
-                    AppImplementationSettingsRoute(appid: appImplementation.id)
-                        .go(context);
+                    AppImplementationSettingsRoute(appid: appImplementation.id).go(context);
                   },
                 ),
               ],
@@ -330,14 +333,12 @@ class _SettingsPageState extends State<SettingsPage> {
     return ValueListenableBuilder(
       valueListenable: globalOptions.pushNotificationsEnabled,
       builder: (context, _, __) => SettingsCategory(
-        title: Text(
-            NeonLocalizations.of(context).optionsCategoryPushNotifications),
+        title: Text(NeonLocalizations.of(context).optionsCategoryPushNotifications),
         key: ValueKey(SettingsCategories.pushNotifications.name),
         tiles: [
           if (!globalOptions.pushNotificationsEnabled.enabled)
             TextSettingsTile(
-              text: NeonLocalizations.of(context)
-                  .globalOptionsPushNotificationsEnabledDisabledNotice,
+              text: NeonLocalizations.of(context).globalOptionsPushNotificationsEnabledDisabledNotice,
               style: TextStyle(
                 fontWeight: FontWeight.w600,
                 fontStyle: FontStyle.italic,
@@ -361,7 +362,12 @@ class _SettingsPageState extends State<SettingsPage> {
     final accounts = accountsBloc.accounts.value;
     final hasMultipleAccounts = accounts.length > 1;
 
-    final title = Text(NeonLocalizations.of(context).optionsCategoryAccounts);
+    final title = Text(
+      NeonLocalizations.of(context).optionsCategoryAccounts,
+      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+            fontWeight: FontWeight.w600,
+          ),
+    );
     final key = ValueKey(SettingsCategories.accounts.name);
     final accountTiles = accounts.map(
       (account) => AccountSettingsTile(
@@ -405,10 +411,18 @@ class _SettingsPageState extends State<SettingsPage> {
       );
     } else {
       final addAccountTile = CustomSettingsTile(
-        title: ElevatedButton.icon(
+        title: TextButton.icon(
+          style: TextButton.styleFrom(
+            backgroundColor: Theme.of(context).colorScheme.primary,
+          ),
           onPressed: () async => const LoginRoute().push(context),
           icon: const Icon(MdiIcons.accountPlus),
-          label: Text(NeonLocalizations.of(context).globalOptionsAccountsAdd),
+          label: Text(
+            NeonLocalizations.of(context).globalOptionsAccountsAdd,
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onPrimary,
+            ),
+          ),
         ),
       );
 
@@ -428,8 +442,7 @@ class _SettingsPageState extends State<SettingsPage> {
   SettingsExportHelper _buildSettingsExportHelper(BuildContext context) {
     final globalOptions = NeonProvider.of<GlobalOptions>(context);
     final accountsBloc = NeonProvider.of<AccountsBloc>(context);
-    final appImplementations =
-        NeonProvider.of<Iterable<AppImplementation>>(context);
+    final appImplementations = NeonProvider.of<Iterable<AppImplementation>>(context);
 
     return SettingsExportHelper(
       exportables: {

@@ -51,8 +51,9 @@ class _NeonAppBarState extends State<NeonAppBar> {
       }
     });
 
-    _searchTermSubscription =
-        _searchTermController.stream.debounceTime(const Duration(milliseconds: 250)).listen(unifiedSearchBloc.search);
+    _searchTermSubscription = _searchTermController.stream
+        .debounceTime(const Duration(milliseconds: 250))
+        .listen(unifiedSearchBloc.search);
   }
 
   @override
@@ -64,14 +65,16 @@ class _NeonAppBarState extends State<NeonAppBar> {
   }
 
   @override
-  Widget build(BuildContext context) => ResultBuilder<Iterable<AppImplementation>>.behaviorSubject(
+  Widget build(BuildContext context) =>
+      ResultBuilder<Iterable<AppImplementation>>.behaviorSubject(
         subject: appsBloc.appImplementations,
         builder: (context, appImplementations) => StreamBuilder(
           stream: appsBloc.activeApp,
           builder: (context, activeAppSnapshot) => StreamBuilder(
             stream: unifiedSearchBloc.enabled,
             builder: (context, unifiedSearchEnabledSnapshot) {
-              final unifiedSearchEnabled = unifiedSearchEnabledSnapshot.data ?? false;
+              final unifiedSearchEnabled =
+                  unifiedSearchEnabledSnapshot.data ?? false;
               return AppBar(
                 title: unifiedSearchEnabled
                     ? null
@@ -103,7 +106,9 @@ class _NeonAppBarState extends State<NeonAppBar> {
                                 ),
                                 Expanded(
                                   child: NeonLinearProgressIndicator(
-                                    color: Theme.of(context).appBarTheme.foregroundColor,
+                                    color: Theme.of(context)
+                                        .appBarTheme
+                                        .foregroundColor,
                                   ),
                                 ),
                               ],
@@ -121,9 +126,14 @@ class _NeonAppBarState extends State<NeonAppBar> {
                   if (unifiedSearchEnabled) ...[
                     Flexible(
                       child: SearchBar(
+                        shadowColor: MaterialStateProperty.all(
+                          Colors.transparent,
+                        ),
+                        elevation: MaterialStateProperty.all(0),
                         focusNode: _searchBarFocusNode,
                         hintText: NeonLocalizations.of(context).search,
-                        padding: const MaterialStatePropertyAll(EdgeInsets.only(left: 16)),
+                        padding: const MaterialStatePropertyAll(
+                            EdgeInsets.only(left: 16)),
                         onChanged: _searchTermController.add,
                         trailing: [
                           IconButton(
@@ -162,7 +172,9 @@ class SearchIconButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) => IconButton(
         onPressed: () {
-          NeonProvider.of<AccountsBloc>(context).activeUnifiedSearchBloc.enable();
+          NeonProvider.of<AccountsBloc>(context)
+              .activeUnifiedSearchBloc
+              .enable();
         },
         tooltip: NeonLocalizations.of(context).search,
         icon: const Icon(
@@ -199,8 +211,10 @@ class _NotificationIconButtonState extends State<NotificationIconButton> {
     _account = _accountsBloc.activeAccount.value!;
 
     notificationSubscription = _appsBloc.openNotifications.listen((_) async {
-      final notificationsAppImplementation = _appsBloc.notificationsAppImplementation.valueOrNull;
-      if (notificationsAppImplementation != null && notificationsAppImplementation.hasData) {
+      final notificationsAppImplementation =
+          _appsBloc.notificationsAppImplementation.valueOrNull;
+      if (notificationsAppImplementation != null &&
+          notificationsAppImplementation.hasData) {
         await _openNotifications(notificationsAppImplementation.data!);
       }
     });
@@ -249,25 +263,31 @@ class _NotificationIconButtonState extends State<NotificationIconButton> {
   }
 
   @override
-  Widget build(BuildContext context) => ResultBuilder<NotificationsAppInterface?>.behaviorSubject(
+  Widget build(BuildContext context) =>
+      ResultBuilder<NotificationsAppInterface?>.behaviorSubject(
         subject: _appsBloc.notificationsAppImplementation,
         builder: (context, notificationsAppImplementation) {
           if (!notificationsAppImplementation.hasData) {
             return const SizedBox.shrink();
           }
 
-          final notificationsImplementationData = notificationsAppImplementation.data!;
-          final notificationBloc = notificationsImplementationData.getBloc(_account);
+          final notificationsImplementationData =
+              notificationsAppImplementation.data!;
+          final notificationBloc =
+              notificationsImplementationData.getBloc(_account);
 
           return IconButton(
             key: Key('app-${notificationsImplementationData.id}'),
             onPressed: () async {
               await _openNotifications(notificationsImplementationData);
             },
-            tooltip: NeonLocalizations.of(context).appImplementationName(notificationsImplementationData.id),
+            tooltip: NeonLocalizations.of(context)
+                .appImplementationName(notificationsImplementationData.id),
             icon: StreamBuilder<int>(
-              stream: notificationsImplementationData.getUnreadCounter(notificationBloc),
-              builder: (context, unreadCounterSnapshot) => NeonAppImplementationIcon(
+              stream: notificationsImplementationData
+                  .getUnreadCounter(notificationBloc),
+              builder: (context, unreadCounterSnapshot) =>
+                  NeonAppImplementationIcon(
                 appImplementation: notificationsImplementationData,
                 unreadCount: unreadCounterSnapshot.data,
               ),

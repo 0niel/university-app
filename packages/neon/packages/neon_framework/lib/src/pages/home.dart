@@ -60,8 +60,7 @@ class _HomePageState extends State<HomePage> {
         final versionCheck = entry.value;
         final appName = l10n.appImplementationName(entry.key);
 
-        buffer.writeln(
-            '- $appName >=${versionCheck.minimumVersion} <${versionCheck.maximumMajor + 1}.0.0');
+        buffer.writeln('- $appName >=${versionCheck.minimumVersion} <${versionCheck.maximumMajor + 1}.0.0');
       }
 
       final message = l10n.errorUnsupportedAppVersions(buffer.toString());
@@ -85,8 +84,7 @@ class _HomePageState extends State<HomePage> {
       final status = await widget.account.client.core.getStatus();
 
       if (status.body.maintenance && mounted) {
-        final message =
-            NeonLocalizations.of(context).errorServerInMaintenanceMode;
+        final message = NeonLocalizations.of(context).errorServerInMaintenanceMode;
         await showErrorDialog(context: context, message: message);
       }
     } catch (e, s) {
@@ -119,8 +117,7 @@ class _HomePageState extends State<HomePage> {
             if (appImplementations.requireData.isEmpty) {
               return Center(
                 child: Text(
-                  NeonLocalizations.of(context)
-                      .errorNoCompatibleNextcloudAppsFound,
+                  NeonLocalizations.of(context).errorNoCompatibleNextcloudAppsFound,
                   textAlign: TextAlign.center,
                 ),
               );
@@ -146,8 +143,7 @@ class _HomePageState extends State<HomePage> {
     final body = ValueListenableBuilder(
       valueListenable: _globalOptions.navigationMode,
       builder: (context, navigationMode, _) {
-        final drawerAlwaysVisible =
-            navigationMode == global_options.NavigationMode.drawerAlwaysVisible;
+        final drawerAlwaysVisible = navigationMode == global_options.NavigationMode.drawerAlwaysVisible;
 
         final body = Scaffold(
           resizeToAvoidBottomInset: false,

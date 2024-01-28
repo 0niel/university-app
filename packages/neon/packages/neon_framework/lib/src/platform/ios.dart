@@ -38,8 +38,7 @@ class IosNeonPlatform implements NeonPlatform {
   void init() {}
 
   @override
-  Future<String?> saveFileWithPickDialog(String fileName, Uint8List data) =>
-      FlutterFileDialog.saveFile(
+  Future<String?> saveFileWithPickDialog(String fileName, Uint8List data) => FlutterFileDialog.saveFile(
         params: SaveFileDialogParams(
           data: data,
           fileName: fileName,

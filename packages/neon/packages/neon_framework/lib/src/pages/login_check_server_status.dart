@@ -76,7 +76,7 @@ class _LoginCheckServerStatusPageState extends State<LoginCheckServerStatusPage>
                         _buildMaintenanceModeTile(state),
                         Align(
                           alignment: Alignment.bottomRight,
-                          child: ElevatedButton(
+                          child: TextButton(
                             onPressed: success ? _onContinue : bloc.refresh,
                             child: Text(
                               success
