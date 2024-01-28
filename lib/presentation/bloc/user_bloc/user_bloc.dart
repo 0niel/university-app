@@ -42,8 +42,7 @@ class UserBloc extends HydratedBloc<UserEvent, UserState> {
   }
 
   void _setSentryUserIdentity(String id, String email, String group) {
-    Sentry.configureScope((scope) => scope
-        .setUser(SentryUser(id: id, email: email, data: {'group': group})));
+    Sentry.configureScope((scope) => scope.setUser(SentryUser(id: id, email: email, data: {'group': group})));
   }
 
   void _onLogInEvent(
@@ -75,8 +74,7 @@ class UserBloc extends HydratedBloc<UserEvent, UserState> {
         (user) {
           var student = getActiveStudent(user);
 
-          _setSentryUserIdentity(
-              user.id.toString(), user.login, student.academicGroup);
+          _setSentryUserIdentity(user.id.toString(), user.login, student.academicGroup);
           emit(state.copyWith(status: UserStatus.authorized, user: user));
         },
       );
@@ -92,8 +90,7 @@ class UserBloc extends HydratedBloc<UserEvent, UserState> {
   }
 
   static Student getActiveStudent(User user) {
-    var student = user.students
-        .firstWhereOrNull((element) => element.status == 'активный');
+    var student = user.students.firstWhereOrNull((element) => element.status == 'активный');
     student ??= user.students.first;
     return student;
   }
@@ -118,9 +115,7 @@ class UserBloc extends HydratedBloc<UserEvent, UserState> {
     emit(state.copyWith(status: UserStatus.loading));
     final user = await getUserData();
 
-    user.fold(
-        (failure) => emit(state.copyWith(status: UserStatus.unauthorized)),
-        (r) {
+    user.fold((failure) => emit(state.copyWith(status: UserStatus.unauthorized)), (r) {
       var student = getActiveStudent(r);
 
       _setSentryUserIdentity(r.id.toString(), r.login, student.academicGroup);

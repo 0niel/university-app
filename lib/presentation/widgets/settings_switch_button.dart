@@ -44,9 +44,7 @@ class _SettingsSwitchButtonState extends State<SettingsSwitchButton> {
             children: [
               widget.svgPicture ?? widget.icon!,
               const SizedBox(width: 20),
-              Text(widget.text,
-                  style: AppTextStyle.buttonL
-                      .copyWith(color: AppTheme.colorsOf(context).active)),
+              Text(widget.text, style: AppTextStyle.buttonL.copyWith(color: AppTheme.colorsOf(context).active)),
             ],
           ),
           Padding(

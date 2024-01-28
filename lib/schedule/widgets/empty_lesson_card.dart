@@ -28,8 +28,7 @@ class EmptyLessonCard extends StatelessWidget {
           children: [
             Text(
               '$lessonNumber пара',
-              style: AppTextStyle.body
-                  .copyWith(color: AppTheme.colorsOf(context).colorful03),
+              style: AppTextStyle.body.copyWith(color: AppTheme.colorsOf(context).colorful03),
             ),
           ],
         ),

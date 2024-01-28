@@ -15,8 +15,7 @@ class StoriesBloc extends Bloc<StoriesEvent, StoriesState> {
         emit(StoriesLoading());
 
         final stories = await storiesRepository.getStories();
-        stories.fold((failure) => emit(StoriesLoadError()),
-            (r) => emit(StoriesLoaded(stories: r)));
+        stories.fold((failure) => emit(StoriesLoadError()), (r) => emit(StoriesLoaded(stories: r)));
       }
     });
   }

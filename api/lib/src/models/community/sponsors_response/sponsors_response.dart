@@ -10,8 +10,7 @@ class SponsorsResponse extends Equatable {
     required this.sponsors,
   });
 
-  factory SponsorsResponse.fromJson(Map<String, dynamic> json) =>
-      _$SponsorsResponseFromJson(json);
+  factory SponsorsResponse.fromJson(Map<String, dynamic> json) => _$SponsorsResponseFromJson(json);
 
   final List<Sponsor> sponsors;
 

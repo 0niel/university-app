@@ -18,8 +18,7 @@ class SearchItem extends Equatable {
   });
 
   /// Converts a `Map<String, dynamic>` into a [SearchItem] instance.
-  factory SearchItem.fromJson(Map<String, dynamic> json) =>
-      _$SearchItemFromJson(json);
+  factory SearchItem.fromJson(Map<String, dynamic> json) => _$SearchItemFromJson(json);
 
   /// The id of the schedule target.
   final int id;
@@ -51,6 +50,5 @@ class SearchItem extends Equatable {
   Map<String, dynamic> toJson() => _$SearchItemToJson(this);
 
   @override
-  List<Object> get props =>
-      [id, targetTitle, fullTitle, scheduleTarget, iCalLink];
+  List<Object> get props => [id, targetTitle, fullTitle, scheduleTarget, iCalLink];
 }

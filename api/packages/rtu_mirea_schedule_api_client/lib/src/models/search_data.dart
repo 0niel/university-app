@@ -15,8 +15,7 @@ class SearchData extends Equatable {
   });
 
   /// Converts a `Map<String, dynamic>` into a [SearchData] instance.
-  factory SearchData.fromJson(Map<String, dynamic> json) =>
-      _$SearchDataFromJson(json);
+  factory SearchData.fromJson(Map<String, dynamic> json) => _$SearchDataFromJson(json);
 
   /// The search data results.
   final List<SearchItem> data;

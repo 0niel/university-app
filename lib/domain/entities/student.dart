@@ -31,8 +31,7 @@ class Student extends Equatable {
     required this.status,
   });
 
-  factory Student.fromJson(Map<String, dynamic> json) =>
-      _$StudentFromJson(json);
+  factory Student.fromJson(Map<String, dynamic> json) => _$StudentFromJson(json);
 
   Map<String, dynamic> toJson() => _$StudentToJson(this);
 

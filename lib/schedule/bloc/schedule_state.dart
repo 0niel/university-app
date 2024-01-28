@@ -26,8 +26,7 @@ class ScheduleState extends Equatable {
           status: ScheduleStatus.initial,
         );
 
-  factory ScheduleState.fromJson(Map<String, dynamic> json) =>
-      _$ScheduleStateFromJson(json);
+  factory ScheduleState.fromJson(Map<String, dynamic> json) => _$ScheduleStateFromJson(json);
 
   final ScheduleStatus status;
 
@@ -74,8 +73,7 @@ class ScheduleState extends Equatable {
       selectedSchedule: selectedSchedule ?? this.selectedSchedule,
       isMiniature: isMiniature ?? this.isMiniature,
       showEmptyLessons: showEmptyLessons ?? this.showEmptyLessons,
-      showCommentsIndicators:
-          showCommentsIndicators ?? this.showCommentsIndicators,
+      showCommentsIndicators: showCommentsIndicators ?? this.showCommentsIndicators,
       comments: comments ?? this.comments,
     );
   }
@@ -96,16 +94,13 @@ class ScheduleState extends Equatable {
       ];
 }
 
-class SelectedScheduleConverter
-    implements JsonConverter<SelectedSchedule?, Map<String, dynamic>?> {
+class SelectedScheduleConverter implements JsonConverter<SelectedSchedule?, Map<String, dynamic>?> {
   const SelectedScheduleConverter();
 
   @override
-  Map<String, dynamic>? toJson(SelectedSchedule? selectedSchedule) =>
-      selectedSchedule?.toJson();
+  Map<String, dynamic>? toJson(SelectedSchedule? selectedSchedule) => selectedSchedule?.toJson();
 
   @override
-  SelectedSchedule? fromJson(Object? jsonString) => jsonString != null
-      ? SelectedSchedule.fromJson(jsonString as Map<String, dynamic>)
-      : null;
+  SelectedSchedule? fromJson(Object? jsonString) =>
+      jsonString != null ? SelectedSchedule.fromJson(jsonString as Map<String, dynamic>) : null;
 }

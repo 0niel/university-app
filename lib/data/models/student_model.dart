@@ -29,8 +29,7 @@ class StudentModel extends Student {
           status: status,
         );
 
-  static List<StudentModel> fromRawJson(String str) =>
-      StudentModel.fromJson(json.decode(str));
+  static List<StudentModel> fromRawJson(String str) => StudentModel.fromJson(json.decode(str));
 
   static List<StudentModel> fromJson(Map<String, dynamic> json) {
     final studentsRaw = json["STUDENTS"].values.where((element) =>
@@ -47,8 +46,7 @@ class StudentModel extends Student {
         academicGroup: e["PROPERTIES"]["ACADEMIC_GROUP"]["VALUE_TEXT"],
         educationStartDate: e["PROPERTIES"]["START_DATE"]["VALUE"],
         code: e["CODE"],
-        eduProgram: EduProgramModel.fromJson(
-            json["EDU_PROGRAM"][e["PROPERTIES"]["EDU_PROGRAM"]["VALUE"]]),
+        eduProgram: EduProgramModel.fromJson(json["EDU_PROGRAM"][e["PROPERTIES"]["EDU_PROGRAM"]["VALUE"]]),
         status: e["PROPERTIES"]["STATUS"]["VALUE_TEXT"],
       ),
     ));

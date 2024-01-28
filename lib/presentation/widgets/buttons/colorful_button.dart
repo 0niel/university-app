@@ -2,11 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:rtu_mirea_app/presentation/typography.dart';
 
 class ColorfulButton extends StatelessWidget {
-  const ColorfulButton(
-      {Key? key,
-      required this.text,
-      required this.onClick,
-      required this.backgroundColor})
+  const ColorfulButton({Key? key, required this.text, required this.onClick, required this.backgroundColor})
       : super(key: key);
 
   final String text;

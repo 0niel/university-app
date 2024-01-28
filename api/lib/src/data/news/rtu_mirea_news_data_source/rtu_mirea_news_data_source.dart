@@ -67,14 +67,11 @@ class RtuMireNewsDataSource implements NewsDataSource {
     try {
       final tagsResult = responseJson['result'] as List<dynamic>;
 
-      final tags = tagsResult
-          .cast<Map<String, dynamic>>()
-          .where((element) => int.parse(element['CNT'] as String) > 3)
-          .toList()
-        ..sort(
-          (a, b) => int.parse(b['CNT'] as String)
-              .compareTo(int.parse(a['CNT'] as String)),
-        );
+      final tags =
+          tagsResult.cast<Map<String, dynamic>>().where((element) => int.parse(element['CNT'] as String) > 3).toList()
+            ..sort(
+              (a, b) => int.parse(b['CNT'] as String).compareTo(int.parse(a['CNT'] as String)),
+            );
 
       return tags.map((e) => e['NAME'] as String).toList();
     } catch (error, stackTrace) {
@@ -134,8 +131,7 @@ class RtuMireNewsDataSource implements NewsDataSource {
 
       return List<Article>.from(
         rawNews.map((rawNewsItem) {
-          return RtuMireaNewsItem.fromJson(rawNewsItem as Map<String, dynamic>)
-              .toArticle();
+          return RtuMireaNewsItem.fromJson(rawNewsItem as Map<String, dynamic>).toArticle();
         }),
       );
     } catch (error, stackTrace) {

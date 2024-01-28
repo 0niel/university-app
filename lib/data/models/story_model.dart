@@ -22,10 +22,8 @@ class StoryModel extends Story {
         publishedAt: DateTime.parse(json["publishedAt"]),
         stopShowDate: DateTime.parse(json["stopShowDate"]),
         author: AuthorModel.fromJson(json["author"]["data"]["attributes"]),
-        pages: List<StoryPageModel>.from(
-            json["pages"].map((x) => StoryPageModel.fromJson(x))),
-        preview:
-            StrapiMediaModel.fromJson(json["preview"]["data"]["attributes"]),
+        pages: List<StoryPageModel>.from(json["pages"].map((x) => StoryPageModel.fromJson(x))),
+        preview: StrapiMediaModel.fromJson(json["preview"]["data"]["attributes"]),
       );
 
   Map<String, dynamic> toJson() => {
@@ -34,8 +32,7 @@ class StoryModel extends Story {
         "stopShowDate":
             "${stopShowDate.year.toString().padLeft(4, '0')}-${stopShowDate.month.toString().padLeft(2, '0')}-${stopShowDate.day.toString().padLeft(2, '0')}",
         "author": (author as AuthorModel).toJson(),
-        "pages": List<dynamic>.from(
-            pages.map((x) => (x as StoryPageModel).toJson())),
+        "pages": List<dynamic>.from(pages.map((x) => (x as StoryPageModel).toJson())),
         "preview": (preview as StrapiMediaModel).toJson(),
       };
 }
@@ -51,8 +48,7 @@ class StoryPageModel extends StoryPage {
   factory StoryPageModel.fromJson(Map<String, dynamic> json) => StoryPageModel(
         title: json["title"],
         text: json["text"],
-        actions: List<StoryPageActionModel>.from(
-            json["actions"].map((x) => StoryPageActionModel.fromJson(x))),
+        actions: List<StoryPageActionModel>.from(json["actions"].map((x) => StoryPageActionModel.fromJson(x))),
         media: StrapiMediaModel.fromJson(json["media"]["data"]["attributes"]),
       );
 
@@ -70,8 +66,7 @@ class StoryPageActionModel extends StoryPageAction {
     required url,
   }) : super(title: title, url: url);
 
-  factory StoryPageActionModel.fromJson(Map<String, dynamic> json) =>
-      StoryPageActionModel(
+  factory StoryPageActionModel.fromJson(Map<String, dynamic> json) => StoryPageActionModel(
         title: json["title"],
         url: json["url"],
       );

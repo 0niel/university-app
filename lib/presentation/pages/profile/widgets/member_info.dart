@@ -4,11 +4,7 @@ import 'package:url_launcher/url_launcher_string.dart';
 import 'package:rtu_mirea_app/presentation/typography.dart';
 
 class MemberInfo extends StatelessWidget {
-  const MemberInfo(
-      {Key? key,
-      required this.username,
-      required this.avatarUrl,
-      required this.profileUrl})
+  const MemberInfo({Key? key, required this.username, required this.avatarUrl, required this.profileUrl})
       : super(key: key);
   final String username;
   final String avatarUrl;
@@ -19,8 +15,7 @@ class MemberInfo extends StatelessWidget {
     return GestureDetector(
       child: Column(children: [
         CachedNetworkImage(
-          progressIndicatorBuilder: (context, url, progress) =>
-              const SizedBox(width: 60, height: 60),
+          progressIndicatorBuilder: (context, url, progress) => const SizedBox(width: 60, height: 60),
           imageUrl: avatarUrl,
           errorWidget: (context, url, error) => const Icon(Icons.error),
           imageBuilder: (context, imageProvider) => CircleAvatar(

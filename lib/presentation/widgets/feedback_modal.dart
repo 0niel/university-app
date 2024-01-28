@@ -39,8 +39,7 @@ class FeedbackBottomModalSheet extends StatefulWidget {
   }
 
   @override
-  State<FeedbackBottomModalSheet> createState() =>
-      _FeedbackBottomModalSheetState();
+  State<FeedbackBottomModalSheet> createState() => _FeedbackBottomModalSheetState();
 }
 
 class _FeedbackBottomModalSheetState extends State<FeedbackBottomModalSheet> {
@@ -84,8 +83,7 @@ class _FeedbackBottomModalSheetState extends State<FeedbackBottomModalSheet> {
       _textErrorText = null;
     });
 
-    final SentryId sentryId =
-        await Sentry.captureMessage(text, level: SentryLevel.info);
+    final SentryId sentryId = await Sentry.captureMessage(text, level: SentryLevel.info);
 
     final userFeedback = SentryUserFeedback(
       eventId: sentryId,

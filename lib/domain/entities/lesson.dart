@@ -20,6 +20,5 @@ class Lesson extends Equatable {
   final List<String> rooms;
 
   @override
-  List<Object?> get props =>
-      [name, weeks, timeStart, timeEnd, types, teachers, rooms];
+  List<Object?> get props => [name, weeks, timeStart, timeEnd, types, teachers, rooms];
 }

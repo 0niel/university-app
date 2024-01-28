@@ -18,8 +18,7 @@ class HolidaySchedulePart with EquatableMixin implements SchedulePart {
   });
 
   /// Converts a `Map<String, dynamic>` into a [HolidaySchedulePart] instance.
-  factory HolidaySchedulePart.fromJson(Map<String, dynamic> json) =>
-      _$HolidaySchedulePartFromJson(json);
+  factory HolidaySchedulePart.fromJson(Map<String, dynamic> json) => _$HolidaySchedulePartFromJson(json);
 
   /// The unknown schedule part type identifier.
   static const identifier = '__holiday__';

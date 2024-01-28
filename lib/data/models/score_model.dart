@@ -25,8 +25,7 @@ class ScoreModel extends Score {
           year: year,
         );
 
-  factory ScoreModel.fromRawJson(String str) =>
-      ScoreModel.fromJson(json.decode(str));
+  factory ScoreModel.fromRawJson(String str) => ScoreModel.fromJson(json.decode(str));
 
   factory ScoreModel.fromJson(Map<String, dynamic> json) {
     return ScoreModel(

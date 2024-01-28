@@ -14,8 +14,7 @@ EduProgram _$EduProgramFromJson(Map<String, dynamic> json) => EduProgram(
       type: json['type'] as String?,
     );
 
-Map<String, dynamic> _$EduProgramToJson(EduProgram instance) =>
-    <String, dynamic>{
+Map<String, dynamic> _$EduProgramToJson(EduProgram instance) => <String, dynamic>{
       'eduProgram': instance.eduProgram,
       'eduProgramCode': instance.eduProgramCode,
       'department': instance.department,

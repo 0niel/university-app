@@ -26,8 +26,7 @@ void main() {
       test('saves the value in Storage', () async {
         const enabled = true;
 
-        await NotificationsStorage(storage: storage)
-            .setNotificationsEnabled(enabled: enabled);
+        await NotificationsStorage(storage: storage).setNotificationsEnabled(enabled: enabled);
 
         verify(
           () => storage.write(
@@ -41,12 +40,10 @@ void main() {
     group('fetchNotificationsEnabled', () {
       test('returns the value from Storage', () async {
         when(
-          () =>
-              storage.read(key: NotificationsStorageKeys.notificationsEnabled),
+          () => storage.read(key: NotificationsStorageKeys.notificationsEnabled),
         ).thenAnswer((_) async => 'true');
 
-        final result = await NotificationsStorage(storage: storage)
-            .fetchNotificationsEnabled();
+        final result = await NotificationsStorage(storage: storage).fetchNotificationsEnabled();
 
         verify(
           () => storage.read(
@@ -59,12 +56,10 @@ void main() {
 
       test('returns false when no value exists in Storage', () async {
         when(
-          () =>
-              storage.read(key: NotificationsStorageKeys.notificationsEnabled),
+          () => storage.read(key: NotificationsStorageKeys.notificationsEnabled),
         ).thenAnswer((_) async => null);
 
-        final result = await NotificationsStorage(storage: storage)
-            .fetchNotificationsEnabled();
+        final result = await NotificationsStorage(storage: storage).fetchNotificationsEnabled();
 
         verify(
           () => storage.read(
@@ -106,12 +101,10 @@ void main() {
         };
 
         when(
-          () =>
-              storage.read(key: NotificationsStorageKeys.categoriesPreferences),
+          () => storage.read(key: NotificationsStorageKeys.categoriesPreferences),
         ).thenAnswer((_) async => json.encode(preferences));
 
-        final result = await NotificationsStorage(storage: storage)
-            .fetchCategoriesPreferences();
+        final result = await NotificationsStorage(storage: storage).fetchCategoriesPreferences();
 
         verify(
           () => storage.read(
@@ -124,12 +117,10 @@ void main() {
 
       test('returns null when no value exists in Storage', () async {
         when(
-          () =>
-              storage.read(key: NotificationsStorageKeys.categoriesPreferences),
+          () => storage.read(key: NotificationsStorageKeys.categoriesPreferences),
         ).thenAnswer((_) async => null);
 
-        final result = await NotificationsStorage(storage: storage)
-            .fetchCategoriesPreferences();
+        final result = await NotificationsStorage(storage: storage).fetchCategoriesPreferences();
 
         verify(
           () => storage.read(

@@ -18,8 +18,7 @@ class Sponsor extends Equatable {
   });
 
   /// Converts a `Map<String, dynamic>` into a [Sponsor] instance.
-  factory Sponsor.fromJson(Map<String, dynamic> json) =>
-      _$SponsorFromJson(json);
+  factory Sponsor.fromJson(Map<String, dynamic> json) => _$SponsorFromJson(json);
 
   /// The sponsor's username.
   final String username;

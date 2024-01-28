@@ -38,11 +38,7 @@ List<String> parseGroupsFromDescription(String description) {
   final match = exp.firstMatch(description);
 
   List<String> splitToGroups(String groups) {
-    return groups
-        .split('\n')
-        .map((e) => e.trim())
-        .where((element) => element.isNotEmpty)
-        .toList();
+    return groups.split('\n').map((e) => e.trim()).where((element) => element.isNotEmpty).toList();
   }
 
   if (match == null) {

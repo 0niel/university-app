@@ -5,8 +5,7 @@ import 'package:rtu_mirea_app/presentation/typography.dart';
 import 'package:rtu_mirea_app/presentation/widgets/buttons/colorful_button.dart';
 
 class NoSelectedScheduleMessage extends StatelessWidget {
-  const NoSelectedScheduleMessage({Key? key, required this.onTap})
-      : super(key: key);
+  const NoSelectedScheduleMessage({Key? key, required this.onTap}) : super(key: key);
 
   final VoidCallback onTap;
 
@@ -21,8 +20,7 @@ class NoSelectedScheduleMessage extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 24),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment:
-                isTable ? CrossAxisAlignment.center : CrossAxisAlignment.start,
+            crossAxisAlignment: isTable ? CrossAxisAlignment.center : CrossAxisAlignment.start,
             children: [
               Center(
                 child: Image.asset(

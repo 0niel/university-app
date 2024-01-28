@@ -30,26 +30,16 @@ abstract class AppTextStyle {
   static final h6 = _headline.copyWith(fontSize: 20, height: 1.2);
   static final title = _headline.copyWith(fontSize: 18, height: 1.3);
 
-  static final titleM =
-      _inter.copyWith(fontSize: 16, fontWeight: FontWeight.w600);
-  static final titleS =
-      _inter.copyWith(fontSize: 14, fontWeight: FontWeight.w600);
-  static final buttonL =
-      _inter.copyWith(fontSize: 16, fontWeight: FontWeight.w700);
-  static final buttonS =
-      _inter.copyWith(fontSize: 14, fontWeight: FontWeight.w700);
+  static final titleM = _inter.copyWith(fontSize: 16, fontWeight: FontWeight.w600);
+  static final titleS = _inter.copyWith(fontSize: 14, fontWeight: FontWeight.w600);
+  static final buttonL = _inter.copyWith(fontSize: 16, fontWeight: FontWeight.w700);
+  static final buttonS = _inter.copyWith(fontSize: 14, fontWeight: FontWeight.w700);
   static final tab = _inter.copyWith(fontSize: 14, fontWeight: FontWeight.w600);
-  static final bodyL =
-      _inter.copyWith(fontSize: 14, fontWeight: FontWeight.w500);
-  static final body =
-      _inter.copyWith(fontSize: 13, fontWeight: FontWeight.w500);
-  static final bodyBold =
-      _inter.copyWith(fontSize: 14, fontWeight: FontWeight.w700);
+  static final bodyL = _inter.copyWith(fontSize: 14, fontWeight: FontWeight.w500);
+  static final body = _inter.copyWith(fontSize: 13, fontWeight: FontWeight.w500);
+  static final bodyBold = _inter.copyWith(fontSize: 14, fontWeight: FontWeight.w700);
   static final bodyRegular = _inter.copyWith(fontSize: 13);
-  static final captionL =
-      _inter.copyWith(fontSize: 12, fontWeight: FontWeight.w500);
-  static final captionS =
-      _inter.copyWith(fontSize: 11, fontWeight: FontWeight.w500);
-  static final chip = _inter.copyWith(
-      fontSize: 10, fontWeight: FontWeight.w700, letterSpacing: 0.50);
+  static final captionL = _inter.copyWith(fontSize: 12, fontWeight: FontWeight.w500);
+  static final captionS = _inter.copyWith(fontSize: 11, fontWeight: FontWeight.w500);
+  static final chip = _inter.copyWith(fontSize: 10, fontWeight: FontWeight.w700, letterSpacing: 0.50);
 }

@@ -21,17 +21,14 @@ class NotificationsStorage {
   final Storage _storage;
 
   /// Устанавливает статус включенности уведомлений ([enabled]) в хранилище.
-  Future<void> setNotificationsEnabled({required bool enabled}) =>
-      _storage.write(
+  Future<void> setNotificationsEnabled({required bool enabled}) => _storage.write(
         key: NotificationsStorageKeys.notificationsEnabled,
         value: enabled.toString(),
       );
 
   /// Получает статус включенности уведомлений из хранилища.
   Future<bool> fetchNotificationsEnabled() async =>
-      (await _storage.read(key: NotificationsStorageKeys.notificationsEnabled))
-          ?.parseBool() ??
-      false;
+      (await _storage.read(key: NotificationsStorageKeys.notificationsEnabled))?.parseBool() ?? false;
 
   /// Устанавливает предпочтения категорий в [categories] в хранилище.
   Future<void> setCategoriesPreferences({

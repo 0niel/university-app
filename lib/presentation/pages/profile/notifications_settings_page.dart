@@ -67,8 +67,7 @@ class _NotificationPreferencesView extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Expanded(
-            child: BlocBuilder<NotificationPreferencesBloc,
-                NotificationPreferencesState>(
+            child: BlocBuilder<NotificationPreferencesBloc, NotificationPreferencesState>(
               builder: (context, state) {
                 return ListView(
                   children: state.categories
@@ -79,14 +78,12 @@ class _NotificationPreferencesView extends StatelessWidget {
                             name: category,
                             description: _getDescription(category),
                             value: state.selectedCategories.contains(category),
-                            onChanged: (value) =>
-                                context.read<NotificationPreferencesBloc>().add(
-                                      CategoriesPreferenceToggled(
-                                        category: category,
-                                        group: UserBloc.getActiveStudent(user)
-                                            .academicGroup,
-                                      ),
-                                    ),
+                            onChanged: (value) => context.read<NotificationPreferencesBloc>().add(
+                                  CategoriesPreferenceToggled(
+                                    category: category,
+                                    group: UserBloc.getActiveStudent(user).academicGroup,
+                                  ),
+                                ),
                           ),
                         ),
                       )
@@ -125,8 +122,7 @@ class _NotificationsSwitch extends StatelessWidget {
         children: [
           SizedBox(
             width: MediaQuery.of(context).size.width - 120,
-            child:
-                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               Text(name, style: AppTextStyle.buttonL),
               const SizedBox(height: 4),
               Text(

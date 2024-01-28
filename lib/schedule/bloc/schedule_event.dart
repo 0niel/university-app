@@ -37,8 +37,7 @@ class ScheduleRequested extends ScheduleEvent with AnalyticsEventMixin {
   List<Object> get props => [group];
 }
 
-class ClassroomScheduleRequested extends ScheduleEvent
-    with AnalyticsEventMixin {
+class ClassroomScheduleRequested extends ScheduleEvent with AnalyticsEventMixin {
   const ClassroomScheduleRequested({
     required this.classroom,
   });
@@ -148,8 +147,7 @@ class SetSelectedSchedule extends ScheduleEvent with AnalyticsEventMixin {
         'group': group.name,
       });
     } else if (selectedSchedule is SelectedClassroomSchedule) {
-      final classroom =
-          (selectedSchedule as SelectedClassroomSchedule).classroom;
+      final classroom = (selectedSchedule as SelectedClassroomSchedule).classroom;
       return AnalyticsEvent('SetSelectedClassroomSchedule', properties: {
         'classroom': classroom.name,
         'campus': classroom.campus?.name,

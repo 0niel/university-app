@@ -23,8 +23,7 @@ class LessonBells extends Equatable {
         );
 
   /// Converts a `Map<String, dynamic>` into a [LessonBells] instance.
-  factory LessonBells.fromJson(Map<String, dynamic> json) =>
-      _$LessonBellsFromJson(json);
+  factory LessonBells.fromJson(Map<String, dynamic> json) => _$LessonBellsFromJson(json);
 
   /// Lesson number.
   final int number;

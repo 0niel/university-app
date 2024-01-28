@@ -29,13 +29,11 @@ class ForumMemberModel extends ForumMember {
             lastSeenAt: lastSeenAt,
             addedAt: addedAt);
 
-  factory ForumMemberModel.fromRawJson(String str) =>
-      ForumMemberModel.fromJson(json.decode(str));
+  factory ForumMemberModel.fromRawJson(String str) => ForumMemberModel.fromJson(json.decode(str));
 
   String toRawJson() => json.encode(toJson());
 
-  factory ForumMemberModel.fromJson(Map<String, dynamic> json) =>
-      ForumMemberModel(
+  factory ForumMemberModel.fromJson(Map<String, dynamic> json) => ForumMemberModel(
         id: json["id"],
         username: json["username"],
         name: json["name"],
@@ -45,9 +43,7 @@ class ForumMemberModel extends ForumMember {
         flairUrl: json["flair_url"],
         trustLevel: json["trust_level"],
         title: json["title"],
-        lastPostedAt: json["last_posted_at"] == null
-            ? null
-            : DateTime.parse(json["last_posted_at"]),
+        lastPostedAt: json["last_posted_at"] == null ? null : DateTime.parse(json["last_posted_at"]),
         lastSeenAt: DateTime.parse(json["last_seen_at"]),
         addedAt: DateTime.parse(json["added_at"]),
       );
@@ -62,8 +58,7 @@ class ForumMemberModel extends ForumMember {
         "flair_url": flairUrl,
         "trust_level": trustLevel,
         "title": title,
-        "last_posted_at":
-            lastPostedAt == null ? null : lastPostedAt!.toIso8601String(),
+        "last_posted_at": lastPostedAt == null ? null : lastPostedAt!.toIso8601String(),
         "last_seen_at": lastSeenAt.toIso8601String(),
         "added_at": addedAt.toIso8601String(),
       };

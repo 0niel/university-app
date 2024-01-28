@@ -15,13 +15,11 @@ class ForumRemoteDataImpl implements ForumRemoteData {
 
   @override
   Future<List<ForumMemberModel>> getPatrons() async {
-    final response = await httpClient.get(
-        '${_apiUrl}groups/patrons/members.json?offset=0&order=&asc=true&filter=');
+    final response = await httpClient.get('${_apiUrl}groups/patrons/members.json?offset=0&order=&asc=true&filter=');
     if (response.statusCode == 200) {
       Map responseBody = response.data;
       List<ForumMemberModel> patrons = [];
-      patrons = List<ForumMemberModel>.from(
-          responseBody['members'].map((x) => ForumMemberModel.fromJson(x)));
+      patrons = List<ForumMemberModel>.from(responseBody['members'].map((x) => ForumMemberModel.fromJson(x)));
       return patrons;
     } else {
       throw ServerException('Response status code is $response.statusCode');

@@ -42,12 +42,10 @@ class RatingSystemCalculatorView extends StatefulWidget {
   const RatingSystemCalculatorView({super.key});
 
   @override
-  State<RatingSystemCalculatorView> createState() =>
-      _RatingSystemCalculatorViewState();
+  State<RatingSystemCalculatorView> createState() => _RatingSystemCalculatorViewState();
 }
 
-class _RatingSystemCalculatorViewState
-    extends State<RatingSystemCalculatorView> {
+class _RatingSystemCalculatorViewState extends State<RatingSystemCalculatorView> {
   @override
   void initState() {
     super.initState();
@@ -64,10 +62,7 @@ class _RatingSystemCalculatorViewState
     final selectedSchedule = scheduleBloc.state.selectedSchedule;
 
     if (selectedSchedule is SelectedGroupSchedule) {
-      final subjectNames = selectedSchedule.schedule
-          .whereType<LessonSchedulePart>()
-          .map((e) => e.subject)
-          .toSet();
+      final subjectNames = selectedSchedule.schedule.whereType<LessonSchedulePart>().map((e) => e.subject).toSet();
 
       final selectedGroup = selectedSchedule.group.name;
 
@@ -191,8 +186,7 @@ class SubjectsListView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final selectedSchedule =
-        context.watch<ScheduleBloc>().state.selectedSchedule;
+    final selectedSchedule = context.watch<ScheduleBloc>().state.selectedSchedule;
 
     if (selectedSchedule is SelectedGroupSchedule) {
       return BlocBuilder<RatingSystemBloc, RatingSystemState>(

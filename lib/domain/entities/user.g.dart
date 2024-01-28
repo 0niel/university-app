@@ -17,9 +17,7 @@ User _$UserFromJson(Map<String, dynamic> json) => User(
       photoUrl: json['photoUrl'] as String,
       registerDate: json['registerDate'] as String,
       lastLoginDate: json['lastLoginDate'] as String,
-      students: (json['students'] as List<dynamic>)
-          .map((e) => Student.fromJson(e as Map<String, dynamic>))
-          .toList(),
+      students: (json['students'] as List<dynamic>).map((e) => Student.fromJson(e as Map<String, dynamic>)).toList(),
     );
 
 Map<String, dynamic> _$UserToJson(User instance) => <String, dynamic>{

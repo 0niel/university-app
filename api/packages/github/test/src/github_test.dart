@@ -15,9 +15,7 @@ void main() {
       path ??= uri.path;
       query ??= uri.query;
 
-      return uri.authority == authority &&
-          uri.path == path &&
-          uri.query == query;
+      return uri.authority == authority && uri.path == path && uri.query == query;
     });
   }
 
@@ -56,8 +54,7 @@ void main() {
           HttpStatus.ok,
         );
 
-        when(() => httpClient.get(any(), headers: any(named: 'headers')))
-            .thenAnswer(
+        when(() => httpClient.get(any(), headers: any(named: 'headers'))).thenAnswer(
           (_) async => response,
         );
 

@@ -21,8 +21,7 @@ class LessonModel extends Lesson {
           rooms: rooms,
         );
 
-  factory LessonModel.fromRawJson(String str) =>
-      LessonModel.fromJson(json.decode(str));
+  factory LessonModel.fromRawJson(String str) => LessonModel.fromJson(json.decode(str));
 
   String toRawJson() => json.encode(toJson());
 

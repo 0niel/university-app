@@ -35,8 +35,7 @@ class _ProfileScoresPageState extends State<ProfileScoresPage> {
   Widget _buildUserBlocBuilder() {
     return BlocBuilder<UserBloc, UserState>(
       builder: (context, userState) {
-        if (userState.status == UserStatus.authorized &&
-            userState.user != null) {
+        if (userState.status == UserStatus.authorized && userState.user != null) {
           return _buildScoresBloc(userState);
         } else {
           return const Center(
@@ -66,8 +65,7 @@ class _ProfileScoresPageState extends State<ProfileScoresPage> {
       },
       builder: (context, state) {
         if (state.scores != null && state.selectedSemester != null) {
-          _tabValueNotifier.value =
-              (int.tryParse(state.selectedSemester ?? '') ?? 1) - 1;
+          _tabValueNotifier.value = (int.tryParse(state.selectedSemester ?? '') ?? 1) - 1;
 
           return _buildScoresLoadedLayout(state);
         } else if (state.status == ScoresStatus.loading) {
@@ -145,15 +143,12 @@ class _ProfileScoresPageState extends State<ProfileScoresPage> {
 
   void _onTabClicked(BuildContext context, int index, String semester) {
     _tabValueNotifier.value = index;
-    context
-        .read<ScoresBloc>()
-        .add(ChangeSelectedScoresSemester(semester: semester));
+    context.read<ScoresBloc>().add(ChangeSelectedScoresSemester(semester: semester));
   }
 
   void _showScoresChartModal() {
     showModalBottomSheet(
-      shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
       backgroundColor: AppTheme.colorsOf(context).background02,
       context: context,
       builder: (context) => BlocBuilder<ScoresBloc, ScoresState>(
@@ -247,8 +242,7 @@ class _AverageRatingCard extends StatelessWidget {
     return BlocBuilder<ScoresBloc, ScoresState>(
       builder: (context, state) {
         final averageRating = state.averageRating;
-        final selectedSemester =
-            int.tryParse(state.selectedSemester ?? '') ?? 1;
+        final selectedSemester = int.tryParse(state.selectedSemester ?? '') ?? 1;
 
         if (state.status == ScoresStatus.loaded) {
           return Card(

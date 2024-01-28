@@ -8,16 +8,14 @@ void main() {
       expect(result, isEmpty);
     });
 
-    test('should return empty list when description does not match pattern',
-        () {
+    test('should return empty list when description does not match pattern', () {
       const description = 'Some random description';
       final result = parseTeachersFromDescription(description);
       expect(result, isEmpty);
     });
 
     test('should return list of teachers when description matches pattern', () {
-      const description =
-          'Преподаватели:\nБалак Павел Викторович\nМартыненков Борис Витальевич\n\n';
+      const description = 'Преподаватели:\nБалак Павел Викторович\nМартыненков Борис Витальевич\n\n';
       final result = parseTeachersFromDescription(description);
       expect(result, hasLength(2));
       expect(
@@ -28,8 +26,7 @@ void main() {
       );
     });
 
-    test('should return list of teachers even if there is only one teacher',
-        () {
+    test('should return list of teachers even if there is only one teacher', () {
       const description = 'Преподаватель:\nБалак Павел Викторович\n\n';
       final result = parseTeachersFromDescription(description);
       expect(result, hasLength(1));
@@ -37,8 +34,7 @@ void main() {
     });
 
     test('should return list of teachers even if there is additional info', () {
-      const description =
-          'Преподаватель: Конюхова Галина Павловна\n\nГруппа: РКБО-02-23 ';
+      const description = 'Преподаватель: Конюхова Галина Павловна\n\nГруппа: РКБО-02-23 ';
       final result = parseTeachersFromDescription(description);
       expect(result, hasLength(1));
       expect(
@@ -64,8 +60,7 @@ void main() {
       expect(result, isEmpty);
     });
 
-    test('should return empty list when description does not match pattern',
-        () {
+    test('should return empty list when description does not match pattern', () {
       const description = 'Some random description';
       final result = parseGroupsFromDescription(description);
       expect(result, isEmpty);
@@ -78,8 +73,7 @@ void main() {
       expect(result, containsAll(['Group 1', 'Group 2']));
     });
 
-    test('should return list of groups even if there is many groups and info',
-        () {
+    test('should return list of groups even if there is many groups and info', () {
       const description =
           'Преподаватель: Царёв Роман Юрьевич\n\nГруппы:\nИКБО-01-20 \nИКБО-02-20 \nИКБО-10-20 \nИКБО-16-20 \nИКБО-24-20 \nИКБО-30-20 \n';
       final result = parseGroupsFromDescription(description);
@@ -101,8 +95,7 @@ void main() {
     });
 
     test('should return list of classrooms when location matches pattern', () {
-      const location =
-          'А-110 (МП-1) А-153 (МП-1) Б-304 (МП-1) А-111 (МП-1) А-155 (МП-1) '
+      const location = 'А-110 (МП-1) А-153 (МП-1) Б-304 (МП-1) А-111 (МП-1) А-155 (МП-1) '
           'А-112 (МП-1) А-150 (МП-1) А-156 (МП-1) А-157 (МП-1) А-109 (МП-1) '
           'Б-308 (МП-1) Б-305 (МП-1) Б-306 (МП-1) Б-307 (МП-1)';
       final result = parseClassroomsFromLocation(location);
@@ -123,9 +116,7 @@ void main() {
     expect(result[0].campus?.shortName, 'В-78');
   });
 
-  test(
-      'shoud return classroom with null campus if campus has unknown short name',
-      () {
+  test('shoud return classroom with null campus if campus has unknown short name', () {
     const location = 'А-110 (З-11)';
     final result = parseClassroomsFromLocation(location);
     expect(result, hasLength(1));

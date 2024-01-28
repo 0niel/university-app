@@ -6,8 +6,7 @@ import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:rtu_mirea_app/presentation/typography.dart';
 
 class StoryItem extends StatelessWidget {
-  const StoryItem({Key? key, required this.stories, required this.storyIndex})
-      : super(key: key);
+  const StoryItem({Key? key, required this.stories, required this.storyIndex}) : super(key: key);
 
   final int storyIndex;
   final List<Story> stories;
@@ -31,14 +30,12 @@ class StoryItem extends StatelessWidget {
             image: DecorationImage(
               fit: BoxFit.cover,
               image: stories[storyIndex].preview.formats != null
-                  ? CachedNetworkImageProvider(
-                      stories[storyIndex].preview.formats!.small != null
-                          ? stories[storyIndex].preview.formats!.small!.url
-                          : stories[storyIndex].preview.formats!.thumbnail.url)
+                  ? CachedNetworkImageProvider(stories[storyIndex].preview.formats!.small != null
+                      ? stories[storyIndex].preview.formats!.small!.url
+                      : stories[storyIndex].preview.formats!.thumbnail.url)
                   : CachedNetworkImageProvider(stories[storyIndex].preview.url),
-              colorFilter: ColorFilter.mode(
-                  AppTheme.colorsOf(context).background02.withOpacity(0.15),
-                  BlendMode.dstOut),
+              colorFilter:
+                  ColorFilter.mode(AppTheme.colorsOf(context).background02.withOpacity(0.15), BlendMode.dstOut),
             ),
           ),
           child: Material(

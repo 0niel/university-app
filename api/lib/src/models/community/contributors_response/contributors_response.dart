@@ -10,8 +10,7 @@ class ContributorsResponse extends Equatable {
     required this.contributors,
   });
 
-  factory ContributorsResponse.fromJson(Map<String, dynamic> json) =>
-      _$ContriubutorsResponseFromJson(json);
+  factory ContributorsResponse.fromJson(Map<String, dynamic> json) => _$ContriubutorsResponseFromJson(json);
 
   final List<Contributor> contributors;
 

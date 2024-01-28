@@ -54,8 +54,7 @@ void main() {
 
         await firebaseNotificationsClient.unsubscribeFromCategory(category);
 
-        verify(() => firebaseMessaging.unsubscribeFromTopic(category))
-            .called(1);
+        verify(() => firebaseMessaging.unsubscribeFromTopic(category)).called(1);
       });
 
       test(

@@ -11,10 +11,8 @@ class GetAttendance extends UseCase<List<Attendance>, GetAttendanceParams> {
   GetAttendance(this.userRepository);
 
   @override
-  Future<Either<Failure, List<Attendance>>> call(
-      GetAttendanceParams params) async {
-    return await userRepository.getAattendance(
-        params.startDate, params.endDate);
+  Future<Either<Failure, List<Attendance>>> call(GetAttendanceParams params) async {
+    return await userRepository.getAattendance(params.startDate, params.endDate);
   }
 }
 

@@ -9,8 +9,7 @@ class AttendanceModel extends Attendance {
     required eventType,
   }) : super(date: date, time: time, eventType: eventType);
 
-  factory AttendanceModel.fromRawJson(String str) =>
-      AttendanceModel.fromJson(json.decode(str));
+  factory AttendanceModel.fromRawJson(String str) => AttendanceModel.fromJson(json.decode(str));
 
   factory AttendanceModel.fromJson(Map<String, dynamic> json) {
     return AttendanceModel(

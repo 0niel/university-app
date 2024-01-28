@@ -13,7 +13,6 @@ abstract class UserRepository {
   Future<Either<Failure, List<Announce>>> getAnnounces();
   Future<Either<Failure, List<Employee>>> getEmployees(String name);
   Future<Either<Failure, Map<String, Map<String, List<Score>>>>> getScores();
-  Future<Either<Failure, List<Attendance>>> getAattendance(
-      String dateStart, String dateEnd);
+  Future<Either<Failure, List<Attendance>>> getAattendance(String dateStart, String dateEnd);
   Future<Either<Failure, String>> getAuthToken();
 }

@@ -63,11 +63,7 @@ String transletirateGroupName(String groupName) {
     'Я': 'Ja',
   };
 
-  return groupName
-      .split('-')
-      .map((word) =>
-          word.split('').map((char) => mappings[char] ?? char).join(''))
-      .join('-');
+  return groupName.split('-').map((word) => word.split('').map((char) => mappings[char] ?? char).join('')).join('-');
 }
 
 /// Категория уведомлений. [toString] возвращает название категории, которое
@@ -154,8 +150,7 @@ class Topic extends Equatable {
   List<Object?> get props => [topic, groupName];
 }
 
-class NotificationPreferencesBloc
-    extends Bloc<NotificationPreferencesEvent, NotificationPreferencesState> {
+class NotificationPreferencesBloc extends Bloc<NotificationPreferencesEvent, NotificationPreferencesState> {
   NotificationPreferencesBloc({
     required NotificationsRepository notificationsRepository,
   })  : _notificationsRepository = notificationsRepository,
@@ -185,9 +180,8 @@ class NotificationPreferencesBloc
         : updatedCategories.add(event.category);
 
     try {
-      final categoriesToSubscribe = updatedCategories
-          .map((category) => Topic.fromVisibleName(category, event.group))
-          .toSet();
+      final categoriesToSubscribe =
+          updatedCategories.map((category) => Topic.fromVisibleName(category, event.group)).toSet();
 
       /// Добавляем в категории названия академической группы для подписки на
       /// уведомления для группы. Это обязательная категория, которую
@@ -204,8 +198,7 @@ class NotificationPreferencesBloc
         }
 
         final groupName = category.groupName!.toLowerCase();
-        final eventGroupName =
-            transletirateGroupName(event.group).toLowerCase();
+        final eventGroupName = transletirateGroupName(event.group).toLowerCase();
 
         return groupName != eventGroupName;
       });
@@ -217,8 +210,7 @@ class NotificationPreferencesBloc
         ),
       );
 
-      await _notificationsRepository.setCategoriesPreferences(
-          categoriesToSubscribe.map((e) => e.toString()).toSet());
+      await _notificationsRepository.setCategoriesPreferences(categoriesToSubscribe.map((e) => e.toString()).toSet());
     } catch (error, stackTrace) {
       emit(
         state.copyWith(status: NotificationPreferencesStatus.failure),
@@ -236,24 +228,20 @@ class NotificationPreferencesBloc
     try {
       Set<Topic> selectedCategories = await _notificationsRepository
           .fetchCategoriesPreferences()
-          .then((categories) =>
-              categories?.map((e) => Topic.fromString(e)).toSet() ?? {});
+          .then((categories) => categories?.map((e) => Topic.fromString(e)).toSet() ?? {});
 
       /// Подписываемся на уведомления для группы [event.group] и отписываемся
       /// от уведомлений для других групп.
       if (!selectedCategories.contains(
         Topic(topic: Category.group, groupName: event.group),
       )) {
-        selectedCategories = selectedCategories
-            .where((category) => category.topic != Category.group)
-            .toSet();
+        selectedCategories = selectedCategories.where((category) => category.topic != Category.group).toSet();
 
         selectedCategories.add(
           Topic(topic: Category.group, groupName: event.group),
         );
 
-        await _notificationsRepository.setCategoriesPreferences(
-            selectedCategories.map((e) => e.toString()).toSet());
+        await _notificationsRepository.setCategoriesPreferences(selectedCategories.map((e) => e.toString()).toSet());
       }
 
       await _notificationsRepository.toggleNotifications(
@@ -263,8 +251,7 @@ class NotificationPreferencesBloc
       emit(
         state.copyWith(
           status: NotificationPreferencesStatus.success,
-          selectedCategories:
-              selectedCategories.map((e) => e.getVisibleName()).toSet(),
+          selectedCategories: selectedCategories.map((e) => e.getVisibleName()).toSet(),
           categories: visibleCategoryNames.values.toSet(),
         ),
       );

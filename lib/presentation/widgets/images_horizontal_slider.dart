@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-
 class ImagesHorizontalSlider extends StatelessWidget {
-  const ImagesHorizontalSlider({Key? key, required this.images})
-      : super(key: key);
+  const ImagesHorizontalSlider({Key? key, required this.images}) : super(key: key);
 
   final List<String> images;
 

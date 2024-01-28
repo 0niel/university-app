@@ -6,8 +6,7 @@ import 'package:rtu_mirea_app/presentation/typography.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class ContributorCard extends StatelessWidget {
-  const ContributorCard({Key? key, required this.contributor})
-      : super(key: key);
+  const ContributorCard({Key? key, required this.contributor}) : super(key: key);
 
   final Contributor contributor;
 
@@ -44,8 +43,7 @@ class ContributorCard extends StatelessWidget {
           ),
         ),
         onTap: () {
-          launchUrl(Uri.parse(contributor.htmlUrl),
-              mode: LaunchMode.externalApplication);
+          launchUrl(Uri.parse(contributor.htmlUrl), mode: LaunchMode.externalApplication);
         },
       ),
     );

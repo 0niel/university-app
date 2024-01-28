@@ -28,8 +28,7 @@ class Classroom extends Equatable {
         name = 'Online';
 
   /// Converts a `Map<String, dynamic>` into a [Classroom] instance.
-  factory Classroom.fromJson(Map<String, dynamic> json) =>
-      _$ClassroomFromJson(json);
+  factory Classroom.fromJson(Map<String, dynamic> json) => _$ClassroomFromJson(json);
 
   /// The unique identifier of the classroom. This is used for identifying the
   /// classroom in the database and in the API.

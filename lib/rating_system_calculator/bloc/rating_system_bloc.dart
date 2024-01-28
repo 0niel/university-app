@@ -9,8 +9,7 @@ part 'rating_system_state.dart';
 
 typedef Group = String;
 
-class RatingSystemBloc
-    extends HydratedBloc<RatingSystemEvent, RatingSystemState> {
+class RatingSystemBloc extends HydratedBloc<RatingSystemEvent, RatingSystemState> {
   RatingSystemBloc() : super(const RatingSystemState()) {
     on<UpdateSubjectsByCurrentSchedule>(_onUpdateSubjectsByCurrentSchedule);
   }
@@ -25,8 +24,7 @@ class RatingSystemBloc
 
     for (final actualSubject in actualSubjects) {
       final index = state.subjects.indexWhere(
-        (element) =>
-            element.$2.name == actualSubject.name && element.$1 == event.group,
+        (element) => element.$2.name == actualSubject.name && element.$1 == event.group,
       );
 
       if (index == -1) {
@@ -36,9 +34,7 @@ class RatingSystemBloc
       } else {
         final subject = state.subjects[index];
 
-        if (actualSubject.mainScore == 0 &&
-            actualSubject.additionalScore == 0 &&
-            actualSubject.classScore == 0) {
+        if (actualSubject.mainScore == 0 && actualSubject.additionalScore == 0 && actualSubject.classScore == 0) {
           state.subjects.removeAt(index);
         } else {
           newSubjects.add(subject);
@@ -54,8 +50,7 @@ class RatingSystemBloc
   }
 
   @override
-  RatingSystemState? fromJson(Map<String, dynamic> json) =>
-      RatingSystemState.fromJson(json);
+  RatingSystemState? fromJson(Map<String, dynamic> json) => RatingSystemState.fromJson(json);
 
   @override
   Map<String, dynamic>? toJson(RatingSystemState state) => state.toJson();

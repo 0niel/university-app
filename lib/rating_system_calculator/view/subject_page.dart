@@ -37,12 +37,10 @@ class RatingSystemCalculatorView extends StatefulWidget {
   final Subject subject;
 
   @override
-  State<RatingSystemCalculatorView> createState() =>
-      _RatingSystemCalculatorViewState();
+  State<RatingSystemCalculatorView> createState() => _RatingSystemCalculatorViewState();
 }
 
-class _RatingSystemCalculatorViewState
-    extends State<RatingSystemCalculatorView> {
+class _RatingSystemCalculatorViewState extends State<RatingSystemCalculatorView> {
   @override
   void initState() {
     super.initState();

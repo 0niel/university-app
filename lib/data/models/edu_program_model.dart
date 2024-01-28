@@ -17,8 +17,7 @@ class EduProgramModel extends EduProgram {
           type: type,
         );
 
-  factory EduProgramModel.fromRawJson(String str) =>
-      EduProgramModel.fromJson(json.decode(str));
+  factory EduProgramModel.fromRawJson(String str) => EduProgramModel.fromJson(json.decode(str));
 
   factory EduProgramModel.fromJson(Map<String, dynamic> json) {
     return EduProgramModel(

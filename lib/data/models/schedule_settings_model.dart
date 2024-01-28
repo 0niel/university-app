@@ -12,13 +12,11 @@ class ScheduleSettingsModel extends ScheduleSettings {
           calendarFormat: calendarFormat,
         );
 
-  factory ScheduleSettingsModel.fromRawJson(String str) =>
-      ScheduleSettingsModel.fromJson(json.decode(str));
+  factory ScheduleSettingsModel.fromRawJson(String str) => ScheduleSettingsModel.fromJson(json.decode(str));
 
   String toRawJson() => json.encode(toJson());
 
-  factory ScheduleSettingsModel.fromJson(Map<String, dynamic> json) =>
-      ScheduleSettingsModel(
+  factory ScheduleSettingsModel.fromJson(Map<String, dynamic> json) => ScheduleSettingsModel(
         showEmptyLessons: json["show_empty_lessons"],
         showLessonsNumbers: json["show_lessons_numbers"],
         calendarFormat: json["calendar_format"],

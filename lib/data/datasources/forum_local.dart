@@ -16,9 +16,7 @@ class ForumLocalDataImpl implements ForumLocalData {
   Future<List<ForumMemberModel>> getPatronsFromCache() {
     final jsonPatronsList = sharedPreferences.getStringList('forum_patrons');
     if (jsonPatronsList != null) {
-      return Future.value(jsonPatronsList
-          .map((jsonPatron) => ForumMemberModel.fromRawJson(jsonPatron))
-          .toList());
+      return Future.value(jsonPatronsList.map((jsonPatron) => ForumMemberModel.fromRawJson(jsonPatron)).toList());
     } else {
       throw CacheException('The list of patrons is not set');
     }
@@ -26,9 +24,7 @@ class ForumLocalDataImpl implements ForumLocalData {
 
   @override
   Future<void> setPatronsToCache(List<ForumMemberModel> patrons) {
-    final List<String> jsonContributorsList =
-        patrons.map((contributor) => contributor.toRawJson()).toList();
-    return sharedPreferences.setStringList(
-        'forum_patrons', jsonContributorsList);
+    final List<String> jsonContributorsList = patrons.map((contributor) => contributor.toRawJson()).toList();
+    return sharedPreferences.setStringList('forum_patrons', jsonContributorsList);
   }
 }

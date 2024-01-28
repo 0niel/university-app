@@ -53,11 +53,9 @@ class ProfilePage extends StatelessWidget {
                   },
                   bloc: context.read<UserBloc>()..add(Started()),
                   builder: (context, state) {
-                    if (state.status == UserStatus.unauthorized &&
-                        state.user == null) {
+                    if (state.status == UserStatus.unauthorized && state.user == null) {
                       return const _InitialProfileStatePage();
-                    } else if (state.status == UserStatus.loading ||
-                        state.status == UserStatus.initial) {
+                    } else if (state.status == UserStatus.loading || state.status == UserStatus.initial) {
                       return ConstrainedBox(
                         constraints: BoxConstraints(
                           minHeight: viewportConstraints.maxHeight,
@@ -69,8 +67,7 @@ class ProfilePage extends StatelessWidget {
                     } else if (state.user != null) {
                       BlocProvider.of<NotificationPreferencesBloc>(context).add(
                         InitialCategoriesPreferencesRequested(
-                            group: UserBloc.getActiveStudent(state.user!)
-                                .academicGroup),
+                            group: UserBloc.getActiveStudent(state.user!).academicGroup),
                       );
                       return _UserLoggedInView(user: state.user!);
                     } else {
@@ -99,8 +96,7 @@ class _UserLoggedInView extends StatelessWidget {
       children: [
         CircleAvatar(
           radius: 68,
-          backgroundImage:
-              Image.network('https://lk.mirea.ru${user.photoUrl}').image,
+          backgroundImage: Image.network('https://lk.mirea.ru${user.photoUrl}').image,
         ),
         Padding(
           padding: const EdgeInsets.only(top: 13, bottom: 4),
@@ -112,9 +108,7 @@ class _UserLoggedInView extends StatelessWidget {
         Text(
           user.login,
           style: AppTextStyle.titleS.copyWith(
-            color: AdaptiveTheme.of(context).mode.isDark
-                ? AppTheme.colors.colorful04
-                : AppTheme.colors.primary,
+            color: AdaptiveTheme.of(context).mode.isDark ? AppTheme.colors.colorful04 : AppTheme.colors.primary,
           ),
         ),
         const SizedBox(height: 12),
@@ -149,9 +143,7 @@ class _UserLoggedInView extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         SettingsButton(
-            text: 'Зачетная книжка',
-            icon: Icons.menu_book_rounded,
-            onClick: () => context.go('/profile/scores')),
+            text: 'Зачетная книжка', icon: Icons.menu_book_rounded, onClick: () => context.go('/profile/scores')),
         const SizedBox(height: 8),
         SettingsButton(
           text: 'О приложении',
@@ -159,10 +151,7 @@ class _UserLoggedInView extends StatelessWidget {
           onClick: () => context.go('/profile/about'),
         ),
         const SizedBox(height: 8),
-        SettingsButton(
-            text: 'Настройки',
-            icon: Icons.settings_rounded,
-            onClick: () => context.go('/profile/settings')),
+        SettingsButton(text: 'Настройки', icon: Icons.settings_rounded, onClick: () => context.go('/profile/settings')),
         const SizedBox(height: 8),
         ColorfulButton(
             text: 'Выйти',

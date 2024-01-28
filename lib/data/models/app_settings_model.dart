@@ -13,8 +13,7 @@ class AppSettingsModel extends AppSettings {
           theme: theme,
         );
 
-  factory AppSettingsModel.fromRawJson(String str) =>
-      AppSettingsModel.fromJson(json.decode(str));
+  factory AppSettingsModel.fromRawJson(String str) => AppSettingsModel.fromJson(json.decode(str));
 
   factory AppSettingsModel.fromJson(Map<String, dynamic> json) {
     return AppSettingsModel(

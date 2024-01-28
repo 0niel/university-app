@@ -19,8 +19,7 @@ class ScheduleComment extends Equatable {
   });
 
   /// {@macro from_json}
-  factory ScheduleComment.fromJson(Map<String, dynamic> json) =>
-      _$ScheduleCommentFromJson(json);
+  factory ScheduleComment.fromJson(Map<String, dynamic> json) => _$ScheduleCommentFromJson(json);
 
   /// {@macro to_json}
   Map<String, dynamic> toJson() => _$ScheduleCommentToJson(this);

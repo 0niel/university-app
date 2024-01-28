@@ -59,8 +59,7 @@ class SearchBloc extends HydratedBloc<SearchEvent, SearchState> {
     on<RemoveQueryFromSearchHistory>(
       (event, emit) {
         emit(state.copyWith(
-          searchHisoty:
-              state.searchHisoty.where((e) => e != event.query).toList(),
+          searchHisoty: state.searchHisoty.where((e) => e != event.query).toList(),
         ));
       },
     );
@@ -99,8 +98,7 @@ class SearchBloc extends HydratedBloc<SearchEvent, SearchState> {
   }
 
   @override
-  SearchState? fromJson(Map<String, dynamic> json) =>
-      SearchState.fromJson(json);
+  SearchState? fromJson(Map<String, dynamic> json) => SearchState.fromJson(json);
 
   @override
   Map<String, dynamic>? toJson(SearchState state) => state.toJson();

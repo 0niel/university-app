@@ -12,8 +12,7 @@ class GetNews extends UseCase<List<NewsItem>, GetNewsParams> {
 
   @override
   Future<Either<Failure, List<NewsItem>>> call(GetNewsParams params) async {
-    return await newsRepository.getNews(
-        params.page, params.pageSize, params.isImportant, params.tag);
+    return await newsRepository.getNews(params.page, params.pageSize, params.isImportant, params.tag);
   }
 }
 

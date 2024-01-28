@@ -81,9 +81,7 @@ class _ScheduleDetailsPageState extends State<ScheduleDetailsPage> {
     final bloc = context.read<ScheduleBloc>();
 
     return bloc.state.comments.firstWhereOrNull(
-      (comment) =>
-          widget.lesson.dates.contains(comment.lessonDate) &&
-          comment.lessonBells == widget.lesson.lessonBells,
+      (comment) => widget.lesson.dates.contains(comment.lessonDate) && comment.lessonBells == widget.lesson.lessonBells,
     );
   }
 
@@ -147,9 +145,8 @@ class _ScheduleDetailsPageState extends State<ScheduleDetailsPage> {
               controller: _textController,
               errorText: _textErrorText,
               maxLines: 5,
-              fillColor: AdaptiveTheme.of(context).mode.isDark
-                  ? AppTheme.colorsOf(context).background03
-                  : Colors.white),
+              fillColor:
+                  AdaptiveTheme.of(context).mode.isDark ? AppTheme.colorsOf(context).background03 : Colors.white),
         ),
       ),
       const Divider(),
@@ -205,8 +202,7 @@ class _ScheduleDetailsPageState extends State<ScheduleDetailsPage> {
             onTap: () => context.go('/schedule/search', extra: classroom.name),
           ),
           const Divider(),
-          if (classroom.campus != null &&
-              classroom.campus?.latitude != null) ...[
+          if (classroom.campus != null && classroom.campus?.latitude != null) ...[
             ListTile(
               title: Text('Кампус'.toUpperCase()),
               subtitle: Text(classroom.campus!.name),
@@ -281,8 +277,7 @@ class _ScheduleDetailsPageState extends State<ScheduleDetailsPage> {
     return ListTile(
       title: Padding(
         padding: EdgeInsets.symmetric(
-          horizontal:
-              Theme.of(context).listTileTheme.contentPadding!.horizontal / 2,
+          horizontal: Theme.of(context).listTileTheme.contentPadding!.horizontal / 2,
         ),
         child: Text('Преподаватели'.toUpperCase()),
       ),

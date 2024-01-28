@@ -45,8 +45,7 @@ class ScoresBloc extends HydratedBloc<ScoresEvent, ScoresState> {
     Map<String, List<Score>> newMap = {};
 
     final sortedKeys = scores.keys.toList()
-      ..sort((a, b) =>
-          int.parse(a.split(' ')[0]).compareTo(int.parse(b.split(' ')[0])));
+      ..sort((a, b) => int.parse(a.split(' ')[0]).compareTo(int.parse(b.split(' ')[0])));
 
     for (final key in sortedKeys) {
       newMap[key] = scores[key]!;
@@ -65,8 +64,7 @@ class ScoresBloc extends HydratedBloc<ScoresEvent, ScoresState> {
       final scores = await getScores();
       final studentCode = event.studentCode;
 
-      scores.fold((failure) => emit(state.copyWith(status: ScoresStatus.error)),
-          (result) {
+      scores.fold((failure) => emit(state.copyWith(status: ScoresStatus.error)), (result) {
         final scores = result[studentCode];
 
         if (scores == null) {
@@ -86,8 +84,7 @@ class ScoresBloc extends HydratedBloc<ScoresEvent, ScoresState> {
   }
 
   @override
-  ScoresState? fromJson(Map<String, dynamic> json) =>
-      ScoresState.fromJson(json);
+  ScoresState? fromJson(Map<String, dynamic> json) => ScoresState.fromJson(json);
 
   @override
   Map<String, dynamic>? toJson(ScoresState state) => state.toJson();

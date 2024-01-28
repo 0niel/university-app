@@ -11,8 +11,7 @@ abstract class CalendarUtils {
   }
 
   /// Returns the number of the current week using the current date
-  static int getCurrentWeek(
-      {DateTime? mCurrentDate, final Clock clock = const Clock()}) {
+  static int getCurrentWeek({DateTime? mCurrentDate, final Clock clock = const Clock()}) {
     DateTime currentDate = mCurrentDate ?? clock.now();
     DateTime startDate = getSemesterStart(mCurrentDate: currentDate);
 
@@ -37,12 +36,10 @@ abstract class CalendarUtils {
     DateTime semStart = getSemesterStart(mCurrentDate: mCurrentDate);
 
     // Понедельник недели начала семестра
-    var firstDayOfWeek =
-        semStart.subtract(Duration(days: semStart.weekday - 1));
+    var firstDayOfWeek = semStart.subtract(Duration(days: semStart.weekday - 1));
 
     // Прибавляем сколько дней прошло с начала семестра
-    var firstDayOfChosenWeek =
-        firstDayOfWeek.add(Duration(days: (week - 1) * 7));
+    var firstDayOfChosenWeek = firstDayOfWeek.add(Duration(days: (week - 1) * 7));
 
     // Добавляем дни в массив, увеличивая счётчик на 1 день
     for (int i = 0; i < 7; ++i) {
@@ -56,15 +53,12 @@ abstract class CalendarUtils {
   ///
   /// [mCurrentDate] is the date for which
   /// the beginning of the semester will be calculated.
-  static DateTime getSemesterStart(
-      {DateTime? mCurrentDate, final Clock clock = const Clock()}) {
-    return _CurrentSemesterStart.getCurrentSemesterStart(
-        mCurrentDate: mCurrentDate, clock: clock);
+  static DateTime getSemesterStart({DateTime? mCurrentDate, final Clock clock = const Clock()}) {
+    return _CurrentSemesterStart.getCurrentSemesterStart(mCurrentDate: mCurrentDate, clock: clock);
   }
 
   /// Get the last date of the semester
-  static DateTime getSemesterLastDay(
-      {DateTime? mCurrentDate, final Clock clock = const Clock()}) {
+  static DateTime getSemesterLastDay({DateTime? mCurrentDate, final Clock clock = const Clock()}) {
     return getDaysInWeek(
         kMaxWeekInSemester,
         _CurrentSemesterStart.getCurrentSemesterStart(
@@ -98,8 +92,7 @@ abstract class _CurrentSemesterStart {
   /// Get the first Monday of the month from which the current semester begins
   static DateTime _getFirstMondayOfMonth(int year, int month) {
     var firstOfMonth = DateTime(year, month, 1);
-    var firstMonday = firstOfMonth.add(
-        Duration(days: (7 - (firstOfMonth.weekday - DateTime.monday)) % 7));
+    var firstMonday = firstOfMonth.add(Duration(days: (7 - (firstOfMonth.weekday - DateTime.monday)) % 7));
     return firstMonday;
   }
 
@@ -118,8 +111,7 @@ abstract class _CurrentSemesterStart {
   /// For the first semester it is September 1
   /// For the second semester it is February 9th
   static DateTime _getExpectedSemesterStart(DateTime currentDate) {
-    if (currentDate.month >= DateTime.september ||
-        (currentDate.month == DateTime.august && currentDate.day >= 25)) {
+    if (currentDate.month >= DateTime.september || (currentDate.month == DateTime.august && currentDate.day >= 25)) {
       return DateTime(currentDate.year, DateTime.september, 1);
     } else {
       return DateTime(currentDate.year, DateTime.february, 9);
@@ -127,8 +119,7 @@ abstract class _CurrentSemesterStart {
   }
 
   /// Get the start date of the current semester
-  static DateTime getCurrentSemesterStart(
-      {DateTime? mCurrentDate, final Clock clock = const Clock()}) {
+  static DateTime getCurrentSemesterStart({DateTime? mCurrentDate, final Clock clock = const Clock()}) {
     DateTime currentDate = mCurrentDate ?? clock.now();
     // Expected start date of the semester
     DateTime expectedStart = _getExpectedSemesterStart(currentDate);

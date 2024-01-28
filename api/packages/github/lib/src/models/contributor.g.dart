@@ -13,8 +13,7 @@ Contributor _$ContributorFromJson(Map<String, dynamic> json) => Contributor(
       contributions: json['contributions'] as int,
     );
 
-Map<String, dynamic> _$ContributorToJson(Contributor instance) =>
-    <String, dynamic>{
+Map<String, dynamic> _$ContributorToJson(Contributor instance) => <String, dynamic>{
       'login': instance.login,
       'avatar_url': instance.avatarUrl,
       'html_url': instance.htmlUrl,

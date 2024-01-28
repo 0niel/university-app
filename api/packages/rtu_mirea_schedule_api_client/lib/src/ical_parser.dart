@@ -209,18 +209,15 @@ class ICalParser {
         );
       }
 
-      final teachers =
-          List<String>.from(data['x-meta-teacher'] as Iterable<dynamic>? ?? []);
+      final teachers = List<String>.from(data['x-meta-teacher'] as Iterable<dynamic>? ?? []);
 
-      final groups =
-          List<String>.from(data['x-meta-group'] as Iterable<dynamic>? ?? []);
+      final groups = List<String>.from(data['x-meta-group'] as Iterable<dynamic>? ?? []);
 
       final location = List<String>.from(
         data['x-meta-auditorium'] as Iterable<dynamic>? ?? [],
       );
 
-      final classrooms =
-          location.map(parseClassroomsFromLocation).flattened.toList();
+      final classrooms = location.map(parseClassroomsFromLocation).flattened.toList();
 
       final type = data['x-meta-lesson_type'] as String?;
 
@@ -233,9 +230,7 @@ class ICalParser {
         classrooms: classrooms,
         lessonBells: defaultLessonsBells
             .where(
-              (element) =>
-                  element.startTime == datesAndTime.timeStart &&
-                  element.endTime == datesAndTime.timeEnd,
+              (element) => element.startTime == datesAndTime.timeStart && element.endTime == datesAndTime.timeEnd,
             )
             .first,
         dates: datesAndTime.dates,
@@ -281,8 +276,7 @@ class ICalParser {
         final lessonDates = lesson.dates;
 
         final dates = lessonDates.where((date) {
-          return !excludeDates
-              .any((excludeDate) => date.isSameDate(excludeDate));
+          return !excludeDates.any((excludeDate) => date.isSameDate(excludeDate));
         }).toList();
 
         return lesson.copyWith(dates: dates);
@@ -330,12 +324,8 @@ class ICalParser {
 
     // Remove timezone (to utc) without changing the time. It is necessary
     // because the RRule package does not support timezones.
-    dtstartObject = dtstartObject
-        .add(Duration(hours: dtstartObject.timeZoneOffset.inHours))
-        .toUtc();
-    dtendObject = dtendObject
-        .add(Duration(hours: dtendObject.timeZoneOffset.inHours))
-        .toUtc();
+    dtstartObject = dtstartObject.add(Duration(hours: dtstartObject.timeZoneOffset.inHours)).toUtc();
+    dtendObject = dtendObject.add(Duration(hours: dtendObject.timeZoneOffset.inHours)).toUtc();
 
     final rrule = data['rrule'] as String?;
 

@@ -9,8 +9,7 @@ class AnnounceModel extends Announce {
     required date,
   }) : super(name: name, text: text, date: date);
 
-  factory AnnounceModel.fromRawJson(String str) =>
-      AnnounceModel.fromJson(json.decode(str));
+  factory AnnounceModel.fromRawJson(String str) => AnnounceModel.fromJson(json.decode(str));
 
   factory AnnounceModel.fromJson(Map<String, dynamic> json) {
     return AnnounceModel(

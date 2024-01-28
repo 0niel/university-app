@@ -69,12 +69,9 @@ class _SchedulePageState extends State<SchedulePage> {
           );
         }
       },
-      buildWhen: (previous, current) =>
-          current.status != ScheduleStatus.failure &&
-          current.selectedSchedule != null,
+      buildWhen: (previous, current) => current.status != ScheduleStatus.failure && current.selectedSchedule != null,
       builder: (context, state) {
-        if (state.selectedSchedule == null &&
-            state.status != ScheduleStatus.loading) {
+        if (state.selectedSchedule == null && state.status != ScheduleStatus.loading) {
           return NoSelectedScheduleMessage(onTap: () {
             context.go('/schedule/search');
           });
@@ -82,8 +79,7 @@ class _SchedulePageState extends State<SchedulePage> {
           return const Center(
             child: CircularProgressIndicator(),
           );
-        } else if (state.status == ScheduleStatus.failure &&
-            state.selectedSchedule == null) {
+        } else if (state.status == ScheduleStatus.failure && state.selectedSchedule == null) {
           return LoadingErrorMessage(onTap: () {
             context.go('/schedule/search');
           });
@@ -112,8 +108,7 @@ class _SchedulePageState extends State<SchedulePage> {
                             title: 'Управление расписанием',
                             description:
                                 'Редактирование сохраненных расписаний и добавление новых, а также настройки отображения расписания.',
-                            backgroundColor:
-                                AppTheme.colorsOf(context).background03,
+                            backgroundColor: AppTheme.colorsOf(context).background03,
                           );
                         },
                       ),
@@ -136,8 +131,7 @@ class _SchedulePageState extends State<SchedulePage> {
               body: EventsPageView(
                 controller: _schedulePageController,
                 itemBuilder: (context, index) {
-                  final day =
-                      Calendar.firstCalendarDay.add(Duration(days: index));
+                  final day = Calendar.firstCalendarDay.add(Duration(days: index));
                   final schedules = Calendar.getSchedulePartsByDay(
                     schedule: state.selectedSchedule?.schedule ?? [],
                     day: day,
@@ -148,16 +142,14 @@ class _SchedulePageState extends State<SchedulePage> {
                   );
 
                   if (holiday != null) {
-                    return HolidayPage(
-                        title: (holiday as HolidaySchedulePart).title);
+                    return HolidayPage(title: (holiday as HolidaySchedulePart).title);
                   }
 
                   if (day.weekday == DateTime.sunday) {
                     return const HolidayPage(title: 'Выходной');
                   }
 
-                  final lessons =
-                      schedules.whereType<LessonSchedulePart>().toList();
+                  final lessons = schedules.whereType<LessonSchedulePart>().toList();
 
                   if (state.showEmptyLessons) {
                     return ListView.builder(

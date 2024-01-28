@@ -17,8 +17,7 @@ final List<String> defaultHosts = [
 /// If the device is connected to the internet, the [connectionChange] stream
 /// will emit true.
 class InternetConnectionChecker {
-  static final InternetConnectionChecker _singleton =
-      InternetConnectionChecker._internal();
+  static final InternetConnectionChecker _singleton = InternetConnectionChecker._internal();
   InternetConnectionChecker._internal();
 
   static InternetConnectionChecker getInstance() => _singleton;

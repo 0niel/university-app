@@ -19,8 +19,7 @@ class EduProgram extends Equatable {
     required this.type,
   });
 
-  factory EduProgram.fromJson(Map<String, dynamic> json) =>
-      _$EduProgramFromJson(json);
+  factory EduProgram.fromJson(Map<String, dynamic> json) => _$EduProgramFromJson(json);
 
   Map<String, dynamic> toJson() => _$EduProgramToJson(this);
 

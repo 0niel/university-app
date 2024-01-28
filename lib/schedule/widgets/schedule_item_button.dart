@@ -30,9 +30,7 @@ class SelectedScheduleItemButton extends StatelessWidget {
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
               width: 1.5,
-              color: isSelected
-                  ? AppTheme.colors.colorful05
-                  : AppTheme.colors.colorful06,
+              color: isSelected ? AppTheme.colors.colorful05 : AppTheme.colors.colorful06,
             ),
           ),
           child: Row(
@@ -57,12 +55,9 @@ class SelectedScheduleItemButton extends StatelessWidget {
                       }
                     },
                     shape: const CircleBorder(),
-                    constraints:
-                        const BoxConstraints(minWidth: 36.0, minHeight: 36.0),
+                    constraints: const BoxConstraints(minWidth: 36.0, minHeight: 36.0),
                     child: Icon(Icons.refresh_rounded,
-                        color: isSelected
-                            ? AppTheme.colors.colorful05
-                            : AppTheme.colors.colorful06),
+                        color: isSelected ? AppTheme.colors.colorful05 : AppTheme.colors.colorful06),
                   ),
                 ],
               ),
@@ -101,8 +96,7 @@ class SelectedScheduleItemButton extends StatelessWidget {
                     }
                   },
                   shape: const CircleBorder(),
-                  constraints:
-                      const BoxConstraints(minWidth: 36.0, minHeight: 36.0),
+                  constraints: const BoxConstraints(minWidth: 36.0, minHeight: 36.0),
                   child: const Icon(Icons.check_rounded),
                 ),
                 RawMaterialButton(
@@ -112,8 +106,7 @@ class SelectedScheduleItemButton extends StatelessWidget {
                     }
                   },
                   shape: const CircleBorder(),
-                  constraints:
-                      const BoxConstraints(minWidth: 36.0, minHeight: 36.0),
+                  constraints: const BoxConstraints(minWidth: 36.0, minHeight: 36.0),
                   child: const Icon(Icons.delete_rounded),
                 ),
               ],

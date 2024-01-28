@@ -15,8 +15,7 @@ Student _$StudentFromJson(Map<String, dynamic> json) => Student(
       educationEndDate: json['educationEndDate'] as String,
       academicGroup: json['academicGroup'] as String,
       code: json['code'] as String,
-      eduProgram:
-          EduProgram.fromJson(json['eduProgram'] as Map<String, dynamic>),
+      eduProgram: EduProgram.fromJson(json['eduProgram'] as Map<String, dynamic>),
       status: json['status'] as String,
     );
 

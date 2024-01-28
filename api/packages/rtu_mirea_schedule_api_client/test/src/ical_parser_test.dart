@@ -22,9 +22,7 @@ void main() {
       expect(iCalParser, isNotNull);
     });
 
-    test(
-        'parse throws InvalidICalendarDataException if iCalendar data is invalid',
-        () {
+    test('parse throws InvalidICalendarDataException if iCalendar data is invalid', () {
       expect(
         () => ICalParser.fromString(''),
         throwsA(isA<InvalidICalendarDataException>()),

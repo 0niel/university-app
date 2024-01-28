@@ -65,8 +65,7 @@ class _ImagesViewGalleryState extends State<ImagesViewGallery> {
                 return PhotoViewGalleryPageOptions(
                   imageProvider: NetworkImage(widget.imageUrls[index]),
                   initialScale: PhotoViewComputedScale.contained * 0.8,
-                  heroAttributes:
-                      PhotoViewHeroAttributes(tag: widget.imageUrls[index]),
+                  heroAttributes: PhotoViewHeroAttributes(tag: widget.imageUrls[index]),
                 );
               },
               itemCount: widget.imageUrls.length,
@@ -75,17 +74,12 @@ class _ImagesViewGalleryState extends State<ImagesViewGallery> {
                   width: 20.0,
                   height: 20.0,
                   child: CircularProgressIndicator(
-                    value: event == null
-                        ? 0
-                        : event.cumulativeBytesLoaded /
-                            event.expectedTotalBytes!,
+                    value: event == null ? 0 : event.cumulativeBytesLoaded / event.expectedTotalBytes!,
                   ),
                 ),
               ),
-              backgroundDecoration: widget.imageUrls.length == 1
-                  ? BoxDecoration(
-                      color: AppTheme.colorsOf(context).background01)
-                  : null,
+              backgroundDecoration:
+                  widget.imageUrls.length == 1 ? BoxDecoration(color: AppTheme.colorsOf(context).background01) : null,
               pageController: _pageController,
             ),
           ],

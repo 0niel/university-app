@@ -35,16 +35,13 @@ class AttendanceBloc extends Bloc<AttendanceEvent, AttendanceState> {
     return count;
   }
 
-  void _onLoadAttendance(
-      LoadAttendance event, Emitter<AttendanceState> emit) async {
+  void _onLoadAttendance(LoadAttendance event, Emitter<AttendanceState> emit) async {
     emit(AttendanceLoading());
 
-    final announces = await getAttendance(
-        GetAttendanceParams(event.startDate, event.endDate));
+    final announces = await getAttendance(GetAttendanceParams(event.startDate, event.endDate));
 
     announces.fold((failure) => emit(AttendanceLoadError()), (result) {
-      emit(AttendanceLoaded(
-          attendance: result, visitsCount: _getVisistsCount(result)));
+      emit(AttendanceLoaded(attendance: result, visitsCount: _getVisistsCount(result)));
     });
   }
 }

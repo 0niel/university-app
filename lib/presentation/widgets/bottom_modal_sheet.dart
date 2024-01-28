@@ -28,8 +28,7 @@ class BottomModalSheet extends StatelessWidget {
       showDragHandle: true,
       isDismissible: true,
       isScrollControlled: true,
-      backgroundColor:
-          backgroundColor ?? AppTheme.colorsOf(context).background02,
+      backgroundColor: backgroundColor ?? AppTheme.colorsOf(context).background02,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(
           top: Radius.circular(24),

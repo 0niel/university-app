@@ -37,25 +37,21 @@ class _LabelledInputState extends State<LabelledInput> {
         Text(
           widget.label.toUpperCase(),
           textAlign: TextAlign.left,
-          style:
-              AppTextStyle.chip.copyWith(color: AppTheme.colors.deactiveDarker),
+          style: AppTextStyle.chip.copyWith(color: AppTheme.colors.deactiveDarker),
         ),
         TextField(
           controller: widget.controller,
           autofillHints: [
-            if (widget.placeholder == "Пароль") ...[
-              AutofillHints.password
-            ] else if (widget.placeholder == "Email")
+            if (widget.placeholder == "Пароль") ...[AutofillHints.password] else if (widget.placeholder == "Email")
               AutofillHints.email,
           ],
           style: AppTextStyle.title,
           onTap: () {},
           keyboardType: widget.keyboardType,
-          obscureText: (widget.placeholder == 'Пароль' ||
-                      widget.placeholder == 'Введите пароль') &&
-                  _showPassword == false
-              ? true
-              : false,
+          obscureText:
+              (widget.placeholder == 'Пароль' || widget.placeholder == 'Введите пароль') && _showPassword == false
+                  ? true
+                  : false,
           decoration: InputDecoration(
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 0,
@@ -69,9 +65,7 @@ class _LabelledInputState extends State<LabelledInput> {
                       });
                     },
                     child: Icon(
-                      _showPassword
-                          ? FontAwesomeIcons.eye
-                          : FontAwesomeIcons.eyeSlash,
+                      _showPassword ? FontAwesomeIcons.eye : FontAwesomeIcons.eyeSlash,
                       size: 15.0,
                       color: AppTheme.colors.deactiveDarker,
                     ))
@@ -79,12 +73,10 @@ class _LabelledInputState extends State<LabelledInput> {
                     onTap: () {
                       widget.controller.text = "";
                     },
-                    child: Icon(FontAwesomeIcons.solidCircleXmark,
-                        size: 15, color: AppTheme.colors.deactiveDarker),
+                    child: Icon(FontAwesomeIcons.solidCircleXmark, size: 15, color: AppTheme.colors.deactiveDarker),
                   ),
             hintText: widget.placeholder,
-            hintStyle:
-                AppTextStyle.titleM.copyWith(color: AppTheme.colors.deactive),
+            hintStyle: AppTextStyle.titleM.copyWith(color: AppTheme.colors.deactive),
             focusedBorder: UnderlineInputBorder(
               borderSide: BorderSide(color: AppTheme.colors.colorful05),
             ),

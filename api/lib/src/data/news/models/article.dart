@@ -16,8 +16,7 @@ class Article extends Equatable {
   });
 
   /// Converts a `Map<String, dynamic>` into a [Article] instance.
-  factory Article.fromJson(Map<String, dynamic> json) =>
-      _$ArticleFromJson(json);
+  factory Article.fromJson(Map<String, dynamic> json) => _$ArticleFromJson(json);
 
   final String title;
 
@@ -35,6 +34,5 @@ class Article extends Equatable {
   Map<String, dynamic> toJson() => _$ArticleToJson(this);
 
   @override
-  List<Object> get props =>
-      [title, htmlContent, publishedAt, imageUrls, categories];
+  List<Object> get props => [title, htmlContent, publishedAt, imageUrls, categories];
 }

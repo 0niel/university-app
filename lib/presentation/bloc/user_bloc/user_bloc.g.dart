@@ -7,11 +7,8 @@ part of 'user_bloc.dart';
 // **************************************************************************
 
 UserState _$UserStateFromJson(Map<String, dynamic> json) => UserState(
-      user: json['user'] == null
-          ? null
-          : User.fromJson(json['user'] as Map<String, dynamic>),
-      status: $enumDecodeNullable(_$UserStatusEnumMap, json['status']) ??
-          UserStatus.initial,
+      user: json['user'] == null ? null : User.fromJson(json['user'] as Map<String, dynamic>),
+      status: $enumDecodeNullable(_$UserStatusEnumMap, json['status']) ?? UserStatus.initial,
     );
 
 Map<String, dynamic> _$UserStateToJson(UserState instance) => <String, dynamic>{

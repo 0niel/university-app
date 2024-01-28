@@ -7,9 +7,12 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:provider/provider.dart';
+import 'package:provider/single_child_widget.dart';
 import 'package:rtu_mirea_app/analytics/bloc/analytics_bloc.dart';
 import 'package:rtu_mirea_app/app_bloc_observer.dart';
 
@@ -17,8 +20,9 @@ import 'package:rtu_mirea_app/common/widget_data_init.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:rtu_mirea_app/data/datasources/strapi_remote.dart';
 import 'package:rtu_mirea_app/data/repositories/stories_repository_impl.dart';
+import 'package:rtu_mirea_app/home/cubit/home_cubit.dart';
+import 'package:rtu_mirea_app/neon/main.dart';
 import 'package:rtu_mirea_app/presentation/bloc/announces_bloc/announces_bloc.dart';
-import 'package:rtu_mirea_app/presentation/bloc/app_cubit/app_cubit.dart';
 import 'package:rtu_mirea_app/presentation/bloc/attendance_bloc/attendance_bloc.dart';
 
 import 'package:rtu_mirea_app/presentation/bloc/employee_bloc/employee_bloc.dart';
@@ -27,7 +31,7 @@ import 'package:rtu_mirea_app/presentation/bloc/notification_preferences/notific
 
 import 'package:rtu_mirea_app/presentation/bloc/scores_bloc/scores_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/user_bloc/user_bloc.dart';
-import 'package:rtu_mirea_app/presentation/core/routes/routes.dart';
+import 'package:rtu_mirea_app/navigation/routes/routes.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:intl/intl_standalone.dart';
 import 'package:rtu_mirea_app/schedule/bloc/schedule_bloc.dart';
@@ -45,6 +49,17 @@ import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:schedule_repository/schedule_repository.dart'
     as schedule_repository;
 import 'package:adaptive_theme/adaptive_theme.dart';
+import 'package:neon_framework/models.dart' as neon_models;
+import 'package:neon_framework/src/bloc/result.dart' as neon_bloc_result;
+import 'package:nextcloud/core.dart' as neon_core;
+import 'package:neon_framework/src/widgets/options_collection_builder.dart';
+import 'package:neon_framework/src/utils/global_options.dart';
+import 'package:neon_framework/src/blocs/accounts.dart';
+import 'package:neon_framework/src/utils/provider.dart';
+import 'package:neon_framework/l10n/localizations.dart' as neon_localizations;
+import 'package:neon_framework/theme.dart' as neon_theme;
+import 'package:neon_framework/src/theme/theme.dart' as app_neon_theme;
+import 'package:neon_framework/src/theme/server.dart' as neon_server_theme;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -95,6 +110,8 @@ Future<void> main() async {
         : await getApplicationDocumentsDirectory(),
   );
 
+  final (neonTheme, neonProviders) = await runNeon();
+
   await SentryFlutter.init(
     (options) {
       options.dsn = sentryDsn;
@@ -120,6 +137,8 @@ Future<void> main() async {
           bundle: SentryAssetBundle(),
           child: App(
             analyticsRepository: analyticsRepository,
+            providers: neonProviders,
+            neonTheme: neonTheme,
           ),
         ),
       ),
@@ -133,10 +152,14 @@ Future<void> main() async {
 class App extends StatelessWidget {
   const App({
     required AnalyticsRepository analyticsRepository,
+    required this.providers,
+    required this.neonTheme,
     super.key,
   }) : _analyticsRepository = analyticsRepository;
 
   final AnalyticsRepository _analyticsRepository;
+  final List<SingleChildWidget> providers;
+  final neon_theme.NeonTheme neonTheme;
 
   @override
   Widget build(BuildContext context) {
@@ -190,12 +213,92 @@ class App extends StatelessWidget {
           BlocProvider<ScoresBloc>(create: (context) => getIt<ScoresBloc>()),
           BlocProvider<AttendanceBloc>(
               create: (context) => getIt<AttendanceBloc>()),
-          BlocProvider<AppCubit>(create: (context) => getIt<AppCubit>()),
+          BlocProvider<HomeCubit>(create: (context) => getIt<HomeCubit>()),
           BlocProvider<NotificationPreferencesBloc>(
             create: (_) => getIt<NotificationPreferencesBloc>(),
           ),
         ],
-        child: const _MaterialApp(),
+        child: MultiProvider(
+          providers: providers,
+          child: _NeonProvider(
+            key: _neonWrapperKey,
+            neonTheme: neonTheme,
+            child: const _MaterialApp(),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+final _neonWrapperKey = GlobalKey<_NeonProviderState>();
+
+class _NeonProvider extends StatefulWidget {
+  const _NeonProvider({
+    Key? key,
+    required this.child,
+    required this.neonTheme,
+  }) : super(key: key);
+
+  final Widget child;
+  final neon_theme.NeonTheme neonTheme;
+
+  @override
+  State<_NeonProvider> createState() => _NeonProviderState();
+}
+
+class _NeonProviderState extends State<_NeonProvider> {
+  late final Iterable<neon_models.AppImplementation> _appImplementations;
+  late final GlobalOptions _globalOptions;
+  late final AccountsBloc _accountsBloc;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _appImplementations =
+        NeonProvider.of<Iterable<neon_models.AppImplementation>>(context);
+    _globalOptions = NeonProvider.of<GlobalOptions>(context);
+    _accountsBloc = NeonProvider.of<AccountsBloc>(context);
+  }
+
+  List<LocalizationsDelegate<dynamic>> getNeonLocalizationsDelegates() {
+    return [
+      ..._appImplementations.map((app) => app.localizationsDelegate),
+      ...neon_localizations.NeonLocalizations.localizationsDelegates,
+    ];
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final appTheme = app_neon_theme.AppTheme(
+      serverTheme: const neon_server_theme.ServerTheme(
+        nextcloudTheme: null,
+      ),
+      useNextcloudTheme: false,
+      deviceThemeLight: null,
+      deviceThemeDark: null,
+      appThemes:
+          _appImplementations.map((a) => a.theme).whereType<ThemeExtension>(),
+      neonTheme: widget.neonTheme,
+    );
+
+    return OptionsCollectionBuilder(
+      valueListenable: _globalOptions,
+      builder: (context, options, _) => StreamBuilder<neon_models.Account?>(
+        stream: _accountsBloc.activeAccount,
+        builder: (context, activeAccountSnapshot) {
+          return neon_bloc_result.ResultBuilder<
+              neon_core
+              .OcsGetCapabilitiesResponseApplicationJson_Ocs_Data?>.behaviorSubject(
+            subject: activeAccountSnapshot.hasData
+                ? _accountsBloc
+                    .getCapabilitiesBlocFor(activeAccountSnapshot.data!)
+                    .capabilities
+                : null,
+            builder: (context, capabilitiesSnapshot) => widget.child,
+          );
+        },
       ),
     );
   }
@@ -211,7 +314,19 @@ class _MaterialApp extends StatefulWidget {
 }
 
 class _MaterialAppState extends State<_MaterialApp> {
-  final router = createRouter();
+  late final GoRouter router;
+  late final List<LocalizationsDelegate<dynamic>> neonLocalizationsDelegates;
+
+  @override
+  void initState() {
+    super.initState();
+
+    router = createRouter();
+    neonLocalizationsDelegates = _neonWrapperKey.currentState!
+        .getNeonLocalizationsDelegates()
+        .cast<LocalizationsDelegate<dynamic>>();
+  }
+
   @override
   Widget build(BuildContext context) {
     return AdaptiveTheme(
@@ -231,10 +346,11 @@ class _MaterialAppState extends State<_MaterialApp> {
                     : Brightness.dark));
 
         return MaterialApp.router(
-          localizationsDelegates: const [
+          localizationsDelegates: [
             GlobalMaterialLocalizations.delegate,
             GlobalWidgetsLocalizations.delegate,
             GlobalCupertinoLocalizations.delegate,
+            ...neonLocalizationsDelegates,
           ],
           supportedLocales: const [
             Locale('en'),

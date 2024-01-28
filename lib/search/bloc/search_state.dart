@@ -37,8 +37,7 @@ class SearchState extends Equatable {
   final List<String> searchHisoty;
   final SearchStatus status;
 
-  factory SearchState.fromJson(Map<String, dynamic> json) =>
-      _$SearchStateFromJson(json);
+  factory SearchState.fromJson(Map<String, dynamic> json) => _$SearchStateFromJson(json);
 
   Map<String, dynamic> toJson() => _$SearchStateToJson(this);
 
@@ -59,6 +58,5 @@ class SearchState extends Equatable {
   }
 
   @override
-  List<Object?> get props =>
-      [groups, teachers, classrooms, status, searchHisoty];
+  List<Object?> get props => [groups, teachers, classrooms, status, searchHisoty];
 }

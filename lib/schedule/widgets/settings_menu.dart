@@ -19,17 +19,13 @@ class SettingsMenu extends StatelessWidget {
 
     final state = context.read<ScheduleBloc>().state;
 
-    if (state.status == ScheduleStatus.loaded &&
-        state.selectedSchedule != null) {
+    if (state.status == ScheduleStatus.loaded && state.selectedSchedule != null) {
       if (state.selectedSchedule is SelectedGroupSchedule) {
-        defaultText +=
-            ' группы ${(state.selectedSchedule as SelectedGroupSchedule).group.name}';
+        defaultText += ' группы ${(state.selectedSchedule as SelectedGroupSchedule).group.name}';
       } else if (state.selectedSchedule is SelectedTeacherSchedule) {
-        defaultText +=
-            ' преподавателя ${(state.selectedSchedule as SelectedTeacherSchedule).teacher.name}';
+        defaultText += ' преподавателя ${(state.selectedSchedule as SelectedTeacherSchedule).teacher.name}';
       } else if (state.selectedSchedule is SelectedClassroomSchedule) {
-        defaultText +=
-            ' аудитории ${(state.selectedSchedule as SelectedClassroomSchedule).classroom.name}';
+        defaultText += ' аудитории ${(state.selectedSchedule as SelectedClassroomSchedule).classroom.name}';
       }
     }
 
@@ -90,9 +86,7 @@ class SettingsMenu extends StatelessWidget {
             ),
             text: "Компактный вид",
             onChanged: (value) {
-              context
-                  .read<ScheduleBloc>()
-                  .add(ScheduleSetDisplayMode(isMiniature: value));
+              context.read<ScheduleBloc>().add(ScheduleSetDisplayMode(isMiniature: value));
             },
           ),
         ),
@@ -107,8 +101,7 @@ class SettingsMenu extends StatelessWidget {
             ),
             text: "Показывать пустые пары",
             onChanged: (value) {
-              context.read<ScheduleBloc>().add(
-                  ScheduleSetEmptyLessonsDisplaying(showEmptyLessons: value));
+              context.read<ScheduleBloc>().add(ScheduleSetEmptyLessonsDisplaying(showEmptyLessons: value));
             },
           ),
         ),
@@ -123,8 +116,7 @@ class SettingsMenu extends StatelessWidget {
             ),
             text: "Индикатор заметок",
             onChanged: (value) {
-              context.read<ScheduleBloc>().add(ScheduleSetShowCommentsIndicator(
-                  showCommentsIndicators: value));
+              context.read<ScheduleBloc>().add(ScheduleSetShowCommentsIndicator(showCommentsIndicators: value));
             },
           ),
         ),

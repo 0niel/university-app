@@ -9,8 +9,7 @@ class RatingSystemState extends Equatable {
   @SubjectsConverter()
   final List<(Group, Subject)> subjects;
 
-  factory RatingSystemState.fromJson(Map<String, dynamic> json) =>
-      _$RatingSystemStateFromJson(json);
+  factory RatingSystemState.fromJson(Map<String, dynamic> json) => _$RatingSystemStateFromJson(json);
 
   Map<String, dynamic> toJson() => _$RatingSystemStateToJson(this);
 
@@ -28,8 +27,7 @@ class RatingSystemState extends Equatable {
       ];
 }
 
-class SubjectsConverter
-    implements JsonConverter<List<(Group, Subject)>, List<dynamic>> {
+class SubjectsConverter implements JsonConverter<List<(Group, Subject)>, List<dynamic>> {
   const SubjectsConverter();
 
   @override

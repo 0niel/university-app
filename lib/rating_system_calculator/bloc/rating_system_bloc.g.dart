@@ -6,14 +6,10 @@ part of 'rating_system_bloc.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-RatingSystemState _$RatingSystemStateFromJson(Map<String, dynamic> json) =>
-    RatingSystemState(
-      subjects: json['subjects'] == null
-          ? const []
-          : const SubjectsConverter().fromJson(json['subjects'] as List),
+RatingSystemState _$RatingSystemStateFromJson(Map<String, dynamic> json) => RatingSystemState(
+      subjects: json['subjects'] == null ? const [] : const SubjectsConverter().fromJson(json['subjects'] as List),
     );
 
-Map<String, dynamic> _$RatingSystemStateToJson(RatingSystemState instance) =>
-    <String, dynamic>{
+Map<String, dynamic> _$RatingSystemStateToJson(RatingSystemState instance) => <String, dynamic>{
       'subjects': const SubjectsConverter().toJson(instance.subjects),
     };

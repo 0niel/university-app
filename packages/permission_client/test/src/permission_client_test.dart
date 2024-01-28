@@ -16,16 +16,14 @@ void main() {
       permissionClient = PermissionClient();
       calls = [];
 
-      MethodChannel('flutter.baseflow.com/permissions/methods')
-          .setMockMethodCallHandler((call) async {
+      MethodChannel('flutter.baseflow.com/permissions/methods').setMockMethodCallHandler((call) async {
         calls.add(call);
 
         if (call.method == 'checkPermissionStatus') {
           return PermissionStatus.granted.index;
         } else if (call.method == 'requestPermissions') {
           return <dynamic, dynamic>{
-            for (final key in call.arguments as List<dynamic>)
-              key: PermissionStatus.granted.index,
+            for (final key in call.arguments as List<dynamic>) key: PermissionStatus.granted.index,
           };
         } else if (call.method == 'openAppSettings') {
           return true;

@@ -15,8 +15,7 @@ class ContainerLabel extends StatelessWidget {
       alignment: Alignment.centerLeft,
       child: Text(
         label,
-        style: AppTextStyle.titleM
-            .copyWith(color: AppTheme.colorsOf(context).deactive),
+        style: AppTextStyle.titleM.copyWith(color: AppTheme.colorsOf(context).deactive),
       ),
     );
   }

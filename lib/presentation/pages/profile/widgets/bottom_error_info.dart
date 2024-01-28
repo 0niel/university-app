@@ -31,9 +31,7 @@ class BottomErrorInfo extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 24),
             decoration: BoxDecoration(
               color: AppTheme.colorsOf(context).background01,
-              borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(25.0),
-                  topRight: Radius.circular(25.0)),
+              borderRadius: const BorderRadius.only(topLeft: Radius.circular(25.0), topRight: Radius.circular(25.0)),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
@@ -54,18 +52,15 @@ class BottomErrorInfo extends StatelessWidget {
                 const SizedBox(height: 8),
                 Text(
                   "Разработчики, отвечающие за API ЛКС, отключили возможность производить аутентификацию и получать данные своего аккаунта. Пожалуйста, используйте lk.mirea.ru",
-                  style: AppTextStyle.captionL
-                      .copyWith(color: AppTheme.colorsOf(context).deactive),
+                  style: AppTextStyle.captionL.copyWith(color: AppTheme.colorsOf(context).deactive),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 32),
                 ConstrainedBox(
-                  constraints: const BoxConstraints.tightFor(
-                      width: double.infinity, height: 48),
+                  constraints: const BoxConstraints.tightFor(width: double.infinity, height: 48),
                   child: ElevatedButton(
                     style: ButtonStyle(
-                      backgroundColor: MaterialStateProperty.all(
-                          AppTheme.colorsOf(context).primary),
+                      backgroundColor: MaterialStateProperty.all(AppTheme.colorsOf(context).primary),
                       shape: MaterialStateProperty.all<RoundedRectangleBorder>(
                         RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(24.0),

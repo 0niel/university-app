@@ -17,8 +17,7 @@ class EventsPageView extends StatelessWidget {
   Widget build(BuildContext context) {
     return PageView.builder(
       controller: controller,
-      itemCount:
-          Calendar.lastCalendarDay.difference(Calendar.firstCalendarDay).inDays,
+      itemCount: Calendar.lastCalendarDay.difference(Calendar.firstCalendarDay).inDays,
       itemBuilder: itemBuilder,
     );
   }

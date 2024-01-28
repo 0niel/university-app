@@ -166,9 +166,8 @@ class _StoriesPageViewState extends State<StoriesPageView> {
   }
 
   Widget _buildGestureItems(int pageIndex, int storyIndex) {
-    final height = MediaQuery.of(context).size.height -
-        MediaQuery.of(context).padding.bottom -
-        MediaQuery.of(context).padding.top;
+    final height =
+        MediaQuery.of(context).size.height - MediaQuery.of(context).padding.bottom - MediaQuery.of(context).padding.top;
     final contentHeigth = height * (9 / 16);
     final buttonSpaceHeight = (height - contentHeigth) / 2;
 
@@ -205,12 +204,10 @@ class _StoriesPageViewState extends State<StoriesPageView> {
               (index) => Padding(
                 padding: const EdgeInsets.only(bottom: 8),
                 child: PrimaryButton(
-                  text: widget.stories[pageIndex].pages[storyIndex]
-                      .actions[index].title,
+                  text: widget.stories[pageIndex].pages[storyIndex].actions[index].title,
                   onClick: () {
                     launchUrlString(
-                      widget.stories[pageIndex].pages[storyIndex].actions[index]
-                          .url,
+                      widget.stories[pageIndex].pages[storyIndex].actions[index].url,
                       mode: LaunchMode.externalApplication,
                     );
                   },

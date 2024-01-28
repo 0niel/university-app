@@ -12,8 +12,7 @@ class GetSchedule extends UseCase<Schedule, GetScheduleParams> {
 
   @override
   Future<Either<Failure, Schedule>> call(GetScheduleParams params) async {
-    return await scheduleRepository.getSchedule(
-        params.group, params.fromRemote);
+    return await scheduleRepository.getSchedule(params.group, params.fromRemote);
   }
 }
 

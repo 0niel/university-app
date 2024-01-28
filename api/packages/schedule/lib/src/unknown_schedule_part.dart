@@ -17,8 +17,7 @@ class UnknownSchedulePart with EquatableMixin implements SchedulePart {
   });
 
   /// Converts a `Map<String, dynamic>` into a [UnknownSchedulePart] instance.
-  factory UnknownSchedulePart.fromJson(Map<String, dynamic> json) =>
-      _$UnknownSchedulePartFromJson(json);
+  factory UnknownSchedulePart.fromJson(Map<String, dynamic> json) => _$UnknownSchedulePartFromJson(json);
 
   /// The unknown schedule part type identifier.
   static const identifier = '__unknown__';

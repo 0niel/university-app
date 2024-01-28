@@ -22,8 +22,7 @@ class Teacher extends Equatable {
   });
 
   /// Converts a `Map<String, dynamic>` into a [Teacher] instance.
-  factory Teacher.fromJson(Map<String, dynamic> json) =>
-      _$TeacherFromJson(json);
+  factory Teacher.fromJson(Map<String, dynamic> json) => _$TeacherFromJson(json);
 
   /// The unique identifier of the Teacher. This is used for identifying the
   /// Teacher in the database and in the API.
@@ -51,6 +50,5 @@ class Teacher extends Equatable {
   Map<String, dynamic> toJson() => _$TeacherToJson(this);
 
   @override
-  List<Object?> get props =>
-      [uid, name, photoUrl, email, phone, post, department];
+  List<Object?> get props => [uid, name, photoUrl, email, phone, post, department];
 }

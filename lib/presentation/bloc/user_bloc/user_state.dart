@@ -30,8 +30,7 @@ class UserState extends Equatable {
     );
   }
 
-  factory UserState.fromJson(Map<String, dynamic> json) =>
-      _$UserStateFromJson(json);
+  factory UserState.fromJson(Map<String, dynamic> json) => _$UserStateFromJson(json);
 
   Map<String, dynamic> toJson() => _$UserStateToJson(this);
 

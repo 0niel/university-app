@@ -37,8 +37,7 @@ class LessonSchedulePart with EquatableMixin implements SchedulePart {
         ];
 
   /// Converts a `Map<String, dynamic>` into a [LessonSchedulePart] instance.
-  factory LessonSchedulePart.fromJson(Map<String, dynamic> json) =>
-      _$LessonSchedulePartFromJson(json);
+  factory LessonSchedulePart.fromJson(Map<String, dynamic> json) => _$LessonSchedulePartFromJson(json);
 
   /// The large post block type identifier.
   static const identifier = '__lesson_schedule__';

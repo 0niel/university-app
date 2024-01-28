@@ -95,17 +95,14 @@ class _CalendarState extends State<Calendar> {
           }
 
           _selectedPage = widget.pageViewController.page!.round();
-          _selectedDay =
-              Calendar.firstCalendarDay.add(Duration(days: _selectedPage));
-          _selectedWeek =
-              CalendarUtils.getCurrentWeek(mCurrentDate: _selectedDay);
+          _selectedDay = Calendar.firstCalendarDay.add(Duration(days: _selectedPage));
+          _selectedWeek = CalendarUtils.getCurrentWeek(mCurrentDate: _selectedDay);
           _focusedDay = Calendar.getDayInAvailableRange(_selectedDay);
         });
       }
     });
 
-    _selectedDay =
-        Calendar.getDayInAvailableRange(Calendar.getNowWithoutTime());
+    _selectedDay = Calendar.getDayInAvailableRange(Calendar.getNowWithoutTime());
     _selectedWeek = CalendarUtils.getCurrentWeek();
   }
 
@@ -134,8 +131,7 @@ class _CalendarState extends State<Calendar> {
                       height: 6,
                       margin: const EdgeInsets.symmetric(horizontal: 0.3),
                       decoration: BoxDecoration(
-                        color: LessonCard.getColorByType(
-                            (events[index] as LessonSchedulePart).lessonType),
+                        color: LessonCard.getColorByType((events[index] as LessonSchedulePart).lessonType),
                         shape: BoxShape.circle,
                       ),
                     ),
@@ -143,20 +139,17 @@ class _CalendarState extends State<Calendar> {
                 );
               },
               defaultBuilder: (context, day, focusedDay) {
-                final comments = widget.comments
-                    .where((element) => isSameDay(element.lessonDate, day))
-                    .toList();
+                final comments = widget.comments.where((element) => isSameDay(element.lessonDate, day)).toList();
 
                 return Center(
                   child: Text(
                     day.day.toString(),
                     style: AppTextStyle.body.copyWith(
-                      color:
-                          comments.isNotEmpty && widget.showCommentsIndicators
-                              ? AppTheme.colorsOf(context).colorful02
-                              : (day.weekday == DateTime.sunday
-                                  ? AppTheme.colorsOf(context).deactiveDarker
-                                  : AppTheme.colorsOf(context).active),
+                      color: comments.isNotEmpty && widget.showCommentsIndicators
+                          ? AppTheme.colorsOf(context).colorful02
+                          : (day.weekday == DateTime.sunday
+                              ? AppTheme.colorsOf(context).deactiveDarker
+                              : AppTheme.colorsOf(context).active),
                     ),
                   ),
                 );
@@ -181,10 +174,8 @@ class _CalendarState extends State<Calendar> {
                 String weekStr = _selectedWeek.toString();
                 return '$dateStr\nвыбрана $weekStr неделя';
               },
-              leftChevronIcon: Icon(Icons.chevron_left,
-                  color: AppTheme.colorsOf(context).active),
-              rightChevronIcon: Icon(Icons.chevron_right,
-                  color: AppTheme.colorsOf(context).active),
+              leftChevronIcon: Icon(Icons.chevron_left, color: AppTheme.colorsOf(context).active),
+              rightChevronIcon: Icon(Icons.chevron_right, color: AppTheme.colorsOf(context).active),
               formatButtonDecoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
@@ -198,10 +189,8 @@ class _CalendarState extends State<Calendar> {
               cellMargin: const EdgeInsets.all(10),
             ),
             daysOfWeekStyle: DaysOfWeekStyle(
-              weekdayStyle: AppTextStyle.body
-                  .copyWith(color: AppTheme.colorsOf(context).deactive),
-              weekendStyle: AppTextStyle.body
-                  .copyWith(color: AppTheme.colorsOf(context).deactiveDarker),
+              weekdayStyle: AppTextStyle.body.copyWith(color: AppTheme.colorsOf(context).deactive),
+              weekendStyle: AppTextStyle.body.copyWith(color: AppTheme.colorsOf(context).deactiveDarker),
             ),
             focusedDay: _focusedDay,
             availableCalendarFormats: const {
@@ -210,8 +199,7 @@ class _CalendarState extends State<Calendar> {
               CalendarFormat.week: 'Неделя'
             },
             eventLoader: (day) {
-              return Calendar.getSchedulePartsByDay(
-                      schedule: widget.schedule, day: day)
+              return Calendar.getSchedulePartsByDay(schedule: widget.schedule, day: day)
                   .whereType<LessonSchedulePart>()
                   .toList();
             },
@@ -226,8 +214,7 @@ class _CalendarState extends State<Calendar> {
             },
             onDaySelected: (selectedDay, focusedDay) {
               if (!isSameDay(_selectedDay, selectedDay)) {
-                final int currentNewWeek =
-                    CalendarUtils.getCurrentWeek(mCurrentDate: selectedDay);
+                final int currentNewWeek = CalendarUtils.getCurrentWeek(mCurrentDate: selectedDay);
                 // Call `setState()` when updating the selected day
                 if (mounted) {
                   setState(() {
@@ -260,8 +247,7 @@ class _CalendarState extends State<Calendar> {
                 setState(() {
                   _focusedDay = Calendar.getDayInAvailableRange(currentDate);
                   _selectedDay = currentDate;
-                  _selectedWeek =
-                      CalendarUtils.getCurrentWeek(mCurrentDate: _selectedDay);
+                  _selectedWeek = CalendarUtils.getCurrentWeek(mCurrentDate: _selectedDay);
                   _selectedPage = Calendar.getPageIndex(_selectedDay);
                 });
                 if (widget.pageViewController.hasClients) {

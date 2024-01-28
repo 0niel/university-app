@@ -46,8 +46,7 @@ class NewsDetailsPage extends StatelessWidget {
               padding: EdgeInsets.zero,
               children: [
                 Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -94,8 +93,7 @@ class NewsDetailsPage extends StatelessWidget {
                             // to display the YouTube video player
                             IframeHtmlExtension(),
                           ],
-                          onLinkTap:
-                              (String? url, Map<String, String> attributes, _) {
+                          onLinkTap: (String? url, Map<String, String> attributes, _) {
                             if (url != null) {
                               launchUrlString(url);
                             }
@@ -118,8 +116,7 @@ class NewsDetailsPage extends StatelessWidget {
 
 /// Tags and date of publication of the news
 class _NewsItemInfo extends StatelessWidget {
-  const _NewsItemInfo({Key? key, required this.tags, required this.date})
-      : super(key: key);
+  const _NewsItemInfo({Key? key, required this.tags, required this.date}) : super(key: key);
 
   final List<String> tags;
   final DateTime date;
@@ -128,9 +125,7 @@ class _NewsItemInfo extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisAlignment: NewsBloc.isTagsNotEmpty(tags)
-          ? MainAxisAlignment.spaceBetween
-          : MainAxisAlignment.start,
+      mainAxisAlignment: NewsBloc.isTagsNotEmpty(tags) ? MainAxisAlignment.spaceBetween : MainAxisAlignment.start,
       children: [
         NewsBloc.isTagsNotEmpty(tags)
             ? Expanded(
@@ -158,13 +153,11 @@ class _NewsItemInfo extends StatelessWidget {
                 children: [
                   Text(
                     "Дата",
-                    style: AppTextStyle.body
-                        .copyWith(color: AppTheme.colorsOf(context).deactive),
+                    style: AppTextStyle.body.copyWith(color: AppTheme.colorsOf(context).deactive),
                   ),
                   Text(
                     DateFormat.MMMd('ru_RU').format(date).toString(),
-                    style: AppTextStyle.titleM
-                        .copyWith(color: AppTheme.colorsOf(context).colorful02),
+                    style: AppTextStyle.titleM.copyWith(color: AppTheme.colorsOf(context).colorful02),
                   ),
                 ],
               ),

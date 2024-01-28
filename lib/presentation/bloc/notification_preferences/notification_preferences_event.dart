@@ -5,8 +5,7 @@ abstract class NotificationPreferencesEvent extends Equatable {
 }
 
 class CategoriesPreferenceToggled extends NotificationPreferencesEvent {
-  const CategoriesPreferenceToggled(
-      {required this.category, required this.group});
+  const CategoriesPreferenceToggled({required this.category, required this.group});
 
   final String category;
 
@@ -17,8 +16,7 @@ class CategoriesPreferenceToggled extends NotificationPreferencesEvent {
   List<Object?> get props => [category, group];
 }
 
-class InitialCategoriesPreferencesRequested
-    extends NotificationPreferencesEvent {
+class InitialCategoriesPreferencesRequested extends NotificationPreferencesEvent {
   const InitialCategoriesPreferencesRequested({required this.group});
 
   /// Название академической группы.

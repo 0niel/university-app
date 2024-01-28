@@ -53,16 +53,13 @@ class SearchView extends StatefulWidget {
 }
 
 class _SearchViewState extends State<SearchView> {
-  late final TextEditingController _controller =
-      TextEditingController(text: widget.query);
+  late final TextEditingController _controller = TextEditingController(text: widget.query);
 
   @override
   void initState() {
     super.initState();
     _controller.addListener(
-      () => context
-          .read<SearchBloc>()
-          .add(SearchQueryChanged(searchQuery: _controller.text)),
+      () => context.read<SearchBloc>().add(SearchQueryChanged(searchQuery: _controller.text)),
     );
   }
 
@@ -113,9 +110,7 @@ class _SearchViewState extends State<SearchView> {
                               _controller.text = value;
                             },
                             onClear: () {
-                              context
-                                  .read<SearchBloc>()
-                                  .add(RemoveQueryFromSearchHistory(query: e));
+                              context.read<SearchBloc>().add(RemoveQueryFromSearchHistory(query: e));
                             },
                           ),
                         ),
@@ -131,9 +126,7 @@ class _SearchViewState extends State<SearchView> {
                             name: group.name,
                             type: ItemType.group,
                             onPressed: () => {
-                              context
-                                  .read<ScheduleBloc>()
-                                  .add(ScheduleRequested(group: group)),
+                              context.read<ScheduleBloc>().add(ScheduleRequested(group: group)),
                               context.go(
                                 '/schedule',
                               ),
@@ -155,14 +148,12 @@ class _SearchViewState extends State<SearchView> {
                             name: teacher.name,
                             type: ItemType.teacher,
                             onPressed: () => {
-                              context.read<ScheduleBloc>().add(
-                                  TeacherScheduleRequested(teacher: teacher)),
+                              context.read<ScheduleBloc>().add(TeacherScheduleRequested(teacher: teacher)),
                               context.go(
                                 '/schedule',
                               ),
                               context.read<SearchBloc>().add(
-                                    AddQueryToSearchHistory(
-                                        query: teacher.name),
+                                    AddQueryToSearchHistory(query: teacher.name),
                                   ),
                             },
                           ),
@@ -180,15 +171,12 @@ class _SearchViewState extends State<SearchView> {
                                 '${classroom.name}${classroom.campus != null ? ' (${classroom.campus?.shortName ?? classroom.campus?.name})' : ''}',
                             type: ItemType.classroom,
                             onPressed: () => {
-                              context.read<ScheduleBloc>().add(
-                                  ClassroomScheduleRequested(
-                                      classroom: classroom)),
+                              context.read<ScheduleBloc>().add(ClassroomScheduleRequested(classroom: classroom)),
                               context.go(
                                 '/schedule',
                               ),
                               context.read<SearchBloc>().add(
-                                    AddQueryToSearchHistory(
-                                        query: classroom.name),
+                                    AddQueryToSearchHistory(query: classroom.name),
                                   ),
                             },
                           ),

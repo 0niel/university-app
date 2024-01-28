@@ -14,8 +14,7 @@ class NewsItemResponse extends Equatable {
     this.url,
   });
 
-  factory NewsItemResponse.fromJson(Map<String, dynamic> json) =>
-      _$NewsItemResponseFromJson(json);
+  factory NewsItemResponse.fromJson(Map<String, dynamic> json) => _$NewsItemResponseFromJson(json);
 
   final String title;
 
@@ -32,6 +31,5 @@ class NewsItemResponse extends Equatable {
   Map<String, dynamic> toJson() => _$NewsItemResponseToJson(this);
 
   @override
-  List<Object> get props =>
-      [title, htmlContent, publishedAt, imageUrls, categories];
+  List<Object> get props => [title, htmlContent, publishedAt, imageUrls, categories];
 }

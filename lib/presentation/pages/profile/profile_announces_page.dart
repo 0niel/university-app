@@ -19,8 +19,7 @@ class ProfileAnnouncesPage extends StatelessWidget {
       ),
       body: SafeArea(
         bottom: false,
-        child: BlocBuilder<AnnouncesBloc, AnnouncesState>(
-            builder: (context, state) {
+        child: BlocBuilder<AnnouncesBloc, AnnouncesState>(builder: (context, state) {
           if (state is AnnouncesLoading) {
             return const Center(child: CircularProgressIndicator());
           } else if (state is AnnouncesLoaded) {
@@ -28,8 +27,7 @@ class ProfileAnnouncesPage extends StatelessWidget {
               padding: const EdgeInsets.only(top: 24),
               child: ListView.separated(
                 itemCount: state.announces.length,
-                separatorBuilder: (context, index) =>
-                    const SizedBox(height: 16),
+                separatorBuilder: (context, index) => const SizedBox(height: 16),
                 itemBuilder: (context, index) => Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Card(
@@ -45,8 +43,7 @@ class ProfileAnnouncesPage extends StatelessWidget {
                           const SizedBox(height: 6),
                           Text(
                             state.announces[index].date,
-                            style: AppTextStyle.bodyRegular
-                                .copyWith(color: AppTheme.colors.deactive),
+                            style: AppTextStyle.bodyRegular.copyWith(color: AppTheme.colors.deactive),
                           ),
                           const SizedBox(height: 8),
                           Html(
@@ -59,8 +56,7 @@ class ProfileAnnouncesPage extends StatelessWidget {
                                 margin: Margins.all(0),
                               ),
                             },
-                            onLinkTap: (String? url,
-                                Map<String, String> attributes, _) {
+                            onLinkTap: (String? url, Map<String, String> attributes, _) {
                               if (url != null) {
                                 launchUrlString(url);
                               }

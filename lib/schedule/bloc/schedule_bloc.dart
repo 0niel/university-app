@@ -23,13 +23,10 @@ class ScheduleBloc extends HydratedBloc<ScheduleEvent, ScheduleState> {
   })  : _scheduleRepository = scheduleRepository,
         super(const ScheduleState.initial()) {
     on<ScheduleRequested>(_onScheduleRequested, transformer: sequential());
-    on<TeacherScheduleRequested>(_onTeacherScheduleRequested,
-        transformer: sequential());
-    on<ClassroomScheduleRequested>(_onClassroomScheduleRequested,
-        transformer: sequential());
+    on<TeacherScheduleRequested>(_onTeacherScheduleRequested, transformer: sequential());
+    on<ClassroomScheduleRequested>(_onClassroomScheduleRequested, transformer: sequential());
     on<ScheduleResumed>(_onScheduleResumed, transformer: droppable());
-    on<ScheduleRefreshRequested>(_onScheduleRefreshRequested,
-        transformer: sequential());
+    on<ScheduleRefreshRequested>(_onScheduleRefreshRequested, transformer: sequential());
     on<ScheduleSetDisplayMode>(_onScheduleSetDisplayMode);
     on<SetSelectedSchedule>(_onSetSelectedSchedule);
     on<DeleteSchedule>(_onRemoveSavedSchedule);
@@ -52,9 +49,7 @@ class ScheduleBloc extends HydratedBloc<ScheduleEvent, ScheduleState> {
     Emitter<ScheduleState> emit,
   ) async {
     final comment = state.comments.firstWhereOrNull(
-      (comment) =>
-          event.comment.lessonDate == comment.lessonDate &&
-          event.comment.lessonBells == comment.lessonBells,
+      (comment) => event.comment.lessonDate == comment.lessonDate && event.comment.lessonBells == comment.lessonBells,
     );
 
     if (event.comment.text.isEmpty && comment == null) {
@@ -64,8 +59,7 @@ class ScheduleBloc extends HydratedBloc<ScheduleEvent, ScheduleState> {
     List<ScheduleComment> updatedComments = state.comments
         .where(
           (element) =>
-              element.lessonDate != event.comment.lessonDate ||
-              element.lessonBells != event.comment.lessonBells,
+              element.lessonDate != event.comment.lessonDate || element.lessonBells != event.comment.lessonBells,
         )
         .toList();
 
@@ -208,8 +202,7 @@ class ScheduleBloc extends HydratedBloc<ScheduleEvent, ScheduleState> {
     if (state.selectedSchedule != null) {
       try {
         if (state.selectedSchedule is SelectedGroupSchedule) {
-          final selectedSchedule =
-              state.selectedSchedule as SelectedGroupSchedule;
+          final selectedSchedule = state.selectedSchedule as SelectedGroupSchedule;
           final response = await _scheduleRepository.getSchedule(
             group: selectedSchedule.group.uid ?? selectedSchedule.group.name,
           );
@@ -223,11 +216,9 @@ class ScheduleBloc extends HydratedBloc<ScheduleEvent, ScheduleState> {
             ),
           );
         } else if (state.selectedSchedule is SelectedTeacherSchedule) {
-          final selectedSchedule =
-              state.selectedSchedule as SelectedTeacherSchedule;
+          final selectedSchedule = state.selectedSchedule as SelectedTeacherSchedule;
           final response = await _scheduleRepository.getTeacherSchedule(
-            teacher:
-                selectedSchedule.teacher.uid ?? selectedSchedule.teacher.name,
+            teacher: selectedSchedule.teacher.uid ?? selectedSchedule.teacher.name,
           );
           emit(
             state.copyWith(
@@ -239,11 +230,9 @@ class ScheduleBloc extends HydratedBloc<ScheduleEvent, ScheduleState> {
             ),
           );
         } else if (state.selectedSchedule is SelectedClassroomSchedule) {
-          final selectedSchedule =
-              state.selectedSchedule as SelectedClassroomSchedule;
+          final selectedSchedule = state.selectedSchedule as SelectedClassroomSchedule;
           final response = await _scheduleRepository.getClassroomSchedule(
-            classroom: selectedSchedule.classroom.uid ??
-                selectedSchedule.classroom.name,
+            classroom: selectedSchedule.classroom.uid ?? selectedSchedule.classroom.name,
           );
           emit(
             state.copyWith(
@@ -318,8 +307,7 @@ class ScheduleBloc extends HydratedBloc<ScheduleEvent, ScheduleState> {
             schedule: response.data,
           ),
           teachersSchedule: state.teachersSchedule.contains(
-            (element) =>
-                element.$1 == (event.teacher.uid ?? event.teacher.name),
+            (element) => element.$1 == (event.teacher.uid ?? event.teacher.name),
           )
               ? state.teachersSchedule
               : [
@@ -356,8 +344,7 @@ class ScheduleBloc extends HydratedBloc<ScheduleEvent, ScheduleState> {
             schedule: response.data,
           ),
           classroomsSchedule: state.classroomsSchedule.contains(
-            (element) =>
-                element.$1 == (event.classroom.uid ?? event.classroom.name),
+            (element) => element.$1 == (event.classroom.uid ?? event.classroom.name),
           )
               ? state.classroomsSchedule
               : [
@@ -377,8 +364,7 @@ class ScheduleBloc extends HydratedBloc<ScheduleEvent, ScheduleState> {
   }
 
   @override
-  ScheduleState? fromJson(Map<String, dynamic> json) =>
-      ScheduleState.fromJson(json);
+  ScheduleState? fromJson(Map<String, dynamic> json) => ScheduleState.fromJson(json);
 
   @override
   Map<String, dynamic>? toJson(ScheduleState state) => state.toJson();

@@ -14,8 +14,7 @@ SearchItem _$SearchItemFromJson(Map<String, dynamic> json) => SearchItem(
       iCalLink: json['iCalLink'] as String,
     );
 
-Map<String, dynamic> _$SearchItemToJson(SearchItem instance) =>
-    <String, dynamic>{
+Map<String, dynamic> _$SearchItemToJson(SearchItem instance) => <String, dynamic>{
       'id': instance.id,
       'targetTitle': instance.targetTitle,
       'fullTitle': instance.fullTitle,

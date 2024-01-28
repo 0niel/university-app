@@ -42,8 +42,8 @@ import 'package:rtu_mirea_app/domain/usecases/log_in.dart';
 import 'package:rtu_mirea_app/domain/usecases/log_out.dart';
 import 'package:rtu_mirea_app/domain/usecases/set_app_settings.dart';
 import 'package:rtu_mirea_app/domain/usecases/set_schedule_settings.dart';
+import 'package:rtu_mirea_app/home/home.dart';
 import 'package:rtu_mirea_app/presentation/bloc/announces_bloc/announces_bloc.dart';
-import 'package:rtu_mirea_app/presentation/bloc/app_cubit/app_cubit.dart';
 import 'package:rtu_mirea_app/presentation/bloc/attendance_bloc/attendance_bloc.dart';
 
 import 'package:rtu_mirea_app/presentation/bloc/employee_bloc/employee_bloc.dart';
@@ -70,7 +70,7 @@ Future<void> setup() async {
   getIt.registerFactory(() => AttendanceBloc(getAttendance: getIt()));
 
   getIt.registerFactory(
-    () => AppCubit(
+    () => HomeCubit(
       getAppSettings: getIt(),
       setAppSettings: getIt(),
     ),

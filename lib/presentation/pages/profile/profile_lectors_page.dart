@@ -8,8 +8,7 @@ import 'package:rtu_mirea_app/presentation/pages/profile/widgets/lector_search_c
 import 'package:rtu_mirea_app/presentation/typography.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 
-final GlobalKey<FloatingSearchBarState> _searchBarKey =
-    GlobalKey<FloatingSearchBarState>();
+final GlobalKey<FloatingSearchBarState> _searchBarKey = GlobalKey<FloatingSearchBarState>();
 
 class ProfileLectrosPage extends StatefulWidget {
   const ProfileLectrosPage({Key? key}) : super(key: key);
@@ -46,8 +45,7 @@ class _ProfileLectrosPageState extends State<ProfileLectrosPage> {
         bottom: false,
         child: BlocBuilder<UserBloc, UserState>(
           builder: (context, userState) {
-            if (userState.status == UserStatus.authorized &&
-                userState.user != null) {
+            if (userState.status == UserStatus.authorized && userState.user != null) {
               return BlocBuilder<EmployeeBloc, EmployeeState>(
                 builder: (context, state) {
                   return FloatingSearchBar(
@@ -64,18 +62,14 @@ class _ProfileLectrosPageState extends State<ProfileLectrosPage> {
                         ? Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              const Icon(FontAwesomeIcons.magnifyingGlass,
-                                  size: 85),
+                              const Icon(FontAwesomeIcons.magnifyingGlass, size: 85),
                               const SizedBox(height: 24),
                               Text('Здесь появятся результаты поиска',
-                                  style: AppTextStyle.body.copyWith(
-                                      color:
-                                          AppTheme.colorsOf(context).deactive)),
+                                  style: AppTextStyle.body.copyWith(color: AppTheme.colorsOf(context).deactive)),
                             ],
                           )
                         : Container(),
-                    hintStyle: AppTextStyle.titleS
-                        .copyWith(color: AppTheme.colorsOf(context).deactive),
+                    hintStyle: AppTextStyle.titleS.copyWith(color: AppTheme.colorsOf(context).deactive),
                     borderRadius: const BorderRadius.all(Radius.circular(12)),
                     scrollPadding: const EdgeInsets.only(top: 16, bottom: 56),
                     transitionDuration: const Duration(milliseconds: 800),
@@ -86,9 +80,7 @@ class _ProfileLectrosPageState extends State<ProfileLectrosPage> {
                     progress: state is EmployeeLoading,
                     onQueryChanged: (query) {
                       if (query.length > 2) {
-                        context
-                            .read<EmployeeBloc>()
-                            .add(LoadEmployees(name: query));
+                        context.read<EmployeeBloc>().add(LoadEmployees(name: query));
                       }
                     },
                     transition: CircularFloatingSearchBarTransition(),
@@ -115,8 +107,7 @@ class _ProfileLectrosPageState extends State<ProfileLectrosPage> {
                               mainAxisSize: MainAxisSize.min,
                               children: List.generate(
                                 state.employees.length,
-                                (index) => LectorSearchCard(
-                                    employee: state.employees[index]),
+                                (index) => LectorSearchCard(employee: state.employees[index]),
                               ),
                             ),
                           ),

@@ -26,8 +26,7 @@ class SelectedTeacherSchedule with EquatableMixin implements SelectedSchedule {
 
   final Teacher teacher;
 
-  factory SelectedTeacherSchedule.fromJson(Map<String, dynamic> json) =>
-      _$SelectedTeacherScheduleFromJson(json);
+  factory SelectedTeacherSchedule.fromJson(Map<String, dynamic> json) => _$SelectedTeacherScheduleFromJson(json);
 
   @override
   List<Object> get props => [type, teacher, schedule];

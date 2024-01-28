@@ -28,8 +28,7 @@ class AppTheme {
       titleSpacing: 24,
       backgroundColor: darkThemeColors.background01,
       shadowColor: Colors.transparent,
-      titleTextStyle:
-          AppTextStyle.title.copyWith(color: darkThemeColors.active),
+      titleTextStyle: AppTextStyle.title.copyWith(color: darkThemeColors.active),
       iconTheme: IconThemeData(color: blackThemeColors.active),
     ),
     chipTheme: ChipThemeData(
@@ -42,8 +41,7 @@ class AppTheme {
         borderRadius: BorderRadius.circular(16),
       ),
       labelStyle: AppTextStyle.chip.copyWith(color: darkThemeColors.active),
-      secondaryLabelStyle:
-          AppTextStyle.chip.copyWith(color: darkThemeColors.active),
+      secondaryLabelStyle: AppTextStyle.chip.copyWith(color: darkThemeColors.active),
       brightness: Brightness.dark,
     ),
     cardTheme: CardTheme(
@@ -54,15 +52,14 @@ class AppTheme {
         borderRadius: BorderRadius.circular(16),
       ),
     ),
-    bottomNavigationBarTheme:
-        ThemeData.dark().bottomNavigationBarTheme.copyWith(
-              type: BottomNavigationBarType.shifting,
-              backgroundColor: darkThemeColors.background01,
-              selectedItemColor: darkThemeColors.active,
-              unselectedItemColor: darkThemeColors.deactive,
-              selectedLabelStyle: AppTextStyle.captionL,
-              unselectedLabelStyle: AppTextStyle.captionS,
-            ),
+    bottomNavigationBarTheme: ThemeData.dark().bottomNavigationBarTheme.copyWith(
+          type: BottomNavigationBarType.shifting,
+          backgroundColor: darkThemeColors.background01,
+          selectedItemColor: darkThemeColors.active,
+          unselectedItemColor: darkThemeColors.deactive,
+          selectedLabelStyle: AppTextStyle.captionL,
+          unselectedLabelStyle: AppTextStyle.captionS,
+        ),
     listTileTheme: ListTileThemeData(
       tileColor: Colors.transparent,
       contentPadding: const EdgeInsets.symmetric(horizontal: 24),
@@ -120,19 +117,17 @@ class AppTheme {
       titleSpacing: 24,
       backgroundColor: lightThemeColors.background01,
       shadowColor: Colors.transparent,
-      titleTextStyle:
-          AppTextStyle.title.copyWith(color: lightThemeColors.active),
+      titleTextStyle: AppTextStyle.title.copyWith(color: lightThemeColors.active),
       iconTheme: IconThemeData(color: lightThemeColors.active),
     ),
-    bottomNavigationBarTheme:
-        ThemeData.light().bottomNavigationBarTheme.copyWith(
-              type: BottomNavigationBarType.shifting,
-              backgroundColor: lightThemeColors.background03,
-              selectedItemColor: lightThemeColors.active,
-              unselectedItemColor: lightThemeColors.deactive,
-              selectedLabelStyle: AppTextStyle.captionL,
-              unselectedLabelStyle: AppTextStyle.captionS,
-            ),
+    bottomNavigationBarTheme: ThemeData.light().bottomNavigationBarTheme.copyWith(
+          type: BottomNavigationBarType.shifting,
+          backgroundColor: lightThemeColors.background03,
+          selectedItemColor: lightThemeColors.active,
+          unselectedItemColor: lightThemeColors.deactive,
+          selectedLabelStyle: AppTextStyle.captionL,
+          unselectedLabelStyle: AppTextStyle.captionS,
+        ),
     chipTheme: ChipThemeData(
       backgroundColor: lightThemeColors.background02,
       disabledColor: lightThemeColors.background02,
@@ -143,8 +138,7 @@ class AppTheme {
         borderRadius: BorderRadius.circular(16),
       ),
       labelStyle: AppTextStyle.chip.copyWith(color: lightThemeColors.active),
-      secondaryLabelStyle:
-          AppTextStyle.chip.copyWith(color: lightThemeColors.active),
+      secondaryLabelStyle: AppTextStyle.chip.copyWith(color: lightThemeColors.active),
       brightness: Brightness.light,
     ),
     listTileTheme: ListTileThemeData(

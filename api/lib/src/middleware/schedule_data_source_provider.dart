@@ -6,7 +6,6 @@ final _scheduleDataSource = RtuMireaScheduleDataSource();
 
 Middleware scheduleDataSourceProvider() {
   return (handler) {
-    return handler
-        .use(provider<ScheduleDataSource>((_) => _scheduleDataSource));
+    return handler.use(provider<ScheduleDataSource>((_) => _scheduleDataSource));
   };
 }

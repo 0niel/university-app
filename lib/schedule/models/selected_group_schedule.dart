@@ -9,8 +9,7 @@ part 'selected_group_schedule.g.dart';
 @JsonSerializable()
 @immutable
 class SelectedGroupSchedule with EquatableMixin implements SelectedSchedule {
-  factory SelectedGroupSchedule.fromJson(Map<String, dynamic> json) =>
-      _$SelectedGroupScheduleFromJson(json);
+  factory SelectedGroupSchedule.fromJson(Map<String, dynamic> json) => _$SelectedGroupScheduleFromJson(json);
 
   const SelectedGroupSchedule({
     required this.group,

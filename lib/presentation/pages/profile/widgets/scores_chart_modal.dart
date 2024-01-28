@@ -5,9 +5,7 @@ import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 
 class ScoresChartModal extends StatefulWidget {
-  const ScoresChartModal(
-      {Key? key, required this.scores, required this.averageRating})
-      : super(key: key);
+  const ScoresChartModal({Key? key, required this.scores, required this.averageRating}) : super(key: key);
 
   final Map<String, List<Score>> scores;
   final Map<int, double> averageRating;
@@ -79,8 +77,7 @@ class _ScoresChartModalState extends State<ScoresChartModal> {
           textStyle: AppTextStyle.titleS,
           alignment: ChartAlignment.center,
         ),
-        plotAreaBorderColor:
-            AppTheme.colorsOf(context).active.withOpacity(0.05),
+        plotAreaBorderColor: AppTheme.colorsOf(context).active.withOpacity(0.05),
         borderWidth: 0,
         legend: Legend(
           isVisible: true,
@@ -90,8 +87,7 @@ class _ScoresChartModalState extends State<ScoresChartModal> {
           textStyle: AppTextStyle.bodyBold,
           iconHeight: 10,
           iconWidth: 10,
-          legendItemBuilder: (legendText, series, point, seriesIndex) =>
-              Container(
+          legendItemBuilder: (legendText, series, point, seriesIndex) => Container(
             padding: const EdgeInsets.symmetric(vertical: 4),
             child: Row(
               mainAxisSize: MainAxisSize.min,
@@ -119,8 +115,7 @@ class _ScoresChartModalState extends State<ScoresChartModal> {
                   onTap: () {
                     setState(() {
                       _trendlineType = _TrendlineTypeCustom.values[
-                          (_TrendlineTypeCustom.values.indexOf(_trendlineType) +
-                                  1) %
+                          (_TrendlineTypeCustom.values.indexOf(_trendlineType) + 1) %
                               _TrendlineTypeCustom.values.length];
                     });
                   },
@@ -129,10 +124,8 @@ class _ScoresChartModalState extends State<ScoresChartModal> {
                       width: 20,
                       height: 20,
                       decoration: BoxDecoration(
-                        color:
-                            AppTheme.colorsOf(context).active.withOpacity(0.1),
-                        borderRadius:
-                            const BorderRadius.all(Radius.circular(10)),
+                        color: AppTheme.colorsOf(context).active.withOpacity(0.1),
+                        borderRadius: const BorderRadius.all(Radius.circular(10)),
                       ),
                       child: Icon(
                         Icons.trending_up,
@@ -144,8 +137,7 @@ class _ScoresChartModalState extends State<ScoresChartModal> {
                     Text(
                       _trendlineType.toString().split('.').last,
                       style: AppTextStyle.bodyBold.copyWith(
-                        color:
-                            AppTheme.colorsOf(context).active.withOpacity(0.8),
+                        color: AppTheme.colorsOf(context).active.withOpacity(0.8),
                       ),
                     ),
                   ]),
@@ -158,8 +150,7 @@ class _ScoresChartModalState extends State<ScoresChartModal> {
           labelFormat: '{value} сем.',
           interval: 0.5,
           axisLine: const AxisLine(width: 0),
-          labelStyle: AppTextStyle.chip
-              .copyWith(color: AppTheme.colorsOf(context).deactive),
+          labelStyle: AppTextStyle.chip.copyWith(color: AppTheme.colorsOf(context).deactive),
           minimum: 0.5,
           majorTickLines: const MajorTickLines(color: Colors.transparent),
           edgeLabelPlacement: EdgeLabelPlacement.shift,
@@ -174,8 +165,7 @@ class _ScoresChartModalState extends State<ScoresChartModal> {
         primaryYAxis: NumericAxis(
           labelFormat: '{value}',
           axisLine: const AxisLine(width: 0),
-          labelStyle: AppTextStyle.chip
-              .copyWith(color: AppTheme.colorsOf(context).deactive),
+          labelStyle: AppTextStyle.chip.copyWith(color: AppTheme.colorsOf(context).deactive),
           maximum: 5,
           majorTickLines: const MajorTickLines(color: Colors.transparent),
         ),

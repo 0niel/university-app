@@ -16,8 +16,7 @@ class ProfileDetailPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var student = user.students
-        .firstWhereOrNull((element) => element.status == 'активный');
+    var student = user.students.firstWhereOrNull((element) => element.status == 'активный');
     student ??= user.students.first;
     return Scaffold(
       appBar: AppBar(
@@ -33,9 +32,7 @@ class ProfileDetailPage extends StatelessWidget {
               Center(
                 child: CircleAvatar(
                   radius: 68,
-                  backgroundImage:
-                      Image.network('https://lk.mirea.ru${user.photoUrl}')
-                          .image,
+                  backgroundImage: Image.network('https://lk.mirea.ru${user.photoUrl}').image,
                 ),
               ),
               const SizedBox(height: 13),
@@ -87,42 +84,26 @@ class ProfileDetailPage extends StatelessWidget {
               const SizedBox(height: 20),
               const SizedBox(height: 23),
               CopyTextBlockWithLabel(label: "Логин", text: user.login),
-              CopyTextBlockWithLabel(
-                  label: "Персональный email", text: user.email),
+              CopyTextBlockWithLabel(label: "Персональный email", text: user.email),
+              const SizedBox(height: 23),
+              CopyTextBlockWithLabel(label: "Дата рождения", text: user.birthday),
+              const SizedBox(height: 23),
+              CopyTextBlockWithLabel(label: "Дата начала обучения", text: student.educationStartDate),
+              const SizedBox(height: 23),
+              CopyTextBlockWithLabel(label: "Дата окончания обучения", text: student.educationEndDate),
+              const SizedBox(height: 23),
+              CopyTextBlockWithLabel(label: "Дата регистрации", text: user.registerDate),
+              const SizedBox(height: 23),
+              CopyTextBlockWithLabel(label: "Формирующее подразделение", text: student.eduProgram.department),
+              const SizedBox(height: 23),
+              CopyTextBlockWithLabel(label: "Выпускающее подразделение", text: student.eduProgram.prodDepartment),
               const SizedBox(height: 23),
               CopyTextBlockWithLabel(
-                  label: "Дата рождения", text: user.birthday),
+                  label: "Направление подготовки (специальность)", text: student.eduProgram.eduProgram),
               const SizedBox(height: 23),
-              CopyTextBlockWithLabel(
-                  label: "Дата начала обучения",
-                  text: student.educationStartDate),
+              CopyTextBlockWithLabel(label: "Код направления", text: student.eduProgram.eduProgramCode),
               const SizedBox(height: 23),
-              CopyTextBlockWithLabel(
-                  label: "Дата окончания обучения",
-                  text: student.educationEndDate),
-              const SizedBox(height: 23),
-              CopyTextBlockWithLabel(
-                  label: "Дата регистрации", text: user.registerDate),
-              const SizedBox(height: 23),
-              CopyTextBlockWithLabel(
-                  label: "Формирующее подразделение",
-                  text: student.eduProgram.department),
-              const SizedBox(height: 23),
-              CopyTextBlockWithLabel(
-                  label: "Выпускающее подразделение",
-                  text: student.eduProgram.prodDepartment),
-              const SizedBox(height: 23),
-              CopyTextBlockWithLabel(
-                  label: "Направление подготовки (специальность)",
-                  text: student.eduProgram.eduProgram),
-              const SizedBox(height: 23),
-              CopyTextBlockWithLabel(
-                  label: "Код направления",
-                  text: student.eduProgram.eduProgramCode),
-              const SizedBox(height: 23),
-              CopyTextBlockWithLabel(
-                  label: "Вид образовательной программы",
-                  text: student.eduProgram.type ?? ""),
+              CopyTextBlockWithLabel(label: "Вид образовательной программы", text: student.eduProgram.type ?? ""),
             ],
           ),
         ),

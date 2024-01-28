@@ -8,11 +8,8 @@ part 'selected_classroom_schedule.g.dart';
 
 @JsonSerializable()
 @immutable
-class SelectedClassroomSchedule
-    with EquatableMixin
-    implements SelectedSchedule {
-  factory SelectedClassroomSchedule.fromJson(Map<String, dynamic> json) =>
-      _$SelectedClassroomScheduleFromJson(json);
+class SelectedClassroomSchedule with EquatableMixin implements SelectedSchedule {
+  factory SelectedClassroomSchedule.fromJson(Map<String, dynamic> json) => _$SelectedClassroomScheduleFromJson(json);
 
   const SelectedClassroomSchedule({
     required this.classroom,

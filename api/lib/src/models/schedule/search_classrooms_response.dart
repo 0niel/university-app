@@ -8,8 +8,7 @@ part 'search_classrooms_response.g.dart';
 class SearchClassroomsResponse extends Equatable {
   const SearchClassroomsResponse({required this.results});
 
-  factory SearchClassroomsResponse.fromJson(Map<String, dynamic> json) =>
-      _$SearchClassroomsResponseFromJson(json);
+  factory SearchClassroomsResponse.fromJson(Map<String, dynamic> json) => _$SearchClassroomsResponseFromJson(json);
 
   /// The schedule parts which are used to build the schedule. Each schedule
   /// part represents a content-based component. For example, a lesson or a

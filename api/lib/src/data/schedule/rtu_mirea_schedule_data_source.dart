@@ -69,8 +69,7 @@ class RtuMireaScheduleDataSource implements ScheduleDataSource {
 
     final onlyClassrooms = searchData.data
         .where(
-          (element) =>
-              element.scheduleTarget == classroomScheduleTargetIdentifier,
+          (element) => element.scheduleTarget == classroomScheduleTargetIdentifier,
         )
         .toList()
         .map(
@@ -110,8 +109,7 @@ class RtuMireaScheduleDataSource implements ScheduleDataSource {
 
     final onlyTeachers = searchData.data
         .where(
-          (element) =>
-              element.scheduleTarget == teacherScheduleTargetIdentifier,
+          (element) => element.scheduleTarget == teacherScheduleTargetIdentifier,
         )
         .toList()
         .map(

@@ -105,16 +105,14 @@ class NotificationsRepository {
 
         // Открывает настройки разрешений, если разрешение на уведомления
         // запрещено или ограничено.
-        if (permissionStatus.isPermanentlyDenied ||
-            permissionStatus.isRestricted) {
+        if (permissionStatus.isPermanentlyDenied || permissionStatus.isRestricted) {
           await _permissionClient.openPermissionSettings();
           return;
         }
 
         // Запрашивает разрешение, если уведомления запрещены.
         if (permissionStatus.isDenied) {
-          final updatedPermissionStatus =
-              await _permissionClient.requestNotifications();
+          final updatedPermissionStatus = await _permissionClient.requestNotifications();
           if (!updatedPermissionStatus.isGranted) {
             return;
           }
@@ -206,8 +204,7 @@ class NotificationsRepository {
   Future<void> _toggleCategoriesPreferencesSubscriptions({
     required bool enable,
   }) async {
-    final categoriesPreferences =
-        await _storage.fetchCategoriesPreferences() ?? {};
+    final categoriesPreferences = await _storage.fetchCategoriesPreferences() ?? {};
     await Future.wait(
       categoriesPreferences.map((category) {
         return enable

@@ -4,6 +4,8 @@ import 'package:dart_frog/dart_frog.dart';
 import 'package:university_app_server_api/src/data/schedule/schedule_data_source.dart';
 import 'package:university_app_server_api/src/models/schedule/search_classrooms_response.dart';
 
+/// @Allow(GET)
+/// @Query(query)
 Future<Response> onRequest(RequestContext context) async {
   if (context.request.method != HttpMethod.get) {
     return Response(statusCode: HttpStatus.methodNotAllowed);

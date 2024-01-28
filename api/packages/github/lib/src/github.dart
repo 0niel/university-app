@@ -92,9 +92,7 @@ class GithubClient {
 extension on http.Response {
   List<Map<String, dynamic>> jsonArray() {
     try {
-      return (jsonDecode(body) as List<dynamic>)
-          .cast<Map<String, dynamic>>()
-          .toList();
+      return (jsonDecode(body) as List<dynamic>).cast<Map<String, dynamic>>().toList();
     } on FormatException catch (e) {
       throw GithubApiMalformedResponse(error: e);
     }

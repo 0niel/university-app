@@ -16,13 +16,10 @@ class NewsRepositoryImpl implements NewsRepository {
   });
 
   @override
-  Future<Either<Failure, List<NewsItem>>> getNews(
-      int page, int pageSize, bool isImportant,
-      [String? tag]) async {
+  Future<Either<Failure, List<NewsItem>>> getNews(int page, int pageSize, bool isImportant, [String? tag]) async {
     if (await connectionChecker.hasConnection) {
       try {
-        final newsList =
-            await remoteDataSource.getNews(page, pageSize, isImportant, tag);
+        final newsList = await remoteDataSource.getNews(page, pageSize, isImportant, tag);
         return Right(newsList);
       } on ServerException {
         return const Left(ServerFailure());

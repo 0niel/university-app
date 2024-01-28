@@ -6,9 +6,7 @@ class TextOutlinedButton extends StatelessWidget {
   final String content;
   final double? width;
   final VoidCallback? onPressed;
-  const TextOutlinedButton(
-      {Key? key, required this.content, this.width, this.onPressed})
-      : super(key: key);
+  const TextOutlinedButton({Key? key, required this.content, this.width, this.onPressed}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -18,20 +16,17 @@ class TextOutlinedButton extends StatelessWidget {
       child: ElevatedButton(
         onPressed: onPressed,
         style: ButtonStyle(
-          backgroundColor: MaterialStateProperty.all(
-              AppTheme.colorsOf(context).background01),
+          backgroundColor: MaterialStateProperty.all(AppTheme.colorsOf(context).background01),
           shape: MaterialStateProperty.all<RoundedRectangleBorder>(
             RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(50.0),
-                side: BorderSide(
-                    color: AppTheme.colorsOf(context).primary, width: 2)),
+                side: BorderSide(color: AppTheme.colorsOf(context).primary, width: 2)),
           ),
         ),
         child: Center(
           child: Text(
             content,
-            style: AppTextStyle.buttonS
-                .copyWith(color: AppTheme.colorsOf(context).active),
+            style: AppTextStyle.buttonS.copyWith(color: AppTheme.colorsOf(context).active),
           ),
         ),
       ),

@@ -9,8 +9,7 @@ class CategoriesResponse extends Equatable {
     required this.categories,
   });
 
-  factory CategoriesResponse.fromJson(Map<String, dynamic> json) =>
-      _$CategoriesResponseFromJson(json);
+  factory CategoriesResponse.fromJson(Map<String, dynamic> json) => _$CategoriesResponseFromJson(json);
 
   final List<String> categories;
 

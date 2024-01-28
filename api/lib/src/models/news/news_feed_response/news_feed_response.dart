@@ -11,8 +11,7 @@ class NewsFeedResponse extends Equatable {
     required this.news,
   });
 
-  factory NewsFeedResponse.fromJson(Map<String, dynamic> json) =>
-      _$NewsFeedResponseFromJson(json);
+  factory NewsFeedResponse.fromJson(Map<String, dynamic> json) => _$NewsFeedResponseFromJson(json);
 
   final List<NewsItemResponse> news;
 

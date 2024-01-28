@@ -52,8 +52,7 @@ class ScoresState extends Equatable {
     );
   }
 
-  factory ScoresState.fromJson(Map<String, dynamic> json) =>
-      _$ScoresStateFromJson(json);
+  factory ScoresState.fromJson(Map<String, dynamic> json) => _$ScoresStateFromJson(json);
 
   Map<String, dynamic> toJson() => _$ScoresStateToJson(this);
 

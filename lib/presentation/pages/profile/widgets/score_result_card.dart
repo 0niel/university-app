@@ -32,9 +32,7 @@ class _ScoreResultCardState extends State<ScoreResultCard> {
     return GestureDetector(
       onTap: () {
         setState(() {
-          _viewType = _viewType == ViewType.minify
-              ? ViewType.expanded
-              : ViewType.minify;
+          _viewType = _viewType == ViewType.minify ? ViewType.expanded : ViewType.minify;
         });
       },
       child: _buildCard(
@@ -204,9 +202,7 @@ class _ScoreResultCardState extends State<ScoreResultCard> {
       children: [
         Icon(icon),
         const SizedBox(width: 10),
-        text.isNotEmpty
-            ? Expanded(child: Text(text, style: AppTextStyle.body))
-            : _buildEmtyDataLine(context),
+        text.isNotEmpty ? Expanded(child: Text(text, style: AppTextStyle.body)) : _buildEmtyDataLine(context),
       ],
     );
   }

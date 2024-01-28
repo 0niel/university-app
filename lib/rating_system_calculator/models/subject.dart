@@ -16,8 +16,7 @@ class Subject extends Equatable {
   });
 
   /// {@macro from_json}
-  factory Subject.fromJson(Map<String, dynamic> json) =>
-      _$SubjectFromJson(json);
+  factory Subject.fromJson(Map<String, dynamic> json) => _$SubjectFromJson(json);
 
   /// {@macro to_json}
   Map<String, dynamic> toJson() => _$SubjectToJson(this);

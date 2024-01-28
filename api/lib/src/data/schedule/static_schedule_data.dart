@@ -19,9 +19,7 @@ final schedules = <SchedulePart>[
   LessonSchedulePart(
     subject: 'Математический анализ',
     lessonType: LessonType.practice,
-    teachers: [
-      const Teacher(name: 'Зуев Андрей Сергеевич', email: 'zuev_a@mirea.ru')
-    ],
+    teachers: [const Teacher(name: 'Зуев Андрей Сергеевич', email: 'zuev_a@mirea.ru')],
     classrooms: [
       const Classroom(
         name: 'А-401',

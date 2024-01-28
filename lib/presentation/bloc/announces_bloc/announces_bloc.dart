@@ -21,7 +21,6 @@ class AnnouncesBloc extends Bloc<AnnouncesEvent, AnnouncesState> {
 
     final announces = await getAnnounces();
 
-    announces.fold((failure) => emit(AnnouncesLoadError()),
-        (r) => emit(AnnouncesLoaded(announces: r)));
+    announces.fold((failure) => emit(AnnouncesLoadError()), (r) => emit(AnnouncesLoaded(announces: r)));
   }
 }

@@ -3,9 +3,7 @@ import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:rtu_mirea_app/presentation/typography.dart';
 
 class SettingsButton extends StatelessWidget {
-  const SettingsButton(
-      {Key? key, required this.text, required this.icon, required this.onClick})
-      : super(key: key);
+  const SettingsButton({Key? key, required this.text, required this.icon, required this.onClick}) : super(key: key);
   final String text;
   final IconData icon;
   final Function onClick;

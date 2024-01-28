@@ -6,14 +6,19 @@ import 'package:rtu_mirea_app/presentation/bloc/news_bloc/news_bloc.dart';
 import 'package:rtu_mirea_app/presentation/widgets/buttons/app_settings_button.dart';
 import 'package:rtu_mirea_app/presentation/widgets/buttons/primary_tab_button.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:very_good_infinite_list/very_good_infinite_list.dart';
 import 'widgets/news_card.dart';
 import 'widgets/tag_badge.dart';
-import 'package:rtu_mirea_app/presentation/typography.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 
-class NewsPage extends StatelessWidget {
-  NewsPage({super.key});
+class NewsPage extends StatefulWidget {
+  const NewsPage({super.key});
 
+  @override
+  State<NewsPage> createState() => _NewsPageState();
+}
+
+class _NewsPageState extends State<NewsPage> {
   final ValueNotifier<int> _tabValueNotifier = ValueNotifier(0);
 
   void _filterNewsByTag(NewsBloc bloc, String tag) {
@@ -42,14 +47,10 @@ class NewsPage extends StatelessWidget {
       showDragHandle: true,
       builder: (context) => SafeArea(
         child: Container(
-          height: 420 < MediaQuery.of(context).size.height * 0.6
-              ? 420
-              : MediaQuery.of(context).size.height * 0.6,
-          padding:
-              const EdgeInsets.only(top: 4, bottom: 16, left: 24, right: 24),
+          height: 420 < MediaQuery.of(context).size.height * 0.6 ? 420 : MediaQuery.of(context).size.height * 0.6,
+          padding: const EdgeInsets.only(top: 4, bottom: 16, left: 24, right: 24),
           child: BlocConsumer<NewsBloc, NewsState>(
-            listener: (context, state) =>
-                state.runtimeType != NewsLoaded ? context.pop() : null,
+            listener: (context, state) => state.runtimeType != NewsLoaded ? context.pop() : null,
             buildWhen: (previous, current) => (current is NewsLoaded),
             builder: (context, state) {
               final loadedState = state as NewsLoaded;
@@ -59,8 +60,7 @@ class NewsPage extends StatelessWidget {
                 children: [
                   TagBadge(
                     tag: "все",
-                    onPressed: () =>
-                        _filterNewsByTag(context.read<NewsBloc>(), "все"),
+                    onPressed: () => _filterNewsByTag(context.read<NewsBloc>(), "все"),
                   ),
                   const SizedBox(height: 16),
                   Expanded(
@@ -72,20 +72,16 @@ class NewsPage extends StatelessWidget {
                         children: List.generate(
                           loadedState.tags.length,
                           (index) {
-                            if (loadedState.selectedTag ==
-                                loadedState.tags[index]) {
+                            if (loadedState.selectedTag == loadedState.tags[index]) {
                               return TagBadge(
                                 tag: loadedState.tags[index],
                                 color: AppTheme.colorsOf(context).colorful04,
-                                onPressed: () => _filterNewsByTag(
-                                    context.read<NewsBloc>(), "все"),
+                                onPressed: () => _filterNewsByTag(context.read<NewsBloc>(), "все"),
                               );
                             }
                             return TagBadge(
                               tag: loadedState.tags[index],
-                              onPressed: () => _filterNewsByTag(
-                                  context.read<NewsBloc>(),
-                                  loadedState.tags[index]),
+                              onPressed: () => _filterNewsByTag(context.read<NewsBloc>(), loadedState.tags[index]),
                             );
                           },
                         ),
@@ -101,10 +97,13 @@ class NewsPage extends StatelessWidget {
     );
   }
 
-  Widget _buildTabButtons(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16).copyWith(bottom: 16),
-      child: Row(
+  Widget _buildTabButtons() {
+    return SliverAppBar(
+      floating: true,
+      elevation: 0,
+      backgroundColor: AppTheme.colorsOf(context).background01,
+      automaticallyImplyLeading: false,
+      title: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Row(
@@ -115,9 +114,7 @@ class NewsPage extends StatelessWidget {
                 itemIndex: 0,
                 notifier: _tabValueNotifier,
                 onClick: () {
-                  context.read<NewsBloc>().add(NewsLoadEvent(
-                      refresh: true,
-                      isImportant: _tabValueNotifier.value == 1));
+                  context.read<NewsBloc>().add(NewsLoadEvent(refresh: true, isImportant: _tabValueNotifier.value == 1));
                 },
               ),
               PrimaryTabButton(
@@ -139,14 +136,28 @@ class NewsPage extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.only(right: 12),
             child: AppSettingsButton(
-              onClick: () => (context.read<NewsBloc>().state is NewsLoaded)
-                  ? _showTagsModalWindow(context)
-                  : null,
+              onClick: () => (context.read<NewsBloc>().state is NewsLoaded) ? _showTagsModalWindow(context) : null,
             ),
           ),
         ],
       ),
     );
+  }
+
+  late final ScrollController _scrollController;
+  List<NewsItem> news = [];
+  bool isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController = ScrollController();
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
   }
 
   @override
@@ -155,59 +166,44 @@ class NewsPage extends StatelessWidget {
       appBar: AppBar(
         title: const Text("Новости"),
       ),
-      body: Builder(
-        builder: (BuildContext context) {
-          List<NewsItem> news = [];
-          bool isLoading = false;
-
-          return Column(
-            children: [
-              const SizedBox(height: 16),
-              _buildTabButtons(context),
-              Expanded(
-                child: BlocBuilder<NewsBloc, NewsState>(
-                  builder: (context, state) {
-                    if (state is NewsInitial) {
-                      context.read<NewsBloc>().add(NewsLoadEvent(
-                          isImportant: _tabValueNotifier.value == 1,
-                          refresh: true));
-                    } else if (state is NewsLoaded) {
-                      news = state.news;
-                    } else if (state is NewsLoading && state.isFirstFetch) {
-                      return Column(
-                        children: [
-                          const SizedBox(height: 12),
-                          Expanded(
-                            child: ListView.builder(
-                              physics: const NeverScrollableScrollPhysics(),
-                              itemCount: 3,
-                              itemBuilder: (context, index) =>
-                                  const _ShimmerNewsCardLoading(),
-                            ),
-                          ),
-                        ],
-                      );
-                    } else if (state is NewsLoading) {
-                      isLoading = true;
-                    } else if (state is NewsLoadError) {
-                      return SingleChildScrollView(
-                        physics: const AlwaysScrollableScrollPhysics(),
-                        child: Center(
-                          child: Text(
-                            'Произошла ошибка при загрузке новостей.',
-                            textAlign: TextAlign.center,
-                            style: AppTextStyle.title,
-                          ),
-                        ),
-                      );
-                    }
-                    return _NewsPageView(
-                      tabValueNotifier: _tabValueNotifier,
-                      news: news,
-                      isLoading: isLoading,
-                    );
-                  },
+      body: BlocBuilder<NewsBloc, NewsState>(
+        builder: (context, state) {
+          if (state is NewsInitial) {
+            context.read<NewsBloc>().add(
+                  const NewsLoadEvent(
+                    isImportant: false,
+                    refresh: true,
+                  ),
+                );
+          } else if ((state is NewsLoading && state.isFirstFetch) || state is NewsLoadError) {
+            return Column(
+              children: [
+                const SizedBox(height: 12),
+                Expanded(
+                  child: ListView.builder(
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: 3,
+                    itemBuilder: (context, index) => const _ShimmerNewsCardLoading(),
+                  ),
                 ),
+              ],
+            );
+          }
+          if (state is NewsLoaded) {
+            news = state.news;
+            isLoading = false;
+          } else if (state is NewsLoading) {
+            isLoading = true;
+          }
+
+          return CustomScrollView(
+            controller: _scrollController,
+            slivers: [
+              _buildTabButtons(),
+              _NewsPageView(
+                tabValueNotifier: _tabValueNotifier,
+                news: news,
+                isLoading: isLoading,
               ),
             ],
           );
@@ -234,31 +230,6 @@ class _NewsPageView extends StatefulWidget {
 }
 
 class _NewsPageViewState extends State<_NewsPageView> {
-  late final ScrollController _scrollController;
-
-  @override
-  void initState() {
-    super.initState();
-    _scrollController = ScrollController()..addListener(_scrollListener);
-  }
-
-  @override
-  void dispose() {
-    _scrollController.removeListener(_scrollListener);
-    super.dispose();
-  }
-
-  void _scrollListener() {
-    if (_scrollController.position.pixels >=
-        _scrollController.position.maxScrollExtent - 200) {
-      if (context.read<NewsBloc>().state is! NewsLoading) {
-        context.read<NewsBloc>().add(NewsLoadEvent(
-              isImportant: widget.tabValueNotifier.value == 1,
-            ));
-      }
-    }
-  }
-
   int _getColumnCount(double screenWidth) {
     if (screenWidth < 900) {
       return 1;
@@ -282,36 +253,34 @@ class _NewsPageViewState extends State<_NewsPageView> {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      controller: _scrollController,
-      child: Wrap(
-        alignment: WrapAlignment.start,
-        spacing: 0,
-        runSpacing: 0,
-        children: [
-          const SizedBox(
-            width: double.infinity,
-            height: 16,
+    return SliverInfiniteList(
+      itemCount: widget.news.length,
+      onFetchData: () {
+        if (context.read<NewsBloc>().state is! NewsLoading) {
+          context.read<NewsBloc>().add(
+                NewsLoadEvent(
+                  isImportant: widget.tabValueNotifier.value == 1,
+                ),
+              );
+        }
+      },
+      isLoading: widget.isLoading,
+      itemBuilder: (context, index) {
+        return SizedBox(
+          width: _computeWidth(context),
+          child: NewsCard(
+            key: ObjectKey(widget.news[index]),
+            newsItem: widget.news[index],
+            onClickNewsTag: (tag) => context.read<NewsBloc>().add(
+                  NewsLoadEvent(
+                    refresh: true,
+                    isImportant: widget.tabValueNotifier.value == 1,
+                    tag: tag,
+                  ),
+                ),
           ),
-          for (var index = 0; index < widget.news.length; index++)
-            SizedBox(
-              width: _computeWidth(context),
-              child: NewsCard(
-                  newsItem: widget.news[index],
-                  onClickNewsTag: (tag) => context.read<NewsBloc>().add(
-                        NewsLoadEvent(
-                          refresh: true,
-                          isImportant: widget.tabValueNotifier.value == 1,
-                          tag: tag,
-                        ),
-                      )),
-            ),
-          if (widget.isLoading)
-            const Center(
-              child: CircularProgressIndicator(),
-            ),
-        ],
-      ),
+        );
+      },
     );
   }
 }

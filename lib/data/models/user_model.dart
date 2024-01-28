@@ -30,8 +30,7 @@ class UserModel extends User {
           students: students,
         );
 
-  factory UserModel.fromRawJson(String str) =>
-      UserModel.fromJson(json.decode(str));
+  factory UserModel.fromRawJson(String str) => UserModel.fromJson(json.decode(str));
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(

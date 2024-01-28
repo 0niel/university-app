@@ -58,9 +58,7 @@ class SubjectCard extends StatelessWidget {
   final void Function(Subject) onTap;
 
   double get score {
-    return (subject.mainScore ?? 0) +
-        (subject.additionalScore ?? 0) +
-        (subject.classScore ?? 0);
+    return (subject.mainScore ?? 0) + (subject.additionalScore ?? 0) + (subject.classScore ?? 0);
   }
 
   @override

@@ -218,8 +218,7 @@ class ApiClient {
   Future<SearchClassroomsResponse> searchClassrooms({
     String query = '',
   }) async {
-    final uri =
-        Uri.parse('$_baseUrl/api/v1/schedule/search/classrooms').replace(
+    final uri = Uri.parse('$_baseUrl/api/v1/schedule/search/classrooms').replace(
       queryParameters: <String, String>{
         'query': query,
       },

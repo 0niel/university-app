@@ -21,8 +21,7 @@ class ProfileSettingsPage extends StatelessWidget {
             const SizedBox(height: 24),
             ListTile(
               title: Text("Тема", style: AppTextStyle.body),
-              leading: Icon(FontAwesomeIcons.palette,
-                  color: AppTheme.colorsOf(context).active),
+              leading: Icon(FontAwesomeIcons.palette, color: AppTheme.colorsOf(context).active),
               trailing: const Icon(Icons.chevron_right),
               onTap: () {
                 showDialog(
@@ -35,10 +34,8 @@ class ProfileSettingsPage extends StatelessWidget {
                     children: [
                       _ListTileThemeItem(
                         title: "Светлая",
-                        trailing: AdaptiveTheme.of(context).mode ==
-                                AdaptiveThemeMode.light
-                            ? Icon(Icons.check,
-                                color: AppTheme.colorsOf(context).active)
+                        trailing: AdaptiveTheme.of(context).mode == AdaptiveThemeMode.light
+                            ? Icon(Icons.check, color: AppTheme.colorsOf(context).active)
                             : null,
                         onTap: () {
                           AdaptiveTheme.of(context).setLight();
@@ -48,10 +45,8 @@ class ProfileSettingsPage extends StatelessWidget {
                       const SizedBox(height: 8),
                       _ListTileThemeItem(
                         title: "Тёмная",
-                        trailing: AdaptiveTheme.of(context).mode ==
-                                AdaptiveThemeMode.dark
-                            ? Icon(Icons.check,
-                                color: AppTheme.colorsOf(context).active)
+                        trailing: AdaptiveTheme.of(context).mode == AdaptiveThemeMode.dark
+                            ? Icon(Icons.check, color: AppTheme.colorsOf(context).active)
                             : null,
                         onTap: () {
                           AdaptiveTheme.of(context).setDark();
@@ -61,10 +56,8 @@ class ProfileSettingsPage extends StatelessWidget {
                       const SizedBox(height: 8),
                       _ListTileThemeItem(
                         title: "Как в системе",
-                        trailing: AdaptiveTheme.of(context).mode ==
-                                AdaptiveThemeMode.system
-                            ? Icon(Icons.check,
-                                color: AppTheme.colorsOf(context).active)
+                        trailing: AdaptiveTheme.of(context).mode == AdaptiveThemeMode.system
+                            ? Icon(Icons.check, color: AppTheme.colorsOf(context).active)
                             : null,
                         onTap: () {
                           AdaptiveTheme.of(context).setSystem();
@@ -79,8 +72,7 @@ class ProfileSettingsPage extends StatelessWidget {
             const Divider(),
             ListTile(
               title: Text("Уведомления", style: AppTextStyle.body),
-              leading: Icon(Icons.notifications,
-                  color: AppTheme.colorsOf(context).active),
+              leading: Icon(Icons.notifications, color: AppTheme.colorsOf(context).active),
               onTap: () {
                 context.go("/profile/settings/notifications");
               },

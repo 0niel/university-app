@@ -50,8 +50,7 @@ class UserRemoteDataImpl implements UserRemoteData {
       '$_apiUrl/?action=getData&url=https://lk.mirea.ru/profile/',
     );
 
-    log('Status code: ${response.statusCode}, Response: ${response.body}',
-        name: 'getProfileData');
+    log('Status code: ${response.statusCode}, Response: ${response.body}', name: 'getProfileData');
 
     try {
       var jsonResponse = json.decode(response.body);
@@ -77,8 +76,7 @@ class UserRemoteDataImpl implements UserRemoteData {
       '$_apiUrl/?action=getData&url=https://lk.mirea.ru/livestream/',
     );
 
-    log('Status code: ${response.statusCode}, Response: ${response.body}',
-        name: 'getAnnounces');
+    log('Status code: ${response.statusCode}, Response: ${response.body}', name: 'getAnnounces');
 
     var jsonResponse = json.decode(response.body);
     if (jsonResponse.containsKey('errors')) {
@@ -102,8 +100,7 @@ class UserRemoteDataImpl implements UserRemoteData {
       '$_apiUrl/?action=getData&url=https://lk.mirea.ru/lectors/&page=undefined&findname=$name',
     );
 
-    log('Status code: ${response.statusCode}, Response: ${response.body}',
-        name: 'getEmployees');
+    log('Status code: ${response.statusCode}, Response: ${response.body}', name: 'getEmployees');
 
     var jsonResponse = json.decode(response.body);
     if (jsonResponse.containsKey('errors')) {
@@ -129,8 +126,7 @@ class UserRemoteDataImpl implements UserRemoteData {
       '$_apiUrl/?action=getData&url=https://lk.mirea.ru/learning/scores/',
     );
 
-    log('Status code: ${response.statusCode}, Response: ${response.body}',
-        name: 'getScores');
+    log('Status code: ${response.statusCode}, Response: ${response.body}', name: 'getScores');
 
     var jsonResponse = json.decode(response.body);
     if (jsonResponse.containsKey('errors')) {
@@ -168,14 +164,12 @@ class UserRemoteDataImpl implements UserRemoteData {
   }
 
   @override
-  Future<List<AttendanceModel>> getAttendance(
-      String dateStart, String dateEnd) async {
+  Future<List<AttendanceModel>> getAttendance(String dateStart, String dateEnd) async {
     final response = await lksOauth2.oauth2Helper.get(
       '$_apiUrl/?action=getData&url=https://lk.mirea.ru/schedule/attendance/&startDate=$dateStart&endDate=$dateEnd',
     );
 
-    log('Status code: ${response.statusCode}, Response: ${response.body}',
-        name: 'getAttendance');
+    log('Status code: ${response.statusCode}, Response: ${response.body}', name: 'getAttendance');
 
     var jsonResponse = json.decode(response.body);
     if (jsonResponse.containsKey('errors')) {
@@ -188,14 +182,12 @@ class UserRemoteDataImpl implements UserRemoteData {
         Map<String, dynamic>.from(jsonResponse["ROWS"]).forEach((date, row) {
           if (row.containsKey("START")) {
             if (row["START"] != null) {
-              attendance.add(
-                  AttendanceModel.fromJson(row["START"]).copyWith(date: date));
+              attendance.add(AttendanceModel.fromJson(row["START"]).copyWith(date: date));
             }
           }
           if (row.containsKey("END")) {
             if (row["END"] != null) {
-              attendance.add(
-                  AttendanceModel.fromJson(row["END"]).copyWith(date: date));
+              attendance.add(AttendanceModel.fromJson(row["END"]).copyWith(date: date));
             }
           }
         });
@@ -208,11 +200,9 @@ class UserRemoteDataImpl implements UserRemoteData {
 
   @override
   Future<int> getNfcCode(String code, String studentId, String deviceId) async {
-    final response = await lksOauth2.oauth2Helper
-        .get('$_apiUrl/get-nfc-code/$code/$studentId/$deviceId');
+    final response = await lksOauth2.oauth2Helper.get('$_apiUrl/get-nfc-code/$code/$studentId/$deviceId');
 
-    log('Status code: ${response.statusCode}, Response: ${response.body}',
-        name: 'getNfcCode');
+    log('Status code: ${response.statusCode}, Response: ${response.body}', name: 'getNfcCode');
 
     var jsonResponse = json.decode(response.body);
 
@@ -224,8 +214,7 @@ class UserRemoteDataImpl implements UserRemoteData {
         throw ServerException(jsonResponse['message']);
       }
       // LKS api error
-      else if (jsonResponse.containsKey('error') &&
-          jsonResponse['error'] == 'StaffnodeNotExist') {
+      else if (jsonResponse.containsKey('error') && jsonResponse['error'] == 'StaffnodeNotExist') {
         throw NfcStaffnodeNotExistException();
       } else {
         throw ServerException('${jsonResponse['error']}');
@@ -234,8 +223,7 @@ class UserRemoteDataImpl implements UserRemoteData {
   }
 
   @override
-  Future<void> sendNfcNotExistFeedback(String fullName, String group,
-      String personalNumber, String studentId) async {
+  Future<void> sendNfcNotExistFeedback(String fullName, String group, String personalNumber, String studentId) async {
     final data = {
       'fullName': fullName,
       'group': group,
@@ -252,8 +240,7 @@ class UserRemoteDataImpl implements UserRemoteData {
       body: json.encode(data),
     );
 
-    log('Status code: ${response.statusCode}, Response: ${response.body}',
-        name: 'sendNfcNotExistFeedback');
+    log('Status code: ${response.statusCode}, Response: ${response.body}', name: 'sendNfcNotExistFeedback');
 
     if (response.statusCode != 200) {
       if (response.statusCode == 400) {

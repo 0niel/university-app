@@ -20,8 +20,7 @@ class RtuMireaNewsItem extends Equatable {
   });
 
   /// Конвертирует `Map<String, dynamic>` в [RtuMireaNewsItem]
-  factory RtuMireaNewsItem.fromJson(Map<String, dynamic> json) =>
-      _$RtuMireaNewsItemFromJson(json);
+  factory RtuMireaNewsItem.fromJson(Map<String, dynamic> json) => _$RtuMireaNewsItemFromJson(json);
 
   /// Заголовок новости.
   @JsonKey(name: 'NAME')
@@ -31,8 +30,7 @@ class RtuMireaNewsItem extends Equatable {
   @JsonKey(name: 'DETAIL_TEXT')
   final String text;
 
-  static DateTime _dateFromJson(String date) =>
-      DateFormat('dd.MM.yyyy').parse(date);
+  static DateTime _dateFromJson(String date) => DateFormat('dd.MM.yyyy').parse(date);
 
   /// Дата публикации новости.
   @JsonKey(
@@ -49,8 +47,7 @@ class RtuMireaNewsItem extends Equatable {
   @JsonKey(name: 'DETAIL_PICTURE')
   final String coverImage;
 
-  static List<String> _tagsFromJson(String tags) =>
-      tags.split(',').map((e) => e.trim()).toList();
+  static List<String> _tagsFromJson(String tags) => tags.split(',').map((e) => e.trim()).toList();
 
   static String _tagsToJson(List<String> tags) => tags.join(',');
 
@@ -81,6 +78,5 @@ class RtuMireaNewsItem extends Equatable {
       );
 
   @override
-  List<Object> get props =>
-      [title, text, date, images, tags, coverImage, detailPageUrl];
+  List<Object> get props => [title, text, date, images, tags, coverImage, detailPageUrl];
 }

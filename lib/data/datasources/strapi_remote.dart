@@ -22,8 +22,7 @@ class StrapiRemoteDataImpl implements StrapiRemoteData {
     if (response.statusCode == 200) {
       final responseBody = response.data;
       List<StoryModel> stories = [];
-      stories = List<StoryModel>.from(responseBody['data']
-          .map((x) => StoryModel.fromJson(x['attributes'])));
+      stories = List<StoryModel>.from(responseBody['data'].map((x) => StoryModel.fromJson(x['attributes'])));
       return stories;
     } else {
       throw ServerException('Response status code is $response.statusCode');
@@ -32,14 +31,13 @@ class StrapiRemoteDataImpl implements StrapiRemoteData {
 
   @override
   Future<List<UpdateInfoModel>> getLastUpdateInfo() async {
-    final response =
-        await httpClient.get('$_apiUrl/updates?sort=buildNumber:DESC');
+    final response = await httpClient.get('$_apiUrl/updates?sort=buildNumber:DESC');
     if (response.statusCode == 200) {
       try {
         final responseBody = response.data;
         List<UpdateInfoModel> updatesList = [];
-        updatesList = List<UpdateInfoModel>.from(responseBody['data']
-            .map((x) => UpdateInfoModel.fromJson(x['attributes'])));
+        updatesList =
+            List<UpdateInfoModel>.from(responseBody['data'].map((x) => UpdateInfoModel.fromJson(x['attributes'])));
         return updatesList;
       } catch (e) {
         throw ParsingException(

@@ -4,6 +4,10 @@ import 'package:dart_frog/dart_frog.dart';
 import 'package:university_app_server_api/api.dart';
 import 'package:university_app_server_api/src/models/models.dart';
 
+/// @Allow(GET)
+/// @Query(limit)
+/// @Query(offset)
+/// @Query(category)
 Future<Response> onRequest(RequestContext context) async {
   if (context.request.method != HttpMethod.get) {
     return Response(statusCode: HttpStatus.methodNotAllowed);
@@ -23,13 +27,16 @@ Future<Response> onRequest(RequestContext context) async {
 
   final response = NewsFeedResponse(
     news: news
-        .map((article) => NewsItemResponse(
+        .map(
+          (article) => NewsItemResponse(
             title: article.title,
             htmlContent: article.htmlContent,
             publishedAt: article.publishedAt,
             imageUrls: article.imageUrls,
             categories: article.categories,
-            url: article.url,),)
+            url: article.url,
+          ),
+        )
         .toList(),
   );
 

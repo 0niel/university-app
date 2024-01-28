@@ -3,8 +3,7 @@ import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:rtu_mirea_app/presentation/typography.dart';
 
 class PrimaryButton extends StatelessWidget {
-  const PrimaryButton({Key? key, required this.text, required this.onClick})
-      : super(key: key);
+  const PrimaryButton({Key? key, required this.text, required this.onClick}) : super(key: key);
 
   final String text;
   final Function onClick;
@@ -12,12 +11,10 @@ class PrimaryButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ConstrainedBox(
-      constraints:
-          const BoxConstraints.tightFor(width: double.infinity, height: 48),
+      constraints: const BoxConstraints.tightFor(width: double.infinity, height: 48),
       child: ElevatedButton(
         style: ButtonStyle(
-          backgroundColor:
-              MaterialStateProperty.all(AppTheme.colorsOf(context).primary),
+          backgroundColor: MaterialStateProperty.all(AppTheme.colorsOf(context).primary),
           shape: MaterialStateProperty.all<RoundedRectangleBorder>(
             RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(24.0),

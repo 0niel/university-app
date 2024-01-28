@@ -23,16 +23,13 @@ class StrapiMediaModel extends StrapiMedia {
           url: url,
         );
 
-  factory StrapiMediaModel.fromJson(Map<String, dynamic> json) =>
-      StrapiMediaModel(
+  factory StrapiMediaModel.fromJson(Map<String, dynamic> json) => StrapiMediaModel(
         name: json["name"],
         alternativeText: json["alternativeText"],
         caption: json["caption"],
         width: json["width"],
         height: json["height"],
-        formats: json["formats"] != null
-            ? FormatsModel.fromJson(json["formats"])
-            : null,
+        formats: json["formats"] != null ? FormatsModel.fromJson(json["formats"]) : null,
         size: json["size"].toDouble(),
         url: json["url"],
       );
@@ -63,18 +60,10 @@ class FormatsModel extends Formats {
         );
 
   factory FormatsModel.fromJson(Map<String, dynamic> json) => FormatsModel(
-        large: json["large"] != null
-            ? StrapiImageModel.fromJson(json["large"])
-            : null,
-        small: json["small"] != null
-            ? StrapiImageModel.fromJson(json["small"])
-            : null,
-        medium: json["medium"] != null
-            ? StrapiImageModel.fromJson(json["medium"])
-            : null,
-        thumbnail: json["thumbnail"] != null
-            ? StrapiImageModel.fromJson(json["thumbnail"])
-            : null,
+        large: json["large"] != null ? StrapiImageModel.fromJson(json["large"]) : null,
+        small: json["small"] != null ? StrapiImageModel.fromJson(json["small"]) : null,
+        medium: json["medium"] != null ? StrapiImageModel.fromJson(json["medium"]) : null,
+        thumbnail: json["thumbnail"] != null ? StrapiImageModel.fromJson(json["thumbnail"]) : null,
       );
 
   Map<String, dynamic> toJson() => {
@@ -100,11 +89,9 @@ class StrapiImageModel extends StrapiImage {
           height: height,
         );
 
-  factory StrapiImageModel.fromRawJson(String str) =>
-      StrapiImageModel.fromJson(json.decode(str));
+  factory StrapiImageModel.fromRawJson(String str) => StrapiImageModel.fromJson(json.decode(str));
 
-  factory StrapiImageModel.fromJson(Map<String, dynamic> json) =>
-      StrapiImageModel(
+  factory StrapiImageModel.fromJson(Map<String, dynamic> json) => StrapiImageModel(
         url: json["url"],
         name: json["name"],
         size: json["size"].toDouble(),

@@ -20,9 +20,7 @@ Middleware userProvider() {
     return handler.use(
       provider<RequestUser>((context) {
         final userId = _extractUserId(context.request);
-        return userId != null
-            ? RequestUser._(id: userId)
-            : RequestUser.anonymous;
+        return userId != null ? RequestUser._(id: userId) : RequestUser.anonymous;
       }),
     );
   };

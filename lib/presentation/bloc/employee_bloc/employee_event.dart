@@ -13,6 +13,5 @@ class LoadEmployees extends EmployeeEvent with AnalyticsEventMixin {
   List<Object> get props => [name];
 
   @override
-  AnalyticsEvent get event =>
-      AnalyticsEvent('LoadEmployees', properties: {'name': name});
+  AnalyticsEvent get event => AnalyticsEvent('LoadEmployees', properties: {'name': name});
 }

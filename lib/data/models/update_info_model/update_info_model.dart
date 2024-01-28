@@ -13,6 +13,5 @@ class UpdateInfoModel with _$UpdateInfoModel {
     @JsonKey(name: 'buildNumber') required int buildNumber,
   }) = _UpdateInfoModel;
 
-  factory UpdateInfoModel.fromJson(Map<String, dynamic> json) =>
-      _$UpdateInfoModelFromJson(json);
+  factory UpdateInfoModel.fromJson(Map<String, dynamic> json) => _$UpdateInfoModelFromJson(json);
 }

@@ -89,8 +89,7 @@ class UserRepositoryImpl implements UserRepository {
   }
 
   @override
-  Future<Either<Failure, Map<String, Map<String, List<Score>>>>>
-      getScores() async {
+  Future<Either<Failure, Map<String, Map<String, List<Score>>>>> getScores() async {
     try {
       final scores = await remoteDataSource.getScores();
       return Right(scores);
@@ -100,11 +99,9 @@ class UserRepositoryImpl implements UserRepository {
   }
 
   @override
-  Future<Either<Failure, List<Attendance>>> getAattendance(
-      String dateStart, String dateEnd) async {
+  Future<Either<Failure, List<Attendance>>> getAattendance(String dateStart, String dateEnd) async {
     try {
-      final attendance =
-          await remoteDataSource.getAttendance(dateStart, dateEnd);
+      final attendance = await remoteDataSource.getAttendance(dateStart, dateEnd);
       return Right(attendance);
     } on ServerException {
       return Future.value(const Left(ServerFailure()));

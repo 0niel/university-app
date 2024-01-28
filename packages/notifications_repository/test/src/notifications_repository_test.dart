@@ -29,8 +29,7 @@ void main() {
       storage = MockNotificationsStorage();
       notificationsClient = MockNotificationsClient();
 
-      when(permissionClient.notificationsStatus)
-          .thenAnswer((_) async => PermissionStatus.denied);
+      when(permissionClient.notificationsStatus).thenAnswer((_) async => PermissionStatus.denied);
 
       when(
         () => storage.setNotificationsEnabled(
@@ -46,13 +45,10 @@ void main() {
 
       when(storage.fetchNotificationsEnabled).thenAnswer((_) async => false);
 
-      when(storage.fetchCategoriesPreferences)
-          .thenAnswer((_) async => {'ИКБО-30-20'});
+      when(storage.fetchCategoriesPreferences).thenAnswer((_) async => {'ИКБО-30-20'});
 
-      when(() => notificationsClient.subscribeToCategory(any()))
-          .thenAnswer((_) async {});
-      when(() => notificationsClient.unsubscribeFromCategory(any()))
-          .thenAnswer((_) async {});
+      when(() => notificationsClient.subscribeToCategory(any())).thenAnswer((_) async {});
+      when(() => notificationsClient.unsubscribeFromCategory(any())).thenAnswer((_) async {});
     });
 
     group('constructor', () {
@@ -113,11 +109,9 @@ void main() {
         test(
             'calls openPermissionSettings on PermissionClient '
             'when PermissionStatus is permanentlyDenied', () async {
-          when(permissionClient.notificationsStatus)
-              .thenAnswer((_) async => PermissionStatus.permanentlyDenied);
+          when(permissionClient.notificationsStatus).thenAnswer((_) async => PermissionStatus.permanentlyDenied);
 
-          when(permissionClient.openPermissionSettings)
-              .thenAnswer((_) async => true);
+          when(permissionClient.openPermissionSettings).thenAnswer((_) async => true);
 
           await NotificationsRepository(
             permissionClient: permissionClient,
@@ -131,11 +125,9 @@ void main() {
         test(
             'calls openPermissionSettings on PermissionClient '
             'when PermissionStatus is restricted', () async {
-          when(permissionClient.notificationsStatus)
-              .thenAnswer((_) async => PermissionStatus.restricted);
+          when(permissionClient.notificationsStatus).thenAnswer((_) async => PermissionStatus.restricted);
 
-          when(permissionClient.openPermissionSettings)
-              .thenAnswer((_) async => true);
+          when(permissionClient.openPermissionSettings).thenAnswer((_) async => true);
 
           await NotificationsRepository(
             permissionClient: permissionClient,
@@ -149,11 +141,9 @@ void main() {
         test(
             'calls requestNotifications on PermissionClient '
             'when PermissionStatus is denied', () async {
-          when(permissionClient.requestNotifications)
-              .thenAnswer((_) async => PermissionStatus.granted);
+          when(permissionClient.requestNotifications).thenAnswer((_) async => PermissionStatus.granted);
 
-          when(permissionClient.notificationsStatus)
-              .thenAnswer((_) async => PermissionStatus.denied);
+          when(permissionClient.notificationsStatus).thenAnswer((_) async => PermissionStatus.denied);
 
           await NotificationsRepository(
             permissionClient: permissionClient,
@@ -170,11 +160,9 @@ void main() {
             'ИКБО-40-20',
           };
 
-          when(storage.fetchCategoriesPreferences)
-              .thenAnswer((_) async => categoriesPreferences);
+          when(storage.fetchCategoriesPreferences).thenAnswer((_) async => categoriesPreferences);
 
-          when(permissionClient.notificationsStatus)
-              .thenAnswer((_) async => PermissionStatus.granted);
+          when(permissionClient.notificationsStatus).thenAnswer((_) async => PermissionStatus.granted);
 
           await NotificationsRepository(
             permissionClient: permissionClient,
@@ -183,16 +171,14 @@ void main() {
           ).toggleNotifications(enable: true);
 
           for (final category in categoriesPreferences) {
-            verify(() => notificationsClient.subscribeToCategory(category))
-                .called(1);
+            verify(() => notificationsClient.subscribeToCategory(category)).called(1);
           }
         });
 
         test(
             'calls setNotificationsEnabled with true '
             'on NotificationsStorage', () async {
-          when(permissionClient.notificationsStatus)
-              .thenAnswer((_) async => PermissionStatus.granted);
+          when(permissionClient.notificationsStatus).thenAnswer((_) async => PermissionStatus.granted);
 
           await NotificationsRepository(
             permissionClient: permissionClient,
@@ -213,8 +199,7 @@ void main() {
             'ИКБО-40-20',
           };
 
-          when(storage.fetchCategoriesPreferences)
-              .thenAnswer((_) async => categoriesPreferences);
+          when(storage.fetchCategoriesPreferences).thenAnswer((_) async => categoriesPreferences);
 
           await NotificationsRepository(
             permissionClient: permissionClient,
@@ -265,8 +250,7 @@ void main() {
           'returns true '
           'when the notification permission is granted '
           'and the notification setting is enabled', () async {
-        when(permissionClient.notificationsStatus)
-            .thenAnswer((_) async => PermissionStatus.granted);
+        when(permissionClient.notificationsStatus).thenAnswer((_) async => PermissionStatus.granted);
 
         when(storage.fetchNotificationsEnabled).thenAnswer((_) async => true);
 
@@ -283,8 +267,7 @@ void main() {
           'returns false '
           'when the notification permission is not granted '
           'and the notification setting is enabled', () async {
-        when(permissionClient.notificationsStatus)
-            .thenAnswer((_) async => PermissionStatus.denied);
+        when(permissionClient.notificationsStatus).thenAnswer((_) async => PermissionStatus.denied);
 
         when(storage.fetchNotificationsEnabled).thenAnswer((_) async => true);
 
@@ -301,8 +284,7 @@ void main() {
           'returns false '
           'when the notification permission is not granted '
           'and the notification setting is disabled', () async {
-        when(permissionClient.notificationsStatus)
-            .thenAnswer((_) async => PermissionStatus.denied);
+        when(permissionClient.notificationsStatus).thenAnswer((_) async => PermissionStatus.denied);
 
         when(storage.fetchNotificationsEnabled).thenAnswer((_) async => false);
 
@@ -319,8 +301,7 @@ void main() {
           'returns false '
           'when the notification permission is granted '
           'and the notification setting is disabled', () async {
-        when(permissionClient.notificationsStatus)
-            .thenAnswer((_) async => PermissionStatus.granted);
+        when(permissionClient.notificationsStatus).thenAnswer((_) async => PermissionStatus.granted);
 
         when(storage.fetchNotificationsEnabled).thenAnswer((_) async => false);
 
@@ -384,8 +365,7 @@ void main() {
           'ИКБО-40-20',
         };
 
-        when(storage.fetchCategoriesPreferences)
-            .thenAnswer((_) async => previousCategoriesPreferences);
+        when(storage.fetchCategoriesPreferences).thenAnswer((_) async => previousCategoriesPreferences);
 
         await NotificationsRepository(
           permissionClient: permissionClient,
@@ -403,13 +383,11 @@ void main() {
       test(
           'subscribes to categories preferences '
           'when notifications are enabled', () async {
-        when(storage.fetchCategoriesPreferences)
-            .thenAnswer((_) async => categoriesPreferences);
+        when(storage.fetchCategoriesPreferences).thenAnswer((_) async => categoriesPreferences);
 
         when(storage.fetchNotificationsEnabled).thenAnswer((_) async => true);
 
-        when(permissionClient.notificationsStatus)
-            .thenAnswer((_) async => PermissionStatus.granted);
+        when(permissionClient.notificationsStatus).thenAnswer((_) async => PermissionStatus.granted);
 
         await NotificationsRepository(
           permissionClient: permissionClient,
@@ -418,8 +396,7 @@ void main() {
         ).setCategoriesPreferences(categoriesPreferences);
 
         for (final category in categoriesPreferences) {
-          verify(() => notificationsClient.subscribeToCategory(category))
-              .called(1);
+          verify(() => notificationsClient.subscribeToCategory(category)).called(1);
         }
       });
 
@@ -449,10 +426,8 @@ void main() {
         'ИКБО-40-20',
       };
 
-      test('returns categories preferences from NotificationsStorage',
-          () async {
-        when(storage.fetchCategoriesPreferences)
-            .thenAnswer((_) async => categoriesPreferences);
+      test('returns categories preferences from NotificationsStorage', () async {
+        when(storage.fetchCategoriesPreferences).thenAnswer((_) async => categoriesPreferences);
 
         final actualPreferences = await NotificationsRepository(
           permissionClient: permissionClient,
@@ -465,8 +440,7 @@ void main() {
 
       test(
           'returns null '
-          'when categories preferences do not exist in NotificationsStorage',
-          () async {
+          'when categories preferences do not exist in NotificationsStorage', () async {
         when(storage.fetchCategoriesPreferences).thenAnswer((_) async => null);
 
         final preferences = await NotificationsRepository(
@@ -487,8 +461,7 @@ void main() {
           notificationsClient: notificationsClient,
         );
 
-        when(storage.fetchCategoriesPreferences)
-            .thenThrow(StorageException(Error()));
+        when(storage.fetchCategoriesPreferences).thenThrow(StorageException(Error()));
 
         expect(
           notificationsRepository.fetchCategoriesPreferences,

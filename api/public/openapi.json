@@ -1,0 +1,443 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "A sample API",
+    "description": "A sample API",
+    "termsOfService": "http://localhost",
+    "contact": {
+      "name": "none",
+      "url": "http://localhost",
+      "email": "none@api.com"
+    },
+    "license": {
+      "name": "",
+      "url": ""
+    },
+    "version": "0.0.0"
+  },
+  "externalDocs": {
+    "description": "",
+    "url": "http://localhost/"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080",
+      "description": "Local server"
+    }
+  ],
+  "tags": [
+    {
+      "name": "contributors",
+      "description": "Operations about contributors"
+    },
+    {
+      "name": "sponsors",
+      "description": "Operations about sponsors"
+    },
+    {
+      "name": "ads",
+      "description": "Operations about ads"
+    },
+    {
+      "name": "categories",
+      "description": "Operations about categories"
+    },
+    {
+      "name": "news",
+      "description": "Operations about news"
+    },
+    {
+      "name": "classroom",
+      "description": "Operations about classroom"
+    },
+    {
+      "name": "group",
+      "description": "Operations about group"
+    },
+    {
+      "name": "classrooms",
+      "description": "Operations about classrooms"
+    },
+    {
+      "name": "groups",
+      "description": "Operations about groups"
+    },
+    {
+      "name": "teachers",
+      "description": "Operations about teachers"
+    },
+    {
+      "name": "teacher",
+      "description": "Operations about teacher"
+    }
+  ],
+  "components": {
+    "schemas": {},
+    "securitySchemes": {}
+  },
+  "paths": {
+    "/api/v1/community/contributors": {
+      "get": {
+        "tags": [
+          "contributors"
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of contributors.",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [],
+        "security": []
+      }
+    },
+    "/api/v1/community/sponsors": {
+      "get": {
+        "tags": [
+          "sponsors"
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of sponsors.",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [],
+        "security": []
+      }
+    },
+    "/api/v1/news/ads": {
+      "get": {
+        "tags": [
+          "ads"
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of ads.",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [],
+        "security": []
+      }
+    },
+    "/api/v1/news/categories": {
+      "get": {
+        "tags": [
+          "categories"
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of categories.",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [],
+        "security": []
+      }
+    },
+    "/api/v1/news": {
+      "get": {
+        "tags": [
+          "news"
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of news.",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "deprecated": false,
+            "allowEmptyValue": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "deprecated": false,
+            "allowEmptyValue": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "category",
+            "in": "query",
+            "required": false,
+            "deprecated": false,
+            "allowEmptyValue": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": []
+      }
+    },
+    "/api/v1/schedule/classroom/{classroom}": {
+      "get": {
+        "tags": [
+          "classroom"
+        ],
+        "responses": {
+          "200": {
+            "description": "A classroom.",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "classroom",
+            "in": "path",
+            "required": true,
+            "deprecated": false,
+            "allowEmptyValue": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": []
+      }
+    },
+    "/api/v1/schedule/group/{group}": {
+      "get": {
+        "tags": [
+          "group"
+        ],
+        "responses": {
+          "200": {
+            "description": "A group.",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "group",
+            "in": "path",
+            "required": true,
+            "deprecated": false,
+            "allowEmptyValue": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": []
+      }
+    },
+    "/api/v1/schedule/search/classrooms": {
+      "get": {
+        "tags": [
+          "classrooms"
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of classrooms.",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "query",
+            "in": "query",
+            "required": false,
+            "deprecated": false,
+            "allowEmptyValue": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": []
+      }
+    },
+    "/api/v1/schedule/search/groups": {
+      "get": {
+        "tags": [
+          "groups"
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of groups.",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "query",
+            "in": "query",
+            "required": false,
+            "deprecated": false,
+            "allowEmptyValue": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": []
+      }
+    },
+    "/api/v1/schedule/search/teachers": {
+      "get": {
+        "tags": [
+          "teachers"
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of teachers.",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "query",
+            "in": "query",
+            "required": false,
+            "deprecated": false,
+            "allowEmptyValue": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": []
+      }
+    },
+    "/api/v1/schedule/teacher/{teacher}": {
+      "get": {
+        "tags": [
+          "teacher"
+        ],
+        "responses": {
+          "200": {
+            "description": "A teacher.",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "teacher",
+            "in": "path",
+            "required": true,
+            "deprecated": false,
+            "allowEmptyValue": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": []
+      }
+    }
+  }
+}

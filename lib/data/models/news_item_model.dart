@@ -21,10 +21,8 @@ class NewsItemModel extends NewsItem {
       title: json['NAME'],
       text: json['DETAIL_TEXT'],
       date: DateFormat("dd.MM.yyyy").parse(json['DATE_ACTIVE_FROM']),
-      images: List<String>.from(json['PROPERTY_MY_GALLERY_VALUE'] ?? [])
-        ..add(json['DETAIL_PICTURE']),
-      tags: List<String>.from(
-          json['TAGS'].toString().split(',').map((x) => x.trim())),
+      images: List<String>.from(json['PROPERTY_MY_GALLERY_VALUE'] ?? [])..add(json['DETAIL_PICTURE']),
+      tags: List<String>.from(json['TAGS'].toString().split(',').map((x) => x.trim())),
     );
   }
 

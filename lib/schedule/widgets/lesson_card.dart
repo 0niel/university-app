@@ -73,19 +73,13 @@ class LessonCard extends StatelessWidget {
 
   String _getClassroomNames(List<Classroom> classrooms) {
     return classrooms
-        .map((e) =>
-            e.name +
-            (e.campus != null
-                ? ' (${e.campus?.shortName ?? e.campus?.name ?? ''})'
-                : ''))
+        .map((e) => e.name + (e.campus != null ? ' (${e.campus?.shortName ?? e.campus?.name ?? ''})' : ''))
         .join(', ');
   }
 
   Widget _buildCommentAlert(List<ScheduleComment> comments) {
     final comment = comments.firstWhereOrNull(
-      (comment) =>
-          lesson.dates.contains(comment.lessonDate) &&
-          comment.lessonBells == lesson.lessonBells,
+      (comment) => lesson.dates.contains(comment.lessonDate) && comment.lessonBells == lesson.lessonBells,
     );
 
     if (comment == null) {
@@ -196,8 +190,7 @@ class LessonCard extends StatelessWidget {
                         children: [
                           Text(
                             '${lesson.lessonBells.number} пара',
-                            style: AppTextStyle.body.copyWith(
-                                color: AppTheme.colorsOf(context).colorful03),
+                            style: AppTextStyle.body.copyWith(color: AppTheme.colorsOf(context).colorful03),
                           ),
                           Text(
                             'в ${lesson.lessonBells.startTime} - ${lesson.lessonBells.endTime}',
@@ -211,9 +204,7 @@ class LessonCard extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Divider(
-                            color: AppTheme.colorsOf(context)
-                                .deactive
-                                .withOpacity(0.1),
+                            color: AppTheme.colorsOf(context).deactive.withOpacity(0.1),
                             thickness: 1,
                             height: 30,
                           ),
@@ -238,9 +229,7 @@ class LessonCard extends StatelessWidget {
                                 Expanded(
                                   child: Text(
                                     _getClassroomNames(lesson.classrooms),
-                                    style: AppTextStyle.body.copyWith(
-                                        color:
-                                            AppTheme.colorsOf(context).active),
+                                    style: AppTextStyle.body.copyWith(color: AppTheme.colorsOf(context).active),
                                     maxLines: 2,
                                     overflow: TextOverflow.ellipsis,
                                   ),
@@ -252,12 +241,8 @@ class LessonCard extends StatelessWidget {
                           // SelectedGroupSchedule because this is the group
                           // that was selected.
                           if (lesson.groups != null &&
-                              ((state.selectedSchedule
-                                          is! SelectedGroupSchedule &&
-                                      lesson.groups!.isNotEmpty) ||
-                                  (state.selectedSchedule
-                                          is SelectedGroupSchedule &&
-                                      lesson.groups!.length > 1))) ...[
+                              ((state.selectedSchedule is! SelectedGroupSchedule && lesson.groups!.isNotEmpty) ||
+                                  (state.selectedSchedule is SelectedGroupSchedule && lesson.groups!.length > 1))) ...[
                             const SizedBox(
                               height: 4,
                             ),
@@ -278,9 +263,7 @@ class LessonCard extends StatelessWidget {
                                 Expanded(
                                   child: Text(
                                     lesson.groups?.join(', ') ?? '',
-                                    style: AppTextStyle.body.copyWith(
-                                        color: AppTheme.colorsOf(context)
-                                            .deactive),
+                                    style: AppTextStyle.body.copyWith(color: AppTheme.colorsOf(context).deactive),
                                   ),
                                 ),
                               ],
@@ -294,8 +277,7 @@ class LessonCard extends StatelessWidget {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Padding(
-                                  padding: const EdgeInsets.only(
-                                      left: 2, right: 7, top: 3),
+                                  padding: const EdgeInsets.only(left: 2, right: 7, top: 3),
                                   child: FaIcon(
                                     FontAwesomeIcons.userTie,
                                     size: 12,
@@ -304,12 +286,8 @@ class LessonCard extends StatelessWidget {
                                 ),
                                 Expanded(
                                   child: Text(
-                                    lesson.teachers
-                                        .map((e) => e.name)
-                                        .join(', '),
-                                    style: AppTextStyle.body.copyWith(
-                                        color: AppTheme.colorsOf(context)
-                                            .deactive),
+                                    lesson.teachers.map((e) => e.name).join(', '),
+                                    style: AppTextStyle.body.copyWith(color: AppTheme.colorsOf(context).deactive),
                                   ),
                                 ),
                               ],

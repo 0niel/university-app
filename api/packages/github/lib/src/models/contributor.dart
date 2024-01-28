@@ -17,8 +17,7 @@ class Contributor extends Equatable {
   });
 
   /// Converts a `Map<String, dynamic>` into a [Contributor] instance.
-  factory Contributor.fromJson(Map<String, dynamic> json) =>
-      _$ContributorFromJson(json);
+  factory Contributor.fromJson(Map<String, dynamic> json) => _$ContributorFromJson(json);
 
   /// The contributor's login.
   final String login;

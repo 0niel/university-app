@@ -7,12 +7,9 @@ part of 'search_data.dart';
 // **************************************************************************
 
 SearchData _$SearchDataFromJson(Map<String, dynamic> json) => SearchData(
-      data: (json['data'] as List<dynamic>)
-          .map((e) => SearchItem.fromJson(e as Map<String, dynamic>))
-          .toList(),
+      data: (json['data'] as List<dynamic>).map((e) => SearchItem.fromJson(e as Map<String, dynamic>)).toList(),
     );
 
-Map<String, dynamic> _$SearchDataToJson(SearchData instance) =>
-    <String, dynamic>{
+Map<String, dynamic> _$SearchDataToJson(SearchData instance) => <String, dynamic>{
       'data': instance.data,
     };

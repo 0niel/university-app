@@ -18,8 +18,7 @@ class LoadingErrorMessage extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 24),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment:
-              isTable ? CrossAxisAlignment.center : CrossAxisAlignment.start,
+          crossAxisAlignment: isTable ? CrossAxisAlignment.center : CrossAxisAlignment.start,
           children: [
             Center(
               child: Image.asset(

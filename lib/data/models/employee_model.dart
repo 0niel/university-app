@@ -19,8 +19,7 @@ class EmployeeModel extends Employee {
           department: department,
         );
 
-  factory EmployeeModel.fromRawJson(String str) =>
-      EmployeeModel.fromJson(json.decode(str));
+  factory EmployeeModel.fromRawJson(String str) => EmployeeModel.fromJson(json.decode(str));
 
   factory EmployeeModel.fromJson(Map<String, dynamic> json) {
     return EmployeeModel(

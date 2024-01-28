@@ -18,8 +18,7 @@ class Campus extends Equatable {
     this.longitude,
     this.uid,
   }) : assert(
-          latitude == null && longitude == null ||
-              latitude != null && longitude != null,
+          latitude == null && longitude == null || latitude != null && longitude != null,
           'Latitude and longitude must be both null or both not null',
         );
 

@@ -87,8 +87,7 @@ class _SelectRangeDateButtonState extends State<SelectRangeDateButton> {
         builder: (context) {
           return Dialog(
             backgroundColor: AppTheme.colorsOf(context).background02,
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20.0)),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
             child: Container(
               constraints: const BoxConstraints(maxHeight: 360),
               child: CalendarDatePicker2(

@@ -80,11 +80,9 @@ class AboutAppPage extends StatelessWidget {
                             ];
                           },
                           child: Container(
-                            padding: const EdgeInsets.only(
-                                left: 8, right: 8, top: 4, bottom: 4),
+                            padding: const EdgeInsets.only(left: 8, right: 8, top: 4, bottom: 4),
                             decoration: BoxDecoration(
-                              borderRadius:
-                                  const BorderRadius.all(Radius.circular(4)),
+                              borderRadius: const BorderRadius.all(Radius.circular(4)),
                               color: AppTheme.colorsOf(context).primary,
                             ),
                             child: Text(
@@ -115,8 +113,7 @@ class AboutAppPage extends StatelessWidget {
                           ),
                           TextSpan(
                             text: 'Mirea Ninja.',
-                            style: AppTextStyle.bodyRegular.copyWith(
-                                color: AppTheme.colorsOf(context).primary),
+                            style: AppTextStyle.bodyRegular.copyWith(color: AppTheme.colorsOf(context).primary),
                             recognizer: TapGestureRecognizer()
                               ..onTap = () {
                                 launchUrlString("https://mirea.ninja/");
@@ -150,10 +147,7 @@ class AboutAppPage extends StatelessWidget {
                           height: 40,
                           width: 90,
                           child: SocialIconButton(
-                              icon: Icon(UniconsLine.telegram,
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .onBackground),
+                              icon: Icon(UniconsLine.telegram, color: Theme.of(context).colorScheme.onBackground),
                               onClick: () {
                                 launchUrlString(
                                   'https://t.me/mirea_ninja_chat/1',
@@ -210,8 +204,7 @@ class AboutAppPage extends StatelessWidget {
                   width: double.infinity,
                   child: ColorfulButton(
                     text: 'Сообщить об ошибке',
-                    backgroundColor:
-                        AppTheme.colorsOf(context).colorful07.withBlue(180),
+                    backgroundColor: AppTheme.colorsOf(context).colorful07.withBlue(180),
                     onClick: () {
                       final userBloc = context.read<UserBloc>();
 

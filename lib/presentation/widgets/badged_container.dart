@@ -6,8 +6,7 @@ class BadgedContainer extends StatelessWidget {
   final String label;
   final String text;
 
-  const BadgedContainer({Key? key, required this.label, required this.text})
-      : super(key: key);
+  const BadgedContainer({Key? key, required this.label, required this.text}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

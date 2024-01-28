@@ -60,8 +60,7 @@ class SchedulesList extends StatelessWidget {
               const SizedBox(height: 20),
               Text(
                 "Сохранено".toUpperCase(),
-                style:
-                    AppTextStyle.chip.copyWith(color: AppTheme.colors.deactive),
+                style: AppTextStyle.chip.copyWith(color: AppTheme.colors.deactive),
                 textAlign: TextAlign.left,
               ),
               const SizedBox(height: 10),
@@ -80,10 +79,7 @@ class SchedulesList extends StatelessWidget {
                         ),
                       ),
                 ),
-              ...state.groupsSchedule
-                  .where((el) =>
-                      el.$1 != _getSelectedScheduleUid(state.selectedSchedule))
-                  .map(
+              ...state.groupsSchedule.where((el) => el.$1 != _getSelectedScheduleUid(state.selectedSchedule)).map(
                     (el) => SelectedScheduleItemButton(
                       text: el.$2.name,
                       isSelected: false,
@@ -110,10 +106,7 @@ class SchedulesList extends StatelessWidget {
                       },
                     ),
                   ),
-              ...state.teachersSchedule
-                  .where((el) =>
-                      el.$1 != _getSelectedScheduleUid(state.selectedSchedule))
-                  .map(
+              ...state.teachersSchedule.where((el) => el.$1 != _getSelectedScheduleUid(state.selectedSchedule)).map(
                     (el) => SelectedScheduleItemButton(
                         text: el.$2.name,
                         isSelected: false,
@@ -139,10 +132,7 @@ class SchedulesList extends StatelessWidget {
                           context.pop();
                         }),
                   ),
-              ...state.classroomsSchedule
-                  .where((el) =>
-                      el.$1 != _getSelectedScheduleUid(state.selectedSchedule))
-                  .map(
+              ...state.classroomsSchedule.where((el) => el.$1 != _getSelectedScheduleUid(state.selectedSchedule)).map(
                     (el) => SelectedScheduleItemButton(
                       text: el.$2.name,
                       isSelected: false,

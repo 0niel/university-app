@@ -10,8 +10,7 @@ class GetScores extends UseCase<Map<String, Map<String, List<Score>>>, void> {
   GetScores(this.userRepository);
 
   @override
-  Future<Either<Failure, Map<String, Map<String, List<Score>>>>> call(
-      [params]) async {
+  Future<Either<Failure, Map<String, Map<String, List<Score>>>>> call([params]) async {
     return userRepository.getScores();
   }
 }

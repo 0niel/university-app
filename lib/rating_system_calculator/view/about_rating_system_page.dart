@@ -31,12 +31,10 @@ class RatingSystemCalculatorView extends StatefulWidget {
   const RatingSystemCalculatorView({super.key});
 
   @override
-  State<RatingSystemCalculatorView> createState() =>
-      _RatingSystemCalculatorViewState();
+  State<RatingSystemCalculatorView> createState() => _RatingSystemCalculatorViewState();
 }
 
-class _RatingSystemCalculatorViewState
-    extends State<RatingSystemCalculatorView> {
+class _RatingSystemCalculatorViewState extends State<RatingSystemCalculatorView> {
   @override
   void initState() {
     super.initState();
@@ -66,8 +64,7 @@ class _RatingSystemCalculatorViewState
               ),
               const ShortDescriptionCard(
                 icon: UniconsSolid.exclamation_circle,
-                text:
-                    'Полученные баллы можно будет увидеть в СДО по каждой дисциплине',
+                text: 'Полученные баллы можно будет увидеть в СДО по каждой дисциплине',
               ),
               const SizedBox(height: 24),
               Text("Основные баллы", style: AppTextStyle.h6),
@@ -86,8 +83,7 @@ class _RatingSystemCalculatorViewState
                   children: [
                     const TextSpan(text: 'Выставляются за выполненеие '),
                     TextSpan(
-                      text:
-                          'обязательных заданий на аудиторных практических занятиях',
+                      text: 'обязательных заданий на аудиторных практических занятиях',
                       style: AppTextStyle.body.copyWith(
                         color: AppTheme.colors.primary,
                       ),
@@ -171,8 +167,7 @@ class _RatingSystemCalculatorViewState
                       ),
                     ),
                     const TextSpan(
-                      text:
-                          ', можно автоматически получить зачет или оценку «удовлетворительно» на экзамене.\n\n',
+                      text: ', можно автоматически получить зачет или оценку «удовлетворительно» на экзамене.\n\n',
                     ),
                     const TextSpan(
                       text:

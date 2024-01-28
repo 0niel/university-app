@@ -6,9 +6,7 @@ part of 'update_info_model.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_$UpdateInfoModelImpl _$$UpdateInfoModelImplFromJson(
-        Map<String, dynamic> json) =>
-    _$UpdateInfoModelImpl(
+_$UpdateInfoModelImpl _$$UpdateInfoModelImplFromJson(Map<String, dynamic> json) => _$UpdateInfoModelImpl(
       title: json['title'] as String,
       description: json['description'] as String?,
       text: json['text'] as String,
@@ -16,9 +14,7 @@ _$UpdateInfoModelImpl _$$UpdateInfoModelImplFromJson(
       buildNumber: json['buildNumber'] as int,
     );
 
-Map<String, dynamic> _$$UpdateInfoModelImplToJson(
-        _$UpdateInfoModelImpl instance) =>
-    <String, dynamic>{
+Map<String, dynamic> _$$UpdateInfoModelImplToJson(_$UpdateInfoModelImpl instance) => <String, dynamic>{
       'title': instance.title,
       'description': instance.description,
       'text': instance.text,

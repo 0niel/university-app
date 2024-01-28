@@ -40,8 +40,7 @@ class SponsorCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(16),
               onTap: sponsor.url != null
                   ? () {
-                      launchUrl(Uri.parse(sponsor.url!),
-                          mode: LaunchMode.externalApplication);
+                      launchUrl(Uri.parse(sponsor.url!), mode: LaunchMode.externalApplication);
                     }
                   : null,
               child: Container(
@@ -56,12 +55,8 @@ class SponsorCard extends StatelessWidget {
                         CircleAvatar(
                           radius: 20,
                           backgroundColor: AppTheme.colorsOf(context).deactive,
-                          backgroundImage: sponsor.avatarUrl != null
-                              ? NetworkImage(sponsor.avatarUrl!)
-                              : null,
-                          child: sponsor.avatarUrl == null
-                              ? Text(sponsor.username[0])
-                              : null,
+                          backgroundImage: sponsor.avatarUrl != null ? NetworkImage(sponsor.avatarUrl!) : null,
+                          child: sponsor.avatarUrl == null ? Text(sponsor.username[0]) : null,
                         ),
                         const SizedBox(width: 16),
                         Expanded(
