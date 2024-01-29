@@ -46,8 +46,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'package:sentry_logging/sentry_logging.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
-import 'package:schedule_repository/schedule_repository.dart'
-    as schedule_repository;
+import 'package:schedule_repository/schedule_repository.dart' as schedule_repository;
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:neon_framework/models.dart' as neon_models;
 import 'package:neon_framework/src/bloc/result.dart' as neon_bloc_result;
@@ -105,9 +104,7 @@ Future<void> main() async {
   Bloc.observer = AppBlocObserver(analyticsRepository: analyticsRepository);
 
   HydratedBloc.storage = await HydratedStorage.build(
-    storageDirectory: kIsWeb
-        ? HydratedStorage.webStorageDirectory
-        : await getApplicationDocumentsDirectory(),
+    storageDirectory: kIsWeb ? HydratedStorage.webStorageDirectory : await getApplicationDocumentsDirectory(),
   );
 
   final (neonTheme, neonProviders) = await runNeon();
@@ -175,14 +172,10 @@ class App extends StatelessWidget {
     return MultiRepositoryProvider(
       providers: [
         RepositoryProvider.value(value: _analyticsRepository),
+        RepositoryProvider.value(value: schedule_repository.ScheduleRepository(apiClient: apiClient)),
+        RepositoryProvider.value(value: CommunityRepository(apiClient: apiClient)),
         RepositoryProvider.value(
-            value:
-                schedule_repository.ScheduleRepository(apiClient: apiClient)),
-        RepositoryProvider.value(
-            value: CommunityRepository(apiClient: apiClient)),
-        RepositoryProvider.value(
-          value: StoriesRepositoryImpl(
-              remoteDataSource: getIt<StrapiRemoteData>()),
+          value: StoriesRepositoryImpl(remoteDataSource: getIt<StrapiRemoteData>()),
         ),
       ],
       child: MultiBlocProvider(
@@ -195,8 +188,7 @@ class App extends StatelessWidget {
           ),
           BlocProvider<ScheduleBloc>(
             create: (context) => ScheduleBloc(
-              scheduleRepository:
-                  context.read<schedule_repository.ScheduleRepository>(),
+              scheduleRepository: context.read<schedule_repository.ScheduleRepository>(),
             )..add(const ScheduleResumed()),
           ),
           BlocProvider<StoriesBloc>(
@@ -206,13 +198,10 @@ class App extends StatelessWidget {
           ),
           BlocProvider<NewsBloc>(create: (context) => getIt<NewsBloc>()),
           BlocProvider<UserBloc>(create: (context) => getIt<UserBloc>()),
-          BlocProvider<AnnouncesBloc>(
-              create: (context) => getIt<AnnouncesBloc>()),
-          BlocProvider<EmployeeBloc>(
-              create: (context) => getIt<EmployeeBloc>()),
+          BlocProvider<AnnouncesBloc>(create: (context) => getIt<AnnouncesBloc>()),
+          BlocProvider<EmployeeBloc>(create: (context) => getIt<EmployeeBloc>()),
           BlocProvider<ScoresBloc>(create: (context) => getIt<ScoresBloc>()),
-          BlocProvider<AttendanceBloc>(
-              create: (context) => getIt<AttendanceBloc>()),
+          BlocProvider<AttendanceBloc>(create: (context) => getIt<AttendanceBloc>()),
           BlocProvider<HomeCubit>(create: (context) => getIt<HomeCubit>()),
           BlocProvider<NotificationPreferencesBloc>(
             create: (_) => getIt<NotificationPreferencesBloc>(),
@@ -269,8 +258,7 @@ class _NeonProviderState extends State<_NeonProvider> {
   void initState() {
     super.initState();
 
-    _appImplementations =
-        NeonProvider.of<Iterable<neon_models.AppImplementation>>(context);
+    _appImplementations = NeonProvider.of<Iterable<neon_models.AppImplementation>>(context);
     _globalOptions = NeonProvider.of<GlobalOptions>(context);
     _accountsBloc = NeonProvider.of<AccountsBloc>(context);
   }
@@ -289,26 +277,20 @@ class _NeonProviderState extends State<_NeonProvider> {
       builder: (context, options, _) => StreamBuilder<neon_models.Account?>(
         stream: _accountsBloc.activeAccount,
         builder: (context, activeAccountSnapshot) {
-          return neon_bloc_result.ResultBuilder<
-              neon_core
-              .OcsGetCapabilitiesResponseApplicationJson_Ocs_Data?>.behaviorSubject(
+          return neon_bloc_result
+              .ResultBuilder<neon_core.OcsGetCapabilitiesResponseApplicationJson_Ocs_Data?>.behaviorSubject(
             subject: activeAccountSnapshot.hasData
-                ? _accountsBloc
-                    .getCapabilitiesBlocFor(activeAccountSnapshot.data!)
-                    .capabilities
+                ? _accountsBloc.getCapabilitiesBlocFor(activeAccountSnapshot.data!).capabilities
                 : null,
             builder: (context, capabilitiesSnapshot) {
               final appTheme = app_neon_theme.AppTheme(
                 serverTheme: neon_server_theme.ServerTheme(
-                  nextcloudTheme: capabilitiesSnapshot
-                      .data?.capabilities.themingPublicCapabilities?.theming,
+                  nextcloudTheme: capabilitiesSnapshot.data?.capabilities.themingPublicCapabilities?.theming,
                 ),
                 useNextcloudTheme: false,
                 deviceThemeLight: AppTheme.lightTheme.colorScheme,
                 deviceThemeDark: AppTheme.darkTheme.colorScheme,
-                appThemes: _appImplementations
-                    .map((a) => a.theme)
-                    .whereType<ThemeExtension>(),
+                appThemes: _appImplementations.map((a) => a.theme).whereType<ThemeExtension>(),
                 neonTheme: widget.neonTheme,
               );
 
@@ -346,9 +328,8 @@ class _MaterialAppState extends State<_MaterialApp> {
     super.initState();
 
     router = createRouter();
-    neonLocalizationsDelegates = _neonWrapperKey.currentState!
-        .getNeonLocalizationsDelegates()
-        .cast<LocalizationsDelegate<dynamic>>();
+    neonLocalizationsDelegates =
+        _neonWrapperKey.currentState!.getNeonLocalizationsDelegates().cast<LocalizationsDelegate<dynamic>>();
   }
 
   @override
@@ -361,13 +342,9 @@ class _MaterialAppState extends State<_MaterialApp> {
         SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
             systemNavigationBarColor: theme.scaffoldBackgroundColor,
             statusBarColor: theme.scaffoldBackgroundColor,
-            statusBarIconBrightness: theme.brightness == Brightness.light
-                ? Brightness.light
-                : Brightness.dark,
+            statusBarIconBrightness: theme.brightness == Brightness.light ? Brightness.light : Brightness.dark,
             systemNavigationBarIconBrightness:
-                theme.brightness == Brightness.light
-                    ? Brightness.light
-                    : Brightness.dark));
+                theme.brightness == Brightness.light ? Brightness.light : Brightness.dark));
 
         return MaterialApp.router(
           localizationsDelegates: [

@@ -140,7 +140,7 @@ class NotificationsRepository {
       ]);
 
       final permissionStatus = results.first as PermissionStatus;
-      final notificationsEnabled = results.last;
+      final notificationsEnabled = results.last as bool;
 
       return permissionStatus.isGranted && notificationsEnabled;
     } catch (error, stackTrace) {
