@@ -65,6 +65,8 @@ class _ImagesViewGalleryState extends State<ImagesViewGallery> {
                 return PhotoViewGalleryPageOptions(
                   imageProvider: NetworkImage(widget.imageUrls[index]),
                   initialScale: PhotoViewComputedScale.contained * 0.8,
+                  minScale: PhotoViewComputedScale.contained * 0.6,
+                  maxScale: PhotoViewComputedScale.covered * 5.9,
                   heroAttributes: PhotoViewHeroAttributes(tag: widget.imageUrls[index]),
                 );
               },
