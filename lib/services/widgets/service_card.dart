@@ -9,6 +9,7 @@ class ServiceCard extends StatelessWidget {
     required this.title,
     required this.icon,
     this.onTap,
+    this.onLongPress,
     this.url,
     this.description,
     this.launchMode = LaunchMode.externalApplication,
@@ -20,6 +21,7 @@ class ServiceCard extends StatelessWidget {
   final LaunchMode launchMode;
   final String? description;
   final VoidCallback? onTap;
+  final VoidCallback? onLongPress;
 
   @override
   Widget build(BuildContext context) {
@@ -31,6 +33,7 @@ class ServiceCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(12),
         ),
         child: InkWell(
+          onLongPress: onLongPress,
           onTap: () {
             if (onTap != null) {
               onTap!();

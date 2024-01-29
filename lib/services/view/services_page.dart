@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:rtu_mirea_app/neon/bloc/neon_bloc.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
+import 'package:rtu_mirea_app/presentation/typography.dart';
+import 'package:rtu_mirea_app/presentation/widgets/bottom_modal_sheet.dart';
+import 'package:rtu_mirea_app/presentation/widgets/buttons/primary_button.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 import '../widgets/widgets.dart';
@@ -32,6 +37,62 @@ class ServicesView extends StatefulWidget {
 }
 
 class _ServicesViewState extends State<ServicesView> {
+  late final NeonBloc neonBloc;
+
+  @override
+  void initState() {
+    neonBloc = NeonBloc();
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    neonBloc.close();
+    super.dispose();
+  }
+
+  void _showNeonAccountOffer() {
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) {
+        neonBloc.add(const VieweRegisterOffer());
+        BottomModalSheet.show(
+          context,
+          child: Center(
+            child: Column(
+              children: [
+                Icon(
+                  Icons.cloud,
+                  size: 64,
+                  color: AppTheme.colorsOf(context).active,
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'На cloud.mirea.ninja вы можете хранить до 10 ГБ бесплатно (квоту можно расширить в телеграм боте), а также делиться файлами и онлайн редактировать документы вместе с одногруппниками.',
+                  style: AppTextStyle.bodyL.copyWith(
+                    color: AppTheme.colorsOf(context).active,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 24),
+                PrimaryButton(
+                  onClick: () {
+                    launchUrlString('https://t.me/cloud_mirea_ninja_bot',
+                        mode: LaunchMode.externalApplication);
+                  },
+                  text: 'Создать аккаунт',
+                ),
+              ],
+            ),
+          ),
+          title: 'Создайте аккаунт',
+          description:
+              'Мы предлагаем вам бесплатно создать аккаунт в нашем облачном хранилище, чтобы вы могли хранить свои файлы и документы!',
+          backgroundColor: AppTheme.colorsOf(context).background03,
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -68,28 +129,40 @@ class _ServicesViewState extends State<ServicesView> {
                   launchMode: LaunchMode.inAppBrowserView,
                   description: 'Найди нужный кабинет',
                 ),
-                ServiceCard(
-                  title: 'Cloud Mirea Ninja',
-                  onTap: () {
-                    context.go('/services/neon');
+                BlocBuilder<NeonBloc, NeonState>(
+                  bloc: neonBloc,
+                  builder: (context, state) {
+                    return ServiceCard(
+                      title: 'Cloud Mirea Ninja',
+                      onTap: () {
+                        if (state.isRegisterOfferViewed == false) {
+                          _showNeonAccountOffer();
+                        } else {
+                          context.go('/services/neon');
+                        }
+                      },
+                      onLongPress: () {
+                        _showNeonAccountOffer();
+                      },
+                      icon: ServiceIcon(
+                        color: AppTheme.colorsOf(context).colorful04,
+                        iconColor: AppTheme.colorsOf(context).background01,
+                        icon: Icons.cloud,
+                      ),
+                    );
                   },
-                  icon: ServiceIcon(
-                    color: AppTheme.colorsOf(context).colorful04,
-                    iconColor: AppTheme.colorsOf(context).background01,
-                    icon: Icons.cloud,
-                  ),
                 ),
-                ServiceCard(
-                  title: 'Калькулятор БРС',
-                  onTap: () {
-                    context.go('/services/rating-system-calculator');
-                  },
-                  icon: ServiceIcon(
-                    color: AppTheme.colors.colorful02,
-                    iconColor: AppTheme.colors.background01,
-                    icon: Icons.calculate,
-                  ),
-                ),
+                // ServiceCard(
+                //   title: 'Калькулятор БРС',
+                //   onTap: () {
+                //     context.go('/services/rating-system-calculator');
+                //   },
+                //   icon: ServiceIcon(
+                //     color: AppTheme.colors.colorful02,
+                //     iconColor: AppTheme.colors.background01,
+                //     icon: Icons.calculate,
+                //   ),
+                // ),
                 ServiceCard(
                   title: 'Бюро находок',
                   url: 'https://finds.mirea.ru/',
@@ -178,7 +251,8 @@ class _ServicesViewState extends State<ServicesView> {
                       ).image,
                     ),
                     launchMode: LaunchMode.externalApplication,
-                    description: 'Кафедра Инструментального и прикладного программного обеспечения',
+                    description:
+                        'Кафедра Инструментального и прикладного программного обеспечения',
                   ),
                 ],
               ),
