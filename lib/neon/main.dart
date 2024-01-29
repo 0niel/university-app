@@ -1,13 +1,9 @@
-import 'package:neon_framework/neon.dart';
 import 'package:provider/single_child_widget.dart';
-import 'package:rtu_mirea_app/main.dart';
 import 'package:rtu_mirea_app/neon/apps.dart';
 import 'package:rtu_mirea_app/neon/branding.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_native_splash/flutter_native_splash.dart';
-import 'package:neon_framework/src/app.dart';
 import 'package:neon_framework/src/blocs/accounts.dart';
 import 'package:neon_framework/src/blocs/first_launch.dart';
 import 'package:neon_framework/src/blocs/next_push.dart';

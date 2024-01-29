@@ -7,7 +7,6 @@ import 'package:rtu_mirea_app/domain/entities/news_item.dart';
 import 'package:rtu_mirea_app/domain/entities/story.dart';
 import 'package:rtu_mirea_app/domain/entities/user.dart';
 import 'package:rtu_mirea_app/home/view/home_page.dart';
-import 'package:rtu_mirea_app/neon/main.dart';
 import 'package:rtu_mirea_app/presentation/pages/profile/notifications_settings_page.dart';
 import 'package:rtu_mirea_app/navigation/view/scaffold_navigation_shell.dart';
 import 'package:rtu_mirea_app/presentation/pages/news/news_details_page.dart';

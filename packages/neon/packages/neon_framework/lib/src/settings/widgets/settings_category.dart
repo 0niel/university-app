@@ -60,7 +60,6 @@ class MaterialSettingsCategory extends StatelessWidget {
             padding: const EdgeInsets.only(top: 25, bottom: 5),
             child: DefaultTextStyle(
               style: textTheme.titleMedium!.copyWith(
-                color: theme.colorScheme.secondary,
                 fontWeight: FontWeight.bold,
               ),
               child: header!,

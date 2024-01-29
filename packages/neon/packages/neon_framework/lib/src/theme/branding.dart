@@ -53,11 +53,7 @@ class Branding {
 
   /// The data from the closest [Branding] instance given the build context.
   static Branding of(BuildContext context) =>
-      Theme.of(context).extension<NeonTheme>()?.branding ??
-      const Branding(
-        name: 'Mirea Ninja',
-        logo: FlutterLogo(),
-      );
+      Theme.of(context).extension<NeonTheme>()!.branding;
 
   @override
   int get hashCode => Object.hashAll([
@@ -72,6 +68,9 @@ class Branding {
       return true;
     }
 
-    return other is Branding && name == other.name && logo == other.logo && legalese == other.legalese;
+    return other is Branding &&
+        name == other.name &&
+        logo == other.logo &&
+        legalese == other.legalese;
   }
 }
