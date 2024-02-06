@@ -7,8 +7,7 @@ import 'package:rtu_mirea_app/presentation/theme.dart';
 import '../../presentation/constants.dart';
 
 class ScaffoldNavigationShell extends StatelessWidget {
-  const ScaffoldNavigationShell({Key? key, required this.navigationShell})
-      : super(key: key);
+  const ScaffoldNavigationShell({Key? key, required this.navigationShell}) : super(key: key);
 
   final StatefulNavigationShell navigationShell;
 
@@ -37,10 +36,10 @@ class ScaffoldNavigationShell extends StatelessWidget {
           return Scaffold(
             backgroundColor: AppTheme.colorsOf(context).background03,
             body: navigationShell,
-            // bottomNavigationBar: AppBottomNavigationBar(
-            //   index: navigationShell.currentIndex,
-            //   onClick: (index) => _setActiveIndex(index),
-            // ),
+            bottomNavigationBar: AppBottomNavigationBar(
+              index: navigationShell.currentIndex,
+              onClick: (index) => _setActiveIndex(index),
+            ),
           );
         }
       },
