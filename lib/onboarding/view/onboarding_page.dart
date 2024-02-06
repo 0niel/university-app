@@ -16,25 +16,27 @@ class OnBoardingPage extends StatefulWidget {
 }
 
 class _OnBoardingPageState extends State<OnBoardingPage> {
-  final int _numPages = 3;
+  final int _numPages = 1;
 
   /// Main images
-  static const List<Image> containersImages = [
-    Image(
-      image: AssetImage('assets/images/Saly-1.png'),
-      height: 375.0,
-      width: 375.0,
-    ),
-    Image(
-      image: AssetImage('assets/images/Saly-2.png'),
-      height: 324.0,
-      width: 328.0,
-    ),
-    Image(
-      image: AssetImage('assets/images/Saly-3.png'),
-      height: 315.0,
-      width: 315.0,
-    ),
+  static List<Image> containersImages = [
+    // Image(
+    //   image: AssetImage('assets/images/Saly-1.png'),
+    //   height: 375.0,
+    //   width: 375.0,
+    // ),
+    Image.network(
+        'https://sun9-67.userapi.com/impg/Iv2ugpWgE2Oe5TJhD_Fi1OxISwsOLlKR_fnmiQ/yIOJTJyVb1s.jpg?size=700x700&quality=95&sign=51ccad9618f5721f52f9e0c164b91871&type=album'),
+    // Image(
+    //   image: AssetImage('assets/images/Saly-2.png'),
+    //   height: 324.0,
+    //   width: 328.0,
+    // ),
+    // Image(
+    //   image: AssetImage('assets/images/Saly-3.png'),
+    //   height: 315.0,
+    //   width: 315.0,
+    // ),
     // Image(
     //   image: AssetImage('assets/images/Saly-4.png'),
     //   height: 375.0,
@@ -49,17 +51,18 @@ class _OnBoardingPageState extends State<OnBoardingPage> {
 
   static const List titlesTexts = [
     'Добро пожаловать!',
-    'Смотри расписание!',
-    'Будь в курсе в любой момент!',
+    // 'Смотри расписание!',
+    // 'Будь в курсе в любой момент!',
     // 'Ставь цели!',
     //'Коммуницируй!',
   ];
 
   /// Bottom text strings
   static const List contentTexts = [
-    'Это приложение было создано студентами для студентов',
-    'Как же легко, оказывается, можно смотреть расписание, а главное – быстро',
-    'Иногда так лень заходить на сайт и искать нужную тебе информацию, мы это исправили',
+    'Это приложение было создано с помощью технологий ВИКИ - виртуального информационно-коммуникационного ассистента ИИТ РТУ МИРЭА!',
+
+    // 'Как же легко, оказывается, можно смотреть расписание, а главное – быстро',
+    // 'Иногда так лень заходить на сайт и искать нужную тебе информацию, мы это исправили',
     // 'Как же много дедлайнов!? Создавать дедлайны теперь как никогда просто и удобно',
     //'Слово сложное, но на деле всё легко. Общайся и делись материалами с другими группами мгновенно',
   ];
@@ -101,8 +104,9 @@ class _OnBoardingPageState extends State<OnBoardingPage> {
               left: 0,
               right: 0,
               child: Center(
-                child:
-                    Padding(padding: EdgeInsets.only(top: getImageTopPadding(index)), child: containersImages[index]),
+                child: Padding(
+                    padding: EdgeInsets.only(top: getImageTopPadding(index)),
+                    child: containersImages[index]),
               ),
             ),
             Positioned(
@@ -187,7 +191,9 @@ class _PageIndicatorsState extends State<PageIndicators> {
   List<Widget> _buildPageIndicators(int currentPage) {
     List<Widget> list = [];
     for (int i = 0; i < widget.dotsNum; i++) {
-      list.add(i == currentPage ? const PageViewIndicator(isActive: true) : const PageViewIndicator(isActive: false));
+      list.add(i == currentPage
+          ? const PageViewIndicator(isActive: true)
+          : const PageViewIndicator(isActive: false));
     }
     return list;
   }

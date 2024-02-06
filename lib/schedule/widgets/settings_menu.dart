@@ -8,6 +8,7 @@ import 'package:rtu_mirea_app/presentation/widgets/feedback_modal.dart';
 import 'package:rtu_mirea_app/presentation/widgets/settings_switch_button.dart';
 import 'package:rtu_mirea_app/schedule/bloc/schedule_bloc.dart';
 import 'package:rtu_mirea_app/schedule/widgets/widgets.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 import '../models/models.dart';
 
@@ -19,13 +20,17 @@ class SettingsMenu extends StatelessWidget {
 
     final state = context.read<ScheduleBloc>().state;
 
-    if (state.status == ScheduleStatus.loaded && state.selectedSchedule != null) {
+    if (state.status == ScheduleStatus.loaded &&
+        state.selectedSchedule != null) {
       if (state.selectedSchedule is SelectedGroupSchedule) {
-        defaultText += ' группы ${(state.selectedSchedule as SelectedGroupSchedule).group.name}';
+        defaultText +=
+            ' группы ${(state.selectedSchedule as SelectedGroupSchedule).group.name}';
       } else if (state.selectedSchedule is SelectedTeacherSchedule) {
-        defaultText += ' преподавателя ${(state.selectedSchedule as SelectedTeacherSchedule).teacher.name}';
+        defaultText +=
+            ' преподавателя ${(state.selectedSchedule as SelectedTeacherSchedule).teacher.name}';
       } else if (state.selectedSchedule is SelectedClassroomSchedule) {
-        defaultText += ' аудитории ${(state.selectedSchedule as SelectedClassroomSchedule).classroom.name}';
+        defaultText +=
+            ' аудитории ${(state.selectedSchedule as SelectedClassroomSchedule).classroom.name}';
       }
     }
 
@@ -73,53 +78,54 @@ class SettingsMenu extends StatelessWidget {
               BlendMode.srcIn,
             ),
           ),
-          onTap: () => _onFeedbackTap(context),
+          // onTap: () => _onFeedbackTap(context),
+          onTap: () => launchUrlString("https://vk.com/id96595205"),
         ),
-        SizedBox(
-          height: 60,
-          child: SettingsSwitchButton(
-            initialValue: state.isMiniature,
-            svgPicture: SvgPicture.asset(
-              'assets/icons/lessons.svg',
-              height: 16,
-              width: 16,
-            ),
-            text: "Компактный вид",
-            onChanged: (value) {
-              context.read<ScheduleBloc>().add(ScheduleSetDisplayMode(isMiniature: value));
-            },
-          ),
-        ),
-        SizedBox(
-          height: 60,
-          child: SettingsSwitchButton(
-            initialValue: state.showEmptyLessons,
-            svgPicture: SvgPicture.asset(
-              'assets/icons/lessons.svg',
-              height: 16,
-              width: 16,
-            ),
-            text: "Показывать пустые пары",
-            onChanged: (value) {
-              context.read<ScheduleBloc>().add(ScheduleSetEmptyLessonsDisplaying(showEmptyLessons: value));
-            },
-          ),
-        ),
-        SizedBox(
-          height: 60,
-          child: SettingsSwitchButton(
-            initialValue: state.showCommentsIndicators,
-            icon: Icon(
-              Icons.circle,
-              color: AppTheme.colorsOf(context).active,
-              size: 16,
-            ),
-            text: "Индикатор заметок",
-            onChanged: (value) {
-              context.read<ScheduleBloc>().add(ScheduleSetShowCommentsIndicator(showCommentsIndicators: value));
-            },
-          ),
-        ),
+        // SizedBox(
+        //   height: 60,
+        //   child: SettingsSwitchButton(
+        //     initialValue: state.isMiniature,
+        //     svgPicture: SvgPicture.asset(
+        //       'assets/icons/lessons.svg',
+        //       height: 16,
+        //       width: 16,
+        //     ),
+        //     text: "Компактный вид",
+        //     onChanged: (value) {
+        //       context.read<ScheduleBloc>().add(ScheduleSetDisplayMode(isMiniature: value));
+        //     },
+        //   ),
+        // ),
+        // SizedBox(
+        //   height: 60,
+        //   child: SettingsSwitchButton(
+        //     initialValue: state.showEmptyLessons,
+        //     svgPicture: SvgPicture.asset(
+        //       'assets/icons/lessons.svg',
+        //       height: 16,
+        //       width: 16,
+        //     ),
+        //     text: "Показывать пустые пары",
+        //     onChanged: (value) {
+        //       context.read<ScheduleBloc>().add(ScheduleSetEmptyLessonsDisplaying(showEmptyLessons: value));
+        //     },
+        //   ),
+        // ),
+        // SizedBox(
+        //   height: 60,
+        //   child: SettingsSwitchButton(
+        //     initialValue: state.showCommentsIndicators,
+        //     icon: Icon(
+        //       Icons.circle,
+        //       color: AppTheme.colorsOf(context).active,
+        //       size: 16,
+        //     ),
+        //     text: "Индикатор заметок",
+        //     onChanged: (value) {
+        //       context.read<ScheduleBloc>().add(ScheduleSetShowCommentsIndicator(showCommentsIndicators: value));
+        //     },
+        //   ),
+        // ),
         const SchedulesList(),
       ],
     );
