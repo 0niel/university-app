@@ -37,14 +37,14 @@ class SetUserIdFailure extends AnalyticsFailure {
 /// {@endtemplate}
 class AnalyticsRepository {
   /// {@macro analytics_repository}
-  const AnalyticsRepository(FirebaseAnalytics analytics) : _analytics = analytics;
+  const AnalyticsRepository({FirebaseAnalytics? analytics}) : _analytics = analytics;
 
-  final FirebaseAnalytics _analytics;
+  final FirebaseAnalytics? _analytics;
 
   /// Tracks the provided [AnalyticsEvent].
   Future<void> track(AnalyticsEvent event) async {
     try {
-      await _analytics.logEvent(
+      await _analytics?.logEvent(
         name: event.name,
         parameters: event.properties,
       );
@@ -58,7 +58,7 @@ class AnalyticsRepository {
   /// Setting a null [userId] will clear the user identifier.
   Future<void> setUserId(String? userId) async {
     try {
-      await _analytics.setUserId(id: userId);
+      await _analytics?.setUserId(id: userId);
     } catch (error, stackTrace) {
       Error.throwWithStackTrace(SetUserIdFailure(error), stackTrace);
     }

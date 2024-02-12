@@ -25,7 +25,6 @@ dependencies:
   flutter_material_design_icons: ^1.0.0
   flutter_native_splash: ^2.0.0
   flutter_svg: ^2.0.0
-  flutter_zxing: ^1.0.0
   go_router: ^13.0.0
   http: ^1.0.0
   image: ^4.0.0

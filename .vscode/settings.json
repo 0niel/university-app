@@ -1,4 +1,13 @@
 {
+    "dart.lineLength": 120,
+    "files.insertFinalNewline": true,
     "java.configuration.updateBuildConfiguration": "interactive",
-    "cmake.configureOnOpen": false
+    "cmake.configureOnOpen": false,
+    "dart.flutterSdkPath": ".fvm/flutter_sdk",
+    "search.exclude": {
+      "**/.fvm": true
+    },
+    "files.watcherExclude": {
+      "**/.fvm": true
+    },
 }

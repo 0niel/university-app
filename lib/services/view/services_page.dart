@@ -76,8 +76,7 @@ class _ServicesViewState extends State<ServicesView> {
                 const SizedBox(height: 24),
                 PrimaryButton(
                   onClick: () {
-                    launchUrlString('https://t.me/cloud_mirea_ninja_bot',
-                        mode: LaunchMode.externalApplication);
+                    launchUrlString('https://t.me/cloud_mirea_ninja_bot', mode: LaunchMode.externalApplication);
                   },
                   text: 'Создать аккаунт',
                 ),
@@ -251,8 +250,7 @@ class _ServicesViewState extends State<ServicesView> {
                       ).image,
                     ),
                     launchMode: LaunchMode.externalApplication,
-                    description:
-                        'Кафедра Инструментального и прикладного программного обеспечения',
+                    description: 'Кафедра Инструментального и прикладного программного обеспечения',
                   ),
                 ],
               ),

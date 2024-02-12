@@ -85,19 +85,6 @@ class _LoginPageState extends State<LoginPage> {
                     icon: const Icon(Icons.login),
                     label: const Text('Войти через Cloud Mirea Ninja'),
                   ),
-                  if (NeonPlatform.instance.canUseCamera) ...[
-                    const SizedBox(
-                      height: 50,
-                    ),
-                    IconButton(
-                      tooltip: NeonLocalizations.of(context).loginUsingQRcode,
-                      icon: const Icon(
-                        Icons.qr_code_scanner_rounded,
-                        size: 60,
-                      ),
-                      onPressed: () => const LoginQRcodeRoute().go(context),
-                    ),
-                  ],
                 ],
               ),
             ),

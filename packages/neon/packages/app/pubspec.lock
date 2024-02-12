@@ -73,46 +73,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "8.9.0"
-  camera:
-    dependency: transitive
-    description:
-      name: camera
-      sha256: "9499cbc2e51d8eb0beadc158b288380037618ce4e30c9acbc4fae1ac3ecb5797"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.10.5+9"
-  camera_android:
-    dependency: transitive
-    description:
-      name: camera_android
-      sha256: "351429510121d179b9aac5a2e8cb525c3cd6c39f4d709c5f72dfb21726e52371"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.10.8+16"
-  camera_avfoundation:
-    dependency: transitive
-    description:
-      name: camera_avfoundation
-      sha256: "6f89cacd6039d37c122c4b2365d23b2a7493395300767873b5d39359ddbc5d5f"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.9.13+11"
-  camera_platform_interface:
-    dependency: transitive
-    description:
-      name: camera_platform_interface
-      sha256: e971ebca970f7cfee396f76ef02070b5e441b4aa04942da9c108d725f57bbd32
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.7.2"
-  camera_web:
-    dependency: transitive
-    description:
-      name: camera_web
-      sha256: f18ccfb33b2a7c49a52ad5aa3f07330b7422faaecbdfd9b9fe8e51182f6ad67d
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.3.2+4"
   characters:
     dependency: transitive
     description:
@@ -440,14 +400,6 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
-  flutter_zxing:
-    dependency: transitive
-    description:
-      name: flutter_zxing
-      sha256: ed8da1a0e4650c7645e94b5ab92f855a6b628385d815641761ccbdcaee131683
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.5.2"
   fuchsia_remote_debug_protocol:
     dependency: transitive
     description: flutter
@@ -1158,14 +1110,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.2"
-  stream_transform:
-    dependency: transitive
-    description:
-      name: stream_transform
-      sha256: "14a00e794c7c11aa145a170587321aedce29769c08d7f58b1d141da75e3b1c6f"
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.1.0"
   string_scanner:
     dependency: transitive
     description:

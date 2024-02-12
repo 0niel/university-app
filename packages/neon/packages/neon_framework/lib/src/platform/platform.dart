@@ -5,6 +5,7 @@ import 'package:meta/meta.dart';
 import 'package:neon_framework/src/platform/android.dart';
 import 'package:neon_framework/src/platform/ios.dart';
 import 'package:neon_framework/src/platform/linux.dart';
+import 'package:neon_framework/src/platform/windows.dart';
 import 'package:universal_io/io.dart';
 
 /// Implements platform specific functionality and exposes the availability of certain features.
@@ -36,6 +37,8 @@ abstract interface class NeonPlatform {
       _platform = const LinuxNeonPlatform();
     } else if (Platform.isIOS) {
       _platform = const IosNeonPlatform();
+    } else if (Platform.isWindows) {
+      _platform = const WindowsNeonPlatform();
     } else {
       throw UnimplementedError('No implementation for platform ${Platform.operatingSystem} found');
     }

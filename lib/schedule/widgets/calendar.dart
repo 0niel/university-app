@@ -18,12 +18,16 @@ class Calendar extends StatefulWidget {
     required this.schedule,
     required this.comments,
     required this.showCommentsIndicators,
+    this.calendarFormat = CalendarFormat.week,
+    this.canChangeFormat = true,
   }) : super(key: key);
 
   final PageController pageViewController;
   final List<SchedulePart> schedule;
   final List<ScheduleComment> comments;
   final bool showCommentsIndicators;
+  final CalendarFormat calendarFormat;
+  final bool canChangeFormat;
 
   static List<SchedulePart> getSchedulePartsByDay({
     required List<SchedulePart> schedule,
@@ -72,7 +76,7 @@ class Calendar extends StatefulWidget {
 }
 
 class _CalendarState extends State<Calendar> {
-  CalendarFormat _calendarFormat = CalendarFormat.week;
+  late CalendarFormat _calendarFormat;
 
   late DateTime _focusedDay;
   late DateTime _selectedDay;
@@ -83,8 +87,8 @@ class _CalendarState extends State<Calendar> {
   void initState() {
     super.initState();
 
+    _calendarFormat = widget.calendarFormat;
     _focusedDay = Calendar.getDayInAvailableRange(Calendar.getNowWithoutTime());
-
     _selectedPage = Calendar.getPageIndex(_focusedDay);
 
     widget.pageViewController.addListener(() {
@@ -115,7 +119,6 @@ class _CalendarState extends State<Calendar> {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
-        final isDesktop = constraints.maxWidth > tabletBreakpoint + 150;
         return Padding(
           padding: const EdgeInsets.only(bottom: 8.0),
           child: TableCalendar(
@@ -155,13 +158,13 @@ class _CalendarState extends State<Calendar> {
                 );
               },
             ),
-            calendarFormat: isDesktop ? CalendarFormat.month : _calendarFormat,
+            calendarFormat: _calendarFormat,
             firstDay: Calendar.firstCalendarDay,
             lastDay: Calendar.lastCalendarDay,
             sixWeekMonthsEnforced: true,
             startingDayOfWeek: StartingDayOfWeek.monday,
             headerStyle: HeaderStyle(
-              formatButtonVisible: !isDesktop,
+              formatButtonVisible: widget.canChangeFormat,
               formatButtonShowsNext: false,
               titleTextStyle: AppTextStyle.captionL.copyWith(
                 color: AppTheme.colorsOf(context).active,
@@ -230,6 +233,9 @@ class _CalendarState extends State<Calendar> {
               }
             },
             onFormatChanged: (format) {
+              if (!widget.canChangeFormat) {
+                return;
+              }
               if (_calendarFormat != format) {
                 // Call `setState()` when updating calendar format
                 setState(() {

@@ -8,6 +8,7 @@ import 'package:rtu_mirea_app/presentation/widgets/bottom_modal_sheet.dart';
 import 'package:rtu_mirea_app/schedule/bloc/schedule_bloc.dart';
 import 'package:rtu_mirea_app/schedule/models/models.dart';
 import 'package:rtu_mirea_app/stories/view/stories_view.dart';
+import 'package:table_calendar/table_calendar.dart';
 import 'package:university_app_server_api/client.dart';
 
 import '../widgets/widgets.dart';
@@ -85,133 +86,179 @@ class _SchedulePageState extends State<SchedulePage> {
           });
         } else if (state.selectedSchedule != null) {
           return Scaffold(
-            body: NestedScrollView(
-              headerSliverBuilder: (_, __) => [
-                SliverAppBar(
-                  pinned: false,
-                  title: Text(
-                    _getAppBarTitle,
-                  ),
-                  actions: [
-                    SizedBox(
-                      width: 60,
-                      height: 60,
-                      child: IconButton(
-                        icon: FaIcon(
-                          FontAwesomeIcons.ellipsis,
-                          color: AppTheme.colorsOf(context).active,
-                        ),
-                        onPressed: () {
-                          BottomModalSheet.show(
-                            context,
-                            child: const SettingsMenu(),
-                            title: 'Управление расписанием',
-                            description:
-                                'Редактирование сохраненных расписаний и добавление новых, а также настройки отображения расписания.',
-                            backgroundColor: AppTheme.colorsOf(context).background03,
+            body: LayoutBuilder(
+              builder: (BuildContext context, BoxConstraints constraints) {
+                bool isWideScreen = constraints.maxWidth > 880;
+
+                final eventsPageView = EventsPageView(
+                  controller: _schedulePageController,
+                  itemBuilder: (context, index) {
+                    final day = Calendar.firstCalendarDay.add(Duration(days: index));
+                    final schedules = Calendar.getSchedulePartsByDay(
+                      schedule: state.selectedSchedule?.schedule ?? [],
+                      day: day,
+                    );
+
+                    final holiday = schedules.firstWhereOrNull(
+                      (element) => element is HolidaySchedulePart,
+                    );
+
+                    if (holiday != null) {
+                      return HolidayPage(title: (holiday as HolidaySchedulePart).title);
+                    }
+
+                    if (day.weekday == DateTime.sunday) {
+                      return const HolidayPage(title: 'Выходной');
+                    }
+
+                    final lessons = schedules.whereType<LessonSchedulePart>().toList();
+
+                    if (state.showEmptyLessons) {
+                      return ListView.builder(
+                        itemCount: 6,
+                        itemBuilder: (context, index) {
+                          final lesson = lessons.firstWhereOrNull(
+                            (element) => element.lessonBells.number == index + 1,
                           );
-                        },
-                      ),
-                    ),
-                  ],
-                  bottom: const PreferredSize(
-                    preferredSize: Size.fromHeight(80),
-                    child: StoriesView(),
-                  ),
-                ),
-                SliverToBoxAdapter(
-                  child: Calendar(
-                    pageViewController: _schedulePageController,
-                    schedule: state.selectedSchedule?.schedule ?? [],
-                    comments: state.comments,
-                    showCommentsIndicators: state.showCommentsIndicators,
-                  ),
-                ),
-              ],
-              body: EventsPageView(
-                controller: _schedulePageController,
-                itemBuilder: (context, index) {
-                  final day = Calendar.firstCalendarDay.add(Duration(days: index));
-                  final schedules = Calendar.getSchedulePartsByDay(
-                    schedule: state.selectedSchedule?.schedule ?? [],
-                    day: day,
-                  );
 
-                  final holiday = schedules.firstWhereOrNull(
-                    (element) => element is HolidaySchedulePart,
-                  );
+                          if (lesson != null) {
+                            return Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16.0,
+                                vertical: 8.0,
+                              ),
+                              child: LessonCard(
+                                lesson: lesson,
+                                onTap: (lesson) {
+                                  context.go(
+                                    '/schedule/details',
+                                    extra: (lesson, day),
+                                  );
+                                },
+                              ),
+                            );
+                          }
 
-                  if (holiday != null) {
-                    return HolidayPage(title: (holiday as HolidaySchedulePart).title);
-                  }
-
-                  if (day.weekday == DateTime.sunday) {
-                    return const HolidayPage(title: 'Выходной');
-                  }
-
-                  final lessons = schedules.whereType<LessonSchedulePart>().toList();
-
-                  if (state.showEmptyLessons) {
-                    return ListView.builder(
-                      itemCount: 6,
-                      itemBuilder: (context, index) {
-                        final lesson = lessons.firstWhereOrNull(
-                          (element) => element.lessonBells.number == index + 1,
-                        );
-
-                        if (lesson != null) {
                           return Padding(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 16.0,
                               vertical: 8.0,
                             ),
-                            child: LessonCard(
-                              lesson: lesson,
-                              onTap: (lesson) {
-                                context.go(
-                                  '/schedule/details',
-                                  extra: (lesson, day),
-                                );
-                              },
-                            ),
+                            child: EmptyLessonCard(lessonNumber: index + 1),
                           );
-                        }
+                        },
+                      );
+                    }
 
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16.0,
-                            vertical: 8.0,
-                          ),
-                          child: EmptyLessonCard(lessonNumber: index + 1),
-                        );
-                      },
+                    return ListView(
+                      children: schedules
+                          .whereType<LessonSchedulePart>()
+                          .map(
+                            (e) => Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16.0,
+                                vertical: 8.0,
+                              ),
+                              child: LessonCard(
+                                lesson: e,
+                                onTap: (lesson) {
+                                  context.go(
+                                    '/schedule/details',
+                                    extra: (lesson, day),
+                                  );
+                                },
+                              ),
+                            ),
+                          )
+                          .toList(),
                     );
-                  }
+                  },
+                );
 
-                  return ListView(
-                    children: schedules
-                        .whereType<LessonSchedulePart>()
-                        .map(
-                          (e) => Padding(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 16.0,
-                              vertical: 8.0,
+                return NestedScrollView(
+                  headerSliverBuilder: (_, __) => [
+                    SliverAppBar(
+                      pinned: false,
+                      title: Text(
+                        _getAppBarTitle,
+                      ),
+                      actions: [
+                        SizedBox(
+                          width: 60,
+                          height: 60,
+                          child: IconButton(
+                            icon: FaIcon(
+                              FontAwesomeIcons.ellipsis,
+                              color: AppTheme.colorsOf(context).active,
                             ),
-                            child: LessonCard(
-                              lesson: e,
-                              onTap: (lesson) {
-                                context.go(
-                                  '/schedule/details',
-                                  extra: (lesson, day),
-                                );
-                              },
-                            ),
+                            onPressed: () {
+                              BottomModalSheet.show(
+                                context,
+                                child: const SettingsMenu(),
+                                title: 'Управление расписанием',
+                                description:
+                                    'Редактирование сохраненных расписаний и добавление новых, а также настройки отображения расписания.',
+                                backgroundColor: AppTheme.colorsOf(context).background03,
+                              );
+                            },
                           ),
+                        ),
+                      ],
+                      bottom: const PreferredSize(
+                        preferredSize: Size.fromHeight(80),
+                        child: StoriesView(),
+                      ),
+                    ),
+                    if (!isWideScreen)
+                      SliverToBoxAdapter(
+                        child: Calendar(
+                          pageViewController: _schedulePageController,
+                          schedule: state.selectedSchedule?.schedule ?? [],
+                          comments: state.comments,
+                          showCommentsIndicators: state.showCommentsIndicators,
+                        ),
+                      ),
+                  ],
+                  body: isWideScreen
+                      ? Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              flex: 2,
+                              child: eventsPageView,
+                            ),
+                            Flexible(
+                              flex: 1,
+                              child: ConstrainedBox(
+                                constraints: const BoxConstraints(
+                                  minHeight: 100,
+                                  maxHeight: 466,
+                                ),
+                                child: Container(
+                                  margin: const EdgeInsets.all(8.0),
+                                  padding: const EdgeInsets.all(16.0),
+                                  decoration: BoxDecoration(
+                                    border: Border.all(
+                                      color: AppTheme.colorsOf(context).deactiveDarker,
+                                    ),
+                                    borderRadius: BorderRadius.circular(16.0),
+                                  ),
+                                  child: Calendar(
+                                    pageViewController: _schedulePageController,
+                                    schedule: state.selectedSchedule?.schedule ?? [],
+                                    comments: state.comments,
+                                    showCommentsIndicators: state.showCommentsIndicators,
+                                    calendarFormat: CalendarFormat.month,
+                                    canChangeFormat: false,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
                         )
-                        .toList(),
-                  );
-                },
-              ),
+                      : eventsPageView,
+                );
+              },
             ),
           );
         } else {

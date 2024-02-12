@@ -131,6 +131,7 @@ class LessonCard extends StatelessWidget {
           highlightColor: Colors.transparent,
         ),
         child: InkWell(
+          borderRadius: BorderRadius.circular(12),
           onTap: () {
             onTap?.call(lesson);
           },

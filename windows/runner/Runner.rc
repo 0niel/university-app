@@ -89,13 +89,13 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "ninja.mirea" "\0"
-            VALUE "FileDescription", "rtu_mirea_mobile" "\0"
+            VALUE "CompanyName", "Mirea Ninja" "\0"
+            VALUE "FileDescription", "Приложение РТУ МИРЭА" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "rtu_mirea_mobile" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2023 ninja.mirea. All rights reserved." "\0"
-            VALUE "OriginalFilename", "rtu_mirea_mobile.exe" "\0"
-            VALUE "ProductName", "rtu_mirea_mobile" "\0"
+            VALUE "InternalName", "Мой РТУ МИРЭА" "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2024 Sergey Dmitriev. All rights reserved." "\0"
+            VALUE "OriginalFilename", "Мой РТУ МИРЭА.exe" "\0"
+            VALUE "ProductName", "Ninja Mirea Desktop" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

@@ -36,38 +36,44 @@ class _StoriesPageViewState extends State<StoriesPageView> {
       onDismissed: () => context.pop(),
       isFullScreen: false,
       direction: DismissiblePageDismissDirection.vertical,
-      backgroundColor: Colors.transparent,
+      backgroundColor: Colors.black.withOpacity(0.8),
       child: Center(
-        child: Material(
-          color: Colors.transparent,
-          child: Hero(
-            tag: widget.stories[widget.storyIndex].title,
-            child: StoryPageView(
-              indicatorDuration: const Duration(seconds: 6, milliseconds: 500),
-              initialPage: widget.storyIndex,
-              itemBuilder: (context, pageIndex, storyIndex) {
-                if (pageIndex != _prevStoryIndex) {
-                  _prevStoryIndex = pageIndex;
-                  context.read<AnalyticsBloc>().add(
-                        TrackAnalyticsEvent(
-                          ViewStory(
-                            storyTitle: widget.stories[pageIndex].title,
-                          ),
-                        ),
-                      );
-                }
-                final author = widget.stories[pageIndex].author;
-                final page = widget.stories[pageIndex].pages[storyIndex];
-                return _buildStoryPage(author, page);
-              },
-              gestureItemBuilder: (context, pageIndex, storyIndex) {
-                return _buildGestureItems(pageIndex, storyIndex);
-              },
-              pageLength: widget.stories.length,
-              storyLength: (int pageIndex) {
-                return widget.stories[pageIndex].pages.length;
-              },
-              onPageLimitReached: () => context.pop(),
+        child: AspectRatio(
+          aspectRatio: 9 / 16,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: Material(
+              color: Colors.transparent,
+              child: Hero(
+                tag: widget.stories[widget.storyIndex].title,
+                child: StoryPageView(
+                  indicatorDuration: const Duration(seconds: 6, milliseconds: 500),
+                  initialPage: widget.storyIndex,
+                  itemBuilder: (context, pageIndex, storyIndex) {
+                    if (pageIndex != _prevStoryIndex) {
+                      _prevStoryIndex = pageIndex;
+                      context.read<AnalyticsBloc>().add(
+                            TrackAnalyticsEvent(
+                              ViewStory(
+                                storyTitle: widget.stories[pageIndex].title,
+                              ),
+                            ),
+                          );
+                    }
+                    final author = widget.stories[pageIndex].author;
+                    final page = widget.stories[pageIndex].pages[storyIndex];
+                    return _buildStoryPage(author, page);
+                  },
+                  gestureItemBuilder: (context, pageIndex, storyIndex) {
+                    return _buildGestureItems(pageIndex, storyIndex);
+                  },
+                  pageLength: widget.stories.length,
+                  storyLength: (int pageIndex) {
+                    return widget.stories[pageIndex].pages.length;
+                  },
+                  onPageLimitReached: () => context.pop(),
+                ),
+              ),
             ),
           ),
         ),

@@ -19,8 +19,7 @@ class NeonState extends Equatable {
     bool? isRegisterOfferViewed,
   }) {
     return NeonState(
-      isRegisterOfferViewed:
-          isRegisterOfferViewed ?? this.isRegisterOfferViewed,
+      isRegisterOfferViewed: isRegisterOfferViewed ?? this.isRegisterOfferViewed,
     );
   }
 }

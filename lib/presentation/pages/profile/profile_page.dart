@@ -168,6 +168,7 @@ class _InitialProfileStatePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
           padding: const EdgeInsets.fromLTRB(0, 24, 0, 24),

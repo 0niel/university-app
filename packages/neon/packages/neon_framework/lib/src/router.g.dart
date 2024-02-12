@@ -36,10 +36,6 @@ RouteBase get $homeRoute => GoRouteData.$route(
                   factory: $_AddAccountFlowRouteExtension._fromState,
                 ),
                 GoRouteData.$route(
-                  path: 'qr-code',
-                  factory: $_AddAccountQRcodeRouteExtension._fromState,
-                ),
-                GoRouteData.$route(
                   path: 'check/server',
                   factory: $_AddAccountCheckServerStatusRouteExtension._fromState,
                 ),
@@ -162,22 +158,6 @@ extension $_AddAccountFlowRouteExtension on _AddAccountFlowRoute {
   void replace(BuildContext context) => context.replace(location);
 }
 
-extension $_AddAccountQRcodeRouteExtension on _AddAccountQRcodeRoute {
-  static _AddAccountQRcodeRoute _fromState(GoRouterState state) => const _AddAccountQRcodeRoute();
-
-  String get location => GoRouteData.$location(
-        'neon/settings/account/add/qr-code',
-      );
-
-  void go(BuildContext context) => context.go(location);
-
-  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
-
-  void pushReplacement(BuildContext context) => context.pushReplacement(location);
-
-  void replace(BuildContext context) => context.replace(location);
-}
-
 extension $_AddAccountCheckServerStatusRouteExtension on _AddAccountCheckServerStatusRoute {
   static _AddAccountCheckServerStatusRoute _fromState(GoRouterState state) => _AddAccountCheckServerStatusRoute(
         serverUrl: Uri.parse(state.uri.queryParameters['server-url']!),
@@ -265,10 +245,6 @@ RouteBase get $loginRoute => GoRouteData.$route(
           factory: $LoginFlowRouteExtension._fromState,
         ),
         GoRouteData.$route(
-          path: 'qr-code',
-          factory: $LoginQRcodeRouteExtension._fromState,
-        ),
-        GoRouteData.$route(
           path: 'check/server',
           factory: $LoginCheckServerStatusRouteExtension._fromState,
         ),
@@ -305,22 +281,6 @@ extension $LoginFlowRouteExtension on LoginFlowRoute {
         queryParams: {
           'server-url': serverUrl.toString(),
         },
-      );
-
-  void go(BuildContext context) => context.go(location);
-
-  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
-
-  void pushReplacement(BuildContext context) => context.pushReplacement(location);
-
-  void replace(BuildContext context) => context.replace(location);
-}
-
-extension $LoginQRcodeRouteExtension on LoginQRcodeRoute {
-  static LoginQRcodeRoute _fromState(GoRouterState state) => const LoginQRcodeRoute();
-
-  String get location => GoRouteData.$location(
-        'neon-login/qr-code',
       );
 
   void go(BuildContext context) => context.go(location);

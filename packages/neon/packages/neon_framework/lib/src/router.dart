@@ -16,7 +16,6 @@ import 'package:neon_framework/src/pages/login.dart';
 import 'package:neon_framework/src/pages/login_check_account.dart';
 import 'package:neon_framework/src/pages/login_check_server_status.dart';
 import 'package:neon_framework/src/pages/login_flow.dart';
-import 'package:neon_framework/src/pages/login_qr_code.dart';
 import 'package:neon_framework/src/pages/route_not_found.dart';
 import 'package:neon_framework/src/pages/settings.dart';
 import 'package:neon_framework/src/utils/findable.dart';
@@ -127,9 +126,6 @@ class AccountSettingsRoute extends GoRouteData {
             TypedGoRoute<_AddAccountFlowRoute>(
               path: 'flow',
             ),
-            TypedGoRoute<_AddAccountQRcodeRoute>(
-              path: 'qr-code',
-            ),
             TypedGoRoute<_AddAccountCheckServerStatusRoute>(
               path: 'check/server',
             ),
@@ -184,9 +180,6 @@ class HomeRoute extends GoRouteData {
   routes: [
     TypedGoRoute<LoginFlowRoute>(
       path: 'flow',
-    ),
-    TypedGoRoute<LoginQRcodeRoute>(
-      path: 'qr-code',
     ),
     TypedGoRoute<LoginCheckServerStatusRoute>(
       path: 'check/server',
@@ -243,32 +236,6 @@ class LoginFlowRoute extends GoRouteData {
 
     if (state.fullPath == location && hasAccounts) {
       return _AddAccountFlowRoute(serverUrl: serverUrl).location;
-    }
-
-    return null;
-  }
-}
-
-/// {@template AppRoutes.LoginQRcodeRoute}
-/// Route for the the [LoginQRcodePage].
-///
-/// Redirects to [_AddAccountQRcodeRoute] when at least one account is already
-/// logged in.
-/// {@endtemplate}
-@immutable
-class LoginQRcodeRoute extends GoRouteData {
-  /// {@macro AppRoutes.LoginQRcodeRoute}
-  const LoginQRcodeRoute();
-
-  @override
-  Widget build(BuildContext context, GoRouterState state) => const LoginQRcodePage();
-
-  @override
-  FutureOr<String?> redirect(BuildContext context, GoRouterState state) {
-    final hasAccounts = NeonProvider.of<AccountsBloc>(context).hasAccounts;
-
-    if (state.fullPath == location && hasAccounts) {
-      return const _AddAccountQRcodeRoute().location;
     }
 
     return null;
@@ -415,11 +382,6 @@ class _AddAccountFlowRoute extends LoginFlowRoute {
 
   @override
   Uri get serverUrl => super.serverUrl;
-}
-
-@immutable
-class _AddAccountQRcodeRoute extends LoginQRcodeRoute {
-  const _AddAccountQRcodeRoute();
 }
 
 @immutable

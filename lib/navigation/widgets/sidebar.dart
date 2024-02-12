@@ -23,45 +23,88 @@ class Sidebar extends StatelessWidget {
     return Container(
       width: sidebarWith,
       color: AppTheme.colorsOf(context).background01,
-      child: ListView(
-        children: [
-          ListTile(
-            leading: const Icon(Icons.library_books_rounded),
-            title: Text("Новости", style: AppTextStyle.tab),
-            selected: currentIndex == 0,
-            onTap: () => onClick(0),
-            selectedColor: AppTheme.colors.primary,
-          ),
-          ListTile(
-            leading: const Icon(Icons.calendar_today_rounded),
-            title: Text("Расписание", style: AppTextStyle.tab),
-            selected: currentIndex == 1,
-            onTap: () => onClick(1),
-            selectedColor: AppTheme.colors.primary,
-          ),
-          ListTile(
-            leading: const Icon(Icons.widgets_rounded),
-            title: Text("Сервисы", style: AppTextStyle.tab),
-            selected: currentIndex == 2,
-            onTap: () => onClick(2),
-            selectedColor: AppTheme.colors.primary,
-          ),
-          isDesktop
-              ? ListTile(
-                  leading: const Icon(UniconsLine.info_circle),
-                  title: Text("О приложении", style: AppTextStyle.tab),
-                  selected: currentIndex == 3,
-                  onTap: () => onClick(3),
-                  selectedColor: AppTheme.colors.primary,
-                )
-              : ListTile(
-                  leading: const Icon(Icons.person),
-                  title: Text("Профиль", style: AppTextStyle.tab),
-                  selected: currentIndex == 3,
-                  onTap: () => onClick(3),
-                  selectedColor: AppTheme.colors.primary,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: ListView(
+          children: [
+            SidebarNavButton(
+              isSelected: currentIndex == 0,
+              title: "Новости",
+              icon: const Icon(Icons.library_books_rounded),
+              onClick: () => onClick(0),
+            ),
+            SidebarNavButton(
+              isSelected: currentIndex == 1,
+              title: "Расписание",
+              icon: const Icon(Icons.calendar_today_rounded),
+              onClick: () => onClick(1),
+            ),
+            SidebarNavButton(
+              isSelected: currentIndex == 2,
+              title: "Сервисы",
+              icon: const Icon(Icons.widgets_rounded),
+              onClick: () => onClick(2),
+            ),
+            SidebarNavButton(
+              isSelected: currentIndex == 3,
+              title: "Профиль",
+              icon: const Icon(Icons.person),
+              onClick: () => onClick(3),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class SidebarNavButton extends StatelessWidget {
+  const SidebarNavButton({
+    Key? key,
+    required this.isSelected,
+    required this.title,
+    required this.icon,
+    required this.onClick,
+  }) : super(key: key);
+
+  final bool isSelected;
+  final String title;
+  final Widget icon;
+  final VoidCallback onClick;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(top: 8),
+      decoration: isSelected
+          ? BoxDecoration(
+              color: AppTheme.colorsOf(context).colorful03,
+              borderRadius: BorderRadius.circular(8),
+            )
+          : null,
+      child: TextButton(
+        onPressed: onClick,
+        style: TextButton.styleFrom(
+          padding: const EdgeInsets.all(16),
+          foregroundColor: isSelected ? AppTheme.colorsOf(context).background01 : AppTheme.colorsOf(context).active,
+        ),
+        child: Row(
+          children: [
+            Theme(
+              data: ThemeData(
+                iconTheme: IconThemeData(
+                  color: AppTheme.colorsOf(context).active,
                 ),
-        ],
+              ),
+              child: icon,
+            ),
+            const SizedBox(width: 16),
+            Text(
+              title,
+              style: AppTextStyle.buttonS.copyWith(color: AppTheme.colorsOf(context).active),
+            ),
+          ],
+        ),
       ),
     );
   }

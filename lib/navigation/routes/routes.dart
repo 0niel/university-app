@@ -230,16 +230,14 @@ GoRouter createRouter() => GoRouter(
         GoRoute(
           parentNavigatorKey: _rootNavigatorKey,
           path: '/image',
-          pageBuilder: (context, state) {
-            return CustomTransitionPage(
-              fullscreenDialog: true,
-              opaque: false,
-              transitionsBuilder: (_, __, ___, child) => child,
-              child: ImagesViewGallery(
-                imageUrls: List<String>.from(state.extra as List<dynamic>),
-              ),
-            );
-          },
+          pageBuilder: (context, state) => CustomTransitionPage(
+            fullscreenDialog: true,
+            opaque: false,
+            transitionsBuilder: (_, __, ___, child) => child,
+            child: ImagesViewGallery(
+              imageUrls: List<String>.from(state.extra as List<dynamic>),
+            ),
+          ),
         ),
       ],
       observers: [
