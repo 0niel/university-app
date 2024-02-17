@@ -23,82 +23,12 @@
   <img src="https://github.com/mirea-ninja/rtu-mirea-mobile/assets/121052717/73476d7c-eeda-47ef-8f81-80c4a95c0ca5" width="150" />
 </p>
 
-# Самостоятельная сборка проекта
-1. Установите стабильную версию Flutter для своей операционной системы, используя [руководство на странице документации](https://docs.flutter.dev/get-started/install). 
-2. Установить зависимости пакетов:
-```
-flutter pub get
-```
-3. Откройте эмулятор устройства, а затем запустите проект, выполнив команду:
-```
-flutter run
-```
-4. Используйте одну из этих команд для сборки проекта:
-```
-flutter build apk
-flutter build ios
-flutter build appbundle
-```
-5. Если возникнут какие-либо проблемы при выполнении предыдущих действий, выполните приведенную ниже команду для анализа и устанения неполадок:
-```
-flutter doctor
-```
-
-## Генерация кода
-Пакеты **freezed** и **auto_route** генерируют код для API моделей данных и навигации.
-Используйте флаг [watch], чтобы следить за изменениями в файловой системе и перестраивать код при необходимости.
-```
-flutter packages pub run build_runner watch --delete-conflicting-outputs
-```
-
-Если вы хотите, чтобы генератор запустился один раз и завершил работу, используйте
-```
-flutter packages pub run build_runner build --delete-conflicting-outputs
-```
-
-## Конфигурация Firebase Analytics
-1. Зарегистрируйте приложение в [Firebase](https://console.firebase.google.com/).
-2. Выполните шаги для генерации `firebase_options.dart` файла с помощью [FlutterFire CLI](https://firebase.flutter.dev/docs/cli).
-3. Firebase Analytics для Android не поддерживает Dart-only конфигурацию. Как только ваше приложение для Android будет зарегистрировано в Firebase, загрузите файл конфигурации с консоли Firebase (файл называется `google-services.json`). Добавьте этот файл в каталог `android/app`.
-4. Проект готов для использования с Firebase Analytics и Crashlytics.
-
-## Переменные окружения
-Приложение использует переменные среды времени компиляции для хранения конфиденциальных данных, таких как ключи API и токены. 
-
-Эти переменные должны передаваться при запуске или сборке приложения с помощью аргумента `--dart-define` или установленной переменной окружения. Если вам нужно передать несколько пар ключ-значение, просто определите --dart-define несколько раз.
-
-### Переменные приложения:
-- `SENTRY_DSN` - DSN для отправки отчетов об ошибках в Sentry.
-- `LK_CLIENT_ID` - ID клиента для авторизации в Личном кабинете с помощью OAuth2.
-- `LK_CLIENT_SECRET` - Секретный ключ клиента для авторизации в Личном кабинете с помощью OAuth2.
-
-**Пример:**
-```bash
-flutter run --dart-define=SENTRY_DSN=YOUR_DSN --dart-define=LK_CLIENT_ID=YOUR_CLIENT_ID --dart-define=LK_CLIENT_SECRET=YOUR_CLIENT_SECRET
-```
-
-
-## При ошибках
-**Исключения платформы**
-1. flutter clean
-2. flutter pub get
-3. flutter run
-
-**Любое исключение пакета (зависимости)**
-- Удалите pubspec.lock файл
-
-Выполните следующие команды:
-1. flutter clean
-2. flutter pub cache repair
-3. flutter pub get
-4. flutter run
-
 # Установка
 Следить за актуальностью приложения и скачать готовый билд вы можете на [странице релизов](https://github.com/Ninja-Official/rtu-mirea-mobile/releases) этого репозитория.
 
 # Ваше участие
 Это приложение и все относящиеся к нему сервисы являются **100% бесплатными** и **Open Source** продуктами. Мы с огромным удовольствием примем любые ваши предложения и сообщения, а также мы рады любому вашему участию в проекте! Перед тем как принять участие в развитии проекта:
-1. Ознакомьтесь с нашим [CONTRIBUTING.MD](https://github.com/Ninja-Official/rtu-mirea-mobile/blob/master/CONTRIBUTING.md), в котором описано то, как должны вести себя участники проекта.
+1. Ознакомьтесь с нашим [CONTRIBUTING.MD](https://github.com/0niel/rtu-mirea-mobile/blob/master/CONTRIBUTING.md), в котором описано то, как должны вести себя участники проекта.
 2. Уважайте других участников, обсуждайте идеи, а не личности, ознакомьтесь с [кодексом поведения](https://github.com/Ninja-Official/rtu-mirea-mobile/blob/master/CODE_OF_CONDUCT.md).
 3. Не знаете, над чем вы хотите работать? Ознакомьтесь с нашей [дорожной картой](https://github.com/Ninja-Official/rtu-mirea-mobile/projects/1).
 
