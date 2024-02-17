@@ -12,8 +12,10 @@
 2. Тщательно документируйте свой код.
 3. Придерживайтесь стандартов оформления кода. Например, таких, как [Effective Dart: Style](https://dart.dev/guides/language/effective-dart/style)
 
+
 # DCO 
 Мы используем Developer Certificate of Origin (DCO) в качестве дополнительной защиты от недобросовестных участников. Это значит, что каждый коммит должен быть подписан автором, используя `git commit -s`.  Подробнее о DCO можно прочитать [здесь](https://developercertificate.org/). Узнать, как подписать свой коммит, можно [здесь](https://docs.github.com/en/authentication/managing-commit-signature-verification/signing-commits).
+
 
 # Установка и конфигурация проекта
 1. [Установите стабильную версию Flutter](https://docs.flutter.dev/get-started/install) для своей операционной системы, если вы этого ещё не сделали. Используйте `flutter doctor` для проверки установки и конфигурации Flutter.
@@ -45,35 +47,40 @@ melos bootstrap
 ```bash
 fvm flutter run
 ```
-6. Используйте одну из этих команд для сборки проекта:
+
+### Дополнительные команды
+- Используйте одну из этих команд для сборки проекта:
 ```bash
 fvm flutter build apk
 fvm flutter build ios
 fvm flutter build appbundle
 ```
 
-7. Используйте melos для запуска команд во всех подпакетах:
+- Используйте melos для запуска команд во всех подпакетах:
 ```bash
 melos run
 ```
 
-8. Если возникнут какие-либо проблемы при выполнении предыдущих действий, выполните приведенную ниже команду для анализа и устанения неполадок: -->
+- Если возникнут какие-либо проблемы при выполнении предыдущих действий, выполните приведенную ниже команду для анализа и устанения неполадок: -->
 ```bash
 flutter doctor
 ```
+
 
 ## Генерация кода
 Проект использует [build_runner](https://pub.dev/packages/build_runner) для генерации кода, например, сериализаторов JSON и маршалинга.
 
 Используйте `melos run` для запуска команды `flutter pub run build_runner build` во всех подпакетах.
 
+
 ## Конфигурация Firebase Analytics
-Если вы не планируете использовать Firebase Analytics и Crashlytics или же вы просто хотите внести свой вклад в этот проект, вы можете пропустить этот шаг.
+Пропустите этот шаг, если вы не планируете распространять свою собственную сборку приложения.
 
 1. Зарегистрируйте приложение в [Firebase](https://console.firebase.google.com/).
 2. Выполните шаги для генерации `firebase_options.dart` файла с помощью [FlutterFire CLI](https://firebase.flutter.dev/docs/cli).
 3. Firebase Analytics для Android не поддерживает Dart-only конфигурацию. Как только ваше приложение для Android будет зарегистрировано в Firebase, загрузите файл конфигурации с консоли Firebase (файл называется `google-services.json`). Добавьте этот файл в каталог `android/app`.
 4. Проект готов для использования с Firebase Analytics и Crashlytics.
+
 
 ## Переменные окружения
 Приложение использует переменные среды времени компиляции для хранения конфиденциальных данных, таких как ключи API и токены. 
@@ -89,6 +96,9 @@ flutter doctor
 ```bash
 fvm run --dart-define=SENTRY_DSN=YOUR_DSN --dart-define=LK_CLIENT_ID=YOUR_CLIENT_ID --dart-define=LK_CLIENT_SECRET=YOUR_CLIENT_SECRET
 ```
+
+Если LK_CLIENT_ID и LK_CLIENT_SECRET не будут переданы, приложение будет работать в режиме "без авторизации", а пользователь не сможет войти в Личный кабинет.
+
 
 # Запуск API сервера
 В папке `api` расположен исходный код сервера, который используется для получения расписания, новостей, данных о сообществе. В качестве бэкенд-фреймворка используется [dart_frog](https://github.com/VeryGoodOpenSource/dart_frog). Сервер и мобильное приложение используют общую кодовую базу, а API-клиенты, с помощью которых приложение взаимодействует с сервером, определены в `./api/lib/src/client/api_client.dart`.
@@ -115,7 +125,8 @@ dart_frog dev
 dart_frog build
 ```
 
-Используйте `ApiClient.localhost()` для взаимодействия с сервером во время разработки (https://github.com/0niel/university-app/blob/eea141fc7ce7a5f26e1486822eaec0d2d2983059/lib/main.dart#L170).
+Используйте `ApiClient.localhost()` для взаимодействия с сервером во время разработки https://github.com/0niel/university-app/blob/eea141fc7ce7a5f26e1486822eaec0d2d2983059/lib/main.dart#L170.
+
 
 # Соглашение о коммитах
 Мы используем семантическое именование коммитов, чтобы упростить процесс релизов и автоматизировать генерацию changelog'ов. Придерживайтесь правил, определённых в [Conventional Commits](https://www.conventionalcommits.org/).
