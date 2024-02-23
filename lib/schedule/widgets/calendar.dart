@@ -8,6 +8,7 @@ import 'package:rtu_mirea_app/presentation/typography.dart';
 import 'package:rtu_mirea_app/schedule/models/models.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:university_app_server_api/client.dart';
+import "package:collection/collection.dart";
 
 import 'lesson_card.dart';
 
@@ -202,9 +203,11 @@ class _CalendarState extends State<Calendar> {
               CalendarFormat.week: 'Неделя'
             },
             eventLoader: (day) {
-              return Calendar.getSchedulePartsByDay(schedule: widget.schedule, day: day)
+              final events = Calendar.getSchedulePartsByDay(schedule: widget.schedule, day: day)
                   .whereType<LessonSchedulePart>()
                   .toList();
+              final eventsByTime = groupBy(events, (LessonSchedulePart e) => e.lessonBells.number);
+              return eventsByTime.values.map((e) => e.first).toList();
             },
             locale: 'ru_RU',
             selectedDayPredicate: (day) {

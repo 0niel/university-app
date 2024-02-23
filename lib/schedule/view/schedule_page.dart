@@ -7,11 +7,12 @@ import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:rtu_mirea_app/presentation/widgets/bottom_modal_sheet.dart';
 import 'package:rtu_mirea_app/schedule/bloc/schedule_bloc.dart';
 import 'package:rtu_mirea_app/schedule/models/models.dart';
+import 'package:rtu_mirea_app/schedule/widgets/widgets.dart';
 import 'package:rtu_mirea_app/stories/view/stories_view.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:university_app_server_api/client.dart';
-
-import '../widgets/widgets.dart';
+import "package:collection/collection.dart";
+import 'package:expandable_page_view/expandable_page_view.dart';
 
 class SchedulePage extends StatefulWidget {
   const SchedulePage({super.key});
@@ -112,33 +113,63 @@ class _SchedulePageState extends State<SchedulePage> {
                     }
 
                     final lessons = schedules.whereType<LessonSchedulePart>().toList();
+                    final lessonsByTime = groupBy<LessonSchedulePart, int>(
+                      lessons,
+                      (lesson) => lesson.lessonBells.number,
+                    );
 
-                    if (state.showEmptyLessons) {
-                      return ListView.builder(
-                        itemCount: 6,
-                        itemBuilder: (context, index) {
-                          final lesson = lessons.firstWhereOrNull(
-                            (element) => element.lessonBells.number == index + 1,
-                          );
+                    const maxLessonCountInDay = 6;
+                    return ListView.builder(
+                      itemCount: maxLessonCountInDay,
+                      itemBuilder: (context, index) {
+                        final lessons = List<LessonSchedulePart>.from(
+                            (lessonsByTime.containsKey(index + 1) ? lessonsByTime[index + 1] : []) as Iterable);
+                        final lesson = lessons.isNotEmpty ? lessons.first : null;
 
-                          if (lesson != null) {
-                            return Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16.0,
-                                vertical: 8.0,
-                              ),
-                              child: LessonCard(
-                                lesson: lesson,
-                                onTap: (lesson) {
-                                  context.go(
-                                    '/schedule/details',
-                                    extra: (lesson, day),
-                                  );
-                                },
-                              ),
-                            );
-                          }
+                        if (lesson != null) {
+                          return lessons.length == 1
+                              ? Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 16.0,
+                                    vertical: 8.0,
+                                  ),
+                                  child: LessonCard(
+                                    lesson: lesson,
+                                    onTap: (lesson) {
+                                      context.go(
+                                        '/schedule/details',
+                                        extra: (lesson, day),
+                                      );
+                                    },
+                                  ),
+                                )
+                              : ExpandablePageView.builder(
+                                  scrollDirection: Axis.horizontal,
+                                  itemCount: lessons.length,
+                                  itemBuilder: (context, index) {
+                                    final lesson = lessons[index];
+                                    return Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 16.0,
+                                        vertical: 8.0,
+                                      ),
+                                      child: LessonCard(
+                                        countInGroup: lessons.length,
+                                        indexInGroup: index,
+                                        lesson: lesson,
+                                        onTap: (lesson) {
+                                          context.go(
+                                            '/schedule/details',
+                                            extra: (lesson, day),
+                                          );
+                                        },
+                                      ),
+                                    );
+                                  },
+                                );
+                        }
 
+                        if (state.showEmptyLessons) {
                           return Padding(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 16.0,
@@ -146,31 +177,10 @@ class _SchedulePageState extends State<SchedulePage> {
                             ),
                             child: EmptyLessonCard(lessonNumber: index + 1),
                           );
-                        },
-                      );
-                    }
-
-                    return ListView(
-                      children: schedules
-                          .whereType<LessonSchedulePart>()
-                          .map(
-                            (e) => Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16.0,
-                                vertical: 8.0,
-                              ),
-                              child: LessonCard(
-                                lesson: e,
-                                onTap: (lesson) {
-                                  context.go(
-                                    '/schedule/details',
-                                    extra: (lesson, day),
-                                  );
-                                },
-                              ),
-                            ),
-                          )
-                          .toList(),
+                        } else {
+                          return const SizedBox.shrink();
+                        }
+                      },
                     );
                   },
                 );

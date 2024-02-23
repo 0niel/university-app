@@ -103,6 +103,18 @@ class AppTheme {
       error: darkThemeColors.colorful07,
       surfaceTint: Colors.transparent,
     ),
+    elevatedButtonTheme: ElevatedButtonThemeData(
+      style: ButtonStyle(
+        backgroundColor: MaterialStateProperty.all(darkThemeColors.primary),
+        elevation: MaterialStateProperty.all(2),
+        shape: MaterialStateProperty.all(
+          RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+        ),
+        textStyle: MaterialStateProperty.all(AppTextStyle.buttonL),
+      ),
+    ),
   );
 
   static final lightTheme = ThemeData.light().copyWith(
@@ -191,6 +203,18 @@ class AppTheme {
       onSecondary: lightThemeColors.active,
       error: lightThemeColors.colorful07,
       surfaceTint: Colors.transparent,
+    ),
+    elevatedButtonTheme: ElevatedButtonThemeData(
+      style: ButtonStyle(
+        backgroundColor: MaterialStateProperty.all(darkThemeColors.primary),
+        elevation: MaterialStateProperty.all(2),
+        shape: MaterialStateProperty.all(
+          RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+        ),
+        textStyle: MaterialStateProperty.all(AppTextStyle.buttonL),
+      ),
     ),
   );
 

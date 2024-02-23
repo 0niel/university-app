@@ -7,18 +7,22 @@ import 'package:rtu_mirea_app/presentation/typography.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:rtu_mirea_app/schedule/models/models.dart';
 import 'package:university_app_server_api/client.dart';
-
+import 'package:intl/intl.dart';
 import '../schedule.dart';
 
 class LessonCard extends StatelessWidget {
   const LessonCard({
     Key? key,
     required this.lesson,
+    this.indexInGroup,
+    this.countInGroup,
     this.onTap,
   }) : super(key: key);
 
   final LessonSchedulePart lesson;
   final void Function(LessonSchedulePart)? onTap;
+  final int? indexInGroup;
+  final int? countInGroup;
 
   static Color getColorByType(LessonType lessonType) {
     switch (lessonType) {
@@ -194,7 +198,7 @@ class LessonCard extends StatelessWidget {
                             style: AppTextStyle.body.copyWith(color: AppTheme.colorsOf(context).colorful03),
                           ),
                           Text(
-                            'в ${lesson.lessonBells.startTime} - ${lesson.lessonBells.endTime}',
+                            '${lesson.lessonBells.startTime} - ${lesson.lessonBells.endTime}',
                             style: AppTextStyle.body.copyWith(
                               color: AppTheme.colorsOf(context).colorful03,
                             ),
@@ -207,7 +211,7 @@ class LessonCard extends StatelessWidget {
                           Divider(
                             color: AppTheme.colorsOf(context).deactive.withOpacity(0.1),
                             thickness: 1,
-                            height: 30,
+                            height: 18,
                           ),
                           if (lesson.classrooms.isNotEmpty) ...[
                             const SizedBox(
@@ -309,6 +313,7 @@ class LessonCard extends StatelessWidget {
                         },
                       ),
                       _buildCommentAlert(state.comments),
+                      _buildGroupIndicator()
                     ],
                   ),
                 ),
@@ -319,6 +324,39 @@ class LessonCard extends StatelessWidget {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildGroupIndicator() {
+    if (indexInGroup == null || countInGroup == null) {
+      return const SizedBox.shrink();
+    }
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 8),
+      child: Row(
+        children: [
+          Text(
+            '$countInGroup ${Intl.plural(countInGroup!, one: 'пара', few: 'пары', many: 'пар', other: 'пар')} в это время',
+            style: AppTextStyle.captionL.copyWith(
+              color: AppTheme.colors.colorful03,
+            ),
+          ),
+          const SizedBox(
+            width: 8,
+          ),
+          for (var i = 0; i < countInGroup!; i++)
+            Container(
+              width: 8,
+              height: 8,
+              margin: const EdgeInsets.only(right: 4),
+              decoration: BoxDecoration(
+                color: i == indexInGroup! ? AppTheme.colors.colorful03 : AppTheme.colors.colorful03.withOpacity(0.3),
+                shape: BoxShape.circle,
+              ),
+            ),
+        ],
       ),
     );
   }

@@ -235,6 +235,8 @@ dependencies:
     path: packages/notifications_client/firebase_notifications_client
   persistent_storage:
     path: packages/storage/persistent_storage
+  collection: ^1.18.0
+  expandable_page_view: ^1.0.17
 
 
 dev_dependencies:
