@@ -9,17 +9,19 @@
 
 # Скриншоты
 <p float="left">
-  <img src="https://github.com/mirea-ninja/rtu-mirea-mobile/assets/51058739/0306ec8f-c6cd-49c2-a3eb-043a3bf9e1ce" width="150" />
-  <img src="https://github.com/mirea-ninja/rtu-mirea-mobile/assets/51058739/e57e07fa-3e55-40fd-bac0-393b460f2925" width="150" />
-  <img src="https://github.com/mirea-ninja/rtu-mirea-mobile/assets/51058739/c1010e39-2eb5-4e9f-acba-81bd2368b174" width="150" />
-  <img src="https://github.com/mirea-ninja/rtu-mirea-mobile/assets/51058739/72f8fdf2-05b8-4cb0-8834-d3cef30fa899" width="150" />
+  <img src="https://github.com/0niel/university-app/assets/51058739/4d0fb795-3c8b-43d7-812b-9f0c319599a1" width="150" />
+  <img src="https://github.com/0niel/university-app/assets/51058739/a6e18dc0-1a13-49da-92f4-21ce47e351d8" width="150" />
+  <img src="https://github.com/0niel/university-app/assets/51058739/6b97ab7d-c651-4850-9392-2c10ba85a8cc" width="150" />
+  <img src="https://github.com/0niel/university-app/assets/51058739/25deb3cd-2847-4eff-bcb7-1ce69b1631c6" width="150" />
+  <img src="https://github.com/0niel/university-app/assets/51058739/5c73cf09-a6f9-4194-bdd5-72ff41318f0a" width="150" />
   <img src="https://github.com/mirea-ninja/rtu-mirea-mobile/assets/121052717/64ae1e7f-19e4-473c-a3f0-93ae64439551" width="150" />
  </p>
  <p float="left">
-  <img src="https://github.com/mirea-ninja/rtu-mirea-mobile/assets/51058739/2cb09f12-9185-47f5-9125-3f5afa1b52be" width="150" />
-  <img src="https://github.com/mirea-ninja/rtu-mirea-mobile/assets/51058739/f0df7fc8-f3f5-4706-84f8-6d16041f5337" width="150" />
-  <img src="https://github.com/mirea-ninja/rtu-mirea-mobile/assets/51058739/b8929457-b8b5-4a56-8e34-15afe6350de0" width="150" />
-  <img src="https://github.com/mirea-ninja/rtu-mirea-mobile/assets/51058739/a477c6c2-3082-49d3-ab65-dac371ab3b11" width="150" />
+  <img src="https://github.com/0niel/university-app/assets/51058739/677bb516-b813-4d26-80fc-97114c054512" width="150" />
+  <img src="https://github.com/0niel/university-app/assets/51058739/f2635689-2eea-44a8-b2f7-f2eebc5e642b" width="150" />
+  <img src="https://github.com/0niel/university-app/assets/51058739/b3f9c18a-6511-4893-9386-985d266ca1e6" width="150" />
+  <img src="https://github.com/0niel/university-app/assets/51058739/e186f706-ad88-4d54-b5b9-755f622cb04d" width="150" />
+  <img src="https://github.com/0niel/university-app/assets/51058739/a0229a27-9778-4e15-8bbc-97018f775cb8" width="150" />
   <img src="https://github.com/mirea-ninja/rtu-mirea-mobile/assets/121052717/73476d7c-eeda-47ef-8f81-80c4a95c0ca5" width="150" />
 </p>
 
