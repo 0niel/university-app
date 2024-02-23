@@ -1,4 +1,0 @@
-lib/src/webdav/props.csv
-lib/src/patches/
-lib/src/api/*.openapi.json
-/*.dart

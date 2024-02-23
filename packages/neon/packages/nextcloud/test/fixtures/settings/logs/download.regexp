@@ -1,3 +1,0 @@
-GET http://localhost/index\.php/settings/admin/log/download
-accept: application/octet-stream
-authorization: Bearer mock

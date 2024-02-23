@@ -1,6 +1,0 @@
-[Desktop Entry]
-Type=Application
-Name=Nextcloud Neon
-Icon=de.provokateurin.neon
-Exec=nextcloud-neon %U
-Keywords=Nextcloud;Neon

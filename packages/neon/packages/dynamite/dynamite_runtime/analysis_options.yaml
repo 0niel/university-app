@@ -1,5 +1,0 @@
-include: package:neon_lints/dart.yaml
-
-analyzer:
-  exclude:
-    - '**.g.dart'

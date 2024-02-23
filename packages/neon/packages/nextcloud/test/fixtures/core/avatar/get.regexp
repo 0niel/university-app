@@ -1,3 +1,0 @@
-GET http://localhost/index\.php/avatar/admin/32
-accept: \*/\*
-authorization: Bearer mock

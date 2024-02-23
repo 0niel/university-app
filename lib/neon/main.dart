@@ -1,3 +1,4 @@
+import 'package:built_collection/built_collection.dart';
 import 'package:provider/single_child_widget.dart';
 import 'package:rtu_mirea_app/neon/apps.dart';
 import 'package:rtu_mirea_app/neon/branding.dart';
@@ -12,7 +13,7 @@ import 'package:neon_framework/src/models/account.dart';
 import 'package:neon_framework/src/models/app_implementation.dart';
 import 'package:neon_framework/src/models/disposable.dart';
 import 'package:neon_framework/src/platform/platform.dart';
-import 'package:neon_framework/src/settings/models/storage.dart';
+import 'package:neon_framework/src/storage/storage_manager.dart';
 import 'package:neon_framework/src/theme/neon.dart';
 import 'package:neon_framework/src/utils/global_options.dart';
 import 'package:neon_framework/src/utils/provider.dart';
@@ -30,9 +31,8 @@ Future<(NeonTheme, List<SingleChildWidget>)> runNeon({
   @visibleForTesting bool firstLaunchDisabled = false,
   @visibleForTesting bool nextPushDisabled = false,
 }) async {
-  await NeonPlatform.setup();
-  await RequestManager.instance.initCache();
-  await NeonStorage.init();
+  await NeonPlatform.instance.init();
+  await NeonStorage().init();
 
   final packageInfo = await PackageInfo.fromPlatform();
   buildUserAgent(packageInfo);
@@ -70,7 +70,7 @@ Future<(NeonTheme, List<SingleChildWidget>)> runNeon({
       NeonProvider<AccountsBloc>.value(value: accountsBloc),
       NeonProvider<FirstLaunchBloc>.value(value: firstLaunchBloc),
       NeonProvider<NextPushBloc>.value(value: nextPushBloc),
-      Provider<Iterable<AppImplementation>>(
+      Provider<BuiltSet<AppImplementation>>(
         create: (_) => appImplementations,
         dispose: (_, appImplementations) => appImplementations.disposeAll(),
       ),

@@ -1,3 +1,0 @@
-GET http://localhost/index\.php/apps/news/api
-accept: application/json
-authorization: Basic mock

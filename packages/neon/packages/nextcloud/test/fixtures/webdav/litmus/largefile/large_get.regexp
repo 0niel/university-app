@@ -1,8 +1,0 @@
-PUT http://localhost/remote\.php/webdav/largefile\.txt
-authorization: Bearer mock
-content-length: 1000000000
-content-type: application/xml
-.*
-GET http://localhost/remote\.php/webdav/largefile\.txt
-authorization: Bearer mock
-content-type: application/xml

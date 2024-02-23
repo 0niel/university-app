@@ -45,6 +45,19 @@ final GlobalKey<NavigatorState> _servicesNavigatorKey = GlobalKey<NavigatorState
 final GlobalKey<NavigatorState> _profileNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'profile');
 final GlobalKey<NavigatorState> _infoNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'info');
 
+String _getNeonPathInCurrentRouter(String neonRouterPath) {
+  late final String path;
+  if (neonRouterPath.startsWith('/') && neonRouterPath.length > 1) {
+    path = 'neon-${neonRouterPath.substring(1)}';
+  } else if (neonRouterPath.startsWith('/') && neonRouterPath.length == 1) {
+    path = 'neon';
+  } else {
+    path = neonRouterPath;
+  }
+
+  return path;
+}
+
 GoRouter createRouter() => GoRouter(
       navigatorKey: _rootNavigatorKey,
       initialLocation: '/home',
@@ -55,7 +68,8 @@ GoRouter createRouter() => GoRouter(
           final redirectPath = neon.redirect(accountsBloc, context, state);
 
           if (redirectPath != null) {
-            return '/services/$redirectPath';
+            final pathInCurrentRouter = _getNeonPathInCurrentRouter(redirectPath);
+            return '/services/$pathInCurrentRouter';
           } else if (state.matchedLocation.startsWith('neon')) {
             return '/services/${state.uri}';
           }
@@ -145,7 +159,23 @@ GoRouter createRouter() => GoRouter(
                         ),
                       ],
                     ),
-                    ...neon.$appRoutes,
+                    ...neon.$appRoutes.map((route) {
+                      if (route is GoRoute) {
+                        route = GoRoute(
+                          path: _getNeonPathInCurrentRouter(route.path),
+                          name: route.name,
+                          builder: route.builder,
+                          redirect: route.redirect,
+                          routes: route.routes,
+                          pageBuilder: route.pageBuilder,
+                          parentNavigatorKey: route.parentNavigatorKey,
+                        );
+
+                        return route;
+                      }
+
+                      return route;
+                    }),
                   ],
                 ),
               ],

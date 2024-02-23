@@ -1,6 +1,0 @@
-PUT http://localhost/index\.php/apps/uppush/device\?deviceName=Test
-accept: application/json
-authorization: Basic mock
-PUT http://localhost/index\.php/apps/uppush/app\?deviceId=[a-zA-Z0-9-_]+&appName=Test
-accept: application/json
-authorization: Basic mock

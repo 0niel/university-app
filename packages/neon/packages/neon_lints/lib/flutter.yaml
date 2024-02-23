@@ -1,5 +1,0 @@
-include: package:neon_lints/src/base.yaml
-
-linter:
-  rules:
-    avoid_print: true

@@ -1,5 +1,6 @@
 import 'dart:io' show Platform;
 import 'package:analytics_repository/analytics_repository.dart';
+import 'package:built_collection/built_collection.dart';
 import 'package:community_repository/community_repository.dart';
 import 'package:dio/dio.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
@@ -16,7 +17,6 @@ import 'package:provider/single_child_widget.dart';
 import 'package:rtu_mirea_app/analytics/bloc/analytics_bloc.dart';
 import 'package:rtu_mirea_app/app_bloc_observer.dart';
 
-import 'package:rtu_mirea_app/common/widget_data_init.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:rtu_mirea_app/data/datasources/strapi_remote.dart';
 import 'package:rtu_mirea_app/data/repositories/stories_repository_impl.dart';
@@ -38,6 +38,7 @@ import 'package:rtu_mirea_app/schedule/bloc/schedule_bloc.dart';
 import 'package:rtu_mirea_app/service_locator.dart' as dependency_injection;
 import 'package:rtu_mirea_app/stories/bloc/stories_bloc.dart';
 import 'package:sentry_dio/sentry_dio.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:university_app_server_api/client.dart';
 import 'package:url_strategy/url_strategy.dart';
 import 'common/constants.dart';
@@ -59,6 +60,7 @@ import 'package:neon_framework/l10n/localizations.dart' as neon_localizations;
 import 'package:neon_framework/theme.dart' as neon_theme;
 import 'package:neon_framework/src/theme/theme.dart' as app_neon_theme;
 import 'package:neon_framework/src/theme/server.dart' as neon_server_theme;
+import 'package:flutter/foundation.dart' show TargetPlatform;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -68,8 +70,6 @@ Future<void> main() async {
   );
 
   await dependency_injection.setup();
-
-  WidgetDataProvider.initData();
 
   if (Platform.isAndroid || Platform.isIOS) {
     await FirebaseAnalytics.instance.logAppOpen();
@@ -81,8 +81,8 @@ Future<void> main() async {
     // await secureStorage.deleteAll();
 
     // // Clear local dota
-    // var prefs = getIt<SharedPreferences>();
-    // await prefs.clear();
+    var prefs = getIt<SharedPreferences>();
+    await prefs.clear();
 
     // // Clear oauth tokens
     // var lksOauth2 = getIt<LksOauth2>();
@@ -99,7 +99,12 @@ Future<void> main() async {
     Intl.systemLocale = await findSystemLocale();
   }
 
-  final analyticsRepository = AnalyticsRepository(FirebaseAnalytics.instance);
+  late final AnalyticsRepository analyticsRepository;
+  try {
+    analyticsRepository = AnalyticsRepository(FirebaseAnalytics.instance);
+  } catch (e) {
+    analyticsRepository = const AnalyticsRepository();
+  }
 
   Bloc.observer = AppBlocObserver(analyticsRepository: analyticsRepository);
 
@@ -250,7 +255,7 @@ class _NeonProvider extends StatefulWidget {
 }
 
 class _NeonProviderState extends State<_NeonProvider> {
-  late final Iterable<neon_models.AppImplementation> _appImplementations;
+  late final BuiltSet<neon_models.AppImplementation> _appImplementations;
   late final GlobalOptions _globalOptions;
   late final AccountsBloc _accountsBloc;
 
@@ -258,7 +263,7 @@ class _NeonProviderState extends State<_NeonProvider> {
   void initState() {
     super.initState();
 
-    _appImplementations = NeonProvider.of<Iterable<neon_models.AppImplementation>>(context);
+    _appImplementations = NeonProvider.of<BuiltSet<neon_models.AppImplementation>>(context);
     _globalOptions = NeonProvider.of<GlobalOptions>(context);
     _accountsBloc = NeonProvider.of<AccountsBloc>(context);
   }
@@ -347,6 +352,7 @@ class _MaterialAppState extends State<_MaterialApp> {
                 theme.brightness == Brightness.light ? Brightness.light : Brightness.dark));
 
         return MaterialApp.router(
+          restorationScopeId: "app",
           localizationsDelegates: [
             GlobalMaterialLocalizations.delegate,
             GlobalWidgetsLocalizations.delegate,
