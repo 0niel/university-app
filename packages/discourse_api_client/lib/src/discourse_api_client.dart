@@ -40,7 +40,7 @@ class DiscourseApiClient {
   final http.Client _httpClient;
 
   Future<Top> getTop() async {
-    final uri = Uri.parse('$_baseUrl/top.json');
+    final uri = Uri.parse('$_baseUrl/top.json?period=monthly');
     final response = await _httpClient.get(
       uri,
       headers: await _getRequestHeaders(),
