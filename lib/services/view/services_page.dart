@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:rtu_mirea_app/discourse/view/view.dart';
 import 'package:rtu_mirea_app/neon/bloc/neon_bloc.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:rtu_mirea_app/presentation/typography.dart';
 import 'package:rtu_mirea_app/presentation/widgets/bottom_modal_sheet.dart';
 import 'package:rtu_mirea_app/presentation/widgets/buttons/primary_button.dart';
+import 'package:rtu_mirea_app/services/widgets/activity_calendar_graph.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 import '../widgets/widgets.dart';
@@ -96,125 +98,146 @@ class _ServicesViewState extends State<ServicesView> {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16.0),
-            child: Text(
-              "Популярные",
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16.0),
+              child: Text(
+                "Популярные",
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
-          ),
-          const SizedBox(height: 8),
-          SizedBox(
-            height: 152,
-            child: ListView(
-              shrinkWrap: true,
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              children: [
-                ServiceCard(
-                  title: 'Карта МИРЭА',
-                  url: 'https://map.mirea.ru/',
-                  icon: ServiceIcon(
-                    color: AppTheme.colorsOf(context).colorful07,
-                    iconColor: AppTheme.colorsOf(context).active,
-                    icon: Icons.map,
-                  ),
-                  launchMode: LaunchMode.inAppBrowserView,
-                  description: 'Найди нужный кабинет',
-                ),
-                BlocBuilder<NeonBloc, NeonState>(
-                  bloc: neonBloc,
-                  builder: (context, state) {
-                    return ServiceCard(
-                      title: 'Cloud Mirea Ninja',
-                      onTap: () {
-                        if (state.isRegisterOfferViewed == false) {
-                          _showNeonAccountOffer();
-                        } else {
-                          context.go('/services/neon');
-                        }
-                      },
-                      onLongPress: () {
-                        _showNeonAccountOffer();
-                      },
-                      icon: ServiceIcon(
-                        color: AppTheme.colorsOf(context).colorful04,
-                        iconColor: AppTheme.colorsOf(context).background01,
-                        icon: Icons.cloud,
-                      ),
-                    );
-                  },
-                ),
-                // ServiceCard(
-                //   title: 'Калькулятор БРС',
-                //   onTap: () {
-                //     context.go('/services/rating-system-calculator');
-                //   },
-                //   icon: ServiceIcon(
-                //     color: AppTheme.colors.colorful02,
-                //     iconColor: AppTheme.colors.background01,
-                //     icon: Icons.calculate,
-                //   ),
-                // ),
-                ServiceCard(
-                  title: 'Бюро находок',
-                  url: 'https://finds.mirea.ru/',
-                  icon: ServiceIcon(
-                    color: AppTheme.colorsOf(context).colorful06,
-                    iconColor: AppTheme.colorsOf(context).background01,
-                    icon: Icons.search,
-                  ),
-                  launchMode: LaunchMode.externalApplication,
-                  description: 'Найди свои вещи',
-                ),
-                ServiceCard(
-                  title: 'Траектория обучения',
-                  url: 'https://t.me/learning_roadmap_bot',
-                  icon: ServiceIcon(
-                    color: AppTheme.colorsOf(context).colorful05,
-                    iconColor: AppTheme.colorsOf(context).background01,
-                    icon: Icons.timeline,
-                  ),
-                  launchMode: LaunchMode.externalApplication,
-                ),
-                ServiceCard(
-                  title: 'Форум',
-                  url: 'https://mirea.ninja/',
-                  icon: ServiceIcon(
-                    color: AppTheme.colorsOf(context).colorful01,
-                    iconColor: AppTheme.colorsOf(context).background01,
-                    icon: Icons.forum,
-                  ),
-                  launchMode: LaunchMode.externalApplication,
-                  description: 'Форум студентов МИРЭА',
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 24),
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16.0),
-            child: Text(
-              "Сообщества",
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-          const SizedBox(height: 8),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            const SizedBox(height: 8),
+            SizedBox(
+              height: 152,
               child: ListView(
                 shrinkWrap: true,
-                scrollDirection: Axis.vertical,
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                children: [
+                  ServiceCard(
+                    title: 'Карта МИРЭА',
+                    url: 'https://map.mirea.ru/',
+                    icon: ServiceIcon(
+                      color: AppTheme.colorsOf(context).colorful07,
+                      iconColor: AppTheme.colorsOf(context).active,
+                      icon: Icons.map,
+                    ),
+                    launchMode: LaunchMode.inAppBrowserView,
+                    description: 'Найди нужный кабинет',
+                  ),
+                  BlocBuilder<NeonBloc, NeonState>(
+                    bloc: neonBloc,
+                    builder: (context, state) {
+                      return ServiceCard(
+                        title: 'Cloud Mirea Ninja',
+                        onTap: () {
+                          if (state.isRegisterOfferViewed == false) {
+                            _showNeonAccountOffer();
+                          } else {
+                            context.go('/services/neon');
+                          }
+                        },
+                        onLongPress: () {
+                          _showNeonAccountOffer();
+                        },
+                        icon: ServiceIcon(
+                          color: AppTheme.colorsOf(context).colorful04,
+                          iconColor: AppTheme.colorsOf(context).background01,
+                          icon: Icons.cloud,
+                        ),
+                      );
+                    },
+                  ),
+                  // ServiceCard(
+                  //   title: 'Калькулятор БРС',
+                  //   onTap: () {
+                  //     context.go('/services/rating-system-calculator');
+                  //   },
+                  //   icon: ServiceIcon(
+                  //     color: AppTheme.colors.colorful02,
+                  //     iconColor: AppTheme.colors.background01,
+                  //     icon: Icons.calculate,
+                  //   ),
+                  // ),
+                  ServiceCard(
+                    title: 'Бюро находок',
+                    url: 'https://finds.mirea.ru/',
+                    icon: ServiceIcon(
+                      color: AppTheme.colorsOf(context).colorful06,
+                      iconColor: AppTheme.colorsOf(context).background01,
+                      icon: Icons.search,
+                    ),
+                    launchMode: LaunchMode.externalApplication,
+                    description: 'Найди свои вещи',
+                  ),
+                  ServiceCard(
+                    title: 'Траектория обучения',
+                    url: 'https://t.me/learning_roadmap_bot',
+                    icon: ServiceIcon(
+                      color: AppTheme.colorsOf(context).colorful05,
+                      iconColor: AppTheme.colorsOf(context).background01,
+                      icon: Icons.timeline,
+                    ),
+                    launchMode: LaunchMode.externalApplication,
+                  ),
+                  ServiceCard(
+                    title: 'Форум',
+                    url: 'https://mirea.ninja/',
+                    icon: ServiceIcon(
+                      color: AppTheme.colorsOf(context).colorful01,
+                      iconColor: AppTheme.colorsOf(context).background01,
+                      icon: Icons.forum,
+                    ),
+                    launchMode: LaunchMode.externalApplication,
+                    description: 'Форум студентов МИРЭА',
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 24),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    "Обсуждаемое",
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      launchUrlString('https://mirea.ninja/top', mode: LaunchMode.externalApplication);
+                    },
+                    child: const Text('Все'),
+                  ),
+                ],
+              ),
+            ),
+            const TopTopicsView(),
+            const SizedBox(height: 24),
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16.0),
+              child: Text(
+                "Сообщества",
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: Column(
                 children: [
                   CommunityCard(
                     title: 'Mirea Ninja',
@@ -255,9 +278,10 @@ class _ServicesViewState extends State<ServicesView> {
                 ],
               ),
             ),
-          ),
-          const SizedBox(height: 16),
-        ],
+            const SizedBox(height: 16),
+            const ActivityCalendarGraph(),
+          ],
+        ),
       ),
     );
   }

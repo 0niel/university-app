@@ -58,7 +58,7 @@ class ForumMemberModel extends ForumMember {
         "flair_url": flairUrl,
         "trust_level": trustLevel,
         "title": title,
-        "last_posted_at": lastPostedAt == null ? null : lastPostedAt!.toIso8601String(),
+        "last_posted_at": lastPostedAt?.toIso8601String(),
         "last_seen_at": lastSeenAt.toIso8601String(),
         "added_at": addedAt.toIso8601String(),
       };

@@ -24,6 +24,14 @@ packages:
       relative: true
     source: path
     version: "0.1.0+1"
+  activity_calendar:
+    dependency: "direct main"
+    description:
+      name: activity_calendar
+      sha256: "32f7ff265230f35e7d224ee3b990c6427ad82796fdf68fc43e7795887cbaad72"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.1"
   adaptive_theme:
     dependency: "direct main"
     description:
@@ -259,10 +267,10 @@ packages:
     dependency: transitive
     description:
       name: camera_platform_interface
-      sha256: fceb2c36038b6392317b1d5790c6ba9e6ca9f1da3031181b8bea03882bf9387a
+      sha256: a250314a48ea337b35909a4c9d5416a208d736dcb01d0b02c6af122be66660b0
       url: "https://pub.dev"
     source: hosted
-    version: "2.7.3"
+    version: "2.7.4"
   camera_web:
     dependency: transitive
     description:
@@ -542,6 +550,20 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "5.4.1"
+  discourse_api_client:
+    dependency: "direct main"
+    description:
+      path: "packages/discourse_api_client"
+      relative: true
+    source: path
+    version: "0.1.0+1"
+  discourse_repository:
+    dependency: "direct main"
+    description:
+      path: "packages/discourse_repository"
+      relative: true
+    source: path
+    version: "1.0.0+1"
   dismissible_page:
     dependency: "direct main"
     description:
@@ -957,10 +979,10 @@ packages:
     dependency: "direct main"
     description:
       name: flutter_markdown
-      sha256: "5b24061317f850af858ef7151dadbb6eb77c1c449c954c7bb064e8a5e0e7d81f"
+      sha256: a64c5323ac83ed2b7940d2b6288d160aa1753ff271ba9d9b2a86770414aa3eab
       url: "https://pub.dev"
     source: hosted
-    version: "0.6.20"
+    version: "0.6.20+1"
   flutter_material_design_icons:
     dependency: transitive
     description:
@@ -1135,10 +1157,10 @@ packages:
     dependency: "direct dev"
     description:
       name: fvm
-      sha256: b5a4324846cc3c0164881e77465bf71e12b473a2970b0ac735e3d7ef3c343846
+      sha256: "70f30527135c33242503577b90bea3da4460f8d39c16e9b5771d1cde92ad0e0f"
       url: "https://pub.dev"
     source: hosted
-    version: "3.0.7"
+    version: "3.0.11"
   get:
     dependency: "direct main"
     description:
@@ -1222,10 +1244,10 @@ packages:
     dependency: transitive
     description:
       name: hotreloader
-      sha256: "728c0613556c1d153f7e7f4a367cffacc3f5a677d7f6497a1c2b35add4e6dacf"
+      sha256: ed56fdc1f3a8ac924e717257621d09e9ec20e308ab6352a73a50a1d7a4d9158e
       url: "https://pub.dev"
     source: hosted
-    version: "3.0.6"
+    version: "4.2.0"
   html:
     dependency: transitive
     description:
@@ -1350,10 +1372,10 @@ packages:
     dependency: transitive
     description:
       name: image_picker_platform_interface
-      sha256: fa4e815e6fcada50e35718727d83ba1c92f1edf95c0b4436554cec301b56233b
+      sha256: "3d2c323daea9d60608f1caf30be32a938916f4975434b8352e6f73dae496da38"
       url: "https://pub.dev"
     source: hosted
-    version: "2.9.3"
+    version: "2.9.4"
   image_picker_windows:
     dependency: transitive
     description:
@@ -1701,7 +1723,7 @@ packages:
     description:
       path: "."
       ref: HEAD
-      resolved-ref: "4d4d15e770f0589a8a02bfe9000c3e38dbf34d13"
+      resolved-ref: "968cbe4897afb11ebfbf810f09e41a14164ed84f"
       url: "https://github.com/0niel/oauth2_client.git"
     source: git
     version: "3.2.5"
@@ -2248,10 +2270,10 @@ packages:
     dependency: transitive
     description:
       name: shelf_hotreload
-      sha256: "5e7a68273d64a095384325d769c6a4885ea15c6aafee361098c0d8a5ecb5dcf6"
+      sha256: d7099618b18d3c63ba5272491c1812c306629495129ef9996115f0417902f963
       url: "https://pub.dev"
     source: hosted
-    version: "1.4.0"
+    version: "1.5.0"
   shelf_packages_handler:
     dependency: transitive
     description:

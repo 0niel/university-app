@@ -120,6 +120,7 @@ class _SchedulePageState extends State<SchedulePage> {
 
                     const maxLessonCountInDay = 6;
                     return ListView.builder(
+                      shrinkWrap: true,
                       itemCount: maxLessonCountInDay,
                       itemBuilder: (context, index) {
                         final lessons = List<LessonSchedulePart>.from(

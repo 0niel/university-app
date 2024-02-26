@@ -1,10 +1,10 @@
 // This is a generated file; do not edit or check into version control.
-FLUTTER_ROOT=/mnt/c/src/flutter
-FLUTTER_APPLICATION_PATH=/mnt/c/Users/foran/Desktop/Sources/rtu_mirea_mobile
+FLUTTER_ROOT=C:\Users\foran\fvm\versions\3.19.0
+FLUTTER_APPLICATION_PATH=C:\Users\foran\Desktop\university-app
 COCOAPODS_PARALLEL_CODE_SIGN=true
 FLUTTER_BUILD_DIR=build
-FLUTTER_BUILD_NAME=1.5.0
-FLUTTER_BUILD_NUMBER=79
+FLUTTER_BUILD_NAME=1.5.1
+FLUTTER_BUILD_NUMBER=81
 DART_OBFUSCATION=false
 TRACK_WIDGET_CREATION=true
 TREE_SHAKE_ICONS=false

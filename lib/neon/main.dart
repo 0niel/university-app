@@ -17,7 +17,6 @@ import 'package:neon_framework/src/storage/storage_manager.dart';
 import 'package:neon_framework/src/theme/neon.dart';
 import 'package:neon_framework/src/utils/global_options.dart';
 import 'package:neon_framework/src/utils/provider.dart';
-import 'package:neon_framework/src/utils/request_manager.dart';
 import 'package:neon_framework/src/utils/user_agent.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';

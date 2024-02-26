@@ -3,6 +3,8 @@ import 'package:analytics_repository/analytics_repository.dart';
 import 'package:built_collection/built_collection.dart';
 import 'package:community_repository/community_repository.dart';
 import 'package:dio/dio.dart';
+import 'package:discourse_api_client/discourse_api_client.dart';
+import 'package:discourse_repository/discourse_repository.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -38,7 +40,6 @@ import 'package:rtu_mirea_app/schedule/bloc/schedule_bloc.dart';
 import 'package:rtu_mirea_app/service_locator.dart' as dependency_injection;
 import 'package:rtu_mirea_app/stories/bloc/stories_bloc.dart';
 import 'package:sentry_dio/sentry_dio.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:university_app_server_api/client.dart';
 import 'package:url_strategy/url_strategy.dart';
 import 'common/constants.dart';
@@ -60,7 +61,6 @@ import 'package:neon_framework/l10n/localizations.dart' as neon_localizations;
 import 'package:neon_framework/theme.dart' as neon_theme;
 import 'package:neon_framework/src/theme/theme.dart' as app_neon_theme;
 import 'package:neon_framework/src/theme/server.dart' as neon_server_theme;
-import 'package:flutter/foundation.dart' show TargetPlatform;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -81,8 +81,8 @@ Future<void> main() async {
     // await secureStorage.deleteAll();
 
     // // Clear local dota
-    var prefs = getIt<SharedPreferences>();
-    await prefs.clear();
+    // var prefs = getIt<SharedPreferences>();
+    // await prefs.clear();
 
     // // Clear oauth tokens
     // var lksOauth2 = getIt<LksOauth2>();
@@ -173,6 +173,9 @@ class App extends StatelessWidget {
     ]);
 
     final apiClient = ApiClient();
+    final discourseApiClient = DiscourseApiClient(
+      baseUrl: 'https://mirea.ninja',
+    );
 
     return MultiRepositoryProvider(
       providers: [
@@ -182,6 +185,7 @@ class App extends StatelessWidget {
         RepositoryProvider.value(
           value: StoriesRepositoryImpl(remoteDataSource: getIt<StrapiRemoteData>()),
         ),
+        RepositoryProvider.value(value: DiscourseRepository(apiClient: discourseApiClient)),
       ],
       child: MultiBlocProvider(
         providers: [
