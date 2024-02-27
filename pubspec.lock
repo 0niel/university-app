@@ -585,7 +585,7 @@ packages:
     description:
       path: "packages/dynamite/dynamite_runtime"
       ref: HEAD
-      resolved-ref: "4e8ee087a8e35a8eb057c0267716f457b6a6e151"
+      resolved-ref: "923cfa2489f13f00cbda357a3e69970ce660ec47"
       url: "https://github.com/0niel/neon.git"
     source: git
     version: "0.2.0"
@@ -658,7 +658,7 @@ packages:
     description:
       path: "packages/file_icons"
       ref: HEAD
-      resolved-ref: "4e8ee087a8e35a8eb057c0267716f457b6a6e151"
+      resolved-ref: "923cfa2489f13f00cbda357a3e69970ce660ec47"
       url: "https://github.com/0niel/neon.git"
     source: git
     version: "1.0.0"
@@ -1613,7 +1613,7 @@ packages:
     description:
       path: "packages/neon/neon_dashboard"
       ref: HEAD
-      resolved-ref: "4e8ee087a8e35a8eb057c0267716f457b6a6e151"
+      resolved-ref: "923cfa2489f13f00cbda357a3e69970ce660ec47"
       url: "https://github.com/0niel/neon.git"
     source: git
     version: "1.0.0"
@@ -1622,7 +1622,7 @@ packages:
     description:
       path: "packages/neon/neon_files"
       ref: HEAD
-      resolved-ref: "4e8ee087a8e35a8eb057c0267716f457b6a6e151"
+      resolved-ref: "923cfa2489f13f00cbda357a3e69970ce660ec47"
       url: "https://github.com/0niel/neon.git"
     source: git
     version: "1.0.0"
@@ -1631,7 +1631,7 @@ packages:
     description:
       path: "packages/neon_framework"
       ref: HEAD
-      resolved-ref: "4e8ee087a8e35a8eb057c0267716f457b6a6e151"
+      resolved-ref: "923cfa2489f13f00cbda357a3e69970ce660ec47"
       url: "https://github.com/0niel/neon.git"
     source: git
     version: "1.0.0"
@@ -1640,7 +1640,7 @@ packages:
     description:
       path: "packages/neon_lints"
       ref: HEAD
-      resolved-ref: "4e8ee087a8e35a8eb057c0267716f457b6a6e151"
+      resolved-ref: "923cfa2489f13f00cbda357a3e69970ce660ec47"
       url: "https://github.com/0niel/neon.git"
     source: git
     version: "1.0.0"
@@ -1649,7 +1649,7 @@ packages:
     description:
       path: "packages/neon/neon_news"
       ref: HEAD
-      resolved-ref: "4e8ee087a8e35a8eb057c0267716f457b6a6e151"
+      resolved-ref: "923cfa2489f13f00cbda357a3e69970ce660ec47"
       url: "https://github.com/0niel/neon.git"
     source: git
     version: "1.0.0"
@@ -1658,7 +1658,7 @@ packages:
     description:
       path: "packages/neon/neon_notes"
       ref: HEAD
-      resolved-ref: "4e8ee087a8e35a8eb057c0267716f457b6a6e151"
+      resolved-ref: "923cfa2489f13f00cbda357a3e69970ce660ec47"
       url: "https://github.com/0niel/neon.git"
     source: git
     version: "1.0.0"
@@ -1667,7 +1667,7 @@ packages:
     description:
       path: "packages/neon/neon_notifications"
       ref: HEAD
-      resolved-ref: "4e8ee087a8e35a8eb057c0267716f457b6a6e151"
+      resolved-ref: "923cfa2489f13f00cbda357a3e69970ce660ec47"
       url: "https://github.com/0niel/neon.git"
     source: git
     version: "1.0.0"
@@ -1684,7 +1684,7 @@ packages:
     description:
       path: "packages/nextcloud"
       ref: HEAD
-      resolved-ref: "4e8ee087a8e35a8eb057c0267716f457b6a6e151"
+      resolved-ref: "923cfa2489f13f00cbda357a3e69970ce660ec47"
       url: "https://github.com/0niel/neon.git"
     source: git
     version: "5.0.2"
@@ -2332,7 +2332,7 @@ packages:
     description:
       path: "packages/sort_box"
       ref: HEAD
-      resolved-ref: "4e8ee087a8e35a8eb057c0267716f457b6a6e151"
+      resolved-ref: "923cfa2489f13f00cbda357a3e69970ce660ec47"
       url: "https://github.com/0niel/neon.git"
     source: git
     version: "1.0.0"
