@@ -25,8 +25,7 @@ class ScheduleBloc extends HydratedBloc<ScheduleEvent, ScheduleState> {
     on<ScheduleRequested>(_onScheduleRequested, transformer: sequential());
     on<TeacherScheduleRequested>(_onTeacherScheduleRequested, transformer: sequential());
     on<ClassroomScheduleRequested>(_onClassroomScheduleRequested, transformer: sequential());
-    on<ScheduleResumed>(_onScheduleResumed, transformer: droppable());
-    on<ScheduleRefreshRequested>(_onScheduleRefreshRequested, transformer: sequential());
+    on<RefreshSelectedScheduleData>(_onScheduleResumed, transformer: droppable());
     on<ScheduleSetDisplayMode>(_onScheduleSetDisplayMode);
     on<SetSelectedSchedule>(_onSetSelectedSchedule);
     on<DeleteSchedule>(_onRemoveSavedSchedule);
@@ -123,6 +122,8 @@ class ScheduleBloc extends HydratedBloc<ScheduleEvent, ScheduleState> {
     Emitter<ScheduleState> emit,
   ) async {
     emit(state.copyWith(selectedSchedule: event.selectedSchedule));
+    // Add on Resume event to refresh schedule data.
+    add(const RefreshSelectedScheduleData());
   }
 
   FutureOr<void> _onScheduleSetDisplayMode(
@@ -132,71 +133,8 @@ class ScheduleBloc extends HydratedBloc<ScheduleEvent, ScheduleState> {
     emit(state.copyWith(isMiniature: event.isMiniature));
   }
 
-  Future<void> _onScheduleRefreshRequested(
-    ScheduleRefreshRequested event,
-    Emitter<ScheduleState> emit,
-  ) async {
-    emit(state.copyWith(status: ScheduleStatus.loading));
-
-    try {
-      final selected = state.selectedSchedule;
-
-      if (selected == null) {
-        emit(state.copyWith(status: ScheduleStatus.failure));
-        return;
-      }
-
-      if (selected is SelectedGroupSchedule) {
-        final response = await _scheduleRepository.getSchedule(
-          group: selected.group.uid ?? selected.group.name,
-        );
-
-        emit(
-          state.copyWith(
-            status: ScheduleStatus.loaded,
-            selectedSchedule: SelectedGroupSchedule(
-              group: selected.group,
-              schedule: response.data,
-            ),
-          ),
-        );
-      } else if (selected is SelectedTeacherSchedule) {
-        final response = await _scheduleRepository.getTeacherSchedule(
-          teacher: selected.teacher.uid ?? selected.teacher.name,
-        );
-
-        emit(
-          state.copyWith(
-            status: ScheduleStatus.loaded,
-            selectedSchedule: SelectedTeacherSchedule(
-              teacher: selected.teacher,
-              schedule: response.data,
-            ),
-          ),
-        );
-      } else if (selected is SelectedClassroomSchedule) {
-        final response = await _scheduleRepository.getClassroomSchedule(
-          classroom: selected.classroom.uid ?? selected.classroom.name,
-        );
-
-        emit(
-          state.copyWith(
-            status: ScheduleStatus.loaded,
-            selectedSchedule: SelectedClassroomSchedule(
-              classroom: selected.classroom,
-              schedule: response.data,
-            ),
-          ),
-        );
-      }
-    } catch (error, stackTrace) {
-      emit(state.copyWith(status: ScheduleStatus.failure));
-      addError(error, stackTrace);
-    }
-  }
-
   FutureOr<void> _onScheduleResumed(
-    ScheduleResumed event,
+    RefreshSelectedScheduleData event,
     Emitter<ScheduleState> emit,
   ) async {
     if (state.selectedSchedule != null) {

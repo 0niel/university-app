@@ -28,6 +28,7 @@ class ScheduleState extends Equatable {
 
   factory ScheduleState.fromJson(Map<String, dynamic> json) => _$ScheduleStateFromJson(json);
 
+  @JsonKey(includeToJson: false, includeFromJson: false)
   final ScheduleStatus status;
 
   final List<(UID, Classroom, List<SchedulePart>)> classroomsSchedule;

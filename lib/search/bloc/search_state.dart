@@ -15,27 +15,28 @@ enum SearchType {
 @JsonSerializable()
 class SearchState extends Equatable {
   const SearchState({
-    required this.groups,
-    required this.teachers,
-    required this.classrooms,
-    required this.status,
-    required this.searchHisoty,
-  });
+    SearchGroupsResponse? groups,
+    SearchTeachersResponse? teachers,
+    SearchClassroomsResponse? classrooms,
+    List<String>? searchHisoty,
+    SearchStatus? status,
+  })  : groups = groups ?? const SearchGroupsResponse(results: []),
+        teachers = teachers ?? const SearchTeachersResponse(results: []),
+        classrooms = classrooms ?? const SearchClassroomsResponse(results: []),
+        searchHisoty = searchHisoty ?? const [],
+        status = status ?? SearchStatus.initial;
 
-  const SearchState.initial()
-      : this(
-          groups: const SearchGroupsResponse(results: []),
-          teachers: const SearchTeachersResponse(results: []),
-          classrooms: const SearchClassroomsResponse(results: []),
-          searchHisoty: const [],
-          status: SearchStatus.initial,
-        );
+  const SearchState.initial() : this();
 
+  @JsonKey(includeToJson: false, includeFromJson: false)
   final SearchGroupsResponse groups;
+  @JsonKey(includeToJson: false, includeFromJson: false)
   final SearchTeachersResponse teachers;
+  @JsonKey(includeToJson: false, includeFromJson: false)
   final SearchClassroomsResponse classrooms;
-  final List<String> searchHisoty;
+  @JsonKey(includeToJson: false, includeFromJson: false)
   final SearchStatus status;
+  final List<String> searchHisoty;
 
   factory SearchState.fromJson(Map<String, dynamic> json) => _$SearchStateFromJson(json);
 

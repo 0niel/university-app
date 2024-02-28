@@ -4,10 +4,8 @@ import 'package:go_router/go_router.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:rtu_mirea_app/presentation/typography.dart';
 import 'package:rtu_mirea_app/schedule/models/models.dart';
+import 'package:rtu_mirea_app/schedule/schedule.dart';
 import 'package:university_app_server_api/client.dart';
-
-import '../bloc/schedule_bloc.dart';
-import 'widgets.dart';
 
 class SchedulesList extends StatelessWidget {
   const SchedulesList({Key? key}) : super(key: key);
@@ -69,14 +67,7 @@ class SchedulesList extends StatelessWidget {
                   text: _getNameBySelectedSchedule(state.selectedSchedule!),
                   isSelected: true,
                   onRefreshPressed: () => context.read<ScheduleBloc>().add(
-                        ScheduleRefreshRequested(
-                          identifier: _getIdentifierBySelectedSchedule(
-                            state.selectedSchedule!,
-                          ),
-                          target: SelectedSchedule.toScheduleTarget(
-                            state.selectedSchedule!.type,
-                          ),
-                        ),
+                        const RefreshSelectedScheduleData(),
                       ),
                 ),
               ...state.groupsSchedule.where((el) => el.$1 != _getSelectedScheduleUid(state.selectedSchedule)).map(
@@ -129,6 +120,7 @@ class SchedulesList extends StatelessWidget {
                                   ),
                                 ),
                               );
+
                           context.pop();
                         }),
                   ),

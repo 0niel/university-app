@@ -198,7 +198,7 @@ class App extends StatelessWidget {
           BlocProvider<ScheduleBloc>(
             create: (context) => ScheduleBloc(
               scheduleRepository: context.read<schedule_repository.ScheduleRepository>(),
-            )..add(const ScheduleResumed()),
+            )..add(const RefreshSelectedScheduleData()),
           ),
           BlocProvider<StoriesBloc>(
             create: (context) => StoriesBloc(

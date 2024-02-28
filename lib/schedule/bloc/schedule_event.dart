@@ -76,21 +76,8 @@ class TeacherScheduleRequested extends ScheduleEvent with AnalyticsEventMixin {
   List<Object> get props => [teacher];
 }
 
-class ScheduleRefreshRequested extends ScheduleEvent {
-  const ScheduleRefreshRequested({
-    required this.identifier,
-    required this.target,
-  });
-
-  final UID identifier;
-  final ScheduleTarget target;
-
-  @override
-  List<Object> get props => [identifier, target];
-}
-
-class ScheduleResumed extends ScheduleEvent {
-  const ScheduleResumed();
+class RefreshSelectedScheduleData extends ScheduleEvent {
+  const RefreshSelectedScheduleData();
 
   @override
   List<Object> get props => [];
