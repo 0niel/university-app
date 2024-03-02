@@ -4,6 +4,8 @@ import 'package:university_app_server_api/api.dart';
 
 Handler middleware(Handler handler) {
   return handler
+      .use(loggerProvider())
+      .use(redisProvider())
       .use(requestLogger())
       .use(userProvider())
       .use(newsDataSourceProvider())

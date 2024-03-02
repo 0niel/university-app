@@ -1,0 +1,71 @@
+version: "3.9"
+
+services:
+  traefik:
+    image: traefik:v2.9
+    command:
+      - --accesslog=true
+      - --log.level=INFO
+      - --providers.docker=true
+      - --providers.docker.exposedByDefault=false
+      - --providers.docker.constraints=Label(`traefik.constraint-label-stack`,`api`)
+      - --entrypoints.api_web.address=:80
+      - --entrypoints.api_websecure.address=:443
+      # LetsEncrypt Staging Server
+      # - --certificatesResolvers.letsencrypt.acme.caServer=https://acme-staging-v02.api.letsencrypt.org/directory
+      - --certificatesresolvers.letsencrypt.acme.httpchallenge=true
+      - --certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=api_web
+      - --certificatesresolvers.letsencrypt.acme.email=${EMAIL}
+      - --certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json
+    restart: unless-stopped
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./data/letsencrypt:/letsencrypt
+    depends_on:
+      - backend
+    networks:
+      - gateway
+      - application
+
+  backend:
+    build: /build
+    networks:
+      - application
+      - default
+    env_file:
+      - .env
+    labels:
+      - traefik.enable=true
+      - traefik.constraint-label-stack=api
+      - traefik.docker.network=application
+      - traefik.http.services.api.loadbalancer.server.port=8080
+      #http
+      - traefik.http.routers.api_http.entrypoints=api_web
+      - traefik.http.routers.api_http.rule=(Host(`${API_HOST}`) && PathPrefix(`/api`))
+      - traefik.http.routers.api_http.service=api
+      - traefik.http.routers.api_http.middlewares=api_redirect_https
+      # https
+      - traefik.http.middlewares.api_redirect_https.redirectscheme.scheme=https
+      - traefik.http.middlewares.api_redirect_https.redirectscheme.permanent=true
+      - traefik.http.routers.api_https.entrypoints=api_websecure
+      - traefik.http.routers.api_https.rule=(Host(`${API_HOST}`) && PathPrefix(`/api`))
+      - traefik.http.routers.api_https.service=api
+      - traefik.http.routers.api_https.tls=true
+      - traefik.http.routers.api_https.tls.certresolver=letsencrypt
+
+  redis:
+    image: bitnami/redis:latest
+    networks:
+      - application
+      - default
+    labels:
+      - traefik.enable=false
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+
+networks:
+  gateway:
+  application:

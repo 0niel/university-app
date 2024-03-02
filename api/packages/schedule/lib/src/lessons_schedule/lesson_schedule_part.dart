@@ -113,4 +113,13 @@ class LessonSchedulePart with EquatableMixin implements SchedulePart {
         dates,
         groups,
       ];
+
+  /// Returns `true` if the lesson is a session lesson (exam, credit, etc.)
+  bool get isSessionLesson {
+    return lessonType == LessonType.exam ||
+        lessonType == LessonType.credit ||
+        lessonType == LessonType.courseWork ||
+        lessonType == LessonType.courseProject ||
+        lessonType == LessonType.consultation;
+  }
 }

@@ -32,13 +32,13 @@ final schedules = <SchedulePart>[
       endTime: const TimeOfDay(hour: 10, minute: 30),
     ),
     dates: [
-      DateTime(2023, 12, 1),
+      DateTime(2023, 12),
     ],
   ),
   HolidaySchedulePart(
     title: 'Новый год',
     dates: [
-      DateTime(2023, 1, 1),
+      DateTime(2023),
     ],
   ),
 ];

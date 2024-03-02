@@ -5,3 +5,4 @@ analyzer:
 linter:
   rules:
     file_names: false
+    lines_longer_than_80_chars: false

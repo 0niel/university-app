@@ -73,7 +73,7 @@ class RtuMireaScheduleDataSource implements ScheduleDataSource {
         )
         .toList()
         .map(
-          (searchItem) => parseClassroomsFromLocation(searchItem.fullTitle).map(
+          (searchItem) => getClassroomsFromLocationText(searchItem.fullTitle).map(
             (classroom) => classroom.copyWith(
               uid: searchItem.id.toString(),
             ),

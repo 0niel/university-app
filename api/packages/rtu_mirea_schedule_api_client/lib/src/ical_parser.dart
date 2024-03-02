@@ -2,6 +2,7 @@ import 'package:collection/collection.dart';
 import 'package:icalendar_parser/icalendar_parser.dart';
 import 'package:rrule/rrule.dart';
 import 'package:rtu_mirea_schedule_api_client/src/fields_data_parsers.dart';
+import 'package:rtu_mirea_schedule_api_client/src/ical_custom_fields_registry.dart';
 import 'package:rtu_mirea_schedule_api_client/src/lessons_bells.dart';
 import 'package:schedule/schedule.dart';
 
@@ -49,130 +50,7 @@ class ICalParser {
   }
 
   void _registerCustomFields() {
-    if (!ICalendar.objects.containsKey('RDATE')) {
-      ICalendar.registerField(
-        field: 'RDATE',
-        function: (value, params, event, lastEvent) {
-          try {
-            final datesString = value.split(',');
-
-            final dates = datesString.map((e) {
-              final date = IcsDateTime(dt: e);
-
-              return date;
-            }).toList();
-
-            lastEvent['RDATE'] = dates;
-
-            return lastEvent;
-          } catch (error, stackTrace) {
-            Error.throwWithStackTrace(
-              InvalidICalendarDataException(error: error),
-              stackTrace,
-            );
-          }
-        },
-      );
-    }
-
-    if (!ICalendar.objects.containsKey('X-META-AUDITORIUM')) {
-      ICalendar.registerField(
-        field: 'X-META-AUDITORIUM',
-        function: (value, params, event, lastEvent) {
-          try {
-            lastEvent['X-META-AUDITORIUM'] = [
-              ...(lastEvent['X-META-AUDITORIUM'] ?? []) as Iterable,
-              value,
-            ];
-
-            return lastEvent;
-          } catch (error, stackTrace) {
-            Error.throwWithStackTrace(
-              InvalidICalendarDataException(error: error),
-              stackTrace,
-            );
-          }
-        },
-      );
-    }
-
-    if (!ICalendar.objects.containsKey('X-META-DISCIPLINE')) {
-      ICalendar.registerField(
-        field: 'X-META-DISCIPLINE',
-        function: (value, params, event, lastEvent) {
-          try {
-            lastEvent['X-META-DISCIPLINE'] = value;
-
-            return lastEvent;
-          } catch (error, stackTrace) {
-            Error.throwWithStackTrace(
-              InvalidICalendarDataException(error: error),
-              stackTrace,
-            );
-          }
-        },
-      );
-    }
-
-    if (!ICalendar.objects.containsKey('X-META-GROUP')) {
-      ICalendar.registerField(
-        field: 'X-META-GROUP',
-        function: (value, params, event, lastEvent) {
-          try {
-            lastEvent['X-META-GROUP'] = [
-              ...(lastEvent['X-META-GROUP'] ?? []) as Iterable,
-              value,
-            ];
-
-            return lastEvent;
-          } catch (error, stackTrace) {
-            Error.throwWithStackTrace(
-              InvalidICalendarDataException(error: error),
-              stackTrace,
-            );
-          }
-        },
-      );
-    }
-
-    if (!ICalendar.objects.containsKey('X-META-LESSON_TYPE')) {
-      ICalendar.registerField(
-        field: 'X-META-LESSON_TYPE',
-        function: (value, params, event, lastEvent) {
-          try {
-            lastEvent['X-META-LESSON_TYPE'] = value;
-
-            return lastEvent;
-          } catch (error, stackTrace) {
-            Error.throwWithStackTrace(
-              InvalidICalendarDataException(error: error),
-              stackTrace,
-            );
-          }
-        },
-      );
-    }
-
-    if (!ICalendar.objects.containsKey('X-META-TEACHER')) {
-      ICalendar.registerField(
-        field: 'X-META-TEACHER',
-        function: (value, params, event, lastEvent) {
-          try {
-            lastEvent['X-META-TEACHER'] = [
-              ...(lastEvent['X-META-TEACHER'] ?? []) as Iterable,
-              value,
-            ];
-
-            return lastEvent;
-          } catch (error, stackTrace) {
-            Error.throwWithStackTrace(
-              InvalidICalendarDataException(error: error),
-              stackTrace,
-            );
-          }
-        },
-      );
-    }
+    CustomFieldsRegistry.register();
   }
 
   final String _data;
@@ -217,11 +95,11 @@ class ICalParser {
         data['x-meta-auditorium'] as Iterable<dynamic>? ?? [],
       );
 
-      final classrooms = location.map(parseClassroomsFromLocation).flattened.toList();
+      final classrooms = location.map(getClassroomsFromLocationText).flattened.toList();
 
       final type = data['x-meta-lesson_type'] as String?;
 
-      final lessonType = parseSubjectAndLessonTypeFromSummary(type ?? '');
+      final lessonType = getLessonTypeFromText(type ?? '');
 
       final schedulePart = LessonSchedulePart(
         subject: discipline,
@@ -240,64 +118,7 @@ class ICalParser {
       scheduleParts.add(schedulePart);
     }
 
-    final exams = <SchedulePart>[];
-    var lessons = <SchedulePart>[];
-
-    for (final schedulePart in scheduleParts) {
-      if (_isSessionLesson(schedulePart)) {
-        exams.add(schedulePart);
-      } else {
-        lessons.add(schedulePart);
-      }
-    }
-
-    final excludeDates = [
-      DateTime(2023, 12, 23),
-      DateTime(2023, 12, 24),
-      DateTime(2023, 12, 25),
-      DateTime(2023, 12, 26),
-      DateTime(2023, 12, 27),
-      DateTime(2023, 12, 28),
-      DateTime(2023, 12, 29),
-      DateTime(2023, 12, 30),
-      DateTime(2023, 12, 31),
-      DateTime(2024),
-      DateTime(2024, 1, 2),
-      DateTime(2024, 1, 3),
-      DateTime(2024, 1, 4),
-      DateTime(2024, 1, 5),
-      DateTime(2024, 1, 6),
-      DateTime(2024, 1, 7),
-      DateTime(2024, 1, 8),
-    ];
-
-    lessons = lessons.map((lesson) {
-      if (lesson is LessonSchedulePart) {
-        final lessonDates = lesson.dates;
-
-        final dates = lessonDates.where((date) {
-          return !excludeDates.any((excludeDate) => date.isSameDate(excludeDate));
-        }).toList();
-
-        return lesson.copyWith(dates: dates);
-      } else {
-        return lesson;
-      }
-    }).toList();
-
-    return lessons..addAll(exams);
-  }
-
-  bool _isSessionLesson(SchedulePart schedulePart) {
-    if (schedulePart is LessonSchedulePart) {
-      return schedulePart.lessonType == LessonType.exam ||
-          schedulePart.lessonType == LessonType.credit ||
-          schedulePart.lessonType == LessonType.courseWork ||
-          schedulePart.lessonType == LessonType.courseProject ||
-          schedulePart.lessonType == LessonType.consultation;
-    }
-
-    return false;
+    return scheduleParts;
   }
 
   EventDatesAndTime _getEventDatesAndTime(Map<String, dynamic> data) {

@@ -22,10 +22,9 @@ class RtuMireaScheduleApiRequestFailure implements Exception {
 }
 
 /// {@template rtu_mirea_schedule_api_client}
-/// A client for the RTU MIREA schedule API service that
-/// is powered by the `schedule-of.mirea.ru` website. This client
-/// is used to search for groups, teachers, and rooms, and to get
-/// the schedule in the iCal format.
+/// A client for the RTU MIREA schedule API service that is powered by the
+/// `schedule-of.mirea.ru` website. This client is used to search for groups,
+/// teachers, and rooms, and to get the schedule in the iCal format.
 /// {@endtemplate}
 class RtuMireaScheduleApiClient {
   /// {@macro rtu_mirea_schedule_api_client}
