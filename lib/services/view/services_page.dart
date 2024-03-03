@@ -121,37 +121,37 @@ class _ServicesViewState extends State<ServicesView> {
                 scrollDirection: Axis.horizontal,
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 children: [
-                  ServiceCard(
-                    title: 'Тест FCM токена',
-                    icon: ServiceIcon(
-                      color: AppTheme.colorsOf(context).colorful03,
-                      iconColor: AppTheme.colorsOf(context).active,
-                      icon: Icons.notifications,
-                    ),
-                    onLongPress: () {
-                      final firebase = FirebaseMessaging.instance;
-                      firebase.getToken().then((value) {
-                        showDialog(
-                          context: context,
-                          builder: (context) {
-                            return AlertDialog(
-                              title: const Text('FCM токен'),
-                              content: Text(value ?? 'Токен не найден'),
-                              actions: [
-                                TextButton(
-                                  onPressed: () {
-                                    Clipboard.setData(ClipboardData(text: value ?? ''));
-                                    Navigator.of(context).pop();
-                                  },
-                                  child: const Text('Ок'),
-                                ),
-                              ],
-                            );
-                          },
-                        );
-                      });
-                    },
-                  ),
+                  // ServiceCard(
+                  //   title: 'Тест FCM токена',
+                  //   icon: ServiceIcon(
+                  //     color: AppTheme.colorsOf(context).colorful03,
+                  //     iconColor: AppTheme.colorsOf(context).active,
+                  //     icon: Icons.notifications,
+                  //   ),
+                  //   onLongPress: () {
+                  //     final firebase = FirebaseMessaging.instance;
+                  //     firebase.getToken().then((value) {
+                  //       showDialog(
+                  //         context: context,
+                  //         builder: (context) {
+                  //           return AlertDialog(
+                  //             title: const Text('FCM токен'),
+                  //             content: Text(value ?? 'Токен не найден'),
+                  //             actions: [
+                  //               TextButton(
+                  //                 onPressed: () {
+                  //                   Clipboard.setData(ClipboardData(text: value ?? ''));
+                  //                   Navigator.of(context).pop();
+                  //                 },
+                  //                 child: const Text('Ок'),
+                  //               ),
+                  //             ],
+                  //           );
+                  //         },
+                  //       );
+                  //     });
+                  //   },
+                  // ),
                   ServiceCard(
                     title: 'Карта МИРЭА',
                     url: 'https://map.mirea.ru/',
