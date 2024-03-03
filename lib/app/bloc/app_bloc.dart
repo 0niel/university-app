@@ -31,9 +31,9 @@ class AppBloc extends Bloc<AppEvent, AppState> {
 
   void _handleMessage(Emitter<AppState> emit, RemoteMessage message) {
     final data = message.data;
-    final discoursePostId = data['discourse_post_id'];
+    final discoursePostId = data['discourse_post_id'] as String?;
 
-    emit(InteractedMessageRecieved(discoursePostIdToOpen: int.tryParse(discoursePostId)));
+    emit(InteractedMessageRecieved(discoursePostIdToOpen: int.tryParse(discoursePostId ?? '')));
   }
 
   Future<void> _onAppOpened(AppOpened event, Emitter<AppState> emit) async {

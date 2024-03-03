@@ -17,11 +17,14 @@ enum Category {
   /// Уведомления для конкретной группы. Обязательная категория, которую
   /// пользователь не может отключить.
   group,
+
+  development,
 }
 
 const visibleCategoryNames = {
   Category.announcements: 'Объявления',
   Category.scheduleUpdates: 'Обновления расписания',
+  Category.development: 'Для разработчиков',
 };
 
 /// Транслитерирует название группы для использования в качестве названия
@@ -95,6 +98,8 @@ class Topic extends Equatable {
         return 'ScheduleUpdates__${groupName!}';
       case Category.group:
         return groupName!;
+      case Category.development:
+        return 'Development';
     }
   }
 
@@ -106,6 +111,8 @@ class Topic extends Equatable {
         return visibleCategoryNames[Category.scheduleUpdates]!;
       case Category.group:
         return groupName!;
+      case Category.development:
+        return visibleCategoryNames[Category.development]!;
     }
   }
 
