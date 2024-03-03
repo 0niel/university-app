@@ -58,6 +58,25 @@ class DiscourseApiClient {
     return Top.fromJson(body);
   }
 
+  Future<Post> getPost(int id) async {
+    final uri = Uri.parse('$_baseUrl/posts/$id.json');
+    final response = await _httpClient.get(
+      uri,
+      headers: await _getRequestHeaders(),
+    );
+
+    final body = response.json();
+
+    if (response.statusCode != HttpStatus.ok) {
+      throw DiscourseApiRequestFailure(
+        body: body,
+        statusCode: response.statusCode,
+      );
+    }
+
+    return Post.fromJson(body);
+  }
+
   Future<Map<String, String>> _getRequestHeaders() async {
     return <String, String>{
       HttpHeaders.contentTypeHeader: ContentType.json.value,

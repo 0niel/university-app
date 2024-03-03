@@ -11,9 +11,9 @@ User _$UserFromJson(Map<String, dynamic> json) => User(
       username: json['username'] as String,
       name: json['name'] as String?,
       avatarTemplate: json['avatar_template'] as String,
+      trustLevel: json['trust_level'] as int,
       admin: json['admin'] as bool?,
       moderator: json['moderator'] as bool?,
-      trustLevel: json['trust_level'] as int,
       customFields: json['custom_fields'] as Map<String, dynamic>?,
     );
 

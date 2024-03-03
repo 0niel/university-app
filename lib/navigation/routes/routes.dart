@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
+import 'package:rtu_mirea_app/discourse_post_overview/view/view.dart';
 import 'package:rtu_mirea_app/domain/entities/news_item.dart';
 import 'package:rtu_mirea_app/domain/entities/story.dart';
 import 'package:rtu_mirea_app/domain/entities/user.dart';
@@ -143,6 +144,13 @@ GoRouter createRouter() => GoRouter(
                   path: '/services',
                   builder: (context, state) => const ServicesPage(),
                   routes: [
+                    GoRoute(
+                      path: 'discourse-post-overview/:postId',
+                      builder: (context, state) {
+                        final postId = int.parse(state.pathParameters['postId'] ?? '0');
+                        return DiscoursePostOverviewPageView(postId: postId);
+                      },
+                    ),
                     GoRoute(
                       path: 'rating-system-calculator',
                       builder: (context, state) => const RatingSystemCalculatorPage(),

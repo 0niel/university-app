@@ -2,8 +2,8 @@ import 'package:collection/collection.dart';
 import 'package:discourse_repository/discourse_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:rtu_mirea_app/discourse/bloc/discourse_bloc.dart';
-import 'package:rtu_mirea_app/discourse/widgets/widgets.dart';
+import 'package:rtu_mirea_app/top_discussions/bloc/discourse_bloc.dart';
+import 'package:rtu_mirea_app/top_discussions/widgets/widgets.dart';
 
 class TopTopicsView extends StatelessWidget {
   const TopTopicsView({super.key});

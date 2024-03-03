@@ -20,6 +20,10 @@ class GetTopFailure extends DiscourseFailure {
   const GetTopFailure(super.error);
 }
 
+class GetPostFailure extends DiscourseFailure {
+  const GetPostFailure(super.error);
+}
+
 /// {@template discourse_repository}
 /// A repository that manages Discourse community data.
 /// {@endtemplate}
@@ -36,6 +40,14 @@ class DiscourseRepository {
       return await _apiClient.getTop();
     } catch (error, stackTrace) {
       Error.throwWithStackTrace(GetTopFailure(error), stackTrace);
+    }
+  }
+
+  Future<Post> getPost(int id) async {
+    try {
+      return await _apiClient.getPost(id);
+    } catch (error, stackTrace) {
+      Error.throwWithStackTrace(GetPostFailure(error), stackTrace);
     }
   }
 }

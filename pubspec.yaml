@@ -121,6 +121,7 @@ dependencies:
   flutter_html_iframe: ^3.0.0-beta.2
   flutter_html_video: ^3.0.0-beta.2
   flutter_html_svg: ^3.0.0-beta.2
+  flutter_html_table: ^3.0.0-beta.2
 
   # The Font Awesome Icon pack available as Flutter Icons. 
   # Provides 1600 additional icons to use in your apps.
@@ -160,8 +161,6 @@ dependencies:
   syncfusion_flutter_gauges: ^22.2.12
 
   url_launcher: ^6.0.17
-
-  flutter_markdown: ^0.6.9
   
   carousel_slider: ^4.0.0
 
@@ -244,6 +243,8 @@ dependencies:
     path: packages/discourse_api_client
   news_repository:
     path: packages/news_repository
+  logger: ^2.0.2+1
+  flutter_markdown: ^0.6.20+1
 
 dev_dependencies:
   # The "flutter_lints" package below contains a set of recommended lints to

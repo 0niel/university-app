@@ -1,7 +1,9 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:rtu_mirea_app/discourse/view/view.dart';
+import 'package:rtu_mirea_app/top_discussions/view/view.dart';
 import 'package:rtu_mirea_app/neon/bloc/neon_bloc.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:rtu_mirea_app/presentation/typography.dart';
@@ -120,6 +122,37 @@ class _ServicesViewState extends State<ServicesView> {
                 scrollDirection: Axis.horizontal,
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 children: [
+                  ServiceCard(
+                    title: 'Тест FCM токена',
+                    icon: ServiceIcon(
+                      color: AppTheme.colorsOf(context).colorful03,
+                      iconColor: AppTheme.colorsOf(context).active,
+                      icon: Icons.notifications,
+                    ),
+                    onLongPress: () {
+                      final firebase = FirebaseMessaging.instance;
+                      firebase.getToken().then((value) {
+                        showDialog(
+                          context: context,
+                          builder: (context) {
+                            return AlertDialog(
+                              title: const Text('FCM токен'),
+                              content: Text(value ?? 'Токен не найден'),
+                              actions: [
+                                TextButton(
+                                  onPressed: () {
+                                    Clipboard.setData(ClipboardData(text: value ?? ''));
+                                    Navigator.of(context).pop();
+                                  },
+                                  child: const Text('Ок'),
+                                ),
+                              ],
+                            );
+                          },
+                        );
+                      });
+                    },
+                  ),
                   ServiceCard(
                     title: 'Карта МИРЭА',
                     url: 'https://map.mirea.ru/',
@@ -279,7 +312,6 @@ class _ServicesViewState extends State<ServicesView> {
               ),
             ),
             const SizedBox(height: 16),
-            const ActivityCalendarGraph(),
           ],
         ),
       ),
