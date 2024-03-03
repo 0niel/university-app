@@ -25,7 +25,9 @@ void main() {
       test('calls FirebaseMessaging.subscribeToTopic', () async {
         when(
           () => firebaseMessaging.subscribeToTopic(category),
-        ).thenAnswer((_) async {});
+        ).thenAnswer((_) async {
+          return;
+        });
 
         await firebaseNotificationsClient.subscribeToCategory(category);
 
@@ -50,7 +52,9 @@ void main() {
       test('calls FirebaseMessaging.unsubscribeFromTopic', () async {
         when(
           () => firebaseMessaging.unsubscribeFromTopic(category),
-        ).thenAnswer((_) async {});
+        ).thenAnswer((_) async {
+          return;
+        });
 
         await firebaseNotificationsClient.unsubscribeFromCategory(category);
 

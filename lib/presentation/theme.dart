@@ -22,6 +22,11 @@ class AppTheme {
           bodyColor: darkThemeColors.active,
           displayColor: darkThemeColors.active,
         ),
+    textButtonTheme: TextButtonThemeData(
+      style: ButtonStyle(
+        textStyle: MaterialStateProperty.all(AppTextStyle.buttonS),
+      ),
+    ),
     scaffoldBackgroundColor: darkThemeColors.background01,
     appBarTheme: AppBarTheme(
       surfaceTintColor: Colors.transparent,
@@ -122,6 +127,11 @@ class AppTheme {
           bodyColor: lightThemeColors.active,
           displayColor: lightThemeColors.active,
         ),
+    textButtonTheme: TextButtonThemeData(
+      style: ButtonStyle(
+        textStyle: MaterialStateProperty.all(AppTextStyle.buttonS),
+      ),
+    ),
     scaffoldBackgroundColor: lightThemeColors.background01,
     appBarTheme: AppBarTheme(
       elevation: 0,

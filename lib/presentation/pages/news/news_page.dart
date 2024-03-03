@@ -5,7 +5,7 @@ import 'package:rtu_mirea_app/domain/entities/news_item.dart';
 import 'package:rtu_mirea_app/presentation/bloc/news_bloc/news_bloc.dart';
 import 'package:rtu_mirea_app/presentation/widgets/buttons/app_settings_button.dart';
 import 'package:rtu_mirea_app/presentation/widgets/buttons/primary_tab_button.dart';
-import 'package:shimmer/shimmer.dart';
+import 'package:rtu_mirea_app/presentation/widgets/skeleton.dart';
 import 'package:very_good_infinite_list/very_good_infinite_list.dart';
 import 'widgets/news_card.dart';
 import 'widgets/tag_badge.dart';
@@ -304,46 +304,15 @@ class _ShimmerNewsCardLoading extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            Shimmer.fromColors(
-              baseColor: AppTheme.colorsOf(context).background01,
-              highlightColor: AppTheme.colorsOf(context).background02,
-              child: Container(
-                height: 175,
-                decoration: BoxDecoration(
-                  color: AppTheme.colorsOf(context).background02,
-                  borderRadius: BorderRadius.circular(16),
-                ),
-              ),
-            ),
+            const Skeleton(height: 175),
             Padding(
               padding: const EdgeInsets.only(top: 16, bottom: 4),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Shimmer.fromColors(
-                    baseColor: AppTheme.colorsOf(context).background01,
-                    highlightColor: AppTheme.colorsOf(context).background02,
-                    child: Container(
-                      height: 18,
-                      decoration: BoxDecoration(
-                        color: AppTheme.colorsOf(context).background02,
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                    ),
-                  ),
+                  const Skeleton(height: 18),
                   const SizedBox(height: 4),
-                  Shimmer.fromColors(
-                    baseColor: AppTheme.colorsOf(context).background01,
-                    highlightColor: AppTheme.colorsOf(context).background02,
-                    child: Container(
-                      height: 18,
-                      width: MediaQuery.of(context).size.width * 0.4,
-                      decoration: BoxDecoration(
-                        color: AppTheme.colorsOf(context).background02,
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                    ),
-                  ),
+                  Skeleton(height: 18, width: MediaQuery.of(context).size.width * 0.4),
                 ],
               ),
             ),

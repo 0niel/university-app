@@ -12,7 +12,7 @@ publish_to: 'none'
 # In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-version: 1.5.1+84
+version: 1.5.2+85
 
 environment:
   sdk: ">=3.1.1"
@@ -242,6 +242,8 @@ dependencies:
     path: packages/discourse_repository
   discourse_api_client:
     path: packages/discourse_api_client
+  news_repository:
+    path: packages/news_repository
 
 dev_dependencies:
   # The "flutter_lints" package below contains a set of recommended lints to

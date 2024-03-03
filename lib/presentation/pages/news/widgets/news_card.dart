@@ -9,7 +9,7 @@ import 'package:intl/intl.dart';
 import 'package:rtu_mirea_app/presentation/bloc/news_bloc/news_bloc.dart';
 import 'package:rtu_mirea_app/presentation/pages/news/widgets/tag_badge.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
-import 'package:shimmer/shimmer.dart';
+import 'package:rtu_mirea_app/presentation/widgets/image_placeholder.dart';
 import 'package:rtu_mirea_app/presentation/typography.dart';
 
 class NewsCard extends StatelessWidget {
@@ -52,20 +52,7 @@ class NewsCard extends StatelessWidget {
                 loadStateChanged: (ExtendedImageState state) {
                   switch (state.extendedImageLoadState) {
                     case LoadState.loading:
-                      return Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        child: Shimmer.fromColors(
-                          baseColor: AppTheme.colorsOf(context).background03,
-                          highlightColor: AppTheme.colorsOf(context).background03.withOpacity(0.5),
-                          child: Container(
-                            height: double.infinity,
-                            width: double.infinity,
-                            color: AppTheme.colorsOf(context).background03,
-                          ),
-                        ),
-                      );
+                      return const ImagePlaceholder();
 
                     case LoadState.completed:
                       return Container(

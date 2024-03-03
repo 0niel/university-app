@@ -1679,6 +1679,13 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.0"
+  news_repository:
+    dependency: "direct main"
+    description:
+      path: "packages/news_repository"
+      relative: true
+    source: path
+    version: "1.0.0+1"
   nextcloud:
     dependency: "direct overridden"
     description:

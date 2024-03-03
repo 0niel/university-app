@@ -39,7 +39,8 @@ class _ContributorsView extends StatelessWidget {
         if (state.status == ContributorsStatus.loading) {
           return SizedBox(
             height: 177,
-            child: ListView.builder(
+            child: ListView.separated(
+              separatorBuilder: (context, index) => const SizedBox(width: 8),
               physics: const NeverScrollableScrollPhysics(),
               padding: const EdgeInsets.symmetric(horizontal: 24),
               scrollDirection: Axis.horizontal,
