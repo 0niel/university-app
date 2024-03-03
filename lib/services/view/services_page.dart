@@ -9,7 +9,6 @@ import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:rtu_mirea_app/presentation/typography.dart';
 import 'package:rtu_mirea_app/presentation/widgets/bottom_modal_sheet.dart';
 import 'package:rtu_mirea_app/presentation/widgets/buttons/primary_button.dart';
-import 'package:rtu_mirea_app/services/widgets/activity_calendar_graph.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 import '../widgets/widgets.dart';

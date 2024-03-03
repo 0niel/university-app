@@ -8,7 +8,6 @@ import 'package:go_router/go_router.dart';
 import 'package:notifications_repository/notifications_repository.dart';
 import 'package:rtu_mirea_app/app/app.dart';
 import 'package:rtu_mirea_app/domain/repositories/news_repository.dart';
-import 'package:rtu_mirea_app/domain/repositories/stories_repository.dart';
 import 'package:rtu_mirea_app/service_locator.dart';
 import 'package:schedule_repository/schedule_repository.dart';
 import 'package:built_collection/built_collection.dart';
@@ -29,7 +28,6 @@ import 'package:rtu_mirea_app/presentation/bloc/notification_preferences/notific
 
 import 'package:rtu_mirea_app/presentation/bloc/scores_bloc/scores_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/user_bloc/user_bloc.dart';
-import 'package:rtu_mirea_app/navigation/routes/routes.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:rtu_mirea_app/schedule/bloc/schedule_bloc.dart';
 import 'package:rtu_mirea_app/stories/bloc/stories_bloc.dart';
@@ -138,11 +136,9 @@ class App extends StatelessWidget {
                 theme.serverTheme,
                 theme.neonTheme,
               ]);
-              return FirebaseInteractedMessageListener(
-                child: _MaterialApp(
-                  lightTheme: light,
-                  darkTheme: dark,
-                ),
+              return _MaterialApp(
+                lightTheme: light,
+                darkTheme: dark,
               );
             },
           ),
@@ -246,7 +242,7 @@ class _MaterialAppState extends State<_MaterialApp> {
   void initState() {
     super.initState();
 
-    router = createRouter();
+    router = getIt<GoRouter>();
     neonLocalizationsDelegates =
         _neonWrapperKey.currentState!.getNeonLocalizationsDelegates().cast<LocalizationsDelegate<dynamic>>();
   }
@@ -265,24 +261,26 @@ class _MaterialAppState extends State<_MaterialApp> {
             systemNavigationBarIconBrightness:
                 theme.brightness == Brightness.light ? Brightness.light : Brightness.dark));
 
-        return MaterialApp.router(
-          restorationScopeId: "app",
-          localizationsDelegates: [
-            GlobalMaterialLocalizations.delegate,
-            GlobalWidgetsLocalizations.delegate,
-            GlobalCupertinoLocalizations.delegate,
-            ...neonLocalizationsDelegates,
-          ],
-          supportedLocales: const [
-            Locale('en'),
-            Locale('ru'),
-          ],
-          locale: const Locale('ru'),
-          debugShowCheckedModeBanner: false,
-          title: 'Приложение РТУ МИРЭА',
-          routerConfig: router,
-          theme: theme,
-          darkTheme: darkTheme,
+        return FirebaseInteractedMessageListener(
+          child: MaterialApp.router(
+            restorationScopeId: "app",
+            localizationsDelegates: [
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+              ...neonLocalizationsDelegates,
+            ],
+            supportedLocales: const [
+              Locale('en'),
+              Locale('ru'),
+            ],
+            locale: const Locale('ru'),
+            debugShowCheckedModeBanner: false,
+            title: 'Приложение РТУ МИРЭА',
+            routerConfig: router,
+            theme: theme,
+            darkTheme: darkTheme,
+          ),
         );
       },
     );

@@ -6,7 +6,6 @@ part 'post.g.dart';
 class Post {
   Post({
     required this.id,
-    this.name,
     required this.username,
     required this.avatarTemplate,
     required this.createdAt,
@@ -25,19 +24,12 @@ class Post {
     required this.topicId,
     required this.topicSlug,
     required this.displayUsername,
-    this.primaryGroupName,
-    this.flairName,
-    this.flairUrl,
-    this.flairBgColor,
-    this.flairColor,
-    this.flairGroupId,
     required this.version,
     required this.canEdit,
     required this.canDelete,
     required this.canRecover,
     required this.canSeeHiddenPost,
     required this.canWiki,
-    this.userTitle,
     required this.bookmarked,
     required this.raw,
     required this.actionsSummary,
@@ -49,28 +41,36 @@ class Post {
     required this.trustLevel,
     required this.deletedAt,
     required this.userDeleted,
-    this.editReason,
     required this.canViewEditHistory,
     required this.wiki,
-    this.reviewableId,
-    this.reviewableScoreCount,
-    this.reviewableScorePendingCount,
     required this.mentionedUsers,
-    this.event,
     required this.calendarDetails,
-    this.categoryExpertApprovedGroup,
-    this.needsCategoryExpertApproval,
     required this.canManageCategoryExpertPosts,
-    this.userNftVerified,
     required this.ratings,
     required this.reactions,
-    this.currentUserReaction,
     required this.reactionUsersCount,
     required this.currentUserUsedMainReaction,
     required this.canAcceptAnswer,
     required this.canUnacceptAnswer,
     required this.acceptedAnswer,
     required this.topicAcceptedAnswer,
+    this.name,
+    this.primaryGroupName,
+    this.flairName,
+    this.flairUrl,
+    this.flairBgColor,
+    this.flairColor,
+    this.flairGroupId,
+    this.userTitle,
+    this.editReason,
+    this.reviewableId,
+    this.reviewableScoreCount,
+    this.reviewableScorePendingCount,
+    this.event,
+    this.categoryExpertApprovedGroup,
+    this.needsCategoryExpertApproval,
+    this.userNftVerified,
+    this.currentUserReaction,
   });
 
   factory Post.fromJson(Map<String, dynamic> json) => _$PostFromJson(json);
@@ -154,7 +154,7 @@ class Post {
   final bool canViewEditHistory;
   final bool wiki;
   @JsonKey(name: 'reviewable_id')
-  final dynamic? reviewableId;
+  final dynamic reviewableId;
   @JsonKey(name: 'reviewable_score_count')
   final int? reviewableScoreCount;
   @JsonKey(name: 'reviewable_score_pending_count')
