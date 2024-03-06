@@ -72,6 +72,10 @@ class ICalParser {
         (key, value) => MapEntry(key.toLowerCase(), value),
       );
 
+      if (data['transp'] == IcsTransp.transparent) {
+        continue;
+      }
+
       if (data['type'].toString().toLowerCase() != 'vevent') {
         continue;
       }
