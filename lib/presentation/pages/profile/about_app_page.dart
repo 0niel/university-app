@@ -163,26 +163,7 @@ class AboutAppPage extends StatelessWidget {
               const SizedBox(height: 24),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text('Спонсоры 💜', style: AppTextStyle.h6),
-                    TextButton(
-                      onPressed: () {
-                        launchUrlString(
-                          'https://boosty.to/oniel',
-                          mode: LaunchMode.externalApplication,
-                        );
-                      },
-                      child: Text(
-                        'Стать спонсором',
-                        style: AppTextStyle.buttonS.copyWith(
-                          color: AppTheme.colorsOf(context).primary,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+                child: Text('Поддержавшие 💜', style: AppTextStyle.h6),
               ),
               const SizedBox(height: 16),
               const Padding(
