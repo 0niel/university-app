@@ -1,5 +1,10 @@
+import 'dart:convert';
+
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
+import 'package:open_file/open_file.dart';
+import 'package:rtu_mirea_app/presentation/widgets/image_placeholder.dart';
 
 class ImagesHorizontalSlider extends StatelessWidget {
   const ImagesHorizontalSlider({Key? key, required this.images}) : super(key: key);
@@ -16,19 +21,26 @@ class ImagesHorizontalSlider extends StatelessWidget {
         children: List.generate(
           images.length,
           (index) {
+            final cacheKey = base64Encode(utf8.encode(images[index]));
             return GestureDetector(
-              onTap: () {
-                context.push('/image', extra: images);
+              onTap: () async {
+                final DefaultCacheManager manager = DefaultCacheManager();
+                final fileInfo = await manager.getFileFromCache(cacheKey);
+                if (fileInfo != null) {
+                  OpenFile.open(fileInfo.file.path);
+                }
               },
               child: Padding(
                 padding: const EdgeInsets.only(left: 24),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(12.0),
-                  child: Image.network(
-                    images[index],
+                  child: CachedNetworkImage(
+                    imageUrl: images[index],
                     height: 112,
                     width: 158,
                     fit: BoxFit.cover,
+                    cacheKey: cacheKey,
+                    placeholder: (context, url) => const ImagePlaceholder(),
                   ),
                 ),
               ),

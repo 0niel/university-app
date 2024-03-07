@@ -245,6 +245,8 @@ dependencies:
     path: packages/news_repository
   logger: ^2.0.2+1
   flutter_markdown: ^0.6.20+1
+  open_file: ^3.3.2
+  flutter_cache_manager: ^3.3.1
 
 dev_dependencies:
   # The "flutter_lints" package below contains a set of recommended lints to

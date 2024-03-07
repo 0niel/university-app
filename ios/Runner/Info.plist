@@ -75,7 +75,7 @@
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Приложение запрашивает доступ к камере</string>
+	<string>Приложение запрашивает доступ к галерее</string>
 	<key>NSCameraUsageDescription</key>
 	<string>Приложение запрашивает доступ к камере</string>
 </dict>
