@@ -10,7 +10,7 @@ class CategoriesPreferenceToggled extends NotificationPreferencesEvent {
   final String category;
 
   /// Название академической группы.
-  final String group;
+  final String? group;
 
   @override
   List<Object?> get props => [category, group];
@@ -20,7 +20,7 @@ class InitialCategoriesPreferencesRequested extends NotificationPreferencesEvent
   const InitialCategoriesPreferencesRequested({required this.group});
 
   /// Название академической группы.
-  final String group;
+  final String? group;
 
   @override
   List<Object?> get props => [group];

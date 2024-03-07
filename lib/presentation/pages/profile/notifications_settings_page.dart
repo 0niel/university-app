@@ -1,11 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:rtu_mirea_app/domain/entities/user.dart';
 import 'package:rtu_mirea_app/presentation/bloc/notification_preferences/notification_preferences_bloc.dart';
-import 'package:rtu_mirea_app/presentation/bloc/user_bloc/user_bloc.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
-import 'package:rtu_mirea_app/presentation/typography.dart';
+import 'package:rtu_mirea_app/schedule/bloc/schedule_bloc.dart';
+import 'package:rtu_mirea_app/schedule/models/models.dart';
 
 class NotificationsSettingsPage extends StatelessWidget {
   const NotificationsSettingsPage({Key? key}) : super(key: key);
@@ -16,32 +15,23 @@ class NotificationsSettingsPage extends StatelessWidget {
       appBar: AppBar(
         title: const Text("Настройки уведомлений"),
       ),
-      body: SafeArea(
-        bottom: false,
-        child: BlocBuilder<UserBloc, UserState>(
-          builder: (context, state) {
-            if (state.status == UserStatus.authorized && state.user != null) {
-              return _NotificationPreferencesView(user: state.user!);
-            } else {
-              return const Center(
-                child: Text("Необходимо авторизоваться"),
-              );
-            }
-          },
-        ),
+      body: const SafeArea(
+        child: _NotificationPreferencesView(),
       ),
     );
   }
 }
 
-class _NotificationPreferencesView extends StatelessWidget {
+class _NotificationPreferencesView extends StatefulWidget {
   const _NotificationPreferencesView({
     Key? key,
-    required this.user,
   }) : super(key: key);
 
-  final User user;
+  @override
+  State<_NotificationPreferencesView> createState() => _NotificationPreferencesViewState();
+}
 
+class _NotificationPreferencesViewState extends State<_NotificationPreferencesView> {
   String _getDescription(String category) {
     switch (category) {
       case 'Объявления':
@@ -53,47 +43,56 @@ class _NotificationPreferencesView extends StatelessWidget {
     }
   }
 
+  late final ScheduleBloc _scheduleBloc;
+
+  @override
+  void initState() {
+    super.initState();
+    _scheduleBloc = context.read<ScheduleBloc>();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const SizedBox(height: 24),
-          Text(
+    String? activeGroup = _scheduleBloc.state.selectedSchedule is SelectedGroupSchedule
+        ? (_scheduleBloc.state.selectedSchedule as SelectedGroupSchedule).group.name
+        : null;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 24),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Text(
             'Категории уведомлений',
             style: Theme.of(context).textTheme.titleMedium,
           ),
-          const SizedBox(height: 16),
-          Expanded(
-            child: BlocBuilder<NotificationPreferencesBloc, NotificationPreferencesState>(
-              builder: (context, state) {
-                return ListView(
-                  children: state.categories
-                      .map<Widget>(
-                        (category) => Padding(
-                          padding: const EdgeInsets.only(bottom: 16),
-                          child: _NotificationsSwitch(
-                            name: category,
-                            description: _getDescription(category),
-                            value: state.selectedCategories.contains(category),
-                            onChanged: (value) => context.read<NotificationPreferencesBloc>().add(
-                                  CategoriesPreferenceToggled(
-                                    category: category,
-                                    group: UserBloc.getActiveStudent(user).academicGroup,
-                                  ),
-                                ),
-                          ),
-                        ),
-                      )
-                      .toList(),
-                );
-              },
-            ),
+        ),
+        const SizedBox(height: 8),
+        Expanded(
+          child: BlocBuilder<NotificationPreferencesBloc, NotificationPreferencesState>(
+            builder: (context, state) {
+              return ListView(
+                children: state.categories
+                    .map<Widget>(
+                      (category) => _NotificationsSwitch(
+                        name: category,
+                        description: _getDescription(category),
+                        value: state.selectedCategories.contains(category),
+                        onChanged: (value) => context.read<NotificationPreferencesBloc>().add(
+                              CategoriesPreferenceToggled(
+                                category: category,
+                                group: activeGroup,
+                              ),
+                            ),
+                      ),
+                    )
+                    .toList(),
+              );
+            },
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
@@ -114,35 +113,17 @@ class _NotificationsSwitch extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      highlightColor: Colors.transparent,
-      splashColor: Colors.transparent,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          SizedBox(
-            width: MediaQuery.of(context).size.width - 120,
-            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text(name, style: AppTextStyle.buttonL),
-              const SizedBox(height: 4),
-              Text(
-                description,
-                style: AppTextStyle.body,
-                maxLines: 2,
-                overflow: TextOverflow.clip,
-                softWrap: true,
-              ),
-            ]),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(right: 8),
-            child: CupertinoSwitch(
-              activeColor: AppTheme.colorsOf(context).primary,
-              value: value,
-              onChanged: onChanged,
-            ),
-          ),
-        ],
+    return ListTile(
+      title: Text(description),
+      subtitle: Text(
+        name,
+        maxLines: 2,
+        overflow: TextOverflow.ellipsis,
+      ),
+      trailing: CupertinoSwitch(
+        activeColor: AppTheme.colorsOf(context).primary,
+        value: value,
+        onChanged: onChanged,
       ),
       onTap: () {
         onChanged(!value);

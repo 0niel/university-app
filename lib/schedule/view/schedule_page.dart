@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
+import 'package:rtu_mirea_app/presentation/bloc/notification_preferences/notification_preferences_bloc.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:rtu_mirea_app/presentation/widgets/bottom_modal_sheet.dart';
 import 'package:rtu_mirea_app/schedule/bloc/schedule_bloc.dart';
@@ -70,6 +71,15 @@ class _SchedulePageState extends State<SchedulePage> {
             ),
           );
         }
+
+        // TODO: Remove this logic from here, use DI in bloc instead
+        String? activeGroup;
+        if (state.selectedSchedule is SelectedGroupSchedule) {
+          activeGroup = (state.selectedSchedule as SelectedGroupSchedule).group.name;
+        }
+        BlocProvider.of<NotificationPreferencesBloc>(context).add(
+          InitialCategoriesPreferencesRequested(group: activeGroup),
+        );
       },
       buildWhen: (previous, current) => current.status != ScheduleStatus.failure && current.selectedSchedule != null,
       builder: (context, state) {

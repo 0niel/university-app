@@ -109,7 +109,7 @@ class Topic extends Equatable {
     }
   }
 
-  static Topic fromVisibleName(String name, String groupName) {
+  static Topic fromVisibleName(String name, String? groupName) {
     switch (name) {
       case 'Объявления':
         return Topic(topic: Category.announcements);
@@ -193,12 +193,12 @@ class NotificationPreferencesBloc extends Bloc<NotificationPreferencesEvent, Not
       /// Убираем те категории, название которых содержит название группы, но
       /// не совпадает с названием группы в [event.group].
       categoriesToSubscribe.removeWhere((category) {
-        if (category.groupName == null) {
+        if (category.groupName == null || event.group == null) {
           return false;
         }
 
         final groupName = category.groupName!.toLowerCase();
-        final eventGroupName = transletirateGroupName(event.group).toLowerCase();
+        final eventGroupName = transletirateGroupName(event.group!).toLowerCase();
 
         return groupName != eventGroupName;
       });
