@@ -24,57 +24,59 @@ class ProfilePage extends StatelessWidget {
       appBar: AppBar(
         title: const Text("Профиль"),
         actions: [
-          IconButton(
-            onPressed: () => launchUrlString('https://lk.mirea.ru'),
-            icon: Image.asset(
-              'assets/images/logo.png',
-            ),
-          ),
+          // IconButton(
+          //   onPressed: () => launchUrlString('https://lk.mirea.ru'),
+          //   icon: Image.asset(
+          //     'assets/images/logo.png',
+          //   ),
+          // ),
         ],
       ),
       body: SafeArea(
         bottom: false,
         child: LayoutBuilder(
           builder: (BuildContext context, BoxConstraints viewportConstraints) {
-            return SingleChildScrollView(
+            return const SingleChildScrollView(
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: BlocConsumer<UserBloc, UserState>(
-                  listener: (context, state) {
-                    if (state.status == UserStatus.authorizeError) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text(
-                            'Ошибка авторизации. Попробуйте еще раз.',
-                          ),
-                        ),
-                      );
-                    }
-                  },
-                  bloc: context.read<UserBloc>()..add(Started()),
-                  builder: (context, state) {
-                    if (state.status == UserStatus.unauthorized && state.user == null) {
-                      return const _InitialProfileStatePage();
-                    } else if (state.status == UserStatus.loading || state.status == UserStatus.initial) {
-                      return ConstrainedBox(
-                        constraints: BoxConstraints(
-                          minHeight: viewportConstraints.maxHeight,
-                        ),
-                        child: const Center(
-                          child: CircularProgressIndicator(),
-                        ),
-                      );
-                    } else if (state.user != null) {
-                      BlocProvider.of<NotificationPreferencesBloc>(context).add(
-                        InitialCategoriesPreferencesRequested(
-                            group: UserBloc.getActiveStudent(state.user!).academicGroup),
-                      );
-                      return _UserLoggedInView(user: state.user!);
-                    } else {
-                      return const _InitialProfileStatePage();
-                    }
-                  },
-                ),
+                padding: EdgeInsets.symmetric(horizontal: 24),
+                child: _InitialProfileStatePage(),
+
+                // BlocConsumer<UserBloc, UserState>(
+                //   listener: (context, state) {
+                //     if (state.status == UserStatus.authorizeError) {
+                //       ScaffoldMessenger.of(context).showSnackBar(
+                //         const SnackBar(
+                //           content: Text(
+                //             'Ошибка авторизации. Попробуйте еще раз.',
+                //           ),
+                //         ),
+                //       );
+                //     }
+                //   },
+                //   bloc: context.read<UserBloc>()..add(Started()),
+                //   builder: (context, state) {
+                //     if (state.status == UserStatus.unauthorized && state.user == null) {
+                //       return const _InitialProfileStatePage();
+                //     } else if (state.status == UserStatus.loading || state.status == UserStatus.initial) {
+                //       return ConstrainedBox(
+                //         constraints: BoxConstraints(
+                //           minHeight: viewportConstraints.maxHeight,
+                //         ),
+                //         child: const Center(
+                //           child: CircularProgressIndicator(),
+                //         ),
+                //       );
+                //     } else if (state.user != null) {
+                //       BlocProvider.of<NotificationPreferencesBloc>(context).add(
+                //         InitialCategoriesPreferencesRequested(
+                //             group: UserBloc.getActiveStudent(state.user!).academicGroup),
+                //       );
+                //       return _UserLoggedInView(user: state.user!);
+                //     } else {
+                //       return const _InitialProfileStatePage();
+                //     }
+                //   },
+                // ),
               ),
             );
           },
@@ -170,32 +172,32 @@ class _InitialProfileStatePage extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(0, 24, 0, 24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Привет! 👋',
-                style: AppTextStyle.h4,
-                textAlign: TextAlign.left,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Войдите в аккаунт и быстрый доступ к своему Личному Кабинету Студента МИРЭА. Это безопасно!',
-                style: AppTextStyle.body,
-                textAlign: TextAlign.left,
-              ),
-            ],
-          ),
-        ),
-        ColorfulButton(
-          text: 'Войти',
-          onClick: () {
-            context.read<UserBloc>().add(LogInEvent());
-          },
-          backgroundColor: AppTheme.colors.colorful03,
-        ),
+        // Padding(
+        //   padding: const EdgeInsets.fromLTRB(0, 24, 0, 24),
+        //   child: Column(
+        //     crossAxisAlignment: CrossAxisAlignment.start,
+        //     children: [
+        //       Text(
+        //         'Привет! 👋',
+        //         style: AppTextStyle.h4,
+        //         textAlign: TextAlign.left,
+        //       ),
+        //       const SizedBox(height: 8),
+        //       Text(
+        //         'Войдите в аккаунт и быстрый доступ к своему Личному Кабинету Студента МИРЭА. Это безопасно!',
+        //         style: AppTextStyle.body,
+        //         textAlign: TextAlign.left,
+        //       ),
+        //     ],
+        //   ),
+        // ),
+        // ColorfulButton(
+        //   text: 'Войти',
+        //   onClick: () {
+        //     context.read<UserBloc>().add(LogInEvent());
+        //   },
+        //   backgroundColor: AppTheme.colors.colorful03,
+        // ),
         const SizedBox(height: 8),
         SettingsButton(
           text: 'О приложении',
