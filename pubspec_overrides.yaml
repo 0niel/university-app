@@ -44,6 +44,47 @@ dependency_overrides:
     git:
       url: https://github.com/0niel/neon.git
       path: packages/sort_box
-
-  
-  vm_service: 13.0.0
+  package_info_plus:
+    git:
+      url: https://github.com/fluttercommunity/plus_plugins
+      path: packages/package_info_plus/package_info_plus
+      ref: baa336fe79c29411542fc343d332846bcd7752c1
+  firebase_core:
+    git:
+      url: https://github.com/Taillook/flutterfire
+      path: packages/firebase_core/firebase_core
+      ref: 10778421ce1f38091a2419163637dbc4e6a36657
+  firebase_analytics:
+    git:
+      url: https://github.com/Taillook/flutterfire
+      path: packages/firebase_analytics/firebase_analytics
+      ref: 10778421ce1f38091a2419163637dbc4e6a36657
+  firebase_analytics_web:
+    git:
+      url: https://github.com/Taillook/flutterfire
+      path: packages/firebase_analytics/firebase_analytics_web
+      ref: 10778421ce1f38091a2419163637dbc4e6a36657
+  firebase_messaging:
+    git:
+      url: https://github.com/Taillook/flutterfire
+      path: packages/firebase_messaging/firebase_messaging
+      ref: 10778421ce1f38091a2419163637dbc4e6a36657
+  firebase_messaging_web:
+    git:
+      url: https://github.com/Taillook/flutterfire
+      path: packages/firebase_messaging/firebase_messaging_web
+      ref: 10778421ce1f38091a2419163637dbc4e6a36657
+  firebase_core_web:
+    git:
+      url: https://github.com/Taillook/flutterfire
+      path: packages/firebase_core/firebase_core_web
+      ref: 10778421ce1f38091a2419163637dbc4e6a36657
+  flutter_keyboard_visibility:
+    git:
+      url: https://github.com/MisterJimson/flutter_keyboard_visibility.git
+      ref: 42ddef531e437cdd15b7baf270b64c8ae8ce8a28
+      path: flutter_keyboard_visibility
+  open_file:
+    git:
+      url: https://github.com/crazecoder/open_file.git
+      ref: 7619c1bc2086c052a07701fb5e1456acc833e189

@@ -1,7 +1,6 @@
-import 'dart:developer';
-
 import 'package:analytics_repository/analytics_repository.dart';
 import 'package:bloc/bloc.dart';
+import 'package:rtu_mirea_app/common/utils/logger.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 
 class AppBlocObserver extends BlocObserver {
@@ -17,14 +16,14 @@ class AppBlocObserver extends BlocObserver {
     Transition<dynamic, dynamic> transition,
   ) {
     super.onTransition(bloc, transition);
-    log('onTransition ${bloc.runtimeType}: $transition');
+    logger.i('onTransition ${bloc.runtimeType}: $transition');
   }
 
   @override
   void onError(BlocBase<dynamic> bloc, Object error, StackTrace stackTrace) {
     super.onError(bloc, error, stackTrace);
     Sentry.captureException(error, stackTrace: stackTrace);
-    log('onError ${bloc.runtimeType}', error: error, stackTrace: stackTrace);
+    logger.e('onError ${bloc.runtimeType}', error: error, stackTrace: stackTrace);
   }
 
   @override

@@ -1,6 +1,5 @@
 
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="ninja.mirea.mireaapp">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.NFC" />
@@ -16,7 +15,7 @@
         android:icon="@mipmap/ic_launcher"
         android:enableOnBackInvokedCallback="true"
         android:fullBackupContent="@xml/backup_rules">
-                <meta-data
+        <meta-data
             android:name="com.google.firebase.messaging.default_notification_icon"
             android:resource="@drawable/ic_stat_ic_notification" />
         <activity android:name="com.linusu.flutter_web_auth_2.CallbackActivity" android:exported="true">
@@ -57,32 +56,6 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-
-       <service
-           android:name=".widget_channel.UpdateWidgetService"
-           android:permission="android.permission.BIND_REMOTEVIEWS">
-       </service>
-        <receiver android:name="HomeWidgetProvider"
-            android:exported="true">
-          <intent-filter>
-              <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-          </intent-filter>
-            <intent-filter>
-                <action android:name="ACTION_AUTO_UPDATE_WIDGET" />
-            </intent-filter>
-          <meta-data android:name="android.appwidget.provider"
-              android:resource="@xml/timetable_widget" />
-        </receiver>
-
-       <!-- Used for Background Work -->
-       <receiver android:name="ninja.mirea.mireaapp.widget_channel.HomeWidgetBackgroundReceiver"
-        android:exported="true">
-           <intent-filter>
-               <action android:name="es.antonborri.home_widget.action.BACKGROUND" />
-           </intent-filter>
-       </receiver>
-       <service android:name="ninja.mirea.mireaapp.widget_channel.HomeWidgetBackgroundService"
-           android:permission="android.permission.BIND_JOB_SERVICE" android:exported="true"/>
 
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
