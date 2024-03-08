@@ -108,7 +108,7 @@ dependencies:
 
   # A highly customizable autocomplete text input field for Flutter
   # See https://pub.dev/packages/flutter_typeahead
-  flutter_typeahead: ^4.0.0
+  flutter_typeahead: ^5.0.0
 
   calendar_date_picker2: ^0.5.3
 
