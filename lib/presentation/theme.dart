@@ -24,7 +24,7 @@ class AppTheme {
         ),
     textButtonTheme: TextButtonThemeData(
       style: ButtonStyle(
-        textStyle: MaterialStateProperty.all(AppTextStyle.buttonS),
+        textStyle: MaterialStateProperty.all(AppTextStyle.buttonS.copyWith(color: darkThemeColors.active)),
       ),
     ),
     scaffoldBackgroundColor: darkThemeColors.background01,
@@ -110,14 +110,29 @@ class AppTheme {
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ButtonStyle(
-        backgroundColor: MaterialStateProperty.all(darkThemeColors.primary),
-        elevation: MaterialStateProperty.all(2),
-        shape: MaterialStateProperty.all(
+        foregroundColor: MaterialStateProperty.all(darkThemeColors.white),
+        backgroundColor: MaterialStateProperty.all(AppTheme.colors.primary),
+        shape: MaterialStateProperty.all<RoundedRectangleBorder>(
           RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(24.0),
           ),
         ),
-        textStyle: MaterialStateProperty.all(AppTextStyle.buttonL),
+        textStyle: MaterialStateProperty.all(
+          AppTextStyle.buttonS.copyWith(
+            color: darkThemeColors.white,
+          ),
+        ),
+      ),
+    ),
+    popupMenuTheme: PopupMenuThemeData(
+      color: darkThemeColors.background02,
+      textStyle: AppTextStyle.body.copyWith(
+        color: darkThemeColors.active,
+      ),
+      elevation: 4,
+      shadowColor: darkThemeColors.background02.withOpacity(0.1),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
       ),
     ),
   );
@@ -129,7 +144,7 @@ class AppTheme {
         ),
     textButtonTheme: TextButtonThemeData(
       style: ButtonStyle(
-        textStyle: MaterialStateProperty.all(AppTextStyle.buttonS),
+        textStyle: MaterialStateProperty.all(AppTextStyle.buttonS.copyWith(color: lightThemeColors.active)),
       ),
     ),
     scaffoldBackgroundColor: lightThemeColors.background01,
@@ -216,14 +231,29 @@ class AppTheme {
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ButtonStyle(
-        backgroundColor: MaterialStateProperty.all(darkThemeColors.primary),
-        elevation: MaterialStateProperty.all(2),
-        shape: MaterialStateProperty.all(
+        foregroundColor: MaterialStateProperty.all(lightThemeColors.white),
+        backgroundColor: MaterialStateProperty.all(AppTheme.colors.primary),
+        shape: MaterialStateProperty.all<RoundedRectangleBorder>(
           RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(24.0),
           ),
         ),
-        textStyle: MaterialStateProperty.all(AppTextStyle.buttonL),
+        textStyle: MaterialStateProperty.all(
+          AppTextStyle.buttonS.copyWith(
+            color: lightThemeColors.white,
+          ),
+        ),
+      ),
+    ),
+    popupMenuTheme: PopupMenuThemeData(
+      color: lightThemeColors.background02,
+      textStyle: AppTextStyle.body.copyWith(
+        color: lightThemeColors.active,
+      ),
+      elevation: 4,
+      shadowColor: lightThemeColors.background02.withOpacity(0.1),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
       ),
     ),
   );

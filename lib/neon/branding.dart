@@ -16,6 +16,8 @@ final neonTheme = NeonTheme(
 
 /// The custom branding used in the Neon app.
 final branding = Branding(
+  baseUrl: Uri.parse('https://cloud.mirea.ninja'),
+  useAdaptiveTheme: false,
   name: 'Cloud Mirea Ninja',
   logo: VectorGraphic(
     width: 100,

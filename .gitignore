@@ -123,3 +123,6 @@ lib/generated_plugin_registrant.dart
 !.idea/codeStyles/
 !.idea/dictionaries/
 !.idea/runConfigurations/
+
+# Linux related
+linux/flutter/ephemeral/**

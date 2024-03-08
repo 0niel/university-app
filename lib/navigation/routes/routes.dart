@@ -21,6 +21,8 @@ import 'package:rtu_mirea_app/presentation/pages/profile/profile_lectors_page.da
 import 'package:rtu_mirea_app/presentation/pages/profile/profile_scores_page.dart';
 import 'package:rtu_mirea_app/presentation/pages/profile/profile_page.dart';
 import 'package:rtu_mirea_app/presentation/pages/profile/profile_settings_page.dart';
+import 'package:rtu_mirea_app/presentation/theme.dart';
+import 'package:rtu_mirea_app/presentation/typography.dart';
 import 'package:rtu_mirea_app/presentation/widgets/images_view_gallery.dart';
 import 'package:rtu_mirea_app/rating_system_calculator/models/models.dart';
 import 'package:rtu_mirea_app/rating_system_calculator/view/about_rating_system_page.dart';
@@ -169,17 +171,34 @@ GoRouter createRouter() => GoRouter(
                     ),
                     ...neon.$appRoutes.map((route) {
                       if (route is GoRoute) {
-                        route = GoRoute(
+                        return GoRoute(
                           path: _getNeonPathInCurrentRouter(route.path),
                           name: route.name,
-                          builder: route.builder,
+                          builder: route.builder != null
+                              ? (context, state) {
+                                  final theme = Theme.of(context).copyWith(
+                                    listTileTheme: ListTileThemeData(
+                                      tileColor: Colors.transparent,
+                                      contentPadding: const EdgeInsets.symmetric(horizontal: 24),
+                                      leadingAndTrailingTextStyle: AppTextStyle.chip.copyWith(
+                                        color: AppTheme.colorsOf(context).active,
+                                      ),
+                                      titleTextStyle: AppTextStyle.titleM.copyWith(
+                                        color: AppTheme.colorsOf(context).active,
+                                      ),
+                                      subtitleTextStyle: AppTextStyle.chip.copyWith(
+                                        color: AppTheme.colorsOf(context).deactive,
+                                      ),
+                                    ),
+                                  );
+                                  return Theme(data: theme, child: route.builder!(context, state));
+                                }
+                              : null,
                           redirect: route.redirect,
                           routes: route.routes,
                           pageBuilder: route.pageBuilder,
                           parentNavigatorKey: route.parentNavigatorKey,
                         );
-
-                        return route;
                       }
 
                       return route;
