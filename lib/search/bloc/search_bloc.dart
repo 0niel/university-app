@@ -63,6 +63,19 @@ class SearchBloc extends HydratedBloc<SearchEvent, SearchState> {
         ));
       },
     );
+    on<ChangeSearchMode>(
+      (event, emit) {
+        if (state.searchMode == event.searchMode) return;
+        emit(
+          state.copyWith(
+            searchMode: event.searchMode,
+            groups: const SearchGroupsResponse(results: []),
+            teachers: const SearchTeachersResponse(results: []),
+            classrooms: const SearchClassroomsResponse(results: []),
+          ),
+        );
+      },
+    );
   }
 
   final ScheduleRepository _scheduleRepository;
@@ -71,26 +84,43 @@ class SearchBloc extends HydratedBloc<SearchEvent, SearchState> {
     SearchQueryChanged event,
     Emitter<SearchState> emit,
   ) async {
-    emit(
-      state.copyWith(
-        status: SearchStatus.loading,
-      ),
-    );
-    try {
-      final results = await Future.wait([
-        _scheduleRepository.searchGroups(query: event.searchQuery),
-        _scheduleRepository.searchTeachers(query: event.searchQuery),
-        _scheduleRepository.searchClassrooms(query: event.searchQuery),
-      ]);
+    emit(state.copyWith(status: SearchStatus.loading));
 
-      emit(
-        state.copyWith(
-          groups: results[0] as SearchGroupsResponse,
-          teachers: results[1] as SearchTeachersResponse,
-          classrooms: results[2] as SearchClassroomsResponse,
-          status: SearchStatus.populated,
-        ),
-      );
+    final List<Future<dynamic>> tasks = <Future<dynamic>>[];
+
+    switch (state.searchMode) {
+      case SearchMode.all:
+        tasks
+          ..add(_scheduleRepository.searchGroups(query: event.searchQuery))
+          ..add(_scheduleRepository.searchTeachers(query: event.searchQuery))
+          ..add(_scheduleRepository.searchClassrooms(query: event.searchQuery));
+        break;
+      case SearchMode.groups:
+        tasks.add(_scheduleRepository.searchGroups(query: event.searchQuery));
+        break;
+      case SearchMode.teachers:
+        tasks.add(_scheduleRepository.searchTeachers(query: event.searchQuery));
+        break;
+      case SearchMode.classrooms:
+        tasks.add(_scheduleRepository.searchClassrooms(query: event.searchQuery));
+        break;
+    }
+
+    try {
+      final results = await Future.wait(tasks);
+
+      emit(state.copyWith(
+        groups: state.searchMode == SearchMode.all || state.searchMode == SearchMode.groups
+            ? results[state.searchMode == SearchMode.all ? 0 : 0] as SearchGroupsResponse
+            : state.groups,
+        teachers: state.searchMode == SearchMode.all || state.searchMode == SearchMode.teachers
+            ? results[state.searchMode == SearchMode.all ? 1 : 0] as SearchTeachersResponse
+            : state.teachers,
+        classrooms: state.searchMode == SearchMode.all || state.searchMode == SearchMode.classrooms
+            ? results[state.searchMode == SearchMode.all ? 2 : 0] as SearchClassroomsResponse
+            : state.classrooms,
+        status: SearchStatus.populated,
+      ));
     } catch (error, stackTrace) {
       emit(state.copyWith(status: SearchStatus.failure));
       addError(error, stackTrace);

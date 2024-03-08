@@ -1,0 +1,4 @@
+# melos_managed_dependency_overrides: discourse_api_client
+dependency_overrides:
+  discourse_api_client:
+    path: ..\\discourse_api_client

@@ -37,3 +37,12 @@ class RemoveQueryFromSearchHistory extends SearchEvent {
   @override
   List<Object?> get props => [query];
 }
+
+class ChangeSearchMode extends SearchEvent {
+  const ChangeSearchMode({required this.searchMode});
+
+  final SearchMode searchMode;
+
+  @override
+  List<Object?> get props => [searchMode];
+}
