@@ -16,10 +16,10 @@ class StoriesView extends StatelessWidget {
         if (actualStories.isNotEmpty) {
           return StoriesList(stories: actualStories);
         } else {
-          return const SizedBox();
+          return const SizedBox.shrink();
         }
       }
-      return const SizedBox();
+      return const SizedBox.shrink();
     });
   }
 }

@@ -9,6 +9,7 @@ import 'package:rtu_mirea_app/presentation/widgets/bottom_modal_sheet.dart';
 import 'package:rtu_mirea_app/schedule/bloc/schedule_bloc.dart';
 import 'package:rtu_mirea_app/schedule/models/models.dart';
 import 'package:rtu_mirea_app/schedule/widgets/widgets.dart';
+import 'package:rtu_mirea_app/stories/bloc/stories_bloc.dart';
 import 'package:rtu_mirea_app/stories/view/stories_view.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:university_app_server_api/client.dart';
@@ -196,89 +197,96 @@ class _SchedulePageState extends State<SchedulePage> {
                   },
                 );
 
-                return NestedScrollView(
-                  headerSliverBuilder: (_, __) => [
-                    SliverAppBar(
-                      pinned: false,
-                      title: Text(
-                        _getAppBarTitle,
-                      ),
-                      actions: [
-                        SizedBox(
-                          width: 60,
-                          height: 60,
-                          child: IconButton(
-                            icon: FaIcon(
-                              FontAwesomeIcons.ellipsis,
-                              color: AppTheme.colorsOf(context).active,
+                return BlocBuilder<StoriesBloc, StoriesState>(builder: (context, storiesState) {
+                  return NestedScrollView(
+                    headerSliverBuilder: (_, __) => [
+                      SliverAppBar(
+                        pinned: false,
+                        title: Text(
+                          _getAppBarTitle,
+                        ),
+                        actions: [
+                          SizedBox(
+                            width: 60,
+                            height: 60,
+                            child: IconButton(
+                              icon: FaIcon(
+                                FontAwesomeIcons.ellipsis,
+                                color: AppTheme.colorsOf(context).active,
+                              ),
+                              onPressed: () {
+                                BottomModalSheet.show(
+                                  context,
+                                  child: const SettingsMenu(),
+                                  title: 'Управление расписанием',
+                                  description:
+                                      'Редактирование сохраненных расписаний и добавление новых, а также настройки отображения расписания.',
+                                  backgroundColor: AppTheme.colorsOf(context).background03,
+                                );
+                              },
                             ),
-                            onPressed: () {
-                              BottomModalSheet.show(
-                                context,
-                                child: const SettingsMenu(),
-                                title: 'Управление расписанием',
-                                description:
-                                    'Редактирование сохраненных расписаний и добавление новых, а также настройки отображения расписания.',
-                                backgroundColor: AppTheme.colorsOf(context).background03,
-                              );
-                            },
+                          ),
+                        ],
+                        bottom: (storiesState is StoriesLoaded && storiesState.stories.isNotEmpty)
+                            ? const PreferredSize(
+                                preferredSize: Size.fromHeight(80),
+                                child: StoriesView(),
+                              )
+                            : const PreferredSize(
+                                preferredSize: Size.fromHeight(0),
+                                child: SizedBox.shrink(),
+                              ),
+                      ),
+                      if (!isWideScreen)
+                        SliverToBoxAdapter(
+                          child: Calendar(
+                            pageViewController: _schedulePageController,
+                            schedule: state.selectedSchedule?.schedule ?? [],
+                            comments: state.comments,
+                            showCommentsIndicators: state.showCommentsIndicators,
                           ),
                         ),
-                      ],
-                      bottom: const PreferredSize(
-                        preferredSize: Size.fromHeight(80),
-                        child: StoriesView(),
-                      ),
-                    ),
-                    if (!isWideScreen)
-                      SliverToBoxAdapter(
-                        child: Calendar(
-                          pageViewController: _schedulePageController,
-                          schedule: state.selectedSchedule?.schedule ?? [],
-                          comments: state.comments,
-                          showCommentsIndicators: state.showCommentsIndicators,
-                        ),
-                      ),
-                  ],
-                  body: isWideScreen
-                      ? Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Expanded(
-                              flex: 2,
-                              child: eventsPageView,
-                            ),
-                            Flexible(
-                              flex: 1,
-                              child: ConstrainedBox(
-                                constraints: const BoxConstraints(
-                                  minHeight: 100,
-                                  maxHeight: 466,
-                                ),
-                                child: Container(
-                                  margin: const EdgeInsets.all(8.0),
-                                  padding: const EdgeInsets.all(16.0),
-                                  decoration: BoxDecoration(
-                                    border: Border.all(
-                                      color: AppTheme.colorsOf(context).deactiveDarker,
-                                    ),
-                                    borderRadius: BorderRadius.circular(16.0),
+                    ],
+                    body: isWideScreen
+                        ? Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(
+                                flex: 2,
+                                child: eventsPageView,
+                              ),
+                              Flexible(
+                                flex: 1,
+                                child: ConstrainedBox(
+                                  constraints: const BoxConstraints(
+                                    minHeight: 100,
+                                    maxHeight: 466,
                                   ),
-                                  child: Calendar(
-                                    pageViewController: _schedulePageController,
-                                    schedule: state.selectedSchedule?.schedule ?? [],
-                                    comments: state.comments,
-                                    showCommentsIndicators: state.showCommentsIndicators,
-                                    calendarFormat: CalendarFormat.month,
-                                    canChangeFormat: false,
+                                  child: Container(
+                                    margin: const EdgeInsets.all(8.0),
+                                    padding: const EdgeInsets.all(16.0),
+                                    decoration: BoxDecoration(
+                                      border: Border.all(
+                                        color: AppTheme.colorsOf(context).deactiveDarker,
+                                      ),
+                                      borderRadius: BorderRadius.circular(16.0),
+                                    ),
+                                    child: Calendar(
+                                      pageViewController: _schedulePageController,
+                                      schedule: state.selectedSchedule?.schedule ?? [],
+                                      comments: state.comments,
+                                      showCommentsIndicators: state.showCommentsIndicators,
+                                      calendarFormat: CalendarFormat.month,
+                                      canChangeFormat: false,
+                                    ),
                                   ),
                                 ),
                               ),
-                            ),
-                          ],
-                        )
-                      : eventsPageView,
-                );
+                            ],
+                          )
+                        : eventsPageView,
+                  );
+                });
               },
             ),
           );
