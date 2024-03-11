@@ -1,4 +1,4 @@
-export 'calendar.dart';
+export 'calendar/table_calendar.dart';
 export 'lesson_card.dart';
 export 'no_selected_schedule_message.dart';
 export 'settings_menu.dart';

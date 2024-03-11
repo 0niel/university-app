@@ -1,15 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:intl/intl.dart';
 import 'package:rtu_mirea_app/common/utils/calendar_utils.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:rtu_mirea_app/presentation/typography.dart';
 import 'package:rtu_mirea_app/schedule/models/models.dart';
+import 'package:rtu_mirea_app/schedule/widgets/widgets.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:university_app_server_api/client.dart';
 import "package:collection/collection.dart";
-
-import 'lesson_card.dart';
 
 class Calendar extends StatefulWidget {
   const Calendar({
@@ -82,6 +80,7 @@ class _CalendarState extends State<Calendar> {
   late DateTime _selectedDay;
   late int _selectedPage;
   late int _selectedWeek;
+  PageController? _pageController;
 
   @override
   void initState() {
@@ -122,8 +121,19 @@ class _CalendarState extends State<Calendar> {
         return Padding(
           padding: const EdgeInsets.only(bottom: 8.0),
           child: TableCalendar(
+            onCalendarCreated: (controller) => _pageController = controller,
             weekendDays: const [DateTime.sunday],
             calendarBuilders: CalendarBuilders(
+              headerTitleBuilder: (context, day) {
+                if (_pageController == null) {
+                  return const SizedBox();
+                }
+                return CalendarHeader(
+                  day: day,
+                  format: _calendarFormat,
+                  pageController: _pageController,
+                );
+              },
               markerBuilder: (context, day, events) {
                 return Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -163,28 +173,11 @@ class _CalendarState extends State<Calendar> {
             lastDay: Calendar.lastCalendarDay,
             sixWeekMonthsEnforced: true,
             startingDayOfWeek: StartingDayOfWeek.monday,
-            headerStyle: HeaderStyle(
-              formatButtonVisible: widget.canChangeFormat,
-              formatButtonShowsNext: false,
-              titleTextStyle: AppTextStyle.captionL.copyWith(
-                color: AppTheme.colorsOf(context).active,
-              ),
-              formatButtonTextStyle: AppTextStyle.captionL.copyWith(
-                color: AppTheme.colorsOf(context).active,
-              ),
-              titleTextFormatter: (DateTime date, dynamic locale) {
-                String dateStr = DateFormat.yMMMM(locale).format(date);
-                String weekStr = _selectedWeek.toString();
-                return '$dateStr\nвыбрана $weekStr неделя';
-              },
-              leftChevronIcon: Icon(Icons.chevron_left, color: AppTheme.colorsOf(context).active),
-              rightChevronIcon: Icon(Icons.chevron_right, color: AppTheme.colorsOf(context).active),
-              formatButtonDecoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                  color: AppTheme.colorsOf(context).deactiveDarker,
-                ),
-              ),
+            headerVisible: true,
+            headerStyle: const HeaderStyle(
+              formatButtonVisible: false,
+              leftChevronVisible: false,
+              rightChevronVisible: false,
             ),
             calendarStyle: CalendarStyle(
               rangeHighlightColor: AppTheme.colorsOf(context).secondary,
