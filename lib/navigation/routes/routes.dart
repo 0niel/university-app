@@ -1,7 +1,6 @@
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 import 'package:rtu_mirea_app/discourse_post_overview/view/view.dart';
 import 'package:rtu_mirea_app/domain/entities/news_item.dart';

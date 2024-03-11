@@ -13,9 +13,10 @@ import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:logger/logger.dart';
 import 'package:notifications_repository/notifications_repository.dart';
-import 'package:path_provider/path_provider.dart';
+import 'package:persistent_storage/persistent_storage.dart';
 import 'package:rtu_mirea_app/app/app.dart';
 import 'package:rtu_mirea_app/app_bloc_observer.dart';
+import 'package:rtu_mirea_app/common/hydrated_storage.dart';
 import 'package:rtu_mirea_app/data/datasources/strapi_remote.dart';
 import 'package:rtu_mirea_app/data/repositories/stories_repository_impl.dart';
 
@@ -25,6 +26,7 @@ import 'package:rtu_mirea_app/neon/main.dart';
 import 'package:intl/intl_standalone.dart';
 import 'package:rtu_mirea_app/service_locator.dart' as dependency_injection;
 import 'package:sentry_dio/sentry_dio.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:university_app_server_api/client.dart';
 import 'package:url_strategy/url_strategy.dart';
 import 'common/constants.dart';
@@ -81,6 +83,9 @@ Future<void> main() async {
     Intl.systemLocale = await findSystemLocale();
   }
 
+  final persistentStorage = PersistentStorage(
+    sharedPreferences: getIt<SharedPreferences>(),
+  );
   late final AnalyticsRepository analyticsRepository;
   try {
     analyticsRepository = AnalyticsRepository(FirebaseAnalytics.instance);
@@ -98,9 +103,7 @@ Future<void> main() async {
 
   Bloc.observer = AppBlocObserver(analyticsRepository: analyticsRepository);
 
-  HydratedBloc.storage = await HydratedStorage.build(
-    storageDirectory: kIsWeb ? HydratedStorage.webStorageDirectory : await getApplicationDocumentsDirectory(),
-  );
+  HydratedBloc.storage = CustomHydratedStorage(sharedPreferences: getIt<SharedPreferences>());
 
   final (neonTheme, neonProviders) = await runNeon();
 
