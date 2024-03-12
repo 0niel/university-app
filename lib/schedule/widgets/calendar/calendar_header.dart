@@ -3,17 +3,28 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:rtu_mirea_app/presentation/typography.dart';
-import 'package:rtu_mirea_app/schedule/widgets/widgets.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:unicons/unicons.dart';
 
 class CalendarHeader extends StatefulWidget {
-  const CalendarHeader({Key? key, required this.day, required this.format, required this.pageController})
-      : super(key: key);
+  const CalendarHeader({
+    Key? key,
+    required this.day,
+    required this.week,
+    required this.format,
+    required this.pageController,
+    required this.onMonthChanged,
+    this.onHeaderTap,
+    this.onHeaderLongPress,
+  }) : super(key: key);
 
   final DateTime day;
+  final int week;
   final CalendarFormat format;
   final PageController? pageController;
+  final ValueSetter<int> onMonthChanged;
+  final VoidCallback? onHeaderTap;
+  final VoidCallback? onHeaderLongPress;
 
   @override
   State<CalendarHeader> createState() => _CalendarHeaderState();
@@ -25,20 +36,27 @@ class _CalendarHeaderState extends State<CalendarHeader> with TickerProviderStat
   @override
   void initState() {
     super.initState();
+
     _tabController = TabController(
+      initialIndex: widget.day.month - 1,
       length: 12,
       vsync: this,
     );
 
-    final currentMonth = widget.day.month;
-    final initialDay = Calendar.firstCalendarDay;
-    _tabController.animateTo(currentMonth - 1);
-
-    widget.pageController?.addListener(() {
-      final currentPage = widget.pageController?.page?.toInt() ?? 0;
-      final currentMonth = initialDay.add(Duration(days: currentPage)).month;
-      if (_tabController.index != currentMonth - 1) _tabController.animateTo(currentMonth - 1);
+    _tabController.addListener(() {
+      if (_tabController.indexIsChanging) return;
+      if (widget.day.month == _tabController.index + 1) return;
+      widget.onMonthChanged(_tabController.index + 1);
     });
+  }
+
+  @override
+  void didUpdateWidget(covariant CalendarHeader oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if (oldWidget.day != widget.day) {
+      _tabController.animateTo(widget.day.month - 1);
+    }
   }
 
   @override
@@ -53,7 +71,13 @@ class _CalendarHeaderState extends State<CalendarHeader> with TickerProviderStat
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         const SizedBox(height: 11),
-        _CalendarWeeksHeader(day: widget.day, pageController: widget.pageController),
+        _CalendarWeeksHeader(
+          day: widget.day,
+          pageController: widget.pageController,
+          week: widget.week,
+          onHeaderTap: widget.onHeaderTap,
+          onHeaderLongPress: widget.onHeaderLongPress,
+        ),
         AnimatedContainer(
           duration: const Duration(milliseconds: 200),
           curve: Curves.easeOut,
@@ -70,13 +94,9 @@ class _CalendarHeaderState extends State<CalendarHeader> with TickerProviderStat
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 24),
                     child: SizedBox(
-                      height: 40,
+                      height: 44,
                       child: TextButton(
                         style: TextButton.styleFrom(
-                          side: BorderSide(
-                            color: Theme.of(context).dividerColor.withOpacity(0.12),
-                            width: 1,
-                          ),
                           backgroundColor: AppTheme.colorsOf(context).background02,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
@@ -130,7 +150,7 @@ class _CalendarHeaderState extends State<CalendarHeader> with TickerProviderStat
                       child: TabBar(
                         controller: _tabController,
                         isScrollable: true,
-                        physics: LockScrollPhysics(lockLeft: true, lockRight: true),
+                        physics: const BouncingScrollPhysics(),
                         labelStyle: AppTextStyle.bodyBold,
                         unselectedLabelStyle: AppTextStyle.bodyL,
                         padding: const EdgeInsets.symmetric(horizontal: 15),
@@ -172,93 +192,107 @@ class _CalendarHeaderState extends State<CalendarHeader> with TickerProviderStat
 }
 
 class _CalendarWeeksHeader extends StatelessWidget {
-  const _CalendarWeeksHeader({Key? key, required this.day, required this.pageController}) : super(key: key);
+  const _CalendarWeeksHeader({
+    Key? key,
+    required this.day,
+    required this.pageController,
+    required this.week,
+    this.onHeaderTap,
+    this.onHeaderLongPress,
+  }) : super(key: key);
 
   final DateTime day;
+  final int week;
   final PageController? pageController;
+  final VoidCallback? onHeaderTap;
+  final VoidCallback? onHeaderLongPress;
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          SizedBox(
-            width: 38,
-            child: TextButton(
-              style: TextButton.styleFrom(
-                padding: EdgeInsets.zero,
-                backgroundColor: Colors.transparent,
+    return GestureDetector(
+      onTap: onHeaderTap,
+      onLongPress: onHeaderLongPress,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            SizedBox(
+              width: 38,
+              child: TextButton(
+                style: TextButton.styleFrom(
+                  padding: EdgeInsets.zero,
+                  backgroundColor: Colors.transparent,
+                ),
+                child: Icon(
+                  Icons.arrow_back_ios_rounded,
+                  size: 18,
+                  color: AppTheme.colorsOf(context).active,
+                ),
+                onPressed: () {
+                  pageController?.previousPage(
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeIn,
+                  );
+                },
               ),
-              child: Icon(
-                Icons.arrow_back_ios_rounded,
-                size: 18,
-                color: AppTheme.colorsOf(context).active,
-              ),
-              onPressed: () {
-                pageController?.previousPage(
-                  duration: const Duration(milliseconds: 300),
-                  curve: Curves.easeIn,
+            ),
+            AnimatedSwitcher(
+              switchInCurve: Curves.easeIn,
+              switchOutCurve: Curves.easeOut,
+              duration: const Duration(milliseconds: 150),
+              transitionBuilder: (Widget child, Animation<double> animation) {
+                return FadeTransition(
+                  opacity: animation,
+                  child: child,
                 );
               },
-            ),
-          ),
-          AnimatedSwitcher(
-            switchInCurve: Curves.easeIn,
-            switchOutCurve: Curves.easeOut,
-            duration: const Duration(milliseconds: 150),
-            transitionBuilder: (Widget child, Animation<double> animation) {
-              return FadeTransition(
-                opacity: animation,
-                child: child,
-              );
-            },
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.center,
-              key: ValueKey<String>(DateFormat.yMMMM('ru_RU').format(day)),
-              children: [
-                Text(
-                  DateFormat.yMMMM('ru_RU').format(day)[0].toUpperCase() +
-                      DateFormat.yMMMM('ru_RU').format(day).substring(1).replaceAll(RegExp(r' г.'), ' '),
-                  style: AppTextStyle.bodyL,
-                ),
-                const SizedBox(width: 5.50),
-                Container(
-                  width: 5,
-                  height: 5,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: AppTheme.colorsOf(context).active,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+                key: ValueKey<String>(DateFormat.yMMMM('ru_RU').format(day)),
+                children: [
+                  Text(
+                    DateFormat.yMMMM('ru_RU').format(day)[0].toUpperCase() +
+                        DateFormat.yMMMM('ru_RU').format(day).substring(1).replaceAll(RegExp(r' г.'), ' '),
+                    style: AppTextStyle.bodyL,
                   ),
+                  const SizedBox(width: 5.50),
+                  Container(
+                    width: 5,
+                    height: 5,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: AppTheme.colorsOf(context).active,
+                    ),
+                  ),
+                  const SizedBox(width: 5.50),
+                  Text('$week неделя', style: AppTextStyle.bodyL),
+                ],
+              ),
+            ),
+            SizedBox(
+              width: 38,
+              child: TextButton(
+                style: TextButton.styleFrom(
+                  padding: EdgeInsets.zero,
+                  backgroundColor: Colors.transparent,
                 ),
-                const SizedBox(width: 5.50),
-                Text("12 неделя", style: AppTextStyle.bodyL),
-              ],
-            ),
-          ),
-          SizedBox(
-            width: 38,
-            child: TextButton(
-              style: TextButton.styleFrom(
-                padding: EdgeInsets.zero,
-                backgroundColor: Colors.transparent,
-              ),
-              onPressed: () {
-                pageController?.nextPage(
-                  duration: const Duration(milliseconds: 300),
-                  curve: Curves.easeIn,
-                );
-              },
-              child: Icon(
-                Icons.arrow_forward_ios_rounded,
-                size: 18,
-                color: AppTheme.colorsOf(context).active,
+                onPressed: () {
+                  pageController?.nextPage(
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeIn,
+                  );
+                },
+                child: Icon(
+                  Icons.arrow_forward_ios_rounded,
+                  size: 18,
+                  color: AppTheme.colorsOf(context).active,
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

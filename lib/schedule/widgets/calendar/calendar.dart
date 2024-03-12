@@ -27,6 +27,8 @@ class Calendar extends StatefulWidget {
   final CalendarFormat calendarFormat;
   final bool canChangeFormat;
 
+  static const startingDayOfWeek = StartingDayOfWeek.monday;
+
   static List<SchedulePart> getSchedulePartsByDay({
     required List<SchedulePart> schedule,
     required DateTime day,
@@ -80,6 +82,8 @@ class _CalendarState extends State<Calendar> {
   late DateTime _selectedDay;
   late int _selectedPage;
   late int _selectedWeek;
+
+  /// Page controller for [TableCalendar.onCalendarCreated].
   PageController? _pageController;
 
   @override
@@ -114,6 +118,45 @@ class _CalendarState extends State<Calendar> {
     super.dispose();
   }
 
+  int _calculateFocusedPage(CalendarFormat format, DateTime startDay, DateTime focusedDay) {
+    switch (format) {
+      case CalendarFormat.month:
+        return _getMonthCount(startDay, focusedDay);
+      case CalendarFormat.twoWeeks:
+        return _getTwoWeekCount(startDay, focusedDay);
+      case CalendarFormat.week:
+        return _getWeekCount(startDay, focusedDay);
+      default:
+        return _getMonthCount(startDay, focusedDay);
+    }
+  }
+
+  int _getMonthCount(DateTime first, DateTime last) {
+    final yearDif = last.year - first.year;
+    final monthDif = last.month - first.month;
+
+    return yearDif * 12 + monthDif;
+  }
+
+  int _getWeekCount(DateTime first, DateTime last) {
+    return last.difference(_firstDayOfWeek(first)).inDays ~/ 7;
+  }
+
+  int _getTwoWeekCount(DateTime first, DateTime last) {
+    return last.difference(_firstDayOfWeek(first)).inDays ~/ 14;
+  }
+
+  int _getDaysBefore(DateTime firstDay) {
+    return (firstDay.weekday + 7 - getWeekdayNumber(Calendar.startingDayOfWeek)) % 7;
+  }
+
+  late final ValueNotifier<int> _focusedMonth = ValueNotifier<int>(_focusedDay.month);
+
+  DateTime _firstDayOfWeek(DateTime week) {
+    final daysBefore = _getDaysBefore(week);
+    return week.subtract(Duration(days: daysBefore));
+  }
+
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
@@ -129,9 +172,45 @@ class _CalendarState extends State<Calendar> {
                   return const SizedBox();
                 }
                 return CalendarHeader(
+                  onHeaderTap: () {
+                    final currentDate = Calendar.getNowWithoutTime();
+                    if (mounted) {
+                      setState(() {
+                        _focusedDay = Calendar.getDayInAvailableRange(currentDate);
+                        _selectedDay = currentDate;
+                        _selectedWeek = CalendarUtils.getCurrentWeek(mCurrentDate: _selectedDay);
+                        _selectedPage = Calendar.getPageIndex(_selectedDay);
+                      });
+                      if (widget.pageViewController.hasClients) {
+                        widget.pageViewController.jumpToPage(_selectedPage);
+                      }
+                    }
+                  },
                   day: day,
+                  week: _selectedWeek,
                   format: _calendarFormat,
                   pageController: _pageController,
+                  onMonthChanged: (month) {
+                    if (mounted && _pageController != null) {
+                      final now = Calendar.getNowWithoutTime();
+                      final newFocusedDay = DateTime(now.year, month);
+                      final newPage = _calculateFocusedPage(
+                        _calendarFormat,
+                        Calendar.firstCalendarDay,
+                        newFocusedDay,
+                      );
+
+                      if (newPage == _pageController?.page?.round()) {
+                        return;
+                      }
+
+                      _pageController?.animateToPage(
+                        newPage,
+                        duration: const Duration(milliseconds: 150),
+                        curve: Curves.easeInOut,
+                      );
+                    }
+                  },
                 );
               },
               markerBuilder: (context, day, events) {
@@ -172,7 +251,7 @@ class _CalendarState extends State<Calendar> {
             firstDay: Calendar.firstCalendarDay,
             lastDay: Calendar.lastCalendarDay,
             sixWeekMonthsEnforced: true,
-            startingDayOfWeek: StartingDayOfWeek.monday,
+            startingDayOfWeek: Calendar.startingDayOfWeek,
             headerVisible: true,
             headerStyle: const HeaderStyle(
               formatButtonVisible: false,
@@ -241,20 +320,6 @@ class _CalendarState extends State<Calendar> {
             onPageChanged: (focusedDay) {
               // No need to call `setState()` here
               _focusedDay = Calendar.getDayInAvailableRange(focusedDay);
-            },
-            onHeaderTapped: (date) {
-              final currentDate = Calendar.getNowWithoutTime();
-              if (mounted) {
-                setState(() {
-                  _focusedDay = Calendar.getDayInAvailableRange(currentDate);
-                  _selectedDay = currentDate;
-                  _selectedWeek = CalendarUtils.getCurrentWeek(mCurrentDate: _selectedDay);
-                  _selectedPage = Calendar.getPageIndex(_selectedDay);
-                });
-                if (widget.pageViewController.hasClients) {
-                  widget.pageViewController.jumpToPage(_selectedPage);
-                }
-              }
             },
           ),
         );
