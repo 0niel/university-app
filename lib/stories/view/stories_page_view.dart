@@ -62,7 +62,7 @@ class _StoriesPageViewState extends State<StoriesPageView> {
                       tag: widget.stories[widget.storyIndex].title,
                       child: StoryPageView(
                         showShadow: true,
-                        indicatorDuration: const Duration(seconds: 228, milliseconds: 500),
+                        indicatorDuration: const Duration(seconds: 6, milliseconds: 500),
                         initialPage: widget.storyIndex,
                         itemBuilder: (context, pageIndex, storyIndex) {
                           if (pageIndex != _prevStoryIndex) {
