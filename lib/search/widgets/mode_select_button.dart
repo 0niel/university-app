@@ -50,7 +50,7 @@ class _ModeSelectButtonState extends State<ModeSelectButton> {
             ],
             Text(
               widget.text,
-              style: AppTextStyle.tab.copyWith(
+              style: AppTextStyle.titleS.copyWith(
                 color: widget.isActive ? AppTheme.colorsOf(context).active : AppTheme.colorsOf(context).deactive,
               ),
             ),

@@ -208,11 +208,7 @@ class LessonCard extends StatelessWidget {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Divider(
-                            color: AppTheme.colorsOf(context).deactive.withOpacity(0.1),
-                            thickness: 1,
-                            height: 18,
-                          ),
+                          const Divider(height: 18),
                           if (lesson.classrooms.isNotEmpty) ...[
                             const SizedBox(
                               height: 4,
@@ -282,7 +278,7 @@ class LessonCard extends StatelessWidget {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Padding(
-                                  padding: const EdgeInsets.only(left: 2, right: 7, top: 3),
+                                  padding: const EdgeInsets.only(left: 2, right: 8, top: 3),
                                   child: FaIcon(
                                     FontAwesomeIcons.userTie,
                                     size: 12,

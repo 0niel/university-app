@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:rtu_mirea_app/search/search.dart';
 
 class SearchModeSelect extends StatelessWidget {
@@ -27,7 +28,7 @@ class SearchModeSelect extends StatelessWidget {
                 ModeSelectButton(
                   isActive: state.searchMode == SearchMode.groups,
                   text: "Группы",
-                  icon: const Icon(Icons.group),
+                  icon: const Icon(FontAwesomeIcons.userGraduate, size: 16),
                   onClick: () {
                     context.read<SearchBloc>().add(const ChangeSearchMode(searchMode: SearchMode.groups));
                   },
@@ -35,7 +36,7 @@ class SearchModeSelect extends StatelessWidget {
                 ModeSelectButton(
                   isActive: state.searchMode == SearchMode.teachers,
                   text: "Преподаватели",
-                  icon: const Icon(Icons.person),
+                  icon: const Icon(FontAwesomeIcons.chalkboardUser, size: 16),
                   onClick: () {
                     context.read<SearchBloc>().add(const ChangeSearchMode(searchMode: SearchMode.teachers));
                   },
@@ -43,7 +44,7 @@ class SearchModeSelect extends StatelessWidget {
                 ModeSelectButton(
                   isActive: state.searchMode == SearchMode.classrooms,
                   text: "Аудитории",
-                  icon: const Icon(Icons.home),
+                  icon: const Icon(FontAwesomeIcons.building, size: 16),
                   onClick: () {
                     context.read<SearchBloc>().add(const ChangeSearchMode(searchMode: SearchMode.classrooms));
                   },

@@ -70,7 +70,6 @@ class _CalendarHeaderState extends State<CalendarHeader> with TickerProviderStat
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        const SizedBox(height: 11),
         _CalendarWeeksHeader(
           day: widget.day,
           pageController: widget.pageController,
@@ -213,7 +212,7 @@ class _CalendarWeeksHeader extends StatelessWidget {
       onTap: onHeaderTap,
       onLongPress: onHeaderLongPress,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 4),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -259,8 +258,8 @@ class _CalendarWeeksHeader extends StatelessWidget {
                   ),
                   const SizedBox(width: 5.50),
                   Container(
-                    width: 5,
-                    height: 5,
+                    width: 4,
+                    height: 4,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       color: AppTheme.colorsOf(context).active,

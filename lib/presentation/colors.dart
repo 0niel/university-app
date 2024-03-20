@@ -31,6 +31,8 @@ class ThemeColors {
   Color get activeLightMode => const Color(0xFF200745);
   Color get deactiveDarker => const Color(0xFF3A3D46);
 
+  Color get divider => deactiveDarker.withOpacity(0.25);
+
   LinearGradient get gradient07 => const LinearGradient(colors: [Color(0xFFBBFFE7), Color(0xFF86FFCA)]);
 }
 
@@ -82,6 +84,9 @@ class LightThemeColors extends ThemeColors {
   Color get deactiveDarker => const Color(0xFF3A3D46);
 
   @override
+  Color get divider => const Color(0xFFE5E5E5);
+
+  @override
   LinearGradient get gradient07 => const LinearGradient(colors: [Color(0xFFBBFFE7), Color(0xFF86FFCA)]);
 }
 
@@ -131,6 +136,9 @@ class AmoledDarkThemeColors extends ThemeColors {
   Color get activeLightMode => const Color(0xFF200745);
   @override
   Color get deactiveDarker => const Color(0xFF3A3D46);
+
+  @override
+  Color get divider => const Color(0xFF2E2E2E);
 
   @override
   LinearGradient get gradient07 => const LinearGradient(colors: [Color(0xFFBBFFE7), Color(0xFF86FFCA)]);

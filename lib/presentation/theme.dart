@@ -80,9 +80,7 @@ class AppTheme {
       ),
     ),
     dividerTheme: DividerThemeData(
-      color: darkThemeColors.background02,
-      thickness: 0.5,
-      space: 0,
+      color: darkThemeColors.divider,
     ),
     snackBarTheme: SnackBarThemeData(
       backgroundColor: darkThemeColors.background02,
@@ -203,9 +201,7 @@ class AppTheme {
       insetPadding: const EdgeInsets.all(16),
     ),
     dividerTheme: DividerThemeData(
-      color: lightThemeColors.deactiveDarker.withOpacity(0.25),
-      thickness: 0.5,
-      space: 0,
+      color: lightThemeColors.divider,
     ),
     cardTheme: CardTheme(
       color: lightThemeColors.background02,
