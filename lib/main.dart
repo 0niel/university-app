@@ -54,23 +54,27 @@ Future<void> main() async {
   }
 
   if (kDebugMode) {
-    final FirebaseMessaging firebaseMessaging = FirebaseMessaging.instance;
+    try {
+      final FirebaseMessaging firebaseMessaging = FirebaseMessaging.instance;
 
-    String? token = await firebaseMessaging.getToken();
+      String? token = await firebaseMessaging.getToken();
 
-    Logger().i('Firebase token: $token');
+      Logger().i('Firebase token: $token');
 
-    // Clear Secure Storage
-    // var secureStorage = getIt<FlutterSecureStorage>();
-    // await secureStorage.deleteAll();
+      // Clear Secure Storage
+      // var secureStorage = getIt<FlutterSecureStorage>();
+      // await secureStorage.deleteAll();
 
-    // // Clear local dota
-    // var prefs = getIt<SharedPreferences>();
-    // await prefs.clear();
+      // // Clear local dota
+      // var prefs = getIt<SharedPreferences>();
+      // await prefs.clear();
 
-    // // Clear oauth tokens
-    // var lksOauth2 = getIt<LksOauth2>();
-    // await lksOauth2.oauth2Helper.removeAllTokens();
+      // // Clear oauth tokens
+      // var lksOauth2 = getIt<LksOauth2>();
+      // await lksOauth2.oauth2Helper.removeAllTokens();
+    } catch (e) {
+      Logger().e('Firebase token error: $e');
+    }
   }
 
   setPathUrlStrategy();
