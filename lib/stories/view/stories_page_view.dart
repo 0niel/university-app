@@ -45,55 +45,53 @@ class _StoriesPageViewState extends State<StoriesPageView> {
       isFullScreen: false,
       direction: DismissiblePageDismissDirection.vertical,
       backgroundColor: Colors.black.withOpacity(0.8),
-      child: Expanded(
-        child: Align(
-          alignment: Alignment.topCenter,
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              final maxWidth = computeMaxIntrinsicWidth(constraints.maxHeight, 9 / 16);
+      child: Align(
+        alignment: Alignment.topCenter,
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final maxWidth = computeMaxIntrinsicWidth(constraints.maxHeight, 9 / 16);
 
-              return SizedBox(
-                width: maxWidth,
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: Material(
-                    color: Colors.transparent,
-                    child: Hero(
-                      tag: widget.stories[widget.storyIndex].title,
-                      child: StoryPageView(
-                        showShadow: true,
-                        indicatorDuration: const Duration(seconds: 6, milliseconds: 500),
-                        initialPage: widget.storyIndex,
-                        itemBuilder: (context, pageIndex, storyIndex) {
-                          if (pageIndex != _prevStoryIndex) {
-                            _prevStoryIndex = pageIndex;
-                            context.read<AnalyticsBloc>().add(
-                                  TrackAnalyticsEvent(
-                                    ViewStory(
-                                      storyTitle: widget.stories[pageIndex].title,
-                                    ),
+            return SizedBox(
+              width: maxWidth,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: Material(
+                  color: Colors.transparent,
+                  child: Hero(
+                    tag: widget.stories[widget.storyIndex].title,
+                    child: StoryPageView(
+                      showShadow: true,
+                      indicatorDuration: const Duration(seconds: 6, milliseconds: 500),
+                      initialPage: widget.storyIndex,
+                      itemBuilder: (context, pageIndex, storyIndex) {
+                        if (pageIndex != _prevStoryIndex) {
+                          _prevStoryIndex = pageIndex;
+                          context.read<AnalyticsBloc>().add(
+                                TrackAnalyticsEvent(
+                                  ViewStory(
+                                    storyTitle: widget.stories[pageIndex].title,
                                   ),
-                                );
-                          }
-                          final author = widget.stories[pageIndex].author;
-                          final page = widget.stories[pageIndex].pages[storyIndex];
-                          return _buildStoryPage(author, page);
-                        },
-                        pageLength: widget.stories.length,
-                        storyLength: (int pageIndex) {
-                          return widget.stories[pageIndex].pages.length;
-                        },
-                        onPageLimitReached: () => context.pop(),
-                        gestureItemBuilder: (context, pageIndex, storyIndex) {
-                          return _buildGestureItems(pageIndex, storyIndex);
-                        },
-                      ),
+                                ),
+                              );
+                        }
+                        final author = widget.stories[pageIndex].author;
+                        final page = widget.stories[pageIndex].pages[storyIndex];
+                        return _buildStoryPage(author, page);
+                      },
+                      pageLength: widget.stories.length,
+                      storyLength: (int pageIndex) {
+                        return widget.stories[pageIndex].pages.length;
+                      },
+                      onPageLimitReached: () => context.pop(),
+                      gestureItemBuilder: (context, pageIndex, storyIndex) {
+                        return _buildGestureItems(pageIndex, storyIndex);
+                      },
                     ),
                   ),
                 ),
-              );
-            },
-          ),
+              ),
+            );
+          },
         ),
       ),
     );
