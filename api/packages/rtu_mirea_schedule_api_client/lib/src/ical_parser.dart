@@ -190,6 +190,14 @@ class ICalParser {
       datesAndTime.dates.addAll(dates.whereNotNull());
     }
 
+    final exdate = data['exdate'] as List<IcsDateTime>?;
+
+    if (exdate != null) {
+      final dates = exdate.map((e) => e.toDateTime()).toList();
+
+      datesAndTime.dates.removeWhere((element) => dates.any((e) => e != null && e.isSameDate(element)));
+    }
+
     return datesAndTime;
   }
 
