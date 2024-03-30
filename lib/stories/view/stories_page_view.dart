@@ -188,10 +188,6 @@ class _StoriesPageViewState extends State<StoriesPageView> {
   }
 
   Widget _buildGestureItems(int pageIndex, int storyIndex) {
-    final height = MediaQuery.of(context).size.height;
-    final contentHeigth = height * (9 / 16);
-    final buttonSpaceHeight = (height - contentHeigth) / 2;
-
     return Column(
       children: [
         Align(
@@ -216,22 +212,25 @@ class _StoriesPageViewState extends State<StoriesPageView> {
             ),
           ),
         ),
-        SizedBox(height: contentHeigth),
+        Expanded(child: Container()),
         Padding(
-          padding: EdgeInsets.only(left: 24, right: 24, top: buttonSpaceHeight),
-          child: Column(
-            children: List.generate(
-              widget.stories[pageIndex].pages[storyIndex].actions.length,
-              (index) => Padding(
-                padding: const EdgeInsets.only(bottom: 8),
-                child: PrimaryButton(
-                  text: widget.stories[pageIndex].pages[storyIndex].actions[index].title,
-                  onClick: () {
-                    launchUrlString(
-                      widget.stories[pageIndex].pages[storyIndex].actions[index].url,
-                      mode: LaunchMode.externalApplication,
-                    );
-                  },
+          padding: EdgeInsets.only(left: 24, right: 24, bottom: MediaQuery.of(context).viewInsets.bottom + 16),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: List.generate(
+                widget.stories[pageIndex].pages[storyIndex].actions.length,
+                (index) => Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: PrimaryButton(
+                    text: widget.stories[pageIndex].pages[storyIndex].actions[index].title,
+                    onClick: () {
+                      launchUrlString(
+                        widget.stories[pageIndex].pages[storyIndex].actions[index].url,
+                        mode: LaunchMode.externalApplication,
+                      );
+                    },
+                  ),
                 ),
               ),
             ),
