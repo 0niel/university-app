@@ -14,6 +14,7 @@ import 'package:unicons/unicons.dart';
 import 'package:university_app_server_api/client.dart';
 import 'package:collection/collection.dart';
 import 'package:expandable_page_view/expandable_page_view.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 class SchedulePage extends StatefulWidget {
   const SchedulePage({super.key});
@@ -287,7 +288,7 @@ class _SchedulePageState extends State<SchedulePage> {
       ),
       tooltip: 'Добавить историю',
       onPressed: () {
-        context.go('/stories/add');
+        launchUrlString('https://mirea.ninja/pub/add-stories', mode: LaunchMode.externalApplication);
       },
     );
   }
