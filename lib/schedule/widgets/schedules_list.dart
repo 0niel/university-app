@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:rtu_mirea_app/presentation/typography.dart';
 import 'package:rtu_mirea_app/schedule/models/models.dart';
@@ -22,18 +21,6 @@ class SchedulesList extends StatelessWidget {
     }
   }
 
-  String _getIdentifierBySelectedSchedule(SelectedSchedule schedule) {
-    if (schedule is SelectedGroupSchedule) {
-      return schedule.group.uid ?? schedule.group.name;
-    } else if (schedule is SelectedTeacherSchedule) {
-      return schedule.teacher.uid ?? schedule.teacher.name;
-    } else if (schedule is SelectedClassroomSchedule) {
-      return schedule.classroom.uid ?? schedule.classroom.name;
-    } else {
-      return "";
-    }
-  }
-
   UID _getSelectedScheduleUid(SelectedSchedule? selectedSchedule) {
     if (selectedSchedule is SelectedGroupSchedule) {
       return selectedSchedule.group.uid ?? selectedSchedule.group.name;
@@ -44,6 +31,20 @@ class SchedulesList extends StatelessWidget {
     } else {
       return "";
     }
+  }
+
+  void _showSnackbar(BuildContext context, String message, IconData icon) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            Icon(icon),
+            const SizedBox(width: 8),
+            Text(message),
+          ],
+        ),
+      ),
+    );
   }
 
   @override
@@ -82,7 +83,7 @@ class SchedulesList extends StatelessWidget {
                                 target: ScheduleTarget.group,
                               ),
                             );
-                        context.pop();
+                        _showSnackbar(context, "Удалено расписание группы ${el.$2.name}", Icons.delete);
                       },
                       onSelectedPressed: () {
                         context.read<ScheduleBloc>().add(
@@ -93,7 +94,7 @@ class SchedulesList extends StatelessWidget {
                                 ),
                               ),
                             );
-                        context.pop();
+                        _showSnackbar(context, "Выбрано расписание группы ${el.$2.name}", Icons.check);
                       },
                     ),
                   ),
@@ -109,7 +110,7 @@ class SchedulesList extends StatelessWidget {
                                   target: ScheduleTarget.teacher,
                                 ),
                               );
-                          context.pop();
+                          _showSnackbar(context, "Удалено расписание преподавателя ${el.$2.name}", Icons.delete);
                         },
                         onSelectedPressed: () {
                           context.read<ScheduleBloc>().add(
@@ -120,8 +121,7 @@ class SchedulesList extends StatelessWidget {
                                   ),
                                 ),
                               );
-
-                          context.pop();
+                          _showSnackbar(context, "Выбрано расписание преподавателя ${el.$2.name}", Icons.check);
                         }),
                   ),
               ...state.classroomsSchedule.where((el) => el.$1 != _getSelectedScheduleUid(state.selectedSchedule)).map(
@@ -138,7 +138,7 @@ class SchedulesList extends StatelessWidget {
                                 ),
                               ),
                             );
-                        context.pop();
+                        _showSnackbar(context, "Выбрано расписание аудитории ${el.$2.name}", Icons.check);
                       },
                       onDeletePressed: () {
                         context.read<ScheduleBloc>().add(
@@ -147,7 +147,7 @@ class SchedulesList extends StatelessWidget {
                                 target: ScheduleTarget.classroom,
                               ),
                             );
-                        context.pop();
+                        _showSnackbar(context, "Удалено расписание аудитории ${el.$2.name}", Icons.delete);
                       },
                     ),
                   )
