@@ -197,7 +197,7 @@ class _ServicesViewState extends State<ServicesView> {
                   // ),
                   ServiceCard(
                     title: 'Бюро находок',
-                    url: 'https://finds.mirea.ru/',
+                    url: 'https://finds.mirea.ninja/',
                     icon: ServiceIcon(
                       color: AppTheme.colorsOf(context).colorful06,
                       iconColor: AppTheme.colorsOf(context).background01,
