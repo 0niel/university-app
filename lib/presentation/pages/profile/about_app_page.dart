@@ -102,27 +102,6 @@ class AboutAppPage extends StatelessWidget {
                       style: AppTextStyle.bodyRegular,
                     ),
                     const SizedBox(height: 16),
-                    RichText(
-                      text: TextSpan(
-                        children: [
-                          TextSpan(
-                            text: 'Приложение разработано командой ',
-                            style: AppTextStyle.bodyRegular.copyWith(
-                              color: AppTheme.colorsOf(context).active,
-                            ),
-                          ),
-                          TextSpan(
-                            text: 'Mirea Ninja.',
-                            style: AppTextStyle.bodyRegular.copyWith(color: AppTheme.colorsOf(context).primary),
-                            recognizer: TapGestureRecognizer()
-                              ..onTap = () {
-                                launchUrlString("https://mirea.ninja/");
-                              },
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 16),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
