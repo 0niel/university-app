@@ -10,7 +10,7 @@
     <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
 
    <application
-        android:label="Ninja Mirea"
+        android:label="Мой РТУ МИРЭА"
         android:usesCleartextTraffic="true"
         android:icon="@mipmap/ic_launcher"
         android:enableOnBackInvokedCallback="true"
