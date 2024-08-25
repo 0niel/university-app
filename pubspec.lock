@@ -13,10 +13,10 @@ packages:
     dependency: transitive
     description:
       name: _flutterfire_internals
-      sha256: "554f148e71e9e016d9c04d4af6b103ca3f74a1ceed7d7307b70a0f41e991eb77"
+      sha256: "3dee3db3468c5f4640a4e8aa9c1e22561c298976d8c39ed2fdd456a9a3db26e1"
       url: "https://pub.dev"
     source: hosted
-    version: "1.3.26"
+    version: "1.3.32"
   academic_calendar:
     dependency: "direct main"
     description:
@@ -40,6 +40,13 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.6.0"
+  ads_consent_client:
+    dependency: "direct main"
+    description:
+      path: "packages/ads_consent_client"
+      relative: true
+    source: path
+    version: "1.0.0+1"
   after_layout:
     dependency: "direct main"
     description:
@@ -95,6 +102,13 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "5.1.1"
+  app_ui:
+    dependency: "direct main"
+    description:
+      path: "packages/app_ui"
+      relative: true
+    source: path
+    version: "0.0.0"
   archive:
     dependency: transitive
     description:
@@ -111,6 +125,13 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.4.2"
+  article_repository:
+    dependency: "direct main"
+    description:
+      path: "packages/article_repository"
+      relative: true
+    source: path
+    version: "1.0.0+1"
   asn1lib:
     dependency: transitive
     description:
@@ -328,7 +349,7 @@ packages:
     source: hosted
     version: "0.4.1"
   clock:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: clock
       sha256: cb6d7f03e1de671e34607e909a7213e31d7752be4fb66a86d29fe1eb14bfb5cf
@@ -351,6 +372,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.18.0"
+  color:
+    dependency: transitive
+    description:
+      name: color
+      sha256: ddcdf1b3badd7008233f5acffaf20ca9f5dc2cd0172b75f68f24526a5f5725cb
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.0.0"
   community_repository:
     dependency: "direct main"
     description:
@@ -510,6 +539,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.3.6"
+  dartx:
+    dependency: transitive
+    description:
+      name: dartx
+      sha256: "8b25435617027257d43e6508b5fe061012880ddfdaa75a71d607c3de2a13d244"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.2.0"
   dartz:
     dependency: "direct main"
     description:
@@ -741,38 +778,35 @@ packages:
   firebase_analytics:
     dependency: "direct main"
     description:
-      path: "packages/firebase_analytics/firebase_analytics"
-      ref: "10778421ce1f38091a2419163637dbc4e6a36657"
-      resolved-ref: "10778421ce1f38091a2419163637dbc4e6a36657"
-      url: "https://github.com/Taillook/flutterfire"
-    source: git
-    version: "10.8.8"
+      name: firebase_analytics
+      sha256: c56bcc7abc6caacc33e8495bc604a5861d25ce371f1b06476ae226e7cbb21d4c
+      url: "https://pub.dev"
+    source: hosted
+    version: "10.10.4"
   firebase_analytics_platform_interface:
     dependency: transitive
     description:
       name: firebase_analytics_platform_interface
-      sha256: "0a83107f585a630592e8b9113a7e0f2bd6fb72cdb331026ed45744f80686658d"
+      sha256: e8cdb845820eaa5f1d29de31a72aab8addbbffc6483f1e5123a9d0b611735285
       url: "https://pub.dev"
     source: hosted
-    version: "3.9.10"
+    version: "3.10.5"
   firebase_analytics_web:
-    dependency: "direct overridden"
+    dependency: transitive
     description:
-      path: "packages/firebase_analytics/firebase_analytics_web"
-      ref: "10778421ce1f38091a2419163637dbc4e6a36657"
-      resolved-ref: "10778421ce1f38091a2419163637dbc4e6a36657"
-      url: "https://github.com/Taillook/flutterfire"
-    source: git
-    version: "0.5.5+20"
+      name: firebase_analytics_web
+      sha256: e2fabebdf16bb99506a1e7e84f5effd6313c90678e6ea1876d301f057483a198
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.5.7+4"
   firebase_core:
     dependency: "direct main"
     description:
-      path: "packages/firebase_core/firebase_core"
-      ref: "10778421ce1f38091a2419163637dbc4e6a36657"
-      resolved-ref: "10778421ce1f38091a2419163637dbc4e6a36657"
-      url: "https://github.com/Taillook/flutterfire"
-    source: git
-    version: "2.26.0"
+      name: firebase_core
+      sha256: "4aef2a23d0f3265545807d68fbc2f76a6b994ca3c778d88453b99325abd63284"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.30.1"
   firebase_core_platform_interface:
     dependency: transitive
     description:
@@ -784,38 +818,35 @@ packages:
   firebase_core_web:
     dependency: "direct main"
     description:
-      path: "packages/firebase_core/firebase_core_web"
-      ref: "10778421ce1f38091a2419163637dbc4e6a36657"
-      resolved-ref: "10778421ce1f38091a2419163637dbc4e6a36657"
-      url: "https://github.com/Taillook/flutterfire"
-    source: git
-    version: "2.11.5"
+      name: firebase_core_web
+      sha256: "67f2fcc600fc78c2f731c370a3a5e6c87ee862e3a2fba6f951eca6d5dafe5c29"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.16.0"
   firebase_messaging:
     dependency: "direct main"
     description:
-      path: "packages/firebase_messaging/firebase_messaging"
-      ref: "10778421ce1f38091a2419163637dbc4e6a36657"
-      resolved-ref: "10778421ce1f38091a2419163637dbc4e6a36657"
-      url: "https://github.com/Taillook/flutterfire"
-    source: git
-    version: "14.7.18"
+      name: firebase_messaging
+      sha256: "73a43445a7f8c6e6327f0ec3922b1c99a9f4a0e4896197bfe10a88259f775aad"
+      url: "https://pub.dev"
+    source: hosted
+    version: "14.9.1"
   firebase_messaging_platform_interface:
     dependency: transitive
     description:
       name: firebase_messaging_platform_interface
-      sha256: "1dcf7d0d6776396bb2e488c53b0e4cc671c45a65717a73d881e52190d23aca3c"
+      sha256: "675527aadccb679c9dfd43a4558690427123ac1e99f03eef5bbce9dc216edc91"
       url: "https://pub.dev"
     source: hosted
-    version: "4.5.28"
+    version: "4.5.34"
   firebase_messaging_web:
-    dependency: "direct overridden"
+    dependency: transitive
     description:
-      path: "packages/firebase_messaging/firebase_messaging_web"
-      ref: "10778421ce1f38091a2419163637dbc4e6a36657"
-      resolved-ref: "10778421ce1f38091a2419163637dbc4e6a36657"
-      url: "https://github.com/Taillook/flutterfire"
-    source: git
-    version: "3.6.7"
+      name: firebase_messaging_web
+      sha256: "66deff69307f54fc7a20732b4278af327ae378b86607d5ac877d8f2201fe881e"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.8.4"
   firebase_notifications_client:
     dependency: "direct main"
     description:
@@ -868,6 +899,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.2"
+  flutter_gen_core:
+    dependency: transitive
+    description:
+      name: flutter_gen_core
+      sha256: "3a6c3dbc1c0e260088e9c7ed1ba905436844e8c01a44799f6281edada9e45308"
+      url: "https://pub.dev"
+    source: hosted
+    version: "5.4.0"
+  flutter_gen_runner:
+    dependency: "direct dev"
+    description:
+      name: flutter_gen_runner
+      sha256: "24889d5140b03997f7148066a9c5fab8b606dff36093434c782d7a7fb22c6fb6"
+      url: "https://pub.dev"
+    source: hosted
+    version: "5.4.0"
   flutter_html:
     dependency: "direct main"
     description:
@@ -1259,6 +1306,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "13.2.1"
+  google_mobile_ads:
+    dependency: transitive
+    description:
+      name: google_mobile_ads
+      sha256: f07d4e2ebf56181e8dd18ee810607e84aeac8add5251bb44c1c886af47ff021a
+      url: "https://pub.dev"
+    source: hosted
+    version: "5.0.0"
   graphs:
     dependency: transitive
     description:
@@ -1468,21 +1523,21 @@ packages:
     source: hosted
     version: "0.6.7"
   json_annotation:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: json_annotation
-      sha256: b10a7b2ff83d83c777edba3c6a0f97045ddadd56c944e1a23a3fdf43a1bf4467
+      sha256: "1ce844379ca14835a50d2f019a3099f419082cfdd231cd86a142af94dd5c6bb1"
       url: "https://pub.dev"
     source: hosted
-    version: "4.8.1"
+    version: "4.9.0"
   json_serializable:
     dependency: "direct dev"
     description:
       name: json_serializable
-      sha256: aa1f5a8912615733e0fdc7a02af03308933c93235bdc8d50d0b0c8a8ccb0b969
+      sha256: ea1432d167339ea9b5bb153f0571d0039607a873d6e04e0117af043f14a1fd4b
       url: "https://pub.dev"
     source: hosted
-    version: "6.7.1"
+    version: "6.8.0"
   jsonc:
     dependency: transitive
     description:
@@ -1635,6 +1690,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.5"
+  mockingjay:
+    dependency: transitive
+    description:
+      name: mockingjay
+      sha256: c31b9850139a2a54d6bcfa02af022a8b15bf7c0bb83b0d5881e001e396fa91de
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.3.0"
+  mocktail:
+    dependency: transitive
+    description:
+      name: mocktail
+      sha256: "80a996cd9a69284b3dc521ce185ffe9150cde69767c2d3a0720147d93c0cef53"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.3.0"
   mustache_template:
     dependency: transitive
     description:
@@ -1717,6 +1788,20 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.0"
+  news_blocks:
+    dependency: "direct main"
+    description:
+      path: "api/packages/news_blocks"
+      relative: true
+    source: path
+    version: "1.0.0+1"
+  news_blocks_ui:
+    dependency: "direct main"
+    description:
+      path: "packages/news_blocks_ui"
+      relative: true
+    source: path
+    version: "1.0.0+1"
   news_repository:
     dependency: "direct main"
     description:
@@ -1955,7 +2040,7 @@ packages:
     source: hosted
     version: "0.14.0"
   platform:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: platform
       sha256: "12220bb4b65720483f8fa9450b4332347737cf8213dd2840d8b2c823e47243ec"
@@ -2239,6 +2324,13 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "7.18.0"
+  share_launcher:
+    dependency: "direct main"
+    description:
+      path: "packages/share_launcher"
+      relative: true
+    source: path
+    version: "1.0.0+1"
   share_plus:
     dependency: transitive
     description:
@@ -2889,6 +2981,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.3.0"
+  visibility_detector:
+    dependency: "direct main"
+    description:
+      name: visibility_detector
+      sha256: "15c54a459ec2c17b4705450483f3d5a2858e733aee893dcee9d75fd04814940d"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.3.3"
   vm_service:
     dependency: transitive
     description:
