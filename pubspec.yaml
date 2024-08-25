@@ -44,7 +44,7 @@ dependencies:
   material_floating_search_bar_2: ^0.5.0
   connectivity_plus: ^5.0.2
   dartz: ^0.10.0-nullsafety.2
-  flutter_typeahead: ^4.0.0
+  flutter_typeahead: ^5.0.0
   calendar_date_picker2: ^0.5.3
   flutter_html: ^3.0.0-beta.2
   flutter_html_iframe: ^3.0.0-beta.2
