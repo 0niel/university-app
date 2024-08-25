@@ -32,7 +32,7 @@ dependencies:
   hydrated_bloc: ^9.1.2
   bloc_concurrency: ^0.2.2
   provider: ^6.0.5
-  intl: ^0.18.0
+  intl: ^0.19.0
   dio: ^5.1.2
   shared_preferences: ^2.0.11
   bloc: ^8.1.1

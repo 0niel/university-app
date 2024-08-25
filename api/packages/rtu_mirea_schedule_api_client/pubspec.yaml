@@ -12,7 +12,7 @@ dependencies:
   rrule: ^0.2.14
   equatable: ^2.0.3
   json_annotation: ^4.8.1
-  intl: ^0.18.1
+  intl: ^0.19.0
   schedule:
     path: ../schedule
   collection: ^1.18.0
