@@ -297,7 +297,7 @@ class _SchedulePageState extends State<SchedulePage> {
     return ConstrainedBox(
       constraints: const BoxConstraints(
         minHeight: 100,
-        maxHeight: 466,
+        maxHeight: 602,
       ),
       child: Container(
         margin: const EdgeInsets.all(8.0),
