@@ -7,9 +7,7 @@ dependency_overrides:
   neon_dashboard:
     path: packages/neon/packages/neon/neon_dashboard
   neon_files:
-    git:
-      url: https://github.com/0niel/neon.git
-      path: packages/neon/neon_files
+    path: packages/neon/packages/neon/neon_files
   neon_talk:
     path: packages/neon/packages/neon/neon_talk
   neon_framework:
@@ -40,3 +38,5 @@ dependency_overrides:
     git:
       url: https://github.com/crazecoder/open_file.git
       ref: 7619c1bc2086c052a07701fb5e1456acc833e189
+
+  intl: ^0.19.0

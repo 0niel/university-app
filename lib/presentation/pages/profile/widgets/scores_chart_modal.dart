@@ -98,7 +98,7 @@ class _ScoresChartModalState extends State<ScoresChartModal> {
                     width: 10,
                     height: 10,
                     decoration: BoxDecoration(
-                      color: series.color,
+                      color: series?.color,
                       borderRadius: const BorderRadius.all(Radius.circular(5)),
                     ),
                   ),
