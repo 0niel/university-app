@@ -74,6 +74,7 @@ class _CalendarHeaderState extends State<CalendarHeader> with TickerProviderStat
           day: widget.day,
           pageController: widget.pageController,
           week: widget.week,
+          format: widget.format,
           onHeaderTap: widget.onHeaderTap,
           onHeaderLongPress: widget.onHeaderLongPress,
         ),
@@ -175,7 +176,7 @@ class _CalendarHeaderState extends State<CalendarHeader> with TickerProviderStat
                           Tab(text: 'Сентябрь'),
                           Tab(text: 'Октябрь'),
                           Tab(text: 'Ноябрь'),
-                          Tab(text: 'Декабь'),
+                          Tab(text: 'Декабрь'),
                         ],
                       ),
                     ),
@@ -196,12 +197,14 @@ class _CalendarWeeksHeader extends StatelessWidget {
     required this.day,
     required this.pageController,
     required this.week,
+    required this.format,
     this.onHeaderTap,
     this.onHeaderLongPress,
   }) : super(key: key);
 
   final DateTime day;
   final int week;
+  final CalendarFormat format;
   final PageController? pageController;
   final VoidCallback? onHeaderTap;
   final VoidCallback? onHeaderLongPress;
@@ -236,36 +239,42 @@ class _CalendarWeeksHeader extends StatelessWidget {
                 },
               ),
             ),
-            AnimatedSwitcher(
-              switchInCurve: Curves.easeIn,
-              switchOutCurve: Curves.easeOut,
-              duration: const Duration(milliseconds: 150),
-              transitionBuilder: (Widget child, Animation<double> animation) {
-                return FadeTransition(
-                  opacity: animation,
-                  child: child,
-                );
-              },
+            Expanded(
               child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.center,
-                key: ValueKey<String>(DateFormat.yMMMM('ru_RU').format(day)),
                 children: [
-                  Text(
-                    DateFormat.yMMMM('ru_RU').format(day)[0].toUpperCase() +
-                        DateFormat.yMMMM('ru_RU').format(day).substring(1).replaceAll(RegExp(r' г.'), ' '),
-                    style: AppTextStyle.bodyL,
-                  ),
-                  const SizedBox(width: 5.50),
-                  Container(
-                    width: 4,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: AppTheme.colorsOf(context).active,
+                  AnimatedSize(
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeInOut,
+                    child: AnimatedSlide(
+                      offset: format == CalendarFormat.month ? const Offset(0, -1) : Offset.zero,
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.easeInOut,
+                      child: Visibility(
+                        visible: format != CalendarFormat.month,
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Text(
+                              DateFormat.yMMMM('ru_RU').format(day)[0].toUpperCase() +
+                                  DateFormat.yMMMM('ru_RU').format(day).substring(1).replaceAll(RegExp(r' г.'), ' '),
+                              style: AppTextStyle.bodyL,
+                            ),
+                            const SizedBox(width: 5.50),
+                            Container(
+                              width: 4,
+                              height: 4,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: AppTheme.colorsOf(context).active,
+                              ),
+                            ),
+                            const SizedBox(width: 5.50),
+                          ],
+                        ),
+                      ),
                     ),
                   ),
-                  const SizedBox(width: 5.50),
                   Text('$week неделя', style: AppTextStyle.bodyL),
                 ],
               ),
