@@ -40,3 +40,5 @@ dependency_overrides:
       ref: 7619c1bc2086c052a07701fb5e1456acc833e189
 
   intl: ^0.19.0
+  camera_android_camerax: 0.6.7
+  camera: 0.11.0
