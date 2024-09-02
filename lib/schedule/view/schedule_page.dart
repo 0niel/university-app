@@ -19,6 +19,8 @@ import 'package:url_launcher/url_launcher_string.dart';
 class SchedulePage extends StatefulWidget {
   const SchedulePage({super.key});
 
+  static const int maxLessonCountInDay = 7;
+
   @override
   State<SchedulePage> createState() => _SchedulePageState();
 }
@@ -120,10 +122,9 @@ class _SchedulePageState extends State<SchedulePage> {
                       (lesson) => lesson.lessonBells.number,
                     );
 
-                    const maxLessonCountInDay = 6;
                     return ListView.builder(
                       shrinkWrap: true,
-                      itemCount: maxLessonCountInDay,
+                      itemCount: SchedulePage.maxLessonCountInDay,
                       itemBuilder: (context, index) {
                         final lessons = List<LessonSchedulePart>.from(
                           (lessonsByTime.containsKey(index + 1) ? lessonsByTime[index + 1] : []) as Iterable,
