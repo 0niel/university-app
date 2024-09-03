@@ -90,7 +90,6 @@ class _CalendarHeaderState extends State<CalendarHeader> with TickerProviderStat
             if (widget.format == CalendarFormat.month)
               Column(
                 children: [
-                  const SizedBox(height: 20),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 24),
                     child: SizedBox(
@@ -136,51 +135,42 @@ class _CalendarHeaderState extends State<CalendarHeader> with TickerProviderStat
                     endIndent: 12,
                   ),
                   const SizedBox(height: 12),
-                  Stack(children: [
-                    const Padding(
-                      padding: EdgeInsets.only(top: 58),
-                      child: Divider(
-                        height: 0,
-                        indent: 24,
-                        endIndent: 24,
-                      ),
-                    ),
-                    DefaultTabController(
-                      length: 12,
-                      child: TabBar(
-                        controller: _tabController,
-                        isScrollable: true,
-                        physics: const BouncingScrollPhysics(),
-                        labelStyle: AppTextStyle.bodyBold,
-                        unselectedLabelStyle: AppTextStyle.bodyL,
-                        padding: const EdgeInsets.symmetric(horizontal: 15),
-                        labelColor: AppTheme.colorsOf(context).primary,
-                        labelPadding: const EdgeInsets.symmetric(horizontal: 10).copyWith(bottom: 10),
-                        indicatorSize: TabBarIndicatorSize.label,
-                        unselectedLabelColor: AppTheme.colorsOf(context).deactive,
-                        indicator: UnderlineTabIndicator(
-                          borderSide: BorderSide(
-                            width: 1,
-                            color: AppTheme.colorsOf(context).primary,
-                          ),
+                  DefaultTabController(
+                    length: 12,
+                    child: TabBar(
+                      controller: _tabController,
+                      isScrollable: true,
+                      physics: const BouncingScrollPhysics(),
+                      labelStyle: AppTextStyle.bodyBold,
+                      unselectedLabelStyle: AppTextStyle.bodyL,
+                      padding: const EdgeInsets.symmetric(horizontal: 15),
+                      labelColor: AppTheme.colorsOf(context).primary,
+                      labelPadding: const EdgeInsets.symmetric(horizontal: 10).copyWith(bottom: 10),
+                      indicatorSize: TabBarIndicatorSize.label,
+                      unselectedLabelColor: AppTheme.colorsOf(context).deactive,
+                      indicator: UnderlineTabIndicator(
+                        borderSide: BorderSide(
+                          width: 2,
+                          color: AppTheme.colorsOf(context).primary,
                         ),
-                        tabs: const [
-                          Tab(text: 'Январь'),
-                          Tab(text: 'Февраль'),
-                          Tab(text: 'Март'),
-                          Tab(text: 'Апрель'),
-                          Tab(text: 'Май'),
-                          Tab(text: 'Июнь'),
-                          Tab(text: 'Июль'),
-                          Tab(text: 'Август'),
-                          Tab(text: 'Сентябрь'),
-                          Tab(text: 'Октябрь'),
-                          Tab(text: 'Ноябрь'),
-                          Tab(text: 'Декабрь'),
-                        ],
                       ),
+                      dividerColor: Theme.of(context).dividerTheme.color,
+                      tabs: const [
+                        Tab(text: 'Январь'),
+                        Tab(text: 'Февраль'),
+                        Tab(text: 'Март'),
+                        Tab(text: 'Апрель'),
+                        Tab(text: 'Май'),
+                        Tab(text: 'Июнь'),
+                        Tab(text: 'Июль'),
+                        Tab(text: 'Август'),
+                        Tab(text: 'Сентябрь'),
+                        Tab(text: 'Октябрь'),
+                        Tab(text: 'Ноябрь'),
+                        Tab(text: 'Декабрь'),
+                      ],
                     ),
-                  ]),
+                  ),
                   const SizedBox(height: 20),
                 ],
               ),
