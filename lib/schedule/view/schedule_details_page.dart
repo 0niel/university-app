@@ -266,6 +266,7 @@ class _ScheduleDetailsPageState extends State<ScheduleDetailsPage> {
               return InputChip(
                 label: Text(group),
                 onPressed: () => context.go('/schedule/search', extra: group),
+                side: BorderSide(color: AppTheme.colorsOf(context).deactiveDarker),
               );
             }).toList() ??
             [],
