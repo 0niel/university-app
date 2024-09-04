@@ -3,7 +3,7 @@
   "files.insertFinalNewline": true,
   "java.configuration.updateBuildConfiguration": "interactive",
   "cmake.configureOnOpen": false,
-  "dart.flutterSdkPath": ".fvm\\versions\\3.19.0",
+  "dart.flutterSdkPath": ".fvm/versions/3.22.3",
   "search.exclude": {
     "**/.fvm": true
   },
