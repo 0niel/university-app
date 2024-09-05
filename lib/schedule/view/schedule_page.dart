@@ -287,10 +287,8 @@ class _SchedulePageState extends State<SchedulePage> {
         UniconsLine.plus_circle,
         color: AppTheme.colorsOf(context).active,
       ),
-      tooltip: 'Добавить историю',
-      onPressed: () {
-        launchUrlString('https://mirea.ninja/pub/add-stories', mode: LaunchMode.externalApplication);
-      },
+      tooltip: 'Добавить группу',
+      onPressed: () => context.go('/schedule/search'),
     );
   }
 
