@@ -78,5 +78,9 @@
 	<string>Приложение запрашивает доступ к галерее</string>
 	<key>NSCameraUsageDescription</key>
 	<string>Приложение запрашивает доступ к камере</string>
+	<key>NSCalendarsUsageDescription</key>
+	<string>Мы используем ваш календарь для добавления событий.</string>
+	<key>NSCalendarsFullAccessUsageDescription</key>
+	<string>Мы используем ваш календарь для добавления событий.</string>
 </dict>
 </plist>

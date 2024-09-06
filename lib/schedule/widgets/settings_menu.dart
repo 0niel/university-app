@@ -120,6 +120,36 @@ class SettingsMenu extends StatelessWidget {
             },
           ),
         ),
+        if (state.selectedSchedule != null)
+          ScheduleDrawerButton(
+            text: "Экспортировать в календарь",
+            icon: SvgPicture.asset(
+              'assets/icons/calendar.svg',
+              height: 16,
+              width: 16,
+            ),
+            onTap: () async {
+              context.pop();
+              try {
+                await context.read<ScheduleBloc>().exportScheduleToCalendar(state.selectedSchedule!);
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Расписание успешно добавлено в календарь!'),
+                    ),
+                  );
+                });
+              } catch (e) {
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text((e as Exception).toString()),
+                    ),
+                  );
+                });
+              }
+            },
+          ),
         const SchedulesList(),
       ],
     );
