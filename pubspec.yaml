@@ -2,7 +2,7 @@ name: rtu_mirea_app
 description: Mobile application for students of RTU MIREA
 publish_to: 'none'
 
-version: 1.5.8+102
+version: 1.5.8+103
 
 environment:
   sdk: ">=3.1.1"
@@ -123,6 +123,7 @@ dependencies:
       url: https://github.com/builttoroam/device_calendar.git
       ref: develop
   timezone: ^0.9.4
+  dot_navigation_bar: ^1.0.2
 
 dev_dependencies:
   flutter_lints: ^2.0.1
