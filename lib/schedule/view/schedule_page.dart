@@ -1,65 +1,77 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
+import 'package:hugeicons/hugeicons.dart';
+import 'package:intl/intl.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
+import 'package:rtu_mirea_app/presentation/typography.dart';
 import 'package:rtu_mirea_app/presentation/widgets/bottom_modal_sheet.dart';
 import 'package:rtu_mirea_app/schedule/bloc/schedule_bloc.dart';
 import 'package:rtu_mirea_app/schedule/models/models.dart';
 import 'package:rtu_mirea_app/schedule/widgets/widgets.dart';
 import 'package:rtu_mirea_app/stories/bloc/stories_bloc.dart';
 import 'package:rtu_mirea_app/stories/view/stories_view.dart';
-import 'package:table_calendar/table_calendar.dart';
-import 'package:unicons/unicons.dart';
 import 'package:university_app_server_api/client.dart';
 import 'package:collection/collection.dart';
 import 'package:expandable_page_view/expandable_page_view.dart';
-import 'package:url_launcher/url_launcher_string.dart';
 
 class SchedulePage extends StatefulWidget {
   const SchedulePage({super.key});
 
-  static const int maxLessonCountInDay = 7;
+  static const int maxLessonsPerDay = 7;
 
   @override
   State<SchedulePage> createState() => _SchedulePageState();
 }
 
 class _SchedulePageState extends State<SchedulePage> {
-  late final PageController _schedulePageController;
+  late final PageController _pageController;
+  late final ScrollController _scrollController;
+  late final ScheduleBloc _bloc;
 
   @override
   void initState() {
     super.initState();
-    _schedulePageController = PageController(
+    _pageController = PageController(
       initialPage: Calendar.getPageIndex(Calendar.getNowWithoutTime()),
     );
+    _scrollController = ScrollController();
+    _bloc = context.read<ScheduleBloc>();
   }
 
   @override
   void dispose() {
-    _schedulePageController.dispose();
+    _pageController.dispose();
+    _scrollController.dispose();
+
     super.dispose();
   }
 
-  String get _getAppBarTitle {
-    final schedule = context.read<ScheduleBloc>().state.selectedSchedule;
+  String get _appBarTitle {
+    final scheduleState = context.read<ScheduleBloc>().state.selectedSchedule;
 
-    if (schedule is SelectedGroupSchedule) {
-      return schedule.group.name;
-    } else if (schedule is SelectedTeacherSchedule) {
-      final splittedName = schedule.teacher.name.split(' ');
-      if (splittedName.length == 3) {
-        return '${splittedName[0]} ${splittedName[1][0]}. ${splittedName[2][0]}.';
-      } else if (splittedName.length == 2) {
-        return '${splittedName[0]} ${splittedName[1][0]}.';
-      } else {
-        return schedule.teacher.name;
-      }
-    } else if (schedule is SelectedClassroomSchedule) {
-      return schedule.classroom.name;
+    switch (scheduleState.runtimeType) {
+      case SelectedGroupSchedule:
+        return (scheduleState as SelectedGroupSchedule).group.name;
+      case SelectedTeacherSchedule:
+        return _formatTeacherName((scheduleState as SelectedTeacherSchedule).teacher.name);
+      case SelectedClassroomSchedule:
+        return (scheduleState as SelectedClassroomSchedule).classroom.name;
+      default:
+        return 'Расписание';
+    }
+  }
+
+  String _formatTeacherName(String fullName) {
+    final nameParts = fullName.split(' ');
+    if (nameParts.length == 3) {
+      return '${nameParts[0]} ${nameParts[1][0]}. ${nameParts[2][0]}.';
+    } else if (nameParts.length == 2) {
+      return '${nameParts[0]} ${nameParts[1][0]}.';
     } else {
-      return 'Расписание';
+      return fullName;
     }
   }
 
@@ -77,214 +89,65 @@ class _SchedulePageState extends State<SchedulePage> {
       },
       buildWhen: (previous, current) => current.status != ScheduleStatus.failure && current.selectedSchedule != null,
       builder: (context, state) {
-        if (state.selectedSchedule == null && state.status != ScheduleStatus.loading) {
+        if (state.status == ScheduleStatus.loading) {
+          return const Center(child: CircularProgressIndicator());
+        } else if (state.selectedSchedule == null) {
           return NoSelectedScheduleMessage(onTap: () {
             context.go('/schedule/search');
           });
-        } else if (state.status == ScheduleStatus.loading) {
-          return const Center(
-            child: CircularProgressIndicator(),
-          );
-        } else if (state.status == ScheduleStatus.failure && state.selectedSchedule == null) {
+        } else if (state.status == ScheduleStatus.failure) {
           return LoadingErrorMessage(onTap: () {
             context.go('/schedule/search');
           });
-        } else if (state.selectedSchedule != null) {
-          return Scaffold(
-            body: LayoutBuilder(
-              builder: (BuildContext context, BoxConstraints constraints) {
-                final bool isWideScreen = constraints.maxWidth > 880;
-
-                final eventsPageView = EventsPageView(
-                  controller: _schedulePageController,
-                  itemBuilder: (context, index) {
-                    final day = Calendar.firstCalendarDay.add(Duration(days: index));
-                    final schedules = Calendar.getSchedulePartsByDay(
-                      schedule: state.selectedSchedule?.schedule ?? [],
-                      day: day,
-                    );
-
-                    final holiday = schedules.firstWhereOrNull(
-                      (element) => element is HolidaySchedulePart,
-                    );
-
-                    if (holiday != null) {
-                      return HolidayPage(title: (holiday as HolidaySchedulePart).title);
-                    }
-
-                    if (day.weekday == DateTime.sunday) {
-                      return const HolidayPage(title: 'Выходной');
-                    }
-
-                    final lessons = schedules.whereType<LessonSchedulePart>().toList();
-                    final lessonsByTime = groupBy<LessonSchedulePart, int>(
-                      lessons,
-                      (lesson) => lesson.lessonBells.number,
-                    );
-
-                    return ListView.builder(
-                      shrinkWrap: true,
-                      itemCount: SchedulePage.maxLessonCountInDay,
-                      itemBuilder: (context, index) {
-                        final lessons = List<LessonSchedulePart>.from(
-                          (lessonsByTime.containsKey(index + 1) ? lessonsByTime[index + 1] : []) as Iterable,
-                        );
-                        final lesson = lessons.isNotEmpty ? lessons.first : null;
-
-                        if (lesson != null) {
-                          return _buildLessonCard(lessons, lesson, day);
-                        }
-
-                        if (state.showEmptyLessons) {
-                          return Padding(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 16.0,
-                              vertical: 8.0,
-                            ),
-                            child: EmptyLessonCard(lessonNumber: index + 1),
-                          );
-                        } else {
-                          return const SizedBox.shrink();
-                        }
-                      },
-                    );
-                  },
-                );
-
-                return BlocBuilder<StoriesBloc, StoriesState>(
-                  builder: (context, storiesState) {
-                    return NestedScrollView(
-                      headerSliverBuilder: (_, __) => [
-                        SliverAppBar(
-                          pinned: false,
-                          title: Text(
-                            _getAppBarTitle,
-                          ),
-                          actions: [
-                            _buildStoriesAddButton(context),
-                            _buildSettingsButton(context),
-                          ],
-                          bottom: (storiesState is StoriesLoaded && storiesState.stories.isNotEmpty)
-                              ? const PreferredSize(
-                                  preferredSize: Size.fromHeight(80),
-                                  child: StoriesView(),
-                                )
-                              : const PreferredSize(
-                                  preferredSize: Size.fromHeight(0),
-                                  child: SizedBox.shrink(),
-                                ),
-                        ),
-                        if (!isWideScreen)
-                          SliverToBoxAdapter(
-                            child: Calendar(
-                              pageViewController: _schedulePageController,
-                              schedule: state.selectedSchedule?.schedule ?? [],
-                              comments: state.comments,
-                              showCommentsIndicators: state.showCommentsIndicators,
-                            ),
-                          ),
-                      ],
-                      body: isWideScreen
-                          ? Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Expanded(
-                                  flex: 2,
-                                  child: eventsPageView,
-                                ),
-                                Flexible(
-                                  flex: 1,
-                                  child: _buildCalendar(context, state),
-                                ),
-                              ],
-                            )
-                          : eventsPageView,
-                    );
-                  },
-                );
-              },
-            ),
-          );
-        } else {
-          return const Center(
-            child: CircularProgressIndicator(),
-          );
         }
+
+        return Scaffold(
+          appBar: AppBar(
+            title: Text(_appBarTitle),
+            actions: [
+              _buildAddGroupButton(context),
+              _buildSettingsButton(context),
+              _buildViewToggleButton(),
+            ],
+          ),
+          body: AnimatedSwitcher(
+            duration: 300.ms,
+            switchInCurve: Curves.easeInOut,
+            switchOutCurve: Curves.easeInOut,
+            transitionBuilder: (Widget child, Animation<double> animation) {
+              return FadeTransition(
+                opacity: animation,
+                child: SlideTransition(
+                  position: animation.drive(
+                    Tween<Offset>(
+                      begin: const Offset(0.0, 0.1),
+                      end: Offset.zero,
+                    ),
+                  ),
+                  child: child,
+                ),
+              );
+            },
+            child: state.isListModeEnabled
+                ? KeyedSubtree(
+                    key: const ValueKey('list_mode'),
+                    child: _buildListMode(state),
+                  )
+                : KeyedSubtree(
+                    key: const ValueKey('calendar_mode'),
+                    child: _buildCalendarMode(state),
+                  ),
+          ),
+        );
       },
     );
   }
 
-  Widget _buildLessonCard(List<LessonSchedulePart> lessons, LessonSchedulePart lesson, DateTime day) {
-    return lessons.length == 1
-        ? Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 16.0,
-              vertical: 8.0,
-            ),
-            child: LessonCard(
-              lesson: lesson,
-              onTap: (lesson) {
-                context.go(
-                  '/schedule/details',
-                  extra: (lesson, day),
-                );
-              },
-            ),
-          )
-        : ExpandablePageView.builder(
-            scrollDirection: Axis.horizontal,
-            itemCount: lessons.length,
-            itemBuilder: (context, index) {
-              final lesson = lessons[index];
-              return Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16.0,
-                  vertical: 8.0,
-                ),
-                child: LessonCard(
-                  countInGroup: lessons.length,
-                  indexInGroup: index,
-                  lesson: lesson,
-                  onTap: (lesson) {
-                    context.go(
-                      '/schedule/details',
-                      extra: (lesson, day),
-                    );
-                  },
-                ),
-              );
-            },
-          );
-  }
-
-  Widget _buildSettingsButton(BuildContext context) {
-    return SizedBox(
-      width: 60,
-      height: 60,
-      child: IconButton(
-        icon: Icon(
-          UniconsLine.cog,
-          color: AppTheme.colorsOf(context).active,
-        ),
-        tooltip: 'Управление расписанием',
-        onPressed: () {
-          BottomModalSheet.show(
-            context,
-            child: const SettingsMenu(),
-            title: 'Управление расписанием',
-            description:
-                'Редактирование сохраненных расписаний и добавление новых, а также настройки отображения расписания.',
-            backgroundColor: AppTheme.colorsOf(context).background03,
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _buildStoriesAddButton(BuildContext context) {
+  Widget _buildAddGroupButton(BuildContext context) {
     return IconButton(
-      icon: Icon(
-        UniconsLine.plus_circle,
+      icon: HugeIcon(
+        icon: HugeIcons.strokeRoundedAddSquare,
+        size: 24,
         color: AppTheme.colorsOf(context).active,
       ),
       tooltip: 'Добавить группу',
@@ -292,30 +155,226 @@ class _SchedulePageState extends State<SchedulePage> {
     );
   }
 
-  Widget _buildCalendar(BuildContext context, ScheduleState state) {
-    return ConstrainedBox(
-      constraints: const BoxConstraints(
-        minHeight: 100,
-        maxHeight: 466,
+  Widget _buildSettingsButton(BuildContext context) {
+    return IconButton(
+      icon: HugeIcon(
+        icon: HugeIcons.strokeRoundedSettings02,
+        size: 24,
+        color: AppTheme.colorsOf(context).active,
       ),
-      child: Container(
-        margin: const EdgeInsets.all(8.0),
+      tooltip: 'Управление расписанием',
+      onPressed: () {
+        BottomModalSheet.show(
+          context,
+          child: const SettingsMenu(),
+          title: 'Управление расписанием',
+          description:
+              'Редактирование сохранённых расписаний и добавление новых, а также настройки отображения расписания.',
+          backgroundColor: AppTheme.colorsOf(context).background03,
+        );
+      },
+    );
+  }
+
+  Widget _buildViewToggleButton() {
+    return TextButton(
+      onPressed: () {
+        _bloc.add(const ToggleListMode());
+      },
+      style: TextButton.styleFrom(
+        shape: const CircleBorder(),
         padding: const EdgeInsets.all(16.0),
-        decoration: BoxDecoration(
-          border: Border.all(
-            color: AppTheme.colorsOf(context).deactiveDarker,
-          ),
-          borderRadius: BorderRadius.circular(16.0),
-        ),
-        child: Calendar(
-          pageViewController: _schedulePageController,
-          schedule: state.selectedSchedule?.schedule ?? [],
-          comments: state.comments,
-          showCommentsIndicators: state.showCommentsIndicators,
-          calendarFormat: CalendarFormat.month,
-          canChangeFormat: false,
+      ),
+      child: AnimatedSwitcher(
+        duration: 300.ms,
+        transitionBuilder: (Widget child, Animation<double> animation) {
+          return ScaleTransition(scale: animation, child: child);
+        },
+        child: HugeIcon(
+          key: ValueKey<bool>(_bloc.state.isListModeEnabled),
+          icon: _bloc.state.isListModeEnabled ? HugeIcons.strokeRoundedListView : HugeIcons.strokeRoundedCalendar02,
+          size: 24,
+          color: AppTheme.colorsOf(context).active,
         ),
       ),
     );
+  }
+
+  Map<DateTime, List<SchedulePart>> _groupLessonsByDay(List<SchedulePart> scheduleParts) {
+    final Map<DateTime, List<SchedulePart>> lessonsByDay = {};
+
+    for (final part in scheduleParts) {
+      for (final date in part.dates) {
+        lessonsByDay.update(
+          date,
+          (existing) => existing..add(part),
+          ifAbsent: () => [part],
+        );
+      }
+    }
+
+    return Map.fromEntries(lessonsByDay.entries.toList()..sort((a, b) => a.key.compareTo(b.key)));
+  }
+
+  Widget _buildListMode(ScheduleState state) {
+    final lessonsByDay = _groupLessonsByDay(state.selectedSchedule?.schedule ?? []);
+
+    final today = Calendar.getNowWithoutTime();
+    final filteredLessonsByDay = lessonsByDay.keys
+        .where((day) => day.isAfter(today) || day.isAtSameMomentAs(today))
+        .map((day) => MapEntry(day, lessonsByDay[day]))
+        .toList();
+
+    return ListView.builder(
+      controller: _scrollController,
+      itemCount: filteredLessonsByDay.length,
+      itemBuilder: (context, index) {
+        final day = filteredLessonsByDay[index].key;
+        final lessons = filteredLessonsByDay[index].value?.whereType<LessonSchedulePart>();
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (lessons?.isNotEmpty ?? false)
+              Padding(
+                padding: const EdgeInsets.only(top: 18.0, left: 24.0, bottom: 14),
+                child: Row(
+                  children: [
+                    Icon(
+                      HugeIcons.strokeRoundedCalendar01,
+                      color: AppTheme.colorsOf(context).deactive,
+                      size: 17.5,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      DateFormat('EEEE, d MMMM', 'ru').format(day),
+                      style: AppTextStyle.chip.copyWith(
+                        color: AppTheme.colorsOf(context).deactive,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ...lessons?.map((lessonPart) => Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                      child: LessonCard(
+                        lesson: lessonPart,
+                        onTap: (lesson) {
+                          context.go('/schedule/details', extra: (lesson, day));
+                        },
+                      ),
+                    )) ??
+                [],
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildCalendarMode(ScheduleState state) {
+    return BlocBuilder<StoriesBloc, StoriesState>(
+      builder: (context, storiesState) {
+        return NestedScrollView(
+          headerSliverBuilder: (_, __) => [
+            if (storiesState is StoriesLoaded && storiesState.stories.isNotEmpty) ...[
+              const SliverAppBar(
+                  pinned: false,
+                  bottom: PreferredSize(
+                    preferredSize: Size.fromHeight(80),
+                    child: StoriesView(),
+                  )),
+            ],
+            if (!_bloc.state.isListModeEnabled)
+              SliverToBoxAdapter(
+                child: Calendar(
+                  key: GlobalKey(),
+                  pageViewController: _pageController,
+                  schedule: state.selectedSchedule?.schedule ?? [],
+                  comments: state.comments,
+                  showCommentsIndicators: state.showCommentsIndicators,
+                ),
+              ),
+          ],
+          body: _buildPageView(state),
+        );
+      },
+    );
+  }
+
+  Widget _buildPageView(ScheduleState state) {
+    return EventsPageView(
+      controller: _pageController,
+      itemBuilder: (context, index) {
+        final day = Calendar.firstCalendarDay.add(Duration(days: index));
+        final lessonsForDay = Calendar.getSchedulePartsByDay(
+          schedule: state.selectedSchedule?.schedule ?? [],
+          day: day,
+        );
+
+        final holiday = lessonsForDay.firstWhereOrNull(
+          (element) => element is HolidaySchedulePart,
+        );
+
+        if (holiday != null) {
+          return HolidayPage(title: (holiday as HolidaySchedulePart).title);
+        }
+
+        if (day.weekday == DateTime.sunday) {
+          return const HolidayPage(title: 'Выходной');
+        }
+
+        final lessonsByTime = groupBy<LessonSchedulePart, int>(
+          lessonsForDay.whereType<LessonSchedulePart>().toList(),
+          (lesson) => lesson.lessonBells.number,
+        );
+
+        return ListView.builder(
+          shrinkWrap: true,
+          itemCount: SchedulePage.maxLessonsPerDay,
+          itemBuilder: (context, lessonIndex) {
+            final lessons = lessonsByTime[lessonIndex + 1] ?? [];
+
+            return lessons.isNotEmpty
+                ? _buildLessonCard(lessons, lessons.first, day)
+                : state.showEmptyLessons
+                    ? Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                        child: EmptyLessonCard(lessonNumber: lessonIndex + 1),
+                      )
+                    : const SizedBox.shrink();
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildLessonCard(List<LessonSchedulePart> lessons, LessonSchedulePart lesson, DateTime day) {
+    return lessons.length == 1
+        ? Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            child: LessonCard(
+              lesson: lesson,
+              onTap: (lesson) {
+                context.go('/schedule/details', extra: (lesson, day));
+              },
+            ),
+          )
+        : ExpandablePageView.builder(
+            itemCount: lessons.length,
+            itemBuilder: (context, index) {
+              final currentLesson = lessons[index];
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                child: LessonCard(
+                  countInGroup: lessons.length,
+                  indexInGroup: index,
+                  lesson: currentLesson,
+                  onTap: (lesson) {
+                    context.go('/schedule/details', extra: (lesson, day));
+                  },
+                ),
+              );
+            },
+          );
   }
 }

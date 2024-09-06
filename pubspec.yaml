@@ -117,6 +117,8 @@ dependencies:
   visibility_detector: ^0.3.3
   platform: ^3.0.2
   json_annotation: ^4.9.0
+  hugeicons: ^0.0.7
+  add_2_calendar: ^3.0.1
 
 dev_dependencies:
   flutter_lints: ^2.0.1

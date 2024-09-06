@@ -162,3 +162,10 @@ class DeleteSchedule extends ScheduleEvent {
   @override
   List<Object> get props => [identifier, target];
 }
+
+class ToggleListMode extends ScheduleEvent {
+  const ToggleListMode();
+
+  @override
+  List<Object> get props => [];
+}

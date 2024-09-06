@@ -18,6 +18,7 @@ class ScheduleState extends Equatable {
     this.comments = const [],
     this.showEmptyLessons = false,
     this.showCommentsIndicators = true,
+    this.isListModeEnabled = false,
     this.selectedSchedule,
   });
 
@@ -52,6 +53,8 @@ class ScheduleState extends Equatable {
   /// number will be displayed, even if there is no lesson in this time.
   final bool showEmptyLessons;
 
+  final bool isListModeEnabled;
+
   @SelectedScheduleConverter()
   final SelectedSchedule? selectedSchedule;
 
@@ -65,6 +68,7 @@ class ScheduleState extends Equatable {
     bool? showEmptyLessons,
     List<ScheduleComment>? comments,
     bool? showCommentsIndicators,
+    bool? isListModeEnabled,
   }) {
     return ScheduleState(
       status: status ?? this.status,
@@ -76,6 +80,7 @@ class ScheduleState extends Equatable {
       showEmptyLessons: showEmptyLessons ?? this.showEmptyLessons,
       showCommentsIndicators: showCommentsIndicators ?? this.showCommentsIndicators,
       comments: comments ?? this.comments,
+      isListModeEnabled: isListModeEnabled ?? this.isListModeEnabled,
     );
   }
 
@@ -92,6 +97,7 @@ class ScheduleState extends Equatable {
         showEmptyLessons,
         comments,
         showCommentsIndicators,
+        isListModeEnabled,
       ];
 }
 

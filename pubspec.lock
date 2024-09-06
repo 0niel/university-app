@@ -40,6 +40,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.6.0"
+  add_2_calendar:
+    dependency: "direct main"
+    description:
+      name: add_2_calendar
+      sha256: "8d7a82aba607d35f2a5bc913419e12f865a96a350a8ad2509a59322bc161f200"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.0.1"
   after_layout:
     dependency: "direct main"
     description:
@@ -1413,6 +1421,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.0.2"
+  hugeicons:
+    dependency: "direct main"
+    description:
+      name: hugeicons
+      sha256: b5cf08183a75b7774ca6d601a2ef025ed26550e4fca9d956673ffda91e132411
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.0.7"
   hydrated_bloc:
     dependency: "direct main"
     description:
@@ -3145,5 +3161,5 @@ packages:
     source: hosted
     version: "2.2.0"
 sdks:
-  dart: ">=3.4.0 <3.11.0"
+  dart: ">=3.4.3 <3.11.0"
   flutter: ">=3.20.0-1.2.pre"

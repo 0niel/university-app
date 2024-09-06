@@ -32,6 +32,7 @@ class ScheduleBloc extends HydratedBloc<ScheduleEvent, ScheduleState> {
     on<ScheduleSetEmptyLessonsDisplaying>(_onSetEmptyLessonsDisplaying);
     on<SetLessonComment>(_onSetLessonComment);
     on<ScheduleSetShowCommentsIndicator>(_onSetShowCommentsIndicator);
+    on<ToggleListMode>(_onScheduleToggleListMode);
   }
 
   final ScheduleRepository _scheduleRepository;
@@ -299,6 +300,13 @@ class ScheduleBloc extends HydratedBloc<ScheduleEvent, ScheduleState> {
       emit(state.copyWith(status: ScheduleStatus.failure));
       addError(error, stackTrace);
     }
+  }
+
+  Future<void> _onScheduleToggleListMode(
+    ToggleListMode event,
+    Emitter<ScheduleState> emit,
+  ) async {
+    emit(state.copyWith(isListModeEnabled: !state.isListModeEnabled));
   }
 
   @override
