@@ -19,7 +19,7 @@
 -keepattributes *Annotation*
 -keepattributes SourceFile, LineNumberTable
 
-# Logging 
+# Logging
 -assumenosideeffects class android.util.Log {
     public static *** d(...);
     public static *** v(...);
@@ -62,7 +62,33 @@
 -keep class com.google.android.play.core.splitinstall.** { *; }
 -keep class com.google.android.play.core.tasks.** { *; }
 
+# Keep Flutter Deferred Components
 -keep class io.flutter.embedding.engine.deferredcomponents.** { *; }
+-keep class io.flutter.app.FlutterPlayStoreSplitApplication { *; }
+-keep class io.flutter.embedding.engine.deferredcomponents.PlayStoreDeferredComponentManager { *; }
+-keepclassmembers class io.flutter.embedding.engine.deferredcomponents.PlayStoreDeferredComponentManager {
+    void installDeferredComponent(...);
+}
 
+# Firebase
 -keep class com.google.firebase.** { *; }
+
+# Device Calendar
 -keep class com.builttoroam.devicecalendar.** { *; }
+
+# Fix for missing class: SplitCompatApplication
+-keep class com.google.android.play.core.splitcompat.SplitCompatApplication { *; }
+
+# Fix for missing classes related to SplitInstallManager and SplitInstallRequest
+-keep class com.google.android.play.core.splitinstall.SplitInstallManager { *; }
+-keep class com.google.android.play.core.splitinstall.SplitInstallManagerFactory { *; }
+-keep class com.google.android.play.core.splitinstall.SplitInstallRequest { *; }
+-keep class com.google.android.play.core.splitinstall.SplitInstallRequest$Builder { *; }
+-keep class com.google.android.play.core.splitinstall.SplitInstallSessionState { *; }
+-keep class com.google.android.play.core.splitinstall.SplitInstallStateUpdatedListener { *; }
+-keep class com.google.android.play.core.splitinstall.SplitInstallException { *; }
+
+# Task handling in Play Core
+-keep class com.google.android.play.core.tasks.OnFailureListener { *; }
+-keep class com.google.android.play.core.tasks.OnSuccessListener { *; }
+-keep class com.google.android.play.core.tasks.Task { *; }
