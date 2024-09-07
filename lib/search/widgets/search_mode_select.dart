@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:rtu_mirea_app/gen/assets.gen.dart';
+import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:rtu_mirea_app/search/search.dart';
 
 class SearchModeSelect extends StatelessWidget {
@@ -18,36 +19,35 @@ class SearchModeSelect extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 16),
               scrollDirection: Axis.horizontal,
               children: [
-                ModeSelectButton(
+                _buildModeButton(
+                  context,
                   isActive: state.searchMode == SearchMode.all,
                   text: "Все",
-                  onClick: () {
-                    context.read<SearchBloc>().add(const ChangeSearchMode(searchMode: SearchMode.all));
-                  },
+                  mode: SearchMode.all,
                 ),
-                ModeSelectButton(
+                _buildModeButton(
+                  context,
                   isActive: state.searchMode == SearchMode.groups,
                   text: "Группы",
-                  icon: const Icon(FontAwesomeIcons.userGraduate, size: 16),
-                  onClick: () {
-                    context.read<SearchBloc>().add(const ChangeSearchMode(searchMode: SearchMode.groups));
-                  },
+                  mode: SearchMode.groups,
+                  icon: Assets.icons.hugeicons.userGroup
+                      .svg(color: _getIconColor(context, state.searchMode == SearchMode.groups)),
                 ),
-                ModeSelectButton(
+                _buildModeButton(
+                  context,
                   isActive: state.searchMode == SearchMode.teachers,
                   text: "Преподаватели",
-                  icon: const Icon(FontAwesomeIcons.chalkboardUser, size: 16),
-                  onClick: () {
-                    context.read<SearchBloc>().add(const ChangeSearchMode(searchMode: SearchMode.teachers));
-                  },
+                  mode: SearchMode.teachers,
+                  icon: Assets.icons.hugeicons.teaching
+                      .svg(color: _getIconColor(context, state.searchMode == SearchMode.teachers)),
                 ),
-                ModeSelectButton(
+                _buildModeButton(
+                  context,
                   isActive: state.searchMode == SearchMode.classrooms,
                   text: "Аудитории",
-                  icon: const Icon(FontAwesomeIcons.building, size: 16),
-                  onClick: () {
-                    context.read<SearchBloc>().add(const ChangeSearchMode(searchMode: SearchMode.classrooms));
-                  },
+                  mode: SearchMode.classrooms,
+                  icon: Assets.icons.hugeicons.building06
+                      .svg(color: _getIconColor(context, state.searchMode == SearchMode.classrooms)),
                 ),
               ],
             ),
@@ -55,5 +55,21 @@ class SearchModeSelect extends StatelessWidget {
         );
       },
     );
+  }
+
+  Widget _buildModeButton(BuildContext context,
+      {required bool isActive, required String text, required SearchMode mode, Widget? icon}) {
+    return ModeSelectButton(
+      isActive: isActive,
+      text: text,
+      icon: icon,
+      onClick: () {
+        context.read<SearchBloc>().add(ChangeSearchMode(searchMode: mode));
+      },
+    );
+  }
+
+  Color _getIconColor(BuildContext context, bool isActive) {
+    return isActive ? AppTheme.colorsOf(context).active : AppTheme.colorsOf(context).deactive;
   }
 }

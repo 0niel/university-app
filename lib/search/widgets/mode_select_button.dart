@@ -40,9 +40,11 @@ class _ModeSelectButtonState extends State<ModeSelectButton> {
         child: Row(
           children: [
             if (widget.icon != null) ...[
-              IconTheme(
-                data: IconThemeData(
-                  color: widget.isActive ? AppTheme.colorsOf(context).active : AppTheme.colorsOf(context).deactive,
+              Theme(
+                data: ThemeData(
+                  iconTheme: IconThemeData(
+                    color: widget.isActive ? AppTheme.colorsOf(context).active : AppTheme.colorsOf(context).deactive,
+                  ),
                 ),
                 child: widget.icon!,
               ),
