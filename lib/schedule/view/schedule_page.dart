@@ -272,31 +272,37 @@ class _SchedulePageState extends State<SchedulePage> {
   }
 
   Widget _buildCalendarMode(ScheduleState state) {
+    return NestedScrollView(
+      headerSliverBuilder: (_, __) => [
+        _buildSliverAppBar(),
+        if (!state.isListModeEnabled)
+          SliverToBoxAdapter(
+            child: Calendar(
+              pageViewController: _pageController,
+              schedule: state.selectedSchedule?.schedule ?? [],
+              comments: state.comments,
+              showCommentsIndicators: state.showCommentsIndicators,
+            ),
+          ),
+      ],
+      body: _buildPageView(state),
+    );
+  }
+
+  Widget _buildSliverAppBar() {
     return BlocBuilder<StoriesBloc, StoriesState>(
       builder: (context, storiesState) {
-        return NestedScrollView(
-          headerSliverBuilder: (_, __) => [
-            if (storiesState is StoriesLoaded && storiesState.stories.isNotEmpty) ...[
-              const SliverAppBar(
-                  pinned: false,
-                  bottom: PreferredSize(
-                    preferredSize: Size.fromHeight(80),
-                    child: StoriesView(),
-                  )),
-            ],
-            if (!_bloc.state.isListModeEnabled)
-              SliverToBoxAdapter(
-                child: Calendar(
-                  key: GlobalKey(),
-                  pageViewController: _pageController,
-                  schedule: state.selectedSchedule?.schedule ?? [],
-                  comments: state.comments,
-                  showCommentsIndicators: state.showCommentsIndicators,
-                ),
-              ),
-          ],
-          body: _buildPageView(state),
-        );
+        if (storiesState is StoriesLoaded && storiesState.stories.isNotEmpty) {
+          return const SliverAppBar(
+            pinned: false,
+            bottom: PreferredSize(
+              preferredSize: Size.fromHeight(80),
+              child: StoriesView(),
+            ),
+          );
+        } else {
+          return const SliverToBoxAdapter(child: SizedBox.shrink());
+        }
       },
     );
   }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 import 'package:rtu_mirea_app/common/utils/calendar_utils.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
@@ -164,54 +165,61 @@ class _CalendarState extends State<Calendar> {
         return Padding(
           padding: const EdgeInsets.only(bottom: 8.0),
           child: TableCalendar(
-            onCalendarCreated: (controller) => _pageController = controller,
+            onCalendarCreated: (controller) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                setState(() {
+                  _pageController = controller;
+                });
+              });
+            },
             weekendDays: const [DateTime.sunday],
             calendarBuilders: CalendarBuilders(
               headerTitleBuilder: (context, day) {
-                if (_pageController == null) {
-                  return const SizedBox();
-                }
-                return CalendarHeader(
-                  onHeaderTap: () {
-                    final currentDate = Calendar.getNowWithoutTime();
-                    if (mounted) {
-                      setState(() {
-                        _focusedDay = Calendar.getDayInAvailableRange(currentDate);
-                        _selectedDay = currentDate;
-                        _selectedWeek = CalendarUtils.getCurrentWeek(mCurrentDate: _selectedDay);
-                        _selectedPage = Calendar.getPageIndex(_selectedDay);
-                      });
-                      if (widget.pageViewController.hasClients) {
-                        widget.pageViewController.jumpToPage(_selectedPage);
-                      }
-                    }
-                  },
-                  day: day,
-                  week: _selectedWeek,
-                  format: _calendarFormat,
-                  pageController: _pageController,
-                  onMonthChanged: (month) {
-                    if (mounted && _pageController != null) {
-                      final now = Calendar.getNowWithoutTime();
-                      final newFocusedDay = DateTime(now.year, month);
-                      final newPage = _calculateFocusedPage(
-                        _calendarFormat,
-                        Calendar.firstCalendarDay,
-                        newFocusedDay,
-                      );
+                return _pageController == null
+                    ? const SizedBox.shrink()
+                    : CalendarHeader(
+                        onHeaderTap: () {
+                          final currentDate = Calendar.getNowWithoutTime();
+                          if (mounted) {
+                            setState(() {
+                              _focusedDay = Calendar.getDayInAvailableRange(currentDate);
+                              _selectedDay = currentDate;
+                              _selectedWeek = CalendarUtils.getCurrentWeek(mCurrentDate: _selectedDay);
+                              _selectedPage = Calendar.getPageIndex(_selectedDay);
+                            });
+                            if (widget.pageViewController.hasClients) {
+                              widget.pageViewController.jumpToPage(_selectedPage);
+                            }
+                          }
+                        },
+                        day: day,
+                        week: _selectedWeek,
+                        format: _calendarFormat,
+                        pageController: _pageController,
+                        onMonthChanged: (month) {
+                          if (mounted && _pageController != null) {
+                            final now = Calendar.getNowWithoutTime();
+                            final newFocusedDay = DateTime(now.year, month);
+                            final newPage = _calculateFocusedPage(
+                              _calendarFormat,
+                              Calendar.firstCalendarDay,
+                              newFocusedDay,
+                            );
 
-                      if (newPage == _pageController?.page?.round()) {
-                        return;
-                      }
+                            if (newPage == _pageController?.page?.round()) {
+                              return;
+                            }
 
-                      _pageController?.animateToPage(
-                        newPage,
-                        duration: const Duration(milliseconds: 150),
-                        curve: Curves.easeInOut,
-                      );
-                    }
-                  },
-                );
+                            _pageController?.animateToPage(
+                              newPage,
+                              duration: const Duration(milliseconds: 150),
+                              curve: Curves.easeInOut,
+                            );
+                          }
+                        },
+                      ).animate().fadeIn(
+                          duration: const Duration(milliseconds: 200),
+                        );
               },
               markerBuilder: (context, day, events) {
                 return Row(
