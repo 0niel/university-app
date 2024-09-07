@@ -187,3 +187,12 @@ class DeleteScheduleComment extends ScheduleEvent {
   @override
   List<Object?> get props => [scheduleName];
 }
+
+class ImportScheduleFromJson extends ScheduleEvent {
+  final String jsonString;
+
+  const ImportScheduleFromJson(this.jsonString);
+
+  @override
+  List<Object> get props => [jsonString];
+}

@@ -3,10 +3,11 @@ import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:rtu_mirea_app/presentation/typography.dart';
 
 class PrimaryButton extends StatelessWidget {
-  const PrimaryButton({Key? key, required this.text, required this.onClick}) : super(key: key);
+  const PrimaryButton({Key? key, required this.text, this.onClick, this.onLongPress}) : super(key: key);
 
   final String text;
-  final Function onClick;
+  final VoidCallback? onClick;
+  final VoidCallback? onLongPress;
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +23,10 @@ class PrimaryButton extends StatelessWidget {
           ),
         ),
         onPressed: () {
-          onClick();
+          onClick?.call();
+        },
+        onLongPress: () {
+          onLongPress?.call();
         },
         child: Text(
           text,

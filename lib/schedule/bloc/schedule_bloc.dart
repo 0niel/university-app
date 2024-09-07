@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:analytics_repository/analytics_repository.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
@@ -36,9 +37,31 @@ class ScheduleBloc extends HydratedBloc<ScheduleEvent, ScheduleState> {
     on<ToggleListMode>(_onScheduleToggleListMode);
     on<AddScheduleComment>(_onAddScheduleComment);
     on<DeleteScheduleComment>(_onDeleteScheduleComment);
+    on<ImportScheduleFromJson>(_onImportScheduleFromJson);
   }
 
   final ScheduleRepository _scheduleRepository;
+
+  Future<void> _onImportScheduleFromJson(
+    ImportScheduleFromJson event,
+    Emitter<ScheduleState> emit,
+  ) async {
+    try {
+      final Map<String, dynamic> jsonData = jsonDecode(event.jsonString);
+
+      final importedSchedule = SelectedSchedule.fromJson(jsonData);
+
+      emit(
+        state.copyWith(
+          selectedSchedule: importedSchedule,
+          status: ScheduleStatus.loaded,
+        ),
+      );
+    } catch (error, stackTrace) {
+      emit(state.copyWith(status: ScheduleStatus.failure));
+      addError(error, stackTrace);
+    }
+  }
 
   Future<void> _onAddScheduleComment(
     AddScheduleComment event,

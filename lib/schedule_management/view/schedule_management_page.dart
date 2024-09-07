@@ -18,10 +18,6 @@ class ScheduleManagementPage extends StatelessWidget {
             return const Center(child: CircularProgressIndicator());
           }
 
-          if (state.status == ScheduleStatus.failure) {
-            return const Center(child: Text('Ошибка загрузки данных'));
-          }
-
           return Padding(
             padding: const EdgeInsets.all(24.0),
             child: ScheduleBody(state: state),

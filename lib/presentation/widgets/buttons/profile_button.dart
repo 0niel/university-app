@@ -31,7 +31,7 @@ class ProfileButton extends StatelessWidget {
           borderRadius: BorderRadius.circular(12),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween, 
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Row(
                 children: [
