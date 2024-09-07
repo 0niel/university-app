@@ -224,6 +224,13 @@ class $AssetsIconsHugeiconsGen {
   /// File path: assets/icons/hugeicons/setting-05.svg
   SvgGenImage get setting05 => const SvgGenImage('assets/icons/hugeicons/setting-05.svg');
 
+  /// File path: assets/icons/hugeicons/square-arrow-left-01-round.svg
+  SvgGenImage get squareArrowLeft01Round => const SvgGenImage('assets/icons/hugeicons/square-arrow-left-01-round.svg');
+
+  /// File path: assets/icons/hugeicons/square-arrow-right-01-round.svg
+  SvgGenImage get squareArrowRight01Round =>
+      const SvgGenImage('assets/icons/hugeicons/square-arrow-right-01-round.svg');
+
   /// File path: assets/icons/hugeicons/student-card.svg
   SvgGenImage get studentCard => const SvgGenImage('assets/icons/hugeicons/student-card.svg');
 
@@ -284,6 +291,8 @@ class $AssetsIconsHugeiconsGen {
         search,
         setting01,
         setting05,
+        squareArrowLeft01Round,
+        squareArrowRight01Round,
         studentCard,
         tag01,
         teaching,

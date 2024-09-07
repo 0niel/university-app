@@ -3,6 +3,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
+import 'package:hugeicons/hugeicons.dart';
 import 'package:rtu_mirea_app/presentation/typography.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:rtu_mirea_app/schedule/models/models.dart';
@@ -81,7 +82,7 @@ class LessonCard extends StatelessWidget {
         .join(', ');
   }
 
-  Widget _buildCommentAlert(List<ScheduleComment> comments) {
+  Widget _buildCommentAlert(BuildContext context, List<ScheduleComment> comments) {
     final comment = comments.firstWhereOrNull(
       (comment) => lesson.dates.contains(comment.lessonDate) && comment.lessonBells == lesson.lessonBells,
     );
@@ -99,8 +100,9 @@ class LessonCard extends StatelessWidget {
       ),
       child: Row(
         children: [
-          const FaIcon(
-            FontAwesomeIcons.comment,
+          HugeIcon(
+            icon: HugeIcons.strokeRoundedComment01,
+            color: AppTheme.colorsOf(context).deactive,
             size: 16,
           ),
           const SizedBox(
@@ -216,16 +218,13 @@ class LessonCard extends StatelessWidget {
                             Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Padding(
-                                  padding: const EdgeInsets.only(top: 2),
-                                  child: FaIcon(
-                                    FontAwesomeIcons.mapLocation,
-                                    size: 12,
-                                    color: AppTheme.colorsOf(context).deactive,
-                                  ),
+                                HugeIcon(
+                                  icon: HugeIcons.strokeRoundedUniversity,
+                                  size: 16,
+                                  color: AppTheme.colorsOf(context).deactive,
                                 ),
                                 const SizedBox(
-                                  width: 6.5,
+                                  width: 6,
                                 ),
                                 Expanded(
                                   child: Text(
@@ -252,9 +251,9 @@ class LessonCard extends StatelessWidget {
                               children: [
                                 Padding(
                                   padding: const EdgeInsets.only(top: 2),
-                                  child: FaIcon(
-                                    FontAwesomeIcons.users,
-                                    size: 12,
+                                  child: HugeIcon(
+                                    icon: HugeIcons.strokeRoundedUserGroup,
+                                    size: 16,
                                     color: AppTheme.colorsOf(context).deactive,
                                   ),
                                 ),
@@ -278,13 +277,14 @@ class LessonCard extends StatelessWidget {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Padding(
-                                  padding: const EdgeInsets.only(left: 2, right: 8, top: 3),
-                                  child: FaIcon(
-                                    FontAwesomeIcons.userTie,
-                                    size: 12,
+                                  padding: const EdgeInsets.only(top: 3),
+                                  child: HugeIcon(
+                                    icon: HugeIcons.strokeRoundedTeacher,
+                                    size: 16,
                                     color: AppTheme.colorsOf(context).deactive,
                                   ),
                                 ),
+                                const SizedBox(width: 6),
                                 Expanded(
                                   child: Text(
                                     lesson.teachers.map((e) => e.name).join(', '),
@@ -308,7 +308,7 @@ class LessonCard extends StatelessWidget {
                           return ch;
                         },
                       ),
-                      _buildCommentAlert(state.comments),
+                      _buildCommentAlert(context, state.comments),
                       _buildGroupIndicator()
                     ],
                   ),

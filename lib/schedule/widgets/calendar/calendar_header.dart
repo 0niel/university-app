@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:hugeicons/hugeicons.dart';
 import 'package:intl/intl.dart';
+import 'package:rtu_mirea_app/gen/assets.gen.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:rtu_mirea_app/presentation/typography.dart';
 import 'package:table_calendar/table_calendar.dart';
@@ -216,9 +218,8 @@ class _CalendarWeeksHeader extends StatelessWidget {
                   padding: EdgeInsets.zero,
                   backgroundColor: Colors.transparent,
                 ),
-                child: Icon(
-                  Icons.arrow_back_ios_rounded,
-                  size: 18,
+                child: HugeIcon(
+                  icon: HugeIcons.strokeRoundedArrowLeft01,
                   color: AppTheme.colorsOf(context).active,
                 ),
                 onPressed: () {
@@ -282,9 +283,8 @@ class _CalendarWeeksHeader extends StatelessWidget {
                     curve: Curves.easeIn,
                   );
                 },
-                child: Icon(
-                  Icons.arrow_forward_ios_rounded,
-                  size: 18,
+                child: HugeIcon(
+                  icon: HugeIcons.strokeRoundedArrowRight01,
                   color: AppTheme.colorsOf(context).active,
                 ),
               ),
