@@ -131,6 +131,26 @@ class AppTheme {
         borderRadius: BorderRadius.circular(16),
       ),
     ),
+    switchTheme: SwitchThemeData(
+      thumbColor: WidgetStateProperty.resolveWith<Color>(
+        (Set<WidgetState> states) {
+          if (states.contains(WidgetState.selected)) {
+            return darkThemeColors.primary;
+          }
+          return darkThemeColors.primary.withOpacity(0.5);
+        },
+      ),
+      trackColor: WidgetStateProperty.resolveWith<Color>(
+        (Set<WidgetState> states) {
+          if (states.contains(WidgetState.selected)) {
+            return darkThemeColors.primary.withOpacity(0.5);
+          }
+          return darkThemeColors.background01;
+        },
+      ),
+      trackOutlineColor: WidgetStateProperty.all(darkThemeColors.background01),
+      trackOutlineWidth: WidgetStateProperty.all(2.0),
+    ),
   );
 
   static final lightTheme = ThemeData.light().copyWith(
@@ -247,6 +267,26 @@ class AppTheme {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
       ),
+    ),
+    switchTheme: SwitchThemeData(
+      thumbColor: WidgetStateProperty.resolveWith<Color>(
+        (Set<WidgetState> states) {
+          if (states.contains(WidgetState.selected)) {
+            return lightThemeColors.primary;
+          }
+          return lightThemeColors.primary.withOpacity(0.5);
+        },
+      ),
+      trackColor: WidgetStateProperty.resolveWith<Color>(
+        (Set<WidgetState> states) {
+          if (states.contains(WidgetState.selected)) {
+            return lightThemeColors.primary.withOpacity(0.5);
+          }
+          return lightThemeColors.background01;
+        },
+      ),
+      trackOutlineColor: WidgetStateProperty.all(lightThemeColors.background01),
+      trackOutlineWidth: WidgetStateProperty.all(2.0),
     ),
   );
 
