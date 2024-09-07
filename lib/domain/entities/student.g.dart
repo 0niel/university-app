@@ -9,7 +9,7 @@ part of 'student.dart';
 Student _$StudentFromJson(Map<String, dynamic> json) => Student(
       id: json['id'] as String,
       isActive: json['isActive'] as bool,
-      course: json['course'] as int,
+      course: (json['course'] as num).toInt(),
       personalNumber: json['personalNumber'] as String,
       educationStartDate: json['educationStartDate'] as String,
       educationEndDate: json['educationEndDate'] as String,

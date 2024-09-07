@@ -31,14 +31,14 @@ class PrimaryTabButton extends StatelessWidget {
             },
             style: ButtonStyle(
               backgroundColor: notifier.value == itemIndex
-                  ? MaterialStateProperty.all<Color>(AppTheme.colorsOf(context).primary)
-                  : MaterialStateProperty.all<Color>(AppTheme.colorsOf(context).background01),
-              shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                  ? WidgetStateProperty.all<Color>(AppTheme.colorsOf(context).primary)
+                  : WidgetStateProperty.all<Color>(AppTheme.colorsOf(context).background01),
+              shape: WidgetStateProperty.all<RoundedRectangleBorder>(
                 RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(50.0),
                 ),
               ),
-              shadowColor: MaterialStateProperty.all<Color>(Colors.transparent),
+              shadowColor: WidgetStateProperty.all<Color>(Colors.transparent),
             ),
             child: Text(
               text,

@@ -28,7 +28,7 @@ class LectorSearchCard extends StatelessWidget {
             height: 30,
             child: TextButton(
               style: ButtonStyle(
-                padding: MaterialStateProperty.all<EdgeInsets>(const EdgeInsets.all(0)),
+                padding: WidgetStateProperty.all<EdgeInsets>(const EdgeInsets.all(0)),
               ),
               onLongPress: () {
                 Clipboard.setData(ClipboardData(text: employee.email));

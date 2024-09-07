@@ -60,8 +60,8 @@ class BottomErrorInfo extends StatelessWidget {
                   constraints: const BoxConstraints.tightFor(width: double.infinity, height: 48),
                   child: ElevatedButton(
                     style: ButtonStyle(
-                      backgroundColor: MaterialStateProperty.all(AppTheme.colorsOf(context).primary),
-                      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                      backgroundColor: WidgetStateProperty.all(AppTheme.colorsOf(context).primary),
+                      shape: WidgetStateProperty.all<RoundedRectangleBorder>(
                         RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(24.0),
                         ),

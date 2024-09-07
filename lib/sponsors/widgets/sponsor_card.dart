@@ -35,7 +35,7 @@ class SponsorCard extends StatelessWidget {
           padding: const EdgeInsets.all(1),
           child: Material(
             borderRadius: BorderRadius.circular(16),
-            color: Theme.of(context).colorScheme.background,
+            color: Theme.of(context).colorScheme.surface,
             child: InkWell(
               borderRadius: BorderRadius.circular(16),
               onTap: sponsor.url != null

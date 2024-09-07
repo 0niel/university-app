@@ -10,7 +10,7 @@ enum ScheduleStatus {
 @JsonSerializable()
 class ScheduleState extends Equatable {
   const ScheduleState({
-    required this.status,
+    this.status = ScheduleStatus.initial,
     this.classroomsSchedule = const [],
     this.teachersSchedule = const [],
     this.groupsSchedule = const [],
@@ -29,7 +29,10 @@ class ScheduleState extends Equatable {
 
   factory ScheduleState.fromJson(Map<String, dynamic> json) => _$ScheduleStateFromJson(json);
 
-  @JsonKey(includeToJson: false, includeFromJson: false)
+  @JsonKey(
+    includeToJson: false,
+    includeFromJson: false,
+  )
   final ScheduleStatus status;
 
   final List<(UID, Classroom, List<SchedulePart>)> classroomsSchedule;

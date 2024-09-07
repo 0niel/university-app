@@ -16,8 +16,8 @@ class TextOutlinedButton extends StatelessWidget {
       child: ElevatedButton(
         onPressed: onPressed,
         style: ButtonStyle(
-          backgroundColor: MaterialStateProperty.all(AppTheme.colorsOf(context).background01),
-          shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+          backgroundColor: WidgetStateProperty.all(AppTheme.colorsOf(context).background01),
+          shape: WidgetStateProperty.all<RoundedRectangleBorder>(
             RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(50.0),
                 side: BorderSide(color: AppTheme.colorsOf(context).primary, width: 2)),

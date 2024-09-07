@@ -27,15 +27,15 @@ class _ModeSelectButtonState extends State<ModeSelectButton> {
         },
         style: ButtonStyle(
           backgroundColor: widget.isActive
-              ? MaterialStateProperty.all<Color>(AppTheme.colorsOf(context).primary)
-              : MaterialStateProperty.all<Color>(AppTheme.colorsOf(context).background02),
-          shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+              ? WidgetStateProperty.all<Color>(AppTheme.colorsOf(context).primary)
+              : WidgetStateProperty.all<Color>(AppTheme.colorsOf(context).background02),
+          shape: WidgetStateProperty.all<RoundedRectangleBorder>(
             RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(50.0),
             ),
           ),
-          padding: MaterialStateProperty.all<EdgeInsetsGeometry>(const EdgeInsets.symmetric(horizontal: 8)),
-          shadowColor: MaterialStateProperty.all<Color>(Colors.transparent),
+          padding: WidgetStateProperty.all<EdgeInsetsGeometry>(const EdgeInsets.symmetric(horizontal: 8)),
+          shadowColor: WidgetStateProperty.all<Color>(Colors.transparent),
         ),
         child: Row(
           children: [

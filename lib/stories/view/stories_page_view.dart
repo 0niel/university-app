@@ -201,7 +201,7 @@ class _StoriesPageViewState extends State<StoriesPageView> {
                 color: Colors.white,
                 icon: const Icon(Icons.close),
                 style: ButtonStyle(
-                  shape: MaterialStateProperty.all(
+                  shape: WidgetStateProperty.all(
                     RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(50),
                     ),

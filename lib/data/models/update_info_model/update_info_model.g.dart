@@ -11,7 +11,7 @@ _$UpdateInfoModelImpl _$$UpdateInfoModelImplFromJson(Map<String, dynamic> json) 
       description: json['description'] as String?,
       text: json['text'] as String,
       appVersion: json['appVersion'] as String,
-      buildNumber: json['buildNumber'] as int,
+      buildNumber: (json['buildNumber'] as num).toInt(),
     );
 
 Map<String, dynamic> _$$UpdateInfoModelImplToJson(_$UpdateInfoModelImpl instance) => <String, dynamic>{

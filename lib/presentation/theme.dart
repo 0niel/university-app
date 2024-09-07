@@ -24,7 +24,7 @@ class AppTheme {
         ),
     textButtonTheme: TextButtonThemeData(
       style: ButtonStyle(
-        textStyle: MaterialStateProperty.all(AppTextStyle.buttonS.copyWith(color: darkThemeColors.active)),
+        textStyle: WidgetStateProperty.all(AppTextStyle.buttonS.copyWith(color: darkThemeColors.active)),
       ),
     ),
     scaffoldBackgroundColor: darkThemeColors.background01,
@@ -93,12 +93,10 @@ class AppTheme {
       insetPadding: const EdgeInsets.all(16),
     ),
     colorScheme: ColorScheme(
-      background: darkThemeColors.background01,
       brightness: Brightness.dark,
       primary: darkThemeColors.primary,
       secondary: darkThemeColors.background02,
       surface: darkThemeColors.background01,
-      onBackground: darkThemeColors.active,
       onSurface: darkThemeColors.active,
       onError: darkThemeColors.active,
       onPrimary: lightThemeColors.white,
@@ -108,14 +106,14 @@ class AppTheme {
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ButtonStyle(
-        foregroundColor: MaterialStateProperty.all(darkThemeColors.white),
-        backgroundColor: MaterialStateProperty.all(AppTheme.colors.primary),
-        shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+        foregroundColor: WidgetStateProperty.all(darkThemeColors.white),
+        backgroundColor: WidgetStateProperty.all(AppTheme.colors.primary),
+        shape: WidgetStateProperty.all<RoundedRectangleBorder>(
           RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(24.0),
           ),
         ),
-        textStyle: MaterialStateProperty.all(
+        textStyle: WidgetStateProperty.all(
           AppTextStyle.buttonS.copyWith(
             color: darkThemeColors.white,
           ),
@@ -142,7 +140,7 @@ class AppTheme {
         ),
     textButtonTheme: TextButtonThemeData(
       style: ButtonStyle(
-        textStyle: MaterialStateProperty.all(AppTextStyle.buttonS.copyWith(color: lightThemeColors.active)),
+        textStyle: WidgetStateProperty.all(AppTextStyle.buttonS.copyWith(color: lightThemeColors.active)),
       ),
     ),
     scaffoldBackgroundColor: lightThemeColors.background01,
@@ -212,12 +210,10 @@ class AppTheme {
       ),
     ),
     colorScheme: ColorScheme(
-      background: lightThemeColors.background01,
       brightness: Brightness.light,
       primary: lightThemeColors.primary,
       secondary: lightThemeColors.background02,
       surface: lightThemeColors.background01,
-      onBackground: lightThemeColors.active,
       onSurface: lightThemeColors.active,
       onError: lightThemeColors.active,
       onPrimary: lightThemeColors.white,
@@ -227,14 +223,14 @@ class AppTheme {
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ButtonStyle(
-        foregroundColor: MaterialStateProperty.all(lightThemeColors.white),
-        backgroundColor: MaterialStateProperty.all(AppTheme.colors.primary),
-        shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+        foregroundColor: WidgetStateProperty.all(lightThemeColors.white),
+        backgroundColor: WidgetStateProperty.all(AppTheme.colors.primary),
+        shape: WidgetStateProperty.all<RoundedRectangleBorder>(
           RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(24.0),
           ),
         ),
-        textStyle: MaterialStateProperty.all(
+        textStyle: WidgetStateProperty.all(
           AppTextStyle.buttonS.copyWith(
             color: lightThemeColors.white,
           ),

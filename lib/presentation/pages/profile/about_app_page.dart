@@ -1,7 +1,6 @@
 import 'package:rtu_mirea_app/contributors/view/view.dart';
 import 'package:rtu_mirea_app/sponsors/view/sponsors_view.dart';
 import 'package:unicons/unicons.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -111,7 +110,7 @@ class AboutAppPage extends StatelessWidget {
                           child: SocialIconButton(
                             icon: Icon(
                               UniconsLine.github,
-                              color: Theme.of(context).colorScheme.onBackground,
+                              color: Theme.of(context).colorScheme.onSurface,
                             ),
                             onClick: () {
                               launchUrlString(
@@ -126,7 +125,7 @@ class AboutAppPage extends StatelessWidget {
                           height: 40,
                           width: 90,
                           child: SocialIconButton(
-                              icon: Icon(UniconsLine.telegram, color: Theme.of(context).colorScheme.onBackground),
+                              icon: Icon(UniconsLine.telegram, color: Theme.of(context).colorScheme.onSurface),
                               onClick: () {
                                 launchUrlString(
                                   'https://t.me/mirea_ninja_chat/1',
