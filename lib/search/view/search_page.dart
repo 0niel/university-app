@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:rtu_mirea_app/gen/assets.gen.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:rtu_mirea_app/presentation/typography.dart';
 import 'package:rtu_mirea_app/schedule/bloc/schedule_bloc.dart';
@@ -210,9 +211,10 @@ class _SearchViewState extends State<SearchView> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            const Icon(
-                              Icons.search,
-                              size: 64,
+                            Assets.icons.hugeicons.search.svg(
+                              color: AppTheme.colorsOf(context).active,
+                              width: 64,
+                              height: 64,
                             ),
                             const SizedBox(height: 16),
                             Padding(
