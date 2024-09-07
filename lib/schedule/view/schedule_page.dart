@@ -7,7 +7,6 @@ import 'package:hugeicons/hugeicons.dart';
 import 'package:intl/intl.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:rtu_mirea_app/presentation/typography.dart';
-import 'package:rtu_mirea_app/presentation/widgets/bottom_modal_sheet.dart';
 import 'package:rtu_mirea_app/schedule/bloc/schedule_bloc.dart';
 import 'package:rtu_mirea_app/schedule/models/models.dart';
 import 'package:rtu_mirea_app/schedule/widgets/widgets.dart';
@@ -163,16 +162,7 @@ class _SchedulePageState extends State<SchedulePage> {
         color: AppTheme.colorsOf(context).active,
       ),
       tooltip: 'Управление расписанием',
-      onPressed: () {
-        BottomModalSheet.show(
-          context,
-          child: const SettingsMenu(),
-          title: 'Управление расписанием',
-          description:
-              'Редактирование сохранённых расписаний и добавление новых, а также настройки отображения расписания.',
-          backgroundColor: AppTheme.colorsOf(context).background03,
-        );
-      },
+      onPressed: () => context.go('/profile'),
     );
   }
 

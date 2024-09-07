@@ -6,15 +6,18 @@ part of 'schedule_bloc.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-ScheduleState _$ScheduleStateFromJson(Map<String, dynamic> json) => ScheduleState(
+ScheduleState _$ScheduleStateFromJson(Map<String, dynamic> json) =>
+    ScheduleState(
       classroomsSchedule: (json['classroomsSchedule'] as List<dynamic>?)
               ?.map((e) => _$recordConvert(
                     e,
                     ($jsonValue) => (
                       $jsonValue[r'$1'] as String,
-                      Classroom.fromJson($jsonValue[r'$2'] as Map<String, dynamic>),
+                      Classroom.fromJson(
+                          $jsonValue[r'$2'] as Map<String, dynamic>),
                       ($jsonValue[r'$3'] as List<dynamic>)
-                          .map((e) => SchedulePart.fromJson(e as Map<String, dynamic>))
+                          .map((e) =>
+                              SchedulePart.fromJson(e as Map<String, dynamic>))
                           .toList(),
                     ),
                   ))
@@ -25,9 +28,11 @@ ScheduleState _$ScheduleStateFromJson(Map<String, dynamic> json) => ScheduleStat
                     e,
                     ($jsonValue) => (
                       $jsonValue[r'$1'] as String,
-                      Teacher.fromJson($jsonValue[r'$2'] as Map<String, dynamic>),
+                      Teacher.fromJson(
+                          $jsonValue[r'$2'] as Map<String, dynamic>),
                       ($jsonValue[r'$3'] as List<dynamic>)
-                          .map((e) => SchedulePart.fromJson(e as Map<String, dynamic>))
+                          .map((e) =>
+                              SchedulePart.fromJson(e as Map<String, dynamic>))
                           .toList(),
                     ),
                   ))
@@ -40,7 +45,8 @@ ScheduleState _$ScheduleStateFromJson(Map<String, dynamic> json) => ScheduleStat
                       $jsonValue[r'$1'] as String,
                       Group.fromJson($jsonValue[r'$2'] as Map<String, dynamic>),
                       ($jsonValue[r'$3'] as List<dynamic>)
-                          .map((e) => SchedulePart.fromJson(e as Map<String, dynamic>))
+                          .map((e) =>
+                              SchedulePart.fromJson(e as Map<String, dynamic>))
                           .toList(),
                     ),
                   ))
@@ -48,16 +54,22 @@ ScheduleState _$ScheduleStateFromJson(Map<String, dynamic> json) => ScheduleStat
           const [],
       isMiniature: json['isMiniature'] as bool? ?? false,
       comments: (json['comments'] as List<dynamic>?)
-              ?.map((e) => ScheduleComment.fromJson(e as Map<String, dynamic>))
+              ?.map((e) => LessonComment.fromJson(e as Map<String, dynamic>))
               .toList() ??
           const [],
       showEmptyLessons: json['showEmptyLessons'] as bool? ?? false,
       showCommentsIndicators: json['showCommentsIndicators'] as bool? ?? true,
       isListModeEnabled: json['isListModeEnabled'] as bool? ?? false,
-      selectedSchedule: const SelectedScheduleConverter().fromJson(json['selectedSchedule'] as Map<String, dynamic>?),
+      scheduleComments: (json['scheduleComments'] as List<dynamic>?)
+              ?.map((e) => ScheduleComment.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          const [],
+      selectedSchedule: const SelectedScheduleConverter()
+          .fromJson(json['selectedSchedule'] as Map<String, dynamic>?),
     );
 
-Map<String, dynamic> _$ScheduleStateToJson(ScheduleState instance) => <String, dynamic>{
+Map<String, dynamic> _$ScheduleStateToJson(ScheduleState instance) =>
+    <String, dynamic>{
       'classroomsSchedule': instance.classroomsSchedule
           .map((e) => <String, dynamic>{
                 r'$1': e.$1,
@@ -84,7 +96,9 @@ Map<String, dynamic> _$ScheduleStateToJson(ScheduleState instance) => <String, d
       'showCommentsIndicators': instance.showCommentsIndicators,
       'showEmptyLessons': instance.showEmptyLessons,
       'isListModeEnabled': instance.isListModeEnabled,
-      'selectedSchedule': const SelectedScheduleConverter().toJson(instance.selectedSchedule),
+      'scheduleComments': instance.scheduleComments,
+      'selectedSchedule':
+          const SelectedScheduleConverter().toJson(instance.selectedSchedule),
     };
 
 $Rec _$recordConvert<$Rec>(

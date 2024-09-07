@@ -32,14 +32,35 @@ class ScheduleBloc extends HydratedBloc<ScheduleEvent, ScheduleState> {
     on<DeleteSchedule>(_onRemoveSavedSchedule);
     on<ScheduleSetEmptyLessonsDisplaying>(_onSetEmptyLessonsDisplaying);
     on<SetLessonComment>(_onSetLessonComment);
-    on<ScheduleSetShowCommentsIndicator>(_onSetShowCommentsIndicator);
+    on<SetShowCommentsIndicator>(_onSetShowCommentsIndicator);
     on<ToggleListMode>(_onScheduleToggleListMode);
+    on<AddScheduleComment>(_onAddScheduleComment);
+    on<DeleteScheduleComment>(_onDeleteScheduleComment);
   }
 
   final ScheduleRepository _scheduleRepository;
 
+  Future<void> _onAddScheduleComment(
+    AddScheduleComment event,
+    Emitter<ScheduleState> emit,
+  ) async {
+    final updatedComments = List<ScheduleComment>.from(state.scheduleComments)..add(event.comment);
+
+    emit(state.copyWith(scheduleComments: updatedComments));
+  }
+
+  Future<void> _onDeleteScheduleComment(
+    DeleteScheduleComment event,
+    Emitter<ScheduleState> emit,
+  ) async {
+    final updatedComments =
+        state.scheduleComments.where((comment) => comment.scheduleName != event.scheduleName).toList();
+
+    emit(state.copyWith(scheduleComments: updatedComments));
+  }
+
   Future<void> _onSetShowCommentsIndicator(
-    ScheduleSetShowCommentsIndicator event,
+    SetShowCommentsIndicator event,
     Emitter<ScheduleState> emit,
   ) async {
     emit(state.copyWith(showCommentsIndicators: event.showCommentsIndicators));
@@ -57,7 +78,7 @@ class ScheduleBloc extends HydratedBloc<ScheduleEvent, ScheduleState> {
       return;
     }
 
-    List<ScheduleComment> updatedComments = state.comments
+    List<LessonComment> updatedComments = state.comments
         .where(
           (element) =>
               element.lessonDate != event.comment.lessonDate || element.lessonBells != event.comment.lessonBells,
@@ -202,6 +223,9 @@ class ScheduleBloc extends HydratedBloc<ScheduleEvent, ScheduleState> {
         group: event.group.uid ?? event.group.name,
       );
 
+      final updatedGroupsSchedule =
+          state.groupsSchedule.where((element) => element.$1 != (event.group.uid ?? event.group.name)).toList();
+
       emit(
         state.copyWith(
           status: ScheduleStatus.loaded,
@@ -209,18 +233,14 @@ class ScheduleBloc extends HydratedBloc<ScheduleEvent, ScheduleState> {
             group: event.group,
             schedule: response.data,
           ),
-          groupsSchedule: state.groupsSchedule.contains(
-            (element) => element.$1 == (event.group.uid ?? event.group.name),
-          )
-              ? state.groupsSchedule
-              : [
-                  ...state.groupsSchedule,
-                  (
-                    event.group.uid ?? event.group.name,
-                    event.group,
-                    response.data,
-                  ),
-                ],
+          groupsSchedule: [
+            ...updatedGroupsSchedule,
+            (
+              event.group.uid ?? event.group.name,
+              event.group,
+              response.data,
+            ),
+          ],
         ),
       );
     } catch (error, stackTrace) {
@@ -239,6 +259,9 @@ class ScheduleBloc extends HydratedBloc<ScheduleEvent, ScheduleState> {
         teacher: event.teacher.uid ?? event.teacher.name,
       );
 
+      final updatedTeachersSchedule =
+          state.teachersSchedule.where((element) => element.$1 != (event.teacher.uid ?? event.teacher.name)).toList();
+
       emit(
         state.copyWith(
           status: ScheduleStatus.loaded,
@@ -246,18 +269,14 @@ class ScheduleBloc extends HydratedBloc<ScheduleEvent, ScheduleState> {
             teacher: event.teacher,
             schedule: response.data,
           ),
-          teachersSchedule: state.teachersSchedule.contains(
-            (element) => element.$1 == (event.teacher.uid ?? event.teacher.name),
-          )
-              ? state.teachersSchedule
-              : [
-                  ...state.teachersSchedule,
-                  (
-                    event.teacher.uid ?? event.teacher.name,
-                    event.teacher,
-                    response.data,
-                  ),
-                ],
+          teachersSchedule: [
+            ...updatedTeachersSchedule,
+            (
+              event.teacher.uid ?? event.teacher.name,
+              event.teacher,
+              response.data,
+            ),
+          ],
         ),
       );
     } catch (error, stackTrace) {
@@ -276,6 +295,10 @@ class ScheduleBloc extends HydratedBloc<ScheduleEvent, ScheduleState> {
         classroom: event.classroom.uid ?? event.classroom.name,
       );
 
+      final updatedClassroomsSchedule = state.classroomsSchedule
+          .where((element) => element.$1 != (event.classroom.uid ?? event.classroom.name))
+          .toList();
+
       emit(
         state.copyWith(
           status: ScheduleStatus.loaded,
@@ -283,18 +306,14 @@ class ScheduleBloc extends HydratedBloc<ScheduleEvent, ScheduleState> {
             classroom: event.classroom,
             schedule: response.data,
           ),
-          classroomsSchedule: state.classroomsSchedule.contains(
-            (element) => element.$1 == (event.classroom.uid ?? event.classroom.name),
-          )
-              ? state.classroomsSchedule
-              : [
-                  ...state.classroomsSchedule,
-                  (
-                    event.classroom.uid ?? event.classroom.name,
-                    event.classroom,
-                    response.data,
-                  ),
-                ],
+          classroomsSchedule: [
+            ...updatedClassroomsSchedule,
+            (
+              event.classroom.uid ?? event.classroom.name,
+              event.classroom,
+              response.data,
+            ),
+          ],
         ),
       );
     } catch (error, stackTrace) {

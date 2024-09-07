@@ -107,13 +107,6 @@ class _FeedbackBottomModalSheetState extends State<FeedbackBottomModalSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final border = OutlineInputBorder(
-      borderRadius: BorderRadius.circular(12),
-      borderSide: const BorderSide(
-        color: Colors.transparent,
-        width: 0,
-      ),
-    );
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

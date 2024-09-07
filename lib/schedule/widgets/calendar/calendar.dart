@@ -23,7 +23,7 @@ class Calendar extends StatefulWidget {
 
   final PageController pageViewController;
   final List<SchedulePart> schedule;
-  final List<ScheduleComment> comments;
+  final List<LessonComment> comments;
   final bool showCommentsIndicators;
   final CalendarFormat calendarFormat;
   final bool canChangeFormat;

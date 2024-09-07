@@ -19,6 +19,7 @@ class ScheduleState extends Equatable {
     this.showEmptyLessons = false,
     this.showCommentsIndicators = true,
     this.isListModeEnabled = false,
+    this.scheduleComments = const [],
     this.selectedSchedule,
   });
 
@@ -43,7 +44,7 @@ class ScheduleState extends Equatable {
 
   /// Comments attached to certain lessons at certain times (dates and
   /// [LessonBells]).
-  final List<ScheduleComment> comments;
+  final List<LessonComment> comments;
 
   /// Miniature display mode for lesson cards.
   final bool isMiniature;
@@ -58,6 +59,8 @@ class ScheduleState extends Equatable {
 
   final bool isListModeEnabled;
 
+  final List<ScheduleComment> scheduleComments;
+
   @SelectedScheduleConverter()
   final SelectedSchedule? selectedSchedule;
 
@@ -69,9 +72,10 @@ class ScheduleState extends Equatable {
     SelectedSchedule? selectedSchedule,
     bool? isMiniature,
     bool? showEmptyLessons,
-    List<ScheduleComment>? comments,
+    List<LessonComment>? comments,
     bool? showCommentsIndicators,
     bool? isListModeEnabled,
+    List<ScheduleComment>? scheduleComments,
   }) {
     return ScheduleState(
       status: status ?? this.status,
@@ -84,6 +88,7 @@ class ScheduleState extends Equatable {
       showCommentsIndicators: showCommentsIndicators ?? this.showCommentsIndicators,
       comments: comments ?? this.comments,
       isListModeEnabled: isListModeEnabled ?? this.isListModeEnabled,
+      scheduleComments: scheduleComments ?? this.scheduleComments,
     );
   }
 
@@ -101,6 +106,7 @@ class ScheduleState extends Equatable {
         comments,
         showCommentsIndicators,
         isListModeEnabled,
+        scheduleComments,
       ];
 }
 

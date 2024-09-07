@@ -18,17 +18,18 @@ import 'package:rtu_mirea_app/presentation/pages/profile/profile_attendance_page
 import 'package:rtu_mirea_app/presentation/pages/profile/profile_detail_page.dart';
 import 'package:rtu_mirea_app/presentation/pages/profile/profile_lectors_page.dart';
 import 'package:rtu_mirea_app/presentation/pages/profile/profile_scores_page.dart';
-import 'package:rtu_mirea_app/presentation/pages/profile/profile_page.dart';
 import 'package:rtu_mirea_app/presentation/pages/profile/profile_settings_page.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:rtu_mirea_app/presentation/typography.dart';
 import 'package:rtu_mirea_app/presentation/widgets/images_view_gallery.dart';
+import 'package:rtu_mirea_app/profile/profile.dart';
 import 'package:rtu_mirea_app/rating_system_calculator/models/models.dart';
 import 'package:rtu_mirea_app/rating_system_calculator/view/about_rating_system_page.dart';
 import 'package:rtu_mirea_app/rating_system_calculator/view/subject_page.dart';
 import 'package:rtu_mirea_app/schedule/view/schedule_details_page.dart';
 import 'package:rtu_mirea_app/rating_system_calculator/view/rating_system_calculator_page.dart';
 import 'package:rtu_mirea_app/schedule/view/schedule_page.dart';
+import 'package:rtu_mirea_app/schedule_management/schedule_management.dart';
 import 'package:rtu_mirea_app/search/view/search_page.dart';
 import 'package:rtu_mirea_app/services/view/view.dart';
 import 'package:rtu_mirea_app/stories/stories.dart';
@@ -112,6 +113,10 @@ GoRouter createRouter() => GoRouter(
                 path: '/schedule',
                 builder: (context, state) => const SchedulePage(),
                 routes: [
+                  GoRoute(
+                    path: 'management',
+                    builder: (context, state) => const ScheduleManagementPage(),
+                  ),
                   GoRoute(
                     path: 'search',
                     builder: (context, state) => SearchPage(query: state.extra as String?),

@@ -33,12 +33,14 @@ mixin _$UpdateInfoModel {
 
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
-  $UpdateInfoModelCopyWith<UpdateInfoModel> get copyWith => throw _privateConstructorUsedError;
+  $UpdateInfoModelCopyWith<UpdateInfoModel> get copyWith =>
+      throw _privateConstructorUsedError;
 }
 
 /// @nodoc
 abstract class $UpdateInfoModelCopyWith<$Res> {
-  factory $UpdateInfoModelCopyWith(UpdateInfoModel value, $Res Function(UpdateInfoModel) then) =
+  factory $UpdateInfoModelCopyWith(
+          UpdateInfoModel value, $Res Function(UpdateInfoModel) then) =
       _$UpdateInfoModelCopyWithImpl<$Res, UpdateInfoModel>;
   @useResult
   $Res call(
@@ -50,7 +52,8 @@ abstract class $UpdateInfoModelCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$UpdateInfoModelCopyWithImpl<$Res, $Val extends UpdateInfoModel> implements $UpdateInfoModelCopyWith<$Res> {
+class _$UpdateInfoModelCopyWithImpl<$Res, $Val extends UpdateInfoModel>
+    implements $UpdateInfoModelCopyWith<$Res> {
   _$UpdateInfoModelCopyWithImpl(this._value, this._then);
 
   // ignore: unused_field
@@ -93,8 +96,10 @@ class _$UpdateInfoModelCopyWithImpl<$Res, $Val extends UpdateInfoModel> implemen
 }
 
 /// @nodoc
-abstract class _$$UpdateInfoModelImplCopyWith<$Res> implements $UpdateInfoModelCopyWith<$Res> {
-  factory _$$UpdateInfoModelImplCopyWith(_$UpdateInfoModelImpl value, $Res Function(_$UpdateInfoModelImpl) then) =
+abstract class _$$UpdateInfoModelImplCopyWith<$Res>
+    implements $UpdateInfoModelCopyWith<$Res> {
+  factory _$$UpdateInfoModelImplCopyWith(_$UpdateInfoModelImpl value,
+          $Res Function(_$UpdateInfoModelImpl) then) =
       __$$UpdateInfoModelImplCopyWithImpl<$Res>;
   @override
   @useResult
@@ -107,9 +112,11 @@ abstract class _$$UpdateInfoModelImplCopyWith<$Res> implements $UpdateInfoModelC
 }
 
 /// @nodoc
-class __$$UpdateInfoModelImplCopyWithImpl<$Res> extends _$UpdateInfoModelCopyWithImpl<$Res, _$UpdateInfoModelImpl>
+class __$$UpdateInfoModelImplCopyWithImpl<$Res>
+    extends _$UpdateInfoModelCopyWithImpl<$Res, _$UpdateInfoModelImpl>
     implements _$$UpdateInfoModelImplCopyWith<$Res> {
-  __$$UpdateInfoModelImplCopyWithImpl(_$UpdateInfoModelImpl _value, $Res Function(_$UpdateInfoModelImpl) _then)
+  __$$UpdateInfoModelImplCopyWithImpl(
+      _$UpdateInfoModelImpl _value, $Res Function(_$UpdateInfoModelImpl) _then)
       : super(_value, _then);
 
   @pragma('vm:prefer-inline')
@@ -156,7 +163,8 @@ class _$UpdateInfoModelImpl implements _UpdateInfoModel {
       @JsonKey(name: 'appVersion') required this.appVersion,
       @JsonKey(name: 'buildNumber') required this.buildNumber});
 
-  factory _$UpdateInfoModelImpl.fromJson(Map<String, dynamic> json) => _$$UpdateInfoModelImplFromJson(json);
+  factory _$UpdateInfoModelImpl.fromJson(Map<String, dynamic> json) =>
+      _$$UpdateInfoModelImplFromJson(json);
 
   @override
   @JsonKey(name: 'title')
@@ -185,21 +193,26 @@ class _$UpdateInfoModelImpl implements _UpdateInfoModel {
         (other.runtimeType == runtimeType &&
             other is _$UpdateInfoModelImpl &&
             (identical(other.title, title) || other.title == title) &&
-            (identical(other.description, description) || other.description == description) &&
+            (identical(other.description, description) ||
+                other.description == description) &&
             (identical(other.text, text) || other.text == text) &&
-            (identical(other.appVersion, appVersion) || other.appVersion == appVersion) &&
-            (identical(other.buildNumber, buildNumber) || other.buildNumber == buildNumber));
+            (identical(other.appVersion, appVersion) ||
+                other.appVersion == appVersion) &&
+            (identical(other.buildNumber, buildNumber) ||
+                other.buildNumber == buildNumber));
   }
 
   @JsonKey(ignore: true)
   @override
-  int get hashCode => Object.hash(runtimeType, title, description, text, appVersion, buildNumber);
+  int get hashCode => Object.hash(
+      runtimeType, title, description, text, appVersion, buildNumber);
 
   @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
   _$$UpdateInfoModelImplCopyWith<_$UpdateInfoModelImpl> get copyWith =>
-      __$$UpdateInfoModelImplCopyWithImpl<_$UpdateInfoModelImpl>(this, _$identity);
+      __$$UpdateInfoModelImplCopyWithImpl<_$UpdateInfoModelImpl>(
+          this, _$identity);
 
   @override
   Map<String, dynamic> toJson() {
@@ -211,13 +224,15 @@ class _$UpdateInfoModelImpl implements _UpdateInfoModel {
 
 abstract class _UpdateInfoModel implements UpdateInfoModel {
   const factory _UpdateInfoModel(
-      {@JsonKey(name: 'title') required final String title,
-      @JsonKey(name: 'description') required final String? description,
-      @JsonKey(name: 'text') required final String text,
-      @JsonKey(name: 'appVersion') required final String appVersion,
-      @JsonKey(name: 'buildNumber') required final int buildNumber}) = _$UpdateInfoModelImpl;
+          {@JsonKey(name: 'title') required final String title,
+          @JsonKey(name: 'description') required final String? description,
+          @JsonKey(name: 'text') required final String text,
+          @JsonKey(name: 'appVersion') required final String appVersion,
+          @JsonKey(name: 'buildNumber') required final int buildNumber}) =
+      _$UpdateInfoModelImpl;
 
-  factory _UpdateInfoModel.fromJson(Map<String, dynamic> json) = _$UpdateInfoModelImpl.fromJson;
+  factory _UpdateInfoModel.fromJson(Map<String, dynamic> json) =
+      _$UpdateInfoModelImpl.fromJson;
 
   @override
   @JsonKey(name: 'title')
@@ -236,5 +251,6 @@ abstract class _UpdateInfoModel implements UpdateInfoModel {
   int get buildNumber;
   @override
   @JsonKey(ignore: true)
-  _$$UpdateInfoModelImplCopyWith<_$UpdateInfoModelImpl> get copyWith => throw _privateConstructorUsedError;
+  _$$UpdateInfoModelImplCopyWith<_$UpdateInfoModelImpl> get copyWith =>
+      throw _privateConstructorUsedError;
 }

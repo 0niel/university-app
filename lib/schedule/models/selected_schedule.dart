@@ -37,6 +37,36 @@ abstract class SelectedSchedule extends Equatable {
     }
   }
 
+  static SelectedSchedule createSelectedSchedule<T>(T scheduleEntity, List<SchedulePart> scheduleParts) {
+    if (T == Group) {
+      return SelectedGroupSchedule(group: scheduleEntity as Group, schedule: scheduleParts);
+    } else if (T == Teacher) {
+      return SelectedTeacherSchedule(teacher: scheduleEntity as Teacher, schedule: scheduleParts);
+    } else if (T == Classroom) {
+      return SelectedClassroomSchedule(classroom: scheduleEntity as Classroom, schedule: scheduleParts);
+    }
+    throw Exception('Unknown schedule type');
+  }
+
+  static bool isScheduleSelected<T>(SelectedSchedule? selectedSchedule, T scheduleEntity) {
+    if (selectedSchedule == null) return false;
+    if (T == Group && selectedSchedule is SelectedGroupSchedule) {
+      return (scheduleEntity as Group).name == selectedSchedule.group.name;
+    } else if (T == Teacher && selectedSchedule is SelectedTeacherSchedule) {
+      return (scheduleEntity as Teacher).name == selectedSchedule.teacher.name;
+    } else if (T == Classroom && selectedSchedule is SelectedClassroomSchedule) {
+      return (scheduleEntity as Classroom).name == selectedSchedule.classroom.name;
+    }
+    return false;
+  }
+
+  static String getScheduleName<T>(T scheduleEntity) {
+    if (scheduleEntity is Group) return scheduleEntity.name;
+    if (scheduleEntity is Teacher) return scheduleEntity.name;
+    if (scheduleEntity is Classroom) return scheduleEntity.name;
+    return '';
+  }
+
   final String type;
 
   final List<SchedulePart> schedule;

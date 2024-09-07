@@ -143,6 +143,9 @@ class $AssetsIconsHugeiconsGen {
   /// File path: assets/icons/hugeicons/calendar-03.svg
   SvgGenImage get calendar03 => const SvgGenImage('assets/icons/hugeicons/calendar-03.svg');
 
+  /// File path: assets/icons/hugeicons/calendar-check-out-01.svg
+  SvgGenImage get calendarCheckOut01 => const SvgGenImage('assets/icons/hugeicons/calendar-check-out-01.svg');
+
   /// File path: assets/icons/hugeicons/cancel-square.svg
   SvgGenImage get cancelSquare => const SvgGenImage('assets/icons/hugeicons/cancel-square.svg');
 
@@ -172,6 +175,9 @@ class $AssetsIconsHugeiconsGen {
 
   /// File path: assets/icons/hugeicons/help-square.svg
   SvgGenImage get helpSquare => const SvgGenImage('assets/icons/hugeicons/help-square.svg');
+
+  /// File path: assets/icons/hugeicons/list-view.svg
+  SvgGenImage get listView => const SvgGenImage('assets/icons/hugeicons/list-view.svg');
 
   /// File path: assets/icons/hugeicons/menu-02.svg
   SvgGenImage get menu02 => const SvgGenImage('assets/icons/hugeicons/menu-02.svg');
@@ -224,6 +230,9 @@ class $AssetsIconsHugeiconsGen {
   /// File path: assets/icons/hugeicons/setting-05.svg
   SvgGenImage get setting05 => const SvgGenImage('assets/icons/hugeicons/setting-05.svg');
 
+  /// File path: assets/icons/hugeicons/share-01.svg
+  SvgGenImage get share01 => const SvgGenImage('assets/icons/hugeicons/share-01.svg');
+
   /// File path: assets/icons/hugeicons/square-arrow-left-01-round.svg
   SvgGenImage get squareArrowLeft01Round => const SvgGenImage('assets/icons/hugeicons/square-arrow-left-01-round.svg');
 
@@ -264,6 +273,7 @@ class $AssetsIconsHugeiconsGen {
         bug01,
         building06,
         calendar03,
+        calendarCheckOut01,
         cancelSquare,
         copyLink,
         course,
@@ -274,6 +284,7 @@ class $AssetsIconsHugeiconsGen {
         filterHorizontal,
         github,
         helpSquare,
+        listView,
         menu02,
         moreHorizontalSquare02,
         news,
@@ -291,6 +302,7 @@ class $AssetsIconsHugeiconsGen {
         search,
         setting01,
         setting05,
+        share01,
         squareArrowLeft01Round,
         squareArrowRight01Round,
         studentCard,

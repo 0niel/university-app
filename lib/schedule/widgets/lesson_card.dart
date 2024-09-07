@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:rtu_mirea_app/presentation/typography.dart';
@@ -82,7 +81,7 @@ class LessonCard extends StatelessWidget {
         .join(', ');
   }
 
-  Widget _buildCommentAlert(BuildContext context, List<ScheduleComment> comments) {
+  Widget _buildCommentAlert(BuildContext context, List<LessonComment> comments) {
     final comment = comments.firstWhereOrNull(
       (comment) => lesson.dates.contains(comment.lessonDate) && comment.lessonBells == lesson.lessonBells,
     );

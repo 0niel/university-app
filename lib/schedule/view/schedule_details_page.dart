@@ -66,7 +66,7 @@ class _ScheduleDetailsPageState extends State<ScheduleDetailsPage> {
 
       bloc.add(
         SetLessonComment(
-          comment: ScheduleComment(
+          comment: LessonComment(
             subjectName: widget.lesson.subject,
             lessonDate: widget.lesson.dates.first,
             lessonBells: widget.lesson.lessonBells,
@@ -77,7 +77,7 @@ class _ScheduleDetailsPageState extends State<ScheduleDetailsPage> {
     });
   }
 
-  ScheduleComment? _getComment() {
+  LessonComment? _getComment() {
     final bloc = context.read<ScheduleBloc>();
 
     return bloc.state.comments.firstWhereOrNull(

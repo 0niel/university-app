@@ -9,7 +9,7 @@ class SetLessonComment extends ScheduleEvent with AnalyticsEventMixin {
     required this.comment,
   });
 
-  final ScheduleComment comment;
+  final LessonComment comment;
 
   @override
   AnalyticsEvent get event => const AnalyticsEvent('SetLessonComment');
@@ -105,8 +105,8 @@ class ScheduleSetEmptyLessonsDisplaying extends ScheduleEvent {
   List<Object> get props => [showEmptyLessons];
 }
 
-class ScheduleSetShowCommentsIndicator extends ScheduleEvent {
-  const ScheduleSetShowCommentsIndicator({
+class SetShowCommentsIndicator extends ScheduleEvent {
+  const SetShowCommentsIndicator({
     required this.showCommentsIndicators,
   });
 
@@ -168,4 +168,22 @@ class ToggleListMode extends ScheduleEvent {
 
   @override
   List<Object> get props => [];
+}
+
+class AddScheduleComment extends ScheduleEvent {
+  final ScheduleComment comment;
+
+  const AddScheduleComment(this.comment);
+
+  @override
+  List<Object?> get props => [comment];
+}
+
+class DeleteScheduleComment extends ScheduleEvent {
+  final String scheduleName;
+
+  const DeleteScheduleComment(this.scheduleName);
+
+  @override
+  List<Object?> get props => [scheduleName];
 }
