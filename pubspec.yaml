@@ -123,7 +123,11 @@ dependencies:
       url: https://github.com/builttoroam/device_calendar.git
       ref: develop
   timezone: ^0.9.4
-  dot_navigation_bar: ^1.0.2
+  dot_navigation_bar:
+    git:
+      url: https://github.com/0niel/dot_navigation_bar.git
+      ref: master
+  fluttertoast: ^8.2.8
 
 dev_dependencies:
   flutter_lints: ^2.0.1

@@ -672,11 +672,12 @@ packages:
   dot_navigation_bar:
     dependency: "direct main"
     description:
-      name: dot_navigation_bar
-      sha256: "753e1d91644e39beddd0a4ed7e366f37a95e38cafb601c3b7496120ae0532f63"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.0.2"
+      path: "."
+      ref: master
+      resolved-ref: "5c93cefdf13b47e9d3ec115790fe72be5700555a"
+      url: "https://github.com/0niel/dot_navigation_bar.git"
+    source: git
+    version: "1.0.3"
   dynamic_color:
     dependency: transitive
     description:
@@ -1255,6 +1256,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.7.0"
+  fluttertoast:
+    dependency: "direct main"
+    description:
+      name: fluttertoast
+      sha256: "95f349437aeebe524ef7d6c9bde3e6b4772717cf46a0eb6a3ceaddc740b297cc"
+      url: "https://pub.dev"
+    source: hosted
+    version: "8.2.8"
   font_awesome_flutter:
     dependency: "direct main"
     description:
