@@ -1,9 +1,11 @@
+import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:rtu_mirea_app/presentation/bloc/user_bloc/user_bloc.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
+import 'package:rtu_mirea_app/presentation/typography.dart';
 import 'package:rtu_mirea_app/presentation/widgets/buttons/profile_button.dart';
 import 'package:rtu_mirea_app/presentation/widgets/container_label.dart';
 import 'package:rtu_mirea_app/profile/widgets/widgets.dart';
@@ -95,7 +97,51 @@ class _InitialProfileStatePageState extends State<_InitialProfileStatePage> {
         ProfileButton(
           text: 'Тема',
           icon: HugeIcon(icon: HugeIcons.strokeRoundedMoon02, color: AppTheme.colorsOf(context).active),
-          onPressed: () => context.go('/profile/settings'),
+          onPressed: () {
+            showDialog(
+              context: context,
+              builder: (context) => SimpleDialog(
+                title: Text("Выбор темы", style: AppTextStyle.titleS),
+                contentPadding: const EdgeInsets.all(16),
+                backgroundColor: AppTheme.colorsOf(context).background02,
+                elevation: 0,
+                children: [
+                  ListTileThemeItem(
+                    title: "Светлая",
+                    trailing: AdaptiveTheme.of(context).mode == AdaptiveThemeMode.light
+                        ? Icon(Icons.check, color: AppTheme.colorsOf(context).active)
+                        : null,
+                    onTap: () {
+                      AdaptiveTheme.of(context).setLight();
+                      context.pop();
+                    },
+                  ),
+                  const SizedBox(height: 8),
+                  ListTileThemeItem(
+                    title: "Тёмная",
+                    trailing: AdaptiveTheme.of(context).mode == AdaptiveThemeMode.dark
+                        ? Icon(Icons.check, color: AppTheme.colorsOf(context).active)
+                        : null,
+                    onTap: () {
+                      AdaptiveTheme.of(context).setDark();
+                      context.pop();
+                    },
+                  ),
+                  const SizedBox(height: 8),
+                  ListTileThemeItem(
+                    title: "Как в системе",
+                    trailing: AdaptiveTheme.of(context).mode == AdaptiveThemeMode.system
+                        ? Icon(Icons.check, color: AppTheme.colorsOf(context).active)
+                        : null,
+                    onTap: () {
+                      AdaptiveTheme.of(context).setSystem();
+                      context.pop();
+                    },
+                  ),
+                ],
+              ),
+            );
+          },
         ),
       ],
     );
