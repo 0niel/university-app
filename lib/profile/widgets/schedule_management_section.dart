@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:rtu_mirea_app/gen/assets.gen.dart';
@@ -33,7 +32,7 @@ class ScheduleManagementSection extends StatelessWidget {
             ProfileButton(
               text: 'Группы',
               icon: HugeIcon(icon: HugeIcons.strokeRoundedUserGroup, color: AppTheme.colorsOf(context).active),
-              onPressed: () => context.go('/schedule/management'),
+              onPressed: () => context.go('/profile/schedule-management'),
               trailing: Padding(
                 padding: const EdgeInsets.only(right: 8.0),
                 child: Text(

@@ -23,7 +23,7 @@ class ServicesPage extends StatelessWidget {
           "Сервисы",
         ),
       ),
-      body: ServicesView(),
+      body: const ServicesView(),
     );
   }
 }
@@ -242,6 +242,18 @@ class _ServicesViewState extends State<ServicesView> {
                     ),
                     launchMode: LaunchMode.externalApplication,
                     description: 'Кафедра Инструментального и прикладного программного обеспечения',
+                  ),
+                  const CommunityCard(
+                    title: 'Спортивное программирование МИРЭА',
+                    url: 'https://t.me/cp_mirea',
+                    logo: CircleAvatar(
+                      foregroundImage: NetworkImage(
+                        'https://sun9-55.userapi.com/impg/J-OyvW6fp0ZtQ3mJKhI-OxDwPgQbCLhz_PA7bQ/CicJTono2Wk.jpg?size=1920x1920&quality=96&sign=3d4ffbf9a95a4550f203c6909a1af7cf&type=album',
+                      ),
+                    ),
+                    launchMode: LaunchMode.externalApplication,
+                    description:
+                        'Здесь публикуются различные новости и апдейты по олимпиадному программированию в МИРЭА',
                   ),
                 ],
               ),

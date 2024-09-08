@@ -114,10 +114,6 @@ GoRouter createRouter() => GoRouter(
                 builder: (context, state) => const SchedulePage(),
                 routes: [
                   GoRoute(
-                    path: 'management',
-                    builder: (context, state) => const ScheduleManagementPage(),
-                  ),
-                  GoRoute(
                     path: 'search',
                     builder: (context, state) => SearchPage(query: state.extra as String?),
                   ),
@@ -216,6 +212,10 @@ GoRouter createRouter() => GoRouter(
                 path: '/profile',
                 builder: (context, state) => const ProfilePage(),
                 routes: [
+                  GoRoute(
+                    path: 'schedule-management',
+                    builder: (context, state) => const ScheduleManagementPage(),
+                  ),
                   GoRoute(
                     path: 'about',
                     builder: (context, state) => const AboutAppPage(),

@@ -113,7 +113,7 @@ class _DraggableModalSheetState extends State<_DraggableModalSheet> with SingleT
   late Animation<double> _animation;
   double _dragStartPosition = 0.0;
   double _sheetHeightFactor = 0.75;
-  bool _isExpanded = false;
+  final bool _isExpanded = false;
 
   @override
   void initState() {
