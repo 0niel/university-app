@@ -26,25 +26,26 @@ class CommentSection<T> extends StatelessWidget {
       children: [
         ...scheduleComments.map(
           (comment) {
-            return Container(
-              margin: const EdgeInsets.only(bottom: 8),
-              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-              decoration: BoxDecoration(
-                color: AppTheme.colors.primary.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      comment.text,
-                      style: AppTextStyle.body,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
+            return Row(
+              children: [
+                Container(
+                  width: 12,
+                  height: 12,
+                  decoration: BoxDecoration(
+                    color: AppTheme.colorsOf(context).colorful07,
+                    borderRadius: BorderRadius.circular(4),
                   ),
-                ],
-              ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    comment.text,
+                    style: AppTextStyle.captionL.copyWith(color: AppTheme.colorsOf(context).colorful07),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
             );
           },
         ),

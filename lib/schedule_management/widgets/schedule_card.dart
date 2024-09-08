@@ -113,6 +113,7 @@ class ScheduleCard<T> extends StatelessWidget {
                       .animate()
                       .fadeIn(duration: 400.ms)
                       .slide(duration: 400.ms),
+                  const SizedBox(height: 8)
                 ],
               ],
             ),

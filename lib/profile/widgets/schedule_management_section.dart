@@ -7,6 +7,7 @@ import 'package:rtu_mirea_app/gen/assets.gen.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:rtu_mirea_app/presentation/typography.dart';
 import 'package:rtu_mirea_app/presentation/widgets/buttons/profile_button.dart';
+import 'package:rtu_mirea_app/presentation/widgets/scaffold_messenger_helper.dart';
 import 'package:rtu_mirea_app/schedule/schedule.dart';
 
 class ScheduleManagementSection extends StatelessWidget {
@@ -99,39 +100,18 @@ class ScheduleManagementSection extends StatelessWidget {
                 text: "Экспорт в календарь",
                 icon: Assets.icons.hugeicons.calendarCheckOut01.svg(color: AppTheme.colorsOf(context).active),
                 onPressed: () async {
-                  Fluttertoast.showToast(
-                    msg: "Экспорт расписания...",
-                    toastLength: Toast.LENGTH_SHORT,
-                    gravity: ToastGravity.BOTTOM,
-                    backgroundColor: Colors.blue,
-                    textColor: Colors.white,
-                    fontSize: 16.0,
+                  ScaffoldMessengerHelper.showLoading(
+                    context: context,
+                    title: 'Экпорт расписания..',
+                    loadingCallback: () async {
+                      try {
+                        await context.read<ScheduleBloc>().exportScheduleToCalendar(state.selectedSchedule!);
+                        return (isSuccess: true, message: 'Расписание успешно добавлено в календарь!');
+                      } catch (e) {
+                        return (isSuccess: false, message: 'Произошла ошибка при экспорте расписания');
+                      }
+                    },
                   );
-
-                  try {
-                    await context.read<ScheduleBloc>().exportScheduleToCalendar(state.selectedSchedule!);
-                    WidgetsBinding.instance.addPostFrameCallback((_) {
-                      Fluttertoast.showToast(
-                        msg: 'Расписание успешно добавлено в календарь!',
-                        toastLength: Toast.LENGTH_SHORT,
-                        gravity: ToastGravity.BOTTOM,
-                        backgroundColor: Colors.green,
-                        textColor: Colors.white,
-                        fontSize: 16.0,
-                      );
-                    });
-                  } catch (e) {
-                    WidgetsBinding.instance.addPostFrameCallback((_) {
-                      Fluttertoast.showToast(
-                        msg: (e as Exception).toString(),
-                        toastLength: Toast.LENGTH_LONG,
-                        gravity: ToastGravity.BOTTOM,
-                        backgroundColor: Colors.red,
-                        textColor: Colors.white,
-                        fontSize: 16.0,
-                      );
-                    });
-                  }
                 },
               ),
             ],

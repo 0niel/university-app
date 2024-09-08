@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter_html_iframe/flutter_html_iframe.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -105,6 +106,7 @@ class NewsDetailsPage extends StatelessWidget {
                 ),
                 ImagesHorizontalSlider(images: newsItem.images),
                 const SizedBox(height: 24),
+                SizedBox(height: MediaQuery.of(context).padding.bottom),
               ],
             ),
           ),

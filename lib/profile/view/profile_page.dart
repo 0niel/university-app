@@ -26,11 +26,15 @@ class ProfilePage extends StatelessWidget {
         bottom: false,
         child: LayoutBuilder(
           builder: (BuildContext context, BoxConstraints viewportConstraints) {
-            return const SingleChildScrollView(
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 24),
-                child: _InitialProfileStatePage(),
-              ),
+            return const CustomScrollView(
+              slivers: [
+                SliverPadding(
+                  padding: EdgeInsets.symmetric(horizontal: 24),
+                  sliver: SliverToBoxAdapter(
+                    child: _InitialProfileStatePage(),
+                  ),
+                ),
+              ],
             );
           },
         ),
@@ -143,6 +147,7 @@ class _InitialProfileStatePageState extends State<_InitialProfileStatePage> {
             );
           },
         ),
+        SizedBox(height: MediaQuery.of(context).padding.bottom),
       ],
     );
   }
