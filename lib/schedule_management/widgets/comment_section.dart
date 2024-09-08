@@ -27,7 +27,7 @@ class CommentSection<T> extends StatelessWidget {
         ...scheduleComments.map(
           (comment) {
             return Container(
-              margin: const EdgeInsets.only(top: 8),
+              margin: const EdgeInsets.only(bottom: 8),
               padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
               decoration: BoxDecoration(
                 color: AppTheme.colors.primary.withOpacity(0.1),

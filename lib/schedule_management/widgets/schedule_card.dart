@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_animate/flutter_animate.dart'; // Добавляем flutter_animate
 import 'package:hugeicons/hugeicons.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:rtu_mirea_app/presentation/typography.dart';
@@ -52,51 +53,69 @@ class ScheduleCard<T> extends StatelessWidget {
         child: const Icon(Icons.delete, color: Colors.white),
       ),
       child: Card(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-        color: isSelected ? AppTheme.colorsOf(context).primary.withOpacity(0.05) : null,
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Text(
-                    SelectedSchedule.getScheduleName<T>(schedule.$2),
-                    style: AppTextStyle.titleM,
-                  ),
-                  const Spacer(),
-                  IconButton(
-                    icon: Icon(
-                      isSelected ? Icons.check_circle : Icons.radio_button_unchecked,
-                      color: isSelected ? AppTheme.colorsOf(context).primary : null,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: () {
+            context.read<ScheduleBloc>().add(
+                  SetSelectedSchedule(
+                    selectedSchedule: SelectedSchedule.createSelectedSchedule<T>(
+                      schedule.$2,
+                      schedule.$3,
                     ),
-                    onPressed: () {
-                      context.read<ScheduleBloc>().add(
-                            SetSelectedSchedule(
-                              selectedSchedule: SelectedSchedule.createSelectedSchedule<T>(
-                                schedule.$2,
-                                schedule.$3,
-                              ),
-                            ),
-                          );
-                    },
                   ),
-                  IconButton(
-                    icon: HugeIcon(
-                      icon: HugeIcons.strokeRoundedNote01,
-                      color: AppTheme.colorsOf(context).active,
+                );
+          },
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        SelectedSchedule.getScheduleName<T>(schedule.$2),
+                        style: AppTextStyle.titleM,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
-                    onPressed: () => _showAddCommentBottomSheet(context),
-                  ),
+                    if (isSelected)
+                      IconButton(
+                        icon: Animate(
+                          child: Icon(
+                            Icons.check_circle,
+                            color: AppTheme.colorsOf(context).primary,
+                          ),
+                        ).fadeIn(duration: 200.ms),
+                        onPressed: () {
+                          context.read<ScheduleBloc>().add(
+                                SetSelectedSchedule(
+                                  selectedSchedule: SelectedSchedule.createSelectedSchedule<T>(
+                                    schedule.$2,
+                                    schedule.$3,
+                                  ),
+                                ),
+                              );
+                        },
+                      ),
+                    IconButton(
+                      icon: HugeIcon(
+                        icon: HugeIcons.strokeRoundedNoteEdit,
+                        color: AppTheme.colorsOf(context).active,
+                      ),
+                      onPressed: () => _showAddCommentBottomSheet(context),
+                    ),
+                  ],
+                ),
+                if (_hasComments(context)) ...[
+                  CommentSection<T>(schedule: schedule, state: state, scheduleType: scheduleType)
+                      .animate()
+                      .fadeIn(duration: 400.ms)
+                      .slide(duration: 400.ms),
                 ],
-              ),
-              if (_hasComments(context)) ...[
-                CommentSection<T>(schedule: schedule, state: state, scheduleType: scheduleType),
               ],
-            ],
+            ),
           ),
         ),
       ),
