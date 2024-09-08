@@ -91,6 +91,7 @@ class AppTheme {
         borderRadius: BorderRadius.circular(16),
       ),
       insetPadding: const EdgeInsets.all(16),
+      elevation: 2,
     ),
     colorScheme: ColorScheme(
       brightness: Brightness.dark,
@@ -217,6 +218,7 @@ class AppTheme {
         borderRadius: BorderRadius.circular(16),
       ),
       insetPadding: const EdgeInsets.all(16),
+      elevation: 2,
     ),
     dividerTheme: DividerThemeData(
       color: lightThemeColors.divider,
