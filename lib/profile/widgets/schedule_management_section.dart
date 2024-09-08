@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:rtu_mirea_app/gen/assets.gen.dart';
@@ -98,21 +99,36 @@ class ScheduleManagementSection extends StatelessWidget {
                 text: "Экспорт в календарь",
                 icon: Assets.icons.hugeicons.calendarCheckOut01.svg(color: AppTheme.colorsOf(context).active),
                 onPressed: () async {
+                  Fluttertoast.showToast(
+                    msg: "Экспорт расписания...",
+                    toastLength: Toast.LENGTH_SHORT,
+                    gravity: ToastGravity.BOTTOM,
+                    backgroundColor: Colors.blue,
+                    textColor: Colors.white,
+                    fontSize: 16.0,
+                  );
+
                   try {
                     await context.read<ScheduleBloc>().exportScheduleToCalendar(state.selectedSchedule!);
                     WidgetsBinding.instance.addPostFrameCallback((_) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Расписание успешно добавлено в календарь!'),
-                        ),
+                      Fluttertoast.showToast(
+                        msg: 'Расписание успешно добавлено в календарь!',
+                        toastLength: Toast.LENGTH_SHORT,
+                        gravity: ToastGravity.BOTTOM,
+                        backgroundColor: Colors.green,
+                        textColor: Colors.white,
+                        fontSize: 16.0,
                       );
                     });
                   } catch (e) {
                     WidgetsBinding.instance.addPostFrameCallback((_) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text((e as Exception).toString()),
-                        ),
+                      Fluttertoast.showToast(
+                        msg: (e as Exception).toString(),
+                        toastLength: Toast.LENGTH_LONG,
+                        gravity: ToastGravity.BOTTOM,
+                        backgroundColor: Colors.red,
+                        textColor: Colors.white,
+                        fontSize: 16.0,
                       );
                     });
                   }
