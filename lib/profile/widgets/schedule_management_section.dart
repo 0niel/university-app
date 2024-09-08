@@ -50,6 +50,10 @@ class ScheduleManagementSection extends StatelessWidget {
                   context.read<ScheduleBloc>().add(ScheduleSetDisplayMode(isMiniature: value));
                 },
               ),
+              onPressed: () {
+                final newValue = !state.isMiniature;
+                context.read<ScheduleBloc>().add(ScheduleSetDisplayMode(isMiniature: newValue));
+              },
             ),
             const SizedBox(height: 8),
             ProfileButton(
@@ -61,6 +65,10 @@ class ScheduleManagementSection extends StatelessWidget {
                   context.read<ScheduleBloc>().add(ScheduleSetEmptyLessonsDisplaying(showEmptyLessons: value));
                 },
               ),
+              onPressed: () {
+                final newValue = !state.showEmptyLessons;
+                context.read<ScheduleBloc>().add(ScheduleSetEmptyLessonsDisplaying(showEmptyLessons: newValue));
+              },
             ),
             const SizedBox(height: 8),
             ProfileButton(
@@ -79,6 +87,10 @@ class ScheduleManagementSection extends StatelessWidget {
                   context.read<ScheduleBloc>().add(SetShowCommentsIndicator(showCommentsIndicators: value));
                 },
               ),
+              onPressed: () {
+                final newValue = !state.showCommentsIndicators;
+                context.read<ScheduleBloc>().add(SetShowCommentsIndicator(showCommentsIndicators: newValue));
+              },
             ),
             if (state.selectedSchedule != null) ...[
               const SizedBox(height: 8),
