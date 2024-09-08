@@ -113,7 +113,7 @@ class _DraggableModalSheetState extends State<_DraggableModalSheet> with SingleT
   late Animation<double> _animation;
   double _dragStartPosition = 0.0;
   double _sheetHeightFactor = 0.75;
-  final bool _isExpanded = false;
+  bool _isExpanded = false;
 
   @override
   void initState() {
@@ -143,13 +143,11 @@ class _DraggableModalSheetState extends State<_DraggableModalSheet> with SingleT
 
         if (dragOffset > 0 && widget.isExpandable) {
           setState(() {
-            _sheetHeightFactor = (maxHeight - dragOffset) / screenHeight;
-            _sheetHeightFactor = _sheetHeightFactor.clamp(0.75, 1.0);
+            _sheetHeightFactor = (_sheetHeightFactor + dragOffset / screenHeight).clamp(0.75, 1.0);
           });
         } else if (dragOffset < 0) {
           setState(() {
-            _sheetHeightFactor = (maxHeight + dragOffset) / screenHeight;
-            _sheetHeightFactor = _sheetHeightFactor.clamp(0.5, 0.75);
+            _sheetHeightFactor = (_sheetHeightFactor + dragOffset / screenHeight).clamp(0.33, 0.75);
           });
         }
       },
@@ -173,7 +171,8 @@ class _DraggableModalSheetState extends State<_DraggableModalSheet> with SingleT
               bottom: bottomPadding + 20,
             ),
             constraints: BoxConstraints(
-              maxHeight: screenHeight * _sheetHeightFactor,
+              minHeight: screenHeight * 0.33,
+              maxHeight: maxHeight,
             ),
             decoration: BoxDecoration(
               color: AppTheme.colorsOf(context).background02,
@@ -185,47 +184,41 @@ class _DraggableModalSheetState extends State<_DraggableModalSheet> with SingleT
               top: 16,
               bottom: bottomPadding + 16,
             ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 40,
-                  height: 6,
-                  margin: const EdgeInsets.symmetric(vertical: 12),
-                  decoration: BoxDecoration(
-                    color: AppTheme.colorsOf(context).deactive,
-                    borderRadius: BorderRadius.circular(3),
-                  ),
-                ),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: SingleChildScrollView(
-                      child: Column(
-                        children: [
-                          Text(
-                            widget.title,
-                            style: AppTextStyle.h5.copyWith(
-                              color: AppTheme.colorsOf(context).active,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          if (widget.description != null)
-                            Text(
-                              widget.description!,
-                              style: AppTextStyle.captionL.copyWith(
-                                color: AppTheme.colorsOf(context).deactive,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                          const SizedBox(height: 32),
-                          widget.child,
-                        ],
-                      ),
+            child: IntrinsicHeight(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 40,
+                    height: 6,
+                    margin: const EdgeInsets.symmetric(vertical: 12),
+                    decoration: BoxDecoration(
+                      color: AppTheme.colorsOf(context).deactive,
+                      borderRadius: BorderRadius.circular(3),
                     ),
                   ),
-                ),
-              ],
+                  Center(
+                    child: Text(
+                      widget.title,
+                      style: AppTextStyle.h5.copyWith(
+                        color: AppTheme.colorsOf(context).active,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  if (widget.description != null)
+                    Text(
+                      widget.description!,
+                      style: AppTextStyle.captionL.copyWith(
+                        color: AppTheme.colorsOf(context).deactive,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  const SizedBox(height: 32),
+                  widget.child,
+                ],
+              ),
             ),
           );
         },
