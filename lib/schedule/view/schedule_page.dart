@@ -283,11 +283,16 @@ class _SchedulePageState extends State<SchedulePage> {
     return BlocBuilder<StoriesBloc, StoriesState>(
       builder: (context, storiesState) {
         if (storiesState is StoriesLoaded && storiesState.stories.isNotEmpty) {
-          return const SliverAppBar(
+          final double statusBarHeight = MediaQuery.of(context).padding.top;
+          return SliverAppBar(
             pinned: false,
-            bottom: PreferredSize(
-              preferredSize: Size.fromHeight(80),
-              child: StoriesView(),
+            primary: true,
+            expandedHeight: 80 + statusBarHeight,
+            flexibleSpace: FlexibleSpaceBar(
+              background: Padding(
+                padding: EdgeInsets.only(top: statusBarHeight),
+                child: const StoriesView(),
+              ),
             ),
           );
         } else {
@@ -326,6 +331,7 @@ class _SchedulePageState extends State<SchedulePage> {
 
         return ListView.builder(
           shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
           itemCount: SchedulePage.maxLessonsPerDay,
           itemBuilder: (context, lessonIndex) {
             final lessons = lessonsByTime[lessonIndex + 1] ?? [];
