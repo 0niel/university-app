@@ -126,3 +126,6 @@ lib/generated_plugin_registrant.dart
 
 # Linux related
 linux/flutter/ephemeral/**
+
+.env
+env.g.dart

@@ -21,6 +21,7 @@ import 'package:rtu_mirea_app/data/datasources/strapi_remote.dart';
 import 'package:rtu_mirea_app/data/repositories/stories_repository_impl.dart';
 
 import 'package:rtu_mirea_app/domain/repositories/news_repository.dart';
+import 'package:rtu_mirea_app/env/env.dart';
 import 'package:rtu_mirea_app/neon/main.dart';
 
 import 'package:intl/intl_standalone.dart';
@@ -36,10 +37,12 @@ import 'firebase_options.dart';
 import 'package:sentry_logging/sentry_logging.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:schedule_repository/schedule_repository.dart' as schedule_repository;
+import 'package:yandex_maps_mapkit_lite/init.dart' as yandex_maps_mapkit_lite;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  await yandex_maps_mapkit_lite.initMapkit(apiKey: Env.mapkitApiKey);
   final apiClient = ApiClient();
   final discourseApiClient = DiscourseApiClient(baseUrl: 'https://mirea.ninja');
 
