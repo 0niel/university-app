@@ -2266,6 +2266,13 @@ packages:
       relative: true
     source: path
     version: "1.0.0+1"
+  schedule_exporter_repository:
+    dependency: "direct main"
+    description:
+      path: "packages/schedule_exporter_repository"
+      relative: true
+    source: path
+    version: "0.1.0+1"
   schedule_repository:
     dependency: "direct main"
     description:

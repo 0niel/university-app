@@ -8,7 +8,9 @@ import 'package:go_router/go_router.dart';
 import 'package:notifications_repository/notifications_repository.dart';
 import 'package:rtu_mirea_app/app/app.dart';
 import 'package:rtu_mirea_app/domain/repositories/news_repository.dart';
+import 'package:rtu_mirea_app/schedule_management/bloc/schedule_exporter_cubit.dart';
 import 'package:rtu_mirea_app/service_locator.dart';
+import 'package:schedule_exporter_repository/schedule_exporter_repository.dart';
 import 'package:schedule_repository/schedule_repository.dart';
 import 'package:built_collection/built_collection.dart';
 import 'package:flutter/services.dart';
@@ -55,6 +57,7 @@ class App extends StatelessWidget {
     required DiscourseRepository discourseRepository,
     required NewsRepository newsRepository,
     required NotificationsRepository notificationsRepository,
+    required ScheduleExporterRepository scheduleExporterRepository,
     required List<SingleChildWidget> neonProviders,
     required neon_theme.NeonTheme neonTheme,
     required super.key,
@@ -65,6 +68,7 @@ class App extends StatelessWidget {
         _discourseRepository = discourseRepository,
         _newsRepository = newsRepository,
         _notificationsRepository = notificationsRepository,
+        _scheduleExporterRepository = scheduleExporterRepository,
         _neonTheme = neonTheme,
         _neonProviders = neonProviders;
 
@@ -77,6 +81,7 @@ class App extends StatelessWidget {
   final NotificationsRepository _notificationsRepository;
   final neon_theme.NeonTheme _neonTheme;
   final List<SingleChildWidget> _neonProviders;
+  final ScheduleExporterRepository _scheduleExporterRepository;
 
   @override
   Widget build(BuildContext context) {
@@ -87,9 +92,13 @@ class App extends StatelessWidget {
         RepositoryProvider.value(value: _communityRepository),
         RepositoryProvider.value(value: _storiesRepository),
         RepositoryProvider.value(value: _discourseRepository),
+        RepositoryProvider.value(value: _scheduleExporterRepository),
       ],
       child: MultiBlocProvider(
         providers: [
+          BlocProvider(
+            create: (_) => ScheduleExporterCubit(_scheduleExporterRepository),
+          ),
           BlocProvider(
             create: (_) => AppBloc(
               firebaseMessaging: FirebaseMessaging.instance,

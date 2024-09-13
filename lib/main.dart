@@ -26,6 +26,7 @@ import 'package:rtu_mirea_app/neon/main.dart';
 
 import 'package:intl/intl_standalone.dart';
 import 'package:rtu_mirea_app/service_locator.dart' as dependency_injection;
+import 'package:schedule_exporter_repository/schedule_exporter_repository.dart';
 import 'package:sentry_dio/sentry_dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:university_app_server_api/client.dart';
@@ -107,6 +108,7 @@ Future<void> main() async {
   final storiesRepository = StoriesRepositoryImpl(remoteDataSource: getIt<StrapiRemoteData>());
   final newsRepository = getIt<NewsRepository>();
   final notificationsRepository = getIt<NotificationsRepository>();
+  final scheduleExporterRepository = ScheduleExporterRepository();
 
   Bloc.observer = AppBlocObserver(analyticsRepository: analyticsRepository);
 
@@ -154,6 +156,7 @@ Future<void> main() async {
             neonProviders: neonProviders,
             newsRepository: newsRepository,
             notificationsRepository: notificationsRepository,
+            scheduleExporterRepository: scheduleExporterRepository,
             key: const Key('App'),
           ),
         ),

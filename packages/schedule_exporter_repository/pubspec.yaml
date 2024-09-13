@@ -1,0 +1,25 @@
+name: schedule_exporter_repository
+description: Export schedule to device calendar
+version: 0.1.0+1
+publish_to: none
+
+environment:
+  sdk: ">=3.1.1"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  collection: ^1.19.0
+  device_calendar:
+    git:
+      url: https://github.com/builttoroam/device_calendar.git
+      ref: develop
+  timezone: ^0.9.4
+  university_app_server_api:
+    path: ../../api
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  mocktail: ^1.0.4
+  very_good_analysis: ^6.0.0

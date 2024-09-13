@@ -10,6 +10,7 @@ dependencies:
   equatable: ^2.0.3
   university_app_server_api:
     path: ../../api
+  
 
 dev_dependencies:
   coverage: ^1.2.0

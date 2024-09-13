@@ -152,6 +152,31 @@ class AppTheme {
       trackOutlineColor: WidgetStateProperty.all(darkThemeColors.background01),
       trackOutlineWidth: WidgetStateProperty.all(2.0),
     ),
+    checkboxTheme: CheckboxThemeData(
+      fillColor: MaterialStateProperty.resolveWith<Color>(
+        (Set<MaterialState> states) {
+          if (states.contains(MaterialState.selected)) {
+            return darkThemeColors.primary;
+          }
+          return darkThemeColors.background01;
+        },
+      ),
+      checkColor: MaterialStateProperty.resolveWith<Color>(
+        (Set<MaterialState> states) {
+          if (states.contains(MaterialState.selected)) {
+            return darkThemeColors.white;
+          }
+          return darkThemeColors.background01;
+        },
+      ),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(6),
+      ),
+      side: BorderSide(
+        color: darkThemeColors.primary,
+        width: 2,
+      ),
+    ),
   );
 
   static final lightTheme = ThemeData.light().copyWith(
@@ -289,6 +314,32 @@ class AppTheme {
       ),
       trackOutlineColor: WidgetStateProperty.all(lightThemeColors.background01),
       trackOutlineWidth: WidgetStateProperty.all(2.0),
+    ),
+    checkboxTheme: CheckboxThemeData(
+      fillColor: MaterialStateProperty.resolveWith<Color>(
+        (Set<MaterialState> states) {
+          if (states.contains(MaterialState.selected)) {
+            return lightThemeColors.primary;
+          }
+          return lightThemeColors.background01;
+        },
+      ),
+      checkColor: MaterialStateProperty.resolveWith<Color>(
+        (Set<MaterialState> states) {
+          if (states.contains(MaterialState.selected)) {
+            return lightThemeColors.white;
+          }
+          return lightThemeColors.background01;
+        },
+      ),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(6),
+      ),
+      // custom padding:
+      side: BorderSide(
+        color: lightThemeColors.primary,
+        width: 2,
+      ),
     ),
   );
 

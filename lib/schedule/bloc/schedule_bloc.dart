@@ -7,7 +7,6 @@ import 'package:equatable/equatable.dart';
 import 'package:get/get.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:json_annotation/json_annotation.dart';
-import 'package:rtu_mirea_app/schedule/bloc/schedule_exporter.dart';
 import 'package:schedule_repository/schedule_repository.dart';
 import 'package:university_app_server_api/client.dart';
 
@@ -350,10 +349,6 @@ class ScheduleBloc extends HydratedBloc<ScheduleEvent, ScheduleState> {
     Emitter<ScheduleState> emit,
   ) async {
     emit(state.copyWith(isListModeEnabled: !state.isListModeEnabled));
-  }
-
-  Future<void> exportScheduleToCalendar(SelectedSchedule selectedSchedule) async {
-    await ScheduleExporter().exportScheduleToCalendar(selectedSchedule);
   }
 
   @override
