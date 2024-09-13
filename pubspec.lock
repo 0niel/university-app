@@ -701,6 +701,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.0"
+  envied:
+    dependency: "direct main"
+    description:
+      name: envied
+      sha256: bbff9c76120e4dc5e2e36a46690cf0a26feb65e7765633f4e8d916bcd173a450
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.5.4+1"
+  envied_generator:
+    dependency: "direct dev"
+    description:
+      name: envied_generator
+      sha256: "517b70de08d13dcd40e97b4e5347e216a0b1c75c99e704f3c85c0474a392d14a"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.5.4+1"
   equatable:
     dependency: "direct main"
     description:
@@ -1094,22 +1110,6 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
-  flutter_map:
-    dependency: "direct main"
-    description:
-      name: flutter_map
-      sha256: cda8d72135b697f519287258b5294a57ce2f2a5ebf234f0e406aad4dc14c9399
-      url: "https://pub.dev"
-    source: hosted
-    version: "6.1.0"
-  flutter_map_cancellable_tile_provider:
-    dependency: "direct main"
-    description:
-      name: flutter_map_cancellable_tile_provider
-      sha256: ae18dd59faf74f3eca1d28f83e59b47741bbff962e123bbebe9335c04d432f44
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.0.0"
   flutter_markdown:
     dependency: "direct main"
     description:
@@ -1206,6 +1206,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.1.2"
+  flutter_sticky_header:
+    dependency: "direct main"
+    description:
+      name: flutter_sticky_header
+      sha256: "017f398fbb45a589e01491861ca20eb6570a763fd9f3888165a978e11248c709"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.6.5"
   flutter_svg:
     dependency: "direct main"
     description:
@@ -1647,14 +1655,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.2"
-  lists:
-    dependency: transitive
-    description:
-      name: lists
-      sha256: "4ca5c19ae4350de036a7e996cdd1ee39c93ac0a2b840f4915459b7d0a7d4ab27"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.0.1"
   logger:
     dependency: "direct main"
     description:
@@ -1727,14 +1727,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.12.0"
-  mgrs_dart:
-    dependency: transitive
-    description:
-      name: mgrs_dart
-      sha256: fb89ae62f05fa0bb90f70c31fc870bcbcfd516c843fb554452ab3396f78586f7
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.0.0"
   mime:
     dependency: transitive
     description:
@@ -2092,14 +2084,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.7.4"
-  polylabel:
-    dependency: transitive
-    description:
-      name: polylabel
-      sha256: "41b9099afb2aa6c1730bdd8a0fab1400d287694ec7615dd8516935fa3144214b"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.0.1"
   pool:
     dependency: transitive
     description:
@@ -2124,14 +2108,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.14.2"
-  proj4dart:
-    dependency: transitive
-    description:
-      name: proj4dart
-      sha256: c8a659ac9b6864aa47c171e78d41bbe6f5e1d7bd790a5814249e6b68bc44324e
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.1.0"
   prompts:
     dependency: transitive
     description:
@@ -2236,6 +2212,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.3.1"
+  recase:
+    dependency: transitive
+    description:
+      name: recase
+      sha256: e4eb4ec2dcdee52dcf99cb4ceabaffc631d7424ee55e56f280bc039737f89213
+      url: "https://pub.dev"
+    source: hosted
+    version: "4.1.0"
   redis:
     dependency: transitive
     description:
@@ -2771,14 +2755,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.3.2"
-  unicode:
-    dependency: transitive
-    description:
-      name: unicode
-      sha256: "0f69e46593d65245774d4f17125c6084d2c20b4e473a983f6e21b7d7762218f1"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.3.1"
   unicons:
     dependency: "direct main"
     description:
@@ -2914,6 +2890,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.3.3"
+  value_layout_builder:
+    dependency: transitive
+    description:
+      name: value_layout_builder
+      sha256: "98202ec1807e94ac72725b7f0d15027afde513c55c69ff3f41bcfccb950831bc"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.3.1"
   vector_graphics:
     dependency: transitive
     description:
@@ -3130,14 +3114,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.0.3"
-  wkt_parser:
-    dependency: transitive
-    description:
-      name: wkt_parser
-      sha256: "8a555fc60de3116c00aad67891bcab20f81a958e4219cc106e3c037aa3937f13"
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.0.0"
   xdg_directories:
     dependency: transitive
     description:
@@ -3178,6 +3154,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.2.0"
+  yandex_maps_mapkit_lite:
+    dependency: "direct main"
+    description:
+      name: yandex_maps_mapkit_lite
+      sha256: "04243a0bfd6a9264e1e53cbdf800333d89df63664fbfcd21df5115aa29c46f84"
+      url: "https://pub.dev"
+    source: hosted
+    version: "4.7.2-beta6"
 sdks:
   dart: ">=3.4.3 <3.11.0"
   flutter: ">=3.20.0-1.2.pre"

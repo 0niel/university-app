@@ -15,6 +15,7 @@ import 'package:rtu_mirea_app/stories/view/stories_view.dart';
 import 'package:university_app_server_api/client.dart';
 import 'package:collection/collection.dart';
 import 'package:expandable_page_view/expandable_page_view.dart';
+import 'package:flutter_sticky_header/flutter_sticky_header.dart';
 
 class SchedulePage extends StatefulWidget {
   const SchedulePage({super.key});
@@ -215,49 +216,60 @@ class _SchedulePageState extends State<SchedulePage> {
         .map((day) => MapEntry(day, lessonsByDay[day]))
         .toList();
 
-    return ListView.builder(
-      controller: _scrollController,
-      itemCount: filteredLessonsByDay.length,
-      itemBuilder: (context, index) {
-        final day = filteredLessonsByDay[index].key;
-        final lessons = filteredLessonsByDay[index].value?.whereType<LessonSchedulePart>();
+    return CustomScrollView(
+      slivers: [
+        if (context.read<StoriesBloc>().state is StoriesLoaded &&
+            (context.read<StoriesBloc>().state as StoriesLoaded).stories.isNotEmpty)
+          const SliverToBoxAdapter(
+            child: Padding(
+              padding: EdgeInsets.only(top: 16.0),
+              child: StoriesView(),
+            ),
+          ),
+        for (var entry in filteredLessonsByDay)
+          _buildStickyHeader(entry.key, entry.value?.whereType<LessonSchedulePart>().toList() ?? []),
+      ],
+    );
+  }
 
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+  Widget _buildStickyHeader(DateTime day, List<LessonSchedulePart> lessons) {
+    return SliverStickyHeader(
+      header: Container(
+        color: Theme.of(context).scaffoldBackgroundColor,
+        padding: const EdgeInsets.only(left: 22.0, bottom: 8.0, top: 16.0),
+        alignment: Alignment.centerLeft,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            if (lessons?.isNotEmpty ?? false)
-              Padding(
-                padding: const EdgeInsets.only(top: 18.0, left: 24.0, bottom: 14),
-                child: Row(
-                  children: [
-                    Icon(
-                      HugeIcons.strokeRoundedCalendar01,
-                      color: AppTheme.colorsOf(context).deactive,
-                      size: 17.5,
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      DateFormat('EEEE, d MMMM', 'ru').format(day),
-                      style: AppTextStyle.chip.copyWith(
-                        color: AppTheme.colorsOf(context).deactive,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ...lessons?.map((lessonPart) => Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                      child: LessonCard(
-                        lesson: lessonPart,
-                        onTap: (lesson) {
-                          context.go('/schedule/details', extra: (lesson, day));
-                        },
-                      ),
-                    )) ??
-                [],
+            const Icon(
+              HugeIcons.strokeRoundedCalendar04,
+              size: 17.5,
+            ),
+            const SizedBox(width: 8),
+            Text(
+              DateFormat('EEEE, d MMMM', 'ru').format(day),
+              style: AppTextStyle.bodyBold,
+            ),
           ],
-        );
-      },
+        ),
+      ),
+      sliver: SliverList(
+        delegate: SliverChildBuilderDelegate(
+          (context, index) {
+            final lessonPart = lessons[index];
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+              child: LessonCard(
+                lesson: lessonPart,
+                onTap: (lesson) {
+                  context.go('/schedule/details', extra: (lesson, day));
+                },
+              ),
+            );
+          },
+          childCount: lessons.length,
+        ),
+      ),
     );
   }
 
