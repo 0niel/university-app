@@ -4,7 +4,6 @@ import 'package:rtu_mirea_app/domain/entities/score.dart';
 import 'package:rtu_mirea_app/presentation/bloc/scores_bloc/scores_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/user_bloc/user_bloc.dart';
 import 'package:rtu_mirea_app/presentation/pages/profile/widgets/score_result_card.dart';
-import 'package:rtu_mirea_app/presentation/pages/profile/widgets/scores_chart_modal.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:rtu_mirea_app/presentation/typography.dart';
 import 'package:rtu_mirea_app/presentation/widgets/buttons/primary_tab_button.dart';
@@ -153,12 +152,12 @@ class _ProfileScoresPageState extends State<ProfileScoresPage> {
       context: context,
       builder: (context) => BlocBuilder<ScoresBloc, ScoresState>(
         builder: (context, state) {
-          if (state.status == ScoresStatus.loaded) {
-            return ScoresChartModal(
-              scores: state.scores!,
-              averageRating: state.averageRating!,
-            );
-          }
+          // if (state.status == ScoresStatus.loaded) {
+          //   return ScoresChartModal(
+          //     scores: state.scores!,
+          //     averageRating: state.averageRating!,
+          //   );
+          // }
           return Container();
         },
       ),

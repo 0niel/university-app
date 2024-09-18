@@ -2,7 +2,6 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:rtu_mirea_app/presentation/typography.dart';
 import 'package:rtu_mirea_app/presentation/widgets/buttons/primary_button.dart';
 import 'package:rtu_mirea_app/presentation/widgets/container_label.dart';
@@ -43,7 +42,7 @@ class _ExportScheduleModalContentState extends State<ExportScheduleModalContent>
   final TextEditingController _customReminderController = TextEditingController();
 
   // Список для хранения кастомных напоминаний
-  List<int> _customReminders = [];
+  final List<int> _customReminders = [];
 
   @override
   void initState() {
