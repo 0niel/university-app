@@ -62,7 +62,7 @@ dependencies:
   url_launcher: ^6.0.17
   carousel_slider: ^4.0.0
   salomon_bottom_bar: ^3.3.2
-  url_strategy: ^0.2.0
+  url_strategy: ^0.3.0
   cupertino_icons: ^1.0.2
   after_layout: ^1.1.0
   get:
