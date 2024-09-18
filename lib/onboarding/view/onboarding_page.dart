@@ -208,20 +208,34 @@ class _PageIndicatorsState extends State<PageIndicators> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          widget.dotsNum - 1 == _currentPage
-              ? Container()
-              : TextButton(
-                  onPressed: () {
-                    context.read<HomeCubit>().closeOnboarding();
-                    context.go('/schedule');
-                  },
-                  child: Text(
-                    "Пропустить",
-                    style: AppTextStyle.buttonS.copyWith(
-                      color: AppTheme.colorsOf(context).active,
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 300),
+            transitionBuilder: (Widget child, Animation<double> animation) {
+              return FadeTransition(
+                opacity: animation,
+                child: SizeTransition(
+                  sizeFactor: animation,
+                  axis: Axis.horizontal,
+                  child: child,
+                ),
+              );
+            },
+            child: widget.dotsNum - 1 == _currentPage
+                ? const SizedBox.shrink()
+                : TextButton(
+                    key: const ValueKey("skipButton"),
+                    onPressed: () {
+                      context.read<HomeCubit>().closeOnboarding();
+                      context.go('/schedule');
+                    },
+                    child: Text(
+                      "Пропустить",
+                      style: AppTextStyle.buttonS.copyWith(
+                        color: AppTheme.colorsOf(context).active,
+                      ),
                     ),
                   ),
-                ),
+          ),
           Row(
             children: _buildPageIndicators(_currentPage),
           ),

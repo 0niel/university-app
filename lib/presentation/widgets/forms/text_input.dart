@@ -11,6 +11,7 @@ class TextInput extends StatelessWidget {
     this.keyboardType,
     this.maxLines,
     this.fillColor,
+    this.prefixIcon,
   }) : super(key: key);
 
   final String? hintText;
@@ -19,6 +20,7 @@ class TextInput extends StatelessWidget {
   final TextInputType? keyboardType;
   final int? maxLines;
   final Color? fillColor;
+  final Widget? prefixIcon;
 
   @override
   Widget build(BuildContext context) {
@@ -37,6 +39,7 @@ class TextInput extends StatelessWidget {
           horizontal: 16,
           vertical: 12,
         ),
+        prefixIcon: prefixIcon,
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(

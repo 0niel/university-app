@@ -3,9 +3,16 @@ import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:rtu_mirea_app/presentation/typography.dart';
 
 class PrimaryButton extends StatelessWidget {
-  const PrimaryButton({Key? key, required this.text, this.onClick, this.onLongPress}) : super(key: key);
+  const PrimaryButton({
+    Key? key,
+    required this.text,
+    this.icon,
+    this.onClick,
+    this.onLongPress,
+  }) : super(key: key);
 
   final String text;
+  final Widget? icon;
   final VoidCallback? onClick;
   final VoidCallback? onLongPress;
 
@@ -28,9 +35,16 @@ class PrimaryButton extends StatelessWidget {
         onLongPress: () {
           onLongPress?.call();
         },
-        child: Text(
-          text,
-          style: AppTextStyle.buttonS.copyWith(color: Colors.white),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            if (icon != null) icon!,
+            if (icon != null) const SizedBox(width: 8.0),
+            Text(
+              text,
+              style: AppTextStyle.buttonS.copyWith(color: Colors.white),
+            ),
+          ],
         ),
       ),
     );
