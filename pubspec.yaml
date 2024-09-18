@@ -2,7 +2,7 @@ name: rtu_mirea_app
 description: Mobile application for students of RTU MIREA
 publish_to: 'none'
 
-version: 1.5.9+113
+version: 1.5.9+114
 
 environment:
   sdk: ">=3.1.1"
@@ -121,7 +121,7 @@ dependencies:
       url: https://github.com/0niel/dot_navigation_bar.git
       ref: master
   fluttertoast: ^8.2.8
-  yandex_maps_mapkit_lite: ^4.7.2-beta6
+  # yandex_maps_mapkit_lite: ^4.7.2-beta6
   envied: ^0.5.4+1
   flutter_sticky_header: ^0.6.5
   schedule_exporter_repository:
