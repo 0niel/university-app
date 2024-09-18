@@ -38,12 +38,12 @@ import 'firebase_options.dart';
 import 'package:sentry_logging/sentry_logging.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:schedule_repository/schedule_repository.dart' as schedule_repository;
-import 'package:yandex_maps_mapkit_lite/init.dart' as yandex_maps_mapkit_lite;
+// import 'package:yandex_maps_mapkit_lite/init.dart' as yandex_maps_mapkit_lite;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await yandex_maps_mapkit_lite.initMapkit(apiKey: Env.mapkitApiKey);
+  // await yandex_maps_mapkit_lite.initMapkit(apiKey: Env.mapkitApiKey);
   final apiClient = ApiClient();
   final discourseApiClient = DiscourseApiClient(baseUrl: 'https://mirea.ninja');
 
