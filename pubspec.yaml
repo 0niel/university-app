@@ -54,11 +54,6 @@ dependencies:
   extended_image: ^8.1.0
   shimmer: ^3.0.0
   cached_network_image: ^3.2.0
-  syncfusion_flutter_datagrid: ^26.2.11
-  syncfusion_flutter_core: ^26.2.11
-  syncfusion_flutter_sliders: ^26.2.11
-  syncfusion_flutter_charts: ^26.2.11
-  syncfusion_flutter_gauges: ^26.2.11
   url_launcher: ^6.0.17
   carousel_slider: ^4.0.0
   salomon_bottom_bar: ^3.3.2
