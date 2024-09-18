@@ -112,7 +112,7 @@ dependencies:
     path: packages/news_repository
   share_launcher:
     path: packages/share_launcher
-  visibility_detector: ^0.3.3
+  visibility_detector: ^0.4.0
   platform: ^3.0.2
   json_annotation: ^4.9.0
   hugeicons: ^0.0.7
