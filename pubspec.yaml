@@ -24,7 +24,7 @@ dependencies:
   flutter_animate: ^4.3.0
   latlong2: ^0.9.0
   adaptive_theme: ^3.5.0
-  very_good_infinite_list: ^0.7.1
+  very_good_infinite_list: ^0.8.0
   hydrated_bloc: ^9.1.2
   bloc_concurrency: ^0.2.2
   provider: ^6.0.5
