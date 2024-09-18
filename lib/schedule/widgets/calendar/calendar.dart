@@ -115,6 +115,17 @@ class _CalendarState extends State<Calendar> {
   }
 
   @override
+  void didUpdateWidget(covariant Calendar oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if (oldWidget.calendarFormat != widget.calendarFormat) {
+      setState(() {
+        _calendarFormat = widget.calendarFormat;
+      });
+    }
+  }
+
+  @override
   void dispose() {
     super.dispose();
   }

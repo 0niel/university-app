@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
@@ -12,6 +15,7 @@ import 'package:rtu_mirea_app/schedule/models/models.dart';
 import 'package:rtu_mirea_app/schedule/widgets/widgets.dart';
 import 'package:rtu_mirea_app/stories/bloc/stories_bloc.dart';
 import 'package:rtu_mirea_app/stories/view/stories_view.dart';
+import 'package:table_calendar/table_calendar.dart';
 import 'package:university_app_server_api/client.dart';
 import 'package:collection/collection.dart';
 import 'package:expandable_page_view/expandable_page_view.dart';
@@ -31,6 +35,11 @@ class _SchedulePageState extends State<SchedulePage> {
   late final ScrollController _scrollController;
   late final ScheduleBloc _bloc;
 
+  CalendarFormat _calendarFormat = CalendarFormat.week;
+
+  // Timer to track the duration of the pull
+  Timer? _toggleTimer;
+
   @override
   void initState() {
     super.initState();
@@ -43,6 +52,7 @@ class _SchedulePageState extends State<SchedulePage> {
 
   @override
   void dispose() {
+    _toggleTimer?.cancel();
     _pageController.dispose();
     _scrollController.dispose();
 
@@ -274,20 +284,58 @@ class _SchedulePageState extends State<SchedulePage> {
   }
 
   Widget _buildCalendarMode(ScheduleState state) {
-    return NestedScrollView(
-      headerSliverBuilder: (_, __) => [
-        _buildSliverAppBar(),
-        if (!state.isListModeEnabled)
-          SliverToBoxAdapter(
-            child: Calendar(
-              pageViewController: _pageController,
-              schedule: state.selectedSchedule?.schedule ?? [],
-              comments: state.comments,
-              showCommentsIndicators: state.showCommentsIndicators,
+    return NotificationListener<ScrollNotification>(
+      onNotification: (scrollNotification) {
+        if (scrollNotification is OverscrollNotification) {
+          if (scrollNotification.overscroll < 0) {
+            if (_calendarFormat != CalendarFormat.month && _toggleTimer == null) {
+              _toggleTimer = Timer(const Duration(milliseconds: 300), () {
+                setState(() {
+                  _calendarFormat = CalendarFormat.month;
+                });
+                HapticFeedback.mediumImpact();
+                _toggleTimer = null;
+              });
+            }
+          } else if (scrollNotification.overscroll > 0) {
+            if (_calendarFormat != CalendarFormat.week && _toggleTimer == null) {
+              _toggleTimer = Timer(const Duration(milliseconds: 300), () {
+                setState(() {
+                  _calendarFormat = CalendarFormat.week;
+                });
+                HapticFeedback.mediumImpact();
+                _toggleTimer = null;
+              });
+            }
+          }
+        }
+
+        if (scrollNotification is ScrollUpdateNotification || scrollNotification is ScrollEndNotification) {
+          if (_toggleTimer != null && _toggleTimer!.isActive) {
+            _toggleTimer?.cancel();
+            _toggleTimer = null;
+          }
+        }
+
+        return false;
+      },
+      child: NestedScrollView(
+        controller: _scrollController,
+        headerSliverBuilder: (_, __) => [
+          _buildSliverAppBar(),
+          if (!state.isListModeEnabled)
+            SliverToBoxAdapter(
+              child: Calendar(
+                pageViewController: _pageController,
+                schedule: state.selectedSchedule?.schedule ?? [],
+                comments: state.comments,
+                showCommentsIndicators: state.showCommentsIndicators,
+                calendarFormat: _calendarFormat,
+              ),
             ),
-          ),
-      ],
-      body: _buildPageView(state),
+        ],
+        body: _buildPageView(state),
+      ),
     );
   }
 
