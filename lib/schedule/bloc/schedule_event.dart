@@ -170,13 +170,22 @@ class ToggleListMode extends ScheduleEvent {
   List<Object> get props => [];
 }
 
-class AddScheduleComment extends ScheduleEvent {
+class SetScheduleComment extends ScheduleEvent {
   final ScheduleComment comment;
 
-  const AddScheduleComment(this.comment);
+  const SetScheduleComment(this.comment);
 
   @override
   List<Object?> get props => [comment];
+}
+
+class RemoveScheduleComment extends ScheduleEvent {
+  final String scheduleName;
+
+  const RemoveScheduleComment(this.scheduleName);
+
+  @override
+  List<Object?> get props => [scheduleName];
 }
 
 class DeleteScheduleComment extends ScheduleEvent {

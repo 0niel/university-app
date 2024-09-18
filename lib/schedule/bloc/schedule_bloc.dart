@@ -34,7 +34,8 @@ class ScheduleBloc extends HydratedBloc<ScheduleEvent, ScheduleState> {
     on<SetLessonComment>(_onSetLessonComment);
     on<SetShowCommentsIndicator>(_onSetShowCommentsIndicator);
     on<ToggleListMode>(_onScheduleToggleListMode);
-    on<AddScheduleComment>(_onAddScheduleComment);
+    on<SetScheduleComment>(_onSetScheduleComment);
+    on<RemoveScheduleComment>(_onRemoveScheduleComment);
     on<DeleteScheduleComment>(_onDeleteScheduleComment);
     on<ImportScheduleFromJson>(_onImportScheduleFromJson);
   }
@@ -62,11 +63,23 @@ class ScheduleBloc extends HydratedBloc<ScheduleEvent, ScheduleState> {
     }
   }
 
-  Future<void> _onAddScheduleComment(
-    AddScheduleComment event,
+  Future<void> _onSetScheduleComment(
+    SetScheduleComment event,
     Emitter<ScheduleState> emit,
   ) async {
-    final updatedComments = List<ScheduleComment>.from(state.scheduleComments)..add(event.comment);
+    final updatedComments = List<ScheduleComment>.from(state.scheduleComments)
+      ..removeWhere((comment) => comment.scheduleName == event.comment.scheduleName)
+      ..add(event.comment);
+
+    emit(state.copyWith(scheduleComments: updatedComments));
+  }
+
+  Future<void> _onRemoveScheduleComment(
+    RemoveScheduleComment event,
+    Emitter<ScheduleState> emit,
+  ) async {
+    final updatedComments = List<ScheduleComment>.from(state.scheduleComments)
+      ..removeWhere((comment) => comment.scheduleName == event.scheduleName);
 
     emit(state.copyWith(scheduleComments: updatedComments));
   }

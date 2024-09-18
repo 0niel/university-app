@@ -4,23 +4,31 @@ import 'package:rtu_mirea_app/presentation/widgets/forms/text_input.dart';
 import 'package:rtu_mirea_app/schedule/schedule.dart';
 import 'package:university_app_server_api/client.dart';
 
-class AddCommentBottomSheetContent extends StatefulWidget {
+class SetCommentBottomSheetContent extends StatefulWidget {
   final (UID, dynamic, List<SchedulePart>) schedule;
-  final Function(String) onConfirm;
+  final Function(String?) onConfirm;
+  final String? initialComment;
 
-  const AddCommentBottomSheetContent({
+  const SetCommentBottomSheetContent({
     Key? key,
     required this.schedule,
     required this.onConfirm,
+    this.initialComment,
   }) : super(key: key);
 
   @override
-  State<AddCommentBottomSheetContent> createState() => _AddCommentBottomSheetContentState();
+  State<SetCommentBottomSheetContent> createState() => _SetCommentBottomSheetContentState();
 }
 
-class _AddCommentBottomSheetContentState extends State<AddCommentBottomSheetContent> {
-  final _commentController = TextEditingController();
+class _SetCommentBottomSheetContentState extends State<SetCommentBottomSheetContent> {
+  late final TextEditingController _commentController;
   String? _commentErrorText;
+
+  @override
+  void initState() {
+    super.initState();
+    _commentController = TextEditingController(text: widget.initialComment ?? '');
+  }
 
   @override
   void dispose() {
@@ -28,15 +36,13 @@ class _AddCommentBottomSheetContentState extends State<AddCommentBottomSheetCont
     super.dispose();
   }
 
-  void _addComment() {
+  void _setComment() {
     if (_commentController.text.isEmpty) {
-      setState(() {
-        _commentErrorText = 'Пожалуйста, введите текст комментария';
-      });
+      widget.onConfirm(null);
     } else {
       widget.onConfirm(_commentController.text);
-      Navigator.of(context).pop();
     }
+    Navigator.of(context).pop();
   }
 
   @override
@@ -46,7 +52,7 @@ class _AddCommentBottomSheetContentState extends State<AddCommentBottomSheetCont
       mainAxisSize: MainAxisSize.min,
       children: [
         TextInput(
-          hintText: 'Введите небольшой комментарий...',
+          hintText: 'Введите комментарий...',
           controller: _commentController,
           errorText: _commentErrorText,
           keyboardType: TextInputType.text,
@@ -54,7 +60,7 @@ class _AddCommentBottomSheetContentState extends State<AddCommentBottomSheetCont
         ),
         const SizedBox(height: 24),
         PrimaryButton(
-          onClick: _addComment,
+          onClick: _setComment,
           text: 'Сохранить',
         ),
         const SizedBox(height: 16),

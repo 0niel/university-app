@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_animate/flutter_animate.dart'; // Добавляем flutter_animate
@@ -5,6 +6,7 @@ import 'package:hugeicons/hugeicons.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:rtu_mirea_app/presentation/typography.dart';
 import 'package:rtu_mirea_app/presentation/widgets/bottom_modal_sheet.dart';
+import 'package:rtu_mirea_app/schedule/bloc/schedule_bloc.dart';
 import 'package:rtu_mirea_app/schedule/models/models.dart';
 import 'package:rtu_mirea_app/schedule/schedule.dart';
 import 'package:rtu_mirea_app/schedule_management/widgets/widgets.dart';
@@ -104,7 +106,14 @@ class ScheduleCard<T> extends StatelessWidget {
                         icon: HugeIcons.strokeRoundedNoteEdit,
                         color: AppTheme.colorsOf(context).active,
                       ),
-                      onPressed: () => _showAddCommentBottomSheet(context),
+                      onPressed: () => _showSetCommentBottomSheet(
+                        context,
+                        state.scheduleComments
+                            .firstWhereOrNull(
+                              (comment) => comment.scheduleName == '${schedule.$1}_$scheduleType',
+                            )
+                            ?.text,
+                      ),
                     ),
                   ],
                 ),
@@ -128,26 +137,35 @@ class ScheduleCard<T> extends StatelessWidget {
     return state.scheduleComments.any((comment) => comment.scheduleName == uniqueKey);
   }
 
-  void _showAddCommentBottomSheet(BuildContext context) {
+  void _showSetCommentBottomSheet(BuildContext context, String? currentComment) {
     BottomModalSheet.show(
       context,
-      child: AddCommentBottomSheetContent(
+      child: SetCommentBottomSheetContent(
         schedule: schedule,
+        initialComment: currentComment,
         onConfirm: (text) {
           final uniqueKey = '${schedule.$1}_$scheduleType';
-          final comment = ScheduleComment(scheduleName: uniqueKey, text: text);
-          context.read<ScheduleBloc>().add(AddScheduleComment(comment));
+          final comment = ScheduleComment(
+            scheduleName: uniqueKey,
+            text: text ?? '',
+          );
+
+          if (text == null || text.isEmpty) {
+            context.read<ScheduleBloc>().add(RemoveScheduleComment(uniqueKey));
+          } else {
+            context.read<ScheduleBloc>().add(SetScheduleComment(comment));
+          }
 
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Комментарий добавлен'),
-              duration: Duration(seconds: 2),
+            SnackBar(
+              content: Text(text == null ? 'Комментарий удален' : 'Комментарий сохранен'),
+              duration: const Duration(seconds: 2),
             ),
           );
         },
       ),
-      title: 'Добавить комментарий',
-      description: 'Добавьте комментарий для группы, преподавателя или аудитории.',
+      title: 'Редактировать комментарий',
+      description: 'Добавьте или удалите комментарий для группы, преподавателя или аудитории.',
     );
   }
 }
