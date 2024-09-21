@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -416,7 +417,7 @@ class _SchedulePageState extends State<SchedulePage> {
 
         return ListView.builder(
           shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
+          physics: Platform.isIOS ? const BouncingScrollPhysics() : const ClampingScrollPhysics(),
           itemCount: SchedulePage.maxLessonsPerDay,
           itemBuilder: (context, lessonIndex) {
             final lessons = lessonsByTime[lessonIndex + 1] ?? [];
