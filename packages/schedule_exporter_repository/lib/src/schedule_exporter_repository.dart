@@ -72,8 +72,8 @@ class ScheduleExporterRepository {
           (cal) => cal.name == calendarName,
         );
 
-        if (deleteExistingCalendar) {
-          final deleteResult = await _deviceCalendarPlugin.deleteCalendar(existingCalendar!.id!);
+        if (deleteExistingCalendar && existingCalendar != null) {
+          final deleteResult = await _deviceCalendarPlugin.deleteCalendar(existingCalendar.id!);
           if (!deleteResult.isSuccess) {
             throw CalendarException('Failed to delete existing calendar: ${deleteResult.errors.first.errorMessage}');
           }
