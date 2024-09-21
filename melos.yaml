@@ -1,4 +1,4 @@
-name: neon
+name: university_app
 
 bootstrap:
   # It seems so that running "pub get" in parallel has some issues (like
@@ -38,5 +38,5 @@ scripts:
       dirExists: test -- "dart test --concurrency=$(nproc --all) --fail-fast" &&
     melos exec --flutter --concurrency=1 --fail-fast --packageFilters:
       dirExists: test -- "flutter test --concurrency=$(nproc --all) --fail-fast"
-  generate:neon:build_runner: melos exec --file-exists="build.yaml" -- dart run build_runner build --delete-conflicting-outputs && melos run format
-  generate:neon:l10n: melos exec --flutter --dir-exists="lib/l10n" flutter gen-l10n && melos run format
+  generate:build_runner: melos exec --file-exists="build.yaml" -- dart run build_runner build --delete-conflicting-outputs && melos run format
+  generate:l10n: melos exec --flutter --dir-exists="lib/l10n" flutter gen-l10n && melos run format
