@@ -98,7 +98,7 @@ class TopicCard extends StatelessWidget {
                             children: [
                               Expanded(
                                 child: Text(
-                                  topic.excerpt,
+                                  topic.excerpt ?? '',
                                   style: AppTextStyle.body,
                                   overflow: TextOverflow.ellipsis,
                                   maxLines: 2,

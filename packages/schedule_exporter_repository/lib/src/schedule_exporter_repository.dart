@@ -6,8 +6,8 @@ import 'package:university_app_server_api/client.dart';
 
 /// Exception related to calendar operations.
 class CalendarException implements Exception {
-  final String message;
   CalendarException(this.message);
+  final String message;
 
   @override
   String toString() => 'CalendarException: $message';
@@ -30,10 +30,9 @@ class EventCreationException extends CalendarException {
 
 /// Repository responsible for exporting schedules to device calendars.
 class ScheduleExporterRepository {
-  final DeviceCalendarPlugin _deviceCalendarPlugin = DeviceCalendarPlugin();
-
   /// Creates an instance of [ScheduleExporterRepository].
   ScheduleExporterRepository();
+  final DeviceCalendarPlugin _deviceCalendarPlugin = DeviceCalendarPlugin();
 
   /// Exports the given [lessons] to a device calendar with the specified [calendarName].
   ///
@@ -92,7 +91,8 @@ class ScheduleExporterRepository {
               final deleteEventResult = await _deviceCalendarPlugin.deleteEvent(existingCalendar?.id, event.eventId);
               if (!deleteEventResult.isSuccess) {
                 throw CalendarException(
-                    'Failed to delete event ${event.eventId}: ${deleteEventResult.errors.first.errorMessage}');
+                  'Failed to delete event ${event.eventId}: ${deleteEventResult.errors.first.errorMessage}',
+                );
               }
             }
           }
