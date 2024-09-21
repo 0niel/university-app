@@ -21,12 +21,12 @@ class ExportScheduleModalContent extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _ExportScheduleModalContentState createState() => _ExportScheduleModalContentState();
+  State createState() => _ExportScheduleModalContentState();
 }
 
 class _ExportScheduleModalContentState extends State<ExportScheduleModalContent> {
   bool _includeEmojis = true;
-  bool _includeShortTypeNames = false;
+  bool _includeShortTypeNames = true;
 
   // Определение доступных вариантов напоминаний
   final Map<String, int> _availableReminders = {
