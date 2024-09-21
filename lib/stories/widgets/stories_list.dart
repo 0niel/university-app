@@ -32,12 +32,16 @@ class _StoriesListState extends State<StoriesList> {
       ..storyGroupListHorizontalEdgePadding = 16
       ..storyGroupListHorizontalPaddingBetweenItems = 8
       ..storyGroupTextIsVisible = true
+      ..storyItemTextColor = AppTheme.colorsOf(context).active
       ..storyGroupTextColorSeen = AppTheme.colorsOf(context).active
-      ..storyGroupIconHeight = (80 * devicePixelRatio).round()
-      ..storyGroupIconWidth = (80 * devicePixelRatio).round();
+      ..storyGroupTextColorNotSeen = AppTheme.colorsOf(context).active
+      ..storyGroupIconHeight = (60 * devicePixelRatio).round()
+      ..storyGroupTextLines = 2
+      ..storyGroupIconCornerRadius = 50
+      ..storyGroupIconWidth = (60 * devicePixelRatio).round();
 
     return SizedBox(
-      height: 80,
+      height: 90,
       child: StorylyView(
         onStorylyViewCreated: onStorylyViewCreated,
         androidParam: params,

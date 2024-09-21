@@ -1,8 +1,6 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
@@ -14,7 +12,6 @@ import 'package:rtu_mirea_app/presentation/typography.dart';
 import 'package:rtu_mirea_app/schedule/bloc/schedule_bloc.dart';
 import 'package:rtu_mirea_app/schedule/models/models.dart';
 import 'package:rtu_mirea_app/schedule/widgets/widgets.dart';
-import 'package:rtu_mirea_app/stories/bloc/stories_bloc.dart';
 import 'package:rtu_mirea_app/stories/view/stories_view.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:university_app_server_api/client.dart';
@@ -33,13 +30,14 @@ class SchedulePage extends StatefulWidget {
 
 class _SchedulePageState extends State<SchedulePage> {
   late final PageController _pageController;
-  late final ScrollController _scrollController;
   late final ScheduleBloc _bloc;
 
-  CalendarFormat _calendarFormat = CalendarFormat.week;
+  final CalendarFormat _calendarFormat = CalendarFormat.week;
 
   // Timer to track the duration of the pull
   Timer? _toggleTimer;
+
+  bool _isStoriesVisible = false;
 
   @override
   void initState() {
@@ -47,7 +45,6 @@ class _SchedulePageState extends State<SchedulePage> {
     _pageController = PageController(
       initialPage: Calendar.getPageIndex(Calendar.getNowWithoutTime()),
     );
-    _scrollController = ScrollController();
     _bloc = context.read<ScheduleBloc>();
   }
 
@@ -55,7 +52,6 @@ class _SchedulePageState extends State<SchedulePage> {
   void dispose() {
     _toggleTimer?.cancel();
     _pageController.dispose();
-    _scrollController.dispose();
 
     super.dispose();
   }
@@ -227,16 +223,26 @@ class _SchedulePageState extends State<SchedulePage> {
         .map((day) => MapEntry(day, lessonsByDay[day]))
         .toList();
 
+    final storiesView = StoriesView(onStoriesLoaded: (stories) {
+      if (stories.isNotEmpty && !_isStoriesVisible) {
+        setState(() {
+          _isStoriesVisible = true;
+        });
+      }
+    });
+
     return CustomScrollView(
       slivers: [
-        if (context.read<StoriesBloc>().state is StoriesLoaded &&
-            (context.read<StoriesBloc>().state as StoriesLoaded).stories.isNotEmpty)
-          const SliverToBoxAdapter(
-            child: Padding(
-              padding: EdgeInsets.only(top: 16.0),
-              child: StoriesView(),
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.only(top: 16.0),
+            child: AnimatedOpacity(
+              opacity: _isStoriesVisible ? 1.0 : 0.0,
+              duration: const Duration(milliseconds: 300),
+              child: storiesView,
             ),
           ),
+        ),
         for (var entry in filteredLessonsByDay)
           _buildStickyHeader(entry.key, entry.value?.whereType<LessonSchedulePart>().toList() ?? []),
       ],
@@ -285,69 +291,36 @@ class _SchedulePageState extends State<SchedulePage> {
   }
 
   Widget _buildCalendarMode(ScheduleState state) {
-    return NotificationListener<ScrollNotification>(
-      onNotification: (scrollNotification) {
-        if (scrollNotification is OverscrollNotification) {
-          if (scrollNotification.overscroll < 0) {
-            if (_calendarFormat != CalendarFormat.month && _toggleTimer == null) {
-              _toggleTimer = Timer(const Duration(milliseconds: 300), () {
-                setState(() {
-                  _calendarFormat = CalendarFormat.month;
-                });
-                HapticFeedback.mediumImpact();
-                _toggleTimer = null;
-              });
-            }
-          } else if (scrollNotification.overscroll > 0) {
-            if (_calendarFormat != CalendarFormat.week && _toggleTimer == null) {
-              _toggleTimer = Timer(const Duration(milliseconds: 300), () {
-                setState(() {
-                  _calendarFormat = CalendarFormat.week;
-                });
-                HapticFeedback.mediumImpact();
-                _toggleTimer = null;
-              });
-            }
-          }
-        }
-
-        if (scrollNotification is ScrollUpdateNotification || scrollNotification is ScrollEndNotification) {
-          if (_toggleTimer != null && _toggleTimer!.isActive) {
-            _toggleTimer?.cancel();
-            _toggleTimer = null;
-          }
-        }
-
-        return false;
-      },
-      child: NestedScrollView(
-        controller: _scrollController,
-        headerSliverBuilder: (_, __) => [
-          _buildSliverAppBar(),
-          if (!state.isListModeEnabled)
-            SliverToBoxAdapter(
-              child: Calendar(
-                pageViewController: _pageController,
-                schedule: state.selectedSchedule?.schedule ?? [],
-                comments: state.comments,
-                showCommentsIndicators: state.showCommentsIndicators,
-                calendarFormat: _calendarFormat,
-              ),
+    return NestedScrollView(
+      physics: const ClampingScrollPhysics(),
+      headerSliverBuilder: (_, __) => [
+        _buildSliverAppBar(),
+        if (!state.isListModeEnabled)
+          SliverToBoxAdapter(
+            child: Calendar(
+              pageViewController: _pageController,
+              schedule: state.selectedSchedule?.schedule ?? [],
+              comments: state.comments,
+              showCommentsIndicators: state.showCommentsIndicators,
+              calendarFormat: _calendarFormat,
             ),
-        ],
-        body: _buildPageView(state),
-      ),
+          ),
+      ],
+      body: _buildPageView(state),
     );
   }
 
-  bool _isStoriesVisible = false;
-
   Widget _buildSliverAppBar() {
-    if (!_isStoriesVisible) {
-      return const SliverToBoxAdapter(child: SizedBox.shrink());
-    }
+    final storiesView = StoriesView(onStoriesLoaded: (stories) {
+      if (stories.isNotEmpty && !_isStoriesVisible) {
+        setState(() {
+          _isStoriesVisible = true;
+        });
+      }
+    });
 
     final double statusBarHeight = MediaQuery.of(context).padding.top;
+
     return SliverAppBar(
       pinned: false,
       primary: true,
@@ -355,37 +328,14 @@ class _SchedulePageState extends State<SchedulePage> {
       flexibleSpace: FlexibleSpaceBar(
         background: Padding(
           padding: EdgeInsets.only(top: statusBarHeight),
-          child: StoriesView(onStoriesLoaded: (stories) {
-            if (stories.isNotEmpty && !_isStoriesVisible) {
-              setState(() {
-                _isStoriesVisible = true;
-              });
-            }
-          }),
+          child: AnimatedOpacity(
+            opacity: _isStoriesVisible ? 1.0 : 0.0,
+            duration: const Duration(milliseconds: 300),
+            child: storiesView,
+          ),
         ),
       ),
     );
-
-    // return BlocBuilder<StoriesBloc, StoriesState>(
-    //   builder: (context, storiesState) {
-    //     if (storiesState is StoriesLoaded && storiesState.stories.isNotEmpty) {
-    //       final double statusBarHeight = MediaQuery.of(context).padding.top;
-    //       return SliverAppBar(
-    //         pinned: false,
-    //         primary: true,
-    //         expandedHeight: 80 + statusBarHeight,
-    //         flexibleSpace: FlexibleSpaceBar(
-    //           background: Padding(
-    //             padding: EdgeInsets.only(top: statusBarHeight),
-    //             child: const StoriesView(),
-    //           ),
-    //         ),
-    //       );
-    //     } else {
-    //       return const SliverToBoxAdapter(child: SizedBox.shrink());
-    //     }
-    //   },
-    // );
   }
 
   Widget _buildPageView(ScheduleState state) {
@@ -417,7 +367,7 @@ class _SchedulePageState extends State<SchedulePage> {
 
         return ListView.builder(
           shrinkWrap: true,
-          physics: Platform.isIOS ? const BouncingScrollPhysics() : const ClampingScrollPhysics(),
+          physics: const NeverScrollableScrollPhysics(),
           itemCount: SchedulePage.maxLessonsPerDay,
           itemBuilder: (context, lessonIndex) {
             final lessons = lessonsByTime[lessonIndex + 1] ?? [];

@@ -9,7 +9,6 @@ import 'package:rtu_mirea_app/presentation/widgets/forms/text_input.dart';
 import 'package:rtu_mirea_app/schedule/models/models.dart';
 import 'package:rtu_mirea_app/schedule/schedule.dart';
 import 'package:university_app_server_api/client.dart';
-import 'package:url_launcher/url_launcher_string.dart';
 // import 'package:yandex_maps_mapkit_lite/mapkit.dart';
 // import 'package:yandex_maps_mapkit_lite/yandex_map.dart';
 

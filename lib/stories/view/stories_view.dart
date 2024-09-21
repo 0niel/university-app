@@ -10,18 +10,5 @@ class StoriesView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return StoriesList(onStoriesLoaded: onStoriesLoaded);
-    // return BlocBuilder<StoriesBloc, StoriesState>(builder: (context, state) {
-    //   if (state is StoriesInitial) {
-    //     context.read<StoriesBloc>().add(LoadStories());
-    //   } else if (state is StoriesLoaded) {
-    //     final actualStories = StoriesBloc.getActualStories(state.stories);
-    //     if (actualStories.isNotEmpty) {
-    //       return StoriesList();
-    //     } else {
-    //       return const SizedBox.shrink();
-    //     }
-    //   }
-    //   return const SizedBox.shrink();
-    // });
   }
 }
