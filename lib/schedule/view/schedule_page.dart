@@ -339,27 +339,52 @@ class _SchedulePageState extends State<SchedulePage> {
     );
   }
 
+  bool _isStoriesVisible = false;
+
   Widget _buildSliverAppBar() {
-    return BlocBuilder<StoriesBloc, StoriesState>(
-      builder: (context, storiesState) {
-        if (storiesState is StoriesLoaded && storiesState.stories.isNotEmpty) {
-          final double statusBarHeight = MediaQuery.of(context).padding.top;
-          return SliverAppBar(
-            pinned: false,
-            primary: true,
-            expandedHeight: 80 + statusBarHeight,
-            flexibleSpace: FlexibleSpaceBar(
-              background: Padding(
-                padding: EdgeInsets.only(top: statusBarHeight),
-                child: const StoriesView(),
-              ),
-            ),
-          );
-        } else {
-          return const SliverToBoxAdapter(child: SizedBox.shrink());
-        }
-      },
+    if (!_isStoriesVisible) {
+      return const SliverToBoxAdapter(child: SizedBox.shrink());
+    }
+
+    final double statusBarHeight = MediaQuery.of(context).padding.top;
+    return SliverAppBar(
+      pinned: false,
+      primary: true,
+      expandedHeight: 80 + statusBarHeight,
+      flexibleSpace: FlexibleSpaceBar(
+        background: Padding(
+          padding: EdgeInsets.only(top: statusBarHeight),
+          child: StoriesView(onStoriesLoaded: (stories) {
+            if (stories.isNotEmpty && !_isStoriesVisible) {
+              setState(() {
+                _isStoriesVisible = true;
+              });
+            }
+          }),
+        ),
+      ),
     );
+
+    // return BlocBuilder<StoriesBloc, StoriesState>(
+    //   builder: (context, storiesState) {
+    //     if (storiesState is StoriesLoaded && storiesState.stories.isNotEmpty) {
+    //       final double statusBarHeight = MediaQuery.of(context).padding.top;
+    //       return SliverAppBar(
+    //         pinned: false,
+    //         primary: true,
+    //         expandedHeight: 80 + statusBarHeight,
+    //         flexibleSpace: FlexibleSpaceBar(
+    //           background: Padding(
+    //             padding: EdgeInsets.only(top: statusBarHeight),
+    //             child: const StoriesView(),
+    //           ),
+    //         ),
+    //       );
+    //     } else {
+    //       return const SliverToBoxAdapter(child: SizedBox.shrink());
+    //     }
+    //   },
+    // );
   }
 
   Widget _buildPageView(ScheduleState state) {

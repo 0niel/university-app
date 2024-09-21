@@ -1,45 +1,51 @@
 import 'package:flutter/material.dart';
-import 'package:rtu_mirea_app/domain/entities/story.dart';
+import 'package:rtu_mirea_app/env/env.dart';
+import 'package:rtu_mirea_app/presentation/theme.dart';
+import 'package:storyly_flutter/storyly_flutter.dart';
 
-import 'widgets.dart';
-
-class StoriesList extends StatelessWidget {
+class StoriesList extends StatefulWidget {
   const StoriesList({
     Key? key,
-    required this.stories,
+    this.onStoriesLoaded,
   }) : super(key: key);
 
-  final List<Story> stories;
+  final Function(List<Story>)? onStoriesLoaded;
+
+  @override
+  State<StoriesList> createState() => _StoriesListState();
+}
+
+class _StoriesListState extends State<StoriesList> {
+  late StorylyViewController storylyViewController;
+
+  void onStorylyViewCreated(StorylyViewController storylyViewController) {
+    this.storylyViewController = storylyViewController;
+  }
 
   @override
   Widget build(BuildContext context) {
+    double devicePixelRatio = MediaQuery.of(context).devicePixelRatio;
+
+    final params = StorylyParam()
+      ..storylyId = Env.storylyId
+      ..storyGroupSize = "custom"
+      ..storyGroupListHorizontalEdgePadding = 16
+      ..storyGroupListHorizontalPaddingBetweenItems = 8
+      ..storyGroupTextIsVisible = true
+      ..storyGroupTextColorSeen = AppTheme.colorsOf(context).active
+      ..storyGroupIconHeight = (80 * devicePixelRatio).round()
+      ..storyGroupIconWidth = (80 * devicePixelRatio).round();
+
     return SizedBox(
       height: 80,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 24),
-        itemBuilder: (_, int i) {
-          if (DateTime.now().compareTo(stories[i].stopShowDate) == -1) {
-            return Container(
-              decoration: BoxDecoration(
-                boxShadow: [
-                  BoxShadow(
-                    color: Theme.of(context).shadowColor.withOpacity(0.1),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: StoryItem(
-                stories: stories,
-                storyIndex: i,
-              ),
-            );
-          }
-          return Container();
+      child: StorylyView(
+        onStorylyViewCreated: onStorylyViewCreated,
+        androidParam: params,
+        iosParam: params,
+        storylyLoaded: (storyGroups, dataSource) {
+          final stories = storyGroups.map((st) => st.stories).expand((element) => element).toList();
+          widget.onStoriesLoaded?.call(stories);
         },
-        separatorBuilder: (_, int i) => const SizedBox(width: 10),
-        itemCount: stories.length,
       ),
     );
   }

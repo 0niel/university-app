@@ -126,6 +126,11 @@ dependencies:
   flutter_sticky_header: ^0.6.5
   schedule_exporter_repository:
     path: packages/schedule_exporter_repository
+  storyly_flutter:
+    git:
+      url: https://github.com/0niel/storyly-sdk.git
+      ref: master
+      path: flutter/storyly_flutter/
 
 dev_dependencies:
   flutter_lints: ^2.0.1
