@@ -158,7 +158,6 @@ flutter_gen:
     flutter_svg: true
 
 flutter:
-  generate: true
   uses-material-design: true
 
   assets:
