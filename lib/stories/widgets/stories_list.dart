@@ -24,8 +24,6 @@ class _StoriesListState extends State<StoriesList> {
 
   @override
   Widget build(BuildContext context) {
-    double devicePixelRatio = MediaQuery.of(context).devicePixelRatio;
-
     final params = StorylyParam()
       ..storylyId = Env.storylyId
       ..storyGroupSize = "custom"
@@ -34,13 +32,13 @@ class _StoriesListState extends State<StoriesList> {
       ..storyGroupTextIsVisible = true
       ..storyGroupTextColorSeen = AppTheme.colorsOf(context).active
       ..storyGroupTextColorNotSeen = AppTheme.colorsOf(context).active
-      ..storyGroupIconHeight = 60
+      ..storyGroupIconHeight = 70
       ..storyGroupTextLines = 2
       ..storyGroupIconCornerRadius = 50
-      ..storyGroupIconWidth = 60.round();
+      ..storyGroupIconWidth = 70;
 
     return SizedBox(
-      height: 90,
+      height: 80,
       child: StorylyView(
         onStorylyViewCreated: onStorylyViewCreated,
         androidParam: params,
