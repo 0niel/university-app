@@ -32,13 +32,12 @@ class _StoriesListState extends State<StoriesList> {
       ..storyGroupListHorizontalEdgePadding = 16
       ..storyGroupListHorizontalPaddingBetweenItems = 8
       ..storyGroupTextIsVisible = true
-      ..storyItemTextColor = AppTheme.colorsOf(context).active
       ..storyGroupTextColorSeen = AppTheme.colorsOf(context).active
       ..storyGroupTextColorNotSeen = AppTheme.colorsOf(context).active
-      ..storyGroupIconHeight = (60 * devicePixelRatio).round()
+      ..storyGroupIconHeight = 60
       ..storyGroupTextLines = 2
       ..storyGroupIconCornerRadius = 50
-      ..storyGroupIconWidth = (60 * devicePixelRatio).round();
+      ..storyGroupIconWidth = 60.round();
 
     return SizedBox(
       height: 90,
