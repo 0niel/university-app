@@ -131,6 +131,7 @@ dependencies:
       url: https://github.com/0niel/storyly-sdk.git
       ref: master
       path: flutter/storyly_flutter/
+  flutter_platform_widgets: ^7.0.1
 
 dev_dependencies:
   flutter_lints: ^2.0.1
