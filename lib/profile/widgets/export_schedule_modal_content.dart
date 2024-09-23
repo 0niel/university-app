@@ -1,7 +1,9 @@
 // export_schedule_modal_content.dart
 
+import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:rtu_mirea_app/presentation/typography.dart';
 import 'package:rtu_mirea_app/presentation/widgets/buttons/primary_button.dart';
 import 'package:rtu_mirea_app/presentation/widgets/container_label.dart';
@@ -170,7 +172,7 @@ class _ExportScheduleModalContentState extends State<ExportScheduleModalContent>
                                 style: AppTextStyle.titleS,
                               ),
                             ),
-                            Checkbox(
+                            PlatformCheckbox(
                               value: _selectedReminders[key],
                               onChanged: (value) {
                                 setState(() {
@@ -202,10 +204,12 @@ class _ExportScheduleModalContentState extends State<ExportScheduleModalContent>
                         ),
                       ),
                       const SizedBox(width: 8.0),
-                      IconButton(
-                        icon: const Icon(Icons.add),
+                      PlatformIconButton(
+                        icon: Icon(Icons.add, color: AppTheme.colorsOf(context).active),
                         onPressed: _addCustomReminder,
-                        tooltip: 'Добавить напоминание',
+                        material: (_, __) => MaterialIconButtonData(
+                          tooltip: 'Добавить напоминание',
+                        ),
                       ),
                     ],
                   ),

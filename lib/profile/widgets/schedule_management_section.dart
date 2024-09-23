@@ -1,3 +1,4 @@
+import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -63,7 +64,7 @@ class ScheduleManagementSection extends StatelessWidget {
               ProfileButton(
                 text: "Компактный вид",
                 icon: Assets.icons.hugeicons.listView.svg(color: AppTheme.colorsOf(context).active),
-                trailing: Switch(
+                trailing: PlatformSwitch(
                   value: state.isMiniature,
                   onChanged: (value) {
                     context.read<ScheduleBloc>().add(ScheduleSetDisplayMode(isMiniature: value));
@@ -78,7 +79,7 @@ class ScheduleManagementSection extends StatelessWidget {
               ProfileButton(
                 text: "Пустые пары",
                 icon: Assets.icons.hugeicons.listView.svg(color: AppTheme.colorsOf(context).active),
-                trailing: Switch(
+                trailing: PlatformSwitch(
                   value: state.showEmptyLessons,
                   onChanged: (value) {
                     context.read<ScheduleBloc>().add(ScheduleSetEmptyLessonsDisplaying(showEmptyLessons: value));
@@ -100,7 +101,7 @@ class ScheduleManagementSection extends StatelessWidget {
                     size: 18,
                   ),
                 ),
-                trailing: Switch(
+                trailing: PlatformSwitch(
                   value: state.showCommentsIndicators,
                   onChanged: (value) {
                     context.read<ScheduleBloc>().add(SetShowCommentsIndicator(showCommentsIndicators: value));

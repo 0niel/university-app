@@ -1,4 +1,5 @@
 import 'package:community_repository/community_repository.dart';
+import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
@@ -17,7 +18,7 @@ class ContributorCard extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
       ),
-      child: InkWell(
+      child: PlatformInkWell(
         borderRadius: BorderRadius.circular(12),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),

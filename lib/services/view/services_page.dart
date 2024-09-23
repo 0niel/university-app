@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:go_router/go_router.dart';
 import 'package:rtu_mirea_app/top_discussions/view/view.dart';
 import 'package:rtu_mirea_app/neon/bloc/neon_bloc.dart';
@@ -180,7 +181,7 @@ class _ServicesViewState extends State<ServicesView> {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  TextButton(
+                  PlatformTextButton(
                     onPressed: () {
                       launchUrlString('https://mirea.ninja/top', mode: LaunchMode.externalApplication);
                     },

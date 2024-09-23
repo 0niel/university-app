@@ -1,3 +1,4 @@
+import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:rtu_mirea_app/presentation/typography.dart';
@@ -26,7 +27,7 @@ class CommunityCard extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
       ),
-      child: InkWell(
+      child: PlatformInkWell(
         onTap: () {
           final Uri url = Uri.parse(this.url);
           launchUrl(url, mode: launchMode);

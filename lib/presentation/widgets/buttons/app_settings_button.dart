@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 
@@ -11,7 +12,7 @@ class AppSettingsButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return IconButton(
+    return PlatformIconButton(
       onPressed: onClick,
       icon: Container(
         padding: const EdgeInsets.all(4),

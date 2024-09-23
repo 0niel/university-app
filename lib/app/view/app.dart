@@ -2,7 +2,6 @@ import 'package:analytics_repository/analytics_repository.dart';
 import 'package:community_repository/community_repository.dart';
 import 'package:discourse_repository/discourse_repository.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
@@ -244,8 +243,6 @@ class _MaterialApp extends StatefulWidget {
 }
 
 class _MaterialAppState extends State<_MaterialApp> {
-  _MaterialAppState();
-
   late final GoRouter router;
   late final List<LocalizationsDelegate<dynamic>> neonLocalizationsDelegates;
 
@@ -260,7 +257,11 @@ class _MaterialAppState extends State<_MaterialApp> {
 
   @override
   Widget build(BuildContext context) {
+    final cupertinoLightTheme = MaterialBasedCupertinoThemeData(materialTheme: widget.lightTheme);
+    final cupertinoDarkTheme = MaterialBasedCupertinoThemeData(materialTheme: widget.darkTheme);
+
     return PlatformProvider(
+      initialPlatform: TargetPlatform.iOS,
       builder: (context) => AdaptiveTheme(
         light: widget.lightTheme,
         dark: widget.darkTheme,
@@ -269,44 +270,38 @@ class _MaterialAppState extends State<_MaterialApp> {
           SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
             systemNavigationBarColor: theme.scaffoldBackgroundColor,
             statusBarColor: theme.scaffoldBackgroundColor,
-            statusBarIconBrightness: theme.brightness == Brightness.light ? Brightness.light : Brightness.dark,
+            statusBarIconBrightness: theme.brightness == Brightness.light ? Brightness.dark : Brightness.light,
             systemNavigationBarIconBrightness:
-                theme.brightness == Brightness.light ? Brightness.light : Brightness.dark,
+                theme.brightness == Brightness.light ? Brightness.dark : Brightness.light,
           ));
 
           return PlatformTheme(
-            builder: (context) => FirebaseInteractedMessageListener(
-              child: PlatformApp.router(
-                restorationScopeId: "app",
-                localizationsDelegates: [
-                  GlobalMaterialLocalizations.delegate,
-                  GlobalWidgetsLocalizations.delegate,
-                  GlobalCupertinoLocalizations.delegate,
-                  ...neonLocalizationsDelegates,
-                ],
-                supportedLocales: const [
-                  Locale('en'),
-                  Locale('ru'),
-                ],
-                locale: const Locale('ru'),
-                debugShowCheckedModeBanner: false,
-                title: 'Приложение РТУ МИРЭА',
-                routerConfig: router,
-                material: (_, __) => MaterialAppRouterData(
-                  theme: theme,
-                  darkTheme: darkTheme,
-                  themeMode: theme.brightness == Brightness.light ? ThemeMode.light : ThemeMode.dark,
+            themeMode: theme.brightness == Brightness.light ? ThemeMode.light : ThemeMode.dark,
+            materialLightTheme: widget.lightTheme,
+            materialDarkTheme: widget.darkTheme,
+            cupertinoLightTheme: cupertinoLightTheme,
+            cupertinoDarkTheme: cupertinoDarkTheme,
+            builder: (context) {
+              return FirebaseInteractedMessageListener(
+                child: PlatformApp.router(
+                  restorationScopeId: "app",
+                  localizationsDelegates: [
+                    GlobalMaterialLocalizations.delegate,
+                    GlobalWidgetsLocalizations.delegate,
+                    GlobalCupertinoLocalizations.delegate,
+                    ...neonLocalizationsDelegates,
+                  ],
+                  supportedLocales: const [
+                    Locale('en'),
+                    Locale('ru'),
+                  ],
+                  locale: const Locale('ru'),
+                  debugShowCheckedModeBanner: false,
+                  title: 'Приложение РТУ МИРЭА',
+                  routerConfig: router,
                 ),
-                cupertino: (_, __) => CupertinoAppRouterData(
-                  theme: CupertinoThemeData(
-                    brightness: theme.brightness,
-                    primaryColor: theme.primaryColor,
-                    barBackgroundColor: theme.scaffoldBackgroundColor,
-                    scaffoldBackgroundColor: theme.scaffoldBackgroundColor,
-                  ),
-                ),
-              ),
-            ),
+              );
+            },
           );
         },
       ),

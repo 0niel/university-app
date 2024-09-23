@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -151,39 +152,49 @@ class _SchedulePageState extends State<SchedulePage> {
   }
 
   Widget _buildAddGroupButton(BuildContext context) {
-    return IconButton(
+    return PlatformIconButton(
       icon: HugeIcon(
         icon: HugeIcons.strokeRoundedAddSquare,
         size: 24,
         color: AppTheme.colorsOf(context).active,
       ),
-      tooltip: 'Добавить группу',
+      material: (_, __) => MaterialIconButtonData(
+        padding: const EdgeInsets.all(16.0),
+        tooltip: 'Добавить группу',
+      ),
       onPressed: () => context.go('/schedule/search'),
     );
   }
 
   Widget _buildSettingsButton(BuildContext context) {
-    return IconButton(
+    return PlatformIconButton(
       icon: HugeIcon(
         icon: HugeIcons.strokeRoundedSettings02,
         size: 24,
         color: AppTheme.colorsOf(context).active,
       ),
-      tooltip: 'Управление расписанием',
+      material: (_, __) => MaterialIconButtonData(
+        padding: const EdgeInsets.all(16.0),
+        tooltip: 'Управление расписанием',
+      ),
       onPressed: () => context.go('/profile'),
     );
   }
 
   Widget _buildViewToggleButton() {
-    return TextButton(
+    return PlatformIconButton(
       onPressed: () {
         _bloc.add(const ToggleListMode());
       },
-      style: TextButton.styleFrom(
-        shape: const CircleBorder(),
+      material: (_, __) => MaterialIconButtonData(
+        iconSize: 24,
+        padding: const EdgeInsets.all(16.0),
+        tooltip: 'Переключить вид',
+      ),
+      cupertino: (_, __) => CupertinoIconButtonData(
         padding: const EdgeInsets.all(16.0),
       ),
-      child: AnimatedSwitcher(
+      icon: AnimatedSwitcher(
         duration: 300.ms,
         transitionBuilder: (Widget child, Animation<double> animation) {
           return ScaleTransition(scale: animation, child: child);
@@ -324,7 +335,7 @@ class _SchedulePageState extends State<SchedulePage> {
     return SliverAppBar(
       pinned: false,
       primary: true,
-      expandedHeight: 80 + statusBarHeight,
+      expandedHeight: 90 + statusBarHeight,
       flexibleSpace: FlexibleSpaceBar(
         background: Padding(
           padding: EdgeInsets.only(top: statusBarHeight),

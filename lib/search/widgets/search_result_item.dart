@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:rtu_mirea_app/presentation/typography.dart';
 
@@ -52,7 +53,7 @@ class SearchResultItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return TextButton(
+    return PlatformTextButton(
       onPressed: onPressed,
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 5),

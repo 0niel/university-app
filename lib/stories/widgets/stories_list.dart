@@ -56,7 +56,7 @@ class _StoriesListState extends State<StoriesList> {
       ..storylyLocale = 'ru-RU';
 
     return SizedBox(
-      height: 70,
+      height: 90,
       child: StorylyView(
         onStorylyViewCreated: onStorylyViewCreated,
         androidParam: androidParams,
