@@ -5,9 +5,25 @@
   "cmake.configureOnOpen": false,
   "dart.flutterSdkPath": ".fvm/versions/3.24.3",
   "search.exclude": {
-    "**/.fvm": true
+    "**/.fvm": true,
+    "**/.pub": true,
+    "**/.dart_tool": true,
+    "**/.idea": true,
+    "**/build": true,
+    "**/ios": true,
+    "**/android": true,
+    "**/macos": true,
+    "**/web": true
   },
   "files.watcherExclude": {
-    "**/.fvm": true
+    "**/.fvm": true,
+    "**/.pub": true,
+    "**/.dart_tool": true,
+    "**/build": true,
+    "**/ios": true,
+    "**/android": true,
+    "**/macos": true,
+    "**/web": true
+  },
   }
 }
