@@ -27,40 +27,28 @@ class _StoriesListState extends State<StoriesList> {
   Widget build(BuildContext context) {
     final devicePixelRatio = MediaQuery.of(context).devicePixelRatio;
 
-    final iosParams = StorylyParam()
-      ..storylyId = Env.storylyId
-      ..storyGroupSize = "custom"
-      ..storyGroupListHorizontalEdgePadding = 16
-      ..storyGroupListHorizontalPaddingBetweenItems = 8
-      ..storyGroupTextIsVisible = true
-      ..storyGroupTextColorSeen = AppTheme.colorsOf(context).active
-      ..storyGroupTextColorNotSeen = AppTheme.colorsOf(context).active
-      ..storyGroupIconHeight = 70
-      ..storyGroupIconWidth = 70
-      ..storyGroupTextLines = 2
-      ..storyGroupIconCornerRadius = 50
-      ..storylyLocale = 'ru-RU';
-
-    final androidParams = StorylyParam()
+    final params = StorylyParam()
       ..storylyId = Env.storylyId
       ..storyGroupSize = "custom"
       ..storyGroupListHorizontalEdgePadding = (16 * devicePixelRatio).round()
       ..storyGroupListHorizontalPaddingBetweenItems = (8 * devicePixelRatio).round()
+      ..storyGroupListVerticalEdgePadding = 0
       ..storyGroupTextIsVisible = true
       ..storyGroupTextColorSeen = AppTheme.colorsOf(context).active
       ..storyGroupTextColorNotSeen = AppTheme.colorsOf(context).active
       ..storyGroupIconHeight = (70 * devicePixelRatio).round()
       ..storyGroupIconWidth = (70 * devicePixelRatio).round()
-      ..storyGroupTextLines = 2
+      ..storyGroupTextLines = 1
       ..storyGroupIconCornerRadius = (50 * devicePixelRatio).round()
+      ..storyGroupTextSize = (12 * devicePixelRatio).round()
       ..storylyLocale = 'ru-RU';
 
     return SizedBox(
       height: 90,
       child: StorylyView(
         onStorylyViewCreated: onStorylyViewCreated,
-        androidParam: androidParams,
-        iosParam: iosParams,
+        androidParam: params,
+        iosParam: params,
         storylyLoaded: (storyGroups, dataSource) {
           final stories = storyGroups.map((st) => st.stories).expand((element) => element).toList();
           widget.onStoriesLoaded?.call(stories);

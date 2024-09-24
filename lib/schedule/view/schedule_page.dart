@@ -330,20 +330,15 @@ class _SchedulePageState extends State<SchedulePage> {
       }
     });
 
-    final double statusBarHeight = MediaQuery.of(context).padding.top;
-
     return SliverAppBar(
       pinned: false,
       primary: true,
-      expandedHeight: 90 + statusBarHeight,
+      expandedHeight: 90,
       flexibleSpace: FlexibleSpaceBar(
-        background: Padding(
-          padding: EdgeInsets.only(top: statusBarHeight),
-          child: AnimatedOpacity(
-            opacity: _isStoriesVisible ? 1.0 : 0.0,
-            duration: const Duration(milliseconds: 300),
-            child: storiesView,
-          ),
+        background: AnimatedOpacity(
+          opacity: _isStoriesVisible ? 1.0 : 0.0,
+          duration: const Duration(milliseconds: 300),
+          child: storiesView,
         ),
       ),
     );
