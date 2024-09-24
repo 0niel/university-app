@@ -27,7 +27,7 @@ class _StoriesListState extends State<StoriesList> {
   Widget build(BuildContext context) {
     final devicePixelRatio = MediaQuery.of(context).devicePixelRatio;
 
-    final params = StorylyParam()
+    final androidParams = StorylyParam()
       ..storylyId = Env.storylyId
       ..storyGroupSize = "custom"
       ..storyGroupListHorizontalEdgePadding = (16 * devicePixelRatio).round()
@@ -43,12 +43,28 @@ class _StoriesListState extends State<StoriesList> {
       ..storyGroupTextSize = (12 * devicePixelRatio).round()
       ..storylyLocale = 'ru-RU';
 
+    final iosParams = StorylyParam()
+      ..storylyId = Env.storylyId
+      ..storyGroupSize = "custom"
+      ..storyGroupListHorizontalEdgePadding = 16
+      ..storyGroupListHorizontalPaddingBetweenItems = 8
+      ..storyGroupListVerticalEdgePadding = 0
+      ..storyGroupTextIsVisible = true
+      ..storyGroupTextColorSeen = AppTheme.colorsOf(context).active
+      ..storyGroupTextColorNotSeen = AppTheme.colorsOf(context).active
+      ..storyGroupIconHeight = 70
+      ..storyGroupIconWidth = 70
+      ..storyGroupTextLines = 1
+      ..storyGroupIconCornerRadius = 50
+      ..storyGroupTextSize = 12
+      ..storylyLocale = 'ru-RU';
+
     return SizedBox(
       height: 90,
       child: StorylyView(
         onStorylyViewCreated: onStorylyViewCreated,
-        androidParam: params,
-        iosParam: params,
+        androidParam: androidParams,
+        iosParam: iosParams,
         storylyLoaded: (storyGroups, dataSource) {
           final stories = storyGroups.map((st) => st.stories).expand((element) => element).toList();
           widget.onStoriesLoaded?.call(stories);
