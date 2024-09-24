@@ -19,7 +19,7 @@ class SponsorsView extends StatelessWidget {
 }
 
 class _SponsorsView extends StatelessWidget {
-  const _SponsorsView({Key? key}) : super(key: key);
+  const _SponsorsView();
 
   @override
   Widget build(BuildContext context) {

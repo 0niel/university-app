@@ -14,7 +14,7 @@ import 'package:rtu_mirea_app/schedule/schedule.dart';
 import 'package:rtu_mirea_app/presentation/widgets/feedback_modal.dart';
 
 class ProfilePage extends StatelessWidget {
-  const ProfilePage({Key? key}) : super(key: key);
+  const ProfilePage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -44,7 +44,7 @@ class ProfilePage extends StatelessWidget {
 }
 
 class _InitialProfileStatePage extends StatefulWidget {
-  const _InitialProfileStatePage({Key? key}) : super(key: key);
+  const _InitialProfileStatePage();
 
   @override
   State<_InitialProfileStatePage> createState() => _InitialProfileStatePageState();

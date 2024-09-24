@@ -5,12 +5,12 @@ import 'package:rtu_mirea_app/presentation/typography.dart';
 
 class ProfileButton extends StatelessWidget {
   const ProfileButton({
-    Key? key,
+    super.key,
     required this.text,
     required this.icon,
     this.onPressed,
     this.trailing,
-  }) : super(key: key);
+  });
 
   final String text;
   final Widget icon;

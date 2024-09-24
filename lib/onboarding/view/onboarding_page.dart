@@ -9,7 +9,7 @@ import 'package:rtu_mirea_app/presentation/theme.dart';
 
 /// OnBoarding screen that greets new users
 class OnBoardingPage extends StatefulWidget {
-  const OnBoardingPage({Key? key}) : super(key: key);
+  const OnBoardingPage({super.key});
 
   @override
   State<StatefulWidget> createState() => _OnBoardingPageState();
@@ -170,10 +170,10 @@ class _OnBoardingPageState extends State<OnBoardingPage> {
 
 class PageIndicators extends StatefulWidget {
   const PageIndicators({
-    Key? key,
+    super.key,
     required this.onClick,
     required this.dotsNum,
-  }) : super(key: key);
+  });
 
   final VoidCallback onClick;
   final int dotsNum;

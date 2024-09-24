@@ -12,14 +12,13 @@ class LabelledInput extends StatefulWidget {
   final bool obscureText;
   final TextEditingController controller;
   const LabelledInput(
-      {Key? key,
+      {super.key,
       required this.placeholder,
       required this.keyboardType,
       required this.controller,
       required this.obscureText,
       required this.label,
-      this.value})
-      : super(key: key);
+      this.value});
 
   @override
   State<LabelledInput> createState() => _LabelledInputState();

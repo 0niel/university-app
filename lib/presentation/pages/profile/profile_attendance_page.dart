@@ -10,7 +10,7 @@ import 'package:rtu_mirea_app/presentation/typography.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 
 class ProfileAttendancePage extends StatefulWidget {
-  const ProfileAttendancePage({Key? key}) : super(key: key);
+  const ProfileAttendancePage({super.key});
 
   @override
   State<StatefulWidget> createState() => _ProfileAttendancePageState();

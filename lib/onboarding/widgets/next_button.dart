@@ -8,7 +8,7 @@ import 'package:rtu_mirea_app/presentation/theme.dart';
 /// Get next button to open next page
 /// or to close onboarding and start main app
 class NextButton extends StatelessWidget {
-  const NextButton({Key? key, required this.isLastPage, required this.onClick}) : super(key: key);
+  const NextButton({super.key, required this.isLastPage, required this.onClick});
 
   final bool isLastPage;
   final Function onClick;

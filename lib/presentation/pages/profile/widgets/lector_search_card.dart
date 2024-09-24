@@ -6,7 +6,7 @@ import 'package:rtu_mirea_app/presentation/typography.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 
 class LectorSearchCard extends StatelessWidget {
-  const LectorSearchCard({Key? key, required this.employee}) : super(key: key);
+  const LectorSearchCard({super.key, required this.employee});
 
   final Employee employee;
 

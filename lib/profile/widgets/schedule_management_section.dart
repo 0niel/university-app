@@ -18,7 +18,7 @@ import 'package:university_app_server_api/client.dart';
 class ScheduleManagementSection extends StatelessWidget {
   final void Function(BuildContext) onFeedbackTap;
 
-  const ScheduleManagementSection({Key? key, required this.onFeedbackTap}) : super(key: key);
+  const ScheduleManagementSection({super.key, required this.onFeedbackTap});
 
   int _getTotalSavedSchedules(BuildContext context) {
     final groups = context.read<ScheduleBloc>().state.groupsSchedule;

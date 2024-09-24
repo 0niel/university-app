@@ -5,12 +5,12 @@ import 'package:rtu_mirea_app/presentation/typography.dart';
 
 class PrimaryButton extends StatelessWidget {
   const PrimaryButton({
-    Key? key,
+    super.key,
     required this.text,
     this.icon,
     this.onClick,
     this.onLongPress,
-  }) : super(key: key);
+  });
 
   final String text;
   final Widget? icon;

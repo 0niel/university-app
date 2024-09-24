@@ -5,7 +5,7 @@ import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:rtu_mirea_app/presentation/widgets/skeleton.dart';
 
 class TopicsSkeletonCard extends StatelessWidget {
-  const TopicsSkeletonCard({Key? key}) : super(key: key);
+  const TopicsSkeletonCard({super.key});
 
   @override
   Widget build(BuildContext context) {

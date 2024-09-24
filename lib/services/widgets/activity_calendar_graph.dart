@@ -10,7 +10,7 @@ import 'package:rtu_mirea_app/presentation/typography.dart';
 import 'package:shimmer/shimmer.dart';
 
 class ActivityCalendarGraph extends StatefulWidget {
-  const ActivityCalendarGraph({Key? key}) : super(key: key);
+  const ActivityCalendarGraph({super.key});
 
   @override
   State<ActivityCalendarGraph> createState() => _ActivityCalendarGraphState();

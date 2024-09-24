@@ -13,12 +13,12 @@ import '../schedule.dart';
 
 class LessonCard extends StatelessWidget {
   const LessonCard({
-    Key? key,
+    super.key,
     required this.lesson,
     this.indexInGroup,
     this.countInGroup,
     this.onTap,
-  }) : super(key: key);
+  });
 
   final LessonSchedulePart lesson;
   final void Function(LessonSchedulePart)? onTap;

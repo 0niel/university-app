@@ -5,10 +5,10 @@ import 'package:rtu_mirea_app/presentation/theme.dart';
 
 class ImagesViewGallery extends StatefulWidget {
   const ImagesViewGallery({
-    Key? key,
+    super.key,
     required this.imageUrls,
     this.initialIndex,
-  }) : super(key: key);
+  });
 
   final List<String> imageUrls;
   final int? initialIndex;

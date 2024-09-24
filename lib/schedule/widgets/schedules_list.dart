@@ -7,7 +7,7 @@ import 'package:rtu_mirea_app/schedule/schedule.dart';
 import 'package:university_app_server_api/client.dart';
 
 class SchedulesList extends StatelessWidget {
-  const SchedulesList({Key? key}) : super(key: key);
+  const SchedulesList({super.key});
 
   String _getNameBySelectedSchedule(SelectedSchedule schedule) {
     if (schedule is SelectedGroupSchedule) {

@@ -5,7 +5,7 @@ import 'package:rtu_mirea_app/presentation/typography.dart';
 import 'package:rtu_mirea_app/presentation/widgets/buttons/colorful_button.dart';
 
 class NoSelectedScheduleMessage extends StatelessWidget {
-  const NoSelectedScheduleMessage({Key? key, required this.onTap}) : super(key: key);
+  const NoSelectedScheduleMessage({super.key, required this.onTap});
 
   final VoidCallback onTap;
 

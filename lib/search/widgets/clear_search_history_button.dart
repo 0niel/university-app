@@ -4,7 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:rtu_mirea_app/search/bloc/search_bloc.dart';
 
 class ClearSearchHistoryButton extends StatelessWidget {
-  const ClearSearchHistoryButton({Key? key}) : super(key: key);
+  const ClearSearchHistoryButton({super.key});
 
   @override
   Widget build(BuildContext context) {

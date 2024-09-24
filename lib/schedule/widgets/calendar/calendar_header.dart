@@ -10,7 +10,7 @@ import 'package:unicons/unicons.dart';
 
 class CalendarHeader extends StatefulWidget {
   const CalendarHeader({
-    Key? key,
+    super.key,
     required this.day,
     required this.week,
     required this.format,
@@ -18,7 +18,7 @@ class CalendarHeader extends StatefulWidget {
     required this.onMonthChanged,
     this.onHeaderTap,
     this.onHeaderLongPress,
-  }) : super(key: key);
+  });
 
   final DateTime day;
   final int week;
@@ -192,14 +192,13 @@ class _CalendarHeaderState extends State<CalendarHeader> with TickerProviderStat
 
 class _CalendarWeeksHeader extends StatelessWidget {
   const _CalendarWeeksHeader({
-    Key? key,
     required this.day,
     required this.pageController,
     required this.week,
     required this.format,
     this.onHeaderTap,
     this.onHeaderLongPress,
-  }) : super(key: key);
+  });
 
   final DateTime day;
   final int week;

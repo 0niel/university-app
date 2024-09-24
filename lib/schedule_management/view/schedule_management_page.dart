@@ -4,7 +4,7 @@ import 'package:rtu_mirea_app/schedule/bloc/schedule_bloc.dart';
 import 'package:rtu_mirea_app/schedule_management/widgets/widgets.dart';
 
 class ScheduleManagementPage extends StatelessWidget {
-  const ScheduleManagementPage({Key? key}) : super(key: key);
+  const ScheduleManagementPage({super.key});
 
   @override
   Widget build(BuildContext context) {

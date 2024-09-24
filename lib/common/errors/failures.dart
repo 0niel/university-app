@@ -10,7 +10,7 @@ abstract class Failure extends Equatable {
 }
 
 class ServerFailure extends Failure {
-  const ServerFailure([String? cause]) : super(cause);
+  const ServerFailure([super.cause]);
 }
 
 class NfcStaffnodeNotExistFailure extends ServerFailure {
@@ -18,5 +18,5 @@ class NfcStaffnodeNotExistFailure extends ServerFailure {
 }
 
 class CacheFailure extends Failure {
-  const CacheFailure([String? cause]) : super(cause);
+  const CacheFailure([super.cause]);
 }

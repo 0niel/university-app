@@ -7,7 +7,7 @@ import 'package:open_file/open_file.dart';
 import 'package:rtu_mirea_app/presentation/widgets/image_placeholder.dart';
 
 class ImagesHorizontalSlider extends StatelessWidget {
-  const ImagesHorizontalSlider({Key? key, required this.images}) : super(key: key);
+  const ImagesHorizontalSlider({super.key, required this.images});
 
   final List<String> images;
 

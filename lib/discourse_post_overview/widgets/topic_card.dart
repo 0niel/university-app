@@ -9,7 +9,7 @@ import 'package:rtu_mirea_app/presentation/widgets/image_placeholder.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 class TopicCard extends StatelessWidget {
-  const TopicCard({Key? key, required this.topic, this.author}) : super(key: key);
+  const TopicCard({super.key, required this.topic, this.author});
 
   final Topic topic;
   final User? author;

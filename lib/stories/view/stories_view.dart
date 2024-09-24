@@ -3,7 +3,7 @@ import 'package:rtu_mirea_app/stories/widgets/widgets.dart';
 import 'package:storyly_flutter/storyly_flutter.dart';
 
 class StoriesView extends StatelessWidget {
-  const StoriesView({Key? key, this.onStoriesLoaded}) : super(key: key);
+  const StoriesView({super.key, this.onStoriesLoaded});
 
   final Function(List<Story>)? onStoriesLoaded;
 

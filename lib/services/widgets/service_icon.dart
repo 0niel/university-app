@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 
 class ServiceIcon extends StatelessWidget {
   const ServiceIcon({
-    Key? key,
+    super.key,
     required this.color,
     required this.iconColor,
     required this.icon,
-  }) : super(key: key);
+  });
 
   final Color color;
   final Color iconColor;

@@ -11,7 +11,7 @@ import 'package:university_app_server_api/client.dart';
 class ScheduleBody extends StatefulWidget {
   final ScheduleState state;
 
-  const ScheduleBody({Key? key, required this.state}) : super(key: key);
+  const ScheduleBody({super.key, required this.state});
 
   @override
   State<ScheduleBody> createState() => _ScheduleBodyState();

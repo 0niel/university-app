@@ -4,10 +4,10 @@ import 'package:rtu_mirea_app/presentation/typography.dart';
 
 class ShortDescriptionCard extends StatelessWidget {
   const ShortDescriptionCard({
-    Key? key,
+    super.key,
     required this.icon,
     required this.text,
-  }) : super(key: key);
+  });
 
   final IconData icon;
   final String text;

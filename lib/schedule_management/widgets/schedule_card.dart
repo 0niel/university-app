@@ -19,11 +19,11 @@ class ScheduleCard<T> extends StatelessWidget {
   final String scheduleType;
 
   const ScheduleCard({
-    Key? key,
+    super.key,
     required this.schedule,
     required this.state,
     required this.scheduleType,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

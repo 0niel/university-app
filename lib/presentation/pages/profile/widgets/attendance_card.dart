@@ -4,7 +4,7 @@ import 'package:rtu_mirea_app/presentation/typography.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 
 class AttendanceCard extends StatelessWidget {
-  const AttendanceCard({Key? key, required this.type, required this.date, required this.time}) : super(key: key);
+  const AttendanceCard({super.key, required this.type, required this.date, required this.time});
 
   final String type;
   final String date;

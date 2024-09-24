@@ -7,7 +7,7 @@ import 'package:unicons/unicons.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class SponsorCard extends StatelessWidget {
-  const SponsorCard({Key? key, required this.sponsor}) : super(key: key);
+  const SponsorCard({super.key, required this.sponsor});
 
   final Sponsor sponsor;
 

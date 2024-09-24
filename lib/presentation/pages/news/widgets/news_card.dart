@@ -16,7 +16,7 @@ class NewsCard extends StatelessWidget {
   final NewsItem newsItem;
   final Function(String)? onClickNewsTag;
 
-  const NewsCard({Key? key, required this.newsItem, this.onClickNewsTag}) : super(key: key);
+  const NewsCard({super.key, required this.newsItem, this.onClickNewsTag});
 
   @override
   Widget build(BuildContext context) {
@@ -117,10 +117,9 @@ class _Tags extends StatelessWidget {
   final Function(String)? onClick;
 
   const _Tags({
-    Key? key,
     required this.tags,
     required this.onClick,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

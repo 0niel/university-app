@@ -6,13 +6,13 @@ import 'package:rtu_mirea_app/presentation/typography.dart';
 
 class SelectRangeDateButton extends StatefulWidget {
   const SelectRangeDateButton({
-    Key? key,
+    super.key,
     required this.onDateSelected,
     required this.initialValue,
     this.firstDate,
     this.lastDate,
     this.text,
-  }) : super(key: key);
+  });
 
   final Function(List<DateTime> dates) onDateSelected;
   final DateTime? firstDate;

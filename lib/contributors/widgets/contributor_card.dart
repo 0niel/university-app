@@ -7,7 +7,7 @@ import 'package:rtu_mirea_app/presentation/typography.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class ContributorCard extends StatelessWidget {
-  const ContributorCard({Key? key, required this.contributor}) : super(key: key);
+  const ContributorCard({super.key, required this.contributor});
 
   final Contributor contributor;
 

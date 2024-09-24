@@ -2,7 +2,7 @@ name: rtu_mirea_app
 description: Mobile application for students of RTU MIREA
 publish_to: 'none'
 
-version: 1.5.9+122
+version: 1.5.9+123
 
 environment:
   sdk: ">=3.1.1"
@@ -24,7 +24,7 @@ dependencies:
   flutter_animate: ^4.3.0
   latlong2: ^0.9.0
   adaptive_theme: ^3.5.0
-  very_good_infinite_list: ^0.7.1
+  very_good_infinite_list: ^0.8.0
   hydrated_bloc: ^9.1.2
   bloc_concurrency: ^0.2.2
   provider: ^6.0.5
@@ -35,13 +35,13 @@ dependencies:
   flutter_bloc: ^8.1.2
   flutter_svg: ^2.0.5
   equatable: ^2.0.5
-  get_it: ^7.2.0
-  photo_view: ^0.14.0
+  get_it: ^8.0.0
+  photo_view: ^0.15.0
   material_floating_search_bar_2: ^0.5.0
-  connectivity_plus: ^5.0.2
+  connectivity_plus: ^6.0.5
   dartz: ^0.10.0-nullsafety.2
-  flutter_typeahead: ^4.0.0
-  calendar_date_picker2: ^0.5.3
+  flutter_typeahead: ^5.2.0
+  calendar_date_picker2: ^1.1.7
   flutter_html: ^3.0.0-beta.2
   flutter_html_iframe: ^3.0.0-beta.2
   flutter_html_video: ^3.0.0-beta.2
@@ -55,29 +55,29 @@ dependencies:
   shimmer: ^3.0.0
   cached_network_image: ^3.2.0
   url_launcher: ^6.0.17
-  carousel_slider: ^4.0.0
+  carousel_slider: ^5.0.0
   salomon_bottom_bar: ^3.3.2
-  url_strategy: ^0.2.0
+  url_strategy: ^0.3.0
   cupertino_icons: ^1.0.2
   after_layout: ^1.1.0
   get:
   get_storage:
   home_widget: ^0.7.0
   freezed_annotation: ^2.1.0
-  firebase_core: ^2.30.1
-  firebase_core_web: ^2.16.0
-  firebase_analytics: ^10.10.4
-  firebase_messaging: ^14.9.1
+  firebase_core: ^3.5.0
+  firebase_core_web: ^2.18.1
+  firebase_analytics: ^11.3.2
+  firebase_messaging: ^15.1.2
   oauth2_client:
     git:
       url: https://github.com/0niel/oauth2_client.git
   flutter_secure_storage: ^8.0.0
-  device_info_plus: ^9.1.1
+  device_info_plus: ^10.1.2
   flutter_nfc_kit: ^3.3.1
   app_settings: ^5.0.0
-  sentry_flutter: ^7.9.0
-  sentry_dio: ^7.9.0
-  sentry_logging: ^7.9.0
+  sentry_flutter: ^8.9.0
+  sentry_dio: ^8.9.0
+  sentry_logging: ^8.9.0
   logging: ^1.1.1
   sliver_tools: ^0.2.12
   unicons: any
@@ -102,12 +102,12 @@ dependencies:
   open_file: ^3.3.2
   flutter_cache_manager: ^3.3.1
   bot_toast: ^4.1.3
-  package_info_plus: ^5.0.1
+  package_info_plus: ^8.0.2
   news_repository:
     path: packages/news_repository
   share_launcher:
     path: packages/share_launcher
-  visibility_detector: ^0.3.3
+  visibility_detector: ^0.4.0+2
   platform: ^3.0.2
   json_annotation: ^4.9.0
   hugeicons: ^0.0.7
@@ -135,10 +135,10 @@ dependencies:
   enough_platform_widgets: ^1.1.1
 
 dev_dependencies:
-  flutter_lints: ^2.0.1
+  flutter_lints: ^4.0.0
   flutter_test:
     sdk: flutter
-  flutter_launcher_icons: ^0.13.1
+  flutter_launcher_icons: ^0.14.1
   build_runner:
   flutter_gen_runner:
   freezed: ^2.4.5

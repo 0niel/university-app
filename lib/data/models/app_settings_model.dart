@@ -4,14 +4,10 @@ import 'package:rtu_mirea_app/domain/entities/app_settings.dart';
 
 class AppSettingsModel extends AppSettings {
   const AppSettingsModel({
-    required bool onboardingShown,
-    required String lastUpdateVersion,
-    required String theme,
-  }) : super(
-          onboardingShown: onboardingShown,
-          lastUpdateVersion: lastUpdateVersion,
-          theme: theme,
-        );
+    required super.onboardingShown,
+    required super.lastUpdateVersion,
+    required super.theme,
+  });
 
   factory AppSettingsModel.fromRawJson(String str) => AppSettingsModel.fromJson(json.decode(str));
 

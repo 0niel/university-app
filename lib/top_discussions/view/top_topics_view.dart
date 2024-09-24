@@ -20,7 +20,7 @@ class TopTopicsView extends StatelessWidget {
 }
 
 class _TopTopicsView extends StatelessWidget {
-  const _TopTopicsView({Key? key}) : super(key: key);
+  const _TopTopicsView();
 
   @override
   Widget build(BuildContext context) {

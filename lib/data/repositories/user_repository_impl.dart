@@ -1,7 +1,6 @@
 import 'package:rtu_mirea_app/common/errors/exceptions.dart';
 import 'package:rtu_mirea_app/common/errors/failures.dart';
 import 'package:dartz/dartz.dart';
-import 'package:rtu_mirea_app/common/utils/connection_checker.dart';
 import 'package:rtu_mirea_app/data/datasources/user_local.dart';
 import 'package:rtu_mirea_app/data/datasources/user_remote.dart';
 import 'package:rtu_mirea_app/domain/entities/announce.dart';
@@ -14,27 +13,21 @@ import 'package:rtu_mirea_app/domain/repositories/user_repository.dart';
 class UserRepositoryImpl implements UserRepository {
   final UserRemoteData remoteDataSource;
   final UserLocalData localDataSource;
-  final InternetConnectionChecker connectionChecker;
 
   UserRepositoryImpl({
     required this.remoteDataSource,
     required this.localDataSource,
-    required this.connectionChecker,
   });
   @override
   Future<Either<Failure, String>> logIn() async {
-    if (await connectionChecker.hasConnection) {
-      try {
-        final authToken = await remoteDataSource.auth();
-        return Right(authToken);
-      } catch (e) {
-        if (e is ServerException) {
-          return Left(ServerFailure(e.cause));
-        }
-        return const Left(ServerFailure());
+    try {
+      final authToken = await remoteDataSource.auth();
+      return Right(authToken);
+    } catch (e) {
+      if (e is ServerException) {
+        return Left(ServerFailure(e.cause));
       }
-    } else {
-      return const Left(ServerFailure("Отсутсвует соединение с интернетом"));
+      return const Left(ServerFailure());
     }
   }
 

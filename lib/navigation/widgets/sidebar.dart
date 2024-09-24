@@ -7,10 +7,10 @@ import 'package:rtu_mirea_app/presentation/typography.dart';
 
 class Sidebar extends StatelessWidget {
   const Sidebar({
-    Key? key,
+    super.key,
     required this.currentIndex,
     required this.onClick,
-  }) : super(key: key);
+  });
 
   final int currentIndex;
   final ValueSetter<int> onClick;
@@ -59,12 +59,12 @@ class Sidebar extends StatelessWidget {
 
 class SidebarNavButton extends StatelessWidget {
   const SidebarNavButton({
-    Key? key,
+    super.key,
     required this.isSelected,
     required this.title,
     required this.icon,
     required this.onClick,
-  }) : super(key: key);
+  });
 
   final bool isSelected;
   final String title;

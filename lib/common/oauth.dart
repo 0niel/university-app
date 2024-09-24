@@ -8,13 +8,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class MireaNinjaOauth2Client extends OAuth2Client {
   MireaNinjaOauth2Client({
-    required String redirectUri,
-    required String customUriScheme,
+    required super.redirectUri,
+    required super.customUriScheme,
   }) : super(
           authorizeUrl: 'https://auth-app.mirea.ru/oauth/authorize',
           tokenUrl: 'https://auth-app.mirea.ru/oauth/token',
-          redirectUri: redirectUri,
-          customUriScheme: customUriScheme,
         );
 }
 

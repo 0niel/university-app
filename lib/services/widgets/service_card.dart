@@ -6,7 +6,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 class ServiceCard extends StatelessWidget {
   const ServiceCard({
-    Key? key,
+    super.key,
     required this.title,
     required this.icon,
     this.onTap,
@@ -14,7 +14,7 @@ class ServiceCard extends StatelessWidget {
     this.url,
     this.description,
     this.launchMode = LaunchMode.externalApplication,
-  }) : super(key: key);
+  });
 
   final String title;
   final String? url;

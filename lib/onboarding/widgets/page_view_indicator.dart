@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 
 class PageViewIndicator extends StatelessWidget {
-  const PageViewIndicator({Key? key, required this.isActive}) : super(key: key);
+  const PageViewIndicator({super.key, required this.isActive});
 
   final bool isActive;
 

@@ -11,11 +11,11 @@ enum ItemType {
 
 class SearchResultItem extends StatelessWidget {
   const SearchResultItem({
-    Key? key,
+    super.key,
     required this.name,
     required this.onPressed,
     required this.type,
-  }) : super(key: key);
+  });
 
   final String name;
   final ItemType type;

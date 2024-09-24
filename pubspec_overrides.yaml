@@ -24,11 +24,7 @@ dependency_overrides:
     path: packages/neon/packages/nextcloud
   sort_box:
     path: packages/neon/packages/sort_box
-  package_info_plus:
-    git:
-      url: https://github.com/fluttercommunity/plus_plugins
-      path: packages/package_info_plus/package_info_plus
-      ref: baa336fe79c29411542fc343d332846bcd7752c1
+  package_info_plus: ^8.0.2
   flutter_keyboard_visibility:
     git:
       url: https://github.com/MisterJimson/flutter_keyboard_visibility.git
@@ -38,8 +34,9 @@ dependency_overrides:
     git:
       url: https://github.com/crazecoder/open_file.git
       ref: 7619c1bc2086c052a07701fb5e1456acc833e189
-
   intl: ^0.19.0
   camera_android_camerax: 0.6.7
   camera: 0.11.0
   flutter_local_notifications: ^17.2.2
+  firebase_core_web: ^2.18.1
+  web: ^1.0.0

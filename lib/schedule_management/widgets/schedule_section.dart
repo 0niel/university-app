@@ -11,12 +11,12 @@ class ScheduleSection<T> extends StatelessWidget {
   final String scheduleType;
 
   const ScheduleSection({
-    Key? key,
+    super.key,
     required this.title,
     required this.schedules,
     required this.state,
     required this.scheduleType,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

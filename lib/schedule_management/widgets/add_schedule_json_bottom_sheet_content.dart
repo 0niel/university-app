@@ -6,9 +6,9 @@ class AddScheduleJsonBottomSheetContent extends StatefulWidget {
   final Function(String) onConfirm;
 
   const AddScheduleJsonBottomSheetContent({
-    Key? key,
+    super.key,
     required this.onConfirm,
-  }) : super(key: key);
+  });
 
   @override
   State<AddScheduleJsonBottomSheetContent> createState() => _AddScheduleJsonBottomSheetContentState();

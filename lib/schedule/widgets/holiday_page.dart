@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:rtu_mirea_app/presentation/typography.dart';
 
 class HolidayPage extends StatelessWidget {
-  const HolidayPage({Key? key, required this.title}) : super(key: key);
+  const HolidayPage({super.key, required this.title});
 
   final String title;
 

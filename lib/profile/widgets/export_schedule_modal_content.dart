@@ -17,10 +17,10 @@ class ExportScheduleModalContent extends StatefulWidget {
   final List<LessonSchedulePart> lessons;
 
   const ExportScheduleModalContent({
-    Key? key,
+    super.key,
     required this.calendarName,
     required this.lessons,
-  }) : super(key: key);
+  });
 
   @override
   State createState() => _ExportScheduleModalContentState();

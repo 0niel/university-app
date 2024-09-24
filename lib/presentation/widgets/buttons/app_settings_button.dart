@@ -6,9 +6,9 @@ import 'package:rtu_mirea_app/presentation/theme.dart';
 class AppSettingsButton extends StatelessWidget {
   final VoidCallback onClick;
   const AppSettingsButton({
-    Key? key,
+    super.key,
     required this.onClick,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

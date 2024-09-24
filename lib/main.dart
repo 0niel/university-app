@@ -21,6 +21,7 @@ import 'package:rtu_mirea_app/data/datasources/strapi_remote.dart';
 import 'package:rtu_mirea_app/data/repositories/stories_repository_impl.dart';
 
 import 'package:rtu_mirea_app/domain/repositories/news_repository.dart';
+import 'package:rtu_mirea_app/env/env.dart';
 import 'package:rtu_mirea_app/neon/main.dart';
 
 import 'package:intl/intl_standalone.dart';
@@ -30,7 +31,6 @@ import 'package:sentry_dio/sentry_dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:university_app_server_api/client.dart';
 import 'package:url_strategy/url_strategy.dart';
-import 'common/constants.dart';
 import 'service_locator.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
@@ -124,7 +124,7 @@ Future<void> main() async {
 
   await SentryFlutter.init(
     (options) {
-      options.dsn = sentryDsn;
+      options.dsn = Env.sentryDsn;
 
       options.enableAutoPerformanceTracing = true;
 

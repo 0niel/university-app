@@ -6,9 +6,9 @@ import 'package:url_launcher/url_launcher_string.dart';
 
 class StoriesList extends StatefulWidget {
   const StoriesList({
-    Key? key,
+    super.key,
     this.onStoriesLoaded,
-  }) : super(key: key);
+  });
 
   final Function(List<Story>)? onStoriesLoaded;
 

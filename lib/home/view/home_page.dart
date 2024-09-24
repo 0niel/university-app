@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:rtu_mirea_app/home/cubit/home_cubit.dart';
 
 class HomePage extends StatelessWidget {
-  const HomePage({Key? key}) : super(key: key);
+  const HomePage({super.key});
 
   @override
   Widget build(BuildContext context) {

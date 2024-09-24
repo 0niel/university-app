@@ -19,7 +19,7 @@ class ContributorsView extends StatelessWidget {
 }
 
 class _ContributorsView extends StatelessWidget {
-  const _ContributorsView({Key? key}) : super(key: key);
+  const _ContributorsView();
 
   @override
   Widget build(BuildContext context) {

@@ -10,12 +10,12 @@ class PrimaryTabButton extends StatelessWidget {
   final VoidCallback onClick;
 
   const PrimaryTabButton({
-    Key? key,
+    super.key,
     required this.onClick,
     required this.notifier,
     required this.text,
     required this.itemIndex,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

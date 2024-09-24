@@ -10,11 +10,11 @@ class SetCommentBottomSheetContent extends StatefulWidget {
   final String? initialComment;
 
   const SetCommentBottomSheetContent({
-    Key? key,
+    super.key,
     required this.schedule,
     required this.onConfirm,
     this.initialComment,
-  }) : super(key: key);
+  });
 
   @override
   State<SetCommentBottomSheetContent> createState() => _SetCommentBottomSheetContentState();

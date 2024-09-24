@@ -11,7 +11,7 @@ import 'package:rtu_mirea_app/presentation/theme.dart';
 final GlobalKey<FloatingSearchBarState> _searchBarKey = GlobalKey<FloatingSearchBarState>();
 
 class ProfileLectrosPage extends StatefulWidget {
-  const ProfileLectrosPage({Key? key}) : super(key: key);
+  const ProfileLectrosPage({super.key});
 
   @override
   State<ProfileLectrosPage> createState() => _ProfileLectrosPageState();

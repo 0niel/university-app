@@ -4,7 +4,7 @@ import 'package:rtu_mirea_app/presentation/typography.dart';
 
 class TextInput extends StatelessWidget {
   const TextInput({
-    Key? key,
+    super.key,
     this.hintText,
     this.errorText,
     this.controller,
@@ -12,7 +12,7 @@ class TextInput extends StatelessWidget {
     this.maxLines,
     this.fillColor,
     this.prefixIcon,
-  }) : super(key: key);
+  });
 
   final String? hintText;
   final String? errorText;

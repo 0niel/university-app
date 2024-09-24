@@ -9,7 +9,7 @@ import 'package:rtu_mirea_app/presentation/typography.dart';
 import 'package:rtu_mirea_app/presentation/widgets/buttons/primary_tab_button.dart';
 
 class ProfileScoresPage extends StatefulWidget {
-  const ProfileScoresPage({Key? key}) : super(key: key);
+  const ProfileScoresPage({super.key});
 
   @override
   State<ProfileScoresPage> createState() => _ProfileScoresPageState();
@@ -176,10 +176,9 @@ class _ProfileScoresPageState extends State<ProfileScoresPage> {
 
 class _ScoresCardListView extends StatelessWidget {
   const _ScoresCardListView({
-    Key? key,
     required this.scores,
     required this.selectedSemester,
-  }) : super(key: key);
+  });
 
   final Map<String, List<Score>> scores;
   final String selectedSemester;
@@ -220,7 +219,7 @@ class _ScoresCardListView extends StatelessWidget {
 }
 
 class _AverageRatingCard extends StatelessWidget {
-  const _AverageRatingCard({Key? key}) : super(key: key);
+  const _AverageRatingCard();
 
   Color _getAverageRatingColor(double averageRating) {
     if (averageRating >= 4.5) {

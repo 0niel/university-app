@@ -162,10 +162,10 @@ final _neonWrapperKey = GlobalKey<_NeonProviderState>();
 
 class _NeonProvider extends StatefulWidget {
   const _NeonProvider({
-    Key? key,
+    super.key,
     required this.builder,
     required this.neonTheme,
-  }) : super(key: key);
+  });
 
   final Widget Function(app_neon_theme.AppTheme) builder;
   final neon_theme.NeonTheme neonTheme;
@@ -230,10 +230,9 @@ class _NeonProviderState extends State<_NeonProvider> {
 
 class _MaterialApp extends StatefulWidget {
   const _MaterialApp({
-    Key? key,
     required this.lightTheme,
     required this.darkTheme,
-  }) : super(key: key);
+  });
 
   final ThemeData lightTheme;
   final ThemeData darkTheme;

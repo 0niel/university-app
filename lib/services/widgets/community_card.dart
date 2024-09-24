@@ -6,13 +6,13 @@ import 'package:url_launcher/url_launcher.dart';
 
 class CommunityCard extends StatelessWidget {
   const CommunityCard({
-    Key? key,
+    super.key,
     required this.title,
     required this.url,
     required this.logo,
     this.description,
     this.launchMode = LaunchMode.externalApplication,
-  }) : super(key: key);
+  });
 
   final String title;
   final String url;

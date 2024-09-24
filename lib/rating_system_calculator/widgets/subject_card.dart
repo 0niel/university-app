@@ -49,10 +49,10 @@ import 'package:rtu_mirea_app/rating_system_calculator/models/models.dart';
 
 class SubjectCard extends StatelessWidget {
   const SubjectCard({
-    Key? key,
+    super.key,
     required this.subject,
     required this.onTap,
-  }) : super(key: key);
+  });
 
   final Subject subject;
   final void Function(Subject) onTap;
