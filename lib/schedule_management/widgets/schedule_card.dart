@@ -139,6 +139,8 @@ class ScheduleCard<T> extends StatelessWidget {
   }
 
   void _showSetCommentBottomSheet(BuildContext context, String? currentComment) {
+    final scheduleBloc = context.read<ScheduleBloc>();
+
     BottomModalSheet.show(
       context,
       child: SetCommentBottomSheetContent(
@@ -152,9 +154,9 @@ class ScheduleCard<T> extends StatelessWidget {
           );
 
           if (text == null || text.isEmpty) {
-            context.read<ScheduleBloc>().add(RemoveScheduleComment(uniqueKey));
+            scheduleBloc.add(RemoveScheduleComment(uniqueKey));
           } else {
-            context.read<ScheduleBloc>().add(SetScheduleComment(comment));
+            scheduleBloc.add(SetScheduleComment(comment));
           }
 
           ScaffoldMessenger.of(context).showSnackBar(
