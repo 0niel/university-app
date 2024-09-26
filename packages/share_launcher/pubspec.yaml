@@ -11,12 +11,12 @@ dependencies:
   flutter:
     sdk: flutter
   share_plus: ^7.2.2
-  share_plus_platform_interface: ^3.1.2
+  share_plus_platform_interface: ^5.0.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  mocktail: ^0.3.0
+  mocktail: ^1.0.0
   plugin_platform_interface: ^2.1.2
   url_launcher_platform_interface: ^2.0.5
-  very_good_analysis: ^4.0.0
+  very_good_analysis: ^6.0.0

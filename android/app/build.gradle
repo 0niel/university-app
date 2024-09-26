@@ -89,11 +89,11 @@ flutter {
 
 dependencies {
     implementation("androidx.security:security-crypto:1.1.0-alpha06")
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.9.25"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:2.0.20"
     implementation 'com.android.support:multidex:2.0.1'
-    implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.2"
+    implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3"
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     implementation("androidx.work:work-runtime-ktx:2.9.1")
     implementation("androidx.work:work-runtime:2.9.1")
-    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.0.3'
+    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.2'
 }
