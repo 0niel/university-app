@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:rtu_mirea_app/gen/assets.gen.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:rtu_mirea_app/presentation/typography.dart';
+import 'package:rtu_mirea_app/presentation/widgets/scaffold_messenger_helper.dart';
 import 'package:rtu_mirea_app/schedule/bloc/schedule_bloc.dart';
 import 'package:rtu_mirea_app/search/widgets/search_history_item.dart';
 import 'package:schedule_repository/schedule_repository.dart';
@@ -73,11 +74,14 @@ class _SearchViewState extends State<SearchView> {
     return BlocConsumer<SearchBloc, SearchState>(
       listener: (context, state) {
         if (state.status == SearchStatus.failure) {
-          ScaffoldMessenger.of(context)
-            ..hideCurrentSnackBar()
-            ..showSnackBar(
-              const SnackBar(content: Text("Произошла ошибка")),
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            ScaffoldMessengerHelper.showMessage(
+              context: context,
+              title: 'Ошибка',
+              subtitle: 'Не удалось выполнить поиск',
+              isSuccess: false,
             );
+          });
         }
       },
       builder: (context, state) {
