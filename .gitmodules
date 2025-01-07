@@ -1,4 +1,4 @@
 [submodule "packages/neon"]
 	path = packages/neon
 	url = https://github.com/0niel/neon.git
-	brach = main
+	branch = main
