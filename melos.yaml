@@ -1,26 +1,23 @@
 name: university_app
-
+repository: https://github.com/0niel/university-app
+sdkPath: .fvm/flutter_sdk
 bootstrap:
-  # It seems so that running "pub get" in parallel has some issues (like
-  # https://github.com/dart-lang/pub/issues/3404). Disabling this feature
-  # makes the CI much more stable.
   runPubGetInParallel: false
-  hooks:
-    post: melos run format
-
 packages:
   - packages/*
-  - packages/neon/packages/*
-  - packages/neon/packages/dynamite/*
-  - packages/neon/packages/neon/*
-  - packages/neon/packages/**/example
-
+  - packages/dynamite/**
+  - packages/neon/**
+  - packages/neon/**/packages/**
+  - packages/neon/**/packages/*/neon_framework/packages/**
+  - api/**
 ide:
   intellij:
     enabled: false
-
 command:
   bootstrap:
+    dependency_overrides:
+      intl: ^0.18.0
+      web: ^1.0.0
     hooks:
       post: melos run format
   version:
@@ -28,15 +25,13 @@ command:
       preCommit: |
         melos bootstrap
         git add packages/app/pubspec.lock
-
 scripts:
   format: dart format --fix --line-length 120 .
   format:check: dart format --output=none --set-exit-if-changed --line-length 120 .
-  analyze: dart analyze --fatal-infos .
+  analyze: dart run custom_lint --fatal-infos .
+  fix: dart fix --apply
   test: >
-    melos exec --no-flutter --concurrency=1 --fail-fast --packageFilters:
-      dirExists: test -- "dart test --concurrency=$(nproc --all) --fail-fast" &&
-    melos exec --flutter --concurrency=1 --fail-fast --packageFilters:
-      dirExists: test -- "flutter test --concurrency=$(nproc --all) --fail-fast"
-  generate:build_runner: melos exec --file-exists="build.yaml" -- dart run build_runner build --delete-conflicting-outputs && melos run format
-  generate:l10n: melos exec --flutter --dir-exists="lib/l10n" flutter gen-l10n && melos run format
+    melos exec --no-flutter --concurrency=1 --fail-fast --dir-exists=test -- "dart test --concurrency=$(nproc --all) --fail-fast" &&
+    melos exec --flutter --concurrency=1 --fail-fast --dir-exists=test -- "flutter test --concurrency=$(nproc --all)"
+  generate:neon:build_runner: melos exec --scope="neon*" --file-exists="build.yaml" -- dart run build_runner build --delete-conflicting-outputs && melos run format
+  generate:neon:l10n: melos exec --flutter --dir-exists="lib/l10n" flutter gen-l10n && melos run format
