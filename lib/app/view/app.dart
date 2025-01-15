@@ -170,7 +170,6 @@ class _MaterialAppState extends State<_MaterialApp> {
     final darkTheme = AppTheme.darkTheme.copyWith(extensions: [neonTheme]);
 
     return PlatformProvider(
-      initialPlatform: TargetPlatform.iOS,
       builder: (context) => AdaptiveTheme(
         light: lightTheme,
         dark: darkTheme,
