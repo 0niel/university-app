@@ -31,7 +31,7 @@ class _TopTopicsView extends StatelessWidget {
 
           return top.isNotEmpty
               ? SizedBox(
-                  height: 270,
+                  height: 332,
                   child: ListView.builder(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     scrollDirection: Axis.horizontal,
