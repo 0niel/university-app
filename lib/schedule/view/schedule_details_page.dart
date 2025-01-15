@@ -157,6 +157,7 @@ class _ScheduleDetailsPageState extends State<ScheduleDetailsPage> {
         ),
       ),
       const Divider(),
+      const SizedBox(height: 48),
     ]);
 
     return content;
