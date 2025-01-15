@@ -33,7 +33,6 @@ import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:rtu_mirea_app/schedule/bloc/schedule_bloc.dart';
 import 'package:rtu_mirea_app/stories/bloc/stories_bloc.dart';
 
-import 'package:schedule_repository/schedule_repository.dart' as schedule_repository;
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:neon_framework/l10n/localizations.dart' as neon_localizations;
 
@@ -98,7 +97,7 @@ class App extends StatelessWidget {
           ),
           BlocProvider<ScheduleBloc>(
             create: (context) => ScheduleBloc(
-              scheduleRepository: context.read<schedule_repository.ScheduleRepository>(),
+              scheduleRepository: context.read<ScheduleRepository>(),
             )..add(const RefreshSelectedScheduleData()),
           ),
           BlocProvider<StoriesBloc>(
@@ -117,7 +116,7 @@ class App extends StatelessWidget {
             create: (_) => getIt<NotificationPreferencesBloc>(),
           ),
         ],
-        child: _MaterialApp(
+        child: _AppView(
           neonDependencies: _neonDependencies,
         ),
       ),
@@ -125,30 +124,29 @@ class App extends StatelessWidget {
   }
 }
 
-class _MaterialApp extends StatefulWidget {
-  const _MaterialApp({
+class _AppView extends StatefulWidget {
+  const _AppView({
     required this.neonDependencies,
   });
 
   final NeonDependencies neonDependencies;
 
   @override
-  State<_MaterialApp> createState() => _MaterialAppState();
+  State<_AppView> createState() => _AppViewState();
 }
 
-class _MaterialAppState extends State<_MaterialApp> {
-  late final GoRouter router;
-  late final List<LocalizationsDelegate<dynamic>> neonLocalizationsDelegates;
+class _AppViewState extends State<_AppView> {
+  late final GoRouter _router;
+  late final List<LocalizationsDelegate<dynamic>> _neonLocalizationsDelegates;
 
   @override
   void initState() {
     super.initState();
-
-    router = getIt<GoRouter>();
-    neonLocalizationsDelegates = getNeonLocalizationsDelegates().cast<LocalizationsDelegate<dynamic>>();
+    _router = getIt<GoRouter>();
+    _neonLocalizationsDelegates = _buildNeonLocalizationsDelegates();
   }
 
-  List<LocalizationsDelegate<dynamic>> getNeonLocalizationsDelegates() {
+  List<LocalizationsDelegate<dynamic>> _buildNeonLocalizationsDelegates() {
     return [
       ...widget.neonDependencies.appImplementations.map((app) => app.localizationsDelegate),
       ...neon_localizations.NeonLocalizations.localizationsDelegates,
@@ -158,16 +156,16 @@ class _MaterialAppState extends State<_MaterialApp> {
   @override
   Widget build(BuildContext context) {
     final neonTheme = widget.neonDependencies.neonTheme;
-    final cupertinoLightTheme =
-        MaterialBasedCupertinoThemeData(materialTheme: AppTheme.lightTheme.copyWith(extensions: [neonTheme]));
-
-    final cupertinoDarkTheme = MaterialBasedCupertinoThemeData(
-        materialTheme: AppTheme.darkTheme.copyWith(
-      extensions: [neonTheme],
-    ));
 
     final lightTheme = AppTheme.lightTheme.copyWith(extensions: [neonTheme]);
     final darkTheme = AppTheme.darkTheme.copyWith(extensions: [neonTheme]);
+
+    final cupertinoLightTheme = MaterialBasedCupertinoThemeData(
+      materialTheme: lightTheme,
+    );
+    final cupertinoDarkTheme = MaterialBasedCupertinoThemeData(
+      materialTheme: darkTheme,
+    );
 
     return PlatformProvider(
       builder: (context) => AdaptiveTheme(
@@ -175,13 +173,7 @@ class _MaterialAppState extends State<_MaterialApp> {
         dark: darkTheme,
         initial: AdaptiveThemeMode.dark,
         builder: (theme, darkTheme) {
-          SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
-            systemNavigationBarColor: theme.scaffoldBackgroundColor,
-            statusBarColor: theme.scaffoldBackgroundColor,
-            statusBarIconBrightness: theme.brightness == Brightness.light ? Brightness.dark : Brightness.light,
-            systemNavigationBarIconBrightness:
-                theme.brightness == Brightness.light ? Brightness.dark : Brightness.light,
-          ));
+          _configureSystemUI(theme);
 
           return PlatformTheme(
             themeMode: theme.brightness == Brightness.light ? ThemeMode.light : ThemeMode.dark,
@@ -194,27 +186,36 @@ class _MaterialAppState extends State<_MaterialApp> {
                 child: NeonAppProvider(
                   neonDependencies: widget.neonDependencies,
                   child: PlatformApp.router(
-                    restorationScopeId: "app",
+                    restorationScopeId: 'app',
                     localizationsDelegates: [
                       GlobalMaterialLocalizations.delegate,
                       GlobalWidgetsLocalizations.delegate,
                       GlobalCupertinoLocalizations.delegate,
-                      ...neonLocalizationsDelegates,
+                      ..._neonLocalizationsDelegates,
                     ],
-                    supportedLocales: const [
-                      Locale('en'),
-                      Locale('ru'),
-                    ],
+                    supportedLocales: const [Locale('en'), Locale('ru')],
                     locale: const Locale('ru'),
                     debugShowCheckedModeBanner: false,
                     title: 'Приложение РТУ МИРЭА',
-                    routerConfig: router,
+                    routerConfig: _router,
                   ),
                 ),
               );
             },
           );
         },
+      ),
+    );
+  }
+
+  /// Configure status bar and navigation bar colors/icons according to the theme.
+  void _configureSystemUI(ThemeData theme) {
+    SystemChrome.setSystemUIOverlayStyle(
+      SystemUiOverlayStyle(
+        systemNavigationBarColor: theme.scaffoldBackgroundColor,
+        statusBarColor: theme.scaffoldBackgroundColor,
+        statusBarIconBrightness: theme.brightness == Brightness.light ? Brightness.dark : Brightness.light,
+        systemNavigationBarIconBrightness: theme.brightness == Brightness.light ? Brightness.dark : Brightness.light,
       ),
     );
   }

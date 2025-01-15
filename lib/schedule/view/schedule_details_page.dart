@@ -9,8 +9,10 @@ import 'package:rtu_mirea_app/presentation/widgets/forms/text_input.dart';
 import 'package:rtu_mirea_app/schedule/models/models.dart';
 import 'package:rtu_mirea_app/schedule/schedule.dart';
 import 'package:university_app_server_api/client.dart';
-// import 'package:yandex_maps_mapkit_lite/mapkit.dart';
-// import 'package:yandex_maps_mapkit_lite/yandex_map.dart';
+import 'package:url_launcher/url_launcher_string.dart';
+import 'package:yandex_maps_mapkit_lite/mapkit.dart';
+import 'package:yandex_maps_mapkit_lite/mapkit_factory.dart';
+import 'package:yandex_maps_mapkit_lite/yandex_map.dart';
 
 class ScheduleDetailsPage extends StatefulWidget {
   const ScheduleDetailsPage({
@@ -30,16 +32,17 @@ class ScheduleDetailsPage extends StatefulWidget {
 }
 
 /// Listener for user interactions with the map.
-// final class _MapInputListener extends MapInputListener {
-//   @override
-//   void onMapTap(Map map, Point point) {
-//     launchUrlString(
-//         'https://yandex.ru/maps/?ll=${point.longitude},${point.latitude}&z=15&mode=whatshere&whatshere%5Bpoint%5D=${point.longitude},${point.latitude}&whatshere%5Bzoom%5D=15&whatshere%5Bdirection%5D=down&whatshere%5Bviewport%5D=%5B${point.longitude - 0.0001},${point.latitude - 0.0001}%2C${point.longitude + 0.0001},${point.latitude + 0.0001}%5D&basemap=map');
-//   }
+final class _MapInputListener extends MapInputListener {
+  @override
+  void onMapTap(Map map, Point point) {
+    launchUrlString(
+      'https://yandex.ru/maps/?ll=${point.longitude},${point.latitude}&z=15&mode=whatshere&whatshere%5Bpoint%5D=${point.longitude},${point.latitude}&whatshere%5Bzoom%5D=15&whatshere%5Bdirection%5D=down&whatshere%5Bviewport%5D=%5B${point.longitude - 0.0001},${point.latitude - 0.0001}%2C${point.longitude + 0.0001},${point.latitude + 0.0001}%5D&basemap=map',
+    );
+  }
 
-//   @override
-//   void onMapLongTap(Map map, Point point) {}
-// }
+  @override
+  void onMapLongTap(Map map, Point point) {}
+}
 
 class _ScheduleDetailsPageState extends State<ScheduleDetailsPage> {
   late final TextEditingController _textController;
@@ -211,7 +214,7 @@ class _ScheduleDetailsPageState extends State<ScheduleDetailsPage> {
               title: Text('Кампус'.toUpperCase()),
               subtitle: Text(classroom.campus!.name),
             ),
-            // _buildClassroomMap(classroom),
+            _buildClassroomMap(classroom),
             const Divider(
               height: 32,
             ),
@@ -221,26 +224,27 @@ class _ScheduleDetailsPageState extends State<ScheduleDetailsPage> {
     }).toList();
   }
 
-  // SizedBox _buildClassroomMap(Classroom classroom) {
-  //   return SizedBox(
-  //     height: 200,
-  //     child: YandexMap(onMapCreated: (mapWindow) {
-  //       mapWindow.map.move(
-  //         CameraPosition(
-  //           Point(latitude: classroom.campus!.latitude!, longitude: classroom.campus!.longitude!),
-  //           zoom: 12.0,
-  //           azimuth: 150.0,
-  //           tilt: 30.0,
-  //         ),
-  //       );
-  //       mapWindow.map.addInputListener(_MapInputListener());
-  //       mapWindow.map.mapObjects.addPlacemark().geometry = Point(
-  //         latitude: classroom.campus!.latitude!,
-  //         longitude: classroom.campus!.longitude!,
-  //       );
-  //     }),
-  //   );
-  // }
+  SizedBox _buildClassroomMap(Classroom classroom) {
+    return SizedBox(
+      height: 200,
+      child: YandexMap(onMapCreated: (mapWindow) {
+        mapkit.onStart();
+        mapWindow.map.move(
+          CameraPosition(
+            Point(latitude: classroom.campus!.latitude!, longitude: classroom.campus!.longitude!),
+            zoom: 16.0,
+            azimuth: 0.0,
+            tilt: 30.0,
+          ),
+        );
+        mapWindow.map.addInputListener(_MapInputListener());
+        mapWindow.map.mapObjects.addPlacemark().geometry = Point(
+          latitude: classroom.campus!.latitude!,
+          longitude: classroom.campus!.longitude!,
+        );
+      }),
+    );
+  }
 
   ListTile _buildGroups() {
     return ListTile(

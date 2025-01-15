@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:account_repository/account_repository.dart';
 import 'package:built_collection/built_collection.dart';
@@ -15,14 +14,10 @@ import 'package:neon_framework/src/platform/platform.dart';
 import 'package:neon_framework/src/theme/server.dart';
 import 'package:neon_framework/src/theme/theme.dart';
 import 'package:neon_framework/src/utils/account_options.dart';
-import 'package:neon_framework/src/utils/findable.dart';
 import 'package:neon_framework/src/utils/global_options.dart';
 import 'package:neon_framework/src/utils/localizations.dart';
 import 'package:neon_framework/src/utils/provider.dart';
-import 'package:neon_framework/src/utils/push_utils.dart';
 import 'package:neon_framework/src/widgets/options_collection_builder.dart';
-import 'package:nextcloud/notifications.dart' as notifications;
-import 'package:notifications_push_repository/notifications_push_repository.dart';
 import 'package:provider/provider.dart';
 import 'package:quick_actions/quick_actions.dart';
 import 'package:rtu_mirea_app/neon/neon.dart';

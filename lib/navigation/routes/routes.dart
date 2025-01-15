@@ -39,7 +39,6 @@ import 'package:neon_framework/src/router.dart' as neon;
 import 'package:url_launcher/url_launcher_string.dart';
 
 final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'root');
-final _shellNavigatorKey = GlobalKey<NavigatorState>();
 final GlobalKey<NavigatorState> _newsNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'news');
 final GlobalKey<NavigatorState> _scheduleNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'schedule');
 final GlobalKey<NavigatorState> _servicesNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'services');

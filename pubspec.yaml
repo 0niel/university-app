@@ -118,7 +118,7 @@ dependencies:
     git:
       url: https://github.com/0niel/dot_navigation_bar.git
       ref: master
-  yandex_maps_mapkit_lite: ^4.9.0-beta
+  yandex_maps_mapkit_lite: ^4.10.1-beta
   envied: ^0.5.4+1
   flutter_sticky_header: ^0.6.5
   schedule_exporter_repository:
@@ -139,6 +139,8 @@ dependencies:
     path: packages/neon/packages/neon_framework/packages/account_repository
   flutter_native_splash: ^2.4.4
   http: ^1.2.2
+  flutter_localizations:
+    sdk: flutter
 
 
 dependency_overrides:
