@@ -22,7 +22,7 @@ import 'package:rtu_mirea_app/data/repositories/stories_repository_impl.dart';
 
 import 'package:rtu_mirea_app/domain/repositories/news_repository.dart';
 import 'package:rtu_mirea_app/env/env.dart';
-import 'package:rtu_mirea_app/neon/main.dart';
+import 'package:rtu_mirea_app/neon/neon.dart';
 
 import 'package:intl/intl_standalone.dart';
 import 'package:rtu_mirea_app/service_locator.dart' as dependency_injection;
@@ -113,7 +113,10 @@ Future<void> main() async {
 
   HydratedBloc.storage = CustomHydratedStorage(sharedPreferences: getIt<SharedPreferences>());
 
-  final (neonTheme, neonProviders) = await runNeon();
+  final neonDependencies = await initializeNeonDependencies(
+    appImplementations: appImplementations,
+    theme: neonTheme,
+  );
 
   // blocking the orientation of the application to
   // vertical only
@@ -151,8 +154,7 @@ Future<void> main() async {
             communityRepository: communityRepository,
             storiesRepository: storiesRepository,
             discourseRepository: discourseRepository,
-            neonTheme: neonTheme,
-            neonProviders: neonProviders,
+            neonDependencies: neonDependencies,
             newsRepository: newsRepository,
             notificationsRepository: notificationsRepository,
             scheduleExporterRepository: scheduleExporterRepository,

@@ -118,7 +118,7 @@ class _NotificationsSwitch extends StatelessWidget {
         overflow: TextOverflow.ellipsis,
       ),
       trailing: CupertinoSwitch(
-        activeColor: AppTheme.colorsOf(context).primary,
+        activeTrackColor: AppTheme.colorsOf(context).primary,
         value: value,
         onChanged: onChanged,
       ),

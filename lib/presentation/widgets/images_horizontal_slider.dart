@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
-import 'package:open_file/open_file.dart';
+import 'package:open_filex/open_filex.dart';
 import 'package:rtu_mirea_app/presentation/widgets/image_placeholder.dart';
 
 class ImagesHorizontalSlider extends StatelessWidget {
@@ -27,7 +27,7 @@ class ImagesHorizontalSlider extends StatelessWidget {
                 final DefaultCacheManager manager = DefaultCacheManager();
                 final fileInfo = await manager.getFileFromCache(cacheKey);
                 if (fileInfo != null) {
-                  OpenFile.open(fileInfo.file.path);
+                  OpenFilex.open(fileInfo.file.path);
                 }
               },
               child: Padding(

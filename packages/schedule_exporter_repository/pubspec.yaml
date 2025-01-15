@@ -7,14 +7,14 @@ environment:
   sdk: ">=3.1.1"
 
 dependencies:
-  flutter:
-    sdk: flutter
   collection: ^1.18.0
   device_calendar:
     git:
-      url: https://github.com/builttoroam/device_calendar.git
+      url: https://github.com/0niel/device_calendar.git
       ref: develop
-  timezone: ^0.9.4
+  flutter:
+    sdk: flutter
+  timezone: ^0.10.0
   university_app_server_api:
     path: ../../api
 

@@ -1,4 +1,3 @@
-import 'package:device_info_plus/device_info_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_notifications_client/firebase_notifications_client.dart';
@@ -142,8 +141,6 @@ Future<void> setup() async {
   final PackageInfo packageInfo = await PackageInfo.fromPlatform();
   getIt.registerLazySingleton(() => packageInfo);
   getIt.registerLazySingleton(() => LksOauth2());
-  final DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
-  getIt.registerLazySingleton(() => deviceInfo);
 
   getIt.registerLazySingleton(() => FirebaseNotificationsClient(firebaseMessaging: FirebaseMessaging.instance));
   getIt.registerLazySingleton(() => const PermissionClient());
