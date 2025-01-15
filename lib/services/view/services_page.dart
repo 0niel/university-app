@@ -120,14 +120,15 @@ class _ServicesViewState extends State<ServicesView> {
                   children: [
                     ServiceCard(
                       title: 'Карта МИРЭА',
-                      url: 'https://map.mirea.ru/',
                       icon: ServiceIcon(
                         color: AppTheme.colorsOf(context).colorful07,
                         iconColor: AppTheme.colorsOf(context).active,
                         icon: Icons.map,
                       ),
-                      launchMode: LaunchMode.inAppBrowserView,
                       description: 'Найди нужный кабинет',
+                      onTap: () {
+                        context.go('/services/map');
+                      },
                     ),
                     BlocBuilder<NeonBloc, NeonState>(
                       bloc: neonBloc,

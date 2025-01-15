@@ -141,6 +141,8 @@ dependencies:
   http: ^1.2.2
   flutter_localizations:
     sdk: flutter
+  path_drawing: ^1.0.1
+  xml: ^6.5.0
 
 
 dependency_overrides:
@@ -178,6 +180,9 @@ flutter:
     - assets/images/
     - assets/icons/
     - assets/icons/hugeicons/
+    - assets/maps/v-78/
+    - assets/maps/s-20/
+    - assets/maps/mp-1/
     
   fonts:
     - family: Montserrat
