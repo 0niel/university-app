@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:rtu_mirea_app/presentation/constants.dart';
 import 'package:rtu_mirea_app/presentation/widgets/bottom_modal_sheet.dart';
 import 'package:rtu_mirea_app/presentation/widgets/buttons/primary_button.dart';
 import 'package:rtu_mirea_app/schedule/models/selected_schedule.dart';
@@ -40,37 +41,40 @@ class _ScheduleBodyState extends State<ScheduleBody> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        PrimaryButton(
-          text: 'Добавить расписание',
-          onClick: () => context.go('/schedule/search'),
-          onLongPress: () => _showSecretJsonDialog(context),
-        ),
-        const SizedBox(height: 16),
-        if (widget.state.groupsSchedule.isNotEmpty)
-          ScheduleSection<Group>(
-            title: "Группы",
-            schedules: _getUniqueSchedules<Group>(widget.state.groupsSchedule),
-            state: widget.state,
-            scheduleType: 'group',
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          PrimaryButton(
+            text: 'Добавить расписание',
+            onClick: () => context.go('/schedule/search'),
+            onLongPress: () => _showSecretJsonDialog(context),
           ),
-        if (widget.state.teachersSchedule.isNotEmpty)
-          ScheduleSection<Teacher>(
-            title: "Преподаватели",
-            schedules: _getUniqueSchedules<Teacher>(widget.state.teachersSchedule),
-            state: widget.state,
-            scheduleType: 'teacher',
-          ),
-        if (widget.state.classroomsSchedule.isNotEmpty)
-          ScheduleSection<Classroom>(
-            title: "Аудитории",
-            schedules: _getUniqueSchedules<Classroom>(widget.state.classroomsSchedule),
-            state: widget.state,
-            scheduleType: 'classroom',
-          ),
-      ],
+          const SizedBox(height: 16),
+          if (widget.state.groupsSchedule.isNotEmpty)
+            ScheduleSection<Group>(
+              title: "Группы",
+              schedules: _getUniqueSchedules<Group>(widget.state.groupsSchedule),
+              state: widget.state,
+              scheduleType: 'group',
+            ),
+          if (widget.state.teachersSchedule.isNotEmpty)
+            ScheduleSection<Teacher>(
+              title: "Преподаватели",
+              schedules: _getUniqueSchedules<Teacher>(widget.state.teachersSchedule),
+              state: widget.state,
+              scheduleType: 'teacher',
+            ),
+          if (widget.state.classroomsSchedule.isNotEmpty)
+            ScheduleSection<Classroom>(
+              title: "Аудитории",
+              schedules: _getUniqueSchedules<Classroom>(widget.state.classroomsSchedule),
+              state: widget.state,
+              scheduleType: 'classroom',
+            ),
+          const SizedBox(height: bottomNavigationBarHeight),
+        ],
+      ),
     );
   }
 
