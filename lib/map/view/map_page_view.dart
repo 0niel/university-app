@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:rtu_mirea_app/map/map.dart';
+import 'package:rtu_mirea_app/presentation/constants.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
+import 'package:flutter/services.dart';
 
-class MapPageView extends StatelessWidget {
+class MapPageView extends StatefulWidget {
   const MapPageView({super.key});
 
   static final campuses = [
@@ -103,10 +105,37 @@ class MapPageView extends StatelessWidget {
   ];
 
   @override
+  State<MapPageView> createState() => _MapPageViewState();
+}
+
+class _MapPageViewState extends State<MapPageView> {
+  @override
+  void initState() {
+    super.initState();
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+      DeviceOrientation.landscapeLeft,
+      DeviceOrientation.landscapeRight,
+    ]);
+  }
+
+  @override
+  void dispose() {
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    var isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
+
     return BlocProvider(
       create: (_) => MapBloc(
-        availableCampuses: campuses,
+        availableCampuses: MapPageView.campuses,
         objectsService: ObjectsService(),
       )..add(MapInitialized()),
       child: Scaffold(
@@ -138,7 +167,7 @@ class MapPageView extends StatelessWidget {
                   child: SizedBox(
                     width: 100,
                     child: CampusSelector(
-                      campuses: campuses,
+                      campuses: MapPageView.campuses,
                       selectedCampus: state.selectedCampus,
                       onCampusSelected: (campus) {
                         context.read<MapBloc>().add(CampusSelected(campus));
@@ -147,27 +176,42 @@ class MapPageView extends StatelessWidget {
                   ),
                 ),
                 Positioned(
-                  bottom: MediaQuery.of(context).size.height * 0.15,
+                  bottom: bottomNavigationBarHeight + 32,
                   right: 16,
                   child: Container(
                     decoration: BoxDecoration(
                       color: AppTheme.colorsOf(context).background02,
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: state.selectedCampus.floors.map((floor) {
-                        return MapNavigationButton(
-                          floor: floor.number,
-                          isSelected: state.selectedFloor.number == floor.number,
-                          onClick: () {
-                            context.read<MapBloc>().add(FloorSelected(floor, state.selectedCampus));
-                          },
-                        );
-                      }).toList(),
-                    ),
+                    child: isLandscape
+                        ? Row(
+                            mainAxisSize: MainAxisSize.min,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: state.selectedCampus.floors.map((floor) {
+                              return MapNavigationButton(
+                                floor: floor.number,
+                                isSelected: state.selectedFloor.number == floor.number,
+                                onClick: () {
+                                  context.read<MapBloc>().add(FloorSelected(floor, state.selectedCampus));
+                                },
+                              );
+                            }).toList(),
+                          )
+                        : Column(
+                            mainAxisSize: MainAxisSize.min,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: state.selectedCampus.floors.map((floor) {
+                              return MapNavigationButton(
+                                floor: floor.number,
+                                isSelected: state.selectedFloor.number == floor.number,
+                                onClick: () {
+                                  context.read<MapBloc>().add(FloorSelected(floor, state.selectedCampus));
+                                },
+                              );
+                            }).toList(),
+                          ),
                   ),
                 ),
               ],

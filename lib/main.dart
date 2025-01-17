@@ -8,7 +8,6 @@ import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:logger/logger.dart';
@@ -117,13 +116,6 @@ Future<void> main() async {
     appImplementations: appImplementations,
     theme: neonTheme,
   );
-
-  // blocking the orientation of the application to
-  // vertical only
-  SystemChrome.setPreferredOrientations([
-    DeviceOrientation.portraitDown,
-    DeviceOrientation.portraitUp,
-  ]);
 
   await SentryFlutter.init(
     (options) {
