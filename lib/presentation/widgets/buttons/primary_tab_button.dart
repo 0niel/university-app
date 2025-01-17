@@ -32,9 +32,13 @@ class PrimaryTabButton extends StatelessWidget {
             },
             material: (_, __) => MaterialElevatedButtonData(
               style: ElevatedButton.styleFrom(
+                shadowColor: Colors.transparent,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(50.0),
                 ),
+                backgroundColor: notifier.value == itemIndex
+                    ? AppTheme.colorsOf(context).primary
+                    : AppTheme.colorsOf(context).background01,
               ),
             ),
             color: notifier.value == itemIndex
@@ -49,7 +53,7 @@ class PrimaryTabButton extends StatelessWidget {
               style: AppTextStyle.tab.copyWith(
                 color: notifier.value == itemIndex
                     ? AppTheme.colorsOf(context).active
-                    : AppTheme.colorsOf(context).deactive,
+                    : AppTheme.colorsOf(context).deactive.withAlpha(200),
               ),
             ),
           );
