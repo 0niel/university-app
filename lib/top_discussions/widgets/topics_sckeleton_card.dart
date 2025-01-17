@@ -9,10 +9,15 @@ class TopicsSkeletonCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final maxWidth = min(
+      320.0,
+      MediaQuery.of(context).size.width - 64,
+    );
+
     return ConstrainedBox(
       constraints: BoxConstraints(
-        minWidth: 320,
-        maxWidth: MediaQuery.of(context).size.width - 64,
+        minWidth: 0,
+        maxWidth: maxWidth,
       ),
       child: Container(
         decoration: BoxDecoration(
@@ -26,20 +31,20 @@ class TopicsSkeletonCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Skeleton(height: 128),
+              const Skeleton(height: 96),
               const SizedBox(height: 16),
               Row(
                 children: [
                   Skeleton(height: 42, width: 42, borderRadius: BorderRadius.circular(21)),
                   const SizedBox(width: 16),
-                  const Column(
+                  Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Skeleton(height: 16, width: 240),
-                      SizedBox(height: 8),
+                      Skeleton(height: 16, width: maxWidth - 64 - 16 - 16),
+                      const SizedBox(height: 8),
                       Skeleton(
                         height: 16,
-                        width: 128,
+                        width: max(0, (maxWidth - 64 - 16 - 16) * 0.75),
                       ),
                     ],
                   ),
