@@ -56,7 +56,7 @@ class ScheduleManagementSection extends StatelessWidget {
                   padding: const EdgeInsets.only(right: 8.0),
                   child: Text(
                     _getTotalSavedSchedules(context).toString(),
-                    style: AppTextStyle.bodyL,
+                    style: AppTextStyle.bodyL.copyWith(color: AppTheme.colorsOf(context).active),
                   ),
                 ),
               ),
