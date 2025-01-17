@@ -21,8 +21,9 @@ class CampusSelected extends MapEvent {
 
 class FloorSelected extends MapEvent {
   final FloorModel selectedFloor;
+  final CampusModel selectedCampus;
 
-  const FloorSelected(this.selectedFloor);
+  const FloorSelected(this.selectedFloor, this.selectedCampus);
 
   @override
   List<Object?> get props => [selectedFloor];

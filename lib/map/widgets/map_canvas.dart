@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../models/room_model.dart';
+import 'package:rtu_mirea_app/map/map.dart';
 
 class MapCanvas extends CustomPainter {
   final List<RoomModel> rooms;

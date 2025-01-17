@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:rtu_mirea_app/map/map.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 
-class MapPageView extends StatefulWidget {
+class MapPageView extends StatelessWidget {
   const MapPageView({super.key});
 
   static final campuses = [
@@ -103,35 +103,11 @@ class MapPageView extends StatefulWidget {
   ];
 
   @override
-  State<MapPageView> createState() => _MapPageViewState();
-}
-
-class _MapPageViewState extends State<MapPageView> {
-  bool isLoading = true;
-
-  List<RoomModel> rooms = [];
-
-  Rect viewBoxRect = const Rect.fromLTWH(0, 0, 1000, 1000);
-
-  @override
-  void initState() {
-    super.initState();
-  }
-
-  Future<void> _initMap(String svgPath) async {
-    final (parsedRooms, vb) = await SvgRoomsParser.parseSvg(svgPath);
-    setState(() {
-      rooms = parsedRooms;
-      viewBoxRect = vb;
-      isLoading = false;
-    });
-  }
-
-  @override
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (_) => MapBloc(
-        availableCampuses: MapPageView.campuses,
+        availableCampuses: campuses,
+        objectsService: ObjectsService(),
       )..add(MapInitialized()),
       child: Scaffold(
         appBar: AppBar(
@@ -145,19 +121,13 @@ class _MapPageViewState extends State<MapPageView> {
               );
             }
 
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              _initMap(state.selectedFloor.svgPath);
-            });
-
             return Stack(
               children: [
                 Column(
                   children: [
                     Expanded(
-                      child: SvgInteractiveView(
+                      child: SvgInteractiveMap(
                         svgAssetPath: state.selectedFloor.svgPath,
-                        rooms: state.rooms,
-                        viewBoxRect: viewBoxRect,
                       ),
                     ),
                   ],
@@ -168,7 +138,7 @@ class _MapPageViewState extends State<MapPageView> {
                   child: SizedBox(
                     width: 100,
                     child: CampusSelector(
-                      campuses: MapPageView.campuses,
+                      campuses: campuses,
                       selectedCampus: state.selectedCampus,
                       onCampusSelected: (campus) {
                         context.read<MapBloc>().add(CampusSelected(campus));
@@ -193,7 +163,7 @@ class _MapPageViewState extends State<MapPageView> {
                           floor: floor.number,
                           isSelected: state.selectedFloor.number == floor.number,
                           onClick: () {
-                            context.read<MapBloc>().add(FloorSelected(floor));
+                            context.read<MapBloc>().add(FloorSelected(floor, state.selectedCampus));
                           },
                         );
                       }).toList(),

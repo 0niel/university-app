@@ -177,6 +177,7 @@ flutter:
   uses-material-design: true
 
   assets:
+    - assets/maps/objects.json
     - assets/images/
     - assets/icons/
     - assets/icons/hugeicons/
