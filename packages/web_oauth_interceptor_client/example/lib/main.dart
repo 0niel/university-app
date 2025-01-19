@@ -20,15 +20,16 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  final WebOAuthInterceptorClient oauthClient = WebOAuthInterceptorClient(
-    oauthUrl: "https://online-edu.mirea.ru/login/index.php",
-    expectedRedirectUrls: ["https://online-edu.mirea.ru/my/"],
-    buttonSelectors: {
-      'loginButton': '#loginButton',
+  final OAuthInterceptorClient oauthClient = OAuthInterceptorClient(
+    oauthUrl:
+        'https://attendance.mirea.ru/api/auth/login?redirectUri=https%3A%2F%2Fattendance-app.mirea.ru&rememberMe=True',
+    expectedRedirectUrls: ['https://attendance-app.mirea.ru/'],
+    specialCookieName: '.AspNetCore.Cookies',
+    onLoginSuccess: (data) {
+      print('Login success! Data: ${data.specialCookieValue}');
     },
-    formSelectors: {
-      'usernameField': '#username',
-      'passwordField': '#password',
+    onLoginError: (String error) {
+      print('Login failure! Error: $error');
     },
   );
 
@@ -41,7 +42,7 @@ class _MyAppState extends State<MyApp> {
       body: Center(
         child: ElevatedButton(
           onPressed: () async {
-            await oauthClient.initiateOAuthFlow(context);
+            await oauthClient.initiateOAuthFlow();
           },
           child: const Text("Start OAuth Flow"),
         ),
