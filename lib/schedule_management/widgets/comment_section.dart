@@ -10,11 +10,11 @@ class CommentSection<T> extends StatelessWidget {
   final String scheduleType;
 
   const CommentSection({
-    Key? key,
+    super.key,
     required this.schedule,
     required this.state,
     required this.scheduleType,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

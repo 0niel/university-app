@@ -7,10 +7,9 @@ import 'package:equatable/equatable.dart';
 import 'package:get/get.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:json_annotation/json_annotation.dart';
+import 'package:rtu_mirea_app/schedule/models/models.dart';
 import 'package:schedule_repository/schedule_repository.dart';
 import 'package:university_app_server_api/client.dart';
-
-import '../models/models.dart';
 
 part 'schedule_event.dart';
 part 'schedule_state.dart';
@@ -34,7 +33,8 @@ class ScheduleBloc extends HydratedBloc<ScheduleEvent, ScheduleState> {
     on<SetLessonComment>(_onSetLessonComment);
     on<SetShowCommentsIndicator>(_onSetShowCommentsIndicator);
     on<ToggleListMode>(_onScheduleToggleListMode);
-    on<AddScheduleComment>(_onAddScheduleComment);
+    on<SetScheduleComment>(_onSetScheduleComment);
+    on<RemoveScheduleComment>(_onRemoveScheduleComment);
     on<DeleteScheduleComment>(_onDeleteScheduleComment);
     on<ImportScheduleFromJson>(_onImportScheduleFromJson);
   }
@@ -62,11 +62,23 @@ class ScheduleBloc extends HydratedBloc<ScheduleEvent, ScheduleState> {
     }
   }
 
-  Future<void> _onAddScheduleComment(
-    AddScheduleComment event,
+  Future<void> _onSetScheduleComment(
+    SetScheduleComment event,
     Emitter<ScheduleState> emit,
   ) async {
-    final updatedComments = List<ScheduleComment>.from(state.scheduleComments)..add(event.comment);
+    final updatedComments = List<ScheduleComment>.from(state.scheduleComments)
+      ..removeWhere((comment) => comment.scheduleName == event.comment.scheduleName)
+      ..add(event.comment);
+
+    emit(state.copyWith(scheduleComments: updatedComments));
+  }
+
+  Future<void> _onRemoveScheduleComment(
+    RemoveScheduleComment event,
+    Emitter<ScheduleState> emit,
+  ) async {
+    final updatedComments = List<ScheduleComment>.from(state.scheduleComments)
+      ..removeWhere((comment) => comment.scheduleName == event.scheduleName);
 
     emit(state.copyWith(scheduleComments: updatedComments));
   }

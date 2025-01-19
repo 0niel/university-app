@@ -1,3 +1,4 @@
+import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
@@ -11,14 +12,13 @@ class LabelledInput extends StatefulWidget {
   final bool obscureText;
   final TextEditingController controller;
   const LabelledInput(
-      {Key? key,
+      {super.key,
       required this.placeholder,
       required this.keyboardType,
       required this.controller,
       required this.obscureText,
       required this.label,
-      this.value})
-      : super(key: key);
+      this.value});
 
   @override
   State<LabelledInput> createState() => _LabelledInputState();
@@ -58,7 +58,7 @@ class _LabelledInputState extends State<LabelledInput> {
               vertical: 20,
             ),
             suffixIcon: widget.placeholder == "Пароль"
-                ? InkWell(
+                ? PlatformInkWell(
                     onTap: () {
                       setState(() {
                         _showPassword = !_showPassword;
@@ -69,7 +69,7 @@ class _LabelledInputState extends State<LabelledInput> {
                       size: 15.0,
                       color: AppTheme.colors.deactiveDarker,
                     ))
-                : InkWell(
+                : PlatformInkWell(
                     onTap: () {
                       widget.controller.text = "";
                     },

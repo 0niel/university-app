@@ -8,9 +8,9 @@ import 'package:rtu_mirea_app/presentation/typography.dart';
 
 class ProfileDetailPage extends StatelessWidget {
   const ProfileDetailPage({
-    Key? key,
+    super.key,
     required this.user,
-  }) : super(key: key);
+  });
 
   final User user;
 

@@ -62,6 +62,8 @@ LessonType getLessonTypeFromText(String lessonType) {
     return LessonType.consultation;
   } else if (lessonType.contains('Курсовая работа')) {
     return LessonType.courseWork;
+  } else if (lessonType.contains('Курсовой проект')) {
+    return LessonType.courseProject;
   }
 
   return LessonType.unknown;

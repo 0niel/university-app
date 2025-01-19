@@ -7,7 +7,7 @@ import 'package:rtu_mirea_app/schedule/bloc/schedule_bloc.dart';
 import 'package:rtu_mirea_app/schedule/models/models.dart';
 
 class NotificationsSettingsPage extends StatelessWidget {
-  const NotificationsSettingsPage({Key? key}) : super(key: key);
+  const NotificationsSettingsPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -23,9 +23,7 @@ class NotificationsSettingsPage extends StatelessWidget {
 }
 
 class _NotificationPreferencesView extends StatefulWidget {
-  const _NotificationPreferencesView({
-    Key? key,
-  }) : super(key: key);
+  const _NotificationPreferencesView();
 
   @override
   State<_NotificationPreferencesView> createState() => _NotificationPreferencesViewState();
@@ -104,12 +102,11 @@ class _NotificationsSwitch extends StatelessWidget {
   final Function(bool) onChanged;
 
   const _NotificationsSwitch({
-    Key? key,
     required this.name,
     required this.description,
     required this.value,
     required this.onChanged,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -121,7 +118,7 @@ class _NotificationsSwitch extends StatelessWidget {
         overflow: TextOverflow.ellipsis,
       ),
       trailing: CupertinoSwitch(
-        activeColor: AppTheme.colorsOf(context).primary,
+        activeTrackColor: AppTheme.colorsOf(context).primary,
         value: value,
         onChanged: onChanged,
       ),

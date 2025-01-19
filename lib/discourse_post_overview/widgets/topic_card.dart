@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:discourse_repository/discourse_repository.dart';
+import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
@@ -8,7 +9,7 @@ import 'package:rtu_mirea_app/presentation/widgets/image_placeholder.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 class TopicCard extends StatelessWidget {
-  const TopicCard({Key? key, required this.topic, this.author}) : super(key: key);
+  const TopicCard({super.key, required this.topic, this.author});
 
   final Topic topic;
   final User? author;
@@ -21,7 +22,7 @@ class TopicCard extends StatelessWidget {
         maxWidth: MediaQuery.of(context).size.width - 64,
       ),
       child: Card(
-        child: InkWell(
+        child: PlatformInkWell(
           onTap: () {
             launchUrlString('https://mirea.ninja/t/${topic.id}');
           },
@@ -98,7 +99,7 @@ class TopicCard extends StatelessWidget {
                             children: [
                               Expanded(
                                 child: Text(
-                                  topic.excerpt,
+                                  topic.excerpt ?? '',
                                   style: AppTextStyle.body,
                                   overflow: TextOverflow.ellipsis,
                                   maxLines: 2,

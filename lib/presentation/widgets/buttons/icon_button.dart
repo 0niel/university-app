@@ -4,12 +4,12 @@ import 'package:rtu_mirea_app/presentation/typography.dart';
 
 class SocialIconButton extends StatelessWidget {
   const SocialIconButton({
-    Key? key,
+    super.key,
     required this.icon,
     required this.onClick,
     this.text,
     this.assetPath,
-  }) : super(key: key);
+  });
 
   final Icon icon;
   final Function onClick;

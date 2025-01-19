@@ -215,11 +215,10 @@ class _NewsPageState extends State<NewsPage> {
 
 class _NewsPageView extends StatefulWidget {
   const _NewsPageView({
-    Key? key,
     required this.tabValueNotifier,
     required this.news,
     required this.isLoading,
-  }) : super(key: key);
+  });
 
   final ValueNotifier<int> tabValueNotifier;
   final List<NewsItem> news;
@@ -288,7 +287,7 @@ class _NewsPageViewState extends State<_NewsPageView> {
 /// Widget with news card loading animation (shimmer effect).
 /// Used for first-time loading.
 class _ShimmerNewsCardLoading extends StatelessWidget {
-  const _ShimmerNewsCardLoading({Key? key}) : super(key: key);
+  const _ShimmerNewsCardLoading();
 
   @override
   Widget build(BuildContext context) {

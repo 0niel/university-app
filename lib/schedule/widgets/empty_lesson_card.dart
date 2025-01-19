@@ -6,9 +6,9 @@ class EmptyLessonCard extends StatelessWidget {
   final int lessonNumber;
 
   const EmptyLessonCard({
-    Key? key,
+    super.key,
     required this.lessonNumber,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

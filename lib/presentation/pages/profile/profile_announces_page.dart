@@ -9,7 +9,7 @@ import 'package:rtu_mirea_app/presentation/typography.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 
 class ProfileAnnouncesPage extends StatelessWidget {
-  const ProfileAnnouncesPage({Key? key}) : super(key: key);
+  const ProfileAnnouncesPage({super.key});
 
   @override
   Widget build(BuildContext context) {

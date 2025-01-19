@@ -4,13 +4,12 @@ import 'package:rtu_mirea_app/domain/entities/score.dart';
 import 'package:rtu_mirea_app/presentation/bloc/scores_bloc/scores_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/user_bloc/user_bloc.dart';
 import 'package:rtu_mirea_app/presentation/pages/profile/widgets/score_result_card.dart';
-import 'package:rtu_mirea_app/presentation/pages/profile/widgets/scores_chart_modal.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:rtu_mirea_app/presentation/typography.dart';
 import 'package:rtu_mirea_app/presentation/widgets/buttons/primary_tab_button.dart';
 
 class ProfileScoresPage extends StatefulWidget {
-  const ProfileScoresPage({Key? key}) : super(key: key);
+  const ProfileScoresPage({super.key});
 
   @override
   State<ProfileScoresPage> createState() => _ProfileScoresPageState();
@@ -153,12 +152,12 @@ class _ProfileScoresPageState extends State<ProfileScoresPage> {
       context: context,
       builder: (context) => BlocBuilder<ScoresBloc, ScoresState>(
         builder: (context, state) {
-          if (state.status == ScoresStatus.loaded) {
-            return ScoresChartModal(
-              scores: state.scores!,
-              averageRating: state.averageRating!,
-            );
-          }
+          // if (state.status == ScoresStatus.loaded) {
+          //   return ScoresChartModal(
+          //     scores: state.scores!,
+          //     averageRating: state.averageRating!,
+          //   );
+          // }
           return Container();
         },
       ),
@@ -177,10 +176,9 @@ class _ProfileScoresPageState extends State<ProfileScoresPage> {
 
 class _ScoresCardListView extends StatelessWidget {
   const _ScoresCardListView({
-    Key? key,
     required this.scores,
     required this.selectedSemester,
-  }) : super(key: key);
+  });
 
   final Map<String, List<Score>> scores;
   final String selectedSemester;
@@ -221,7 +219,7 @@ class _ScoresCardListView extends StatelessWidget {
 }
 
 class _AverageRatingCard extends StatelessWidget {
-  const _AverageRatingCard({Key? key}) : super(key: key);
+  const _AverageRatingCard();
 
   Color _getAverageRatingColor(double averageRating) {
     if (averageRating >= 4.5) {

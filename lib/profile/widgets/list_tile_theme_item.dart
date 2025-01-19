@@ -4,11 +4,11 @@ import 'package:rtu_mirea_app/presentation/typography.dart';
 
 class ListTileThemeItem extends StatelessWidget {
   const ListTileThemeItem({
-    Key? key,
+    super.key,
     required this.title,
     required this.onTap,
     this.trailing,
-  }) : super(key: key);
+  });
 
   final String title;
   final Widget? trailing;

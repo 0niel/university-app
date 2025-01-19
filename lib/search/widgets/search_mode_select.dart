@@ -5,7 +5,7 @@ import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:rtu_mirea_app/search/search.dart';
 
 class SearchModeSelect extends StatelessWidget {
-  const SearchModeSelect({Key? key}) : super(key: key);
+  const SearchModeSelect({super.key});
 
   @override
   Widget build(BuildContext context) {

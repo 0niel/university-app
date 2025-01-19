@@ -9,12 +9,12 @@ class TagBadge extends StatelessWidget {
   final bool isSelected;
 
   const TagBadge({
-    Key? key,
+    super.key,
     required this.tag,
     this.isSelected = false,
     this.onPressed,
     this.color,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

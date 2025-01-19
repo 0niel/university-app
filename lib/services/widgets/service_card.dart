@@ -1,3 +1,4 @@
+import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:rtu_mirea_app/presentation/typography.dart';
@@ -5,7 +6,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 class ServiceCard extends StatelessWidget {
   const ServiceCard({
-    Key? key,
+    super.key,
     required this.title,
     required this.icon,
     this.onTap,
@@ -13,7 +14,7 @@ class ServiceCard extends StatelessWidget {
     this.url,
     this.description,
     this.launchMode = LaunchMode.externalApplication,
-  }) : super(key: key);
+  });
 
   final String title;
   final String? url;
@@ -32,7 +33,7 @@ class ServiceCard extends StatelessWidget {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
         ),
-        child: InkWell(
+        child: PlatformInkWell(
           onLongPress: onLongPress,
           onTap: () {
             if (onTap != null) {

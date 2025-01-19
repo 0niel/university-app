@@ -12,7 +12,7 @@ class ScheduleExporterCubit extends Cubit<ScheduleExporterState> {
   /// Creates an instance of [ScheduleExporterCubit].
   ///
   /// [scheduleExporterRepository] is the repository responsible for exporting schedules.
-  ScheduleExporterCubit(this._scheduleExporterRepository) : super(ScheduleExporterState());
+  ScheduleExporterCubit(this._scheduleExporterRepository) : super(const ScheduleExporterState());
 
   /// Exports the given [lessons] to the calendar with the specified [calendarName].
   ///

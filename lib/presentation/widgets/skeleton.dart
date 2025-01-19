@@ -4,14 +4,14 @@ import 'package:shimmer/shimmer.dart';
 
 class Skeleton extends StatelessWidget {
   const Skeleton({
-    Key? key,
+    super.key,
     this.height,
     this.width,
     this.borderRadius = const BorderRadius.all(Radius.circular(16)),
     this.child,
     this.enabled = true,
     this.withBackground = true,
-  }) : super(key: key);
+  });
 
   final double? height;
   final double? width;

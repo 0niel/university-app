@@ -4,13 +4,13 @@ import 'package:rtu_mirea_app/presentation/typography.dart';
 
 class SelectedScheduleItemButton extends StatelessWidget {
   const SelectedScheduleItemButton({
-    Key? key,
+    super.key,
     required this.isSelected,
     required this.text,
     this.onRefreshPressed,
     this.onSelectedPressed,
     this.onDeletePressed,
-  }) : super(key: key);
+  });
 
   final bool isSelected;
   final String text;

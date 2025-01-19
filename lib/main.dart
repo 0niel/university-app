@@ -8,7 +8,6 @@ import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:logger/logger.dart';
@@ -22,7 +21,7 @@ import 'package:rtu_mirea_app/data/repositories/stories_repository_impl.dart';
 
 import 'package:rtu_mirea_app/domain/repositories/news_repository.dart';
 import 'package:rtu_mirea_app/env/env.dart';
-import 'package:rtu_mirea_app/neon/main.dart';
+import 'package:rtu_mirea_app/neon/neon.dart';
 
 import 'package:intl/intl_standalone.dart';
 import 'package:rtu_mirea_app/service_locator.dart' as dependency_injection;
@@ -31,7 +30,6 @@ import 'package:sentry_dio/sentry_dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:university_app_server_api/client.dart';
 import 'package:url_strategy/url_strategy.dart';
-import 'common/constants.dart';
 import 'service_locator.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
@@ -114,18 +112,14 @@ Future<void> main() async {
 
   HydratedBloc.storage = CustomHydratedStorage(sharedPreferences: getIt<SharedPreferences>());
 
-  final (neonTheme, neonProviders) = await runNeon();
-
-  // blocking the orientation of the application to
-  // vertical only
-  SystemChrome.setPreferredOrientations([
-    DeviceOrientation.portraitDown,
-    DeviceOrientation.portraitUp,
-  ]);
+  final neonDependencies = await initializeNeonDependencies(
+    appImplementations: appImplementations,
+    theme: neonTheme,
+  );
 
   await SentryFlutter.init(
     (options) {
-      options.dsn = sentryDsn;
+      options.dsn = Env.sentryDsn;
 
       options.enableAutoPerformanceTracing = true;
 
@@ -152,8 +146,7 @@ Future<void> main() async {
             communityRepository: communityRepository,
             storiesRepository: storiesRepository,
             discourseRepository: discourseRepository,
-            neonTheme: neonTheme,
-            neonProviders: neonProviders,
+            neonDependencies: neonDependencies,
             newsRepository: newsRepository,
             notificationsRepository: notificationsRepository,
             scheduleExporterRepository: scheduleExporterRepository,

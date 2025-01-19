@@ -6,7 +6,7 @@ import 'package:rtu_mirea_app/gen/assets.gen.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 
 class AppBottomNavigationBar extends StatefulWidget {
-  const AppBottomNavigationBar({Key? key, required this.index, required this.onClick}) : super(key: key);
+  const AppBottomNavigationBar({super.key, required this.index, required this.onClick});
 
   final Function(int) onClick;
   final int index;

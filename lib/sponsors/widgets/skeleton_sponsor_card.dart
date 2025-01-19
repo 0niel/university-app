@@ -3,7 +3,7 @@ import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:shimmer/shimmer.dart';
 
 class SkeletonSponsorCard extends StatelessWidget {
-  const SkeletonSponsorCard({Key? key}) : super(key: key);
+  const SkeletonSponsorCard({super.key});
 
   @override
   Widget build(BuildContext context) {

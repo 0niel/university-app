@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:rtu_mirea_app/presentation/typography.dart';
 
 class SearchHistoryItem extends StatelessWidget {
   const SearchHistoryItem({
-    Key? key,
+    super.key,
     required this.query,
     required this.onPressed,
     required this.onClear,
-  }) : super(key: key);
+  });
 
   final String query;
   final void Function(String) onPressed;
@@ -16,7 +17,7 @@ class SearchHistoryItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return TextButton(
+    return PlatformTextButton(
       onPressed: () {
         onPressed(query);
       },

@@ -3,7 +3,7 @@ import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:rtu_mirea_app/presentation/widgets/skeleton.dart';
 
 class SkeletonContributorCard extends StatelessWidget {
-  const SkeletonContributorCard({Key? key}) : super(key: key);
+  const SkeletonContributorCard({super.key});
 
   @override
   Widget build(BuildContext context) {

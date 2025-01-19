@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:go_router/go_router.dart';
 import 'package:rtu_mirea_app/top_discussions/view/view.dart';
 import 'package:rtu_mirea_app/neon/bloc/neon_bloc.dart';
@@ -119,14 +120,15 @@ class _ServicesViewState extends State<ServicesView> {
                   children: [
                     ServiceCard(
                       title: 'Карта МИРЭА',
-                      url: 'https://map.mirea.ru/',
                       icon: ServiceIcon(
                         color: AppTheme.colorsOf(context).colorful07,
                         iconColor: AppTheme.colorsOf(context).active,
                         icon: Icons.map,
                       ),
-                      launchMode: LaunchMode.inAppBrowserView,
                       description: 'Найди нужный кабинет',
+                      onTap: () {
+                        context.go('/services/map');
+                      },
                     ),
                     BlocBuilder<NeonBloc, NeonState>(
                       bloc: neonBloc,
@@ -180,7 +182,7 @@ class _ServicesViewState extends State<ServicesView> {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  TextButton(
+                  PlatformTextButton(
                     onPressed: () {
                       launchUrlString('https://mirea.ninja/top', mode: LaunchMode.externalApplication);
                     },

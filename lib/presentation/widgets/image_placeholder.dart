@@ -3,7 +3,7 @@ import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:shimmer/shimmer.dart';
 
 class ImagePlaceholder extends StatelessWidget {
-  const ImagePlaceholder({Key? key}) : super(key: key);
+  const ImagePlaceholder({super.key});
 
   @override
   Widget build(BuildContext context) {

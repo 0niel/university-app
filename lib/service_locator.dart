@@ -1,4 +1,3 @@
-import 'package:device_info_plus/device_info_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_notifications_client/firebase_notifications_client.dart';
@@ -8,7 +7,6 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:permission_client/permission_client.dart';
 import 'package:persistent_storage/persistent_storage.dart';
 import 'package:rtu_mirea_app/common/oauth.dart';
-import 'package:rtu_mirea_app/common/utils/connection_checker.dart';
 import 'package:rtu_mirea_app/data/datasources/app_settings_local.dart';
 import 'package:rtu_mirea_app/data/datasources/forum_local.dart';
 import 'package:rtu_mirea_app/data/datasources/forum_remote.dart';
@@ -100,14 +98,12 @@ Future<void> setup() async {
   getIt.registerLazySingleton<NewsRepository>(
     () => NewsRepositoryImpl(
       remoteDataSource: getIt(),
-      connectionChecker: getIt(),
     ),
   );
 
   getIt.registerLazySingleton<UserRepository>(() => UserRepositoryImpl(
         remoteDataSource: getIt(),
         localDataSource: getIt(),
-        connectionChecker: getIt(),
       ));
 
   getIt.registerLazySingleton<AppSettingsRepository>(() => AppSettingsRepositoryImpl(
@@ -142,12 +138,9 @@ Future<void> setup() async {
     encryptedSharedPreferences: true,
   ));
   getIt.registerLazySingleton(() => secureStorage);
-  getIt.registerLazySingleton(() => InternetConnectionChecker.getInstance());
   final PackageInfo packageInfo = await PackageInfo.fromPlatform();
   getIt.registerLazySingleton(() => packageInfo);
   getIt.registerLazySingleton(() => LksOauth2());
-  final DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
-  getIt.registerLazySingleton(() => deviceInfo);
 
   getIt.registerLazySingleton(() => FirebaseNotificationsClient(firebaseMessaging: FirebaseMessaging.instance));
   getIt.registerLazySingleton(() => const PermissionClient());

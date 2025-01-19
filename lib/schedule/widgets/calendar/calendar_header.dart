@@ -1,3 +1,4 @@
+import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hugeicons/hugeicons.dart';
@@ -9,7 +10,7 @@ import 'package:unicons/unicons.dart';
 
 class CalendarHeader extends StatefulWidget {
   const CalendarHeader({
-    Key? key,
+    super.key,
     required this.day,
     required this.week,
     required this.format,
@@ -17,7 +18,7 @@ class CalendarHeader extends StatefulWidget {
     required this.onMonthChanged,
     this.onHeaderTap,
     this.onHeaderLongPress,
-  }) : super(key: key);
+  });
 
   final DateTime day;
   final int week;
@@ -95,15 +96,22 @@ class _CalendarHeaderState extends State<CalendarHeader> with TickerProviderStat
                     padding: const EdgeInsets.symmetric(horizontal: 24),
                     child: SizedBox(
                       height: 44,
-                      child: TextButton(
-                        style: TextButton.styleFrom(
-                          backgroundColor: AppTheme.colorsOf(context).background02,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
+                      child: PlatformTextButton(
+                        material: (_, __) => MaterialTextButtonData(
+                          style: TextButton.styleFrom(
+                            backgroundColor: AppTheme.colorsOf(context).background02,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            padding: EdgeInsets.zero,
+                            elevation: 0,
                           ),
-                          padding: EdgeInsets.zero,
-                          elevation: 0,
                         ),
+                        cupertino: (_, __) => CupertinoTextButtonData(
+                          padding: EdgeInsets.zero,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        color: AppTheme.colorsOf(context).background02,
                         onPressed: () {
                           context.go('/schedule/search');
                         },
@@ -184,14 +192,13 @@ class _CalendarHeaderState extends State<CalendarHeader> with TickerProviderStat
 
 class _CalendarWeeksHeader extends StatelessWidget {
   const _CalendarWeeksHeader({
-    Key? key,
     required this.day,
     required this.pageController,
     required this.week,
     required this.format,
     this.onHeaderTap,
     this.onHeaderLongPress,
-  }) : super(key: key);
+  });
 
   final DateTime day;
   final int week;
@@ -212,11 +219,9 @@ class _CalendarWeeksHeader extends StatelessWidget {
           children: [
             SizedBox(
               width: 38,
-              child: TextButton(
-                style: TextButton.styleFrom(
-                  padding: EdgeInsets.zero,
-                  backgroundColor: Colors.transparent,
-                ),
+              child: PlatformTextButton(
+                padding: EdgeInsets.zero,
+                color: Colors.transparent,
                 child: HugeIcon(
                   icon: HugeIcons.strokeRoundedArrowLeft01,
                   color: AppTheme.colorsOf(context).active,
@@ -271,11 +276,9 @@ class _CalendarWeeksHeader extends StatelessWidget {
             ),
             SizedBox(
               width: 38,
-              child: TextButton(
-                style: TextButton.styleFrom(
-                  padding: EdgeInsets.zero,
-                  backgroundColor: Colors.transparent,
-                ),
+              child: PlatformTextButton(
+                padding: EdgeInsets.zero,
+                color: Colors.transparent,
                 onPressed: () {
                   pageController?.nextPage(
                     duration: const Duration(milliseconds: 300),

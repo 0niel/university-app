@@ -5,13 +5,13 @@ import '../typography.dart';
 
 class BottomModalSheet extends StatelessWidget {
   const BottomModalSheet({
-    Key? key,
+    super.key,
     required this.title,
     this.onConfirm,
     this.description,
     required this.child,
     this.isExpandable = true,
-  }) : super(key: key);
+  });
 
   final VoidCallback? onConfirm;
   final String title;
@@ -92,12 +92,11 @@ class BottomModalSheet extends StatelessWidget {
 
 class _DraggableModalSheet extends StatefulWidget {
   const _DraggableModalSheet({
-    Key? key,
     required this.title,
     this.description,
     required this.child,
     required this.isExpandable,
-  }) : super(key: key);
+  });
 
   final String title;
   final String? description;

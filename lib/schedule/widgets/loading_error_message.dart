@@ -5,7 +5,7 @@ import 'package:rtu_mirea_app/presentation/typography.dart';
 import 'package:rtu_mirea_app/presentation/widgets/buttons/colorful_button.dart';
 
 class LoadingErrorMessage extends StatelessWidget {
-  const LoadingErrorMessage({Key? key, required this.onTap}) : super(key: key);
+  const LoadingErrorMessage({super.key, required this.onTap});
 
   final VoidCallback onTap;
 

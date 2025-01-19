@@ -6,7 +6,7 @@ import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:rtu_mirea_app/presentation/typography.dart';
 
 class StoryItem extends StatelessWidget {
-  const StoryItem({Key? key, required this.stories, required this.storyIndex}) : super(key: key);
+  const StoryItem({super.key, required this.stories, required this.storyIndex});
 
   final int storyIndex;
   final List<Story> stories;

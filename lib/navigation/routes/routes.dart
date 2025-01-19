@@ -7,6 +7,7 @@ import 'package:rtu_mirea_app/domain/entities/news_item.dart';
 import 'package:rtu_mirea_app/domain/entities/story.dart';
 import 'package:rtu_mirea_app/domain/entities/user.dart';
 import 'package:rtu_mirea_app/home/view/home_page.dart';
+import 'package:rtu_mirea_app/map/view/map_page_view.dart';
 import 'package:rtu_mirea_app/presentation/pages/profile/notifications_settings_page.dart';
 import 'package:rtu_mirea_app/navigation/view/scaffold_navigation_shell.dart';
 import 'package:rtu_mirea_app/presentation/pages/news/news_details_page.dart';
@@ -35,13 +36,10 @@ import 'package:rtu_mirea_app/services/view/view.dart';
 import 'package:rtu_mirea_app/stories/stories.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:university_app_server_api/client.dart';
-import 'package:neon_framework/src/blocs/accounts.dart';
-import 'package:neon_framework/src/utils/provider.dart';
 import 'package:neon_framework/src/router.dart' as neon;
 import 'package:url_launcher/url_launcher_string.dart';
 
 final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'root');
-
 final GlobalKey<NavigatorState> _newsNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'news');
 final GlobalKey<NavigatorState> _scheduleNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'schedule');
 final GlobalKey<NavigatorState> _servicesNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'services');
@@ -67,8 +65,7 @@ GoRouter createRouter() => GoRouter(
       debugLogDiagnostics: kDebugMode,
       redirect: (context, state) {
         if (state.matchedLocation.contains('neon')) {
-          final accountsBloc = NeonProvider.of<AccountsBloc>(context);
-          final redirectPath = neon.redirect(accountsBloc, context, state);
+          final redirectPath = neon.redirect(context, state);
 
           if (redirectPath != null) {
             final pathInCurrentRouter = _getNeonPathInCurrentRouter(redirectPath);
@@ -146,6 +143,10 @@ GoRouter createRouter() => GoRouter(
                   path: '/services',
                   builder: (context, state) => const ServicesPage(),
                   routes: [
+                    GoRoute(
+                      path: 'map',
+                      builder: (context, state) => const MapPageView(),
+                    ),
                     GoRoute(
                       path: 'discourse-post-overview/:postId',
                       builder: (context, state) {
@@ -266,7 +267,6 @@ GoRouter createRouter() => GoRouter(
         ),
         GoRoute(
           path: '/story/:index',
-          parentNavigatorKey: _rootNavigatorKey,
           pageBuilder: (context, state) => CustomTransitionPage(
             fullscreenDialog: true,
             opaque: false,
@@ -284,12 +284,14 @@ GoRouter createRouter() => GoRouter(
           },
         ),
         GoRoute(
-            parentNavigatorKey: _rootNavigatorKey,
-            path: '/onboarding',
-            builder: (context, state) => const OnBoardingPage()),
-        GoRoute(parentNavigatorKey: _rootNavigatorKey, path: '/home', builder: (context, state) => const HomePage()),
+          path: '/onboarding',
+          builder: (context, state) => const OnBoardingPage(),
+        ),
         GoRoute(
-          parentNavigatorKey: _rootNavigatorKey,
+          path: '/home',
+          builder: (context, state) => const HomePage(),
+        ),
+        GoRoute(
           path: '/image',
           pageBuilder: (context, state) => CustomTransitionPage(
             fullscreenDialog: true,

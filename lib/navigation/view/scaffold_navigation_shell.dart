@@ -3,11 +3,11 @@ import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:rtu_mirea_app/navigation/navigation.dart';
+import 'package:rtu_mirea_app/presentation/constants.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
-import '../../presentation/constants.dart';
 
 class ScaffoldNavigationShell extends StatelessWidget {
-  const ScaffoldNavigationShell({Key? key, required this.navigationShell}) : super(key: key);
+  const ScaffoldNavigationShell({super.key, required this.navigationShell});
 
   final StatefulNavigationShell navigationShell;
 

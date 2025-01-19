@@ -4,14 +4,15 @@ import 'package:rtu_mirea_app/presentation/typography.dart';
 
 class TextInput extends StatelessWidget {
   const TextInput({
-    Key? key,
+    super.key,
     this.hintText,
     this.errorText,
     this.controller,
     this.keyboardType,
     this.maxLines,
     this.fillColor,
-  }) : super(key: key);
+    this.prefixIcon,
+  });
 
   final String? hintText;
   final String? errorText;
@@ -19,6 +20,7 @@ class TextInput extends StatelessWidget {
   final TextInputType? keyboardType;
   final int? maxLines;
   final Color? fillColor;
+  final Widget? prefixIcon;
 
   @override
   Widget build(BuildContext context) {
@@ -37,6 +39,7 @@ class TextInput extends StatelessWidget {
           horizontal: 16,
           vertical: 12,
         ),
+        prefixIcon: prefixIcon,
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(

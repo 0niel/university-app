@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:rtu_mirea_app/presentation/typography.dart';
 
@@ -10,11 +11,11 @@ enum ItemType {
 
 class SearchResultItem extends StatelessWidget {
   const SearchResultItem({
-    Key? key,
+    super.key,
     required this.name,
     required this.onPressed,
     required this.type,
-  }) : super(key: key);
+  });
 
   final String name;
   final ItemType type;
@@ -52,7 +53,7 @@ class SearchResultItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return TextButton(
+    return PlatformTextButton(
       onPressed: onPressed,
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 5),

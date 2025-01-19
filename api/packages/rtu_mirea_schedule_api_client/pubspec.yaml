@@ -12,7 +12,7 @@ dependencies:
   rrule: ^0.2.14
   equatable: ^2.0.3
   json_annotation: ^4.8.1
-  intl: ^0.19.0
+  intl: ^0.18.0
   schedule:
     path: ../schedule
   collection: ^1.18.0
@@ -23,4 +23,4 @@ dev_dependencies:
   json_serializable: ^6.7.1
   mocktail: ^1.0.0
   test: ^1.21.4
-  very_good_analysis: ^5.1.0
+  very_good_analysis: ^6.0.0

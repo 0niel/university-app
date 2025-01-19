@@ -71,7 +71,7 @@ class Topic {
   final int? unreadPosts;
   final bool pinned;
   final dynamic unpinned; // Might need more specific type
-  final String excerpt;
+  final String? excerpt;
   final bool visible;
   final bool closed;
   final bool archived;

@@ -9,11 +9,11 @@ import 'buttons/primary_button.dart';
 
 class FeedbackBottomModalSheet extends StatefulWidget {
   const FeedbackBottomModalSheet({
-    Key? key,
+    super.key,
     this.onConfirm,
     this.defaultText,
     this.defaultEmail,
-  }) : super(key: key);
+  });
 
   final String? defaultEmail;
   final String? defaultText;

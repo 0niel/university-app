@@ -12,7 +12,7 @@ import 'package:rtu_mirea_app/presentation/typography.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 
 class NewsDetailsPage extends StatelessWidget {
-  const NewsDetailsPage({Key? key, required this.newsItem}) : super(key: key);
+  const NewsDetailsPage({super.key, required this.newsItem});
 
   final NewsItem newsItem;
   @override
@@ -117,7 +117,7 @@ class NewsDetailsPage extends StatelessWidget {
 
 /// Tags and date of publication of the news
 class _NewsItemInfo extends StatelessWidget {
-  const _NewsItemInfo({Key? key, required this.tags, required this.date}) : super(key: key);
+  const _NewsItemInfo({required this.tags, required this.date});
 
   final List<String> tags;
   final DateTime date;

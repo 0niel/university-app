@@ -23,7 +23,7 @@ Topic _$TopicFromJson(Map<String, dynamic> json) => Topic(
       newPosts: json['new_posts'] as int?,
       unreadPosts: json['unread_posts'] as int?,
       pinned: json['pinned'] as bool,
-      excerpt: json['excerpt'] as String,
+      excerpt: json['excerpt'] as String?,
       visible: json['visible'] as bool,
       closed: json['closed'] as bool,
       archived: json['archived'] as bool,

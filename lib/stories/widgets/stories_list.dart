@@ -1,45 +1,81 @@
 import 'package:flutter/material.dart';
-import 'package:rtu_mirea_app/domain/entities/story.dart';
+import 'package:rtu_mirea_app/env/env.dart';
+import 'package:rtu_mirea_app/presentation/theme.dart';
+import 'package:storyly_flutter/storyly_flutter.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
-import 'widgets.dart';
-
-class StoriesList extends StatelessWidget {
+class StoriesList extends StatefulWidget {
   const StoriesList({
-    Key? key,
-    required this.stories,
-  }) : super(key: key);
+    super.key,
+    this.onStoriesLoaded,
+  });
 
-  final List<Story> stories;
+  final Function(List<Story>)? onStoriesLoaded;
+
+  @override
+  State<StoriesList> createState() => _StoriesListState();
+}
+
+class _StoriesListState extends State<StoriesList> {
+  late StorylyViewController storylyViewController;
+
+  void onStorylyViewCreated(StorylyViewController storylyViewController) {
+    this.storylyViewController = storylyViewController;
+  }
 
   @override
   Widget build(BuildContext context) {
+    final devicePixelRatio = MediaQuery.of(context).devicePixelRatio;
+
+    final androidParams = StorylyParam()
+      ..storylyId = Env.storylyId
+      ..storyGroupSize = "custom"
+      ..storyGroupListHorizontalEdgePadding = (16 * devicePixelRatio).round()
+      ..storyGroupListHorizontalPaddingBetweenItems = (8 * devicePixelRatio).round()
+      ..storyGroupListVerticalEdgePadding = 0
+      ..storyGroupTextIsVisible = true
+      ..storyGroupTextColorSeen = AppTheme.colorsOf(context).active
+      ..storyGroupTextColorNotSeen = AppTheme.colorsOf(context).active
+      ..storyGroupIconHeight = (70 * devicePixelRatio).round()
+      ..storyGroupIconWidth = (70 * devicePixelRatio).round()
+      ..storyGroupTextLines = 1
+      ..storyGroupIconCornerRadius = (50 * devicePixelRatio).round()
+      ..storyGroupTextSize = (12 * devicePixelRatio).round()
+      ..storylyLocale = 'ru-RU';
+
+    final iosParams = StorylyParam()
+      ..storylyId = Env.storylyId
+      ..storyGroupSize = "custom"
+      ..storyGroupListHorizontalEdgePadding = 16
+      ..storyGroupListHorizontalPaddingBetweenItems = 8
+      ..storyGroupListVerticalEdgePadding = 0
+      ..storyGroupTextIsVisible = true
+      ..storyGroupTextColorSeen = AppTheme.colorsOf(context).active
+      ..storyGroupTextColorNotSeen = AppTheme.colorsOf(context).active
+      ..storyGroupIconHeight = 70
+      ..storyGroupIconWidth = 70
+      ..storyGroupTextLines = 1
+      ..storyGroupIconCornerRadius = 50
+      ..storyGroupTextSize = 12
+      ..storylyLocale = 'ru-RU';
+
     return SizedBox(
-      height: 80,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 24),
-        itemBuilder: (_, int i) {
-          if (DateTime.now().compareTo(stories[i].stopShowDate) == -1) {
-            return Container(
-              decoration: BoxDecoration(
-                boxShadow: [
-                  BoxShadow(
-                    color: Theme.of(context).shadowColor.withOpacity(0.1),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: StoryItem(
-                stories: stories,
-                storyIndex: i,
-              ),
-            );
-          }
-          return Container();
+      height: 90,
+      child: StorylyView(
+        onStorylyViewCreated: onStorylyViewCreated,
+        androidParam: androidParams,
+        iosParam: iosParams,
+        storylyLoaded: (storyGroups, dataSource) {
+          final stories = storyGroups.map((st) => st.stories).expand((element) => element).toList();
+          widget.onStoriesLoaded?.call(stories);
         },
-        separatorBuilder: (_, int i) => const SizedBox(width: 10),
-        itemCount: stories.length,
+        storylyActionClicked: (story) {
+          final url = story.actionUrl;
+
+          if (url != null) {
+            launchUrlString(url, mode: LaunchMode.externalApplication);
+          }
+        },
       ),
     );
   }

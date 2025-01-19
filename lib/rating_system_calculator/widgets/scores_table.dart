@@ -3,7 +3,7 @@ import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:rtu_mirea_app/presentation/typography.dart';
 
 class ScoresTable extends StatelessWidget {
-  const ScoresTable({Key? key}) : super(key: key);
+  const ScoresTable({super.key});
 
   @override
   Widget build(BuildContext context) {

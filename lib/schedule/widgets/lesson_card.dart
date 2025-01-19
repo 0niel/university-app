@@ -1,3 +1,4 @@
+import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -12,12 +13,12 @@ import '../schedule.dart';
 
 class LessonCard extends StatelessWidget {
   const LessonCard({
-    Key? key,
+    super.key,
     required this.lesson,
     this.indexInGroup,
     this.countInGroup,
     this.onTap,
-  }) : super(key: key);
+  });
 
   final LessonSchedulePart lesson;
   final void Function(LessonSchedulePart)? onTap;
@@ -135,7 +136,7 @@ class LessonCard extends StatelessWidget {
           splashColor: Colors.transparent,
           highlightColor: Colors.transparent,
         ),
-        child: InkWell(
+        child: PlatformInkWell(
           borderRadius: BorderRadius.circular(12),
           onTap: () {
             onTap?.call(lesson);

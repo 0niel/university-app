@@ -14,10 +14,10 @@ import 'package:rtu_mirea_app/presentation/typography.dart';
 
 class StoriesPageView extends StatefulWidget {
   const StoriesPageView({
-    Key? key,
+    super.key,
     required this.stories,
     required this.storyIndex,
-  }) : super(key: key);
+  });
 
   final List<Story> stories;
   final int storyIndex;

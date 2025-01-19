@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -10,8 +13,8 @@ import 'package:rtu_mirea_app/presentation/typography.dart';
 import 'package:rtu_mirea_app/schedule/bloc/schedule_bloc.dart';
 import 'package:rtu_mirea_app/schedule/models/models.dart';
 import 'package:rtu_mirea_app/schedule/widgets/widgets.dart';
-import 'package:rtu_mirea_app/stories/bloc/stories_bloc.dart';
 import 'package:rtu_mirea_app/stories/view/stories_view.dart';
+import 'package:table_calendar/table_calendar.dart';
 import 'package:university_app_server_api/client.dart';
 import 'package:collection/collection.dart';
 import 'package:expandable_page_view/expandable_page_view.dart';
@@ -28,8 +31,14 @@ class SchedulePage extends StatefulWidget {
 
 class _SchedulePageState extends State<SchedulePage> {
   late final PageController _pageController;
-  late final ScrollController _scrollController;
   late final ScheduleBloc _bloc;
+
+  final CalendarFormat _calendarFormat = CalendarFormat.week;
+
+  // Timer to track the duration of the pull
+  Timer? _toggleTimer;
+
+  bool _isStoriesVisible = false;
 
   @override
   void initState() {
@@ -37,14 +46,13 @@ class _SchedulePageState extends State<SchedulePage> {
     _pageController = PageController(
       initialPage: Calendar.getPageIndex(Calendar.getNowWithoutTime()),
     );
-    _scrollController = ScrollController();
     _bloc = context.read<ScheduleBloc>();
   }
 
   @override
   void dispose() {
+    _toggleTimer?.cancel();
     _pageController.dispose();
-    _scrollController.dispose();
 
     super.dispose();
   }
@@ -144,39 +152,49 @@ class _SchedulePageState extends State<SchedulePage> {
   }
 
   Widget _buildAddGroupButton(BuildContext context) {
-    return IconButton(
+    return PlatformIconButton(
       icon: HugeIcon(
         icon: HugeIcons.strokeRoundedAddSquare,
         size: 24,
         color: AppTheme.colorsOf(context).active,
       ),
-      tooltip: 'Добавить группу',
+      material: (_, __) => MaterialIconButtonData(
+        padding: const EdgeInsets.all(16.0),
+        tooltip: 'Добавить группу',
+      ),
       onPressed: () => context.go('/schedule/search'),
     );
   }
 
   Widget _buildSettingsButton(BuildContext context) {
-    return IconButton(
+    return PlatformIconButton(
       icon: HugeIcon(
         icon: HugeIcons.strokeRoundedSettings02,
         size: 24,
         color: AppTheme.colorsOf(context).active,
       ),
-      tooltip: 'Управление расписанием',
+      material: (_, __) => MaterialIconButtonData(
+        padding: const EdgeInsets.all(16.0),
+        tooltip: 'Управление расписанием',
+      ),
       onPressed: () => context.go('/profile'),
     );
   }
 
   Widget _buildViewToggleButton() {
-    return TextButton(
+    return PlatformIconButton(
       onPressed: () {
         _bloc.add(const ToggleListMode());
       },
-      style: TextButton.styleFrom(
-        shape: const CircleBorder(),
+      material: (_, __) => MaterialIconButtonData(
+        iconSize: 24,
+        padding: const EdgeInsets.all(16.0),
+        tooltip: 'Переключить вид',
+      ),
+      cupertino: (_, __) => CupertinoIconButtonData(
         padding: const EdgeInsets.all(16.0),
       ),
-      child: AnimatedSwitcher(
+      icon: AnimatedSwitcher(
         duration: 300.ms,
         transitionBuilder: (Widget child, Animation<double> animation) {
           return ScaleTransition(scale: animation, child: child);
@@ -216,16 +234,26 @@ class _SchedulePageState extends State<SchedulePage> {
         .map((day) => MapEntry(day, lessonsByDay[day]))
         .toList();
 
+    final storiesView = StoriesView(onStoriesLoaded: (stories) {
+      if (stories.isNotEmpty && !_isStoriesVisible) {
+        setState(() {
+          _isStoriesVisible = true;
+        });
+      }
+    });
+
     return CustomScrollView(
       slivers: [
-        if (context.read<StoriesBloc>().state is StoriesLoaded &&
-            (context.read<StoriesBloc>().state as StoriesLoaded).stories.isNotEmpty)
-          const SliverToBoxAdapter(
-            child: Padding(
-              padding: EdgeInsets.only(top: 16.0),
-              child: StoriesView(),
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.only(top: 16.0),
+            child: AnimatedOpacity(
+              opacity: _isStoriesVisible ? 1.0 : 0.0,
+              duration: const Duration(milliseconds: 300),
+              child: storiesView,
             ),
           ),
+        ),
         for (var entry in filteredLessonsByDay)
           _buildStickyHeader(entry.key, entry.value?.whereType<LessonSchedulePart>().toList() ?? []),
       ],
@@ -275,6 +303,7 @@ class _SchedulePageState extends State<SchedulePage> {
 
   Widget _buildCalendarMode(ScheduleState state) {
     return NestedScrollView(
+      physics: const ClampingScrollPhysics(),
       headerSliverBuilder: (_, __) => [
         _buildSliverAppBar(),
         if (!state.isListModeEnabled)
@@ -284,6 +313,7 @@ class _SchedulePageState extends State<SchedulePage> {
               schedule: state.selectedSchedule?.schedule ?? [],
               comments: state.comments,
               showCommentsIndicators: state.showCommentsIndicators,
+              calendarFormat: _calendarFormat,
             ),
           ),
       ],
@@ -292,25 +322,25 @@ class _SchedulePageState extends State<SchedulePage> {
   }
 
   Widget _buildSliverAppBar() {
-    return BlocBuilder<StoriesBloc, StoriesState>(
-      builder: (context, storiesState) {
-        if (storiesState is StoriesLoaded && storiesState.stories.isNotEmpty) {
-          final double statusBarHeight = MediaQuery.of(context).padding.top;
-          return SliverAppBar(
-            pinned: false,
-            primary: true,
-            expandedHeight: 80 + statusBarHeight,
-            flexibleSpace: FlexibleSpaceBar(
-              background: Padding(
-                padding: EdgeInsets.only(top: statusBarHeight),
-                child: const StoriesView(),
-              ),
-            ),
-          );
-        } else {
-          return const SliverToBoxAdapter(child: SizedBox.shrink());
-        }
-      },
+    final storiesView = StoriesView(onStoriesLoaded: (stories) {
+      if (stories.isNotEmpty && !_isStoriesVisible) {
+        setState(() {
+          _isStoriesVisible = true;
+        });
+      }
+    });
+
+    return SliverAppBar(
+      pinned: false,
+      primary: true,
+      expandedHeight: 90,
+      flexibleSpace: FlexibleSpaceBar(
+        background: AnimatedOpacity(
+          opacity: _isStoriesVisible ? 1.0 : 0.0,
+          duration: const Duration(milliseconds: 300),
+          child: storiesView,
+        ),
+      ),
     );
   }
 

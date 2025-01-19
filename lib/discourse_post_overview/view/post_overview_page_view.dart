@@ -32,7 +32,7 @@ class DiscoursePostOverviewPageView extends StatelessWidget {
 }
 
 class _PostOverview extends StatelessWidget {
-  const _PostOverview({Key? key}) : super(key: key);
+  const _PostOverview();
 
   @override
   Widget build(BuildContext context) {

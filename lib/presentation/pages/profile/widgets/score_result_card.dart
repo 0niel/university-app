@@ -8,10 +8,10 @@ import 'package:rtu_mirea_app/presentation/typography.dart';
 
 class ScoreResultCard extends StatefulWidget {
   const ScoreResultCard({
-    Key? key,
+    super.key,
     required this.score,
     required this.thisSubjectPrevSemestersScores,
-  }) : super(key: key);
+  });
 
   final Score score;
   final List<Score> thisSubjectPrevSemestersScores;

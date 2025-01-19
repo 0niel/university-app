@@ -6,7 +6,7 @@ import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:rtu_mirea_app/presentation/typography.dart';
 
 class ProfileSettingsPage extends StatelessWidget {
-  const ProfileSettingsPage({Key? key}) : super(key: key);
+  const ProfileSettingsPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -87,11 +87,10 @@ class ProfileSettingsPage extends StatelessWidget {
 
 class _ListTileThemeItem extends StatelessWidget {
   const _ListTileThemeItem({
-    Key? key,
     required this.title,
     required this.onTap,
     this.trailing,
-  }) : super(key: key);
+  });
 
   final String title;
   final Widget? trailing;

@@ -1,4 +1,5 @@
 import 'package:community_repository/community_repository.dart';
+import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:rtu_mirea_app/presentation/typography.dart';
@@ -6,7 +7,7 @@ import 'package:unicons/unicons.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class SponsorCard extends StatelessWidget {
-  const SponsorCard({Key? key, required this.sponsor}) : super(key: key);
+  const SponsorCard({super.key, required this.sponsor});
 
   final Sponsor sponsor;
 
@@ -16,7 +17,7 @@ class SponsorCard extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
       ),
-      child: InkWell(
+      child: PlatformInkWell(
         onTap: () {},
         borderRadius: BorderRadius.circular(16),
         child: Container(
@@ -36,7 +37,7 @@ class SponsorCard extends StatelessWidget {
           child: Material(
             borderRadius: BorderRadius.circular(16),
             color: Theme.of(context).colorScheme.surface,
-            child: InkWell(
+            child: PlatformInkWell(
               borderRadius: BorderRadius.circular(16),
               onTap: sponsor.url != null
                   ? () {

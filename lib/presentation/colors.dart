@@ -31,7 +31,7 @@ class ThemeColors {
   Color get activeLightMode => const Color(0xFF200745);
   Color get deactiveDarker => const Color(0xFF3A3D46);
 
-  Color get divider => deactiveDarker.withOpacity(0.25);
+  Color get divider => deactiveDarker.withValues(alpha: 0.25);
 
   LinearGradient get gradient07 => const LinearGradient(colors: [Color(0xFFBBFFE7), Color(0xFF86FFCA)]);
 }

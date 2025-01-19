@@ -46,7 +46,7 @@ class AnalyticsRepository {
     try {
       await _analytics?.logEvent(
         name: event.name,
-        parameters: event.properties,
+        parameters: event.properties?.map((key, value) => MapEntry(key, value as Object)),
       );
     } catch (error, stackTrace) {
       Error.throwWithStackTrace(TrackEventFailure(error), stackTrace);

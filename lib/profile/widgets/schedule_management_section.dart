@@ -1,3 +1,4 @@
+import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -17,7 +18,7 @@ import 'package:university_app_server_api/client.dart';
 class ScheduleManagementSection extends StatelessWidget {
   final void Function(BuildContext) onFeedbackTap;
 
-  const ScheduleManagementSection({Key? key, required this.onFeedbackTap}) : super(key: key);
+  const ScheduleManagementSection({super.key, required this.onFeedbackTap});
 
   int _getTotalSavedSchedules(BuildContext context) {
     final groups = context.read<ScheduleBloc>().state.groupsSchedule;
@@ -55,7 +56,7 @@ class ScheduleManagementSection extends StatelessWidget {
                   padding: const EdgeInsets.only(right: 8.0),
                   child: Text(
                     _getTotalSavedSchedules(context).toString(),
-                    style: AppTextStyle.bodyL,
+                    style: AppTextStyle.bodyL.copyWith(color: AppTheme.colorsOf(context).active),
                   ),
                 ),
               ),
@@ -63,7 +64,7 @@ class ScheduleManagementSection extends StatelessWidget {
               ProfileButton(
                 text: "Компактный вид",
                 icon: Assets.icons.hugeicons.listView.svg(color: AppTheme.colorsOf(context).active),
-                trailing: Switch(
+                trailing: PlatformSwitch(
                   value: state.isMiniature,
                   onChanged: (value) {
                     context.read<ScheduleBloc>().add(ScheduleSetDisplayMode(isMiniature: value));
@@ -78,7 +79,7 @@ class ScheduleManagementSection extends StatelessWidget {
               ProfileButton(
                 text: "Пустые пары",
                 icon: Assets.icons.hugeicons.listView.svg(color: AppTheme.colorsOf(context).active),
-                trailing: Switch(
+                trailing: PlatformSwitch(
                   value: state.showEmptyLessons,
                   onChanged: (value) {
                     context.read<ScheduleBloc>().add(ScheduleSetEmptyLessonsDisplaying(showEmptyLessons: value));
@@ -100,7 +101,7 @@ class ScheduleManagementSection extends StatelessWidget {
                     size: 18,
                   ),
                 ),
-                trailing: Switch(
+                trailing: PlatformSwitch(
                   value: state.showCommentsIndicators,
                   onChanged: (value) {
                     context.read<ScheduleBloc>().add(SetShowCommentsIndicator(showCommentsIndicators: value));

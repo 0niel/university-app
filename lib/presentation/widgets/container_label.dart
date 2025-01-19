@@ -6,8 +6,8 @@ class ContainerLabel extends StatelessWidget {
   final String label;
   const ContainerLabel({
     required this.label,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {

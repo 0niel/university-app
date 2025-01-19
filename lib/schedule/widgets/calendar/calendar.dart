@@ -12,14 +12,14 @@ import "package:collection/collection.dart";
 
 class Calendar extends StatefulWidget {
   const Calendar({
-    Key? key,
+    super.key,
     required this.pageViewController,
     required this.schedule,
     required this.comments,
     required this.showCommentsIndicators,
     this.calendarFormat = CalendarFormat.week,
     this.canChangeFormat = true,
-  }) : super(key: key);
+  });
 
   final PageController pageViewController;
   final List<SchedulePart> schedule;
@@ -112,6 +112,17 @@ class _CalendarState extends State<Calendar> {
 
     _selectedDay = Calendar.getDayInAvailableRange(Calendar.getNowWithoutTime());
     _selectedWeek = CalendarUtils.getCurrentWeek();
+  }
+
+  @override
+  void didUpdateWidget(covariant Calendar oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if (oldWidget.calendarFormat != widget.calendarFormat) {
+      setState(() {
+        _calendarFormat = widget.calendarFormat;
+      });
+    }
   }
 
   @override

@@ -31,8 +31,12 @@ mixin _$UpdateInfoModel {
   @JsonKey(name: 'buildNumber')
   int get buildNumber => throw _privateConstructorUsedError;
 
+  /// Serializes this UpdateInfoModel to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-  @JsonKey(ignore: true)
+
+  /// Create a copy of UpdateInfoModel
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   $UpdateInfoModelCopyWith<UpdateInfoModel> get copyWith => throw _privateConstructorUsedError;
 }
 
@@ -58,6 +62,8 @@ class _$UpdateInfoModelCopyWithImpl<$Res, $Val extends UpdateInfoModel> implemen
   // ignore: unused_field
   final $Res Function($Val) _then;
 
+  /// Create a copy of UpdateInfoModel
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -112,6 +118,8 @@ class __$$UpdateInfoModelImplCopyWithImpl<$Res> extends _$UpdateInfoModelCopyWit
   __$$UpdateInfoModelImplCopyWithImpl(_$UpdateInfoModelImpl _value, $Res Function(_$UpdateInfoModelImpl) _then)
       : super(_value, _then);
 
+  /// Create a copy of UpdateInfoModel
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -191,11 +199,13 @@ class _$UpdateInfoModelImpl implements _UpdateInfoModel {
             (identical(other.buildNumber, buildNumber) || other.buildNumber == buildNumber));
   }
 
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => Object.hash(runtimeType, title, description, text, appVersion, buildNumber);
 
-  @JsonKey(ignore: true)
+  /// Create a copy of UpdateInfoModel
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
   _$$UpdateInfoModelImplCopyWith<_$UpdateInfoModelImpl> get copyWith =>
@@ -234,7 +244,10 @@ abstract class _UpdateInfoModel implements UpdateInfoModel {
   @override
   @JsonKey(name: 'buildNumber')
   int get buildNumber;
+
+  /// Create a copy of UpdateInfoModel
+  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   _$$UpdateInfoModelImplCopyWith<_$UpdateInfoModelImpl> get copyWith => throw _privateConstructorUsedError;
 }

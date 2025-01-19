@@ -4,11 +4,11 @@ import 'package:rtu_mirea_app/presentation/typography.dart';
 
 class ScheduleDrawerButton extends StatelessWidget {
   const ScheduleDrawerButton({
-    Key? key,
+    super.key,
     required this.onTap,
     required this.text,
     required this.icon,
-  }) : super(key: key);
+  });
 
   final VoidCallback onTap;
   final String text;

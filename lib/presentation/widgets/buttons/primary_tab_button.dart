@@ -1,3 +1,4 @@
+import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:rtu_mirea_app/presentation/typography.dart';
@@ -9,12 +10,12 @@ class PrimaryTabButton extends StatelessWidget {
   final VoidCallback onClick;
 
   const PrimaryTabButton({
-    Key? key,
+    super.key,
     required this.onClick,
     required this.notifier,
     required this.text,
     required this.itemIndex,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -24,28 +25,35 @@ class PrimaryTabButton extends StatelessWidget {
       child: ValueListenableBuilder(
         valueListenable: notifier,
         builder: (BuildContext context, index, child) {
-          return ElevatedButton(
+          return PlatformElevatedButton(
             onPressed: () {
               notifier.value = itemIndex;
               onClick();
             },
-            style: ButtonStyle(
-              backgroundColor: notifier.value == itemIndex
-                  ? WidgetStateProperty.all<Color>(AppTheme.colorsOf(context).primary)
-                  : WidgetStateProperty.all<Color>(AppTheme.colorsOf(context).background01),
-              shape: WidgetStateProperty.all<RoundedRectangleBorder>(
-                RoundedRectangleBorder(
+            material: (_, __) => MaterialElevatedButtonData(
+              style: ElevatedButton.styleFrom(
+                shadowColor: Colors.transparent,
+                shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(50.0),
                 ),
+                backgroundColor: notifier.value == itemIndex
+                    ? AppTheme.colorsOf(context).primary
+                    : AppTheme.colorsOf(context).background01,
               ),
-              shadowColor: WidgetStateProperty.all<Color>(Colors.transparent),
+            ),
+            color: notifier.value == itemIndex
+                ? AppTheme.colorsOf(context).primary
+                : AppTheme.colorsOf(context).background01,
+            cupertino: (_, __) => CupertinoElevatedButtonData(
+              padding: EdgeInsets.zero,
+              borderRadius: BorderRadius.circular(50.0),
             ),
             child: Text(
               text,
               style: AppTextStyle.tab.copyWith(
                 color: notifier.value == itemIndex
                     ? AppTheme.colorsOf(context).active
-                    : AppTheme.colorsOf(context).deactive,
+                    : AppTheme.colorsOf(context).deactive.withAlpha(200),
               ),
             ),
           );

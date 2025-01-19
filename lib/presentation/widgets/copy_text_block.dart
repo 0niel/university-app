@@ -4,10 +4,10 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class CopyTextBlockWithLabel extends StatelessWidget {
   const CopyTextBlockWithLabel({
-    Key? key,
+    super.key,
     required this.label,
     required this.text,
-  }) : super(key: key);
+  });
 
   final String label;
   final String text;

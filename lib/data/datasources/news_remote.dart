@@ -45,13 +45,17 @@ class NewsRemoteDataImpl extends NewsRemoteData {
     if (response.statusCode == 200) {
       Map responseBody = response.data;
 
-      final tagsResponse = responseBody["result"].map((e) => e as Map<String, dynamic>);
+      if (responseBody.containsKey("result") && responseBody["result"] != null) {
+        final tagsResponse = (responseBody["result"] as List).map((e) => e as Map<String, dynamic>);
 
-      final tags = tagsResponse.where((element) => int.parse(element["CNT"]) > 3).map((e) => e["NAME"]!);
+        final tags = tagsResponse.where((element) => int.parse(element["CNT"] ?? '0') > 3).map((e) => e["NAME"]!);
 
-      return tags.toList().cast<String>();
+        return tags.toList().cast<String>();
+      } else {
+        return [];
+      }
     } else {
-      throw ServerException('Response status code is $response.statusCode');
+      throw ServerException('Response status code is ${response.statusCode}');
     }
   }
 }

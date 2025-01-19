@@ -3,8 +3,7 @@ import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:rtu_mirea_app/presentation/typography.dart';
 
 class ModeSelectButton extends StatefulWidget {
-  const ModeSelectButton({Key? key, required this.isActive, required this.text, required this.onClick, this.icon})
-      : super(key: key);
+  const ModeSelectButton({super.key, required this.isActive, required this.text, required this.onClick, this.icon});
 
   final bool isActive;
   final String text;

@@ -20,7 +20,7 @@ class TopTopicsView extends StatelessWidget {
 }
 
 class _TopTopicsView extends StatelessWidget {
-  const _TopTopicsView({Key? key}) : super(key: key);
+  const _TopTopicsView();
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +31,7 @@ class _TopTopicsView extends StatelessWidget {
 
           return top.isNotEmpty
               ? SizedBox(
-                  height: 270,
+                  height: 332,
                   child: ListView.builder(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     scrollDirection: Axis.horizontal,

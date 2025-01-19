@@ -182,7 +182,7 @@ class _RatingSystemCalculatorViewState extends State<RatingSystemCalculatorView>
 }
 
 class SubjectsListView extends StatelessWidget {
-  const SubjectsListView({Key? key}) : super(key: key);
+  const SubjectsListView({super.key});
 
   @override
   Widget build(BuildContext context) {

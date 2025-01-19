@@ -1,45 +1,19 @@
-# melos_managed_dependency_overrides: dynamite_runtime,neon_framework,neon_lints,nextcloud,sort_box
 dependency_overrides:
-  dynamite_runtime:
-    path: packages/neon/packages/dynamite/dynamite_runtime
-  file_icons:
-    path: packages/neon/packages/file_icons
-  neon_dashboard:
-    path: packages/neon/packages/neon/neon_dashboard
-  neon_files:
-    path: packages/neon/packages/neon/neon_files
-  neon_talk:
-    path: packages/neon/packages/neon/neon_talk
+  intl: ^0.19.0
   neon_framework:
     path: packages/neon/packages/neon_framework
-  neon_lints:
-    path: packages/neon/packages/neon_lints
-  neon_news:
-    path: packages/neon/packages/neon/neon_news
-  neon_notes:
-    path: packages/neon/packages/neon/neon_notes
-  neon_notifications:
-    path: packages/neon/packages/neon/neon_notifications
+  files_app:
+    path: packages/neon/packages/neon_framework/packages/files_app
+  neon_http_client:
+    path: packages/neon/packages/neon_framework/packages/neon_http_client
+  account_repository:
+    path: packages/neon/packages/neon_framework/packages/account_repository
+  timezone: ^0.10.0
+  flutter_sticky_header: ^0.7.0
+  value_layout_builder: ^0.4.0
   nextcloud:
-    path: packages/neon/packages/nextcloud
-  sort_box:
-    path: packages/neon/packages/sort_box
-  package_info_plus:
     git:
-      url: https://github.com/fluttercommunity/plus_plugins
-      path: packages/package_info_plus/package_info_plus
-      ref: baa336fe79c29411542fc343d332846bcd7752c1
-  flutter_keyboard_visibility:
-    git:
-      url: https://github.com/MisterJimson/flutter_keyboard_visibility.git
-      ref: 42ddef531e437cdd15b7baf270b64c8ae8ce8a28
-      path: flutter_keyboard_visibility
-  open_file:
-    git:
-      url: https://github.com/crazecoder/open_file.git
-      ref: 7619c1bc2086c052a07701fb5e1456acc833e189
+      url: https://github.com/nextcloud/neon
+      ref: c4be1b2
+      path: packages/nextcloud
 
-  intl: ^0.19.0
-  camera_android_camerax: 0.6.7
-  camera: 0.11.0
-  flutter_local_notifications: ^17.2.2

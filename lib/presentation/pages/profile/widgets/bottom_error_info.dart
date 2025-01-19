@@ -3,7 +3,7 @@ import 'package:rtu_mirea_app/presentation/typography.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 
 class BottomErrorInfo extends StatelessWidget {
-  const BottomErrorInfo({Key? key}) : super(key: key);
+  const BottomErrorInfo({super.key});
 
   @override
   Widget build(BuildContext context) {

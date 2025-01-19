@@ -4,8 +4,7 @@ import 'package:url_launcher/url_launcher_string.dart';
 import 'package:rtu_mirea_app/presentation/typography.dart';
 
 class MemberInfo extends StatelessWidget {
-  const MemberInfo({Key? key, required this.username, required this.avatarUrl, required this.profileUrl})
-      : super(key: key);
+  const MemberInfo({super.key, required this.username, required this.avatarUrl, required this.profileUrl});
   final String username;
   final String avatarUrl;
   final String profileUrl;
