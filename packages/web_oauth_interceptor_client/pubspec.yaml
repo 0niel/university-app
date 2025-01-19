@@ -1,0 +1,22 @@
+name: web_oauth_interceptor_client
+description: A Very Good Project created by Very Good CLI.
+version: 0.1.0+1
+publish_to: none
+
+environment:
+  sdk: ">=3.5.1"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  flutter_inappwebview: ^6.0.0
+  logger: ^2.4.0
+  flutter_inappwebview_platform_interface: any
+  
+  collection: any
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  mocktail: ^1.0.4
+  very_good_analysis: ^6.0.0
