@@ -9,10 +9,9 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-
   flutter_inappwebview: ^6.0.0
+
   logger: ^2.4.0
-  flutter_inappwebview_platform_interface: any
   
   collection: any
 dev_dependencies:
