@@ -1,0 +1,50 @@
+syntax = "proto3";
+
+package rtu.humanpass;
+
+service LongTimeTokenService {
+  rpc GetAccessTokenForDigitalPass(GetAccessTokenForDigitalPassRequest) returns (GetAccessTokenForDigitalPassResponse);
+}
+
+service HumanPassService {
+  rpc SendVerificationCode(SendVerificationCodeRequest) returns (SendVerificationCodeResponse);
+  rpc GetDigitalPass(GetDigitalPassRequest) returns (GetDigitalPassResponse);
+  rpc GetDigitalPassStatus(GetDigitalPassStatusRequest) returns (GetDigitalPassStatusResponse);
+}
+
+message GetAccessTokenForDigitalPassRequest {
+}
+
+message GetAccessTokenForDigitalPassResponse {
+  string jwt = 1;
+}
+
+message SendVerificationCodeRequest {
+}
+
+message SendVerificationCodeResponse {
+}
+
+message GetDigitalPassRequest {
+  string code = 1;      
+  DeviceInfo device_info = 2;
+}
+
+message GetDigitalPassResponse {
+  DigitalPassInner inner = 1;
+}
+
+message DigitalPassInner {
+  int64 pass_id = 1;     // NFC-card ID
+  string pass_uuid = 2;  // UUID
+}
+
+message DeviceInfo {
+  string device_name = 1;
+}
+
+message GetDigitalPassStatusRequest {
+}
+
+message GetDigitalPassStatusResponse {
+}
