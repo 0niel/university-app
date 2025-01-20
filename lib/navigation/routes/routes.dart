@@ -8,6 +8,7 @@ import 'package:rtu_mirea_app/domain/entities/story.dart';
 import 'package:rtu_mirea_app/domain/entities/user.dart';
 import 'package:rtu_mirea_app/home/view/home_page.dart';
 import 'package:rtu_mirea_app/map/view/map_page_view.dart';
+import 'package:rtu_mirea_app/nfc_pass/view/nfc_pass_page_view.dart';
 import 'package:rtu_mirea_app/presentation/pages/profile/notifications_settings_page.dart';
 import 'package:rtu_mirea_app/navigation/view/scaffold_navigation_shell.dart';
 import 'package:rtu_mirea_app/presentation/pages/news/news_details_page.dart';
@@ -143,6 +144,7 @@ GoRouter createRouter() => GoRouter(
                   path: '/services',
                   builder: (context, state) => const ServicesPage(),
                   routes: [
+                    GoRoute(path: 'nfc', builder: (context, state) => const NfcPassPageView()),
                     GoRoute(
                       path: 'map',
                       builder: (context, state) => const MapPageView(),

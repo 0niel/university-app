@@ -6,10 +6,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:go_router/go_router.dart';
+import 'package:nfc_pass_repository/nfc_pass_repository.dart';
 import 'package:notifications_repository/notifications_repository.dart';
 import 'package:rtu_mirea_app/app/app.dart';
 import 'package:rtu_mirea_app/domain/repositories/news_repository.dart';
 import 'package:rtu_mirea_app/neon/neon.dart';
+import 'package:rtu_mirea_app/nfc_pass/bloc/nfc_pass_cubit.dart';
 import 'package:rtu_mirea_app/schedule_management/bloc/schedule_exporter_cubit.dart';
 import 'package:rtu_mirea_app/service_locator.dart';
 import 'package:schedule_exporter_repository/schedule_exporter_repository.dart';
@@ -47,6 +49,7 @@ class App extends StatelessWidget {
     required NotificationsRepository notificationsRepository,
     required ScheduleExporterRepository scheduleExporterRepository,
     required NeonDependencies neonDependencies,
+    required NfcPassRepository nfcPassRepository,
     required super.key,
   })  : _analyticsRepository = analyticsRepository,
         _scheduleRepository = scheduleRepository,
@@ -56,7 +59,8 @@ class App extends StatelessWidget {
         _newsRepository = newsRepository,
         _notificationsRepository = notificationsRepository,
         _scheduleExporterRepository = scheduleExporterRepository,
-        _neonDependencies = neonDependencies;
+        _neonDependencies = neonDependencies,
+        _nfcPassRepository = nfcPassRepository;
 
   final AnalyticsRepository _analyticsRepository;
   final ScheduleRepository _scheduleRepository;
@@ -67,6 +71,7 @@ class App extends StatelessWidget {
   final NotificationsRepository _notificationsRepository;
   final ScheduleExporterRepository _scheduleExporterRepository;
   final NeonDependencies _neonDependencies;
+  final NfcPassRepository _nfcPassRepository;
 
   @override
   Widget build(BuildContext context) {
@@ -78,6 +83,7 @@ class App extends StatelessWidget {
         RepositoryProvider.value(value: _storiesRepository),
         RepositoryProvider.value(value: _discourseRepository),
         RepositoryProvider.value(value: _scheduleExporterRepository),
+        RepositoryProvider.value(value: _nfcPassRepository),
       ],
       child: MultiBlocProvider(
         providers: [
@@ -114,6 +120,11 @@ class App extends StatelessWidget {
           BlocProvider<HomeCubit>(create: (context) => getIt<HomeCubit>()),
           BlocProvider<NotificationPreferencesBloc>(
             create: (_) => getIt<NotificationPreferencesBloc>(),
+          ),
+          BlocProvider<NfcPassCubit>(
+            create: (_) => NfcPassCubit(
+              repository: _nfcPassRepository,
+            ),
           ),
         ],
         child: _AppView(

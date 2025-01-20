@@ -88,6 +88,8 @@ dependencies:
     path: packages/notifications_client/firebase_notifications_client
   persistent_storage:
     path: packages/storage/persistent_storage
+  secure_storage:
+    path: packages/storage/secure_storage
   collection: ^1.18.0
   expandable_page_view: ^1.0.17
   activity_calendar: ^1.0.1
@@ -143,6 +145,13 @@ dependencies:
     sdk: flutter
   path_drawing: ^1.0.1
   xml: ^6.5.0
+  device_info_plus: ^11.2.1
+  image_picker: ^1.1.2
+  video_player: ^2.9.2
+  nfc_pass_client:
+    path: packages/nfc_pass_client
+  nfc_pass_repository:
+    path: packages/nfc_pass_repository
 
 
 dependency_overrides:

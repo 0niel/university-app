@@ -8,11 +8,14 @@ import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:logger/logger.dart';
+import 'package:nfc_pass_repository/nfc_pass_repository.dart';
 import 'package:notifications_repository/notifications_repository.dart';
 import 'package:persistent_storage/persistent_storage.dart';
+import 'package:secure_storage/secure_storage.dart';
 import 'package:rtu_mirea_app/app/app.dart';
 import 'package:rtu_mirea_app/app_bloc_observer.dart';
 import 'package:rtu_mirea_app/common/hydrated_storage.dart';
@@ -64,12 +67,12 @@ Future<void> main() async {
       Logger().i('Firebase token: $token');
 
       // Clear Secure Storage
-      // var secureStorage = getIt<FlutterSecureStorage>();
-      // await secureStorage.deleteAll();
+      var secureStorage = getIt<FlutterSecureStorage>();
+      await secureStorage.deleteAll();
 
       // // Clear local dota
-      // var prefs = getIt<SharedPreferences>();
-      // await prefs.clear();
+      var prefs = getIt<SharedPreferences>();
+      await prefs.clear();
 
       // // Clear oauth tokens
       // var lksOauth2 = getIt<LksOauth2>();
@@ -92,6 +95,9 @@ Future<void> main() async {
   final persistentStorage = PersistentStorage(
     sharedPreferences: getIt<SharedPreferences>(),
   );
+  final secureStorage = SecureStorage(
+    getIt<FlutterSecureStorage>(),
+  );
   late final AnalyticsRepository analyticsRepository;
   try {
     analyticsRepository = AnalyticsRepository(FirebaseAnalytics.instance);
@@ -107,6 +113,7 @@ Future<void> main() async {
   final newsRepository = getIt<NewsRepository>();
   final notificationsRepository = getIt<NotificationsRepository>();
   final scheduleExporterRepository = ScheduleExporterRepository();
+  final nfcPassRepository = NfcPassRepository(storage: secureStorage);
 
   Bloc.observer = AppBlocObserver(analyticsRepository: analyticsRepository);
 
@@ -150,6 +157,7 @@ Future<void> main() async {
             newsRepository: newsRepository,
             notificationsRepository: notificationsRepository,
             scheduleExporterRepository: scheduleExporterRepository,
+            nfcPassRepository: nfcPassRepository,
             key: const Key('App'),
           ),
         ),
