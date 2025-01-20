@@ -37,11 +37,12 @@ class AutoFillConfig {
 
 /// Data class containing information upon successful login.
 class LoginSuccessData {
-
   LoginSuccessData({
-    required this.allCookies, this.accessToken,
+    required this.allCookies,
+    this.accessToken,
     this.specialCookieValue,
   });
+
   /// The access token extracted from the URL, if available.
   final String? accessToken;
 
@@ -164,7 +165,8 @@ class WebOAuthInterceptorClient extends InAppBrowser {
       debugPrint('=== COOKIES for $domain ===');
       for (final cookie in domainCookies) {
         debugPrint(
-            'Cookie: ${cookie.name}=${cookie.value} | httpOnly=${cookie.isHttpOnly} | secure=${cookie.isSecure}',);
+          'Cookie: ${cookie.name}=${cookie.value} | httpOnly=${cookie.isHttpOnly} | secure=${cookie.isSecure}',
+        );
         allCookies[cookie.name] = cookie.value as String;
         if (cookie.name == specialCookieName) {
           debugPrint('--- Special Cookie Found on $domain ---');
@@ -393,7 +395,9 @@ class OAuthInterceptorClient {
   final VoidCallback? onBrowserExit;
 
   /// Initiates the OAuth flow using a custom [WebOAuthInterceptorClient].
-  Future<void> initiateOAuthFlow() async {
+  Future<LoginSuccessData> initiateOAuthFlow() async {
+    final completer = Completer<LoginSuccessData>();
+
     final browser = WebOAuthInterceptorClient(
       oauthUrl: oauthUrl,
       expectedRedirectUrls: expectedRedirectUrls,
@@ -401,9 +405,13 @@ class OAuthInterceptorClient {
       waitForSpecialCookie: waitForSpecialCookie,
       extraHeaders: extraHeaders,
       autoFillConfig: autoFillConfig,
-      onLoginSuccess: onLoginSuccess,
-      onLoginError: onLoginError,
-      onBrowserExit: onBrowserExit,
+      onLoginSuccess: completer.complete,
+      onLoginError: completer.completeError,
+      onBrowserExit: () {
+        if (!completer.isCompleted) {
+          completer.completeError('Browser exited before login.');
+        }
+      },
     );
 
     try {
@@ -413,19 +421,16 @@ class OAuthInterceptorClient {
           headers: extraHeaders,
         ),
         settings: InAppBrowserClassSettings(
-          browserSettings: InAppBrowserSettings(
-            
-            // Add other browser settings if needed
-          ),
+          browserSettings: InAppBrowserSettings(),
           webViewSettings: InAppWebViewSettings(
             useShouldInterceptRequest: true,
-            // Add other WebView settings if needed
           ),
         ),
       );
     } catch (e) {
-      debugPrint('[OAuthInterceptorClient] Error opening browser: $e');
-      onLoginError?.call(e.toString());
+      completer.completeError(e.toString());
     }
+
+    return completer.future;
   }
 }
