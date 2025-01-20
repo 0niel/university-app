@@ -1,147 +1,178 @@
 import 'dart:async';
-import 'dart:convert';
+import 'dart:developer' as developer;
 import 'dart:typed_data';
+
 import 'package:http/http.dart' as http;
+import 'package:nfc_pass_client/src/protos/human_pass.pb.dart';
+import 'package:random_user_agents/random_user_agents.dart';
 
-import 'proto_decoder.dart';
-
-/// A function that returns a cookie when called (asynchronously or synchronously).
+/// {@template cookie_provider}
+/// A function that provides a cookie for the gRPC-Web request.
+/// {@endtemplate}
 typedef CookieProvider = FutureOr<String> Function();
 
-/// A class that encapsulates "raw" access to gRPC endpoints:
+/// {@template nfc_pass_client}
+/// A class that encapsulates  access to gRPC endpoints:
 ///  - GetAccessTokenForDigitalPass
 ///  - SendVerificationCode
 ///  - GetDigitalPass
-///
-/// Here we do not return high-level "models" (AccessTokenModel, etc.),
-/// but only "raw" data (String JWT, int nfcCode) or nothing at all.
+/// {@endtemplate}
 class NfcPassClient {
+  /// {@macro nfc_pass_client}
   NfcPassClient({
     required this.cookieProvider,
     http.Client? httpClient,
-  }) : _httpClient = httpClient ?? http.Client();
+  }) : httpClient = httpClient ?? http.Client();
 
+  /// {@macro cookie_provider}
   final CookieProvider cookieProvider;
-  final http.Client _httpClient;
+
+  /// The HTTP client used to send requests.
+  final http.Client httpClient;
+
+  /// Creates a gRPC-Web frame from the specified protobuf message.
+  Uint8List _makeGrpcWebFrame(Uint8List protobufMessage) {
+    final header = Uint8List(5);
+    header[0] = 0; // flags
+    final length = protobufMessage.length;
+    header[1] = (length >> 24) & 0xFF;
+    header[2] = (length >> 16) & 0xFF;
+    header[3] = (length >> 8) & 0xFF;
+    header[4] = length & 0xFF;
+    return Uint8List.fromList([...header, ...protobufMessage]);
+  }
+
+  /// Parses the gRPC-Web response.
+  Uint8List _parseGrpcWebResponse(Uint8List responseBody) {
+    developer.log(
+      'hex response: ${responseBody.map((e) => e.toRadixString(16).padLeft(2, '0')).join(' ')}',
+    );
+
+    if (responseBody.length < 5) {
+      throw const FormatException('Слишком короткий ответ, нет gRPC header.');
+    }
+
+    final flags = responseBody[0];
+    if (flags != 0) {
+      throw FormatException('Неподдерживаемые gRPC flags: $flags');
+    }
+
+    final length = (responseBody[1] << 24) | (responseBody[2] << 16) | (responseBody[3] << 8) | responseBody[4];
+
+    if (responseBody.length < 5 + length) {
+      throw FormatException(
+        'Длина gRPC payload $length не совпадает с фактической ${responseBody.length - 5}',
+      );
+    }
+
+    final payload = responseBody.sublist(5, 5 + length);
+
+    if (responseBody.length > 5 + length) {
+      developer.log(
+        'Внимание: Дополнительные байты в ответе: ${responseBody.length - (5 + length)}',
+      );
+    }
+
+    return payload;
+  }
+
+  /// Sends a gRPC-Web request to the specified URL.
+  Future<Uint8List> _sendGrpcWebRequest({
+    required String url,
+    required Uint8List protobufMessage,
+    Map<String, String>? headers,
+  }) async {
+    final frame = _makeGrpcWebFrame(protobufMessage);
+    final ua = RandomUserAgents.random();
+    final response = await httpClient.post(
+      Uri.parse(url),
+      headers: {
+        'Content-Type': 'application/grpc-web+proto',
+        'x-grpc-web': '1',
+        'User-Agent': ua,
+        if (headers != null) ...headers,
+      },
+      body: frame,
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception(
+        'HTTP ${response.statusCode} – Ошибка при вызове gRPC-Web метода',
+      );
+    }
+
+    final responseBytes = response.bodyBytes;
+    return _parseGrpcWebResponse(responseBytes);
+  }
 
   /// Obtaining JWT token for DigitalPass.
   ///
   /// This token is used to authenticate subsequent requests.
   Future<String> getAccessTokenForDigitalPass() async {
     final cookie = await cookieProvider();
-    const url = 'https://attendance.mirea.ru'
-        '/rtu.pulse_app.LongTimeTokenService/GetAccessTokenForDigitalPass';
+    const url = 'https://attendance.mirea.ru/rtu.pulse_app.LongTimeTokenService/GetAccessTokenForDigitalPass';
 
-    final response = await _httpClient.post(
-      Uri.parse(url),
+    final request = GetAccessTokenForDigitalPassRequest();
+    final protobufBytes = request.writeToBuffer();
+
+    final responseBytes = await _sendGrpcWebRequest(
+      url: url,
+      protobufMessage: protobufBytes,
       headers: {
-        'Content-Type': 'application/grpc',
-        'Cookie': cookie,
+        'Cookie': '.AspNetCore.Cookies=$cookie',
       },
-      body: Uint8List(0),
     );
 
-    if (response.statusCode != 200) {
-      throw Exception('HTTP ${response.statusCode} – ошибка при получении JWT');
-    }
-
-    final payload = ProtoDecoder.parseGrpcFrame(response.bodyBytes);
-
-    final fields = ProtoDecoder.parseProtobufFields(payload);
-
-    // field №1 -> JWT (string)
-    final field1 = fields[1];
-    if (field1 == null) {
-      throw Exception('Не найдено поле #1 (JWT) в ответе');
-    }
-    final jwtBytes = field1 as Uint8List;
-    final jwt = utf8.decode(jwtBytes);
-
-    return jwt;
+    final response = GetAccessTokenForDigitalPassResponse.fromBuffer(
+      responseBytes,
+    );
+    return response.jwt;
   }
 
-  /// Sending a request to send a 6-digit code to email
+  /// Sending a verification code to the user's email.
   Future<void> sendVerificationCode(String bearerToken) async {
     final cookie = await cookieProvider();
-    const url = 'https://attendance.mirea.ru'
-        '/rtu_tc.rtu_attend.humanpass.HumanPassService/SendVerificationCode';
+    const url = 'https://attendance.mirea.ru/rtu_tc.rtu_attend.humanpass.HumanPassService/SendVerificationCode';
 
-    // (gRPC header + 0-length?)
-    final body = base64Decode('AAAAAAA=');
+    final request = SendVerificationCodeRequest();
+    final protobufBytes = request.writeToBuffer();
 
-    final response = await _httpClient.post(
-      Uri.parse(url),
+    await _sendGrpcWebRequest(
+      url: url,
+      protobufMessage: protobufBytes,
       headers: {
-        'Content-Type': 'application/grpc',
         'Authorization': 'Bearer $bearerToken',
-        'Cookie': cookie,
+        'Cookie': '.AspNetCore.Cookies=$cookie',
       },
-      body: body,
     );
-    if (response.statusCode != 200) {
-      throw Exception('HTTP ${response.statusCode} – ошибка SendVerificationCode');
-    }
   }
 
-  /// Obtaining NFC code based on the entered 6-digit code and device name
+  /// Obtaining a digital pass.
+  ///
+  /// Returns the pass ID. This ID is used in the NFC pass.
   Future<int> getDigitalPass({
     required String bearerToken,
     required String sixDigitCode,
     required String deviceName,
   }) async {
     final cookie = await cookieProvider();
-    const url = 'https://attendance.mirea.ru'
-        '/rtu_tc.rtu_attend.humanpass.HumanPassService/GetDigitalPass';
+    const url = 'https://attendance.mirea.ru/rtu_tc.rtu_attend.humanpass.HumanPassService/GetDigitalPass';
 
-    // field №1 (string) -> sixDigitCode
-    final codeBytes = utf8.encode(sixDigitCode);
-    final codeField = ProtoDecoder.makeLengthDelimitedField(
-      fieldNumber: 1,
-      data: codeBytes,
-    );
+    final request = GetDigitalPassRequest()
+      ..code = sixDigitCode
+      ..deviceInfo = (DeviceInfo()..deviceName = deviceName);
+    final protobufBytes = request.writeToBuffer();
 
-    // field №2 (string) -> deviceName
-    final deviceBytes = utf8.encode(deviceName);
-    final deviceField = ProtoDecoder.makeLengthDelimitedField(
-      fieldNumber: 2,
-      data: deviceBytes,
-    );
-
-    final protobufMessage = <int>[...codeField, ...deviceField];
-
-    final frame = ProtoDecoder.makeGrpcFrame(protobufMessage);
-
-    final response = await _httpClient.post(
-      Uri.parse(url),
+    final responseBytes = await _sendGrpcWebRequest(
+      url: url,
+      protobufMessage: protobufBytes,
       headers: {
-        'Content-Type': 'application/grpc',
         'Authorization': 'Bearer $bearerToken',
-        'Cookie': cookie,
+        'Cookie': '.AspNetCore.Cookies=$cookie',
       },
-      body: frame,
     );
 
-    if (response.statusCode != 200) {
-      throw Exception('HTTP ${response.statusCode} – ошибка GetDigitalPass');
-    }
-
-    final payload = ProtoDecoder.parseGrpcFrame(response.bodyBytes);
-    final topFields = ProtoDecoder.parseProtobufFields(payload);
-
-    // top-level message:
-    //   field #1 => varint (nfcCode)
-    final field1 = topFields[1];
-    if (field1 == null) {
-      throw Exception('Не найдено верхнеуровневое поле #1 (вложенное)');
-    }
-    final innerMsg = field1 as Uint8List;
-    final innerFields = ProtoDecoder.parseProtobufFields(innerMsg);
-
-    final nfcVarint = innerFields[1];
-    if (nfcVarint == null) {
-      throw Exception('Во вложенном сообщении нет field #1 (NFC код)');
-    }
-
-    return nfcVarint as int;
+    final response = GetDigitalPassResponse.fromBuffer(responseBytes);
+    return response.inner.passId.toInt();
   }
 }
