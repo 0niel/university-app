@@ -1,0 +1,6 @@
+# melos_managed_dependency_overrides: nfc_pass_client,web_oauth_interceptor_client
+dependency_overrides:
+  nfc_pass_client:
+    path: ..\\nfc_pass_client
+  web_oauth_interceptor_client:
+    path: ..\\web_oauth_interceptor_client

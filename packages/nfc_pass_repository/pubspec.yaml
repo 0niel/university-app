@@ -1,0 +1,25 @@
+name: nfc_pass_repository
+description: NFC Pass repository package
+version: 0.1.0+1
+publish_to: none
+
+environment:
+  sdk: ^3.5.0
+  flutter: ^3.24.0
+
+dependencies:
+  nfc_pass_client:
+    path: ../nfc_pass_client
+  storage:
+    path: ../storage/storage
+  web_oauth_interceptor_client:
+    path: ../web_oauth_interceptor_client
+  flutter:
+    sdk: flutter
+  equatable: ^2.0.7
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  mocktail: ^1.0.4
+  very_good_analysis: ^6.0.0
