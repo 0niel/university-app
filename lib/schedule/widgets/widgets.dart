@@ -8,3 +8,4 @@ export 'schedules_list.dart';
 export 'schedule_item_button.dart';
 export 'loading_error_message.dart';
 export 'empty_lesson_card.dart';
+export 'comparison_manager.dart';

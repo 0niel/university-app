@@ -10,9 +10,11 @@ class PrimaryButton extends StatelessWidget {
     this.icon,
     this.onClick,
     this.onLongPress,
+    this.enabled = true,
   });
 
   final String text;
+  final bool enabled;
   final Widget? icon;
   final VoidCallback? onClick;
   final VoidCallback? onLongPress;
@@ -22,31 +24,22 @@ class PrimaryButton extends StatelessWidget {
     return ConstrainedBox(
       constraints: const BoxConstraints.tightFor(width: double.infinity, height: 48),
       child: PlatformElevatedButton(
-        // style: ButtonStyle(
-        //   backgroundColor: WidgetStateProperty.all(AppTheme.colorsOf(context).primary),
-        //   shape: WidgetStateProperty.all<RoundedRectangleBorder>(
-        //     RoundedRectangleBorder(
-        //       borderRadius: BorderRadius.circular(24.0),
-        //     ),
-        //   ),
-        // ),
         material: (_, __) => MaterialElevatedButtonData(
-          onLongPress: onLongPress,
+          onLongPress: enabled ? onLongPress : null,
           style: ElevatedButton.styleFrom(
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(24.0),
             ),
+            backgroundColor: enabled ? AppTheme.colorsOf(context).primary : Colors.grey,
           ),
         ),
         cupertino: (_, __) => CupertinoElevatedButtonData(
           padding: EdgeInsets.zero,
           borderRadius: BorderRadius.circular(24.0),
+          color: enabled ? AppTheme.colorsOf(context).primary : Colors.grey,
         ),
-
-        onPressed: () {
-          onClick?.call();
-        },
-        color: AppTheme.colorsOf(context).primary,
+        onPressed: enabled ? onClick : null,
+        color: enabled ? AppTheme.colorsOf(context).primary : Colors.grey,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [

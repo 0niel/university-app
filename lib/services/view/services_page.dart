@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
@@ -130,6 +132,19 @@ class _ServicesViewState extends State<ServicesView> {
                         context.go('/services/map');
                       },
                     ),
+                    if (Platform.isAndroid)
+                      ServiceCard(
+                        title: 'NFC Пропуск',
+                        icon: ServiceIcon(
+                          color: AppTheme.colorsOf(context).colorful03,
+                          iconColor: AppTheme.colorsOf(context).active,
+                          icon: Icons.nfc,
+                        ),
+                        onTap: () {
+                          context.go('/services/nfc');
+                        },
+                        description: 'Смартфон как пропуск',
+                      ),
                     BlocBuilder<NeonBloc, NeonState>(
                       bloc: neonBloc,
                       builder: (context, state) {
@@ -153,17 +168,17 @@ class _ServicesViewState extends State<ServicesView> {
                         );
                       },
                     ),
-                    ServiceCard(
-                      title: 'Бюро находок',
-                      url: 'https://finds.mirea.ninja/',
-                      icon: ServiceIcon(
-                        color: AppTheme.colorsOf(context).colorful06,
-                        iconColor: AppTheme.colorsOf(context).background01,
-                        icon: Icons.search,
-                      ),
-                      launchMode: LaunchMode.externalApplication,
-                      description: 'Найди свои вещи',
-                    ),
+                    // ServiceCard(
+                    //   title: 'Бюро находок',
+                    //   url: 'https://finds.mirea.ninja/',
+                    //   icon: ServiceIcon(
+                    //     color: AppTheme.colorsOf(context).colorful06,
+                    //     iconColor: AppTheme.colorsOf(context).background01,
+                    //     icon: Icons.search,
+                    //   ),
+                    //   launchMode: LaunchMode.externalApplication,
+                    //   description: 'Найди свои вещи',
+                    // ),
                   ],
                 ),
               ),
