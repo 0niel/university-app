@@ -194,21 +194,23 @@ class _AppViewState extends State<_AppView> {
             cupertinoDarkTheme: cupertinoDarkTheme,
             builder: (context) {
               return FirebaseInteractedMessageListener(
-                child: NeonAppProvider(
-                  neonDependencies: widget.neonDependencies,
-                  child: PlatformApp.router(
-                    restorationScopeId: 'app',
-                    localizationsDelegates: [
-                      GlobalMaterialLocalizations.delegate,
-                      GlobalWidgetsLocalizations.delegate,
-                      GlobalCupertinoLocalizations.delegate,
-                      ..._neonLocalizationsDelegates,
-                    ],
-                    supportedLocales: const [Locale('en'), Locale('ru')],
-                    locale: const Locale('ru'),
-                    debugShowCheckedModeBanner: false,
-                    title: 'Приложение РТУ МИРЭА',
-                    routerConfig: _router,
+                child: WatchConnectivityWrapper(
+                  child: NeonAppProvider(
+                    neonDependencies: widget.neonDependencies,
+                    child: PlatformApp.router(
+                      restorationScopeId: 'app',
+                      localizationsDelegates: [
+                        GlobalMaterialLocalizations.delegate,
+                        GlobalWidgetsLocalizations.delegate,
+                        GlobalCupertinoLocalizations.delegate,
+                        ..._neonLocalizationsDelegates,
+                      ],
+                      supportedLocales: const [Locale('en'), Locale('ru')],
+                      locale: const Locale('ru'),
+                      debugShowCheckedModeBanner: false,
+                      title: 'Приложение РТУ МИРЭА',
+                      routerConfig: _router,
+                    ),
                   ),
                 ),
               );

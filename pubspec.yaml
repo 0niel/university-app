@@ -152,6 +152,7 @@ dependencies:
     path: packages/nfc_pass_client
   nfc_pass_repository:
     path: packages/nfc_pass_repository
+  watch_connectivity: ^0.2.1
 
 
 dependency_overrides:
