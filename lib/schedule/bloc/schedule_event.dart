@@ -205,3 +205,34 @@ class ImportScheduleFromJson extends ScheduleEvent {
   @override
   List<Object> get props => [jsonString];
 }
+
+class AddScheduleToComparison extends ScheduleEvent with AnalyticsEventMixin {
+  const AddScheduleToComparison(this.schedule);
+
+  final SelectedSchedule schedule;
+
+  @override
+  AnalyticsEvent get event => const AnalyticsEvent('AddScheduleToComparison');
+
+  @override
+  List<Object> get props => [schedule];
+}
+
+class RemoveScheduleFromComparison extends ScheduleEvent with AnalyticsEventMixin {
+  const RemoveScheduleFromComparison(this.schedule);
+
+  final SelectedSchedule schedule;
+
+  @override
+  AnalyticsEvent get event => const AnalyticsEvent('RemoveScheduleFromComparison');
+
+  @override
+  List<Object> get props => [schedule];
+}
+
+class ToggleComparisonMode extends ScheduleEvent {
+  const ToggleComparisonMode();
+
+  @override
+  List<Object> get props => [];
+}

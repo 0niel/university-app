@@ -3,10 +3,10 @@ import 'dart:convert';
 
 import 'package:analytics_repository/analytics_repository.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
+import 'package:collection/collection.dart';
 import 'package:equatable/equatable.dart';
-import 'package:get/get.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
-import 'package:json_annotation/json_annotation.dart';
 import 'package:rtu_mirea_app/schedule/models/models.dart';
 import 'package:schedule_repository/schedule_repository.dart';
 import 'package:university_app_server_api/client.dart';
@@ -14,6 +14,7 @@ import 'package:university_app_server_api/client.dart';
 part 'schedule_event.dart';
 part 'schedule_state.dart';
 part 'schedule_bloc.g.dart';
+part 'schedule_bloc.freezed.dart';
 
 typedef UID = String;
 
@@ -21,7 +22,7 @@ class ScheduleBloc extends HydratedBloc<ScheduleEvent, ScheduleState> {
   ScheduleBloc({
     required ScheduleRepository scheduleRepository,
   })  : _scheduleRepository = scheduleRepository,
-        super(const ScheduleState.initial()) {
+        super(const ScheduleState()) {
     on<ScheduleRequested>(_onScheduleRequested, transformer: sequential());
     on<TeacherScheduleRequested>(_onTeacherScheduleRequested, transformer: sequential());
     on<ClassroomScheduleRequested>(_onClassroomScheduleRequested, transformer: sequential());
@@ -37,9 +38,15 @@ class ScheduleBloc extends HydratedBloc<ScheduleEvent, ScheduleState> {
     on<RemoveScheduleComment>(_onRemoveScheduleComment);
     on<DeleteScheduleComment>(_onDeleteScheduleComment);
     on<ImportScheduleFromJson>(_onImportScheduleFromJson);
+
+    // Comparison events
+    on<AddScheduleToComparison>(_onAddScheduleToComparison, transformer: sequential());
+    on<RemoveScheduleFromComparison>(_onRemoveScheduleFromComparison, transformer: sequential());
+    on<ToggleComparisonMode>(_onToggleComparisonMode, transformer: sequential());
   }
 
   final ScheduleRepository _scheduleRepository;
+  static const _maxComparisonSchedules = 3;
 
   Future<void> _onImportScheduleFromJson(
     ImportScheduleFromJson event,
@@ -47,7 +54,6 @@ class ScheduleBloc extends HydratedBloc<ScheduleEvent, ScheduleState> {
   ) async {
     try {
       final Map<String, dynamic> jsonData = jsonDecode(event.jsonString);
-
       final importedSchedule = SelectedSchedule.fromJson(jsonData);
 
       emit(
@@ -97,7 +103,9 @@ class ScheduleBloc extends HydratedBloc<ScheduleEvent, ScheduleState> {
     SetShowCommentsIndicator event,
     Emitter<ScheduleState> emit,
   ) async {
-    emit(state.copyWith(showCommentsIndicators: event.showCommentsIndicators));
+    if (state.showCommentsIndicators != event.showCommentsIndicators) {
+      emit(state.copyWith(showCommentsIndicators: event.showCommentsIndicators));
+    }
   }
 
   Future<void> _onSetLessonComment(
@@ -134,7 +142,9 @@ class ScheduleBloc extends HydratedBloc<ScheduleEvent, ScheduleState> {
     ScheduleSetEmptyLessonsDisplaying event,
     Emitter<ScheduleState> emit,
   ) async {
-    emit(state.copyWith(showEmptyLessons: event.showEmptyLessons));
+    if (state.showEmptyLessons != event.showEmptyLessons) {
+      emit(state.copyWith(showEmptyLessons: event.showEmptyLessons));
+    }
   }
 
   Future<void> _onRemoveSavedSchedule(
@@ -142,35 +152,14 @@ class ScheduleBloc extends HydratedBloc<ScheduleEvent, ScheduleState> {
     Emitter<ScheduleState> emit,
   ) async {
     if (event.target == ScheduleTarget.group) {
-      emit(
-        state.copyWith(
-          groupsSchedule: state.groupsSchedule
-              .where(
-                (element) => element.$1 != event.identifier,
-              )
-              .toList(),
-        ),
-      );
+      final updatedGroups = state.groupsSchedule.where((element) => element.$1 != event.identifier).toList();
+      emit(state.copyWith(groupsSchedule: updatedGroups));
     } else if (event.target == ScheduleTarget.teacher) {
-      emit(
-        state.copyWith(
-          teachersSchedule: state.teachersSchedule
-              .where(
-                (element) => element.$1 != event.identifier,
-              )
-              .toList(),
-        ),
-      );
+      final updatedTeachers = state.teachersSchedule.where((element) => element.$1 != event.identifier).toList();
+      emit(state.copyWith(teachersSchedule: updatedTeachers));
     } else if (event.target == ScheduleTarget.classroom) {
-      emit(
-        state.copyWith(
-          classroomsSchedule: state.classroomsSchedule
-              .where(
-                (element) => element.$1 != event.identifier,
-              )
-              .toList(),
-        ),
-      );
+      final updatedClassrooms = state.classroomsSchedule.where((element) => element.$1 != event.identifier).toList();
+      emit(state.copyWith(classroomsSchedule: updatedClassrooms));
     }
   }
 
@@ -179,7 +168,7 @@ class ScheduleBloc extends HydratedBloc<ScheduleEvent, ScheduleState> {
     Emitter<ScheduleState> emit,
   ) async {
     emit(state.copyWith(selectedSchedule: event.selectedSchedule));
-    // Add on Resume event to refresh schedule data.
+    // Trigger data refresh
     add(const RefreshSelectedScheduleData());
   }
 
@@ -187,7 +176,9 @@ class ScheduleBloc extends HydratedBloc<ScheduleEvent, ScheduleState> {
     ScheduleSetDisplayMode event,
     Emitter<ScheduleState> emit,
   ) {
-    emit(state.copyWith(isMiniature: event.isMiniature));
+    if (state.isMiniature != event.isMiniature) {
+      emit(state.copyWith(isMiniature: event.isMiniature));
+    }
   }
 
   FutureOr<void> _onScheduleResumed(
@@ -361,6 +352,41 @@ class ScheduleBloc extends HydratedBloc<ScheduleEvent, ScheduleState> {
     Emitter<ScheduleState> emit,
   ) async {
     emit(state.copyWith(isListModeEnabled: !state.isListModeEnabled));
+  }
+
+  Future<void> _onAddScheduleToComparison(
+    AddScheduleToComparison event,
+    Emitter<ScheduleState> emit,
+  ) async {
+    if (state.comparisonSchedules.length >= _maxComparisonSchedules) return;
+
+    final updatedComparison = Set<SelectedSchedule>.from(state.comparisonSchedules);
+    final wasAdded = updatedComparison.add(event.schedule);
+
+    if (wasAdded) {
+      emit(state.copyWith(comparisonSchedules: updatedComparison));
+    }
+  }
+
+  Future<void> _onRemoveScheduleFromComparison(
+    RemoveScheduleFromComparison event,
+    Emitter<ScheduleState> emit,
+  ) async {
+    final updatedComparison = Set<SelectedSchedule>.from(state.comparisonSchedules);
+    final wasRemoved = updatedComparison.remove(event.schedule);
+
+    if (wasRemoved) {
+      emit(state.copyWith(comparisonSchedules: updatedComparison));
+    }
+  }
+
+  FutureOr<void> _onToggleComparisonMode(
+    ToggleComparisonMode event,
+    Emitter<ScheduleState> emit,
+  ) {
+    emit(state.copyWith(
+      isComparisonModeEnabled: !state.isComparisonModeEnabled,
+    ));
   }
 
   @override

@@ -8,8 +8,10 @@ import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:intl/intl.dart';
+import 'package:rtu_mirea_app/presentation/constants.dart';
 import 'package:rtu_mirea_app/presentation/theme.dart';
 import 'package:rtu_mirea_app/presentation/typography.dart';
+import 'package:rtu_mirea_app/presentation/widgets/bottom_modal_sheet.dart';
 import 'package:rtu_mirea_app/schedule/bloc/schedule_bloc.dart';
 import 'package:rtu_mirea_app/schedule/models/models.dart';
 import 'package:rtu_mirea_app/schedule/widgets/widgets.dart';
@@ -61,11 +63,11 @@ class _SchedulePageState extends State<SchedulePage> {
     final scheduleState = context.read<ScheduleBloc>().state.selectedSchedule;
 
     switch (scheduleState.runtimeType) {
-      case SelectedGroupSchedule:
+      case const (SelectedGroupSchedule):
         return (scheduleState as SelectedGroupSchedule).group.name;
-      case SelectedTeacherSchedule:
+      case const (SelectedTeacherSchedule):
         return _formatTeacherName((scheduleState as SelectedTeacherSchedule).teacher.name);
-      case SelectedClassroomSchedule:
+      case const (SelectedClassroomSchedule):
         return (scheduleState as SelectedClassroomSchedule).classroom.name;
       default:
         return 'Расписание';
@@ -115,6 +117,7 @@ class _SchedulePageState extends State<SchedulePage> {
             actions: [
               _buildAddGroupButton(context),
               _buildSettingsButton(context),
+              _buildComparisonModeButton(context), // Новая кнопка
               _buildViewToggleButton(),
             ],
           ),
@@ -136,16 +139,28 @@ class _SchedulePageState extends State<SchedulePage> {
                 ),
               );
             },
-            child: state.isListModeEnabled
-                ? KeyedSubtree(
-                    key: const ValueKey('list_mode'),
-                    child: _buildListMode(state),
-                  )
-                : KeyedSubtree(
-                    key: const ValueKey('calendar_mode'),
-                    child: _buildCalendarMode(state),
-                  ),
+            child: state.isComparisonModeEnabled
+                ? _buildComparisonMode(state)
+                : (state.isListModeEnabled
+                    ? KeyedSubtree(
+                        key: const ValueKey('list_mode'),
+                        child: _buildListMode(state),
+                      )
+                    : KeyedSubtree(
+                        key: const ValueKey('calendar_mode'),
+                        child: _buildCalendarMode(state),
+                      )),
           ),
+          floatingActionButton: state.isComparisonModeEnabled
+              ? Padding(
+                  padding: const EdgeInsets.only(bottom: bottomNavigationBarHeight + 16.0),
+                  child: FloatingActionButton(
+                    onPressed: _openComparisonManager,
+                    tooltip: 'Управление сравнениями',
+                    child: const Icon(Icons.compare),
+                  ),
+                )
+              : null,
         );
       },
     );
@@ -181,6 +196,23 @@ class _SchedulePageState extends State<SchedulePage> {
     );
   }
 
+  Widget _buildComparisonModeButton(BuildContext context) {
+    return PlatformIconButton(
+      icon: HugeIcon(
+        icon: HugeIcons.strokeRoundedAbacus,
+        size: 24,
+        color: AppTheme.colorsOf(context).active,
+      ),
+      material: (_, __) => MaterialIconButtonData(
+        padding: const EdgeInsets.all(16.0),
+        tooltip: 'Сравнить расписания',
+      ),
+      onPressed: () {
+        _bloc.add(const ToggleComparisonMode());
+      },
+    );
+  }
+
   Widget _buildViewToggleButton() {
     return PlatformIconButton(
       onPressed: () {
@@ -209,20 +241,32 @@ class _SchedulePageState extends State<SchedulePage> {
     );
   }
 
+  void _openComparisonManager() {
+    BottomModalSheet.show(
+      context,
+      child: const ComparisonManager(),
+      title: 'Сравнение расписаний',
+      description: 'Выберите до 4-х расписаний, чтобы сравнить их по дням',
+    );
+  }
+
   Map<DateTime, List<SchedulePart>> _groupLessonsByDay(List<SchedulePart> scheduleParts) {
     final Map<DateTime, List<SchedulePart>> lessonsByDay = {};
 
     for (final part in scheduleParts) {
       for (final date in part.dates) {
+        final day = DateTime(date.year, date.month, date.day);
         lessonsByDay.update(
-          date,
+          day,
           (existing) => existing..add(part),
           ifAbsent: () => [part],
         );
       }
     }
 
-    return Map.fromEntries(lessonsByDay.entries.toList()..sort((a, b) => a.key.compareTo(b.key)));
+    return Map.fromEntries(
+      lessonsByDay.entries.toList()..sort((a, b) => a.key.compareTo(b.key)),
+    );
   }
 
   Widget _buildListMode(ScheduleState state) {
@@ -263,7 +307,7 @@ class _SchedulePageState extends State<SchedulePage> {
   Widget _buildStickyHeader(DateTime day, List<LessonSchedulePart> lessons) {
     return SliverStickyHeader(
       header: Container(
-        color: Theme.of(context).scaffoldBackgroundColor,
+        color: AppTheme.colorsOf(context).background01,
         padding: const EdgeInsets.only(left: 22.0, bottom: 8.0, top: 16.0),
         alignment: Alignment.centerLeft,
         child: Row(
@@ -420,5 +464,265 @@ class _SchedulePageState extends State<SchedulePage> {
               );
             },
           );
+  }
+
+  Widget _buildComparisonMode(ScheduleState state) {
+    if (state.comparisonSchedules.isEmpty) {
+      return Center(
+        child: Text(
+          'Добавьте расписания для сравнения',
+          style: AppTextStyle.body,
+        ),
+      );
+    }
+
+    final allLessons = state.comparisonSchedules
+        .expand(
+          (schedule) => schedule.schedule.whereType<LessonSchedulePart>(),
+        )
+        .toList();
+
+    final lessonsByDay = _groupLessonsByDay(allLessons);
+
+    return CustomScrollView(
+      slivers: [
+        // SliverToBoxAdapter(
+        //   child: Padding(
+        //     padding: const EdgeInsets.all(16.0),
+        //     child: Wrap(
+        //       spacing: 16.0,
+        //       runSpacing: 8.0,
+        //       children: state.comparisonSchedules.toList().asMap().entries.map((entry) {
+        //         final index = entry.key;
+        //         final schedule = entry.value;
+        //         final color = _getBackgroundColor(schedule);
+
+        //         return Row(
+        //           mainAxisSize: MainAxisSize.min,
+        //           children: [
+        //             Container(
+        //               width: 16,
+        //               height: 16,
+        //               decoration: BoxDecoration(
+        //                 color: color,
+        //                 shape: BoxShape.circle,
+        //               ),
+        //             ),
+        //             const SizedBox(width: 4),
+        //             Text(
+        //               _getScheduleTitle(schedule),
+        //               style: AppTextStyle.captionL,
+        //             ),
+        //           ],
+        //         );
+        //       }).toList(),
+        //     ),
+        //   ),
+        // ),
+        for (var entry in lessonsByDay.entries)
+          _buildComparisonStickyHeader(
+              entry.key, entry.value.whereType<LessonSchedulePart>().toList(), state.comparisonSchedules.toList()),
+      ],
+    );
+  }
+
+  Widget _buildComparisonScheduleLegent(SelectedSchedule schedule) {
+    final color = _getBackgroundColor(schedule);
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 16,
+            height: 16,
+            decoration: BoxDecoration(
+              color: color,
+              shape: BoxShape.circle,
+            ),
+          ),
+          const SizedBox(width: 4),
+          Text(
+            _getScheduleTitle(schedule),
+            style: AppTextStyle.captionL,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildComparisonStickyHeader(
+    DateTime day,
+    List<LessonSchedulePart> lessons,
+    List<SelectedSchedule> schedules,
+  ) {
+    if (lessons.isEmpty) {
+      return SliverStickyHeader(
+        header: _buildDayHeader(day),
+        sliver: SliverToBoxAdapter(
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            decoration: BoxDecoration(
+              color: Colors.grey.shade200,
+              borderRadius: BorderRadius.circular(12.0),
+            ),
+            margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            height: 100,
+            alignment: Alignment.center,
+            child: Text(
+              'Пар нет',
+              style: AppTextStyle.body.copyWith(
+                color: AppTheme.colorsOf(context).active,
+                fontStyle: FontStyle.italic,
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    final Map<SelectedSchedule, List<LessonSchedulePart>> lessonsPerSchedule = {
+      for (var schedule in schedules)
+        schedule: lessons
+            .where(
+              (lesson) => schedule.schedule.contains(lesson),
+            )
+            .toList()
+    };
+
+    final int maxLessons = _getMaxLessonsPerDay(schedules);
+
+    return SliverStickyHeader(
+      header: _buildDayHeader(day),
+      sliver: SliverToBoxAdapter(
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Table(
+              columnWidths: {
+                for (int i = 0; i < schedules.length; i++) i: const FixedColumnWidth(220),
+              },
+              defaultVerticalAlignment: TableCellVerticalAlignment.top,
+              children: [
+                // Заголовки расписаний
+                TableRow(
+                  children: schedules.map((schedule) {
+                    return _buildComparisonScheduleLegent(schedule);
+                  }).toList(),
+                ),
+                // Строки уроков
+                for (int lessonIndex = 0; lessonIndex < maxLessons; lessonIndex++)
+                  TableRow(
+                    children: schedules.map((schedule) {
+                      final lesson = lessonsPerSchedule[schedule]?.firstWhereOrNull(
+                        (lesson) => lesson.lessonBells.number == (lessonIndex + 1),
+                      );
+                      if (lesson != null) {
+                        return Padding(
+                          padding: const EdgeInsets.all(4.0),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: _getBackgroundColor(schedule),
+                              borderRadius: BorderRadius.circular(8.0),
+                            ),
+                            padding: const EdgeInsets.all(8.0),
+                            child: LessonCard(
+                              lesson: lesson,
+                              onTap: (lesson) {
+                                context.go('/schedule/details', extra: (lesson, day));
+                              },
+                            ),
+                          ),
+                        );
+                      } else {
+                        return Padding(
+                          padding: const EdgeInsets.all(4.0),
+                          child: Container(
+                            height: 80,
+                            decoration: BoxDecoration(
+                              color: _getBackgroundColor(schedule).withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(8.0),
+                            ),
+                            padding: const EdgeInsets.all(8.0),
+                            child: EmptyLessonCard(lessonNumber: lessonIndex + 1),
+                          ),
+                        );
+                      }
+                    }).toList(),
+                  ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDayHeader(DateTime day) {
+    return Container(
+      color: AppTheme.colorsOf(context).background01,
+      padding: const EdgeInsets.symmetric(horizontal: 22.0, vertical: 8.0),
+      alignment: Alignment.centerLeft,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          const Icon(
+            HugeIcons.strokeRoundedCalendar04,
+            size: 17.5,
+          ),
+          const SizedBox(width: 8),
+          Text(
+            DateFormat('EEEE, d MMMM', 'ru').format(day),
+            style: AppTextStyle.bodyBold,
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Вспомогательные методы
+
+  /// Проверяет, находятся ли две даты в один и тот же день
+  bool isSameDay(DateTime a, DateTime b) {
+    return a.year == b.year && a.month == b.month && a.day == b.day;
+  }
+
+  /// Получает заголовок расписания
+  String _getScheduleTitle(SelectedSchedule schedule) {
+    return schedule is SelectedGroupSchedule
+        ? schedule.group.name
+        : schedule is SelectedTeacherSchedule
+            ? _formatTeacherName(schedule.teacher.name)
+            : schedule is SelectedClassroomSchedule
+                ? schedule.classroom.name
+                : 'Неизвестно';
+  }
+
+  /// Получает цвет фона для расписания
+  Color _getBackgroundColor(SelectedSchedule schedule) {
+    final index = _bloc.state.comparisonSchedules.toList().indexOf(schedule);
+    final colors = [
+      AppTheme.colors.colorful01.withOpacity(0.1),
+      AppTheme.colors.colorful02.withOpacity(0.1),
+      AppTheme.colors.colorful03.withOpacity(0.1),
+      AppTheme.colors.colorful04.withOpacity(0.1),
+      AppTheme.colors.colorful05.withOpacity(0.1),
+      AppTheme.colors.colorful06.withOpacity(0.1),
+      AppTheme.colors.colorful07.withOpacity(0.1),
+    ];
+    return colors[index % colors.length];
+  }
+
+  /// Получает максимальное количество уроков в день среди всех расписаний
+  int _getMaxLessonsPerDay(List<SelectedSchedule> schedules) {
+    int max = 0;
+    for (var schedule in schedules) {
+      final lessonsByDay = _groupLessonsByDay(schedule.schedule);
+      for (var lessons in lessonsByDay.values) {
+        if (lessons.length > max) max = lessons.length;
+      }
+    }
+    return max;
   }
 }

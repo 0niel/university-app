@@ -6,7 +6,8 @@ part of 'schedule_bloc.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-ScheduleState _$ScheduleStateFromJson(Map<String, dynamic> json) => ScheduleState(
+_$ScheduleStateImpl _$$ScheduleStateImplFromJson(Map<String, dynamic> json) => _$ScheduleStateImpl(
+      status: $enumDecodeNullable(_$ScheduleStatusEnumMap, json['status']) ?? ScheduleStatus.initial,
       classroomsSchedule: (json['classroomsSchedule'] as List<dynamic>?)
               ?.map((e) => _$recordConvert(
                     e,
@@ -59,9 +60,15 @@ ScheduleState _$ScheduleStateFromJson(Map<String, dynamic> json) => ScheduleStat
               .toList() ??
           const [],
       selectedSchedule: const SelectedScheduleConverter().fromJson(json['selectedSchedule'] as Map<String, dynamic>?),
+      comparisonSchedules: (json['comparisonSchedules'] as List<dynamic>?)
+              ?.map((e) => SelectedSchedule.fromJson(e as Map<String, dynamic>))
+              .toSet() ??
+          const {},
+      isComparisonModeEnabled: json['isComparisonModeEnabled'] as bool? ?? false,
     );
 
-Map<String, dynamic> _$ScheduleStateToJson(ScheduleState instance) => <String, dynamic>{
+Map<String, dynamic> _$$ScheduleStateImplToJson(_$ScheduleStateImpl instance) => <String, dynamic>{
+      'status': _$ScheduleStatusEnumMap[instance.status]!,
       'classroomsSchedule': instance.classroomsSchedule
           .map((e) => <String, dynamic>{
                 r'$1': e.$1,
@@ -83,14 +90,23 @@ Map<String, dynamic> _$ScheduleStateToJson(ScheduleState instance) => <String, d
                 r'$3': e.$3,
               })
           .toList(),
-      'comments': instance.comments,
       'isMiniature': instance.isMiniature,
-      'showCommentsIndicators': instance.showCommentsIndicators,
+      'comments': instance.comments,
       'showEmptyLessons': instance.showEmptyLessons,
+      'showCommentsIndicators': instance.showCommentsIndicators,
       'isListModeEnabled': instance.isListModeEnabled,
       'scheduleComments': instance.scheduleComments,
       'selectedSchedule': const SelectedScheduleConverter().toJson(instance.selectedSchedule),
+      'comparisonSchedules': instance.comparisonSchedules.toList(),
+      'isComparisonModeEnabled': instance.isComparisonModeEnabled,
     };
+
+const _$ScheduleStatusEnumMap = {
+  ScheduleStatus.initial: 'initial',
+  ScheduleStatus.loading: 'loading',
+  ScheduleStatus.failure: 'failure',
+  ScheduleStatus.loaded: 'loaded',
+};
 
 $Rec _$recordConvert<$Rec>(
   Object? value,
