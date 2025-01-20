@@ -121,6 +121,25 @@ class $AssetsImagesGen {
   List<AssetGenImage> get values => [saly1, saly18, saly2, saly25, saly3, saly39, saly4, saly5, logo];
 }
 
+class $AssetsMapsGen {
+  const $AssetsMapsGen();
+
+  /// Directory path: assets/maps/mp-1
+  $AssetsMapsMp1Gen get mp1 => const $AssetsMapsMp1Gen();
+
+  /// File path: assets/maps/objects.json
+  String get objects => 'assets/maps/objects.json';
+
+  /// Directory path: assets/maps/s-20
+  $AssetsMapsS20Gen get s20 => const $AssetsMapsS20Gen();
+
+  /// Directory path: assets/maps/v-78
+  $AssetsMapsV78Gen get v78 => const $AssetsMapsV78Gen();
+
+  /// List of all assets
+  List<String> get values => [objects];
+}
+
 class $AssetsIconsHugeiconsGen {
   const $AssetsIconsHugeiconsGen();
 
@@ -318,11 +337,78 @@ class $AssetsIconsHugeiconsGen {
       ];
 }
 
+class $AssetsMapsMp1Gen {
+  const $AssetsMapsMp1Gen();
+
+  /// File path: assets/maps/mp-1/-1.svg
+  SvgGenImage get a1Svg => const SvgGenImage('assets/maps/mp-1/-1.svg');
+
+  /// File path: assets/maps/mp-1/1.svg
+  SvgGenImage get a1Svg_ => const SvgGenImage('assets/maps/mp-1/1.svg');
+
+  /// File path: assets/maps/mp-1/2.svg
+  SvgGenImage get a2 => const SvgGenImage('assets/maps/mp-1/2.svg');
+
+  /// File path: assets/maps/mp-1/3.svg
+  SvgGenImage get a3 => const SvgGenImage('assets/maps/mp-1/3.svg');
+
+  /// File path: assets/maps/mp-1/4.svg
+  SvgGenImage get a4 => const SvgGenImage('assets/maps/mp-1/4.svg');
+
+  /// File path: assets/maps/mp-1/5.svg
+  SvgGenImage get a5 => const SvgGenImage('assets/maps/mp-1/5.svg');
+
+  /// List of all assets
+  List<SvgGenImage> get values => [a1Svg, a1Svg_, a2, a3, a4, a5];
+}
+
+class $AssetsMapsS20Gen {
+  const $AssetsMapsS20Gen();
+
+  /// File path: assets/maps/s-20/floor_1.svg
+  SvgGenImage get floor1 => const SvgGenImage('assets/maps/s-20/floor_1.svg');
+
+  /// File path: assets/maps/s-20/floor_2.svg
+  SvgGenImage get floor2 => const SvgGenImage('assets/maps/s-20/floor_2.svg');
+
+  /// File path: assets/maps/s-20/floor_3.svg
+  SvgGenImage get floor3 => const SvgGenImage('assets/maps/s-20/floor_3.svg');
+
+  /// File path: assets/maps/s-20/floor_4.svg
+  SvgGenImage get floor4 => const SvgGenImage('assets/maps/s-20/floor_4.svg');
+
+  /// List of all assets
+  List<SvgGenImage> get values => [floor1, floor2, floor3, floor4];
+}
+
+class $AssetsMapsV78Gen {
+  const $AssetsMapsV78Gen();
+
+  /// File path: assets/maps/v-78/floor_0.svg
+  SvgGenImage get floor0 => const SvgGenImage('assets/maps/v-78/floor_0.svg');
+
+  /// File path: assets/maps/v-78/floor_1.svg
+  SvgGenImage get floor1 => const SvgGenImage('assets/maps/v-78/floor_1.svg');
+
+  /// File path: assets/maps/v-78/floor_2.svg
+  SvgGenImage get floor2 => const SvgGenImage('assets/maps/v-78/floor_2.svg');
+
+  /// File path: assets/maps/v-78/floor_3.svg
+  SvgGenImage get floor3 => const SvgGenImage('assets/maps/v-78/floor_3.svg');
+
+  /// File path: assets/maps/v-78/floor_4.svg
+  SvgGenImage get floor4 => const SvgGenImage('assets/maps/v-78/floor_4.svg');
+
+  /// List of all assets
+  List<SvgGenImage> get values => [floor0, floor1, floor2, floor3, floor4];
+}
+
 class Assets {
   Assets._();
 
   static const $AssetsIconsGen icons = $AssetsIconsGen();
   static const $AssetsImagesGen images = $AssetsImagesGen();
+  static const $AssetsMapsGen maps = $AssetsMapsGen();
 }
 
 class AssetGenImage {
@@ -355,7 +441,7 @@ class AssetGenImage {
     ImageRepeat repeat = ImageRepeat.noRepeat,
     Rect? centerSlice,
     bool matchTextDirection = false,
-    bool gaplessPlayback = false,
+    bool gaplessPlayback = true,
     bool isAntiAlias = false,
     String? package,
     FilterQuality filterQuality = FilterQuality.low,
