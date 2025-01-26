@@ -6,10 +6,7 @@ import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:go_router/go_router.dart';
 import 'package:rtu_mirea_app/top_discussions/view/view.dart';
 import 'package:rtu_mirea_app/neon/bloc/neon_bloc.dart';
-import 'package:rtu_mirea_app/presentation/theme.dart';
-import 'package:rtu_mirea_app/presentation/typography.dart';
-import 'package:rtu_mirea_app/presentation/widgets/bottom_modal_sheet.dart';
-import 'package:rtu_mirea_app/presentation/widgets/buttons/primary_button.dart';
+import 'package:app_ui/app_ui.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 import '../widgets/widgets.dart';
@@ -65,13 +62,13 @@ class _ServicesViewState extends State<ServicesView> {
                 Icon(
                   Icons.cloud,
                   size: 64,
-                  color: AppTheme.colorsOf(context).active,
+                  color: Theme.of(context).extension<AppColors>()!.active,
                 ),
                 const SizedBox(height: 16),
                 Text(
                   'На cloud.mirea.ninja вы можете хранить до 10 ГБ бесплатно (квоту можно расширить в телеграм боте), а также делиться файлами и онлайн редактировать документы вместе с одногруппниками.',
                   style: AppTextStyle.bodyL.copyWith(
-                    color: AppTheme.colorsOf(context).active,
+                    color: Theme.of(context).extension<AppColors>()!.active,
                   ),
                   textAlign: TextAlign.center,
                 ),
@@ -88,7 +85,7 @@ class _ServicesViewState extends State<ServicesView> {
           title: 'Создайте аккаунт',
           description:
               'Мы предлагаем вам бесплатно создать аккаунт в нашем облачном хранилище, чтобы вы могли хранить свои файлы и документы!',
-          backgroundColor: AppTheme.colorsOf(context).background03,
+          backgroundColor: Theme.of(context).extension<AppColors>()!.background03,
         );
       },
     );
@@ -123,8 +120,8 @@ class _ServicesViewState extends State<ServicesView> {
                     ServiceCard(
                       title: 'Карта МИРЭА',
                       icon: ServiceIcon(
-                        color: AppTheme.colorsOf(context).colorful07,
-                        iconColor: AppTheme.colorsOf(context).active,
+                        color: Theme.of(context).extension<AppColors>()!.colorful07,
+                        iconColor: Theme.of(context).extension<AppColors>()!.active,
                         icon: Icons.map,
                       ),
                       description: 'Найди нужный кабинет',
@@ -136,8 +133,8 @@ class _ServicesViewState extends State<ServicesView> {
                       ServiceCard(
                         title: 'NFC Пропуск',
                         icon: ServiceIcon(
-                          color: AppTheme.colorsOf(context).colorful03,
-                          iconColor: AppTheme.colorsOf(context).active,
+                          color: Theme.of(context).extension<AppColors>()!.colorful03,
+                          iconColor: Theme.of(context).extension<AppColors>()!.active,
                           icon: Icons.nfc,
                         ),
                         onTap: () {
@@ -161,8 +158,8 @@ class _ServicesViewState extends State<ServicesView> {
                             _showNeonAccountOffer();
                           },
                           icon: ServiceIcon(
-                            color: AppTheme.colorsOf(context).colorful04,
-                            iconColor: AppTheme.colorsOf(context).background01,
+                            color: Theme.of(context).extension<AppColors>()!.colorful04,
+                            iconColor: Theme.of(context).extension<AppColors>()!.background01,
                             icon: Icons.cloud,
                           ),
                         );
@@ -172,8 +169,8 @@ class _ServicesViewState extends State<ServicesView> {
                     //   title: 'Бюро находок',
                     //   url: 'https://finds.mirea.ninja/',
                     //   icon: ServiceIcon(
-                    //     color: AppTheme.colorsOf(context).colorful06,
-                    //     iconColor: AppTheme.colorsOf(context).background01,
+                    //     color: Theme.of(context).extension<AppColors>()!.colorful06,
+                    //     iconColor: Theme.of(context).extension<AppColors>()!.background01,
                     //     icon: Icons.search,
                     //   ),
                     //   launchMode: LaunchMode.externalApplication,

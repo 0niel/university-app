@@ -236,3 +236,10 @@ class ToggleComparisonMode extends ScheduleEvent {
   @override
   List<Object> get props => [];
 }
+
+class HideScheduleDiffDialog extends ScheduleEvent {
+  const HideScheduleDiffDialog();
+
+  @override
+  List<Object> get props => [];
+}

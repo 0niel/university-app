@@ -8,9 +8,8 @@ import 'package:url_launcher/url_launcher_string.dart';
 import 'package:dismissible_page/dismissible_page.dart';
 import 'package:rtu_mirea_app/common/utils/utils.dart';
 import 'package:rtu_mirea_app/domain/entities/story.dart';
-import 'package:rtu_mirea_app/presentation/widgets/buttons/primary_button.dart';
+import 'package:app_ui/app_ui.dart';
 import 'package:story/story.dart';
-import 'package:rtu_mirea_app/presentation/typography.dart';
 
 class StoriesPageView extends StatefulWidget {
   const StoriesPageView({

@@ -31,7 +31,7 @@ import 'package:rtu_mirea_app/presentation/bloc/notification_preferences/notific
 
 import 'package:rtu_mirea_app/presentation/bloc/scores_bloc/scores_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/user_bloc/user_bloc.dart';
-import 'package:rtu_mirea_app/presentation/theme.dart';
+import 'package:app_ui/app_ui.dart';
 import 'package:rtu_mirea_app/schedule/bloc/schedule_bloc.dart';
 import 'package:rtu_mirea_app/stories/bloc/stories_bloc.dart';
 
@@ -168,8 +168,8 @@ class _AppViewState extends State<_AppView> {
   Widget build(BuildContext context) {
     final neonTheme = widget.neonDependencies.neonTheme;
 
-    final lightTheme = AppTheme.lightTheme.copyWith(extensions: [neonTheme]);
-    final darkTheme = AppTheme.darkTheme.copyWith(extensions: [neonTheme]);
+    final lightTheme = AppTheme.lightTheme.copyWith(extensions: [neonTheme, AppColors.light]);
+    final darkTheme = AppTheme.darkTheme.copyWith(extensions: [neonTheme, AppColors.dark]);
 
     final cupertinoLightTheme = MaterialBasedCupertinoThemeData(
       materialTheme: lightTheme,

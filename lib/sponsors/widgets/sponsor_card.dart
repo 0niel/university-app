@@ -1,8 +1,7 @@
 import 'package:community_repository/community_repository.dart';
 import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:flutter/material.dart';
-import 'package:rtu_mirea_app/presentation/theme.dart';
-import 'package:rtu_mirea_app/presentation/typography.dart';
+import 'package:app_ui/app_ui.dart';
 import 'package:unicons/unicons.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -28,8 +27,8 @@ class SponsorCard extends StatelessWidget {
               end: Alignment.bottomRight,
               transform: const GradientRotation(2.35619),
               colors: [
-                AppTheme.colorsOf(context).colorful02,
-                AppTheme.colorsOf(context).colorful03,
+                Theme.of(context).extension<AppColors>()!.colorful02,
+                Theme.of(context).extension<AppColors>()!.colorful03,
               ],
             ),
           ),
@@ -55,7 +54,7 @@ class SponsorCard extends StatelessWidget {
                       children: [
                         CircleAvatar(
                           radius: 20,
-                          backgroundColor: AppTheme.colorsOf(context).deactive,
+                          backgroundColor: Theme.of(context).extension<AppColors>()!.deactive,
                           backgroundImage: sponsor.avatarUrl != null ? NetworkImage(sponsor.avatarUrl!) : null,
                           child: sponsor.avatarUrl == null ? Text(sponsor.username[0]) : null,
                         ),
@@ -73,7 +72,7 @@ class SponsorCard extends StatelessWidget {
                                 Text(
                                   sponsor.about.toString(),
                                   style: AppTextStyle.captionL.copyWith(
-                                    color: AppTheme.colorsOf(context).deactive,
+                                    color: Theme.of(context).extension<AppColors>()!.deactive,
                                   ),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
@@ -91,12 +90,12 @@ class SponsorCard extends StatelessWidget {
                           height: 24,
                           width: 24,
                           decoration: BoxDecoration(
-                            color: AppTheme.colorsOf(context).colorful01,
+                            color: Theme.of(context).extension<AppColors>()!.colorful01,
                             borderRadius: BorderRadius.circular(24),
                           ),
                           child: Icon(
                             UniconsLine.link,
-                            color: AppTheme.colorsOf(context).active,
+                            color: Theme.of(context).extension<AppColors>()!.active,
                             size: 16,
                           ),
                         ),

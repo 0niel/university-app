@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:rtu_mirea_app/presentation/constants.dart';
-import 'package:rtu_mirea_app/presentation/theme.dart';
-import 'package:rtu_mirea_app/presentation/typography.dart';
-import 'package:rtu_mirea_app/presentation/widgets/buttons/colorful_button.dart';
+import 'package:app_ui/app_ui.dart';
 
 class LoadingErrorMessage extends StatelessWidget {
   const LoadingErrorMessage({super.key, required this.onTap});
@@ -21,10 +19,7 @@ class LoadingErrorMessage extends StatelessWidget {
           crossAxisAlignment: isTable ? CrossAxisAlignment.center : CrossAxisAlignment.start,
           children: [
             Center(
-              child: Image.asset(
-                'assets/images/Saly-2.png',
-                height: 200,
-              ),
+              child: Assets.images.saly2.image(height: 200),
             ),
             const SizedBox(
               height: 8,
@@ -39,7 +34,7 @@ class LoadingErrorMessage extends StatelessWidget {
             Text(
               "Во время получения расписания произошла ошибка. Попробуйте повторить попытку.",
               style: AppTextStyle.captionL.copyWith(
-                color: AppTheme.colors.deactive,
+                color: AppColors.dark.deactive,
               ),
             ),
             const SizedBox(
@@ -50,7 +45,7 @@ class LoadingErrorMessage extends StatelessWidget {
               child: ColorfulButton(
                 text: "Повторить",
                 onClick: onTap,
-                backgroundColor: AppTheme.colors.primary,
+                backgroundColor: AppColors.dark.primary,
               ),
             ),
           ],

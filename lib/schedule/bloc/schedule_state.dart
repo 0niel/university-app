@@ -8,6 +8,30 @@ enum ScheduleStatus {
 }
 
 @freezed
+class ScheduleChange with _$ScheduleChange {
+  const factory ScheduleChange({
+    required ChangeType type,
+    required String title,
+    required String description,
+    required List<DateTime> dates,
+    required LessonBells lessonBells,
+  }) = _ScheduleChange;
+}
+
+enum ChangeType {
+  added,
+  removed,
+  modified,
+}
+
+@freezed
+class ScheduleDiff with _$ScheduleDiff {
+  const factory ScheduleDiff({
+    required Set<ScheduleChange> changes,
+  }) = _ScheduleDiff;
+}
+
+@freezed
 class ScheduleState with _$ScheduleState {
   const factory ScheduleState({
     @Default(ScheduleStatus.initial) @JsonKey(includeFromJson: false, includeToJson: false) ScheduleStatus status,
@@ -23,6 +47,8 @@ class ScheduleState with _$ScheduleState {
     @SelectedScheduleConverter() SelectedSchedule? selectedSchedule,
     @Default({}) @JsonKey(includeFromJson: false, includeToJson: false) Set<SelectedSchedule> comparisonSchedules,
     @Default(false) @JsonKey(includeFromJson: false, includeToJson: false) bool isComparisonModeEnabled,
+    @Default(null) @JsonKey(includeFromJson: false, includeToJson: false) ScheduleDiff? latestDiff,
+    @Default(false) @JsonKey(includeFromJson: false, includeToJson: false) bool showScheduleDiffDialog,
   }) = _ScheduleState;
 
   const ScheduleState._();

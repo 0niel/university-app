@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:rtu_mirea_app/presentation/constants.dart';
-import 'package:rtu_mirea_app/presentation/theme.dart';
-import 'package:rtu_mirea_app/presentation/typography.dart';
-import 'package:rtu_mirea_app/presentation/widgets/buttons/colorful_button.dart';
+import 'package:app_ui/app_ui.dart';
 
 class NoSelectedScheduleMessage extends StatelessWidget {
   const NoSelectedScheduleMessage({super.key, required this.onTap});
@@ -24,10 +22,8 @@ class NoSelectedScheduleMessage extends StatelessWidget {
             crossAxisAlignment: isTable ? CrossAxisAlignment.center : CrossAxisAlignment.start,
             children: [
               Center(
-                child: Image.asset(
-                  'assets/images/Saly-2.png',
-                  height: 200,
-                )
+                child: Assets.images.saly2
+                    .image(height: 200)
                     .animate(onPlay: (controller) => controller.repeat(reverse: true))
                     .rotate(
                       duration: 3000.ms,
@@ -51,7 +47,7 @@ class NoSelectedScheduleMessage extends StatelessWidget {
               Text(
                 "Скачайте расписание по крайней мере для одной группы, чтобы отобразить календарь.",
                 style: AppTextStyle.captionL.copyWith(
-                  color: AppTheme.colorsOf(context).deactive,
+                  color: Theme.of(context).extension<AppColors>()!.deactive,
                 ),
               ),
               const SizedBox(height: 24),
@@ -60,7 +56,7 @@ class NoSelectedScheduleMessage extends StatelessWidget {
                 child: ColorfulButton(
                   text: "Настроить",
                   onClick: onTap,
-                  backgroundColor: AppTheme.colorsOf(context).primary,
+                  backgroundColor: Theme.of(context).extension<AppColors>()!.primary,
                 ),
               ),
             ],

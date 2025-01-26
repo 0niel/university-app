@@ -1,17 +1,13 @@
 import 'dart:async';
 
-import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hugeicons/hugeicons.dart';
-import 'package:intl/intl.dart';
 import 'package:rtu_mirea_app/presentation/constants.dart';
-import 'package:rtu_mirea_app/presentation/theme.dart';
-import 'package:rtu_mirea_app/presentation/typography.dart';
-import 'package:rtu_mirea_app/presentation/widgets/bottom_modal_sheet.dart';
+import 'package:app_ui/app_ui.dart';
 import 'package:rtu_mirea_app/schedule/bloc/schedule_bloc.dart';
 import 'package:rtu_mirea_app/schedule/models/models.dart';
 import 'package:rtu_mirea_app/schedule/widgets/widgets.dart';
@@ -20,7 +16,6 @@ import 'package:table_calendar/table_calendar.dart';
 import 'package:university_app_server_api/client.dart';
 import 'package:collection/collection.dart';
 import 'package:expandable_page_view/expandable_page_view.dart';
-import 'package:flutter_sticky_header/flutter_sticky_header.dart';
 
 class SchedulePage extends StatefulWidget {
   const SchedulePage({super.key});
@@ -37,7 +32,6 @@ class _SchedulePageState extends State<SchedulePage> {
 
   final CalendarFormat _calendarFormat = CalendarFormat.week;
 
-  // Timer to track the duration of the pull
   Timer? _toggleTimer;
 
   bool _isStoriesVisible = false;
@@ -55,22 +49,20 @@ class _SchedulePageState extends State<SchedulePage> {
   void dispose() {
     _toggleTimer?.cancel();
     _pageController.dispose();
-
     super.dispose();
   }
 
   String get _appBarTitle {
-    final scheduleState = context.read<ScheduleBloc>().state.selectedSchedule;
+    final scheduleState = _bloc.state.selectedSchedule;
 
-    switch (scheduleState.runtimeType) {
-      case const (SelectedGroupSchedule):
-        return (scheduleState as SelectedGroupSchedule).group.name;
-      case const (SelectedTeacherSchedule):
-        return _formatTeacherName((scheduleState as SelectedTeacherSchedule).teacher.name);
-      case const (SelectedClassroomSchedule):
-        return (scheduleState as SelectedClassroomSchedule).classroom.name;
-      default:
-        return 'Расписание';
+    if (scheduleState is SelectedGroupSchedule) {
+      return scheduleState.group.name;
+    } else if (scheduleState is SelectedTeacherSchedule) {
+      return _formatTeacherName(scheduleState.teacher.name);
+    } else if (scheduleState is SelectedClassroomSchedule) {
+      return scheduleState.classroom.name;
+    } else {
+      return 'Расписание';
     }
   }
 
@@ -96,6 +88,48 @@ class _SchedulePageState extends State<SchedulePage> {
             ),
           );
         }
+
+        if (state.showScheduleDiffDialog && state.latestDiff != null) {
+          context.read<ScheduleBloc>().add(const HideScheduleDiffDialog());
+
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Row(
+                  children: [
+                    HugeIcon(
+                      icon: HugeIcons.strokeRoundedAlertCircle,
+                      size: 24,
+                      color: Theme.of(context).extension<AppColors>()!.active,
+                    ),
+                    const SizedBox(width: 12.0),
+                    Expanded(
+                      child: Text(
+                        'Найдены изменения в расписании',
+                        style: AppTextStyle.body.copyWith(
+                          color: Theme.of(context).extension<AppColors>()!.active,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                action: SnackBarAction(
+                  label: 'Просмотреть',
+                  textColor: Theme.of(context).extension<AppColors>()!.primary,
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (context) {
+                        return ScheduleChangesDialog(diff: state.latestDiff!);
+                      },
+                    );
+                  },
+                ),
+                duration: const Duration(seconds: 5),
+              ),
+            );
+          });
+        }
       },
       buildWhen: (previous, current) => current.status != ScheduleStatus.failure && current.selectedSchedule != null,
       builder: (context, state) {
@@ -115,10 +149,19 @@ class _SchedulePageState extends State<SchedulePage> {
           appBar: AppBar(
             title: Text(_appBarTitle),
             actions: [
-              _buildAddGroupButton(context),
-              _buildSettingsButton(context),
-              _buildComparisonModeButton(context), // Новая кнопка
-              _buildViewToggleButton(),
+              AddGroupButton(
+                onPressed: () => context.go('/schedule/search'),
+              ),
+              SettingsButton(
+                onPressed: () => context.go('/profile'),
+              ),
+              ComparisonModeButton(
+                onPressed: () => _bloc.add(const ToggleComparisonMode()),
+              ),
+              ViewToggleButton(
+                isListModeEnabled: _bloc.state.isListModeEnabled,
+                onPressed: () => _bloc.add(const ToggleListMode()),
+              ),
             ],
           ),
           body: AnimatedSwitcher(
@@ -140,16 +183,20 @@ class _SchedulePageState extends State<SchedulePage> {
               );
             },
             child: state.isComparisonModeEnabled
-                ? _buildComparisonMode(state)
-                : (state.isListModeEnabled
-                    ? KeyedSubtree(
-                        key: const ValueKey('list_mode'),
-                        child: _buildListMode(state),
+                ? _ComparisonModeView(
+                    onOpenComparisonManager: _openComparisonManager,
+                  )
+                : state.isListModeEnabled
+                    ? _ListModeView(
+                        isStoriesVisible: _isStoriesVisible,
+                        onStoriesLoaded: _handleStoriesLoaded,
                       )
-                    : KeyedSubtree(
-                        key: const ValueKey('calendar_mode'),
-                        child: _buildCalendarMode(state),
-                      )),
+                    : _CalendarModeView(
+                        pageController: _pageController,
+                        calendarFormat: _calendarFormat,
+                        isStoriesVisible: _isStoriesVisible,
+                        onStoriesLoaded: _handleStoriesLoaded,
+                      ),
           ),
           floatingActionButton: state.isComparisonModeEnabled
               ? Padding(
@@ -166,87 +213,65 @@ class _SchedulePageState extends State<SchedulePage> {
     );
   }
 
-  Widget _buildAddGroupButton(BuildContext context) {
-    return PlatformIconButton(
-      icon: HugeIcon(
-        icon: HugeIcons.strokeRoundedAddSquare,
-        size: 24,
-        color: AppTheme.colorsOf(context).active,
-      ),
-      material: (_, __) => MaterialIconButtonData(
-        padding: const EdgeInsets.all(16.0),
-        tooltip: 'Добавить группу',
-      ),
-      onPressed: () => context.go('/schedule/search'),
-    );
-  }
-
-  Widget _buildSettingsButton(BuildContext context) {
-    return PlatformIconButton(
-      icon: HugeIcon(
-        icon: HugeIcons.strokeRoundedSettings02,
-        size: 24,
-        color: AppTheme.colorsOf(context).active,
-      ),
-      material: (_, __) => MaterialIconButtonData(
-        padding: const EdgeInsets.all(16.0),
-        tooltip: 'Управление расписанием',
-      ),
-      onPressed: () => context.go('/profile'),
-    );
-  }
-
-  Widget _buildComparisonModeButton(BuildContext context) {
-    return PlatformIconButton(
-      icon: HugeIcon(
-        icon: HugeIcons.strokeRoundedAbacus,
-        size: 24,
-        color: AppTheme.colorsOf(context).active,
-      ),
-      material: (_, __) => MaterialIconButtonData(
-        padding: const EdgeInsets.all(16.0),
-        tooltip: 'Сравнить расписания',
-      ),
-      onPressed: () {
-        _bloc.add(const ToggleComparisonMode());
-      },
-    );
-  }
-
-  Widget _buildViewToggleButton() {
-    return PlatformIconButton(
-      onPressed: () {
-        _bloc.add(const ToggleListMode());
-      },
-      material: (_, __) => MaterialIconButtonData(
-        iconSize: 24,
-        padding: const EdgeInsets.all(16.0),
-        tooltip: 'Переключить вид',
-      ),
-      cupertino: (_, __) => CupertinoIconButtonData(
-        padding: const EdgeInsets.all(16.0),
-      ),
-      icon: AnimatedSwitcher(
-        duration: 300.ms,
-        transitionBuilder: (Widget child, Animation<double> animation) {
-          return ScaleTransition(scale: animation, child: child);
-        },
-        child: HugeIcon(
-          key: ValueKey<bool>(_bloc.state.isListModeEnabled),
-          icon: _bloc.state.isListModeEnabled ? HugeIcons.strokeRoundedListView : HugeIcons.strokeRoundedCalendar02,
-          size: 24,
-          color: AppTheme.colorsOf(context).active,
-        ),
-      ),
-    );
-  }
-
   void _openComparisonManager() {
     BottomModalSheet.show(
       context,
       child: const ComparisonManager(),
       title: 'Сравнение расписаний',
       description: 'Выберите до 4-х расписаний, чтобы сравнить их по дням',
+    );
+  }
+
+  void _handleStoriesLoaded(bool hasStories) {
+    if (hasStories && !_isStoriesVisible) {
+      setState(() {
+        _isStoriesVisible = true;
+      });
+    }
+  }
+}
+
+class _ListModeView extends StatelessWidget {
+  const _ListModeView({
+    required this.isStoriesVisible,
+    required this.onStoriesLoaded,
+  });
+
+  final bool isStoriesVisible;
+  final ValueChanged<bool> onStoriesLoaded;
+
+  @override
+  Widget build(BuildContext context) {
+    final state = context.select((ScheduleBloc bloc) => bloc.state);
+    final scheduleParts = state.selectedSchedule?.schedule ?? [];
+
+    final lessonsByDay = _groupLessonsByDay(scheduleParts);
+    final today = Calendar.getNowWithoutTime();
+    final filteredLessonsByDay = lessonsByDay.keys
+        .where((day) => day.isAfter(today) || day.isAtSameMomentAs(today))
+        .map((day) => MapEntry(day, lessonsByDay[day]))
+        .toList();
+
+    return CustomScrollView(
+      slivers: [
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.only(top: 16.0),
+            child: AnimatedOpacity(
+              opacity: isStoriesVisible ? 1.0 : 0.0,
+              duration: const Duration(milliseconds: 300),
+              child: StoriesView(
+                onStoriesLoaded: (stories) => onStoriesLoaded(stories.isNotEmpty),
+              ),
+            ),
+          ),
+        ),
+        for (var entry in filteredLessonsByDay)
+          StickyHeader(
+            day: entry.key,
+            lessons: entry.value?.whereType<LessonSchedulePart>().toList() ?? [],
+          ),
+      ],
     );
   }
 
@@ -268,144 +293,79 @@ class _SchedulePageState extends State<SchedulePage> {
       lessonsByDay.entries.toList()..sort((a, b) => a.key.compareTo(b.key)),
     );
   }
+}
 
-  Widget _buildListMode(ScheduleState state) {
-    final lessonsByDay = _groupLessonsByDay(state.selectedSchedule?.schedule ?? []);
+class _CalendarModeView extends StatelessWidget {
+  const _CalendarModeView({
+    required this.pageController,
+    required this.calendarFormat,
+    required this.isStoriesVisible,
+    required this.onStoriesLoaded,
+  });
 
-    final today = Calendar.getNowWithoutTime();
-    final filteredLessonsByDay = lessonsByDay.keys
-        .where((day) => day.isAfter(today) || day.isAtSameMomentAs(today))
-        .map((day) => MapEntry(day, lessonsByDay[day]))
-        .toList();
+  final PageController pageController;
+  final CalendarFormat calendarFormat;
+  final bool isStoriesVisible;
+  final ValueChanged<bool> onStoriesLoaded;
 
-    final storiesView = StoriesView(onStoriesLoaded: (stories) {
-      if (stories.isNotEmpty && !_isStoriesVisible) {
-        setState(() {
-          _isStoriesVisible = true;
-        });
-      }
-    });
+  @override
+  Widget build(BuildContext context) {
+    final state = context.select((ScheduleBloc bloc) => bloc.state);
 
-    return CustomScrollView(
-      slivers: [
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.only(top: 16.0),
-            child: AnimatedOpacity(
-              opacity: _isStoriesVisible ? 1.0 : 0.0,
-              duration: const Duration(milliseconds: 300),
-              child: storiesView,
-            ),
-          ),
-        ),
-        for (var entry in filteredLessonsByDay)
-          _buildStickyHeader(entry.key, entry.value?.whereType<LessonSchedulePart>().toList() ?? []),
-      ],
-    );
-  }
-
-  Widget _buildStickyHeader(DateTime day, List<LessonSchedulePart> lessons) {
-    return SliverStickyHeader(
-      header: Container(
-        color: AppTheme.colorsOf(context).background01,
-        padding: const EdgeInsets.only(left: 22.0, bottom: 8.0, top: 16.0),
-        alignment: Alignment.centerLeft,
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            const Icon(
-              HugeIcons.strokeRoundedCalendar04,
-              size: 17.5,
-            ),
-            const SizedBox(width: 8),
-            Text(
-              DateFormat('EEEE, d MMMM', 'ru').format(day),
-              style: AppTextStyle.bodyBold,
-            ),
-          ],
-        ),
-      ),
-      sliver: SliverList(
-        delegate: SliverChildBuilderDelegate(
-          (context, index) {
-            final lessonPart = lessons[index];
-            return Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-              child: LessonCard(
-                lesson: lessonPart,
-                onTap: (lesson) {
-                  context.go('/schedule/details', extra: (lesson, day));
-                },
-              ),
-            );
-          },
-          childCount: lessons.length,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildCalendarMode(ScheduleState state) {
     return NestedScrollView(
       physics: const ClampingScrollPhysics(),
       headerSliverBuilder: (_, __) => [
-        _buildSliverAppBar(),
-        if (!state.isListModeEnabled)
-          SliverToBoxAdapter(
-            child: Calendar(
-              pageViewController: _pageController,
-              schedule: state.selectedSchedule?.schedule ?? [],
-              comments: state.comments,
-              showCommentsIndicators: state.showCommentsIndicators,
-              calendarFormat: _calendarFormat,
-            ),
-          ),
-      ],
-      body: _buildPageView(state),
-    );
-  }
-
-  Widget _buildSliverAppBar() {
-    final storiesView = StoriesView(onStoriesLoaded: (stories) {
-      if (stories.isNotEmpty && !_isStoriesVisible) {
-        setState(() {
-          _isStoriesVisible = true;
-        });
-      }
-    });
-
-    return SliverAppBar(
-      pinned: false,
-      primary: true,
-      expandedHeight: 90,
-      flexibleSpace: FlexibleSpaceBar(
-        background: AnimatedOpacity(
-          opacity: _isStoriesVisible ? 1.0 : 0.0,
-          duration: const Duration(milliseconds: 300),
-          child: storiesView,
+        CalendarStoriesAppBar(
+          isStoriesVisible: isStoriesVisible,
+          onStoriesLoaded: onStoriesLoaded,
         ),
+        SliverToBoxAdapter(
+          child: Calendar(
+            pageViewController: pageController,
+            schedule: state.selectedSchedule?.schedule ?? [],
+            comments: state.comments,
+            showCommentsIndicators: state.showCommentsIndicators,
+            calendarFormat: calendarFormat,
+          ),
+        ),
+      ],
+      body: _EventsPageView(
+        pageController: pageController,
+        showEmptyLessons: state.showEmptyLessons,
       ),
     );
   }
+}
 
-  Widget _buildPageView(ScheduleState state) {
+class _EventsPageView extends StatelessWidget {
+  const _EventsPageView({
+    required this.pageController,
+    required this.showEmptyLessons,
+  });
+
+  final PageController pageController;
+  final bool showEmptyLessons;
+
+  @override
+  Widget build(BuildContext context) {
+    final state = context.select((ScheduleBloc bloc) => bloc.state);
+    final schedule = state.selectedSchedule?.schedule ?? [];
+
     return EventsPageView(
-      controller: _pageController,
+      controller: pageController,
       itemBuilder: (context, index) {
         final day = Calendar.firstCalendarDay.add(Duration(days: index));
         final lessonsForDay = Calendar.getSchedulePartsByDay(
-          schedule: state.selectedSchedule?.schedule ?? [],
+          schedule: schedule,
           day: day,
         );
 
         final holiday = lessonsForDay.firstWhereOrNull(
           (element) => element is HolidaySchedulePart,
         );
-
         if (holiday != null) {
           return HolidayPage(title: (holiday as HolidaySchedulePart).title);
         }
-
         if (day.weekday == DateTime.sunday) {
           return const HolidayPage(title: 'Выходной');
         }
@@ -421,10 +381,9 @@ class _SchedulePageState extends State<SchedulePage> {
           itemCount: SchedulePage.maxLessonsPerDay,
           itemBuilder: (context, lessonIndex) {
             final lessons = lessonsByTime[lessonIndex + 1] ?? [];
-
             return lessons.isNotEmpty
-                ? _buildLessonCard(lessons, lessons.first, day)
-                : state.showEmptyLessons
+                ? _buildLessonCard(context, lessons, day)
+                : showEmptyLessons
                     ? Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                         child: EmptyLessonCard(lessonNumber: lessonIndex + 1),
@@ -436,38 +395,53 @@ class _SchedulePageState extends State<SchedulePage> {
     );
   }
 
-  Widget _buildLessonCard(List<LessonSchedulePart> lessons, LessonSchedulePart lesson, DateTime day) {
-    return lessons.length == 1
-        ? Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-            child: LessonCard(
-              lesson: lesson,
-              onTap: (lesson) {
-                context.go('/schedule/details', extra: (lesson, day));
-              },
-            ),
-          )
-        : ExpandablePageView.builder(
-            itemCount: lessons.length,
-            itemBuilder: (context, index) {
-              final currentLesson = lessons[index];
-              return Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                child: LessonCard(
-                  countInGroup: lessons.length,
-                  indexInGroup: index,
-                  lesson: currentLesson,
-                  onTap: (lesson) {
-                    context.go('/schedule/details', extra: (lesson, day));
-                  },
-                ),
-              );
-            },
-          );
-  }
+  Widget _buildLessonCard(BuildContext context, List<LessonSchedulePart> lessons, DateTime day) {
+    if (lessons.length == 1) {
+      final lesson = lessons.first;
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+        child: LessonCard(
+          lesson: lesson,
+          onTap: (lesson) {
+            context.go('/schedule/details', extra: (lesson, day));
+          },
+        ),
+      );
+    }
 
-  Widget _buildComparisonMode(ScheduleState state) {
-    if (state.comparisonSchedules.isEmpty) {
+    return ExpandablePageView.builder(
+      itemCount: lessons.length,
+      itemBuilder: (context, index) {
+        final currentLesson = lessons[index];
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+          child: LessonCard(
+            countInGroup: lessons.length,
+            indexInGroup: index,
+            lesson: currentLesson,
+            onTap: (lesson) {
+              context.go('/schedule/details', extra: (lesson, day));
+            },
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _ComparisonModeView extends StatelessWidget {
+  const _ComparisonModeView({
+    required this.onOpenComparisonManager,
+  });
+
+  final VoidCallback onOpenComparisonManager;
+
+  @override
+  Widget build(BuildContext context) {
+    final state = context.select((ScheduleBloc bloc) => bloc.state);
+    final comparisonSchedules = state.comparisonSchedules;
+
+    if (comparisonSchedules.isEmpty) {
       return Center(
         child: Text(
           'Добавьте расписания для сравнения',
@@ -476,7 +450,7 @@ class _SchedulePageState extends State<SchedulePage> {
       );
     }
 
-    final allLessons = state.comparisonSchedules
+    final allLessons = comparisonSchedules
         .expand(
           (schedule) => schedule.schedule.whereType<LessonSchedulePart>(),
         )
@@ -484,245 +458,40 @@ class _SchedulePageState extends State<SchedulePage> {
 
     final lessonsByDay = _groupLessonsByDay(allLessons);
 
+    final today = Calendar.getNowWithoutTime();
+    final filteredLessonsByDay = lessonsByDay.keys
+        .where((day) => day.isAfter(today) || day.isAtSameMomentAs(today))
+        .map((day) => MapEntry(day, lessonsByDay[day]))
+        .toList();
+
     return CustomScrollView(
       slivers: [
-        // SliverToBoxAdapter(
-        //   child: Padding(
-        //     padding: const EdgeInsets.all(16.0),
-        //     child: Wrap(
-        //       spacing: 16.0,
-        //       runSpacing: 8.0,
-        //       children: state.comparisonSchedules.toList().asMap().entries.map((entry) {
-        //         final index = entry.key;
-        //         final schedule = entry.value;
-        //         final color = _getBackgroundColor(schedule);
-
-        //         return Row(
-        //           mainAxisSize: MainAxisSize.min,
-        //           children: [
-        //             Container(
-        //               width: 16,
-        //               height: 16,
-        //               decoration: BoxDecoration(
-        //                 color: color,
-        //                 shape: BoxShape.circle,
-        //               ),
-        //             ),
-        //             const SizedBox(width: 4),
-        //             Text(
-        //               _getScheduleTitle(schedule),
-        //               style: AppTextStyle.captionL,
-        //             ),
-        //           ],
-        //         );
-        //       }).toList(),
-        //     ),
-        //   ),
-        // ),
-        for (var entry in lessonsByDay.entries)
-          _buildComparisonStickyHeader(
-              entry.key, entry.value.whereType<LessonSchedulePart>().toList(), state.comparisonSchedules.toList()),
+        for (var entry in filteredLessonsByDay)
+          ComparisonStickyHeader(
+            day: entry.key,
+            lessons: entry.value ?? [],
+            schedules: comparisonSchedules.toList(),
+          ),
       ],
     );
   }
 
-  Widget _buildComparisonScheduleLegent(SelectedSchedule schedule) {
-    final color = _getBackgroundColor(schedule);
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 16,
-            height: 16,
-            decoration: BoxDecoration(
-              color: color,
-              shape: BoxShape.circle,
-            ),
-          ),
-          const SizedBox(width: 4),
-          Text(
-            _getScheduleTitle(schedule),
-            style: AppTextStyle.captionL,
-          ),
-        ],
-      ),
-    );
-  }
+  Map<DateTime, List<SchedulePart>> _groupLessonsByDay(List<LessonSchedulePart> scheduleParts) {
+    final Map<DateTime, List<SchedulePart>> lessonsByDay = {};
 
-  Widget _buildComparisonStickyHeader(
-    DateTime day,
-    List<LessonSchedulePart> lessons,
-    List<SelectedSchedule> schedules,
-  ) {
-    if (lessons.isEmpty) {
-      return SliverStickyHeader(
-        header: _buildDayHeader(day),
-        sliver: SliverToBoxAdapter(
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-            decoration: BoxDecoration(
-              color: Colors.grey.shade200,
-              borderRadius: BorderRadius.circular(12.0),
-            ),
-            margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-            height: 100,
-            alignment: Alignment.center,
-            child: Text(
-              'Пар нет',
-              style: AppTextStyle.body.copyWith(
-                color: AppTheme.colorsOf(context).active,
-                fontStyle: FontStyle.italic,
-              ),
-            ),
-          ),
-        ),
-      );
-    }
-
-    final Map<SelectedSchedule, List<LessonSchedulePart>> lessonsPerSchedule = {
-      for (var schedule in schedules)
-        schedule: lessons
-            .where(
-              (lesson) => schedule.schedule.contains(lesson),
-            )
-            .toList()
-    };
-
-    final int maxLessons = _getMaxLessonsPerDay(schedules);
-
-    return SliverStickyHeader(
-      header: _buildDayHeader(day),
-      sliver: SliverToBoxAdapter(
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-          child: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Table(
-              columnWidths: {
-                for (int i = 0; i < schedules.length; i++) i: const FixedColumnWidth(220),
-              },
-              defaultVerticalAlignment: TableCellVerticalAlignment.top,
-              children: [
-                // Заголовки расписаний
-                TableRow(
-                  children: schedules.map((schedule) {
-                    return _buildComparisonScheduleLegent(schedule);
-                  }).toList(),
-                ),
-                // Строки уроков
-                for (int lessonIndex = 0; lessonIndex < maxLessons; lessonIndex++)
-                  TableRow(
-                    children: schedules.map((schedule) {
-                      final lesson = lessonsPerSchedule[schedule]?.firstWhereOrNull(
-                        (lesson) => lesson.lessonBells.number == (lessonIndex + 1),
-                      );
-                      if (lesson != null) {
-                        return Padding(
-                          padding: const EdgeInsets.all(4.0),
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: _getBackgroundColor(schedule),
-                              borderRadius: BorderRadius.circular(8.0),
-                            ),
-                            padding: const EdgeInsets.all(8.0),
-                            child: LessonCard(
-                              lesson: lesson,
-                              onTap: (lesson) {
-                                context.go('/schedule/details', extra: (lesson, day));
-                              },
-                            ),
-                          ),
-                        );
-                      } else {
-                        return Padding(
-                          padding: const EdgeInsets.all(4.0),
-                          child: Container(
-                            height: 80,
-                            decoration: BoxDecoration(
-                              color: _getBackgroundColor(schedule).withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(8.0),
-                            ),
-                            padding: const EdgeInsets.all(8.0),
-                            child: EmptyLessonCard(lessonNumber: lessonIndex + 1),
-                          ),
-                        );
-                      }
-                    }).toList(),
-                  ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDayHeader(DateTime day) {
-    return Container(
-      color: AppTheme.colorsOf(context).background01,
-      padding: const EdgeInsets.symmetric(horizontal: 22.0, vertical: 8.0),
-      alignment: Alignment.centerLeft,
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          const Icon(
-            HugeIcons.strokeRoundedCalendar04,
-            size: 17.5,
-          ),
-          const SizedBox(width: 8),
-          Text(
-            DateFormat('EEEE, d MMMM', 'ru').format(day),
-            style: AppTextStyle.bodyBold,
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// Вспомогательные методы
-
-  /// Проверяет, находятся ли две даты в один и тот же день
-  bool isSameDay(DateTime a, DateTime b) {
-    return a.year == b.year && a.month == b.month && a.day == b.day;
-  }
-
-  /// Получает заголовок расписания
-  String _getScheduleTitle(SelectedSchedule schedule) {
-    return schedule is SelectedGroupSchedule
-        ? schedule.group.name
-        : schedule is SelectedTeacherSchedule
-            ? _formatTeacherName(schedule.teacher.name)
-            : schedule is SelectedClassroomSchedule
-                ? schedule.classroom.name
-                : 'Неизвестно';
-  }
-
-  /// Получает цвет фона для расписания
-  Color _getBackgroundColor(SelectedSchedule schedule) {
-    final index = _bloc.state.comparisonSchedules.toList().indexOf(schedule);
-    final colors = [
-      AppTheme.colors.colorful01.withOpacity(0.1),
-      AppTheme.colors.colorful02.withOpacity(0.1),
-      AppTheme.colors.colorful03.withOpacity(0.1),
-      AppTheme.colors.colorful04.withOpacity(0.1),
-      AppTheme.colors.colorful05.withOpacity(0.1),
-      AppTheme.colors.colorful06.withOpacity(0.1),
-      AppTheme.colors.colorful07.withOpacity(0.1),
-    ];
-    return colors[index % colors.length];
-  }
-
-  /// Получает максимальное количество уроков в день среди всех расписаний
-  int _getMaxLessonsPerDay(List<SelectedSchedule> schedules) {
-    int max = 0;
-    for (var schedule in schedules) {
-      final lessonsByDay = _groupLessonsByDay(schedule.schedule);
-      for (var lessons in lessonsByDay.values) {
-        if (lessons.length > max) max = lessons.length;
+    for (final part in scheduleParts) {
+      for (final date in part.dates) {
+        final day = DateTime(date.year, date.month, date.day);
+        lessonsByDay.update(
+          day,
+          (existing) => existing..add(part),
+          ifAbsent: () => [part],
+        );
       }
     }
-    return max;
+
+    return Map.fromEntries(
+      lessonsByDay.entries.toList()..sort((a, b) => a.key.compareTo(b.key)),
+    );
   }
 }

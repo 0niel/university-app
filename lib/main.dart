@@ -5,13 +5,11 @@ import 'package:dio/dio.dart';
 import 'package:discourse_api_client/discourse_api_client.dart';
 import 'package:discourse_repository/discourse_repository.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:intl/intl.dart';
-import 'package:logger/logger.dart';
 import 'package:nfc_pass_repository/nfc_pass_repository.dart';
 import 'package:notifications_repository/notifications_repository.dart';
 import 'package:persistent_storage/persistent_storage.dart';
@@ -56,30 +54,6 @@ Future<void> main() async {
 
   if (Platform.isAndroid || Platform.isIOS) {
     await FirebaseAnalytics.instance.logAppOpen();
-  }
-
-  if (kDebugMode) {
-    try {
-      final FirebaseMessaging firebaseMessaging = FirebaseMessaging.instance;
-
-      String? token = await firebaseMessaging.getToken();
-
-      Logger().i('Firebase token: $token');
-
-      // Clear Secure Storage
-      var secureStorage = getIt<FlutterSecureStorage>();
-      await secureStorage.deleteAll();
-
-      // // Clear local dota
-      var prefs = getIt<SharedPreferences>();
-      await prefs.clear();
-
-      // // Clear oauth tokens
-      // var lksOauth2 = getIt<LksOauth2>();
-      // await lksOauth2.oauth2Helper.removeAllTokens();
-    } catch (e) {
-      Logger().e('Firebase token error: $e');
-    }
   }
 
   setPathUrlStrategy();

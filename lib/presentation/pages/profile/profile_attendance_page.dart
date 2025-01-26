@@ -5,9 +5,7 @@ import 'package:rtu_mirea_app/presentation/bloc/attendance_bloc/attendance_bloc.
 import 'package:rtu_mirea_app/presentation/bloc/user_bloc/user_bloc.dart';
 import 'package:rtu_mirea_app/presentation/pages/profile/widgets/attendance_card.dart';
 import 'package:intl/intl.dart';
-import 'package:rtu_mirea_app/presentation/widgets/buttons/select_range_date_button.dart';
-import 'package:rtu_mirea_app/presentation/typography.dart';
-import 'package:rtu_mirea_app/presentation/theme.dart';
+import 'package:app_ui/app_ui.dart';
 
 class ProfileAttendancePage extends StatefulWidget {
   const ProfileAttendancePage({super.key});
@@ -142,7 +140,9 @@ class _ProfileAttendancePageState extends State<ProfileAttendancePage> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text('Период:', style: AppTextStyle.body.copyWith(color: AppTheme.colorsOf(context).active)),
+                          Text('Период:',
+                              style:
+                                  AppTextStyle.body.copyWith(color: Theme.of(context).extension<AppColors>()!.active)),
                           const SizedBox(width: 16),
                           SelectRangeDateButton(
                             initialValue: [_getFirstAndLastWeekDays().$1, _getFirstAndLastWeekDays().$2],

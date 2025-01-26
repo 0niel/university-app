@@ -3,12 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hugeicons/hugeicons.dart';
-import 'package:rtu_mirea_app/gen/assets.gen.dart';
-import 'package:rtu_mirea_app/presentation/theme.dart';
-import 'package:rtu_mirea_app/presentation/typography.dart';
-import 'package:rtu_mirea_app/presentation/widgets/bottom_modal_sheet.dart';
-import 'package:rtu_mirea_app/presentation/widgets/buttons/profile_button.dart';
-import 'package:rtu_mirea_app/presentation/widgets/scaffold_messenger_helper.dart';
+import 'package:app_ui/app_ui.dart';
 import 'package:rtu_mirea_app/profile/widgets/widgets.dart';
 import 'package:rtu_mirea_app/schedule/models/models.dart';
 import 'package:rtu_mirea_app/schedule/schedule.dart';
@@ -50,20 +45,21 @@ class ScheduleManagementSection extends StatelessWidget {
             children: [
               ProfileButton(
                 text: 'Группы',
-                icon: HugeIcon(icon: HugeIcons.strokeRoundedUserGroup, color: AppTheme.colorsOf(context).active),
+                icon: HugeIcon(
+                    icon: HugeIcons.strokeRoundedUserGroup, color: Theme.of(context).extension<AppColors>()!.active),
                 onPressed: () => context.go('/profile/schedule-management'),
                 trailing: Padding(
                   padding: const EdgeInsets.only(right: 8.0),
                   child: Text(
                     _getTotalSavedSchedules(context).toString(),
-                    style: AppTextStyle.bodyL.copyWith(color: AppTheme.colorsOf(context).active),
+                    style: AppTextStyle.bodyL.copyWith(color: Theme.of(context).extension<AppColors>()!.active),
                   ),
                 ),
               ),
               const SizedBox(height: 8),
               ProfileButton(
                 text: "Компактный вид",
-                icon: Assets.icons.hugeicons.listView.svg(color: AppTheme.colorsOf(context).active),
+                icon: Assets.icons.hugeicons.listView.svg(color: Theme.of(context).extension<AppColors>()!.active),
                 trailing: PlatformSwitch(
                   value: state.isMiniature,
                   onChanged: (value) {
@@ -78,7 +74,7 @@ class ScheduleManagementSection extends StatelessWidget {
               const SizedBox(height: 8),
               ProfileButton(
                 text: "Пустые пары",
-                icon: Assets.icons.hugeicons.listView.svg(color: AppTheme.colorsOf(context).active),
+                icon: Assets.icons.hugeicons.listView.svg(color: Theme.of(context).extension<AppColors>()!.active),
                 trailing: PlatformSwitch(
                   value: state.showEmptyLessons,
                   onChanged: (value) {
@@ -97,7 +93,7 @@ class ScheduleManagementSection extends StatelessWidget {
                   padding: const EdgeInsets.only(left: 4, right: 4),
                   child: Icon(
                     Icons.circle,
-                    color: AppTheme.colorsOf(context).active,
+                    color: Theme.of(context).extension<AppColors>()!.active,
                     size: 18,
                   ),
                 ),
@@ -116,7 +112,8 @@ class ScheduleManagementSection extends StatelessWidget {
                 const SizedBox(height: 8),
                 ProfileButton(
                   text: "Экспорт в календарь",
-                  icon: Assets.icons.hugeicons.calendarCheckOut01.svg(color: AppTheme.colorsOf(context).active),
+                  icon: Assets.icons.hugeicons.calendarCheckOut01
+                      .svg(color: Theme.of(context).extension<AppColors>()!.active),
                   onPressed: () async {
                     final calendarName = _getCalendarName(state.selectedSchedule!);
                     final lessons = state.selectedSchedule!.schedule.whereType<LessonSchedulePart>().toList();
@@ -136,7 +133,7 @@ class ScheduleManagementSection extends StatelessWidget {
               const SizedBox(height: 8),
               ProfileButton(
                 text: "Проблемы с расписанием",
-                icon: Assets.icons.hugeicons.share01.svg(color: AppTheme.colorsOf(context).active),
+                icon: Assets.icons.hugeicons.share01.svg(color: Theme.of(context).extension<AppColors>()!.active),
                 onPressed: () => onFeedbackTap(context),
               ),
             ],

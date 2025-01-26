@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:rtu_mirea_app/presentation/widgets/buttons/primary_button.dart';
-import 'package:rtu_mirea_app/presentation/widgets/forms/text_input.dart';
+import 'package:app_ui/app_ui.dart';
 
 class AddScheduleJsonBottomSheetContent extends StatefulWidget {
   final Function(String) onConfirm;

@@ -3,8 +3,7 @@ import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:rtu_mirea_app/nfc_pass/bloc/nfc_pass_cubit.dart';
-import 'package:rtu_mirea_app/presentation/theme.dart';
-import 'package:rtu_mirea_app/presentation/typography.dart';
+import 'package:app_ui/app_ui.dart';
 
 class NfcCardSettingsDialog extends StatelessWidget {
   const NfcCardSettingsDialog({super.key});
@@ -47,7 +46,7 @@ class _FilePicker extends StatelessWidget {
             child: PlatformTextButton(
               material: (_, __) => MaterialTextButtonData(
                 style: TextButton.styleFrom(
-                  backgroundColor: AppTheme.colorsOf(context).background03,
+                  backgroundColor: Theme.of(context).extension<AppColors>()!.background03,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
@@ -56,7 +55,7 @@ class _FilePicker extends StatelessWidget {
               cupertino: (_, __) => CupertinoTextButtonData(
                 padding: EdgeInsets.zero,
                 borderRadius: BorderRadius.circular(8),
-                color: AppTheme.colorsOf(context).background03,
+                color: Theme.of(context).extension<AppColors>()!.background03,
               ),
               onPressed: () => context.read<NfcPassCubit>().pickFile(),
               child: const Text(
@@ -122,7 +121,7 @@ class _Preview extends StatelessWidget {
                 )
               : Text(
                   "Выбрано видео",
-                  style: AppTextStyle.body.copyWith(color: AppTheme.colorsOf(context).active),
+                  style: AppTextStyle.body.copyWith(color: Theme.of(context).extension<AppColors>()!.active),
                   textAlign: TextAlign.center,
                   key: const ValueKey('video_text'),
                 ),

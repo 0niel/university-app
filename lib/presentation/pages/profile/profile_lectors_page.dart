@@ -5,8 +5,7 @@ import 'package:material_floating_search_bar_2/material_floating_search_bar_2.da
 import 'package:rtu_mirea_app/presentation/bloc/employee_bloc/employee_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/user_bloc/user_bloc.dart';
 import 'package:rtu_mirea_app/presentation/pages/profile/widgets/lector_search_card.dart';
-import 'package:rtu_mirea_app/presentation/typography.dart';
-import 'package:rtu_mirea_app/presentation/theme.dart';
+import 'package:app_ui/app_ui.dart';
 
 final GlobalKey<FloatingSearchBarState> _searchBarKey = GlobalKey<FloatingSearchBarState>();
 
@@ -37,10 +36,10 @@ class _ProfileLectrosPageState extends State<ProfileLectrosPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Преподаватели"),
-        backgroundColor: AppTheme.colorsOf(context).background01,
+        backgroundColor: Theme.of(context).extension<AppColors>()!.background01,
         automaticallyImplyLeading: false,
       ),
-      backgroundColor: AppTheme.colorsOf(context).background01,
+      backgroundColor: Theme.of(context).extension<AppColors>()!.background01,
       body: SafeArea(
         bottom: false,
         child: BlocBuilder<UserBloc, UserState>(
@@ -52,11 +51,11 @@ class _ProfileLectrosPageState extends State<ProfileLectrosPage> {
                     key: _searchBarKey,
                     controller: _controller,
                     elevation: 0,
-                    backdropColor: AppTheme.colorsOf(context).background01,
-                    shadowColor: AppTheme.colorsOf(context).background03,
-                    accentColor: AppTheme.colorsOf(context).primary,
-                    iconColor: AppTheme.colorsOf(context).active,
-                    backgroundColor: AppTheme.colorsOf(context).background02,
+                    backdropColor: Theme.of(context).extension<AppColors>()!.background01,
+                    shadowColor: Theme.of(context).extension<AppColors>()!.background03,
+                    accentColor: Theme.of(context).extension<AppColors>()!.primary,
+                    iconColor: Theme.of(context).extension<AppColors>()!.active,
+                    backgroundColor: Theme.of(context).extension<AppColors>()!.background02,
                     hint: 'Начните вводить фамилию',
                     body: _controller.isOpen == false || _controller.isHidden
                         ? Column(
@@ -65,11 +64,12 @@ class _ProfileLectrosPageState extends State<ProfileLectrosPage> {
                               const Icon(FontAwesomeIcons.magnifyingGlass, size: 85),
                               const SizedBox(height: 24),
                               Text('Здесь появятся результаты поиска',
-                                  style: AppTextStyle.body.copyWith(color: AppTheme.colorsOf(context).deactive)),
+                                  style: AppTextStyle.body
+                                      .copyWith(color: Theme.of(context).extension<AppColors>()!.deactive)),
                             ],
                           )
                         : Container(),
-                    hintStyle: AppTextStyle.titleS.copyWith(color: AppTheme.colorsOf(context).deactive),
+                    hintStyle: AppTextStyle.titleS.copyWith(color: Theme.of(context).extension<AppColors>()!.deactive),
                     borderRadius: const BorderRadius.all(Radius.circular(12)),
                     scrollPadding: const EdgeInsets.only(top: 16, bottom: 56),
                     transitionDuration: const Duration(milliseconds: 800),
@@ -101,7 +101,7 @@ class _ProfileLectrosPageState extends State<ProfileLectrosPage> {
                         return ClipRRect(
                           borderRadius: BorderRadius.circular(8),
                           child: Material(
-                            color: AppTheme.colorsOf(context).background02,
+                            color: Theme.of(context).extension<AppColors>()!.background02,
                             elevation: 4.0,
                             child: Column(
                               mainAxisSize: MainAxisSize.min,

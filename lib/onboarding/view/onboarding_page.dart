@@ -4,8 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:rtu_mirea_app/home/cubit/home_cubit.dart';
 import 'package:rtu_mirea_app/onboarding/widgets/widgets.dart';
-import 'package:rtu_mirea_app/presentation/typography.dart';
-import 'package:rtu_mirea_app/presentation/theme.dart';
+import 'package:app_ui/app_ui.dart';
 
 /// OnBoarding screen that greets new users
 class OnBoardingPage extends StatefulWidget {
@@ -19,22 +18,10 @@ class _OnBoardingPageState extends State<OnBoardingPage> {
   final int _numPages = 3;
 
   /// Main images
-  static const List<Image> containersImages = [
-    Image(
-      image: AssetImage('assets/images/Saly-1.png'),
-      height: 375.0,
-      width: 375.0,
-    ),
-    Image(
-      image: AssetImage('assets/images/Saly-2.png'),
-      height: 324.0,
-      width: 328.0,
-    ),
-    Image(
-      image: AssetImage('assets/images/Saly-3.png'),
-      height: 315.0,
-      width: 315.0,
-    ),
+  static List<Image> containersImages = [
+    Assets.images.saly1.image(height: 375.0, width: 375.0),
+    Assets.images.saly2.image(height: 324.0, width: 328.0),
+    Assets.images.saly3.image(height: 315.0, width: 315.0),
     // Image(
     //   image: AssetImage('assets/images/Saly-4.png'),
     //   height: 375.0,
@@ -143,7 +130,7 @@ class _OnBoardingPageState extends State<OnBoardingPage> {
     );
 
     return Scaffold(
-      backgroundColor: AppTheme.colorsOf(context).background01,
+      backgroundColor: Theme.of(context).extension<AppColors>()!.background01,
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -231,7 +218,7 @@ class _PageIndicatorsState extends State<PageIndicators> {
                     child: Text(
                       "Пропустить",
                       style: AppTextStyle.buttonS.copyWith(
-                        color: AppTheme.colorsOf(context).active,
+                        color: Theme.of(context).extension<AppColors>()!.active,
                       ),
                     ),
                   ),

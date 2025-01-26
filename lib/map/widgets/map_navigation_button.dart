@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:rtu_mirea_app/presentation/theme.dart';
-import 'package:rtu_mirea_app/presentation/typography.dart';
+import 'package:app_ui/app_ui.dart';
 
 class MapNavigationButton extends StatelessWidget {
   const MapNavigationButton({
@@ -22,7 +21,9 @@ class MapNavigationButton extends StatelessWidget {
         style: ButtonStyle(
           padding: WidgetStateProperty.all<EdgeInsets>(EdgeInsets.zero),
           backgroundColor: WidgetStateProperty.all<Color>(
-            isSelected ? AppTheme.colorsOf(context).background03 : AppTheme.colorsOf(context).background02,
+            isSelected
+                ? Theme.of(context).extension<AppColors>()!.background03
+                : Theme.of(context).extension<AppColors>()!.background02,
           ),
           shadowColor: WidgetStateProperty.all<Color>(Colors.transparent),
           shape: WidgetStateProperty.all<RoundedRectangleBorder>(
@@ -35,7 +36,9 @@ class MapNavigationButton extends StatelessWidget {
           child: Text(
             floor.toString(),
             style: AppTextStyle.buttonS.copyWith(
-              color: isSelected ? AppTheme.colorsOf(context).active : AppTheme.colorsOf(context).deactive,
+              color: isSelected
+                  ? Theme.of(context).extension<AppColors>()!.active
+                  : Theme.of(context).extension<AppColors>()!.deactive,
             ),
           ),
         ),

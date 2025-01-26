@@ -4,14 +4,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:rtu_mirea_app/presentation/bloc/user_bloc/user_bloc.dart';
-import 'package:rtu_mirea_app/presentation/theme.dart';
-import 'package:rtu_mirea_app/presentation/typography.dart';
-import 'package:rtu_mirea_app/presentation/widgets/buttons/profile_button.dart';
-import 'package:rtu_mirea_app/presentation/widgets/container_label.dart';
+import 'package:app_ui/app_ui.dart';
+
 import 'package:rtu_mirea_app/profile/widgets/widgets.dart';
 import 'package:rtu_mirea_app/schedule/models/models.dart';
 import 'package:rtu_mirea_app/schedule/schedule.dart';
-import 'package:rtu_mirea_app/presentation/widgets/feedback_modal.dart';
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
@@ -94,26 +91,27 @@ class _InitialProfileStatePageState extends State<_InitialProfileStatePage> {
         const SizedBox(height: 8),
         ProfileButton(
           text: 'О приложении',
-          icon: HugeIcon(icon: HugeIcons.strokeRoundedCoffee02, color: AppTheme.colorsOf(context).active),
+          icon:
+              HugeIcon(icon: HugeIcons.strokeRoundedCoffee02, color: Theme.of(context).extension<AppColors>()!.active),
           onPressed: () => context.go('/profile/about'),
         ),
         const SizedBox(height: 8),
         ProfileButton(
           text: 'Тема',
-          icon: HugeIcon(icon: HugeIcons.strokeRoundedMoon02, color: AppTheme.colorsOf(context).active),
+          icon: HugeIcon(icon: HugeIcons.strokeRoundedMoon02, color: Theme.of(context).extension<AppColors>()!.active),
           onPressed: () {
             showDialog(
               context: context,
               builder: (context) => SimpleDialog(
                 title: Text("Выбор темы", style: AppTextStyle.titleS),
                 contentPadding: const EdgeInsets.all(16),
-                backgroundColor: AppTheme.colorsOf(context).background02,
+                backgroundColor: Theme.of(context).extension<AppColors>()!.background02,
                 elevation: 0,
                 children: [
                   ListTileThemeItem(
                     title: "Светлая",
                     trailing: AdaptiveTheme.of(context).mode == AdaptiveThemeMode.light
-                        ? Icon(Icons.check, color: AppTheme.colorsOf(context).active)
+                        ? Icon(Icons.check, color: Theme.of(context).extension<AppColors>()!.active)
                         : null,
                     onTap: () {
                       AdaptiveTheme.of(context).setLight();
@@ -124,7 +122,7 @@ class _InitialProfileStatePageState extends State<_InitialProfileStatePage> {
                   ListTileThemeItem(
                     title: "Тёмная",
                     trailing: AdaptiveTheme.of(context).mode == AdaptiveThemeMode.dark
-                        ? Icon(Icons.check, color: AppTheme.colorsOf(context).active)
+                        ? Icon(Icons.check, color: Theme.of(context).extension<AppColors>()!.active)
                         : null,
                     onTap: () {
                       AdaptiveTheme.of(context).setDark();
@@ -135,7 +133,7 @@ class _InitialProfileStatePageState extends State<_InitialProfileStatePage> {
                   ListTileThemeItem(
                     title: "Как в системе",
                     trailing: AdaptiveTheme.of(context).mode == AdaptiveThemeMode.system
-                        ? Icon(Icons.check, color: AppTheme.colorsOf(context).active)
+                        ? Icon(Icons.check, color: Theme.of(context).extension<AppColors>()!.active)
                         : null,
                     onTap: () {
                       AdaptiveTheme.of(context).setSystem();

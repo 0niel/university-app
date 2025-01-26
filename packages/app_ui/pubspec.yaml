@@ -1,0 +1,71 @@
+name: app_ui
+description: A UI Toolkit for University App
+version: 0.1.0+1
+publish_to: none
+
+environment:
+  sdk: ^3.5.0
+  flutter: ^3.24.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  shimmer: ^3.0.0
+  flutter_svg: ^2.0.5
+  hugeicons: ^0.0.7
+  extended_image: ^8.1.0
+  cached_network_image: ^3.2.0
+  open_filex: ^4.4.0
+  flutter_platform_widgets: ^7.0.1
+  enough_platform_widgets: ^1.1.1
+  photo_view: ^0.15.0
+  build_runner:
+  flutter_gen_runner:
+  intl: ^0.20.2
+  calendar_date_picker2: ^1.1.8
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  mocktail: ^1.0.4
+  very_good_analysis: ^6.0.0
+
+flutter_gen:
+  assets:
+    enabled: true
+    outputs:
+      package_parameter_enabled: true
+
+  output: lib/src/generated/
+  line_length: 80
+
+  integrations:
+    flutter_svg: true
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/maps/objects.json
+    - assets/images/
+    - assets/icons/
+    - assets/icons/hugeicons/
+    - assets/maps/v-78/
+    - assets/maps/s-20/
+    - assets/maps/mp-1/
+    
+  fonts:
+    - family: Montserrat
+      fonts:
+        - asset: assets/fonts/Montserrat/Montserrat-SemiBold.ttf
+          weight: 600
+    - family: Inter
+      fonts:
+        - asset: assets/fonts/Inter/Inter-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Inter/Inter-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Inter/Inter-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/Inter/Inter-Bold.ttf
+          weight: 700

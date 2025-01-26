@@ -1,17 +1,14 @@
 import 'package:rtu_mirea_app/contributors/view/view.dart';
+import 'package:rtu_mirea_app/presentation/bloc/user_bloc/user_bloc.dart';
+import 'package:rtu_mirea_app/profile/widgets/widgets.dart';
 import 'package:rtu_mirea_app/sponsors/view/sponsors_view.dart';
 import 'package:unicons/unicons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:rtu_mirea_app/presentation/bloc/user_bloc/user_bloc.dart';
-import 'package:rtu_mirea_app/presentation/widgets/buttons/colorful_button.dart';
-import 'package:rtu_mirea_app/presentation/widgets/buttons/icon_button.dart';
-import 'package:rtu_mirea_app/presentation/widgets/feedback_modal.dart';
+import 'package:app_ui/app_ui.dart';
 import 'package:rtu_mirea_app/service_locator.dart';
 import 'package:url_launcher/url_launcher_string.dart';
-import 'package:rtu_mirea_app/presentation/typography.dart';
-import 'package:rtu_mirea_app/presentation/theme.dart';
 
 class AboutAppPage extends StatelessWidget {
   const AboutAppPage({super.key});
@@ -73,7 +70,7 @@ class AboutAppPage extends StatelessWidget {
       children: [
         Text('Open Source', style: AppTextStyle.h4),
         PopupMenuButton<String>(
-          color: AppTheme.colorsOf(context).background03,
+          color: Theme.of(context).extension<AppColors>()!.background03,
           onSelected: (value) {},
           itemBuilder: (BuildContext context) {
             return [
@@ -104,7 +101,7 @@ class AboutAppPage extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
               borderRadius: const BorderRadius.all(Radius.circular(4)),
-              color: AppTheme.colorsOf(context).primary,
+              color: Theme.of(context).extension<AppColors>()!.primary,
             ),
             child: Text(
               getIt<PackageInfo>().version,
@@ -182,7 +179,7 @@ class AboutAppPage extends StatelessWidget {
         width: double.infinity,
         child: ColorfulButton(
           text: 'Сообщить об ошибке',
-          backgroundColor: AppTheme.colorsOf(context).colorful07.withBlue(180),
+          backgroundColor: Theme.of(context).extension<AppColors>()!.colorful07.withBlue(180),
           onClick: () {
             final userBloc = context.read<UserBloc>();
             if (userBloc.state.status == UserStatus.authorized) {

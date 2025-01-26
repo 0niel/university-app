@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:rtu_mirea_app/presentation/theme.dart';
-import 'package:rtu_mirea_app/presentation/typography.dart';
+import 'package:app_ui/app_ui.dart';
 
 class ListTileThemeItem extends StatelessWidget {
   const ListTileThemeItem({
@@ -20,7 +19,7 @@ class ListTileThemeItem extends StatelessWidget {
       title: Text(
         title,
         style: AppTextStyle.body.copyWith(
-          color: AppTheme.colorsOf(context).active,
+          color: Theme.of(context).extension<AppColors>()!.active,
         ),
       ),
       contentPadding: const EdgeInsets.symmetric(horizontal: 8),

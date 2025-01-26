@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 import 'package:rtu_mirea_app/common/utils/calendar_utils.dart';
-import 'package:rtu_mirea_app/presentation/theme.dart';
-import 'package:rtu_mirea_app/presentation/typography.dart';
+import 'package:app_ui/app_ui.dart';
 import 'package:rtu_mirea_app/schedule/models/models.dart';
 import 'package:rtu_mirea_app/schedule/widgets/widgets.dart';
 import 'package:table_calendar/table_calendar.dart';
@@ -257,10 +256,10 @@ class _CalendarState extends State<Calendar> {
                     day.day.toString(),
                     style: AppTextStyle.body.copyWith(
                       color: comments.isNotEmpty && widget.showCommentsIndicators
-                          ? AppTheme.colorsOf(context).colorful02
+                          ? Theme.of(context).extension<AppColors>()!.colorful02
                           : (day.weekday == DateTime.sunday
-                              ? AppTheme.colorsOf(context).deactiveDarker
-                              : AppTheme.colorsOf(context).active),
+                              ? Theme.of(context).extension<AppColors>()!.deactiveDarker
+                              : Theme.of(context).extension<AppColors>()!.active),
                     ),
                   ),
                 );
@@ -278,13 +277,13 @@ class _CalendarState extends State<Calendar> {
               rightChevronVisible: false,
             ),
             calendarStyle: CalendarStyle(
-              rangeHighlightColor: AppTheme.colorsOf(context).secondary,
+              rangeHighlightColor: Theme.of(context).extension<AppColors>()!.secondary,
               cellAlignment: Alignment.center,
               cellMargin: const EdgeInsets.all(10),
             ),
             daysOfWeekStyle: DaysOfWeekStyle(
-              weekdayStyle: AppTextStyle.body.copyWith(color: AppTheme.colorsOf(context).deactive),
-              weekendStyle: AppTextStyle.body.copyWith(color: AppTheme.colorsOf(context).deactiveDarker),
+              weekdayStyle: AppTextStyle.body.copyWith(color: Theme.of(context).extension<AppColors>()!.deactive),
+              weekendStyle: AppTextStyle.body.copyWith(color: Theme.of(context).extension<AppColors>()!.deactiveDarker),
             ),
             focusedDay: _focusedDay,
             availableCalendarFormats: const {

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:rtu_mirea_app/presentation/theme.dart';
-import 'package:rtu_mirea_app/presentation/typography.dart';
+import 'package:app_ui/app_ui.dart';
 import 'package:rtu_mirea_app/schedule/models/models.dart';
 import 'package:rtu_mirea_app/schedule/schedule.dart';
 import 'package:university_app_server_api/client.dart';
@@ -59,7 +58,7 @@ class SchedulesList extends StatelessWidget {
               const SizedBox(height: 20),
               Text(
                 "Сохранено".toUpperCase(),
-                style: AppTextStyle.chip.copyWith(color: AppTheme.colors.deactive),
+                style: AppTextStyle.chip.copyWith(color: AppColors.dark.deactive),
                 textAlign: TextAlign.left,
               ),
               const SizedBox(height: 10),

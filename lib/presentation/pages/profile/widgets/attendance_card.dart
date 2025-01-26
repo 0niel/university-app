@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:rtu_mirea_app/presentation/typography.dart';
-import 'package:rtu_mirea_app/presentation/theme.dart';
+import 'package:app_ui/app_ui.dart';
 
 class AttendanceCard extends StatelessWidget {
   const AttendanceCard({super.key, required this.type, required this.date, required this.time});
@@ -13,7 +12,7 @@ class AttendanceCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      color: AppTheme.colorsOf(context).background02,
+      color: Theme.of(context).extension<AppColors>()!.background02,
       child: Container(
         width: double.infinity,
         height: 80,
@@ -28,7 +27,7 @@ class AttendanceCard extends StatelessWidget {
               height: 40,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: AppTheme.colorsOf(context).background03,
+                color: Theme.of(context).extension<AppColors>()!.background03,
               ),
               alignment: Alignment.center,
               child: Container(
@@ -45,7 +44,7 @@ class AttendanceCard extends StatelessWidget {
                       )
                     : BoxDecoration(
                         shape: BoxShape.circle,
-                        color: AppTheme.colorsOf(context).colorful02,
+                        color: Theme.of(context).extension<AppColors>()!.colorful02,
                       ),
                 alignment: Alignment.center,
                 child: type == "Вход"
@@ -67,8 +66,8 @@ class AttendanceCard extends StatelessWidget {
                   '$date, $time',
                   style: AppTextStyle.captionL.copyWith(
                       color: type == "Вход"
-                          ? AppTheme.colorsOf(context).colorful05
-                          : AppTheme.colorsOf(context).colorful02),
+                          ? Theme.of(context).extension<AppColors>()!.colorful05
+                          : Theme.of(context).extension<AppColors>()!.colorful02),
                 ),
               ],
             ),

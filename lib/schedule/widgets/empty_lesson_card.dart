@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:rtu_mirea_app/presentation/typography.dart';
-import 'package:rtu_mirea_app/presentation/theme.dart';
+import 'package:app_ui/app_ui.dart';
 
 class EmptyLessonCard extends StatelessWidget {
   final int lessonNumber;
@@ -15,8 +14,8 @@ class EmptyLessonCard extends StatelessWidget {
     return Card(
       margin: const EdgeInsets.all(0),
       color: Theme.of(context).brightness == Brightness.dark
-          ? AppTheme.colorsOf(context).background03
-          : AppTheme.colorsOf(context).background02,
+          ? Theme.of(context).extension<AppColors>()!.background03
+          : Theme.of(context).extension<AppColors>()!.background02,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12.0),
       ),
@@ -28,7 +27,7 @@ class EmptyLessonCard extends StatelessWidget {
           children: [
             Text(
               '$lessonNumber пара',
-              style: AppTextStyle.body.copyWith(color: AppTheme.colorsOf(context).colorful03),
+              style: AppTextStyle.body.copyWith(color: Theme.of(context).extension<AppColors>()!.colorful03),
             ),
           ],
         ),

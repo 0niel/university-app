@@ -2,8 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:rtu_mirea_app/domain/entities/story.dart';
-import 'package:rtu_mirea_app/presentation/theme.dart';
-import 'package:rtu_mirea_app/presentation/typography.dart';
+import 'package:app_ui/app_ui.dart';
 
 class StoryItem extends StatelessWidget {
   const StoryItem({super.key, required this.stories, required this.storyIndex});
@@ -34,8 +33,8 @@ class StoryItem extends StatelessWidget {
                       ? stories[storyIndex].preview.formats!.small!.url
                       : stories[storyIndex].preview.formats!.thumbnail.url)
                   : CachedNetworkImageProvider(stories[storyIndex].preview.url),
-              colorFilter:
-                  ColorFilter.mode(AppTheme.colorsOf(context).background02.withOpacity(0.15), BlendMode.dstOut),
+              colorFilter: ColorFilter.mode(
+                  Theme.of(context).extension<AppColors>()!.background02.withOpacity(0.15), BlendMode.dstOut),
             ),
           ),
           child: Material(

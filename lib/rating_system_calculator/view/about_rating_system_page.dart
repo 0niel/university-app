@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:rtu_mirea_app/presentation/theme.dart';
-import 'package:rtu_mirea_app/presentation/typography.dart';
+import 'package:app_ui/app_ui.dart';
 import 'package:rtu_mirea_app/rating_system_calculator/rating_system_calculator.dart';
 import 'package:unicons/unicons.dart';
 
@@ -10,9 +9,9 @@ class AboutRatingSystemPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.colors.background01,
+      backgroundColor: AppColors.dark.background01,
       appBar: AppBar(
-        backgroundColor: AppTheme.colors.background01,
+        backgroundColor: AppColors.dark.background01,
         title: const Text(
           "О БРС",
         ),
@@ -71,21 +70,21 @@ class _RatingSystemCalculatorViewState extends State<RatingSystemCalculatorView>
               Text(
                 "максимум 30",
                 style: AppTextStyle.body.copyWith(
-                  color: AppTheme.colors.primary,
+                  color: AppColors.dark.primary,
                 ),
               ),
               const SizedBox(height: 16),
               RichText(
                 text: TextSpan(
                   style: AppTextStyle.body.copyWith(
-                    color: AppTheme.colors.active,
+                    color: AppColors.dark.active,
                   ),
                   children: [
                     const TextSpan(text: 'Выставляются за выполненеие '),
                     TextSpan(
                       text: 'обязательных заданий на аудиторных практических занятиях',
                       style: AppTextStyle.body.copyWith(
-                        color: AppTheme.colors.primary,
+                        color: AppColors.dark.primary,
                       ),
                     ),
                     const TextSpan(
@@ -99,21 +98,21 @@ class _RatingSystemCalculatorViewState extends State<RatingSystemCalculatorView>
               Text(
                 "максимум 30",
                 style: AppTextStyle.body.copyWith(
-                  color: AppTheme.colors.primary,
+                  color: AppColors.dark.primary,
                 ),
               ),
               const SizedBox(height: 16),
               RichText(
                 text: TextSpan(
                   style: AppTextStyle.body.copyWith(
-                    color: AppTheme.colors.active,
+                    color: AppColors.dark.active,
                   ),
                   children: [
                     const TextSpan(text: 'Выставляются за '),
                     TextSpan(
                       text: 'посещаемость и активность на занятиях',
                       style: AppTextStyle.body.copyWith(
-                        color: AppTheme.colors.primary,
+                        color: AppColors.dark.primary,
                       ),
                     ),
                     const TextSpan(
@@ -127,21 +126,21 @@ class _RatingSystemCalculatorViewState extends State<RatingSystemCalculatorView>
               Text(
                 "максимум 30",
                 style: AppTextStyle.body.copyWith(
-                  color: AppTheme.colors.primary,
+                  color: AppColors.dark.primary,
                 ),
               ),
               const SizedBox(height: 16),
               RichText(
                 text: TextSpan(
                   style: AppTextStyle.body.copyWith(
-                    color: AppTheme.colors.active,
+                    color: AppColors.dark.active,
                   ),
                   children: [
                     const TextSpan(text: 'Выставляются за выполнение '),
                     TextSpan(
                       text: 'тестовых заданий в СДО',
                       style: AppTextStyle.body.copyWith(
-                        color: AppTheme.colors.primary,
+                        color: AppColors.dark.primary,
                       ),
                     ),
                     const TextSpan(
@@ -156,14 +155,14 @@ class _RatingSystemCalculatorViewState extends State<RatingSystemCalculatorView>
               RichText(
                 text: TextSpan(
                   style: AppTextStyle.body.copyWith(
-                    color: AppTheme.colors.active,
+                    color: AppColors.dark.active,
                   ),
                   children: [
                     const TextSpan(text: '1. Если общая '),
                     TextSpan(
                       text: 'сумма баллов 60 и более',
                       style: AppTextStyle.body.copyWith(
-                        color: AppTheme.colors.primary,
+                        color: AppColors.dark.primary,
                       ),
                     ),
                     const TextSpan(

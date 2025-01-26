@@ -3,8 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:intl/intl.dart';
-import 'package:rtu_mirea_app/presentation/theme.dart';
-import 'package:rtu_mirea_app/presentation/typography.dart';
+import 'package:app_ui/app_ui.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:unicons/unicons.dart';
 
@@ -99,7 +98,7 @@ class _CalendarHeaderState extends State<CalendarHeader> with TickerProviderStat
                       child: PlatformTextButton(
                         material: (_, __) => MaterialTextButtonData(
                           style: TextButton.styleFrom(
-                            backgroundColor: AppTheme.colorsOf(context).background02,
+                            backgroundColor: Theme.of(context).extension<AppColors>()!.background02,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
@@ -111,7 +110,7 @@ class _CalendarHeaderState extends State<CalendarHeader> with TickerProviderStat
                           padding: EdgeInsets.zero,
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        color: AppTheme.colorsOf(context).background02,
+                        color: Theme.of(context).extension<AppColors>()!.background02,
                         onPressed: () {
                           context.go('/schedule/search');
                         },
@@ -123,13 +122,13 @@ class _CalendarHeaderState extends State<CalendarHeader> with TickerProviderStat
                               child: Icon(
                                 UniconsLine.search,
                                 size: 20,
-                                color: AppTheme.colorsOf(context).deactive,
+                                color: Theme.of(context).extension<AppColors>()!.deactive,
                               ),
                             ),
                             Text(
                               "Поиск по расписанию",
                               style: AppTextStyle.bodyL.copyWith(
-                                color: AppTheme.colorsOf(context).deactive,
+                                color: Theme.of(context).extension<AppColors>()!.deactive,
                               ),
                             ),
                           ],
@@ -153,14 +152,14 @@ class _CalendarHeaderState extends State<CalendarHeader> with TickerProviderStat
                       labelStyle: AppTextStyle.bodyBold,
                       unselectedLabelStyle: AppTextStyle.bodyL,
                       padding: const EdgeInsets.symmetric(horizontal: 15),
-                      labelColor: AppTheme.colorsOf(context).primary,
+                      labelColor: Theme.of(context).extension<AppColors>()!.primary,
                       labelPadding: const EdgeInsets.symmetric(horizontal: 10).copyWith(bottom: 10),
                       indicatorSize: TabBarIndicatorSize.label,
-                      unselectedLabelColor: AppTheme.colorsOf(context).deactive,
+                      unselectedLabelColor: Theme.of(context).extension<AppColors>()!.deactive,
                       indicator: UnderlineTabIndicator(
                         borderSide: BorderSide(
                           width: 2,
-                          color: AppTheme.colorsOf(context).primary,
+                          color: Theme.of(context).extension<AppColors>()!.primary,
                         ),
                       ),
                       dividerColor: Theme.of(context).dividerTheme.color,
@@ -224,7 +223,7 @@ class _CalendarWeeksHeader extends StatelessWidget {
                 color: Colors.transparent,
                 child: HugeIcon(
                   icon: HugeIcons.strokeRoundedArrowLeft01,
-                  color: AppTheme.colorsOf(context).active,
+                  color: Theme.of(context).extension<AppColors>()!.active,
                 ),
                 onPressed: () {
                   pageController?.previousPage(
@@ -261,7 +260,7 @@ class _CalendarWeeksHeader extends StatelessWidget {
                               height: 4,
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
-                                color: AppTheme.colorsOf(context).active,
+                                color: Theme.of(context).extension<AppColors>()!.active,
                               ),
                             ),
                             const SizedBox(width: 5.50),
@@ -287,7 +286,7 @@ class _CalendarWeeksHeader extends StatelessWidget {
                 },
                 child: HugeIcon(
                   icon: HugeIcons.strokeRoundedArrowRight01,
-                  color: AppTheme.colorsOf(context).active,
+                  color: Theme.of(context).extension<AppColors>()!.active,
                 ),
               ),
             ),

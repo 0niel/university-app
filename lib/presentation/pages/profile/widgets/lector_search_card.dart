@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:rtu_mirea_app/domain/entities/employee.dart';
 import 'package:url_launcher/url_launcher_string.dart';
-import 'package:rtu_mirea_app/presentation/typography.dart';
-import 'package:rtu_mirea_app/presentation/theme.dart';
+import 'package:app_ui/app_ui.dart';
 
 class LectorSearchCard extends StatelessWidget {
   const LectorSearchCard({super.key, required this.employee});
@@ -15,7 +14,7 @@ class LectorSearchCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(8),
       width: double.infinity,
-      color: AppTheme.colorsOf(context).background02,
+      color: Theme.of(context).extension<AppColors>()!.background02,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.start,
@@ -39,7 +38,7 @@ class LectorSearchCard extends StatelessWidget {
               },
               child: Text(
                 employee.email,
-                style: AppTextStyle.bodyRegular.copyWith(color: AppTheme.colorsOf(context).colorful02),
+                style: AppTextStyle.bodyRegular.copyWith(color: Theme.of(context).extension<AppColors>()!.colorful02),
               ),
             ),
           ),

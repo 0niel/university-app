@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:rtu_mirea_app/presentation/theme.dart';
-import 'package:rtu_mirea_app/presentation/typography.dart';
+import 'package:app_ui/app_ui.dart';
 
 class TagBadge extends StatelessWidget {
   final String tag;
@@ -19,16 +18,17 @@ class TagBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChoiceChip(
-      backgroundColor:
-          isSelected ? color ?? AppTheme.colorsOf(context).colorful05 : AppTheme.colorsOf(context).background02,
+      backgroundColor: isSelected
+          ? color ?? Theme.of(context).extension<AppColors>()!.colorful05
+          : Theme.of(context).extension<AppColors>()!.background02,
       shape: RoundedRectangleBorder(
         side: BorderSide(
-          color: color ?? AppTheme.colorsOf(context).colorful05,
+          color: color ?? Theme.of(context).extension<AppColors>()!.colorful05,
           width: 2,
         ),
         borderRadius: BorderRadius.circular(16),
       ),
-      disabledColor: AppTheme.colorsOf(context).background01,
+      disabledColor: Theme.of(context).extension<AppColors>()!.background01,
       surfaceTintColor: Colors.transparent,
       shadowColor: Colors.transparent,
       visualDensity: VisualDensity.compact,
@@ -37,11 +37,11 @@ class TagBadge extends StatelessWidget {
       label: Text(
         tag,
         style: AppTextStyle.body.copyWith(
-          color: isSelected ? Colors.white : color ?? AppTheme.colorsOf(context).colorful05,
+          color: isSelected ? Colors.white : color ?? Theme.of(context).extension<AppColors>()!.colorful05,
         ),
       ),
       iconTheme: IconThemeData(
-        color: isSelected ? Colors.white : color ?? AppTheme.colorsOf(context).colorful05,
+        color: isSelected ? Colors.white : color ?? Theme.of(context).extension<AppColors>()!.colorful05,
       ),
       onSelected: onPressed != null ? (_) => onPressed!() : null,
       selected: isSelected,

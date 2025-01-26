@@ -16,4 +16,20 @@ dependency_overrides:
       url: https://github.com/nextcloud/neon
       ref: c4be1b2
       path: packages/nextcloud
+  bloc_concurrency: ^0.3.0
+  hydrated_bloc:
+    git:
+      url: https://github.com/0niel/bloc
+      path: packages/hydrated_bloc
+      ref: master
+  bloc:
+    git:
+      url: https://github.com/0niel/bloc
+      path: packages/bloc
+      ref: master
+  flutter_bloc:
+    git:
+      url: https://github.com/0niel/bloc
+      path: packages/flutter_bloc
+      ref: master
 

@@ -2,8 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:rtu_mirea_app/presentation/constants.dart';
-import 'package:rtu_mirea_app/presentation/theme.dart';
-import 'package:rtu_mirea_app/presentation/typography.dart';
+import 'package:app_ui/app_ui.dart';
 
 class Sidebar extends StatelessWidget {
   const Sidebar({
@@ -21,7 +20,7 @@ class Sidebar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: sidebarWith,
-      color: AppTheme.colorsOf(context).background01,
+      color: Theme.of(context).extension<AppColors>()!.background01,
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: ListView(
@@ -77,7 +76,7 @@ class SidebarNavButton extends StatelessWidget {
       margin: const EdgeInsets.only(top: 8),
       decoration: isSelected
           ? BoxDecoration(
-              color: AppTheme.colorsOf(context).colorful03,
+              color: Theme.of(context).extension<AppColors>()!.colorful03,
               borderRadius: BorderRadius.circular(8),
             )
           : null,
@@ -85,14 +84,16 @@ class SidebarNavButton extends StatelessWidget {
         onPressed: onClick,
         style: TextButton.styleFrom(
           padding: const EdgeInsets.all(16),
-          foregroundColor: isSelected ? AppTheme.colorsOf(context).background01 : AppTheme.colorsOf(context).active,
+          foregroundColor: isSelected
+              ? Theme.of(context).extension<AppColors>()!.background01
+              : Theme.of(context).extension<AppColors>()!.active,
         ),
         child: Row(
           children: [
             Theme(
               data: ThemeData(
                 iconTheme: IconThemeData(
-                  color: AppTheme.colorsOf(context).active,
+                  color: Theme.of(context).extension<AppColors>()!.active,
                 ),
               ),
               child: icon,
@@ -100,7 +101,7 @@ class SidebarNavButton extends StatelessWidget {
             const SizedBox(width: 16),
             Text(
               title,
-              style: AppTextStyle.buttonS.copyWith(color: AppTheme.colorsOf(context).active),
+              style: AppTextStyle.buttonS.copyWith(color: Theme.of(context).extension<AppColors>()!.active),
             ),
           ],
         ),

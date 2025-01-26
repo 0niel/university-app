@@ -2,11 +2,10 @@ import 'package:collection/collection.dart';
 import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_animate/flutter_animate.dart'; // Добавляем flutter_animate
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:hugeicons/hugeicons.dart';
-import 'package:rtu_mirea_app/presentation/theme.dart';
-import 'package:rtu_mirea_app/presentation/typography.dart';
-import 'package:rtu_mirea_app/presentation/widgets/bottom_modal_sheet.dart';
+import 'package:app_ui/app_ui.dart';
+
 import 'package:rtu_mirea_app/schedule/bloc/schedule_bloc.dart';
 import 'package:rtu_mirea_app/schedule/models/models.dart';
 import 'package:rtu_mirea_app/schedule/schedule.dart';
@@ -88,7 +87,7 @@ class ScheduleCard<T> extends StatelessWidget {
                         icon: Animate(
                           child: Icon(
                             Icons.check_circle,
-                            color: AppTheme.colorsOf(context).primary,
+                            color: Theme.of(context).extension<AppColors>()!.primary,
                           ),
                         ).fadeIn(duration: 200.ms),
                         onPressed: () {
@@ -105,7 +104,7 @@ class ScheduleCard<T> extends StatelessWidget {
                     IconButton(
                       icon: HugeIcon(
                         icon: HugeIcons.strokeRoundedNoteEdit,
-                        color: AppTheme.colorsOf(context).active,
+                        color: Theme.of(context).extension<AppColors>()!.active,
                       ),
                       onPressed: () => _showSetCommentBottomSheet(
                         context,

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:rtu_mirea_app/presentation/theme.dart';
-import 'package:rtu_mirea_app/presentation/typography.dart';
+import 'package:app_ui/app_ui.dart';
 
 class SelectedScheduleItemButton extends StatelessWidget {
   const SelectedScheduleItemButton({
@@ -30,7 +29,7 @@ class SelectedScheduleItemButton extends StatelessWidget {
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
               width: 1.5,
-              color: isSelected ? AppTheme.colors.colorful05 : AppTheme.colors.colorful06,
+              color: isSelected ? AppColors.dark.colorful05 : AppColors.dark.colorful06,
             ),
           ),
           child: Row(
@@ -57,7 +56,7 @@ class SelectedScheduleItemButton extends StatelessWidget {
                     shape: const CircleBorder(),
                     constraints: const BoxConstraints(minWidth: 36.0, minHeight: 36.0),
                     child: Icon(Icons.refresh_rounded,
-                        color: isSelected ? AppTheme.colors.colorful05 : AppTheme.colors.colorful06),
+                        color: isSelected ? AppColors.dark.colorful05 : AppColors.dark.colorful06),
                   ),
                 ],
               ),
@@ -73,7 +72,7 @@ class SelectedScheduleItemButton extends StatelessWidget {
         padding: const EdgeInsets.only(left: 10),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppTheme.colors.deactive),
+          border: Border.all(color: AppColors.dark.deactive),
         ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,

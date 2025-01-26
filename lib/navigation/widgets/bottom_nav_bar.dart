@@ -2,8 +2,7 @@ import 'package:dot_navigation_bar/dot_navigation_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:rtu_mirea_app/gen/assets.gen.dart';
-import 'package:rtu_mirea_app/presentation/theme.dart';
+import 'package:app_ui/app_ui.dart';
 
 class AppBottomNavigationBar extends StatefulWidget {
   const AppBottomNavigationBar({super.key, required this.index, required this.onClick});
@@ -37,8 +36,8 @@ class _AppBottomNavigationBarState extends State<AppBottomNavigationBar> {
         });
         widget.onClick(index);
       },
-      dotIndicatorColor: AppTheme.colors.primary,
-      backgroundColor: AppTheme.colorsOf(context).background03,
+      dotIndicatorColor: AppColors.dark.primary,
+      backgroundColor: Theme.of(context).extension<AppColors>()!.background03,
       borderRadius: 18,
       enablePaddingAnimation: false,
       marginR: const EdgeInsets.only(left: 24, right: 24),
@@ -48,22 +47,22 @@ class _AppBottomNavigationBarState extends State<AppBottomNavigationBar> {
         _buildNavBarItem(
             0,
             Assets.icons.hugeicons.news.svg(
-              color: AppTheme.colorsOf(context).active,
+              color: Theme.of(context).extension<AppColors>()!.active,
             )),
         _buildNavBarItem(
             1,
             Assets.icons.hugeicons.calendar03.svg(
-              color: AppTheme.colorsOf(context).active,
+              color: Theme.of(context).extension<AppColors>()!.active,
             )),
         _buildNavBarItem(
             2,
             Assets.icons.hugeicons.dashboardSquare01.svg(
-              color: AppTheme.colorsOf(context).active,
+              color: Theme.of(context).extension<AppColors>()!.active,
             )),
         _buildNavBarItem(
             3,
             Assets.icons.hugeicons.userAccount.svg(
-              color: AppTheme.colorsOf(context).active,
+              color: Theme.of(context).extension<AppColors>()!.active,
             )),
       ],
     );
@@ -102,7 +101,7 @@ class _AppBottomNavigationBarState extends State<AppBottomNavigationBar> {
                 curve: Curves.easeInOut,
               )
           : icon,
-      selectedColor: AppTheme.colors.primary,
+      selectedColor: AppColors.dark.primary,
     );
   }
 }

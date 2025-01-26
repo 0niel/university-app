@@ -1,9 +1,8 @@
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:flutter/material.dart';
+import 'package:app_ui/app_ui.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
-import 'package:rtu_mirea_app/presentation/theme.dart';
-import 'package:rtu_mirea_app/presentation/typography.dart';
 
 class ProfileSettingsPage extends StatelessWidget {
   const ProfileSettingsPage({super.key});
@@ -21,7 +20,7 @@ class ProfileSettingsPage extends StatelessWidget {
             const SizedBox(height: 24),
             ListTile(
               title: Text("Тема", style: AppTextStyle.body),
-              leading: Icon(FontAwesomeIcons.palette, color: AppTheme.colorsOf(context).active),
+              leading: Icon(FontAwesomeIcons.palette, color: Theme.of(context).extension<AppColors>()!.active),
               trailing: const Icon(Icons.chevron_right),
               onTap: () {
                 showDialog(
@@ -29,13 +28,13 @@ class ProfileSettingsPage extends StatelessWidget {
                   builder: (context) => SimpleDialog(
                     title: Text("Выбор темы", style: AppTextStyle.titleS),
                     contentPadding: const EdgeInsets.all(16),
-                    backgroundColor: AppTheme.colorsOf(context).background02,
+                    backgroundColor: Theme.of(context).extension<AppColors>()!.background02,
                     elevation: 0,
                     children: [
                       _ListTileThemeItem(
                         title: "Светлая",
                         trailing: AdaptiveTheme.of(context).mode == AdaptiveThemeMode.light
-                            ? Icon(Icons.check, color: AppTheme.colorsOf(context).active)
+                            ? Icon(Icons.check, color: Theme.of(context).extension<AppColors>()!.active)
                             : null,
                         onTap: () {
                           AdaptiveTheme.of(context).setLight();
@@ -46,7 +45,7 @@ class ProfileSettingsPage extends StatelessWidget {
                       _ListTileThemeItem(
                         title: "Тёмная",
                         trailing: AdaptiveTheme.of(context).mode == AdaptiveThemeMode.dark
-                            ? Icon(Icons.check, color: AppTheme.colorsOf(context).active)
+                            ? Icon(Icons.check, color: Theme.of(context).extension<AppColors>()!.active)
                             : null,
                         onTap: () {
                           AdaptiveTheme.of(context).setDark();
@@ -57,7 +56,7 @@ class ProfileSettingsPage extends StatelessWidget {
                       _ListTileThemeItem(
                         title: "Как в системе",
                         trailing: AdaptiveTheme.of(context).mode == AdaptiveThemeMode.system
-                            ? Icon(Icons.check, color: AppTheme.colorsOf(context).active)
+                            ? Icon(Icons.check, color: Theme.of(context).extension<AppColors>()!.active)
                             : null,
                         onTap: () {
                           AdaptiveTheme.of(context).setSystem();
@@ -72,7 +71,7 @@ class ProfileSettingsPage extends StatelessWidget {
             const Divider(),
             ListTile(
               title: Text("Уведомления", style: AppTextStyle.body),
-              leading: Icon(Icons.notifications, color: AppTheme.colorsOf(context).active),
+              leading: Icon(Icons.notifications, color: Theme.of(context).extension<AppColors>()!.active),
               onTap: () {
                 context.go("/profile/settings/notifications");
               },
@@ -102,7 +101,7 @@ class _ListTileThemeItem extends StatelessWidget {
       title: Text(
         title,
         style: AppTextStyle.body.copyWith(
-          color: AppTheme.colorsOf(context).active,
+          color: Theme.of(context).extension<AppColors>()!.active,
         ),
       ),
       contentPadding: const EdgeInsets.symmetric(horizontal: 8),

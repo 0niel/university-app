@@ -4,8 +4,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import 'package:hugeicons/hugeicons.dart';
-import 'package:rtu_mirea_app/presentation/typography.dart';
-import 'package:rtu_mirea_app/presentation/theme.dart';
+import 'package:app_ui/app_ui.dart';
 import 'package:rtu_mirea_app/schedule/models/models.dart';
 import 'package:university_app_server_api/client.dart';
 import 'package:intl/intl.dart';
@@ -28,26 +27,26 @@ class LessonCard extends StatelessWidget {
   static Color getColorByType(LessonType lessonType) {
     switch (lessonType) {
       case LessonType.lecture:
-        return AppTheme.colors.colorful01;
+        return AppColors.dark.colorful01;
       case LessonType.laboratoryWork:
-        return AppTheme.colors.colorful02;
+        return AppColors.dark.colorful02;
       case LessonType.practice:
-        return AppTheme.colors.colorful03;
+        return AppColors.dark.colorful03;
       case LessonType.individualWork:
-        return AppTheme.colors.colorful07;
+        return AppColors.dark.colorful07;
       case LessonType.exam:
-        return AppTheme.colors.colorful06;
+        return AppColors.dark.colorful06;
       case LessonType.credit:
-        return AppTheme.colors.colorful07;
+        return AppColors.dark.colorful07;
       case LessonType.consultation:
-        return AppTheme.colors.colorful04;
+        return AppColors.dark.colorful04;
       case LessonType.courseWork:
-        return AppTheme.colors.colorful05;
+        return AppColors.dark.colorful05;
       case LessonType.courseProject:
-        return AppTheme.colors.colorful05;
+        return AppColors.dark.colorful05;
 
       default:
-        return AppTheme.colors.colorful01;
+        return AppColors.dark.colorful01;
     }
   }
 
@@ -95,14 +94,14 @@ class LessonCard extends StatelessWidget {
       margin: const EdgeInsets.only(top: 8),
       padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
       decoration: BoxDecoration(
-        color: AppTheme.colors.colorful01.withOpacity(0.1),
+        color: AppColors.dark.colorful01.withOpacity(0.1),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
         children: [
           HugeIcon(
             icon: HugeIcons.strokeRoundedComment01,
-            color: AppTheme.colorsOf(context).deactive,
+            color: Theme.of(context).extension<AppColors>()!.deactive,
             size: 16,
           ),
           const SizedBox(
@@ -173,7 +172,7 @@ class LessonCard extends StatelessWidget {
                                   ? '${getLessonTypeName(lesson.lessonType)} в ${lesson.classrooms.map((e) => e.name).join(', ')}'
                                   : getLessonTypeName(lesson.lessonType),
                               style: AppTextStyle.captionL.copyWith(
-                                color: AppTheme.colorsOf(context).deactive,
+                                color: Theme.of(context).extension<AppColors>()!.deactive,
                               ),
                             ),
                           ),
@@ -197,12 +196,13 @@ class LessonCard extends StatelessWidget {
                         children: [
                           Text(
                             '${lesson.lessonBells.number} пара',
-                            style: AppTextStyle.body.copyWith(color: AppTheme.colorsOf(context).colorful03),
+                            style:
+                                AppTextStyle.body.copyWith(color: Theme.of(context).extension<AppColors>()!.colorful03),
                           ),
                           Text(
                             '${lesson.lessonBells.startTime} - ${lesson.lessonBells.endTime}',
                             style: AppTextStyle.body.copyWith(
-                              color: AppTheme.colorsOf(context).colorful03,
+                              color: Theme.of(context).extension<AppColors>()!.colorful03,
                             ),
                           ),
                         ],
@@ -221,7 +221,7 @@ class LessonCard extends StatelessWidget {
                                 HugeIcon(
                                   icon: HugeIcons.strokeRoundedUniversity,
                                   size: 16,
-                                  color: AppTheme.colorsOf(context).deactive,
+                                  color: Theme.of(context).extension<AppColors>()!.deactive,
                                 ),
                                 const SizedBox(
                                   width: 6,
@@ -229,7 +229,8 @@ class LessonCard extends StatelessWidget {
                                 Expanded(
                                   child: Text(
                                     _getClassroomNames(lesson.classrooms),
-                                    style: AppTextStyle.body.copyWith(color: AppTheme.colorsOf(context).active),
+                                    style: AppTextStyle.body
+                                        .copyWith(color: Theme.of(context).extension<AppColors>()!.active),
                                     maxLines: 2,
                                     overflow: TextOverflow.ellipsis,
                                   ),
@@ -254,7 +255,7 @@ class LessonCard extends StatelessWidget {
                                   child: HugeIcon(
                                     icon: HugeIcons.strokeRoundedUserGroup,
                                     size: 16,
-                                    color: AppTheme.colorsOf(context).deactive,
+                                    color: Theme.of(context).extension<AppColors>()!.deactive,
                                   ),
                                 ),
                                 const SizedBox(
@@ -263,7 +264,8 @@ class LessonCard extends StatelessWidget {
                                 Expanded(
                                   child: Text(
                                     lesson.groups?.join(', ') ?? '',
-                                    style: AppTextStyle.body.copyWith(color: AppTheme.colorsOf(context).deactive),
+                                    style: AppTextStyle.body
+                                        .copyWith(color: Theme.of(context).extension<AppColors>()!.deactive),
                                   ),
                                 ),
                               ],
@@ -281,14 +283,15 @@ class LessonCard extends StatelessWidget {
                                   child: HugeIcon(
                                     icon: HugeIcons.strokeRoundedTeacher,
                                     size: 16,
-                                    color: AppTheme.colorsOf(context).deactive,
+                                    color: Theme.of(context).extension<AppColors>()!.deactive,
                                   ),
                                 ),
                                 const SizedBox(width: 6),
                                 Expanded(
                                   child: Text(
                                     lesson.teachers.map((e) => e.name).join(', '),
-                                    style: AppTextStyle.body.copyWith(color: AppTheme.colorsOf(context).deactive),
+                                    style: AppTextStyle.body
+                                        .copyWith(color: Theme.of(context).extension<AppColors>()!.deactive),
                                   ),
                                 ),
                               ],
@@ -336,7 +339,7 @@ class LessonCard extends StatelessWidget {
           Text(
             '$countInGroup ${Intl.plural(countInGroup!, one: 'пара', few: 'пары', many: 'пар', other: 'пар')} в это время',
             style: AppTextStyle.captionL.copyWith(
-              color: AppTheme.colors.colorful03,
+              color: AppColors.dark.colorful03,
             ),
           ),
           const SizedBox(
@@ -348,7 +351,7 @@ class LessonCard extends StatelessWidget {
               height: 8,
               margin: const EdgeInsets.only(right: 4),
               decoration: BoxDecoration(
-                color: i == indexInGroup! ? AppTheme.colors.colorful03 : AppTheme.colors.colorful03.withOpacity(0.3),
+                color: i == indexInGroup! ? AppColors.dark.colorful03 : AppColors.dark.colorful03.withOpacity(0.3),
                 shape: BoxShape.circle,
               ),
             ),

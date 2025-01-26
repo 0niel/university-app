@@ -1,11 +1,7 @@
 import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:rtu_mirea_app/presentation/theme.dart';
-import 'package:rtu_mirea_app/presentation/typography.dart';
-import 'package:rtu_mirea_app/presentation/widgets/buttons/primary_button.dart';
-import 'package:rtu_mirea_app/presentation/widgets/container_label.dart';
-import 'package:rtu_mirea_app/presentation/widgets/forms/text_input.dart';
+import 'package:app_ui/app_ui.dart';
 import 'package:rtu_mirea_app/schedule_management/bloc/schedule_exporter_cubit.dart';
 import 'package:university_app_server_api/client.dart';
 
@@ -208,7 +204,7 @@ class _ExportScheduleModalContentState extends State<ExportScheduleModalContent>
             canTapOnHeader: true,
             splashColor: Colors.transparent,
             isExpanded: _isSubjectPanelExpanded,
-            backgroundColor: AppTheme.colorsOf(context).background03,
+            backgroundColor: Theme.of(context).extension<AppColors>()!.background03,
             headerBuilder: (context, isExpanded) {
               return ListTile(
                 title: Text("Предметы", style: AppTextStyle.titleS),
@@ -319,7 +315,7 @@ class _ExportScheduleModalContentState extends State<ExportScheduleModalContent>
                 ),
                 const SizedBox(width: 8.0),
                 PlatformIconButton(
-                  icon: Icon(Icons.add, color: AppTheme.colorsOf(context).active),
+                  icon: Icon(Icons.add, color: Theme.of(context).extension<AppColors>()!.active),
                   onPressed: _addCustomReminder,
                   material: (_, __) => MaterialIconButtonData(
                     tooltip: 'Добавить напоминание',

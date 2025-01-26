@@ -5,8 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:rtu_mirea_app/domain/entities/attendance.dart';
 import 'package:rtu_mirea_app/presentation/bloc/attendance_bloc/attendance_bloc.dart';
 import 'package:rtu_mirea_app/presentation/bloc/user_bloc/user_bloc.dart';
-import 'package:rtu_mirea_app/presentation/theme.dart';
-import 'package:rtu_mirea_app/presentation/typography.dart';
+import 'package:app_ui/app_ui.dart';
 import 'package:shimmer/shimmer.dart';
 
 class ActivityCalendarGraph extends StatefulWidget {
@@ -83,8 +82,8 @@ class _ActivityCalendarGraphState extends State<ActivityCalendarGraph> {
                       child: Card(
                         child: ActivityCalendar(
                           weekday: 6,
-                          fromColor: AppTheme.colorsOf(context).background01,
-                          toColor: AppTheme.colorsOf(context).primary,
+                          fromColor: Theme.of(context).extension<AppColors>()!.background01,
+                          toColor: Theme.of(context).extension<AppColors>()!.primary,
                           steps: 2,
                           borderRadius: const BorderRadius.all(Radius.circular(4)),
                           scrollDirection: Axis.horizontal,
@@ -124,12 +123,12 @@ class _ActivityCalendarGraphState extends State<ActivityCalendarGraph> {
       return Container(
         padding: const EdgeInsets.symmetric(horizontal: 16),
         decoration: BoxDecoration(
-          color: AppTheme.colorsOf(context).background01,
+          color: Theme.of(context).extension<AppColors>()!.background01,
           borderRadius: BorderRadius.circular(16),
         ),
         child: Shimmer.fromColors(
-          baseColor: AppTheme.colorsOf(context).background03,
-          highlightColor: AppTheme.colorsOf(context).background02,
+          baseColor: Theme.of(context).extension<AppColors>()!.background03,
+          highlightColor: Theme.of(context).extension<AppColors>()!.background02,
           child: const SizedBox(height: 124),
         ),
       );

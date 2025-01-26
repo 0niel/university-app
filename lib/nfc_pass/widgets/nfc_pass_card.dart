@@ -4,7 +4,7 @@ import 'dart:io' as io;
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:rtu_mirea_app/presentation/typography.dart';
+import 'package:app_ui/app_ui.dart';
 import 'package:video_player/video_player.dart';
 
 class NfcPassCard extends StatelessWidget {

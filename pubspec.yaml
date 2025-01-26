@@ -46,12 +46,10 @@ dependencies:
   flutter_html_video: ^3.0.0-beta.2
   flutter_html_svg: ^3.0.0-beta.2
   flutter_html_table: ^3.0.0-beta.2
-  font_awesome_flutter: ^10.1.0
   table_calendar: ^3.0.3
   dismissible_page: ^1.0.2
   story: ^1.1.0
   extended_image: ^8.1.0
-  shimmer: ^3.0.0
   cached_network_image: ^3.2.0
   url_launcher: ^6.0.17
   carousel_slider: ^5.0.0
@@ -153,6 +151,9 @@ dependencies:
   nfc_pass_repository:
     path: packages/nfc_pass_repository
   watch_connectivity: ^0.2.1
+  app_ui:
+    path: packages/app_ui
+  font_awesome_flutter: ^10.8.0
 
 
 dependency_overrides:
@@ -175,38 +176,3 @@ flutter_icons:
   android: false
   ios: true
   image_path: "assets/icon.png"
-
-flutter_gen:
-  output: lib/gen/
-  line_length: 120
-
-  integrations:
-    flutter_svg: true
-
-flutter:
-  uses-material-design: true
-
-  assets:
-    - assets/maps/objects.json
-    - assets/images/
-    - assets/icons/
-    - assets/icons/hugeicons/
-    - assets/maps/v-78/
-    - assets/maps/s-20/
-    - assets/maps/mp-1/
-    
-  fonts:
-    - family: Montserrat
-      fonts:
-        - asset: assets/fonts/Montserrat/Montserrat-SemiBold.ttf
-          weight: 600
-    - family: Inter
-      fonts:
-        - asset: assets/fonts/Inter/Inter-Regular.ttf
-          weight: 400
-        - asset: assets/fonts/Inter/Inter-Medium.ttf
-          weight: 500
-        - asset: assets/fonts/Inter/Inter-SemiBold.ttf
-          weight: 600
-        - asset: assets/fonts/Inter/Inter-Bold.ttf
-          weight: 700

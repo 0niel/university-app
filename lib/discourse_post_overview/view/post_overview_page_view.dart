@@ -6,8 +6,7 @@ import 'package:flutter_html_table/flutter_html_table.dart';
 import 'package:flutter_html_video/flutter_html_video.dart';
 import 'package:intl/intl.dart';
 import 'package:rtu_mirea_app/discourse_post_overview/bloc/post_overview_bloc.dart';
-import 'package:rtu_mirea_app/presentation/theme.dart';
-import 'package:rtu_mirea_app/presentation/typography.dart';
+import 'package:app_ui/app_ui.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 class DiscoursePostOverviewPageView extends StatelessWidget {
@@ -71,62 +70,62 @@ class _PostOverview extends StatelessWidget {
                     ],
                     style: {
                       "h1": Style(
-                        color: AppTheme.colorsOf(context).active,
+                        color: Theme.of(context).extension<AppColors>()!.active,
                         fontStyle: AppTextStyle.h1.fontStyle,
                         fontSize: FontSize(24),
                         lineHeight: const LineHeight(1.5),
                       ),
                       "h2": Style(
-                        color: AppTheme.colorsOf(context).active,
+                        color: Theme.of(context).extension<AppColors>()!.active,
                         fontStyle: AppTextStyle.h2.fontStyle,
                         fontSize: FontSize(20),
                         lineHeight: const LineHeight(1.5),
                       ),
                       "h3": Style(
-                        color: AppTheme.colorsOf(context).active,
+                        color: Theme.of(context).extension<AppColors>()!.active,
                         fontStyle: AppTextStyle.h3.fontStyle,
                         fontSize: FontSize(18),
                         lineHeight: const LineHeight(1.5),
                       ),
                       "h4": Style(
-                        color: AppTheme.colorsOf(context).active,
+                        color: Theme.of(context).extension<AppColors>()!.active,
                         fontStyle: AppTextStyle.h4.fontStyle,
                         fontSize: FontSize(16),
                         lineHeight: const LineHeight(1.5),
                       ),
                       "h5": Style(
-                        color: AppTheme.colorsOf(context).active,
+                        color: Theme.of(context).extension<AppColors>()!.active,
                         fontStyle: AppTextStyle.h5.fontStyle,
                         fontSize: FontSize(14),
                         lineHeight: const LineHeight(1.5),
                       ),
                       "h6": Style(
-                        color: AppTheme.colorsOf(context).active,
+                        color: Theme.of(context).extension<AppColors>()!.active,
                         fontStyle: AppTextStyle.h6.fontStyle,
                         fontSize: FontSize(12),
                         lineHeight: const LineHeight(1.5),
                       ),
                       "body": Style(
-                        color: AppTheme.colorsOf(context).active,
+                        color: Theme.of(context).extension<AppColors>()!.active,
                         fontStyle: AppTextStyle.bodyRegular
                             .copyWith(
-                              color: AppTheme.colorsOf(context).active,
+                              color: Theme.of(context).extension<AppColors>()!.active,
                             )
                             .fontStyle,
                         fontSize: FontSize(16),
                         lineHeight: const LineHeight(1.5),
                       ),
                       "a": Style(
-                        color: AppTheme.colorsOf(context).colorful03,
+                        color: Theme.of(context).extension<AppColors>()!.colorful03,
                         fontStyle: AppTextStyle.bodyRegular.fontStyle,
                         fontSize: FontSize(16),
                         lineHeight: const LineHeight(1.5),
                       ),
                       "p": Style(
-                        color: AppTheme.colorsOf(context).active,
+                        color: Theme.of(context).extension<AppColors>()!.active,
                         fontStyle: AppTextStyle.bodyRegular
                             .copyWith(
-                              color: AppTheme.colorsOf(context).active,
+                              color: Theme.of(context).extension<AppColors>()!.active,
                             )
                             .fontStyle,
                         fontSize: FontSize(16),

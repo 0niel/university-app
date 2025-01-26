@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/src/provider.dart';
 import 'package:rtu_mirea_app/home/cubit/home_cubit.dart';
-import 'package:rtu_mirea_app/presentation/typography.dart';
-import 'package:rtu_mirea_app/presentation/theme.dart';
+import 'package:app_ui/app_ui.dart';
 
 /// Get next button to open next page
 /// or to close onboarding and start main app
@@ -25,9 +24,9 @@ class NextButton extends StatelessWidget {
         }
       },
       style: ElevatedButton.styleFrom(
-        foregroundColor: AppTheme.colorsOf(context).primary.withOpacity(0.25),
+        foregroundColor: Theme.of(context).extension<AppColors>()!.primary.withOpacity(0.25),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        backgroundColor: AppTheme.colorsOf(context).primary,
+        backgroundColor: Theme.of(context).extension<AppColors>()!.primary,
         shadowColor: const Color(0x7f000000),
         elevation: 8.0,
       ),
@@ -40,10 +39,10 @@ class NextButton extends StatelessWidget {
             ? Text(
                 "Начать!",
                 style: AppTextStyle.buttonS.copyWith(
-                  color: AppTheme.colorsOf(context).white,
+                  color: Theme.of(context).extension<AppColors>()!.white,
                 ),
               )
-            : Icon(Icons.arrow_forward_ios, color: AppTheme.colorsOf(context).active),
+            : Icon(Icons.arrow_forward_ios, color: Theme.of(context).extension<AppColors>()!.active),
       ),
     );
   }

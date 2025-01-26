@@ -21,9 +21,7 @@ import 'package:rtu_mirea_app/presentation/pages/profile/profile_detail_page.dar
 import 'package:rtu_mirea_app/presentation/pages/profile/profile_lectors_page.dart';
 import 'package:rtu_mirea_app/presentation/pages/profile/profile_scores_page.dart';
 import 'package:rtu_mirea_app/presentation/pages/profile/profile_settings_page.dart';
-import 'package:rtu_mirea_app/presentation/theme.dart';
-import 'package:rtu_mirea_app/presentation/typography.dart';
-import 'package:rtu_mirea_app/presentation/widgets/images_view_gallery.dart';
+import 'package:app_ui/app_ui.dart';
 import 'package:rtu_mirea_app/profile/profile.dart';
 import 'package:rtu_mirea_app/rating_system_calculator/models/models.dart';
 import 'package:rtu_mirea_app/rating_system_calculator/view/about_rating_system_page.dart';
@@ -184,13 +182,13 @@ GoRouter createRouter() => GoRouter(
                                       tileColor: Colors.transparent,
                                       contentPadding: const EdgeInsets.symmetric(horizontal: 24),
                                       leadingAndTrailingTextStyle: AppTextStyle.chip.copyWith(
-                                        color: AppTheme.colorsOf(context).active,
+                                        color: Theme.of(context).extension<AppColors>()!.active,
                                       ),
                                       titleTextStyle: AppTextStyle.titleM.copyWith(
-                                        color: AppTheme.colorsOf(context).active,
+                                        color: Theme.of(context).extension<AppColors>()!.active,
                                       ),
                                       subtitleTextStyle: AppTextStyle.chip.copyWith(
-                                        color: AppTheme.colorsOf(context).deactive,
+                                        color: Theme.of(context).extension<AppColors>()!.deactive,
                                       ),
                                     ),
                                   );

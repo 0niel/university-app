@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:rtu_mirea_app/presentation/theme.dart';
-import 'package:rtu_mirea_app/presentation/widgets/skeleton.dart';
+import 'package:app_ui/app_ui.dart';
 
 class SkeletonContributorCard extends StatelessWidget {
   const SkeletonContributorCard({super.key});
@@ -16,19 +15,19 @@ class SkeletonContributorCard extends StatelessWidget {
           children: [
             CircleAvatar(
               radius: 37,
-              backgroundColor: AppTheme.colors.deactive,
+              backgroundColor: AppColors.dark.deactive,
             ),
             const SizedBox(height: 16),
             Container(
               width: 100,
               height: 16,
-              color: AppTheme.colors.background03,
+              color: AppColors.dark.background03,
             ),
             const SizedBox(height: 8),
             Container(
               width: 100,
               height: 16,
-              color: AppTheme.colors.background03,
+              color: AppColors.dark.background03,
             ),
           ],
         ),

@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:rtu_mirea_app/presentation/theme.dart';
-import 'package:rtu_mirea_app/presentation/typography.dart';
+import 'package:app_ui/app_ui.dart';
 import 'package:rtu_mirea_app/rating_system_calculator/models/models.dart';
 
 // Card(
-//             color: AppTheme.colors.background02,
+//             color: AppColors.dark.background02,
 //             shape: RoundedRectangleBorder(
 //               borderRadius: BorderRadius.circular(16),
 //             ),
@@ -18,11 +17,11 @@ import 'package:rtu_mirea_app/rating_system_calculator/models/models.dart';
 //                     height: 48,
 //                     decoration: BoxDecoration(
 //                       borderRadius: BorderRadius.circular(16),
-//                       color: AppTheme.colors.colorful02,
+//                       color: AppColors.dark.colorful02,
 //                     ),
 //                     child: Icon(
 //                       Icons.school,
-//                       color: AppTheme.colors.activeLightMode,
+//                       color: AppColors.dark.activeLightMode,
 //                     ),
 //                   ),
 //                   const SizedBox(width: 16),
@@ -37,7 +36,7 @@ import 'package:rtu_mirea_app/rating_system_calculator/models/models.dart';
 //                     child: Text(
 //                       "8",
 //                       style: AppTextStyle.buttonL.copyWith(
-//                         color: AppTheme.colors.colorful02,
+//                         color: AppColors.dark.colorful02,
 //                       ),
 //                     ),
 //                   ),
@@ -64,7 +63,7 @@ class SubjectCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      color: AppTheme.colors.background02,
+      color: AppColors.dark.background02,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
       ),
@@ -111,7 +110,7 @@ class SubjectCard extends StatelessWidget {
                 child: Text(
                   score.toString(),
                   style: AppTextStyle.buttonL.copyWith(
-                    color: AppTheme.colors.colorful05,
+                    color: AppColors.dark.colorful05,
                   ),
                 ),
               ),

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:rtu_mirea_app/presentation/theme.dart';
+import 'package:app_ui/app_ui.dart';
 
 class SixDigitCodeInput extends StatefulWidget {
   final Function(String) onCompleted;
@@ -63,13 +63,13 @@ class _SixDigitCodeInputState extends State<SixDigitCodeInput> {
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
                 borderSide: BorderSide(
-                  color: AppTheme.colorsOf(context).primary,
+                  color: Theme.of(context).extension<AppColors>()!.primary,
                 ),
               ),
               focusedErrorBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
                 borderSide: BorderSide(
-                  color: AppTheme.colorsOf(context).colorful07,
+                  color: Theme.of(context).extension<AppColors>()!.colorful07,
                 ),
               ),
               disabledBorder: OutlineInputBorder(
@@ -89,10 +89,10 @@ class _SixDigitCodeInputState extends State<SixDigitCodeInput> {
               errorBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
                 borderSide: BorderSide(
-                  color: AppTheme.colorsOf(context).colorful07,
+                  color: Theme.of(context).extension<AppColors>()!.colorful07,
                 ),
               ),
-              fillColor: AppTheme.colorsOf(context).background01,
+              fillColor: Theme.of(context).extension<AppColors>()!.background01,
               filled: true,
             ),
             onChanged: (value) => _onChanged(value, index),

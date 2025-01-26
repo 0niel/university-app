@@ -5,8 +5,7 @@ import 'package:flutter_html_svg/flutter_html_svg.dart';
 import 'package:flutter_html_video/flutter_html_video.dart';
 import 'package:rtu_mirea_app/presentation/bloc/announces_bloc/announces_bloc.dart';
 import 'package:url_launcher/url_launcher_string.dart';
-import 'package:rtu_mirea_app/presentation/typography.dart';
-import 'package:rtu_mirea_app/presentation/theme.dart';
+import 'package:app_ui/app_ui.dart';
 
 class ProfileAnnouncesPage extends StatelessWidget {
   const ProfileAnnouncesPage({super.key});
@@ -43,7 +42,7 @@ class ProfileAnnouncesPage extends StatelessWidget {
                           const SizedBox(height: 6),
                           Text(
                             state.announces[index].date,
-                            style: AppTextStyle.bodyRegular.copyWith(color: AppTheme.colors.deactive),
+                            style: AppTextStyle.bodyRegular.copyWith(color: AppColors.dark.deactive),
                           ),
                           const SizedBox(height: 8),
                           Html(

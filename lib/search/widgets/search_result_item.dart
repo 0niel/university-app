@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
-import 'package:rtu_mirea_app/presentation/theme.dart';
-import 'package:rtu_mirea_app/presentation/typography.dart';
+import 'package:app_ui/app_ui.dart';
 
 enum ItemType {
   group,
@@ -28,14 +27,14 @@ class SearchResultItem extends StatelessWidget {
           width: 32,
           height: 32,
           decoration: BoxDecoration(
-            color: AppTheme.colorsOf(context).colorful03,
+            color: Theme.of(context).extension<AppColors>()!.colorful03,
             borderRadius: BorderRadius.circular(20),
           ),
           child: Center(
             child: Text(
               name.split(' ').map((e) => e[0]).take(2).join().toUpperCase(),
               style: AppTextStyle.bodyBold.copyWith(
-                color: AppTheme.colorsOf(context).active,
+                color: Theme.of(context).extension<AppColors>()!.active,
               ),
             ),
           ),
@@ -44,7 +43,7 @@ class SearchResultItem extends StatelessWidget {
         Text(
           name,
           style: AppTextStyle.titleS.copyWith(
-            color: AppTheme.colorsOf(context).active,
+            color: Theme.of(context).extension<AppColors>()!.active,
           ),
         ),
       ],
@@ -64,7 +63,7 @@ class SearchResultItem extends StatelessWidget {
                 child: Text(
                   name,
                   style: AppTextStyle.titleS.copyWith(
-                    color: AppTheme.colorsOf(context).active,
+                    color: Theme.of(context).extension<AppColors>()!.active,
                   ),
                 ),
               ),

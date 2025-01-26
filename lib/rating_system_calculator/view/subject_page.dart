@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:rtu_mirea_app/presentation/theme.dart';
-import 'package:rtu_mirea_app/presentation/typography.dart';
+import 'package:app_ui/app_ui.dart';
 import 'package:rtu_mirea_app/rating_system_calculator/models/models.dart';
 
 class SubjectPage extends StatelessWidget {
@@ -14,9 +13,9 @@ class SubjectPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.colors.background01,
+      backgroundColor: AppColors.dark.background01,
       appBar: AppBar(
-        backgroundColor: AppTheme.colors.background01,
+        backgroundColor: AppColors.dark.background01,
         title: const Text(
           "Калькулятор",
         ),
@@ -73,13 +72,13 @@ class _RatingSystemCalculatorViewState extends State<RatingSystemCalculatorView>
                       label: Text(
                         day.toString().split(' ')[0],
                         style: AppTextStyle.body.copyWith(
-                          color: AppTheme.colors.activeLightMode,
+                          color: AppColors.dark.activeLightMode,
                         ),
                       ),
                       selected: false,
                       onSelected: (value) {},
-                      selectedColor: AppTheme.colors.primary,
-                      backgroundColor: AppTheme.colors.background02,
+                      selectedColor: AppColors.dark.primary,
+                      backgroundColor: AppColors.dark.background02,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16),
                       ),

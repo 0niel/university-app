@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:rtu_mirea_app/presentation/typography.dart';
-import 'package:rtu_mirea_app/presentation/theme.dart';
+import 'package:app_ui/app_ui.dart';
 
 class BottomErrorInfo extends StatelessWidget {
   const BottomErrorInfo({super.key});
@@ -13,9 +12,9 @@ class BottomErrorInfo extends StatelessWidget {
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [
-              AppTheme.colorsOf(context).secondary,
-              AppTheme.colorsOf(context).deactive,
-              AppTheme.colorsOf(context).background01
+              Theme.of(context).extension<AppColors>()!.secondary,
+              Theme.of(context).extension<AppColors>()!.deactive,
+              Theme.of(context).extension<AppColors>()!.background01
             ],
             begin: const Alignment(-1, -1),
             end: const Alignment(-1, 1),
@@ -30,19 +29,16 @@ class BottomErrorInfo extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 24),
             decoration: BoxDecoration(
-              color: AppTheme.colorsOf(context).background01,
+              color: Theme.of(context).extension<AppColors>()!.background01,
               borderRadius: const BorderRadius.only(topLeft: Radius.circular(25.0), topRight: Radius.circular(25.0)),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 40),
-                  child: Image(
-                    image: AssetImage('assets/images/Saly-39.png'),
-                    height: 205.0,
-                  ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 40),
+                  child: Assets.images.saly39.image(height: 205.0),
                 ),
                 Text(
                   "Профиль теперь недоступен",
@@ -52,7 +48,7 @@ class BottomErrorInfo extends StatelessWidget {
                 const SizedBox(height: 8),
                 Text(
                   "Разработчики, отвечающие за API ЛКС, отключили возможность производить аутентификацию и получать данные своего аккаунта. Пожалуйста, используйте lk.mirea.ru",
-                  style: AppTextStyle.captionL.copyWith(color: AppTheme.colorsOf(context).deactive),
+                  style: AppTextStyle.captionL.copyWith(color: Theme.of(context).extension<AppColors>()!.deactive),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 32),
@@ -60,7 +56,7 @@ class BottomErrorInfo extends StatelessWidget {
                   constraints: const BoxConstraints.tightFor(width: double.infinity, height: 48),
                   child: ElevatedButton(
                     style: ButtonStyle(
-                      backgroundColor: WidgetStateProperty.all(AppTheme.colorsOf(context).primary),
+                      backgroundColor: WidgetStateProperty.all(Theme.of(context).extension<AppColors>()!.primary),
                       shape: WidgetStateProperty.all<RoundedRectangleBorder>(
                         RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(24.0),

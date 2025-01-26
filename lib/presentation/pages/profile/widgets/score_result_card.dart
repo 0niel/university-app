@@ -3,8 +3,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:rtu_mirea_app/domain/entities/score.dart';
 import 'package:rtu_mirea_app/presentation/bloc/scores_bloc/scores_bloc.dart';
-import 'package:rtu_mirea_app/presentation/theme.dart';
-import 'package:rtu_mirea_app/presentation/typography.dart';
+import 'package:app_ui/app_ui.dart';
 
 class ScoreResultCard extends StatefulWidget {
   const ScoreResultCard({
@@ -125,7 +124,7 @@ class _ScoreResultCardState extends State<ScoreResultCard> {
       color: trend == ScoreTrend.increase
           ? Colors.green
           : trend == ScoreTrend.decrease
-              ? AppTheme.colorsOf(context).colorful07
+              ? Theme.of(context).extension<AppColors>()!.colorful07
               : Colors.transparent,
     );
   }
@@ -136,7 +135,7 @@ class _ScoreResultCardState extends State<ScoreResultCard> {
         Text(
           type,
           style: AppTextStyle.body.copyWith(
-            color: AppTheme.colorsOf(context).colorful03,
+            color: Theme.of(context).extension<AppColors>()!.colorful03,
           ),
         ),
         const SizedBox(width: 10),
@@ -212,22 +211,22 @@ Widget _buildEmtyDataLine(BuildContext context) {
   return Container(
     height: 1,
     width: 48,
-    color: AppTheme.colorsOf(context).deactiveDarker,
+    color: Theme.of(context).extension<AppColors>()!.deactiveDarker,
   );
 }
 
 Color getColorByResult(String result) {
   final resultLookup = {
-    "не зачтено": AppTheme.colors.colorful07,
-    "неуваж": AppTheme.colors.colorful07,
+    "не зачтено": AppColors.dark.colorful07,
+    "неуваж": AppColors.dark.colorful07,
     "зач": Colors.green,
     "зачет": Colors.green,
     "отл": Colors.green,
     "отлично": Colors.green,
-    "хор": AppTheme.colors.colorful05,
-    "хорошо": AppTheme.colors.colorful05,
-    "удовл": AppTheme.colors.colorful06,
-    "удовлетворительно": AppTheme.colors.colorful06,
+    "хор": AppColors.dark.colorful05,
+    "хорошо": AppColors.dark.colorful05,
+    "удовл": AppColors.dark.colorful06,
+    "удовлетворительно": AppColors.dark.colorful06,
   };
 
   for (var entry in resultLookup.entries) {

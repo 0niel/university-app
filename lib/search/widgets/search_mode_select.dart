@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:rtu_mirea_app/gen/assets.gen.dart';
-import 'package:rtu_mirea_app/presentation/theme.dart';
+import 'package:app_ui/app_ui.dart';
 import 'package:rtu_mirea_app/search/search.dart';
 
 class SearchModeSelect extends StatelessWidget {
@@ -70,6 +69,8 @@ class SearchModeSelect extends StatelessWidget {
   }
 
   Color _getIconColor(BuildContext context, bool isActive) {
-    return isActive ? AppTheme.colorsOf(context).active : AppTheme.colorsOf(context).deactive;
+    return isActive
+        ? Theme.of(context).extension<AppColors>()!.active
+        : Theme.of(context).extension<AppColors>()!.deactive;
   }
 }

@@ -8,9 +8,7 @@ import 'package:rtu_mirea_app/domain/entities/news_item.dart';
 import 'package:intl/intl.dart';
 import 'package:rtu_mirea_app/presentation/bloc/news_bloc/news_bloc.dart';
 import 'package:rtu_mirea_app/presentation/pages/news/widgets/tag_badge.dart';
-import 'package:rtu_mirea_app/presentation/theme.dart';
-import 'package:rtu_mirea_app/presentation/widgets/image_placeholder.dart';
-import 'package:rtu_mirea_app/presentation/typography.dart';
+import 'package:app_ui/app_ui.dart';
 
 class NewsCard extends StatelessWidget {
   final NewsItem newsItem;
@@ -32,7 +30,7 @@ class NewsCard extends StatelessWidget {
       child: Container(
         margin: const EdgeInsets.only(bottom: 24, left: 16, right: 16),
         decoration: BoxDecoration(
-          color: AppTheme.colorsOf(context).background02,
+          color: Theme.of(context).extension<AppColors>()!.background02,
           borderRadius: BorderRadius.circular(16),
         ),
         child: Padding(
@@ -96,7 +94,7 @@ class NewsCard extends StatelessWidget {
               ),
               const SizedBox(height: 4),
               Text((DateFormat.yMMMd('ru_RU').format(newsItem.date).toString()),
-                  textAlign: TextAlign.start, style: AppTextStyle.captionL.copyWith(color: AppTheme.colors.secondary)),
+                  textAlign: TextAlign.start, style: AppTextStyle.captionL.copyWith(color: AppColors.dark.secondary)),
               NewsBloc.isTagsNotEmpty(newsItem.tags) ? const SizedBox(height: 16) : Container(),
               NewsBloc.isTagsNotEmpty(newsItem.tags)
                   ? _Tags(

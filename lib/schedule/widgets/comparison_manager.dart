@@ -2,11 +2,10 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:rtu_mirea_app/presentation/widgets/buttons/primary_button.dart';
+
 import 'package:rtu_mirea_app/schedule/bloc/schedule_bloc.dart';
 import 'package:rtu_mirea_app/schedule/models/models.dart';
-import 'package:rtu_mirea_app/presentation/typography.dart';
-import 'package:rtu_mirea_app/presentation/theme.dart';
+import 'package:app_ui/app_ui.dart';
 
 class ComparisonManager extends StatelessWidget {
   const ComparisonManager({super.key});
@@ -55,7 +54,7 @@ class ComparisonManager extends StatelessWidget {
                       title: Text(
                         _getScheduleTitle(schedule),
                         style: AppTextStyle.titleS.copyWith(
-                          color: AppTheme.colors.active,
+                          color: AppColors.dark.active,
                         ),
                       ),
                       trailing: Transform.scale(

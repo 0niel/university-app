@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:rtu_mirea_app/presentation/theme.dart';
-import 'package:rtu_mirea_app/presentation/typography.dart';
+import 'package:app_ui/app_ui.dart';
 import 'package:rtu_mirea_app/map/map.dart';
 
 class CampusSelector extends StatelessWidget {
@@ -20,10 +19,10 @@ class CampusSelector extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12),
       decoration: BoxDecoration(
-        color: AppTheme.colorsOf(context).background02,
+        color: Theme.of(context).extension<AppColors>()!.background02,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: AppTheme.colorsOf(context).divider,
+          color: Theme.of(context).extension<AppColors>()!.divider,
           width: 1,
         ),
       ),
@@ -33,10 +32,10 @@ class CampusSelector extends StatelessWidget {
         underline: const SizedBox(),
         icon: Icon(
           Icons.arrow_drop_down,
-          color: AppTheme.colorsOf(context).active,
+          color: Theme.of(context).extension<AppColors>()!.active,
         ),
-        style: AppTextStyle.bodyBold.copyWith(color: AppTheme.colorsOf(context).active),
-        dropdownColor: AppTheme.colorsOf(context).background02,
+        style: AppTextStyle.bodyBold.copyWith(color: Theme.of(context).extension<AppColors>()!.active),
+        dropdownColor: Theme.of(context).extension<AppColors>()!.background02,
         items: campuses.map((campus) {
           return DropdownMenuItem<CampusModel>(
             value: campus,
@@ -44,7 +43,7 @@ class CampusSelector extends StatelessWidget {
               padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
               child: Text(
                 campus.displayName,
-                style: AppTextStyle.bodyBold.copyWith(color: AppTheme.colorsOf(context).active),
+                style: AppTextStyle.bodyBold.copyWith(color: Theme.of(context).extension<AppColors>()!.active),
               ),
             ),
           );

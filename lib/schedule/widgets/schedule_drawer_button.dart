@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:rtu_mirea_app/presentation/theme.dart';
-import 'package:rtu_mirea_app/presentation/typography.dart';
+import 'package:app_ui/app_ui.dart';
 
 class ScheduleDrawerButton extends StatelessWidget {
   const ScheduleDrawerButton({
@@ -26,7 +25,8 @@ class ScheduleDrawerButton extends StatelessWidget {
               children: [
                 icon,
                 const SizedBox(width: 20),
-                Text(text, style: AppTextStyle.buttonL.copyWith(color: AppTheme.colorsOf(context).active)),
+                Text(text,
+                    style: AppTextStyle.buttonL.copyWith(color: Theme.of(context).extension<AppColors>()!.active)),
               ],
             ),
           ),

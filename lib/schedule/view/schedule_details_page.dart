@@ -3,9 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
-import 'package:rtu_mirea_app/presentation/theme.dart';
-import 'package:rtu_mirea_app/presentation/typography.dart';
-import 'package:rtu_mirea_app/presentation/widgets/forms/text_input.dart';
+import 'package:app_ui/app_ui.dart';
 import 'package:rtu_mirea_app/schedule/models/models.dart';
 import 'package:rtu_mirea_app/schedule/schedule.dart';
 import 'package:university_app_server_api/client.dart';
@@ -152,8 +150,9 @@ class _ScheduleDetailsPageState extends State<ScheduleDetailsPage> {
               controller: _textController,
               errorText: _textErrorText,
               maxLines: 5,
-              fillColor:
-                  AdaptiveTheme.of(context).mode.isDark ? AppTheme.colorsOf(context).background03 : Colors.white),
+              fillColor: AdaptiveTheme.of(context).mode.isDark
+                  ? Theme.of(context).extension<AppColors>()!.background03
+                  : Colors.white),
         ),
       ),
       const Divider(),
@@ -257,7 +256,7 @@ class _ScheduleDetailsPageState extends State<ScheduleDetailsPage> {
               return InputChip(
                 label: Text(group),
                 onPressed: () => context.go('/schedule/search', extra: group),
-                side: BorderSide(color: AppTheme.colorsOf(context).deactiveDarker),
+                side: BorderSide(color: Theme.of(context).extension<AppColors>()!.deactiveDarker),
               );
             }).toList() ??
             [],
@@ -281,14 +280,14 @@ class _ScheduleDetailsPageState extends State<ScheduleDetailsPage> {
             title: Text(
               teacher.name,
               style: AppTextStyle.titleM.copyWith(
-                color: AppTheme.colorsOf(context).active,
+                color: Theme.of(context).extension<AppColors>()!.active,
               ),
             ),
             subtitle: teacher.post != null
                 ? Text(
                     teacher.post!,
                     style: AppTextStyle.captionS.copyWith(
-                      color: AppTheme.colorsOf(context).deactive,
+                      color: Theme.of(context).extension<AppColors>()!.deactive,
                     ),
                   )
                 : null,

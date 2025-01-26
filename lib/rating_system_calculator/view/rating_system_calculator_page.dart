@@ -2,10 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:rtu_mirea_app/presentation/theme.dart';
-import 'package:rtu_mirea_app/presentation/typography.dart';
-import 'package:rtu_mirea_app/presentation/widgets/buttons/primary_button.dart';
-import 'package:rtu_mirea_app/presentation/widgets/buttons/text_outlined_button.dart';
+import 'package:app_ui/app_ui.dart';
 import 'package:rtu_mirea_app/rating_system_calculator/bloc/rating_system_bloc.dart';
 import 'package:rtu_mirea_app/rating_system_calculator/models/models.dart';
 import 'package:rtu_mirea_app/rating_system_calculator/widgets/widgets.dart';
@@ -19,9 +16,9 @@ class RatingSystemCalculatorPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.colors.background01,
+      backgroundColor: AppColors.dark.background01,
       appBar: AppBar(
-        backgroundColor: AppTheme.colors.background01,
+        backgroundColor: AppColors.dark.background01,
         elevation: 0,
         title: const Text(
           "Бально-рейтинговая система",
@@ -137,7 +134,7 @@ class _RatingSystemCalculatorViewState extends State<RatingSystemCalculatorView>
                     Text(
                       "Бально-рейтинговая система",
                       style: AppTextStyle.titleM.copyWith(
-                        color: AppTheme.colors.activeLightMode,
+                        color: AppColors.dark.activeLightMode,
                         fontWeight: FontWeight.w700,
                         fontSize: 21,
                       ),
@@ -149,7 +146,7 @@ class _RatingSystemCalculatorViewState extends State<RatingSystemCalculatorView>
                           child: Text(
                             "📖  Перейдите, чтобы узнать, как это устроено",
                             style: AppTextStyle.bodyL.copyWith(
-                              color: AppTheme.colors.activeLightMode,
+                              color: AppColors.dark.activeLightMode,
                               fontSize: 16,
                             ),
                             maxLines: 2,

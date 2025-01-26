@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
-import 'package:rtu_mirea_app/presentation/theme.dart';
-import 'package:rtu_mirea_app/presentation/typography.dart';
+import 'package:app_ui/app_ui.dart';
 
 class SearchHistoryItem extends StatelessWidget {
   const SearchHistoryItem({
@@ -28,7 +27,7 @@ class SearchHistoryItem extends StatelessWidget {
           child: Text(
             query,
             style: AppTextStyle.titleS.copyWith(
-              color: AppTheme.colorsOf(context).active,
+              color: Theme.of(context).extension<AppColors>()!.active,
             ),
           ),
         ),

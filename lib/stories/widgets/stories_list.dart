@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:rtu_mirea_app/env/env.dart';
-import 'package:rtu_mirea_app/presentation/theme.dart';
+import 'package:app_ui/app_ui.dart';
 import 'package:storyly_flutter/storyly_flutter.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
@@ -34,8 +34,8 @@ class _StoriesListState extends State<StoriesList> {
       ..storyGroupListHorizontalPaddingBetweenItems = (8 * devicePixelRatio).round()
       ..storyGroupListVerticalEdgePadding = 0
       ..storyGroupTextIsVisible = true
-      ..storyGroupTextColorSeen = AppTheme.colorsOf(context).active
-      ..storyGroupTextColorNotSeen = AppTheme.colorsOf(context).active
+      ..storyGroupTextColorSeen = Theme.of(context).extension<AppColors>()!.active
+      ..storyGroupTextColorNotSeen = Theme.of(context).extension<AppColors>()!.active
       ..storyGroupIconHeight = (70 * devicePixelRatio).round()
       ..storyGroupIconWidth = (70 * devicePixelRatio).round()
       ..storyGroupTextLines = 1
@@ -50,8 +50,8 @@ class _StoriesListState extends State<StoriesList> {
       ..storyGroupListHorizontalPaddingBetweenItems = 8
       ..storyGroupListVerticalEdgePadding = 0
       ..storyGroupTextIsVisible = true
-      ..storyGroupTextColorSeen = AppTheme.colorsOf(context).active
-      ..storyGroupTextColorNotSeen = AppTheme.colorsOf(context).active
+      ..storyGroupTextColorSeen = Theme.of(context).extension<AppColors>()!.active
+      ..storyGroupTextColorNotSeen = Theme.of(context).extension<AppColors>()!.active
       ..storyGroupIconHeight = 70
       ..storyGroupIconWidth = 70
       ..storyGroupTextLines = 1

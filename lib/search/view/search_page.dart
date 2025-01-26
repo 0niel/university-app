@@ -2,10 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:rtu_mirea_app/gen/assets.gen.dart';
-import 'package:rtu_mirea_app/presentation/theme.dart';
-import 'package:rtu_mirea_app/presentation/typography.dart';
-import 'package:rtu_mirea_app/presentation/widgets/scaffold_messenger_helper.dart';
+import 'package:app_ui/app_ui.dart';
 import 'package:rtu_mirea_app/schedule/bloc/schedule_bloc.dart';
 import 'package:rtu_mirea_app/search/widgets/search_history_item.dart';
 import 'package:schedule_repository/schedule_repository.dart';
@@ -25,9 +22,9 @@ class SearchPage extends StatelessWidget {
         scheduleRepository: context.read<ScheduleRepository>(),
       )..add(SearchQueryChanged(searchQuery: query ?? '')),
       child: Scaffold(
-        backgroundColor: AppTheme.colorsOf(context).background01,
+        backgroundColor: Theme.of(context).extension<AppColors>()!.background01,
         appBar: AppBar(
-          backgroundColor: AppTheme.colorsOf(context).background01,
+          backgroundColor: Theme.of(context).extension<AppColors>()!.background01,
           elevation: 0,
           title: const Text(
             "Поиск",
@@ -216,7 +213,7 @@ class _SearchViewState extends State<SearchView> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Assets.icons.hugeicons.search.svg(
-                              color: AppTheme.colorsOf(context).active,
+                              color: Theme.of(context).extension<AppColors>()!.active,
                               width: 64,
                               height: 64,
                             ),

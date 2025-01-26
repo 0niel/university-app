@@ -3,13 +3,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:rtu_mirea_app/domain/entities/news_item.dart';
 import 'package:rtu_mirea_app/presentation/bloc/news_bloc/news_bloc.dart';
-import 'package:rtu_mirea_app/presentation/widgets/buttons/app_settings_button.dart';
-import 'package:rtu_mirea_app/presentation/widgets/buttons/primary_tab_button.dart';
-import 'package:rtu_mirea_app/presentation/widgets/skeleton.dart';
+import 'package:app_ui/app_ui.dart';
 import 'package:very_good_infinite_list/very_good_infinite_list.dart';
 import 'widgets/news_card.dart';
 import 'widgets/tag_badge.dart';
-import 'package:rtu_mirea_app/presentation/theme.dart';
 
 class NewsPage extends StatefulWidget {
   const NewsPage({super.key});
@@ -37,7 +34,7 @@ class _NewsPageState extends State<NewsPage> {
     showModalBottomSheet(
       isDismissible: true,
       isScrollControlled: true,
-      backgroundColor: AppTheme.colorsOf(context).background02,
+      backgroundColor: Theme.of(context).extension<AppColors>()!.background02,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(
           top: Radius.circular(24),
@@ -75,7 +72,7 @@ class _NewsPageState extends State<NewsPage> {
                             if (loadedState.selectedTag == loadedState.tags[index]) {
                               return TagBadge(
                                 tag: loadedState.tags[index],
-                                color: AppTheme.colorsOf(context).colorful04,
+                                color: Theme.of(context).extension<AppColors>()!.colorful04,
                                 onPressed: () => _filterNewsByTag(context.read<NewsBloc>(), "все"),
                               );
                             }
@@ -101,7 +98,7 @@ class _NewsPageState extends State<NewsPage> {
     return SliverAppBar(
       floating: true,
       elevation: 0,
-      backgroundColor: AppTheme.colorsOf(context).background01,
+      backgroundColor: Theme.of(context).extension<AppColors>()!.background01,
       automaticallyImplyLeading: false,
       title: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -294,7 +291,7 @@ class _ShimmerNewsCardLoading extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 24, left: 16, right: 16),
       decoration: BoxDecoration(
-        color: AppTheme.colorsOf(context).background02,
+        color: Theme.of(context).extension<AppColors>()!.background02,
         borderRadius: BorderRadius.circular(16),
       ),
       child: Padding(

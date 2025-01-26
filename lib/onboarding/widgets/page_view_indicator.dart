@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:rtu_mirea_app/presentation/theme.dart';
+import 'package:app_ui/app_ui.dart';
 
 class PageViewIndicator extends StatelessWidget {
   const PageViewIndicator({super.key, required this.isActive});
@@ -14,7 +14,7 @@ class PageViewIndicator extends StatelessWidget {
       height: isActive ? 15.0 : 11.0,
       width: isActive ? 15.0 : 11.0,
       decoration: BoxDecoration(
-        color: isActive ? Colors.white : AppTheme.colorsOf(context).active,
+        color: isActive ? Colors.white : Theme.of(context).extension<AppColors>()!.active,
         borderRadius: const BorderRadius.all(Radius.circular(12.0)),
         boxShadow: <BoxShadow>[
           isActive

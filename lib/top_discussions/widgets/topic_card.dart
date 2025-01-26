@@ -2,11 +2,8 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:discourse_repository/discourse_repository.dart';
 import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
-import 'package:rtu_mirea_app/presentation/theme.dart';
-import 'package:rtu_mirea_app/presentation/typography.dart';
-import 'package:rtu_mirea_app/presentation/widgets/image_placeholder.dart';
+import 'package:app_ui/app_ui.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 import 'dart:math' as math;
 
@@ -93,8 +90,7 @@ class _TopicCardState extends State<TopicCard> {
                   ),
                 ),
                 child: Center(
-                  child: SvgPicture.asset(
-                    'assets/icons/image_placeholder.svg',
+                  child: Assets.icons.imagePlaceholder.svg(
                     color: Theme.of(context).colorScheme.onPrimary,
                     width: 48,
                     height: 48,
@@ -132,7 +128,7 @@ class _TopicCardState extends State<TopicCard> {
                 Text(
                   widget.author!.username,
                   style: AppTextStyle.captionS.copyWith(
-                    color: AppTheme.colorsOf(context).deactive,
+                    color: Theme.of(context).extension<AppColors>()!.deactive,
                   ),
                 ),
             ],
@@ -148,7 +144,7 @@ class _TopicCardState extends State<TopicCard> {
         Text(
           DateFormat.yMMMd().format(DateTime.parse(widget.topic.createdAt)),
           style: AppTextStyle.captionS.copyWith(
-            color: AppTheme.colorsOf(context).deactive,
+            color: Theme.of(context).extension<AppColors>()!.deactive,
           ),
         ),
         const Spacer(),
@@ -187,13 +183,13 @@ class _IconStat extends StatelessWidget {
         Icon(
           icon,
           size: 18,
-          color: AppTheme.colorsOf(context).deactive,
+          color: Theme.of(context).extension<AppColors>()!.deactive,
         ),
         const SizedBox(width: 4),
         Text(
           '$count',
           style: AppTextStyle.captionS.copyWith(
-            color: AppTheme.colorsOf(context).deactive,
+            color: Theme.of(context).extension<AppColors>()!.deactive,
           ),
         ),
       ],

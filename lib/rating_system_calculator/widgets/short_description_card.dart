@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:rtu_mirea_app/presentation/theme.dart';
-import 'package:rtu_mirea_app/presentation/typography.dart';
+import 'package:app_ui/app_ui.dart';
 
 class ShortDescriptionCard extends StatelessWidget {
   const ShortDescriptionCard({
@@ -18,7 +17,7 @@ class ShortDescriptionCard extends StatelessWidget {
       margin: const EdgeInsets.only(top: 16),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(24),
-        color: AppTheme.colors.primary.withOpacity(0.1),
+        color: AppColors.dark.primary.withOpacity(0.1),
       ),
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -26,7 +25,7 @@ class ShortDescriptionCard extends StatelessWidget {
           children: [
             Icon(
               icon,
-              color: AppTheme.colors.primary,
+              color: AppColors.dark.primary,
             ),
             const SizedBox(width: 16),
             Expanded(

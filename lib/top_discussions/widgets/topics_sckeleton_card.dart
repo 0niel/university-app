@@ -1,8 +1,7 @@
 import 'dart:math';
 
+import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
-import 'package:rtu_mirea_app/presentation/theme.dart';
-import 'package:rtu_mirea_app/presentation/widgets/skeleton.dart';
 
 class TopicsSkeletonCard extends StatelessWidget {
   const TopicsSkeletonCard({super.key});
@@ -22,7 +21,7 @@ class TopicsSkeletonCard extends StatelessWidget {
       child: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
-          color: AppTheme.colorsOf(context).background02,
+          color: Theme.of(context).extension<AppColors>()!.background02,
         ),
         padding: const EdgeInsets.all(16),
         child: SizedBox(

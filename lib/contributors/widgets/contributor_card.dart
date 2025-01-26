@@ -2,8 +2,7 @@ import 'package:community_repository/community_repository.dart';
 import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:rtu_mirea_app/presentation/theme.dart';
-import 'package:rtu_mirea_app/presentation/typography.dart';
+import 'package:app_ui/app_ui.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class ContributorCard extends StatelessWidget {
@@ -14,7 +13,7 @@ class ContributorCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      color: AppTheme.colorsOf(context).background02,
+      color: Theme.of(context).extension<AppColors>()!.background02,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
       ),
@@ -28,7 +27,7 @@ class ContributorCard extends StatelessWidget {
             children: [
               CircleAvatar(
                 radius: 37,
-                backgroundColor: AppTheme.colorsOf(context).deactive,
+                backgroundColor: Theme.of(context).extension<AppColors>()!.deactive,
                 backgroundImage: NetworkImage(contributor.avatarUrl),
               ),
               const SizedBox(height: 16),

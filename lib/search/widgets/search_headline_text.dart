@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:rtu_mirea_app/presentation/theme.dart';
-import 'package:rtu_mirea_app/presentation/typography.dart';
+import 'package:app_ui/app_ui.dart';
 
 class SearchHeadlineText extends StatelessWidget {
   const SearchHeadlineText({required this.headerText, super.key});
@@ -14,7 +13,7 @@ class SearchHeadlineText extends StatelessWidget {
       child: Text(
         headerText.toUpperCase(),
         style: AppTextStyle.chip.copyWith(
-          color: AppTheme.colorsOf(context).deactive,
+          color: Theme.of(context).extension<AppColors>()!.deactive,
         ),
       ),
     );

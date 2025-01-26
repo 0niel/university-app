@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:rtu_mirea_app/map/map.dart';
 import 'package:rtu_mirea_app/presentation/constants.dart';
-import 'package:rtu_mirea_app/presentation/theme.dart';
+import 'package:app_ui/app_ui.dart';
 import 'package:flutter/services.dart';
 
 class MapPageView extends StatefulWidget {
@@ -180,7 +180,7 @@ class _MapPageViewState extends State<MapPageView> {
                   right: 16,
                   child: Container(
                     decoration: BoxDecoration(
-                      color: AppTheme.colorsOf(context).background02,
+                      color: Theme.of(context).extension<AppColors>()!.background02,
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: isLandscape

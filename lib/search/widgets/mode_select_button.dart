@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:rtu_mirea_app/presentation/theme.dart';
-import 'package:rtu_mirea_app/presentation/typography.dart';
+import 'package:app_ui/app_ui.dart';
 
 class ModeSelectButton extends StatefulWidget {
   const ModeSelectButton({super.key, required this.isActive, required this.text, required this.onClick, this.icon});
@@ -26,8 +25,8 @@ class _ModeSelectButtonState extends State<ModeSelectButton> {
         },
         style: ButtonStyle(
           backgroundColor: widget.isActive
-              ? WidgetStateProperty.all<Color>(AppTheme.colorsOf(context).primary)
-              : WidgetStateProperty.all<Color>(AppTheme.colorsOf(context).background02),
+              ? WidgetStateProperty.all<Color>(Theme.of(context).extension<AppColors>()!.primary)
+              : WidgetStateProperty.all<Color>(Theme.of(context).extension<AppColors>()!.background02),
           shape: WidgetStateProperty.all<RoundedRectangleBorder>(
             RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(50.0),
@@ -42,7 +41,9 @@ class _ModeSelectButtonState extends State<ModeSelectButton> {
               Theme(
                 data: ThemeData(
                   iconTheme: IconThemeData(
-                    color: widget.isActive ? AppTheme.colorsOf(context).active : AppTheme.colorsOf(context).deactive,
+                    color: widget.isActive
+                        ? Theme.of(context).extension<AppColors>()!.active
+                        : Theme.of(context).extension<AppColors>()!.deactive,
                   ),
                 ),
                 child: widget.icon!,
@@ -52,7 +53,9 @@ class _ModeSelectButtonState extends State<ModeSelectButton> {
             Text(
               widget.text,
               style: AppTextStyle.titleS.copyWith(
-                color: widget.isActive ? AppTheme.colorsOf(context).active : AppTheme.colorsOf(context).deactive,
+                color: widget.isActive
+                    ? Theme.of(context).extension<AppColors>()!.active
+                    : Theme.of(context).extension<AppColors>()!.deactive,
               ),
             ),
           ],

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:rtu_mirea_app/presentation/theme.dart';
-import 'package:rtu_mirea_app/presentation/typography.dart';
+import 'package:app_ui/app_ui.dart';
 import 'package:rtu_mirea_app/schedule/schedule.dart';
 import 'package:university_app_server_api/client.dart';
 
@@ -32,7 +31,7 @@ class CommentSection<T> extends StatelessWidget {
                   width: 12,
                   height: 12,
                   decoration: BoxDecoration(
-                    color: AppTheme.colorsOf(context).colorful07,
+                    color: Theme.of(context).extension<AppColors>()!.colorful07,
                     borderRadius: BorderRadius.circular(4),
                   ),
                 ),
@@ -40,7 +39,7 @@ class CommentSection<T> extends StatelessWidget {
                 Expanded(
                   child: Text(
                     comment.text,
-                    style: AppTextStyle.captionL.copyWith(color: AppTheme.colorsOf(context).colorful07),
+                    style: AppTextStyle.captionL.copyWith(color: Theme.of(context).extension<AppColors>()!.colorful07),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),

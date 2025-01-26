@@ -8,12 +8,8 @@ import 'package:go_router/go_router.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:rtu_mirea_app/nfc_pass/bloc/nfc_pass_cubit.dart';
 import 'package:rtu_mirea_app/nfc_pass/widgets/widgets.dart';
-import 'package:rtu_mirea_app/presentation/widgets/bottom_modal_sheet.dart';
 import 'package:video_player/video_player.dart';
-
-import 'package:rtu_mirea_app/presentation/widgets/buttons/colorful_button.dart';
-import 'package:rtu_mirea_app/presentation/typography.dart';
-import 'package:rtu_mirea_app/presentation/theme.dart';
+import 'package:app_ui/app_ui.dart';
 
 class NfcPassPageView extends StatefulWidget {
   const NfcPassPageView({super.key});
@@ -153,7 +149,7 @@ class _NfcPassPageViewState extends State<NfcPassPageView> {
               HugeIcon(
                 icon: HugeIcons.strokeRoundedMail02,
                 size: 64,
-                color: AppTheme.colors.colorful04,
+                color: AppColors.light.colorful04,
               ).animate().scale(
                     duration: 500.ms,
                     curve: Curves.easeOutBack,
@@ -264,7 +260,7 @@ class NfcNotConnected extends StatelessWidget {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        HugeIcon(icon: HugeIcons.strokeRoundedConnect, size: 64, color: AppTheme.colors.colorful04)
+        HugeIcon(icon: HugeIcons.strokeRoundedConnect, size: 64, color: AppColors.dark.colorful04)
             .animate()
             .fadeIn(duration: 500.ms),
         const SizedBox(height: 16),
@@ -283,7 +279,7 @@ class NfcNotConnected extends StatelessWidget {
         ColorfulButton(
           text: "Подключить пропуск",
           onClick: onPressed,
-          backgroundColor: AppTheme.colors.primary,
+          backgroundColor: AppColors.dark.primary,
         ).animate().fadeIn(delay: 300.ms, duration: 500.ms),
       ],
     );
