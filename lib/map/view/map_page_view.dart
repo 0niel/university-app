@@ -9,96 +9,96 @@ class MapPageView extends StatefulWidget {
   const MapPageView({super.key});
 
   static final campuses = [
-    const CampusModel(
+    CampusModel(
       id: 'v-78',
       displayName: 'В-78',
       floors: [
         FloorModel(
           id: 'v-78-floor0',
           number: 0,
-          svgPath: 'assets/maps/v-78/floor_0.svg',
+          svgPath: Assets.maps.v78.floor0.keyName,
         ),
         FloorModel(
           id: 'v-78-floor1',
           number: 1,
-          svgPath: 'assets/maps/v-78/floor_1.svg',
+          svgPath: Assets.maps.v78.floor1.keyName,
         ),
         FloorModel(
           id: 'v-78-floor2',
           number: 2,
-          svgPath: 'assets/maps/v-78/floor_2.svg',
+          svgPath: Assets.maps.v78.floor2.keyName,
         ),
         FloorModel(
           id: 'v-78-floor3',
           number: 3,
-          svgPath: 'assets/maps/v-78/floor_3.svg',
+          svgPath: Assets.maps.v78.floor3.keyName,
         ),
         FloorModel(
           id: 'v-78-floor4',
           number: 4,
-          svgPath: 'assets/maps/v-78/floor_4.svg',
+          svgPath: Assets.maps.v78.floor4.keyName,
         ),
       ],
     ),
-    const CampusModel(
+    CampusModel(
       id: 's-20',
       displayName: 'С-20',
       floors: [
         FloorModel(
           id: 's-20-floor0',
           number: 1,
-          svgPath: 'assets/maps/s-20/floor_1.svg',
+          svgPath: Assets.maps.s20.floor1.keyName,
         ),
         FloorModel(
           id: 's-20-floor1',
           number: 2,
-          svgPath: 'assets/maps/s-20/floor_2.svg',
+          svgPath: Assets.maps.s20.floor2.keyName,
         ),
         FloorModel(
           id: 's-20-floor2',
           number: 3,
-          svgPath: 'assets/maps/s-20/floor_3.svg',
+          svgPath: Assets.maps.s20.floor3.keyName,
         ),
         FloorModel(
           id: 's-20-floor3',
           number: 4,
-          svgPath: 'assets/maps/s-20/floor_4.svg',
+          svgPath: Assets.maps.s20.floor4.keyName,
         ),
       ],
     ),
-    const CampusModel(
+    CampusModel(
       displayName: 'МП-1',
       id: 'mp-1',
       floors: [
         FloorModel(
           id: 'mp-1-floor0',
           number: -1,
-          svgPath: 'assets/maps/mp-1/-1.svg',
+          svgPath: Assets.maps.mp1.a1Svg_.keyName,
         ),
         FloorModel(
           id: 'mp-1-floor1',
           number: 1,
-          svgPath: 'assets/maps/mp-1/1.svg',
+          svgPath: Assets.maps.mp1.a1Svg.keyName,
         ),
         FloorModel(
           id: 'mp-1-floor2',
           number: 2,
-          svgPath: 'assets/maps/mp-1/2.svg',
+          svgPath: Assets.maps.mp1.a2.keyName,
         ),
         FloorModel(
           id: 'mp-1-floor3',
           number: 3,
-          svgPath: 'assets/maps/mp-1/3.svg',
+          svgPath: Assets.maps.mp1.a3.keyName,
         ),
         FloorModel(
           id: 'mp-1-floor4',
           number: 4,
-          svgPath: 'assets/maps/mp-1/4.svg',
+          svgPath: Assets.maps.mp1.a4.keyName,
         ),
         FloorModel(
           id: 'mp-1-floor5',
           number: 5,
-          svgPath: 'assets/maps/mp-1/5.svg',
+          svgPath: Assets.maps.mp1.a5.keyName,
         ),
       ],
     ),
