@@ -8,36 +8,39 @@ class SearchTextField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 48,
-      decoration: BoxDecoration(
-        color: Theme.of(context).extension<AppColors>()!.background02,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: TextField(
-        controller: controller,
-        style: AppTextStyle.titleS.copyWith(
-          color: Theme.of(context).extension<AppColors>()!.active,
+    return Hero(
+      tag: 'searchHero',
+      child: Container(
+        height: 48,
+        decoration: BoxDecoration(
+          color: Theme.of(context).extension<AppColors>()!.background02,
+          borderRadius: BorderRadius.circular(12),
         ),
-        decoration: InputDecoration(
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 12,
+        child: TextField(
+          controller: controller,
+          style: AppTextStyle.titleS.copyWith(
+            color: Theme.of(context).extension<AppColors>()!.active,
           ),
-          border: InputBorder.none,
-          hintText: 'Поиск',
-          hintStyle: AppTextStyle.titleS.copyWith(
-            color: Theme.of(context).extension<AppColors>()!.deactive,
-          ),
-          prefixIcon: Padding(
-            padding: const EdgeInsets.only(right: 8, left: 16),
-            child: Assets.icons.hugeicons.search.svg(
-              color: Theme.of(context).extension<AppColors>()!.active,
+          decoration: InputDecoration(
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 12,
             ),
-          ),
-          prefixIconConstraints: const BoxConstraints(
-            maxWidth: 48,
-            maxHeight: 48,
+            border: InputBorder.none,
+            hintText: 'Поиск',
+            hintStyle: AppTextStyle.titleS.copyWith(
+              color: Theme.of(context).extension<AppColors>()!.deactive,
+            ),
+            prefixIcon: Padding(
+              padding: const EdgeInsets.only(right: 8, left: 16),
+              child: Assets.icons.hugeicons.search.svg(
+                color: Theme.of(context).extension<AppColors>()!.active,
+              ),
+            ),
+            prefixIconConstraints: const BoxConstraints(
+              maxWidth: 48,
+              maxHeight: 48,
+            ),
           ),
         ),
       ),

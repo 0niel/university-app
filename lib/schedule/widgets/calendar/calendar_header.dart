@@ -114,24 +114,27 @@ class _CalendarHeaderState extends State<CalendarHeader> with TickerProviderStat
                         onPressed: () {
                           context.go('/schedule/search');
                         },
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.only(left: 12, right: 9),
-                              child: Icon(
-                                UniconsLine.search,
-                                size: 20,
-                                color: Theme.of(context).extension<AppColors>()!.deactive,
+                        child: Hero(
+                          tag: 'searchHero',
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.only(left: 12, right: 9),
+                                child: Icon(
+                                  UniconsLine.search,
+                                  size: 20,
+                                  color: Theme.of(context).extension<AppColors>()!.deactive,
+                                ),
                               ),
-                            ),
-                            Text(
-                              "Поиск по расписанию",
-                              style: AppTextStyle.bodyL.copyWith(
-                                color: Theme.of(context).extension<AppColors>()!.deactive,
+                              Text(
+                                "Поиск по расписанию",
+                                style: AppTextStyle.bodyL.copyWith(
+                                  color: Theme.of(context).extension<AppColors>()!.deactive,
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
                     ),

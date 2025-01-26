@@ -5,7 +5,6 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
-import 'package:hugeicons/hugeicons.dart';
 import 'package:rtu_mirea_app/presentation/constants.dart';
 import 'package:app_ui/app_ui.dart';
 import 'package:rtu_mirea_app/schedule/bloc/schedule_bloc.dart';
@@ -92,43 +91,43 @@ class _SchedulePageState extends State<SchedulePage> {
         if (state.showScheduleDiffDialog && state.latestDiff != null) {
           context.read<ScheduleBloc>().add(const HideScheduleDiffDialog());
 
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Row(
-                  children: [
-                    HugeIcon(
-                      icon: HugeIcons.strokeRoundedAlertCircle,
-                      size: 24,
-                      color: Theme.of(context).extension<AppColors>()!.active,
-                    ),
-                    const SizedBox(width: 12.0),
-                    Expanded(
-                      child: Text(
-                        'Найдены изменения в расписании',
-                        style: AppTextStyle.body.copyWith(
-                          color: Theme.of(context).extension<AppColors>()!.active,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                action: SnackBarAction(
-                  label: 'Просмотреть',
-                  textColor: Theme.of(context).extension<AppColors>()!.primary,
-                  onPressed: () {
-                    showDialog(
-                      context: context,
-                      builder: (context) {
-                        return ScheduleChangesDialog(diff: state.latestDiff!);
-                      },
-                    );
-                  },
-                ),
-                duration: const Duration(seconds: 5),
-              ),
-            );
-          });
+          // WidgetsBinding.instance.addPostFrameCallback((_) {
+          //   ScaffoldMessenger.of(context).showSnackBar(
+          //     SnackBar(
+          //       content: Row(
+          //         children: [
+          //           HugeIcon(
+          //             icon: HugeIcons.strokeRoundedAlertCircle,
+          //             size: 24,
+          //             color: Theme.of(context).extension<AppColors>()!.active,
+          //           ),
+          //           const SizedBox(width: 12.0),
+          //           Expanded(
+          //             child: Text(
+          //               'Найдены изменения в расписании',
+          //               style: AppTextStyle.body.copyWith(
+          //                 color: Theme.of(context).extension<AppColors>()!.active,
+          //               ),
+          //             ),
+          //           ),
+          //         ],
+          //       ),
+          //       action: SnackBarAction(
+          //         label: 'Просмотреть',
+          //         textColor: Theme.of(context).extension<AppColors>()!.primary,
+          //         onPressed: () {
+          //           showDialog(
+          //             context: context,
+          //             builder: (context) {
+          //               return ScheduleChangesDialog(diff: state.latestDiff!);
+          //             },
+          //           );
+          //         },
+          //       ),
+          //       duration: const Duration(seconds: 5),
+          //     ),
+          //   );
+          // });
         }
       },
       buildWhen: (previous, current) => current.status != ScheduleStatus.failure && current.selectedSchedule != null,
