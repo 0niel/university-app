@@ -1,0 +1,43 @@
+name: Shorebird Release
+
+on:
+  workflow_dispatch:
+
+env:
+  SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
+
+jobs:
+  release:
+    defaults:
+      run:
+        shell: bash
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📚 Git Checkout
+        uses: actions/checkout@v3
+        with:
+          submodules: 'recursive'
+          fetch-depth: 0             
+
+      - name: 🐦 Setup Shorebird
+        uses: shorebirdtech/setup-shorebird@v1
+        with:
+          cache: true
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: 🚀 Shorebird Release (Android)
+        uses: shorebirdtech/shorebird-release@v0
+        with:
+          platform: android
+
+      - name: 🚀 Shorebird Release (iOS)
+        uses: shorebirdtech/shorebird-release@v0
+        with:
+          platform: ios
