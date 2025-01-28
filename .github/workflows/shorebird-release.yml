@@ -19,7 +19,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           submodules: 'recursive'
-          fetch-depth: 0             
+          fetch-depth: 0
 
       - name: 🐦 Setup Shorebird
         uses: shorebirdtech/setup-shorebird@v1
@@ -40,8 +40,14 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
+      - name: 🛠️ Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 'stable'
+          channel: 'stable'
+
       - name: 🛠️ Generate Build Runner (env.g.dart)
-        run: flutter pub run build_runner build
+        run: flutter pub run build_runner build --delete-conflicting-outputs
 
       - name: 🚀 Shorebird Release (Android)
         uses: shorebirdtech/shorebird-release@v0
