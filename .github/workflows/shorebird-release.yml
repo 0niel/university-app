@@ -26,6 +26,14 @@ jobs:
         with:
           cache: true
 
+      - name: Cache Shorebird
+        uses: actions/cache@v2
+        with:
+          path: /home/runner/.config/shorebird
+          key: ${{ runner.os }}-shorebird-cache-${{ hashFiles('**/shorebird-config.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-shorebird-cache-
+
       - name: Set up Java
         uses: actions/setup-java@v4
         with:
