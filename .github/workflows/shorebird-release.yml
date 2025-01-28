@@ -21,30 +21,33 @@ jobs:
           submodules: 'recursive'
           fetch-depth: 0
 
-      - name: 🐦 Setup Shorebird
-        uses: shorebirdtech/setup-shorebird@v1
-        with:
-          cache: true
-
-      - name: Cache Shorebird
-        uses: actions/cache@v2
-        with:
-          path: /home/runner/.config/shorebird
-          key: ${{ runner.os }}-shorebird-cache-${{ hashFiles('**/shorebird-config.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-shorebird-cache-
-
       - name: Set up Java
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: 🛠️ Set up Flutter
+      - name: 🐦 Setup Shorebird
+        uses: shorebirdtech/setup-shorebird@v1
+        with:
+          cache: true
+
+      - name: ♻️ Cache Flutter Pub
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.pub-cache
+            build/
+          key: ${{ runner.os }}-pub-cache-${{ hashFiles('pubspec.lock') }}
+
+      - name: 🚀 Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: 'stable'
-          channel: 'stable'
+          channel: stable
+
+      - name: 📦 Flutter Pub Get
+        run: flutter pub get
+
 
       - name: 🛠️ Generate Build Runner (env.g.dart)
         run: flutter pub run build_runner build --delete-conflicting-outputs
