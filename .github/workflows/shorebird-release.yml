@@ -32,6 +32,9 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
+      - name: 🛠️ Generate Build Runner (env.g.dart)
+        run: flutter pub run build_runner build
+
       - name: 🚀 Shorebird Release (Android)
         uses: shorebirdtech/shorebird-release@v0
         with:
