@@ -1,17 +1,133 @@
-name: ci
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+name: Shorebird Master Push Workflow
 
 on:
-  pull_request:
+  push:
     branches:
-      - main
+      - master
+
+env:
+  SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
+  build_and_release:
+    name: Build & Release for Android/iOS with Shorebird
+    runs-on: macos-latest
+
     steps:
-      - name: noop
-        run: echo 'noop'
+      - name: 📚 Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: ♻️ Cache Flutter Pub
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.pub-cache
+            build/
+          # Ключ кэша основан на ОС и файле pubspec.lock
+          key: ${{ runner.os }}-pub-cache-${{ hashFiles('pubspec.lock') }}
+
+      - name: 🚀 Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: 📦 Flutter Pub Get
+        run: flutter pub get
+
+      - name: 🔄 Bump Version in pubspec.yaml
+        id: bump_version
+        run: |
+          CURRENT_VERSION_LINE=$(grep '^version:' pubspec.yaml)
+          CURRENT_VERSION=$(echo "$CURRENT_VERSION_LINE" | awk '{print $2}')  # "1.2.3+4"
+
+          echo "Current pubspec version: $CURRENT_VERSION"
+
+          IFS='+' read -r SEMVER BUILD_NUMBER <<< "$CURRENT_VERSION"
+
+          NEW_BUILD_NUMBER=$((BUILD_NUMBER + 1))
+          NEW_VERSION="$SEMVER+$NEW_BUILD_NUMBER"
+
+          echo "Updated pubspec version: $NEW_VERSION"
+
+          sed -i.bak "s/^version: .*/version: $NEW_VERSION/" pubspec.yaml
+
+          echo "VERSION=$NEW_VERSION" >> $GITHUB_ENV
+
+      - name: 📝 Commit and Push Version
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add pubspec.yaml
+          git commit -m "chore: bump version to ${{ env.VERSION }} [skip ci]" || echo "No changes to commit."
+          git push origin master || echo "No push required."
+
+      - name: 🐦 Setup Shorebird
+        uses: shorebirdtech/setup-shorebird@v1
+        with:
+          cache: true  # Опционально, чтобы быстрее повторно ставить CLI
+
+      - name: 🔑 Authenticate Shorebird
+        run: shorebird login:ci --token "$SHOREBIRD_TOKEN"
+
+      - name: 🛠️ Build Android
+        run: flutter build apk --release
+      
+      - name: 🛠️ Build iOS
+        run: flutter build ios --release --no-codesign
+
+      - name: 🛠️ Shorebird Patch (Android)
+        id: shorebird-patch-android
+        uses: shorebirdtech/shorebird-patch@v0
+        with:
+          platform: android
+
+      - name: 🛠️ Shorebird Patch (iOS)
+        id: shorebird-patch-ios
+        uses: shorebirdtech/shorebird-patch@v0
+        with:
+          platform: ios
+
+      - name: 📝 Print Patch Numbers
+        run: |
+          echo "Android Patch Number: ${{ steps.shorebird-patch-android.outputs.patch-number }}"
+          echo "iOS Patch Number: ${{ steps.shorebird-patch-ios.outputs.patch-number }}"
+
+      - name: 🔖 Create GitHub Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ env.VERSION }}
+          release_name: "Release ${{ env.VERSION }}"
+          body: |
+            **Android Patch Number**: ${{ steps.shorebird-patch-android.outputs.patch-number }}
+            **iOS Patch Number**: ${{ steps.shorebird-patch-ios.outputs.patch-number }}
+          draft: false
+          prerelease: false
+
+      - name: 📦 Upload Android APK
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: build/app/outputs/flutter-apk/app-release.apk
+          asset_name: "myapp-${{ env.VERSION }}-release.apk"
+          asset_content_type: application/vnd.android.package-archive
+
+      - name: 📦 Zip iOS .app
+        run: |
+          cd build/ios/iphoneos
+          zip -r Runner.app.zip Runner.app
+
+      - name: 📦 Upload iOS .app
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: build/ios/iphoneos/Runner.app.zip
+          asset_name: "myapp-${{ env.VERSION }}-ios.zip"
+          asset_content_type: application/zip
