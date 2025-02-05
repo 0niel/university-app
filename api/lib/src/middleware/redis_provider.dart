@@ -6,7 +6,8 @@ Middleware redisProvider() {
   return (handler) {
     return (context) async {
       final redis = await RedisClient.instance;
-      return handler.use(provider<RedisClient>((_) => redis))(context);
+      final updatedContext = context.provide<RedisClient>(() => redis);
+      return handler(updatedContext);
     };
   };
 }

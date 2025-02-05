@@ -26,11 +26,13 @@ class RedisClient {
     if (_connection == null || _command == null) {
       try {
         final conn = RedisConnection();
-        print('Connecting to Redis..., ${_appConfig.redisHost}, ${_appConfig.redisPort}');
+        print('Connecting to Redis... ${_appConfig.redisHost}, ${_appConfig.redisPort}');
         _command = await conn.connect(_appConfig.redisHost, _appConfig.redisPort);
         _connection = conn;
-      } catch (e, s) {
-        Error.throwWithStackTrace('Failed to connect to Redis.', s);
+      } catch (e) {
+        print('Failed to connect to Redis: $e\nFalling back to no-op Redis.');
+        // Fallback to a no-op command so that errors related to Redis are suppressed.
+        _command = NullCommand();
       }
     }
   }
@@ -49,4 +51,21 @@ class RedisClient {
     }
     return _command!;
   }
+}
+
+/// A no-operation [Command] that safely ignores calls.
+class NullCommand implements Command {
+  @override
+  // ignore: non_constant_identifier_names
+  Future<dynamic> send_object(Object args) async {
+    return null;
+  }
+
+  @override
+  Future<dynamic> get(String key) async {
+    return null;
+  }
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
