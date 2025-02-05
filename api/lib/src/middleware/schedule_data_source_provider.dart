@@ -8,14 +8,11 @@ import 'package:university_app_server_api/src/redis.dart';
 final _delegate = RtuMireaScheduleDataSource();
 
 Middleware scheduleDataSourceProvider() {
-  return (handler) {
-    return (context) async {
-      final redis = context.read<RedisClient>();
-      final dataSource = CachedScheduleDataSource(
-        delegate: _delegate,
-        redisClient: redis,
-      );
-      return handler.use(provider<ScheduleDataSource>((_) => dataSource))(context);
-    };
-  };
+  return provider<ScheduleDataSource>((context) {
+    final redis = context.read<RedisClient>();
+    return CachedScheduleDataSource(
+      delegate: _delegate,
+      redisClient: redis,
+    );
+  });
 }
