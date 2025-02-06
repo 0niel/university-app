@@ -7,6 +7,9 @@ on:
 
 env:
   SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
+  MAPKIT_API_KEY: ${{ secrets.MAPKIT_API_KEY }}
+  STORYLY_ID: ${{ secrets.STORYLY_ID }}
+  SENTRY_DSN: ${{ secrets.STORYLY_ID }}
 
 jobs:
   build_and_release:
@@ -69,9 +72,6 @@ jobs:
         uses: shorebirdtech/setup-shorebird@v1
         with:
           cache: true  # Опционально, чтобы быстрее повторно ставить CLI
-
-      - name: 🔑 Authenticate Shorebird
-        run: shorebird login:ci --token "$SHOREBIRD_TOKEN"
 
       - name: 🛠️ Build Android
         run: flutter build apk --release
