@@ -40,6 +40,10 @@ jobs:
       - name: 📦 Flutter Pub Get
         run: flutter pub get
 
+
+      - name: 🛠️ Generate Build Runner (env.g.dart)
+        run: flutter pub run build_runner build --delete-conflicting-outputs
+
       - name: 🔄 Bump Version in pubspec.yaml
         id: bump_version
         run: |
