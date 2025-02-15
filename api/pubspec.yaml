@@ -21,6 +21,8 @@ dependencies:
     path: ./packages/rtu_mirea_schedule_api_client
   redis: ^4.0.0
   dart_frog_request_logger: ^0.0.2
+  news_blocks:
+    path: packages/news_blocks
 
 dev_dependencies:
   build_runner: ^2.4.6

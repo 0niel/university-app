@@ -48,5 +48,10 @@ class LessonBells extends Equatable {
   Map<String, dynamic> toJson() => _$LessonBellsToJson(this);
 
   @override
+  String toString() {
+    return '$startTime-$endTime';
+  }
+
+  @override
   List<Object?> get props => [number, startTime, endTime];
 }
