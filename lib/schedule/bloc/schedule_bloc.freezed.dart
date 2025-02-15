@@ -15,12 +15,302 @@ final _privateConstructorUsedError = UnsupportedError(
     'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
 
 /// @nodoc
+mixin _$FieldDiff {
+  /// Имя поля (например, "Даты", "Аудитории", "Преподаватели", "Время/номер пары")
+  String get fieldName => throw _privateConstructorUsedError;
+
+  /// Для не-дата полей можно оставить старое и новое значение в виде строки
+  String? get oldValue => throw _privateConstructorUsedError;
+  String? get newValue => throw _privateConstructorUsedError;
+
+  /// Для поля «Даты»—детальный diff: какие даты добавлены
+  List<DateTime>? get addedDates => throw _privateConstructorUsedError;
+
+  /// Для поля «Даты»—детальный diff: какие даты удалены
+  List<DateTime>? get removedDates => throw _privateConstructorUsedError;
+
+  /// И какие даты остались без изменений (можно их просто вывести без подсветки)
+  List<DateTime>? get unchangedDates => throw _privateConstructorUsedError;
+
+  /// Create a copy of FieldDiff
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  $FieldDiffCopyWith<FieldDiff> get copyWith => throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $FieldDiffCopyWith<$Res> {
+  factory $FieldDiffCopyWith(FieldDiff value, $Res Function(FieldDiff) then) = _$FieldDiffCopyWithImpl<$Res, FieldDiff>;
+  @useResult
+  $Res call(
+      {String fieldName,
+      String? oldValue,
+      String? newValue,
+      List<DateTime>? addedDates,
+      List<DateTime>? removedDates,
+      List<DateTime>? unchangedDates});
+}
+
+/// @nodoc
+class _$FieldDiffCopyWithImpl<$Res, $Val extends FieldDiff> implements $FieldDiffCopyWith<$Res> {
+  _$FieldDiffCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  /// Create a copy of FieldDiff
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? fieldName = null,
+    Object? oldValue = freezed,
+    Object? newValue = freezed,
+    Object? addedDates = freezed,
+    Object? removedDates = freezed,
+    Object? unchangedDates = freezed,
+  }) {
+    return _then(_value.copyWith(
+      fieldName: null == fieldName
+          ? _value.fieldName
+          : fieldName // ignore: cast_nullable_to_non_nullable
+              as String,
+      oldValue: freezed == oldValue
+          ? _value.oldValue
+          : oldValue // ignore: cast_nullable_to_non_nullable
+              as String?,
+      newValue: freezed == newValue
+          ? _value.newValue
+          : newValue // ignore: cast_nullable_to_non_nullable
+              as String?,
+      addedDates: freezed == addedDates
+          ? _value.addedDates
+          : addedDates // ignore: cast_nullable_to_non_nullable
+              as List<DateTime>?,
+      removedDates: freezed == removedDates
+          ? _value.removedDates
+          : removedDates // ignore: cast_nullable_to_non_nullable
+              as List<DateTime>?,
+      unchangedDates: freezed == unchangedDates
+          ? _value.unchangedDates
+          : unchangedDates // ignore: cast_nullable_to_non_nullable
+              as List<DateTime>?,
+    ) as $Val);
+  }
+}
+
+/// @nodoc
+abstract class _$$FieldDiffImplCopyWith<$Res> implements $FieldDiffCopyWith<$Res> {
+  factory _$$FieldDiffImplCopyWith(_$FieldDiffImpl value, $Res Function(_$FieldDiffImpl) then) =
+      __$$FieldDiffImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call(
+      {String fieldName,
+      String? oldValue,
+      String? newValue,
+      List<DateTime>? addedDates,
+      List<DateTime>? removedDates,
+      List<DateTime>? unchangedDates});
+}
+
+/// @nodoc
+class __$$FieldDiffImplCopyWithImpl<$Res> extends _$FieldDiffCopyWithImpl<$Res, _$FieldDiffImpl>
+    implements _$$FieldDiffImplCopyWith<$Res> {
+  __$$FieldDiffImplCopyWithImpl(_$FieldDiffImpl _value, $Res Function(_$FieldDiffImpl) _then) : super(_value, _then);
+
+  /// Create a copy of FieldDiff
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? fieldName = null,
+    Object? oldValue = freezed,
+    Object? newValue = freezed,
+    Object? addedDates = freezed,
+    Object? removedDates = freezed,
+    Object? unchangedDates = freezed,
+  }) {
+    return _then(_$FieldDiffImpl(
+      fieldName: null == fieldName
+          ? _value.fieldName
+          : fieldName // ignore: cast_nullable_to_non_nullable
+              as String,
+      oldValue: freezed == oldValue
+          ? _value.oldValue
+          : oldValue // ignore: cast_nullable_to_non_nullable
+              as String?,
+      newValue: freezed == newValue
+          ? _value.newValue
+          : newValue // ignore: cast_nullable_to_non_nullable
+              as String?,
+      addedDates: freezed == addedDates
+          ? _value._addedDates
+          : addedDates // ignore: cast_nullable_to_non_nullable
+              as List<DateTime>?,
+      removedDates: freezed == removedDates
+          ? _value._removedDates
+          : removedDates // ignore: cast_nullable_to_non_nullable
+              as List<DateTime>?,
+      unchangedDates: freezed == unchangedDates
+          ? _value._unchangedDates
+          : unchangedDates // ignore: cast_nullable_to_non_nullable
+              as List<DateTime>?,
+    ));
+  }
+}
+
+/// @nodoc
+
+class _$FieldDiffImpl implements _FieldDiff {
+  const _$FieldDiffImpl(
+      {required this.fieldName,
+      this.oldValue,
+      this.newValue,
+      final List<DateTime>? addedDates,
+      final List<DateTime>? removedDates,
+      final List<DateTime>? unchangedDates})
+      : _addedDates = addedDates,
+        _removedDates = removedDates,
+        _unchangedDates = unchangedDates;
+
+  /// Имя поля (например, "Даты", "Аудитории", "Преподаватели", "Время/номер пары")
+  @override
+  final String fieldName;
+
+  /// Для не-дата полей можно оставить старое и новое значение в виде строки
+  @override
+  final String? oldValue;
+  @override
+  final String? newValue;
+
+  /// Для поля «Даты»—детальный diff: какие даты добавлены
+  final List<DateTime>? _addedDates;
+
+  /// Для поля «Даты»—детальный diff: какие даты добавлены
+  @override
+  List<DateTime>? get addedDates {
+    final value = _addedDates;
+    if (value == null) return null;
+    if (_addedDates is EqualUnmodifiableListView) return _addedDates;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(value);
+  }
+
+  /// Для поля «Даты»—детальный diff: какие даты удалены
+  final List<DateTime>? _removedDates;
+
+  /// Для поля «Даты»—детальный diff: какие даты удалены
+  @override
+  List<DateTime>? get removedDates {
+    final value = _removedDates;
+    if (value == null) return null;
+    if (_removedDates is EqualUnmodifiableListView) return _removedDates;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(value);
+  }
+
+  /// И какие даты остались без изменений (можно их просто вывести без подсветки)
+  final List<DateTime>? _unchangedDates;
+
+  /// И какие даты остались без изменений (можно их просто вывести без подсветки)
+  @override
+  List<DateTime>? get unchangedDates {
+    final value = _unchangedDates;
+    if (value == null) return null;
+    if (_unchangedDates is EqualUnmodifiableListView) return _unchangedDates;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(value);
+  }
+
+  @override
+  String toString() {
+    return 'FieldDiff(fieldName: $fieldName, oldValue: $oldValue, newValue: $newValue, addedDates: $addedDates, removedDates: $removedDates, unchangedDates: $unchangedDates)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$FieldDiffImpl &&
+            (identical(other.fieldName, fieldName) || other.fieldName == fieldName) &&
+            (identical(other.oldValue, oldValue) || other.oldValue == oldValue) &&
+            (identical(other.newValue, newValue) || other.newValue == newValue) &&
+            const DeepCollectionEquality().equals(other._addedDates, _addedDates) &&
+            const DeepCollectionEquality().equals(other._removedDates, _removedDates) &&
+            const DeepCollectionEquality().equals(other._unchangedDates, _unchangedDates));
+  }
+
+  @override
+  int get hashCode => Object.hash(
+      runtimeType,
+      fieldName,
+      oldValue,
+      newValue,
+      const DeepCollectionEquality().hash(_addedDates),
+      const DeepCollectionEquality().hash(_removedDates),
+      const DeepCollectionEquality().hash(_unchangedDates));
+
+  /// Create a copy of FieldDiff
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$FieldDiffImplCopyWith<_$FieldDiffImpl> get copyWith =>
+      __$$FieldDiffImplCopyWithImpl<_$FieldDiffImpl>(this, _$identity);
+}
+
+abstract class _FieldDiff implements FieldDiff {
+  const factory _FieldDiff(
+      {required final String fieldName,
+      final String? oldValue,
+      final String? newValue,
+      final List<DateTime>? addedDates,
+      final List<DateTime>? removedDates,
+      final List<DateTime>? unchangedDates}) = _$FieldDiffImpl;
+
+  /// Имя поля (например, "Даты", "Аудитории", "Преподаватели", "Время/номер пары")
+  @override
+  String get fieldName;
+
+  /// Для не-дата полей можно оставить старое и новое значение в виде строки
+  @override
+  String? get oldValue;
+  @override
+  String? get newValue;
+
+  /// Для поля «Даты»—детальный diff: какие даты добавлены
+  @override
+  List<DateTime>? get addedDates;
+
+  /// Для поля «Даты»—детальный diff: какие даты удалены
+  @override
+  List<DateTime>? get removedDates;
+
+  /// И какие даты остались без изменений (можно их просто вывести без подсветки)
+  @override
+  List<DateTime>? get unchangedDates;
+
+  /// Create a copy of FieldDiff
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  _$$FieldDiffImplCopyWith<_$FieldDiffImpl> get copyWith => throw _privateConstructorUsedError;
+}
+
+/// @nodoc
 mixin _$ScheduleChange {
+  /// Тип изменения: добавление, удаление, модификация
   ChangeType get type => throw _privateConstructorUsedError;
-  String get title => throw _privateConstructorUsedError;
-  String get description => throw _privateConstructorUsedError;
-  List<DateTime> get dates => throw _privateConstructorUsedError;
-  LessonBells get lessonBells => throw _privateConstructorUsedError;
+
+  /// Название предмета, служащее заголовком для данного diff‑блока
+  String get subject => throw _privateConstructorUsedError;
+
+  /// Список изменений по полям: для добавленных и удалённых уроков здесь будут все поля,
+  /// для модифицированных – только те, что изменились.
+  List<FieldDiff> get fieldDiffs => throw _privateConstructorUsedError;
 
   /// Create a copy of ScheduleChange
   /// with the given fields replaced by the non-null parameter values.
@@ -33,7 +323,7 @@ abstract class $ScheduleChangeCopyWith<$Res> {
   factory $ScheduleChangeCopyWith(ScheduleChange value, $Res Function(ScheduleChange) then) =
       _$ScheduleChangeCopyWithImpl<$Res, ScheduleChange>;
   @useResult
-  $Res call({ChangeType type, String title, String description, List<DateTime> dates, LessonBells lessonBells});
+  $Res call({ChangeType type, String subject, List<FieldDiff> fieldDiffs});
 }
 
 /// @nodoc
@@ -51,32 +341,22 @@ class _$ScheduleChangeCopyWithImpl<$Res, $Val extends ScheduleChange> implements
   @override
   $Res call({
     Object? type = null,
-    Object? title = null,
-    Object? description = null,
-    Object? dates = null,
-    Object? lessonBells = null,
+    Object? subject = null,
+    Object? fieldDiffs = null,
   }) {
     return _then(_value.copyWith(
       type: null == type
           ? _value.type
           : type // ignore: cast_nullable_to_non_nullable
               as ChangeType,
-      title: null == title
-          ? _value.title
-          : title // ignore: cast_nullable_to_non_nullable
+      subject: null == subject
+          ? _value.subject
+          : subject // ignore: cast_nullable_to_non_nullable
               as String,
-      description: null == description
-          ? _value.description
-          : description // ignore: cast_nullable_to_non_nullable
-              as String,
-      dates: null == dates
-          ? _value.dates
-          : dates // ignore: cast_nullable_to_non_nullable
-              as List<DateTime>,
-      lessonBells: null == lessonBells
-          ? _value.lessonBells
-          : lessonBells // ignore: cast_nullable_to_non_nullable
-              as LessonBells,
+      fieldDiffs: null == fieldDiffs
+          ? _value.fieldDiffs
+          : fieldDiffs // ignore: cast_nullable_to_non_nullable
+              as List<FieldDiff>,
     ) as $Val);
   }
 }
@@ -87,7 +367,7 @@ abstract class _$$ScheduleChangeImplCopyWith<$Res> implements $ScheduleChangeCop
       __$$ScheduleChangeImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({ChangeType type, String title, String description, List<DateTime> dates, LessonBells lessonBells});
+  $Res call({ChangeType type, String subject, List<FieldDiff> fieldDiffs});
 }
 
 /// @nodoc
@@ -102,32 +382,22 @@ class __$$ScheduleChangeImplCopyWithImpl<$Res> extends _$ScheduleChangeCopyWithI
   @override
   $Res call({
     Object? type = null,
-    Object? title = null,
-    Object? description = null,
-    Object? dates = null,
-    Object? lessonBells = null,
+    Object? subject = null,
+    Object? fieldDiffs = null,
   }) {
     return _then(_$ScheduleChangeImpl(
       type: null == type
           ? _value.type
           : type // ignore: cast_nullable_to_non_nullable
               as ChangeType,
-      title: null == title
-          ? _value.title
-          : title // ignore: cast_nullable_to_non_nullable
+      subject: null == subject
+          ? _value.subject
+          : subject // ignore: cast_nullable_to_non_nullable
               as String,
-      description: null == description
-          ? _value.description
-          : description // ignore: cast_nullable_to_non_nullable
-              as String,
-      dates: null == dates
-          ? _value._dates
-          : dates // ignore: cast_nullable_to_non_nullable
-              as List<DateTime>,
-      lessonBells: null == lessonBells
-          ? _value.lessonBells
-          : lessonBells // ignore: cast_nullable_to_non_nullable
-              as LessonBells,
+      fieldDiffs: null == fieldDiffs
+          ? _value._fieldDiffs
+          : fieldDiffs // ignore: cast_nullable_to_non_nullable
+              as List<FieldDiff>,
     ));
   }
 }
@@ -135,34 +405,33 @@ class __$$ScheduleChangeImplCopyWithImpl<$Res> extends _$ScheduleChangeCopyWithI
 /// @nodoc
 
 class _$ScheduleChangeImpl implements _ScheduleChange {
-  const _$ScheduleChangeImpl(
-      {required this.type,
-      required this.title,
-      required this.description,
-      required final List<DateTime> dates,
-      required this.lessonBells})
-      : _dates = dates;
+  const _$ScheduleChangeImpl({required this.type, required this.subject, required final List<FieldDiff> fieldDiffs})
+      : _fieldDiffs = fieldDiffs;
 
+  /// Тип изменения: добавление, удаление, модификация
   @override
   final ChangeType type;
+
+  /// Название предмета, служащее заголовком для данного diff‑блока
   @override
-  final String title;
+  final String subject;
+
+  /// Список изменений по полям: для добавленных и удалённых уроков здесь будут все поля,
+  /// для модифицированных – только те, что изменились.
+  final List<FieldDiff> _fieldDiffs;
+
+  /// Список изменений по полям: для добавленных и удалённых уроков здесь будут все поля,
+  /// для модифицированных – только те, что изменились.
   @override
-  final String description;
-  final List<DateTime> _dates;
-  @override
-  List<DateTime> get dates {
-    if (_dates is EqualUnmodifiableListView) return _dates;
+  List<FieldDiff> get fieldDiffs {
+    if (_fieldDiffs is EqualUnmodifiableListView) return _fieldDiffs;
     // ignore: implicit_dynamic_type
-    return EqualUnmodifiableListView(_dates);
+    return EqualUnmodifiableListView(_fieldDiffs);
   }
 
   @override
-  final LessonBells lessonBells;
-
-  @override
   String toString() {
-    return 'ScheduleChange(type: $type, title: $title, description: $description, dates: $dates, lessonBells: $lessonBells)';
+    return 'ScheduleChange(type: $type, subject: $subject, fieldDiffs: $fieldDiffs)';
   }
 
   @override
@@ -171,15 +440,12 @@ class _$ScheduleChangeImpl implements _ScheduleChange {
         (other.runtimeType == runtimeType &&
             other is _$ScheduleChangeImpl &&
             (identical(other.type, type) || other.type == type) &&
-            (identical(other.title, title) || other.title == title) &&
-            (identical(other.description, description) || other.description == description) &&
-            const DeepCollectionEquality().equals(other._dates, _dates) &&
-            (identical(other.lessonBells, lessonBells) || other.lessonBells == lessonBells));
+            (identical(other.subject, subject) || other.subject == subject) &&
+            const DeepCollectionEquality().equals(other._fieldDiffs, _fieldDiffs));
   }
 
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, type, title, description, const DeepCollectionEquality().hash(_dates), lessonBells);
+  int get hashCode => Object.hash(runtimeType, type, subject, const DeepCollectionEquality().hash(_fieldDiffs));
 
   /// Create a copy of ScheduleChange
   /// with the given fields replaced by the non-null parameter values.
@@ -193,21 +459,21 @@ class _$ScheduleChangeImpl implements _ScheduleChange {
 abstract class _ScheduleChange implements ScheduleChange {
   const factory _ScheduleChange(
       {required final ChangeType type,
-      required final String title,
-      required final String description,
-      required final List<DateTime> dates,
-      required final LessonBells lessonBells}) = _$ScheduleChangeImpl;
+      required final String subject,
+      required final List<FieldDiff> fieldDiffs}) = _$ScheduleChangeImpl;
 
+  /// Тип изменения: добавление, удаление, модификация
   @override
   ChangeType get type;
+
+  /// Название предмета, служащее заголовком для данного diff‑блока
   @override
-  String get title;
+  String get subject;
+
+  /// Список изменений по полям: для добавленных и удалённых уроков здесь будут все поля,
+  /// для модифицированных – только те, что изменились.
   @override
-  String get description;
-  @override
-  List<DateTime> get dates;
-  @override
-  LessonBells get lessonBells;
+  List<FieldDiff> get fieldDiffs;
 
   /// Create a copy of ScheduleChange
   /// with the given fields replaced by the non-null parameter values.
@@ -218,6 +484,7 @@ abstract class _ScheduleChange implements ScheduleChange {
 
 /// @nodoc
 mixin _$ScheduleDiff {
+  /// Множество изменений в расписании (можно преобразовать в список для удобства отображения)
   Set<ScheduleChange> get changes => throw _privateConstructorUsedError;
 
   /// Create a copy of ScheduleDiff
@@ -295,7 +562,10 @@ class __$$ScheduleDiffImplCopyWithImpl<$Res> extends _$ScheduleDiffCopyWithImpl<
 class _$ScheduleDiffImpl implements _ScheduleDiff {
   const _$ScheduleDiffImpl({required final Set<ScheduleChange> changes}) : _changes = changes;
 
+  /// Множество изменений в расписании (можно преобразовать в список для удобства отображения)
   final Set<ScheduleChange> _changes;
+
+  /// Множество изменений в расписании (можно преобразовать в список для удобства отображения)
   @override
   Set<ScheduleChange> get changes {
     if (_changes is EqualUnmodifiableSetView) return _changes;
@@ -331,6 +601,7 @@ class _$ScheduleDiffImpl implements _ScheduleDiff {
 abstract class _ScheduleDiff implements ScheduleDiff {
   const factory _ScheduleDiff({required final Set<ScheduleChange> changes}) = _$ScheduleDiffImpl;
 
+  /// Множество изменений в расписании (можно преобразовать в список для удобства отображения)
   @override
   Set<ScheduleChange> get changes;
 

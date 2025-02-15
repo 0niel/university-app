@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hugeicons/hugeicons.dart';
+import 'package:rtu_mirea_app/ads/ads.dart';
 import 'package:rtu_mirea_app/presentation/bloc/user_bloc/user_bloc.dart';
 import 'package:app_ui/app_ui.dart';
 
@@ -78,6 +79,34 @@ class _InitialProfileStatePageState extends State<_InitialProfileStatePage> {
     }
   }
 
+  void _onAdsSettingTap(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Поддержите наш сервис'),
+        content: const Text(
+          'Реклама помогает нам бесплатно развивать приложение, добавлять новые возможности и поддерживать качественную работу сервиса. Отключая рекламу, вы лишаете нас важного источника поддержки. Вы уверены, что хотите отключить показ рекламы?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              context.read<AdsBloc>().add(const SetAdsVisibility(showAds: true));
+              Navigator.of(context).pop();
+            },
+            child: const Text('Оставить рекламу'),
+          ),
+          TextButton(
+            onPressed: () {
+              context.read<AdsBloc>().add(const SetAdsVisibility(showAds: false));
+              Navigator.of(context).pop();
+            },
+            child: const Text('Отключить'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -144,6 +173,12 @@ class _InitialProfileStatePageState extends State<_InitialProfileStatePage> {
               ),
             );
           },
+        ),
+        const SizedBox(height: 8),
+        ProfileButton(
+          text: 'Управление рекламой',
+          icon: const Icon(Icons.ad_units, size: 24, color: Colors.blue),
+          onPressed: () => _onAdsSettingTap(context),
         ),
         SizedBox(height: MediaQuery.of(context).padding.bottom),
       ],

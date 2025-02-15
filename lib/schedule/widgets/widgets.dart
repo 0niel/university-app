@@ -17,4 +17,4 @@ export 'add_group_button.dart';
 export 'comparison_lessons_table.dart';
 export 'comparison_sticky_header.dart';
 export 'calendar_stories_app_bar.dart';
-export 'schedule_changes_dialog.dart';
+export 'schedule_diff_dialog.dart';

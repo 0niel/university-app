@@ -1,3 +1,4 @@
+import 'package:ads_ui/ads_ui.dart';
 import 'package:analytics_repository/analytics_repository.dart';
 import 'package:community_repository/community_repository.dart';
 import 'package:discourse_repository/discourse_repository.dart';
@@ -8,6 +9,9 @@ import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:go_router/go_router.dart';
 import 'package:nfc_pass_repository/nfc_pass_repository.dart';
 import 'package:notifications_repository/notifications_repository.dart';
+import 'package:platform/platform.dart';
+import 'package:rtu_mirea_app/ads/bloc/ads_bloc.dart';
+import 'package:rtu_mirea_app/ads/bloc/full_screen_ads_bloc.dart';
 import 'package:rtu_mirea_app/app/app.dart';
 import 'package:rtu_mirea_app/domain/repositories/news_repository.dart';
 import 'package:rtu_mirea_app/neon/neon.dart';
@@ -37,8 +41,45 @@ import 'package:rtu_mirea_app/stories/bloc/stories_bloc.dart';
 
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:neon_framework/l10n/localizations.dart' as neon_localizations;
+import 'package:yandex_mobileads/mobile_ads.dart';
 
-class App extends StatelessWidget {
+// Функция для загрузки интерстициального объявления.
+Future<void> yandexInterstitialAdLoader({
+  required String adUnitId,
+  required AdRequestConfiguration adRequestConfiguration,
+  required void Function(InterstitialAd ad) onAdLoaded,
+  required void Function(Object error) onAdFailedToLoad,
+}) async {
+  try {
+    final loader = await InterstitialAdLoader.create(
+      onAdLoaded: onAdLoaded,
+      onAdFailedToLoad: onAdFailedToLoad,
+    );
+
+    await loader.loadAd(adRequestConfiguration: adRequestConfiguration);
+  } catch (error) {
+    onAdFailedToLoad(error);
+  }
+}
+
+Future<void> yandexRewardedAdLoader({
+  required String adUnitId,
+  required AdRequestConfiguration adRequestConfiguration,
+  required void Function(RewardedAd ad) onAdLoaded,
+  required void Function(Object error) onAdFailedToLoad,
+}) async {
+  try {
+    final loader = await RewardedAdLoader.create(
+      onAdLoaded: onAdLoaded,
+      onAdFailedToLoad: onAdFailedToLoad,
+    );
+    await loader.loadAd(adRequestConfiguration: adRequestConfiguration);
+  } catch (error) {
+    onAdFailedToLoad(error);
+  }
+}
+
+class App extends StatefulWidget {
   const App({
     required AnalyticsRepository analyticsRepository,
     required ScheduleRepository scheduleRepository,
@@ -74,21 +115,27 @@ class App extends StatelessWidget {
   final NfcPassRepository _nfcPassRepository;
 
   @override
+  State<App> createState() => _AppState();
+}
+
+class _AppState extends State<App> {
+  @override
   Widget build(BuildContext context) {
     return MultiRepositoryProvider(
       providers: [
-        RepositoryProvider.value(value: _analyticsRepository),
-        RepositoryProvider.value(value: _scheduleRepository),
-        RepositoryProvider.value(value: _communityRepository),
-        RepositoryProvider.value(value: _storiesRepository),
-        RepositoryProvider.value(value: _discourseRepository),
-        RepositoryProvider.value(value: _scheduleExporterRepository),
-        RepositoryProvider.value(value: _nfcPassRepository),
+        RepositoryProvider.value(value: widget._analyticsRepository),
+        RepositoryProvider.value(value: widget._scheduleRepository),
+        RepositoryProvider.value(value: widget._communityRepository),
+        RepositoryProvider.value(value: widget._storiesRepository),
+        RepositoryProvider.value(value: widget._discourseRepository),
+        RepositoryProvider.value(value: widget._scheduleExporterRepository),
+        RepositoryProvider.value(value: widget._nfcPassRepository),
       ],
       child: MultiBlocProvider(
         providers: [
+          BlocProvider(create: (_) => AdsBloc()),
           BlocProvider(
-            create: (_) => ScheduleExporterCubit(_scheduleExporterRepository),
+            create: (_) => ScheduleExporterCubit(widget._scheduleExporterRepository),
           ),
           BlocProvider(
             create: (_) => AppBloc(
@@ -97,7 +144,7 @@ class App extends StatelessWidget {
           ),
           BlocProvider(
             create: (context) => AnalyticsBloc(
-              analyticsRepository: _analyticsRepository,
+              analyticsRepository: widget._analyticsRepository,
             ),
             lazy: false,
           ),
@@ -123,12 +170,23 @@ class App extends StatelessWidget {
           ),
           BlocProvider<NfcPassCubit>(
             create: (_) => NfcPassCubit(
-              repository: _nfcPassRepository,
+              repository: widget._nfcPassRepository,
             ),
+          ),
+          BlocProvider(
+            create: (context) => FullScreenAdsBloc(
+              interstitialAdLoader: yandexInterstitialAdLoader,
+              rewardedAdLoader: yandexRewardedAdLoader,
+              adsRetryPolicy: const AdsRetryPolicy(),
+              localPlatform: const LocalPlatform(),
+            )
+              ..add(const LoadInterstitialAdRequested())
+              ..add(const LoadRewardedAdRequested()),
+            lazy: false,
           ),
         ],
         child: _AppView(
-          neonDependencies: _neonDependencies,
+          neonDependencies: widget._neonDependencies,
         ),
       ),
     );

@@ -7,6 +7,7 @@ import 'package:collection/collection.dart';
 import 'package:equatable/equatable.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
+import 'package:rtu_mirea_app/schedule/bloc/calculate_schedule_diff.dart';
 import 'package:rtu_mirea_app/schedule/models/models.dart';
 import 'package:schedule_repository/schedule_repository.dart';
 import 'package:university_app_server_api/client.dart';
@@ -196,7 +197,6 @@ class ScheduleBloc extends HydratedBloc<ScheduleEvent, ScheduleState> {
   ) async {
     if (state.selectedSchedule != null) {
       try {
-        // Сохраняем предыдущее расписание для сравнения
         final oldScheduleParts = state.selectedSchedule?.schedule ?? [];
 
         ScheduleDiff? diff;
@@ -209,8 +209,7 @@ class ScheduleBloc extends HydratedBloc<ScheduleEvent, ScheduleState> {
 
           final newScheduleParts = response.data;
 
-          // Сравниваем старое и новое
-          diff = _calculateScheduleDiff(oldScheduleParts, newScheduleParts);
+          // diff = _calculateScheduleDiff(oldScheduleParts, newScheduleParts);
 
           emit(
             state.copyWith(
@@ -219,19 +218,18 @@ class ScheduleBloc extends HydratedBloc<ScheduleEvent, ScheduleState> {
                 group: selectedSchedule.group,
                 schedule: newScheduleParts,
               ),
-              latestDiff: diff,
-              showScheduleDiffDialog: diff != null && diff.changes.isNotEmpty,
+              // latestDiff: diff,
+              // showScheduleDiffDialog: diff != null && diff.changes.isNotEmpty,
             ),
           );
         } else if (state.selectedSchedule is SelectedTeacherSchedule) {
-          // Аналогично для преподавателя
           final selectedSchedule = state.selectedSchedule as SelectedTeacherSchedule;
           final response = await _scheduleRepository.getTeacherSchedule(
             teacher: selectedSchedule.teacher.uid ?? selectedSchedule.teacher.name,
           );
 
           final newScheduleParts = response.data;
-          diff = _calculateScheduleDiff(oldScheduleParts, newScheduleParts);
+          // diff = _calculateScheduleDiff(oldScheduleParts, newScheduleParts);
 
           emit(
             state.copyWith(
@@ -240,19 +238,18 @@ class ScheduleBloc extends HydratedBloc<ScheduleEvent, ScheduleState> {
                 teacher: selectedSchedule.teacher,
                 schedule: newScheduleParts,
               ),
-              latestDiff: diff,
-              showScheduleDiffDialog: diff != null && diff.changes.isNotEmpty,
+              // latestDiff: diff,
+              // showScheduleDiffDialog: diff != null && diff.changes.isNotEmpty,
             ),
           );
         } else if (state.selectedSchedule is SelectedClassroomSchedule) {
-          // Аналогично для аудитории
           final selectedSchedule = state.selectedSchedule as SelectedClassroomSchedule;
           final response = await _scheduleRepository.getClassroomSchedule(
             classroom: selectedSchedule.classroom.uid ?? selectedSchedule.classroom.name,
           );
 
           final newScheduleParts = response.data;
-          diff = _calculateScheduleDiff(oldScheduleParts, newScheduleParts);
+          // diff = _calculateScheduleDiff(oldScheduleParts, newScheduleParts);
 
           emit(
             state.copyWith(
@@ -261,8 +258,8 @@ class ScheduleBloc extends HydratedBloc<ScheduleEvent, ScheduleState> {
                 classroom: selectedSchedule.classroom,
                 schedule: newScheduleParts,
               ),
-              latestDiff: diff,
-              showScheduleDiffDialog: diff != null && diff.changes.isNotEmpty,
+              // latestDiff: diff,
+              // showScheduleDiffDialog: diff != null && diff.changes.isNotEmpty,
             ),
           );
         }
@@ -277,106 +274,7 @@ class ScheduleBloc extends HydratedBloc<ScheduleEvent, ScheduleState> {
     List<SchedulePart> oldParts,
     List<SchedulePart> newParts,
   ) {
-    final changes = <ScheduleChange>[];
-    final oldLessons = oldParts.whereType<LessonSchedulePart>().toList();
-    final newLessons = newParts.whereType<LessonSchedulePart>().toList();
-
-    // Helper to compare classroom sets
-    bool sameClassrooms(LessonSchedulePart a, LessonSchedulePart b) {
-      final setA = a.classrooms.map((c) => c.name).toSet();
-      final setB = b.classrooms.map((c) => c.name).toSet();
-      return setA.length == setB.length && setA.containsAll(setB);
-    }
-
-    // Quickly get a potential match if subject matches
-    LessonSchedulePart? findSameSubject(LessonSchedulePart lesson, List<LessonSchedulePart> list) {
-      return list.firstWhereOrNull((l) => l.subject == lesson.subject);
-    }
-
-    // Check old lessons for removal or modification
-    for (final oldLesson in oldLessons) {
-      final candidate = findSameSubject(oldLesson, newLessons);
-      if (candidate == null) {
-        // Entire old lesson removed
-        changes.add(
-          ScheduleChange(
-            type: ChangeType.removed,
-            title: 'Удалена пара',
-            description: oldLesson.subject,
-            dates: oldLesson.dates,
-            lessonBells: oldLesson.lessonBells,
-          ),
-        );
-        continue;
-      }
-
-      // Check if lesson bells or classrooms changed
-      if (!sameClassrooms(oldLesson, candidate) || oldLesson.lessonBells != candidate.lessonBells) {
-        // Mark overlapping days as modified
-        final commonDays = oldLesson.dates.where(candidate.dates.contains).toList();
-        if (commonDays.isNotEmpty) {
-          changes.add(
-            ScheduleChange(
-              type: ChangeType.modified,
-              title: 'Изменена пара',
-              description: oldLesson.subject,
-              dates: commonDays,
-              lessonBells: candidate.lessonBells,
-            ),
-          );
-        }
-      }
-
-      // Check removed days
-      final removedDays = oldLesson.dates.where((d) => !candidate.dates.contains(d)).toList();
-      if (removedDays.isNotEmpty) {
-        changes.add(
-          ScheduleChange(
-            type: ChangeType.removed,
-            title: 'Удалена пара',
-            description: oldLesson.subject,
-            dates: removedDays,
-            lessonBells: oldLesson.lessonBells,
-          ),
-        );
-      }
-    }
-
-    // Check new lessons for additions or modifications
-    for (final newLesson in newLessons) {
-      final candidate = findSameSubject(newLesson, oldLessons);
-      if (candidate == null) {
-        // Entire new lesson added
-        changes.add(
-          ScheduleChange(
-            type: ChangeType.added,
-            title: 'Добавлена пара',
-            description: newLesson.subject,
-            dates: newLesson.dates,
-            lessonBells: newLesson.lessonBells,
-          ),
-        );
-        continue;
-      }
-
-      // Check added days
-      final addedDays = newLesson.dates.where((d) => !candidate.dates.contains(d)).toList();
-      if (addedDays.isNotEmpty) {
-        changes.add(
-          ScheduleChange(
-            type: ChangeType.added,
-            title: 'Добавлена пара',
-            description: newLesson.subject,
-            dates: addedDays,
-            lessonBells: newLesson.lessonBells,
-          ),
-        );
-      }
-    }
-
-    if (changes.isEmpty) return null;
-
-    return ScheduleDiff(changes: changes.toSet());
+    return calculateScheduleDiff(oldParts, newParts);
   }
 
   FutureOr<void> _onHideScheduleDiffDialog(

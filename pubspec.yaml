@@ -154,6 +154,13 @@ dependencies:
   app_ui:
     path: packages/app_ui
   font_awesome_flutter: ^10.8.0
+  mini_app:
+    path: packages/mini_app
+  yandex_mobileads: ^7.9.0
+  news_blocks:
+    path: api/packages/news_blocks
+  ads_ui:
+    path: packages/ads_ui
 
 
 dependency_overrides:

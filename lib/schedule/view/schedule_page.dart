@@ -5,12 +5,12 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
+import 'package:rtu_mirea_app/ads/ads.dart';
 import 'package:rtu_mirea_app/presentation/constants.dart';
 import 'package:app_ui/app_ui.dart';
 import 'package:rtu_mirea_app/schedule/bloc/schedule_bloc.dart';
 import 'package:rtu_mirea_app/schedule/models/models.dart';
 import 'package:rtu_mirea_app/schedule/widgets/widgets.dart';
-import 'package:rtu_mirea_app/stories/view/stories_view.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:university_app_server_api/client.dart';
 import 'package:collection/collection.dart';
@@ -78,135 +78,138 @@ class _SchedulePageState extends State<SchedulePage> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocConsumer<ScheduleBloc, ScheduleState>(
-      listener: (context, state) {
-        if (state.status == ScheduleStatus.failure) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Ошибка при загрузке расписания'),
-            ),
-          );
-        }
-
-        if (state.showScheduleDiffDialog && state.latestDiff != null) {
-          context.read<ScheduleBloc>().add(const HideScheduleDiffDialog());
-
-          // WidgetsBinding.instance.addPostFrameCallback((_) {
-          //   ScaffoldMessenger.of(context).showSnackBar(
-          //     SnackBar(
-          //       content: Row(
-          //         children: [
-          //           HugeIcon(
-          //             icon: HugeIcons.strokeRoundedAlertCircle,
-          //             size: 24,
-          //             color: Theme.of(context).extension<AppColors>()!.active,
-          //           ),
-          //           const SizedBox(width: 12.0),
-          //           Expanded(
-          //             child: Text(
-          //               'Найдены изменения в расписании',
-          //               style: AppTextStyle.body.copyWith(
-          //                 color: Theme.of(context).extension<AppColors>()!.active,
-          //               ),
-          //             ),
-          //           ),
-          //         ],
-          //       ),
-          //       action: SnackBarAction(
-          //         label: 'Просмотреть',
-          //         textColor: Theme.of(context).extension<AppColors>()!.primary,
-          //         onPressed: () {
-          //           showDialog(
-          //             context: context,
-          //             builder: (context) {
-          //               return ScheduleChangesDialog(diff: state.latestDiff!);
-          //             },
-          //           );
-          //         },
-          //       ),
-          //       duration: const Duration(seconds: 5),
-          //     ),
-          //   );
-          // });
-        }
-      },
-      buildWhen: (previous, current) => current.status != ScheduleStatus.failure && current.selectedSchedule != null,
+    return BlocBuilder<AdsBloc, AdsState>(
       builder: (context, state) {
-        if (state.status == ScheduleStatus.loading) {
-          return const Center(child: CircularProgressIndicator());
-        } else if (state.selectedSchedule == null) {
-          return NoSelectedScheduleMessage(onTap: () {
-            context.go('/schedule/search');
-          });
-        } else if (state.status == ScheduleStatus.failure) {
-          return LoadingErrorMessage(onTap: () {
-            context.go('/schedule/search');
-          });
-        }
-
-        return Scaffold(
-          appBar: AppBar(
-            title: Text(_appBarTitle),
-            actions: [
-              AddGroupButton(
-                onPressed: () => context.go('/schedule/search'),
-              ),
-              SettingsButton(
-                onPressed: () => context.go('/profile'),
-              ),
-              ComparisonModeButton(
-                onPressed: () => _bloc.add(const ToggleComparisonMode()),
-              ),
-              ViewToggleButton(
-                isListModeEnabled: _bloc.state.isListModeEnabled,
-                onPressed: () => _bloc.add(const ToggleListMode()),
-              ),
-            ],
-          ),
-          body: AnimatedSwitcher(
-            duration: 300.ms,
-            switchInCurve: Curves.easeInOut,
-            switchOutCurve: Curves.easeInOut,
-            transitionBuilder: (Widget child, Animation<double> animation) {
-              return FadeTransition(
-                opacity: animation,
-                child: SlideTransition(
-                  position: animation.drive(
-                    Tween<Offset>(
-                      begin: const Offset(0.0, 0.1),
-                      end: Offset.zero,
-                    ),
-                  ),
-                  child: child,
+        return BlocConsumer<ScheduleBloc, ScheduleState>(
+          listener: (context, state) {
+            if (state.status == ScheduleStatus.failure) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Ошибка при загрузке расписания'),
                 ),
               );
-            },
-            child: state.isComparisonModeEnabled
-                ? _ComparisonModeView(
-                    onOpenComparisonManager: _openComparisonManager,
-                  )
-                : state.isListModeEnabled
-                    ? _ListModeView(
-                        isStoriesVisible: _isStoriesVisible,
-                        onStoriesLoaded: _handleStoriesLoaded,
-                      )
-                    : _CalendarModeView(
-                        pageController: _pageController,
-                        calendarFormat: _calendarFormat,
-                        isStoriesVisible: _isStoriesVisible,
-                        onStoriesLoaded: _handleStoriesLoaded,
-                      ),
-          ),
-          floatingActionButton: state.isComparisonModeEnabled
-              ? Padding(
-                  padding: const EdgeInsets.only(bottom: bottomNavigationBarHeight + 16.0),
-                  child: FloatingActionButton(
-                    onPressed: _openComparisonManager,
-                    tooltip: 'Управление сравнениями',
-                    child: const Icon(Icons.compare),
+            }
+
+            // if (state.showScheduleDiffDialog && state.latestDiff != null) {
+            //   context.read<ScheduleBloc>().add(const HideScheduleDiffDialog());
+
+            //   WidgetsBinding.instance.addPostFrameCallback((_) {
+            //     ScaffoldMessenger.of(context).showSnackBar(
+            //       SnackBar(
+            //         content: Row(
+            //           children: [
+            //             HugeIcon(
+            //               icon: HugeIcons.strokeRoundedAlertCircle,
+            //               size: 24,
+            //               color: Theme.of(context).extension<AppColors>()!.active,
+            //             ),
+            //             const SizedBox(width: 12.0),
+            //             Expanded(
+            //               child: Text(
+            //                 'Найдены изменения в расписании',
+            //                 style: AppTextStyle.body.copyWith(
+            //                   color: Theme.of(context).extension<AppColors>()!.active,
+            //                 ),
+            //               ),
+            //             ),
+            //           ],
+            //         ),
+            //         action: SnackBarAction(
+            //           label: 'Просмотреть',
+            //           textColor: Theme.of(context).extension<AppColors>()!.primary,
+            //           onPressed: () {
+            //             Navigator.push(
+            //               context,
+            //               MaterialPageRoute(builder: (_) => ScheduleDiffPage(diff: state.latestDiff!)),
+            //             );
+            //           },
+            //         ),
+            //         duration: const Duration(seconds: 5),
+            //       ),
+            //     );
+            //   });
+            // }
+          },
+          buildWhen: (previous, current) =>
+              current.status != ScheduleStatus.failure && current.selectedSchedule != null,
+          builder: (context, state) {
+            if (state.status == ScheduleStatus.loading) {
+              return const Center(child: CircularProgressIndicator());
+            } else if (state.selectedSchedule == null) {
+              return NoSelectedScheduleMessage(onTap: () {
+                context.go('/schedule/search');
+              });
+            } else if (state.status == ScheduleStatus.failure) {
+              return LoadingErrorMessage(onTap: () {
+                context.go('/schedule/search');
+              });
+            }
+
+            return Scaffold(
+              appBar: AppBar(
+                title: Text(_appBarTitle),
+                actions: [
+                  AddGroupButton(
+                    onPressed: () => context.go('/schedule/search'),
                   ),
-                )
-              : null,
+                  SettingsButton(
+                    onPressed: () => context.go('/profile'),
+                  ),
+                  ComparisonModeButton(
+                    onPressed: () => _bloc.add(const ToggleComparisonMode()),
+                  ),
+                  ViewToggleButton(
+                    isListModeEnabled: _bloc.state.isListModeEnabled,
+                    onPressed: () => _bloc.add(const ToggleListMode()),
+                  ),
+                ],
+              ),
+              body: AnimatedSwitcher(
+                duration: 300.ms,
+                switchInCurve: Curves.easeInOut,
+                switchOutCurve: Curves.easeInOut,
+                transitionBuilder: (Widget child, Animation<double> animation) {
+                  return FadeTransition(
+                    opacity: animation,
+                    child: SlideTransition(
+                      position: animation.drive(
+                        Tween<Offset>(
+                          begin: const Offset(0.0, 0.1),
+                          end: Offset.zero,
+                        ),
+                      ),
+                      child: child,
+                    ),
+                  );
+                },
+                child: state.isComparisonModeEnabled
+                    ? _ComparisonModeView(
+                        onOpenComparisonManager: _openComparisonManager,
+                      )
+                    : state.isListModeEnabled
+                        ? _ListModeView(
+                            isStoriesVisible: _isStoriesVisible,
+                            onStoriesLoaded: _handleStoriesLoaded,
+                          )
+                        : _CalendarModeView(
+                            pageController: _pageController,
+                            calendarFormat: _calendarFormat,
+                            isStoriesVisible: _isStoriesVisible,
+                            onStoriesLoaded: _handleStoriesLoaded,
+                          ),
+              ),
+              floatingActionButton: state.isComparisonModeEnabled
+                  ? Padding(
+                      padding: const EdgeInsets.only(bottom: bottomNavigationBarHeight + 16.0),
+                      child: FloatingActionButton(
+                        onPressed: _openComparisonManager,
+                        tooltip: 'Управление сравнениями',
+                        child: const Icon(Icons.compare),
+                      ),
+                    )
+                  : null,
+            );
+          },
         );
       },
     );
@@ -259,9 +262,8 @@ class _ListModeView extends StatelessWidget {
             child: AnimatedOpacity(
               opacity: isStoriesVisible ? 1.0 : 0.0,
               duration: const Duration(milliseconds: 300),
-              child: StoriesView(
-                onStoriesLoaded: (stories) => onStoriesLoaded(stories.isNotEmpty),
-              ),
+              // child: const StoriesView(),
+              child: const StickyAd(),
             ),
           ),
         ),
@@ -378,14 +380,15 @@ class _EventsPageView extends StatelessWidget {
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
           itemCount: SchedulePage.maxLessonsPerDay,
-          itemBuilder: (context, lessonIndex) {
-            final lessons = lessonsByTime[lessonIndex + 1] ?? [];
+          itemBuilder: (context, index) {
+            final lessonIndex = index;
+            final lessons = lessonsByTime[lessonIndex] ?? [];
             return lessons.isNotEmpty
                 ? _buildLessonCard(context, lessons, day)
                 : showEmptyLessons
                     ? Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                        child: EmptyLessonCard(lessonNumber: lessonIndex + 1),
+                        child: EmptyLessonCard(lessonNumber: lessonIndex),
                       )
                     : const SizedBox.shrink();
           },

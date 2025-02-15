@@ -8,14 +8,24 @@ enum ScheduleStatus {
 }
 
 @freezed
-class ScheduleChange with _$ScheduleChange {
-  const factory ScheduleChange({
-    required ChangeType type,
-    required String title,
-    required String description,
-    required List<DateTime> dates,
-    required LessonBells lessonBells,
-  }) = _ScheduleChange;
+class FieldDiff with _$FieldDiff {
+  const factory FieldDiff({
+    /// Имя поля (например, "Даты", "Аудитории", "Преподаватели", "Время/номер пары")
+    required String fieldName,
+
+    /// Для не-дата полей можно оставить старое и новое значение в виде строки
+    String? oldValue,
+    String? newValue,
+
+    /// Для поля «Даты»—детальный diff: какие даты добавлены
+    List<DateTime>? addedDates,
+
+    /// Для поля «Даты»—детальный diff: какие даты удалены
+    List<DateTime>? removedDates,
+
+    /// И какие даты остались без изменений (можно их просто вывести без подсветки)
+    List<DateTime>? unchangedDates,
+  }) = _FieldDiff;
 }
 
 enum ChangeType {
@@ -25,8 +35,24 @@ enum ChangeType {
 }
 
 @freezed
+class ScheduleChange with _$ScheduleChange {
+  const factory ScheduleChange({
+    /// Тип изменения: добавление, удаление, модификация
+    required ChangeType type,
+
+    /// Название предмета, служащее заголовком для данного diff‑блока
+    required String subject,
+
+    /// Список изменений по полям: для добавленных и удалённых уроков здесь будут все поля,
+    /// для модифицированных – только те, что изменились.
+    required List<FieldDiff> fieldDiffs,
+  }) = _ScheduleChange;
+}
+
+@freezed
 class ScheduleDiff with _$ScheduleDiff {
   const factory ScheduleDiff({
+    /// Множество изменений в расписании (можно преобразовать в список для удобства отображения)
     required Set<ScheduleChange> changes,
   }) = _ScheduleDiff;
 }

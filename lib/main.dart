@@ -42,6 +42,7 @@ import 'package:yandex_maps_mapkit_lite/init.dart' as yandex_maps_mapkit_lite;
 
 Future<void> main() async {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
+
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
 
   await yandex_maps_mapkit_lite.initMapkit(apiKey: Env.mapkitApiKey);

@@ -52,6 +52,13 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.7.0"
+  ads_ui:
+    dependency: "direct main"
+    description:
+      path: "packages/ads_ui"
+      relative: true
+    source: path
+    version: "1.0.0+1"
   after_layout:
     dependency: "direct main"
     description:
@@ -1409,10 +1416,10 @@ packages:
     dependency: "direct main"
     description:
       name: go_router
-      sha256: "7c2d40b59890a929824f30d442e810116caf5088482629c894b9e4478c67472d"
+      sha256: daf3ff5570f55396b2d2c9bf8136d7db3a8acf208ac0cef92a3ae2beb9a81550
       url: "https://pub.dev"
     source: hosted
-    version: "14.6.3"
+    version: "14.7.1"
   google_identity_services_web:
     dependency: transitive
     description:
@@ -1839,6 +1846,13 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.6"
+  mini_app:
+    dependency: "direct main"
+    description:
+      path: "packages/mini_app"
+      relative: true
+    source: path
+    version: "0.1.0+1"
   mustache_template:
     dependency: transitive
     description:
@@ -1877,6 +1891,13 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.0"
+  news_blocks:
+    dependency: "direct main"
+    description:
+      path: "api/packages/news_blocks"
+      relative: true
+    source: path
+    version: "1.0.0+1"
   news_repository:
     dependency: "direct main"
     description:
@@ -2975,7 +2996,7 @@ packages:
       path: api
       relative: true
     source: path
-    version: "0.1.0+1"
+    version: "0.1.1+2"
   uri:
     dependency: transitive
     description:
@@ -3267,10 +3288,10 @@ packages:
     dependency: transitive
     description:
       name: webview_flutter_android
-      sha256: "3d535126f7244871542b2f0b0fcf94629c9a14883250461f9abe1a6644c1c379"
+      sha256: "512c26ccc5b8a571fd5d13ec994b7509f142ff6faf85835e243dde3538fdc713"
       url: "https://pub.dev"
     source: hosted
-    version: "4.2.0"
+    version: "4.3.2"
   webview_flutter_platform_interface:
     dependency: transitive
     description:
@@ -3283,10 +3304,10 @@ packages:
     dependency: transitive
     description:
       name: webview_flutter_wkwebview
-      sha256: b7e92f129482460951d96ef9a46b49db34bd2e1621685de26e9eaafd9674e7eb
+      sha256: "8e0593559bfecd35eb1757d6907ed6b995a41ef82607d6113df897c2805ce6be"
       url: "https://pub.dev"
     source: hosted
-    version: "3.16.3"
+    version: "3.18.0"
   win32:
     dependency: transitive
     description:
@@ -3367,6 +3388,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.10.1-beta"
+  yandex_mobileads:
+    dependency: "direct main"
+    description:
+      name: yandex_mobileads
+      sha256: d66b577889166087afb2c6439c864884520a074b81bf85d4ef36e5e36d664dfd
+      url: "https://pub.dev"
+    source: hosted
+    version: "7.9.0"
 sdks:
   dart: ">=3.6.0 <3.11.0"
   flutter: ">=3.27.0"

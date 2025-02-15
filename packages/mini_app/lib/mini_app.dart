@@ -2,3 +2,4 @@
 library;
 
 export 'src/mini_app.dart';
+export 'src/mini_app_registry.dart';

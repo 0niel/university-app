@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:rtu_mirea_app/stories/view/stories_view.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:rtu_mirea_app/ads/ads.dart';
 
 class CalendarStoriesAppBar extends StatelessWidget {
   const CalendarStoriesAppBar({
@@ -16,14 +17,16 @@ class CalendarStoriesAppBar extends StatelessWidget {
     return SliverAppBar(
       pinned: false,
       primary: true,
-      expandedHeight: 90,
+      // expandedHeight: 90, <- for stories
+      expandedHeight: context.read<AdsBloc>().state.showAds ? 90 : 0,
       flexibleSpace: FlexibleSpaceBar(
         background: AnimatedOpacity(
           opacity: isStoriesVisible ? 1.0 : 0.0,
           duration: const Duration(milliseconds: 300),
-          child: StoriesView(
-            onStoriesLoaded: (stories) => onStoriesLoaded(stories.isNotEmpty),
-          ),
+          // child: StoriesView(
+          //   onStoriesLoaded: (stories) => onStoriesLoaded(stories.isNotEmpty),
+          // ),
+          child: const StickyAd(),
         ),
       ),
     );
