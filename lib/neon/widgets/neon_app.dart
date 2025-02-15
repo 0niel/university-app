@@ -1,19 +1,19 @@
-import 'dart:async';
 import 'package:account_repository/account_repository.dart';
 import 'package:built_collection/built_collection.dart';
+import 'package:neon_framework/models.dart';
+import 'package:neon_framework/src/blocs/accounts.dart';
+import 'package:neon_framework/src/blocs/first_launch.dart';
+import 'package:neon_framework/src/blocs/next_push.dart';
+import 'package:neon_framework/src/utils/global_options.dart';
+import 'dart:async';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:neon_framework/blocs.dart';
-import 'package:neon_framework/models.dart';
-import 'package:neon_framework/src/blocs/accounts.dart';
 import 'package:neon_framework/src/blocs/maintenance_mode.dart';
 import 'package:neon_framework/src/blocs/unified_search.dart';
 import 'package:neon_framework/src/platform/platform.dart';
-import 'package:neon_framework/src/theme/server.dart';
-import 'package:neon_framework/src/theme/theme.dart';
 import 'package:neon_framework/src/utils/account_options.dart';
-import 'package:neon_framework/src/utils/global_options.dart';
 import 'package:neon_framework/src/utils/localizations.dart';
 import 'package:neon_framework/src/utils/provider.dart';
 import 'package:neon_framework/src/widgets/options_collection_builder.dart';
@@ -60,10 +60,7 @@ class _NeonAppProviderState extends State<NeonAppProvider> with WidgetsBindingOb
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final localizations = await appLocalizationsFromSystem();
-
-      if (!mounted) {
-        return;
-      }
+      if (!mounted) return;
       if (NeonPlatform.instance.canUseQuickActions) {
         const quickActions = QuickActions();
         await quickActions.setShortcutItems(
@@ -79,10 +76,8 @@ class _NeonAppProviderState extends State<NeonAppProvider> with WidgetsBindingOb
         );
         await quickActions.initialize(_handleShortcut);
       }
-
       if (NeonPlatform.instance.canUseWindowManager) {
         await windowManager.setPreventClose(true);
-
         if (_globalOptions.startupMinimized.value) {
           await windowManager.minimize();
         }
@@ -132,14 +127,26 @@ class _NeonAppProviderState extends State<NeonAppProvider> with WidgetsBindingOb
           stream: _accountsBloc.activeAccount,
           builder: (context, activeAccountSnapshot) {
             FlutterNativeSplash.remove();
-
             return MultiProvider(
               providers: [
+                Provider<NextPushBloc>.value(
+                  value: widget.neonDependencies.nextPushBloc,
+                ),
                 Provider<AccountRepository>.value(
                   value: widget.neonDependencies.accountRepository,
                 ),
                 NeonProvider<AccountsBloc>.value(
                   value: _accountsBloc,
+                ),
+                NeonProvider<FirstLaunchBloc>.value(
+                  value: widget.neonDependencies.firstLaunchBloc,
+                ),
+                NeonProvider.value(
+                  value: widget.neonDependencies.appImplementations
+                      .firstWhere(
+                        (app) => app.id == 'files',
+                      )
+                      .options,
                 ),
                 if (activeAccountSnapshot.hasData) ...[
                   Provider<Account>.value(
