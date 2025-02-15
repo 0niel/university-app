@@ -26,7 +26,7 @@ command:
         melos bootstrap
         git add packages/app/pubspec.lock
 scripts:
-  format: dart format --fix --line-length 120 .
+  format: dart format --line-length 120 . && dart fix --apply
   format:check: dart format --output=none --set-exit-if-changed --line-length 120 .
   analyze: dart run custom_lint --fatal-infos .
   fix: dart fix --apply
