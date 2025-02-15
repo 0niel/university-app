@@ -154,3 +154,6 @@ app.*.symbols
 # Envied Package
 .env
 env.g.dart
+
+# FVM Version Cache
+.fvm/
