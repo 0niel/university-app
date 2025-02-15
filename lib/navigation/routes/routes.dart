@@ -46,16 +46,13 @@ final GlobalKey<NavigatorState> _profileNavigatorKey = GlobalKey<NavigatorState>
 final GlobalKey<NavigatorState> _infoNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'info');
 
 String _getNeonPathInCurrentRouter(String neonRouterPath) {
-  late final String path;
   if (neonRouterPath.startsWith('/') && neonRouterPath.length > 1) {
-    path = 'neon-${neonRouterPath.substring(1)}';
+    return 'neon$neonRouterPath';
   } else if (neonRouterPath.startsWith('/') && neonRouterPath.length == 1) {
-    path = 'neon';
+    return 'neon';
   } else {
-    path = neonRouterPath;
+    return neonRouterPath;
   }
-
-  return path;
 }
 
 GoRouter createRouter() => GoRouter(
@@ -64,8 +61,8 @@ GoRouter createRouter() => GoRouter(
       debugLogDiagnostics: kDebugMode,
       redirect: (context, state) {
         if (state.matchedLocation.contains('neon')) {
+          // ignore: invalid_use_of_visible_for_testing_member
           final redirectPath = neon.redirect(context, state);
-
           if (redirectPath != null) {
             final pathInCurrentRouter = _getNeonPathInCurrentRouter(redirectPath);
             return '/services/$pathInCurrentRouter';
@@ -76,15 +73,13 @@ GoRouter createRouter() => GoRouter(
         if (state.uri.scheme == 'http' || state.uri.scheme == 'https') {
           launchUrlString(state.uri.toString());
         }
-
         return null;
       },
       routes: [
         GoRoute(path: '/', redirect: (_, __) => '/schedule'),
         StatefulShellRoute.indexedStack(
-          builder: (BuildContext context, GoRouterState state, StatefulNavigationShell navigationShell) {
-            return ScaffoldNavigationShell(navigationShell: navigationShell);
-          },
+          builder: (BuildContext context, GoRouterState state, StatefulNavigationShell navigationShell) =>
+              ScaffoldNavigationShell(navigationShell: navigationShell),
           branches: [
             StatefulShellBranch(navigatorKey: _newsNavigatorKey, routes: [
               GoRoute(
@@ -125,7 +120,6 @@ GoRouter createRouter() => GoRouter(
                     },
                     builder: (context, state) {
                       final extra = state.extra as (LessonSchedulePart, DateTime);
-
                       return ScheduleDetailsPage(
                         lesson: extra.$1,
                         selectedDate: extra.$2,
@@ -201,7 +195,6 @@ GoRouter createRouter() => GoRouter(
                           parentNavigatorKey: route.parentNavigatorKey,
                         );
                       }
-
                       return route;
                     }),
                   ],
