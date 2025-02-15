@@ -292,8 +292,8 @@ class _SvgInteractiveMapState extends State<SvgInteractiveMap> with TickerProvid
     BottomModalSheet.show(
       context,
       child: _buildBottomSheetSelectedRoomContent(roomName: selected.name),
-      title: 'Room ${selected.name}',
-      description: 'You can quickly find the schedule for this room using the schedule search.',
+      title: 'Аудитория ${selected.name}',
+      description: 'Вы можете быстро найти расписание для этой аудитории, используя поиск по расписанию.',
     );
   }
 
