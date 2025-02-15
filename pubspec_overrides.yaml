@@ -32,4 +32,4 @@ dependency_overrides:
       url: https://github.com/0niel/bloc
       path: packages/flutter_bloc
       ref: master
-
+  open_filex: ^4.6.0
