@@ -1,10 +1,5 @@
 name: Shorebird Master Push Workflow
 
-on:
-  push:
-    branches:
-      - master
-
 env:
   SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
   MAPKIT_API_KEY: ${{ secrets.MAPKIT_API_KEY }}
