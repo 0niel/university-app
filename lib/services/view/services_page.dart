@@ -1,4 +1,3 @@
-import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -129,19 +128,19 @@ class _ServicesViewState extends State<ServicesView> {
                         context.go('/services/map');
                       },
                     ),
-                    if (Platform.isAndroid)
-                      ServiceCard(
-                        title: 'NFC Пропуск',
-                        icon: ServiceIcon(
-                          color: Theme.of(context).extension<AppColors>()!.colorful03,
-                          iconColor: Theme.of(context).extension<AppColors>()!.active,
-                          icon: Icons.nfc,
-                        ),
-                        onTap: () {
-                          context.go('/services/nfc');
-                        },
-                        description: 'Смартфон как пропуск',
-                      ),
+                    // if (Platform.isAndroid)
+                    //   ServiceCard(
+                    //     title: 'NFC Пропуск',
+                    //     icon: ServiceIcon(
+                    //       color: Theme.of(context).extension<AppColors>()!.colorful03,
+                    //       iconColor: Theme.of(context).extension<AppColors>()!.active,
+                    //       icon: Icons.nfc,
+                    //     ),
+                    //     onTap: () {
+                    //       context.go('/services/nfc');
+                    //     },
+                    //     description: 'Смартфон как пропуск',
+                    //   ),
                     BlocBuilder<NeonBloc, NeonState>(
                       bloc: neonBloc,
                       builder: (context, state) {

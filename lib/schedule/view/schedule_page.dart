@@ -149,12 +149,6 @@ class _SchedulePageState extends State<SchedulePage> {
               appBar: AppBar(
                 title: Text(_appBarTitle),
                 actions: [
-                  AddGroupButton(
-                    onPressed: () => context.go('/schedule/search'),
-                  ),
-                  SettingsButton(
-                    onPressed: () => context.go('/profile'),
-                  ),
                   ComparisonModeButton(
                     onPressed: () => _bloc.add(const ToggleComparisonMode()),
                   ),
@@ -256,16 +250,8 @@ class _ListModeView extends StatelessWidget {
 
     return CustomScrollView(
       slivers: [
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.only(top: 16.0),
-            child: AnimatedOpacity(
-              opacity: isStoriesVisible ? 1.0 : 0.0,
-              duration: const Duration(milliseconds: 300),
-              // child: const StoriesView(),
-              child: const StickyAd(),
-            ),
-          ),
+        const SliverToBoxAdapter(
+          child: StickyAd(),
         ),
         for (var entry in filteredLessonsByDay)
           StickyHeader(

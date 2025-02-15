@@ -39,9 +39,7 @@ class _StickyAdState extends State<StickyAd> {
           return const SizedBox.shrink();
         }
         final deviceWidth = MediaQuery.of(context).size.width;
-        final adWidth =
-            (deviceWidth - StickyAd.padding.left - StickyAd.padding.right)
-                .truncate();
+        final adWidth = (deviceWidth - StickyAd.padding.left - StickyAd.padding.right).truncate();
 
         return StickyAdContainer(
           key: const Key('stickyAd_container'),
@@ -102,9 +100,8 @@ class StickyAdCloseIcon extends StatelessWidget {
             borderRadius: BorderRadius.circular(20),
           ),
           child: Padding(
-            padding: EdgeInsets.all(AppSpacing.xxs),
-            child: Icon(Icons.close,
-                color: Theme.of(context).extension<AppColors>()!.background03),
+            padding: const EdgeInsets.all(AppSpacing.xxs),
+            child: Icon(Icons.close, color: Theme.of(context).extension<AppColors>()!.background03),
           ),
         ),
       ),
@@ -136,8 +133,7 @@ class StickyAdCloseIconBackground extends StatelessWidget {
         ),
         child: const Padding(
           padding: EdgeInsets.all(AppSpacing.xxs),
-          child: HugeIcon(
-              icon: HugeIcons.strokeRoundedClosedCaption, color: Colors.white),
+          child: HugeIcon(icon: HugeIcons.strokeRoundedClosedCaption, color: Colors.white),
         ),
       ),
     );
