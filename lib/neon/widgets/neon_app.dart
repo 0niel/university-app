@@ -148,6 +148,9 @@ class _NeonAppProviderState extends State<NeonAppProvider> with WidgetsBindingOb
                       )
                       .options,
                 ),
+                Provider<BuiltSet<AppImplementation>>(
+                    create: (_) => _appImplementations, dispose: (_, appImplementations) => appImplementations),
+                for (final appImplementation in _appImplementations) appImplementation.optionsProvider,
                 if (activeAccountSnapshot.hasData) ...[
                   Provider<Account>.value(
                     value: activeAccountSnapshot.data!,
