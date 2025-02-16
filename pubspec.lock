@@ -28,7 +28,7 @@ packages:
       path: "packages/academic_calendar"
       relative: true
     source: path
-    version: "0.1.0+1"
+    version: "0.1.1+2"
   account_repository:
     dependency: "direct main"
     description:
@@ -1979,10 +1979,11 @@ packages:
   open_filex:
     dependency: "direct main"
     description:
-      name: open_filex
-      sha256: dcb7bd3d32db8db5260253a62f1564c02c2c8df64bc0187cd213f65f827519bd
-      url: "https://pub.dev"
-    source: hosted
+      path: "."
+      ref: HEAD
+      resolved-ref: "7ec56421afc37bb2cc3cb751b9775999cd2d9a61"
+      url: "https://github.com/mufassalhussain/open_filex"
+    source: git
     version: "4.6.0"
   package_config:
     dependency: transitive
