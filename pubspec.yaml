@@ -65,7 +65,6 @@ dependencies:
   firebase_analytics: ^10.0.0
   firebase_core_web: ^2.11.5
   firebase_messaging: ^14.0.0
-  oauth2_client: ^3.3.0
   flutter_secure_storage: ^8.0.0
   flutter_nfc_kit: ^3.3.1
   app_settings: ^5.0.0

@@ -6,18 +6,14 @@ import 'package:notifications_repository/notifications_repository.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:permission_client/permission_client.dart';
 import 'package:persistent_storage/persistent_storage.dart';
-import 'package:rtu_mirea_app/common/oauth.dart';
 import 'package:rtu_mirea_app/data/datasources/app_settings_local.dart';
 import 'package:rtu_mirea_app/data/datasources/forum_local.dart';
 import 'package:rtu_mirea_app/data/datasources/forum_remote.dart';
 import 'package:rtu_mirea_app/data/datasources/news_remote.dart';
 import 'package:rtu_mirea_app/data/datasources/strapi_remote.dart';
-import 'package:rtu_mirea_app/data/datasources/user_local.dart';
-import 'package:rtu_mirea_app/data/datasources/user_remote.dart';
 import 'package:rtu_mirea_app/data/datasources/widget_data.dart';
 import 'package:rtu_mirea_app/data/repositories/app_settings_repository_impl.dart';
 import 'package:rtu_mirea_app/data/repositories/news_repository_impl.dart';
-import 'package:rtu_mirea_app/data/repositories/user_repository_impl.dart';
 import 'package:rtu_mirea_app/domain/repositories/app_settings_repository.dart';
 import 'package:rtu_mirea_app/domain/repositories/news_repository.dart';
 import 'package:rtu_mirea_app/domain/repositories/user_repository.dart';
@@ -101,11 +97,6 @@ Future<void> setup() async {
     ),
   );
 
-  getIt.registerLazySingleton<UserRepository>(() => UserRepositoryImpl(
-        remoteDataSource: getIt(),
-        localDataSource: getIt(),
-      ));
-
   getIt.registerLazySingleton<AppSettingsRepository>(() => AppSettingsRepositoryImpl(
         localDataSource: getIt(),
       ));
@@ -116,9 +107,6 @@ Future<void> setup() async {
         notificationsClient: getIt<FirebaseNotificationsClient>(),
       ));
 
-  getIt.registerLazySingleton<UserLocalData>(() => UserLocalDataImpl(
-      sharedPreferences: getIt(), secureStorage: getIt(), oauthHelper: getIt<LksOauth2>().oauth2Helper));
-  getIt.registerLazySingleton<UserRemoteData>(() => UserRemoteDataImpl(httpClient: getIt(), lksOauth2: getIt()));
   getIt.registerLazySingleton<NewsRemoteData>(() => NewsRemoteDataImpl(httpClient: getIt()));
   getIt.registerLazySingleton<ForumRemoteData>(() => ForumRemoteDataImpl(httpClient: getIt()));
   getIt.registerLazySingleton<ForumLocalData>(() => ForumLocalDataImpl(sharedPreferences: getIt()));
@@ -140,7 +128,6 @@ Future<void> setup() async {
   getIt.registerLazySingleton(() => secureStorage);
   final PackageInfo packageInfo = await PackageInfo.fromPlatform();
   getIt.registerLazySingleton(() => packageInfo);
-  getIt.registerLazySingleton(() => LksOauth2());
 
   getIt.registerLazySingleton(() => FirebaseNotificationsClient(firebaseMessaging: FirebaseMessaging.instance));
   getIt.registerLazySingleton(() => const PermissionClient());

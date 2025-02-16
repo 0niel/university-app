@@ -1288,22 +1288,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "5.2.0"
-  flutter_web_auth_2:
-    dependency: transitive
-    description:
-      name: flutter_web_auth_2
-      sha256: "4d3d2fd3d26bf1a26b3beafd4b4b899c0ffe10dc99af25abc58ffe24e991133c"
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.1.2"
-  flutter_web_auth_2_platform_interface:
-    dependency: transitive
-    description:
-      name: flutter_web_auth_2_platform_interface
-      sha256: e8669e262005a8354389ba2971f0fc1c36188481234ff50d013aaf993f30f739
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.1.0"
   flutter_web_plugins:
     dependency: transitive
     description: flutter
@@ -1951,14 +1935,6 @@ packages:
       relative: true
     source: path
     version: "1.0.0+1"
-  oauth2_client:
-    dependency: "direct main"
-    description:
-      name: oauth2_client
-      sha256: db7e93d8097ad0dff1cb07cbe7158344fb32082f8f2ed60b32af84591fb81722
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.3.0"
   octo_image:
     dependency: transitive
     description:
@@ -2342,14 +2318,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.2.2"
-  random_string:
-    dependency: transitive
-    description:
-      name: random_string
-      sha256: "03b52435aae8cbdd1056cf91bfc5bf845e9706724dd35ae2e99fa14a1ef79d02"
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.3.1"
   random_user_agents:
     dependency: transitive
     description:
@@ -3356,14 +3324,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.4.3"
-  window_to_front:
-    dependency: transitive
-    description:
-      name: window_to_front
-      sha256: "7aef379752b7190c10479e12b5fd7c0b9d92adc96817d9e96c59937929512aee"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.0.3"
   xdg_directories:
     dependency: transitive
     description:
