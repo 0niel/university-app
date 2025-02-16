@@ -147,6 +147,12 @@ class _BannerAdContentState extends State<BannerAdContent> with AutomaticKeepAli
   final AdRequest _adRequest = const AdRequest();
 
   @override
+  void initState() {
+    MobileAds.initialize();
+    super.initState();
+  }
+
+  @override
   void dispose() {
     _ad?.destroy();
     super.dispose();
@@ -178,7 +184,6 @@ class _BannerAdContentState extends State<BannerAdContent> with AutomaticKeepAli
 
   Future<void> _loadAd() async {
     final windowSize = MediaQuery.of(context).size;
-    setState(() {});
 
     BannerAdSize currentAdSize;
     if (widget.size == BannerSize.anchoredAdaptive) {
@@ -192,11 +197,8 @@ class _BannerAdContentState extends State<BannerAdContent> with AutomaticKeepAli
     } else {
       currentAdSize = BannerAdContent._sizeValues[widget.size]!;
     }
-    setState(() {});
 
-    if (_isBannerAlreadyCreated) {
-      await _ad?.loadAd(adRequest: _adRequest);
-    } else {
+    if (!_isBannerAlreadyCreated) {
       final adUnitId = widget.currentPlatform.isAndroid
           ? widget.adUnitIdAndroid ?? BannerAdContent.androidTestUnitId
           : widget.adUnitIdIOS ?? BannerAdContent.iosTestUnitAd;
@@ -222,11 +224,15 @@ class _BannerAdContentState extends State<BannerAdContent> with AutomaticKeepAli
         onLeftApplication: () => debugPrint('callback: left app'),
         onReturnedToApplication: () => debugPrint('callback: returned to app'),
         onImpression: (data) => debugPrint('callback: impression: ${data.getRawData()}'),
-      )..loadAd(adRequest: _adRequest);
+      );
       setState(() {
         _isBannerAlreadyCreated = true;
       });
     }
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _ad?.loadAd(adRequest: _adRequest);
+    });
   }
 
   // ignore: unused_element

@@ -13,10 +13,10 @@ part 'lesson_bells.g.dart';
 class LessonBells extends Equatable {
   /// {@macro LessonBells}
   const LessonBells({
-    required this.number,
     required this.startTime,
     required this.endTime,
-  })  : assert(number > 0, 'Lesson number must be greater than 0'),
+    this.number,
+  })  : assert(number == null || number > 0, 'Lesson number must be greater than 0'),
         assert(
           startTime < endTime,
           'Lesson start time must be less than lesson end time',
@@ -26,7 +26,7 @@ class LessonBells extends Equatable {
   factory LessonBells.fromJson(Map<String, dynamic> json) => _$LessonBellsFromJson(json);
 
   /// Lesson number.
-  final int number;
+  final int? number;
 
   /// Lesson start time. This is [TimeOfDay] with only the time part.
   @JsonKey(fromJson: _timeFromJson, toJson: _timeToJson)
