@@ -47,11 +47,15 @@ void main() {
       expect(week10, 14);
     });
 
-    test('getSemesterStart returns correct start date for given date', () {
-      final startDate1 = getSemesterStart(DateTime(2022, 9));
+    test('getSemesterStartWithPeriod returns correct start date for given date', () {
+      // For semester 1 date
+      final period1 = getPeriod(DateTime(2022, 9));
+      final startDate1 = getSemesterStartWithPeriod(period1);
       expect(startDate1, DateTime(2022, 9));
 
-      final startDate2 = getSemesterStart(DateTime(2022, 2));
+      // For semester 2 date
+      final period2 = getPeriod(DateTime(2022, 2));
+      final startDate2 = getSemesterStartWithPeriod(period2);
       expect(startDate2, DateTime(2022, 2, 9));
     });
   });
