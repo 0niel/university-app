@@ -1,3 +1,4 @@
+import 'package:academic_calendar/academic_calendar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
@@ -103,14 +104,14 @@ class _CalendarState extends State<Calendar> {
 
           _selectedPage = widget.pageViewController.page!.round();
           _selectedDay = Calendar.firstCalendarDay.add(Duration(days: _selectedPage));
-          _selectedWeek = CalendarUtils.getCurrentWeek(mCurrentDate: _selectedDay);
+          _selectedWeek = getWeek(_selectedDay);
           _focusedDay = Calendar.getDayInAvailableRange(_selectedDay);
         });
       }
     });
 
     _selectedDay = Calendar.getDayInAvailableRange(Calendar.getNowWithoutTime());
-    _selectedWeek = CalendarUtils.getCurrentWeek();
+    _selectedWeek = getWeek();
   }
 
   @override
@@ -194,13 +195,66 @@ class _CalendarState extends State<Calendar> {
                             setState(() {
                               _focusedDay = Calendar.getDayInAvailableRange(currentDate);
                               _selectedDay = currentDate;
-                              _selectedWeek = CalendarUtils.getCurrentWeek(mCurrentDate: _selectedDay);
+                              _selectedWeek = getWeek(currentDate);
                               _selectedPage = Calendar.getPageIndex(_selectedDay);
                             });
                             if (widget.pageViewController.hasClients) {
                               widget.pageViewController.jumpToPage(_selectedPage);
                             }
                           }
+                        },
+                        onHeaderLongPress: () async {
+                          BottomModalSheet.show(
+                            context,
+                            title: 'Выберите неделю',
+                            description: 'Быстрый способ перейти к определённой неделе',
+                            child: SizedBox(
+                              height: MediaQuery.of(context).size.height * 0.36,
+                              child: GridView.builder(
+                                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: 4,
+                                  mainAxisSpacing: 8,
+                                  crossAxisSpacing: 8,
+                                  childAspectRatio: 1.5,
+                                ),
+                                itemCount: CalendarUtils.kMaxWeekInSemester,
+                                itemBuilder: (context, index) {
+                                  final week = index + 1;
+
+                                  return ColorfulButton(
+                                    text: '$week',
+                                    onClick: () {
+                                      final currentDate = Calendar.getNowWithoutTime();
+                                      final newFocusedDay = CalendarUtils.getDaysInWeek(week, currentDate).first;
+                                      final newPage = _calculateFocusedPage(
+                                        _calendarFormat,
+                                        Calendar.firstCalendarDay,
+                                        newFocusedDay,
+                                      );
+
+                                      if (newPage == _pageController?.page?.round()) {
+                                        return;
+                                      }
+
+                                      _pageController?.animateToPage(
+                                        newPage,
+                                        duration: const Duration(milliseconds: 150),
+                                        curve: Curves.easeInOut,
+                                      );
+
+                                      setState(() {
+                                        _focusedDay = Calendar.getDayInAvailableRange(newFocusedDay);
+                                        _selectedDay = newFocusedDay;
+                                        _selectedWeek = week;
+                                        _selectedPage = newPage;
+                                      });
+                                    },
+                                    backgroundColor: Theme.of(context).extension<AppColors>()!.background03,
+                                  );
+                                },
+                              ),
+                            ),
+                          );
                         },
                         day: day,
                         week: _selectedWeek,
@@ -309,7 +363,7 @@ class _CalendarState extends State<Calendar> {
             },
             onDaySelected: (selectedDay, focusedDay) {
               if (!isSameDay(_selectedDay, selectedDay)) {
-                final int currentNewWeek = CalendarUtils.getCurrentWeek(mCurrentDate: selectedDay);
+                final int currentNewWeek = getWeek(selectedDay);
                 // Call `setState()` when updating the selected day
                 if (mounted) {
                   setState(() {
