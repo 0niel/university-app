@@ -19,7 +19,6 @@ class ScaffoldNavigationShell extends StatelessWidget {
       builder: (context, constraints) {
         if (constraints.maxWidth > tabletBreakpoint) {
           return Scaffold(
-            appBar: AppBar(title: const Text('РТУ МИРЭА')),
             body: Row(
               children: [
                 Sidebar(

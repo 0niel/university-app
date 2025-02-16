@@ -42,8 +42,8 @@ import 'package:rtu_mirea_app/stories/bloc/stories_bloc.dart';
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:neon_framework/l10n/localizations.dart' as neon_localizations;
 import 'package:yandex_mobileads/mobile_ads.dart';
+import 'package:syncfusion_localizations/syncfusion_localizations.dart';
 
-// Функция для загрузки интерстициального объявления.
 Future<void> yandexInterstitialAdLoader({
   required String adUnitId,
   required AdRequestConfiguration adRequestConfiguration,
@@ -262,6 +262,7 @@ class _AppViewState extends State<_AppView> {
                         GlobalWidgetsLocalizations.delegate,
                         GlobalCupertinoLocalizations.delegate,
                         ..._neonLocalizationsDelegates,
+                        SfGlobalLocalizations.delegate,
                       ],
                       supportedLocales: const [Locale('en'), Locale('ru')],
                       locale: const Locale('ru'),

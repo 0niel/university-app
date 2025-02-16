@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide TimeOfDay;
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
@@ -156,6 +156,19 @@ class _SchedulePageState extends State<SchedulePage> {
                     isListModeEnabled: _bloc.state.isListModeEnabled,
                     onPressed: () => _bloc.add(const ToggleListMode()),
                   ),
+
+                  // IconButton(
+                  //   icon: const Icon(Icons.calendar_view_month),
+                  //   tooltip: 'Календарь',
+                  //   onPressed: () {
+                  //     Navigator.push(
+                  //       context,
+                  //       MaterialPageRoute(
+                  //         builder: (_) => const SyncfusionCalendarScreen(),
+                  //       ),
+                  //     );
+                  //   },
+                  // ),
                 ],
               ),
               body: AnimatedSwitcher(
@@ -357,9 +370,9 @@ class _EventsPageView extends StatelessWidget {
           return const HolidayPage(title: 'Выходной');
         }
 
-        final lessonsByTime = groupBy<LessonSchedulePart, int>(
+        final lessonsByTime = groupBy<LessonSchedulePart, TimeOfDay>(
           lessonsForDay.whereType<LessonSchedulePart>().toList(),
-          (lesson) => lesson.lessonBells.number,
+          (lesson) => lesson.lessonBells.startTime,
         );
 
         return ListView.builder(

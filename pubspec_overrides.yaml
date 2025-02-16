@@ -35,3 +35,4 @@ dependency_overrides:
   open_filex:
     git:
       url: https://github.com/mufassalhussain/open_filex
+  flutter_secure_storage: ^9.2.2
