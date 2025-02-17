@@ -8,7 +8,6 @@ import 'package:neon_framework/src/utils/global_options.dart';
 import 'dart:async';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:neon_framework/blocs.dart';
 import 'package:neon_framework/src/blocs/maintenance_mode.dart';
 import 'package:neon_framework/src/blocs/unified_search.dart';
@@ -126,7 +125,6 @@ class _NeonAppProviderState extends State<NeonAppProvider> with WidgetsBindingOb
         builder: (context, options, _) => StreamBuilder(
           stream: _accountsBloc.activeAccount,
           builder: (context, activeAccountSnapshot) {
-            FlutterNativeSplash.remove();
             return MultiProvider(
               providers: [
                 Provider<NextPushBloc>.value(

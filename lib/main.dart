@@ -7,7 +7,6 @@ import 'package:discourse_repository/discourse_repository.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:intl/intl.dart';
@@ -41,9 +40,7 @@ import 'package:schedule_repository/schedule_repository.dart' as schedule_reposi
 import 'package:yandex_maps_mapkit_lite/init.dart' as yandex_maps_mapkit_lite;
 
 Future<void> main() async {
-  WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
-
-  FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
+  WidgetsFlutterBinding.ensureInitialized();
 
   await yandex_maps_mapkit_lite.initMapkit(apiKey: Env.mapkitApiKey);
   final apiClient = ApiClient();
@@ -95,8 +92,6 @@ Future<void> main() async {
   Bloc.observer = AppBlocObserver(analyticsRepository: analyticsRepository);
 
   HydratedBloc.storage = CustomHydratedStorage(sharedPreferences: getIt<SharedPreferences>());
-
-  FlutterNativeSplash.remove();
 
   final neonDependencies = await initializeNeonDependencies(
     appImplementations: appImplementations,
