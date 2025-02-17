@@ -28,11 +28,22 @@ pre_install do |installer|
 end
 
 target 'Runner' do
-  #   use_frameworks!
-  use_modular_headers!
+  use_frameworks!
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
-  
-  pod 'YandexMobileAdsMediation', '~> 7.10.0'
+end
+
+static_frameworks = ['YandexMobileAdsMediation', 'yandex_mobileads']
+pre_install do |installer|
+  installer.pod_targets.each do |pod|
+    if static_frameworks.include?(pod.name)
+      def pod.static_framework?;
+        true
+      end
+      def pod.build_type;
+        Pod::BuildType.static_library
+      end
+    end
+  end
 end
 
 post_install do |installer|
