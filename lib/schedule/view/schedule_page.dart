@@ -5,6 +5,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 import 'package:rtu_mirea_app/ads/ads.dart';
 import 'package:rtu_mirea_app/presentation/constants.dart';
 import 'package:app_ui/app_ui.dart';
@@ -13,7 +14,6 @@ import 'package:rtu_mirea_app/schedule/models/models.dart';
 import 'package:rtu_mirea_app/schedule/widgets/widgets.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:university_app_server_api/client.dart';
-import 'package:collection/collection.dart';
 import 'package:expandable_page_view/expandable_page_view.dart';
 
 class SchedulePage extends StatefulWidget {
@@ -346,6 +346,56 @@ class _EventsPageView extends StatelessWidget {
   final PageController pageController;
   final bool showEmptyLessons;
 
+  int _toMinutes(TimeOfDay t) => t.hour * 60 + t.minute;
+
+  String _pluralizeWindow(int count) {
+    return Intl.plural(
+      count,
+      one: '$count пару',
+      few: '$count пары',
+      many: '$count пар',
+      other: '$count пар',
+    );
+  }
+
+  Widget _buildConsecutiveBreakWidget(
+      BuildContext context, List<LessonSchedulePart> currentLessons, List<LessonSchedulePart> nextLessons) {
+    final currentMax = currentLessons.map((l) => _toMinutes(l.lessonBells.endTime)).reduce((a, b) => a > b ? a : b);
+    final nextMin = nextLessons.map((l) => _toMinutes(l.lessonBells.startTime)).reduce((a, b) => a < b ? a : b);
+    final breakDuration = nextMin - currentMax;
+    final breakText = breakDuration > 0 ? 'Перерыв $breakDuration мин' : 'Перерыв отсутствует';
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
+      child: Container(
+        decoration: BoxDecoration(
+          border: Border.all(color: Theme.of(context).extension<AppColors>()!.deactiveDarker),
+          borderRadius: BorderRadius.circular(8.0),
+        ),
+        padding: const EdgeInsets.all(8.0),
+        child: Center(
+            child: Text(breakText,
+                style: AppTextStyle.captionL.copyWith(color: Theme.of(context).extension<AppColors>()!.deactive))),
+      ),
+    );
+  }
+
+  Widget _buildWindowBreakWidget(BuildContext context, int windowCount) {
+    final windowText = 'Окно в ${_pluralizeWindow(windowCount)}';
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
+      child: Container(
+        decoration: BoxDecoration(
+          border: Border.all(color: Theme.of(context).extension<AppColors>()!.deactiveDarker),
+          borderRadius: BorderRadius.circular(8.0),
+        ),
+        padding: const EdgeInsets.all(8.0),
+        child: Center(
+            child: Text(windowText,
+                style: AppTextStyle.captionL.copyWith(color: Theme.of(context).extension<AppColors>()!.deactive))),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final state = context.select((ScheduleBloc bloc) => bloc.state);
@@ -360,37 +410,76 @@ class _EventsPageView extends StatelessWidget {
           day: day,
         );
 
-        final holiday = lessonsForDay.firstWhereOrNull(
-          (element) => element is HolidaySchedulePart,
-        );
-        if (holiday != null) {
-          return HolidayPage(title: (holiday as HolidaySchedulePart).title);
-        }
-        if (day.weekday == DateTime.sunday) {
-          return const HolidayPage(title: 'Выходной');
+        final holiday = lessonsForDay.firstWhereOrNull((element) => element is HolidaySchedulePart);
+        if (holiday != null) return HolidayPage(title: (holiday as HolidaySchedulePart).title);
+        if (day.weekday == DateTime.sunday) return const HolidayPage(title: 'Выходной');
+
+        final allLessons = lessonsForDay.whereType<LessonSchedulePart>().toList();
+        final numberedLessons = allLessons.where((l) => l.lessonBells.number != null).toList();
+        final unnumberedLessons = allLessons.where((l) => l.lessonBells.number == null).toList();
+
+        numberedLessons
+            .sort((a, b) => _toMinutes(a.lessonBells.startTime).compareTo(_toMinutes(b.lessonBells.startTime)));
+        unnumberedLessons
+            .sort((a, b) => _toMinutes(a.lessonBells.startTime).compareTo(_toMinutes(b.lessonBells.startTime)));
+
+        final lessonsByTime = <int, List<LessonSchedulePart>>{};
+        for (final l in numberedLessons) {
+          final key = l.lessonBells.number!;
+          lessonsByTime.putIfAbsent(key, () => []).add(l);
         }
 
-        final lessonsByTime = groupBy<LessonSchedulePart, TimeOfDay>(
-          lessonsForDay.whereType<LessonSchedulePart>().toList(),
-          (lesson) => lesson.lessonBells.startTime,
-        );
-
-        return ListView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: SchedulePage.maxLessonsPerDay,
-          itemBuilder: (context, index) {
-            final lessonIndex = index;
-            final lessons = lessonsByTime[lessonIndex] ?? [];
-            return lessons.isNotEmpty
+        for (final l in unnumberedLessons) {
+          final lessonTime = _toMinutes(l.lessonBells.startTime);
+          LessonSchedulePart? previous;
+          LessonSchedulePart? next;
+          for (final nl in numberedLessons) {
+            final t = _toMinutes(nl.lessonBells.startTime);
+            if (t <= lessonTime) previous = nl;
+            if (t > lessonTime) {
+              next = nl;
+              break;
+            }
+          }
+          final key = previous != null && next != null
+              ? (lessonTime - _toMinutes(previous.lessonBells.startTime) <=
+                      _toMinutes(next.lessonBells.startTime) - lessonTime
+                  ? previous.lessonBells.number!
+                  : next.lessonBells.number!)
+              : previous?.lessonBells.number ?? next?.lessonBells.number ?? 0;
+          lessonsByTime.putIfAbsent(key, () => []).add(l);
+        }
+        final sortedKeys = lessonsByTime.keys.where((k) => k != 0).toList()..sort();
+        final List<Widget> widgets = [];
+        for (var i = 0; i < sortedKeys.length; i++) {
+          final key = sortedKeys[i];
+          final lessons = lessonsByTime[key]!;
+          widgets.add(
+            lessons.isNotEmpty
                 ? _buildLessonCard(context, lessons, day)
                 : showEmptyLessons
                     ? Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                        child: EmptyLessonCard(lessonNumber: lessonIndex),
+                        child: EmptyLessonCard(lessonNumber: key),
                       )
-                    : const SizedBox.shrink();
-          },
+                    : const SizedBox.shrink(),
+          );
+          if (i < sortedKeys.length - 1) {
+            final int currentKey = sortedKeys[i];
+            final int nextKey = sortedKeys[i + 1];
+            if (nextKey - currentKey == 1) {
+              widgets.add(_buildConsecutiveBreakWidget(context, lessonsByTime[currentKey]!, lessonsByTime[nextKey]!));
+            } else {
+              final windowCount = nextKey - currentKey - 1;
+              widgets.add(_buildWindowBreakWidget(context, windowCount));
+            }
+          }
+        }
+
+        return ListView(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          children: widgets,
         );
       },
     );
