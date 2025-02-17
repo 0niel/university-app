@@ -53,7 +53,6 @@ class _SchedulePageState extends State<SchedulePage> {
 
   String get _appBarTitle {
     final scheduleState = _bloc.state.selectedSchedule;
-
     if (scheduleState is SelectedGroupSchedule) {
       return scheduleState.group.name;
     } else if (scheduleState is SelectedTeacherSchedule) {
@@ -89,46 +88,6 @@ class _SchedulePageState extends State<SchedulePage> {
                 ),
               );
             }
-
-            // if (state.showScheduleDiffDialog && state.latestDiff != null) {
-            //   context.read<ScheduleBloc>().add(const HideScheduleDiffDialog());
-
-            //   WidgetsBinding.instance.addPostFrameCallback((_) {
-            //     ScaffoldMessenger.of(context).showSnackBar(
-            //       SnackBar(
-            //         content: Row(
-            //           children: [
-            //             HugeIcon(
-            //               icon: HugeIcons.strokeRoundedAlertCircle,
-            //               size: 24,
-            //               color: Theme.of(context).extension<AppColors>()!.active,
-            //             ),
-            //             const SizedBox(width: 12.0),
-            //             Expanded(
-            //               child: Text(
-            //                 'Найдены изменения в расписании',
-            //                 style: AppTextStyle.body.copyWith(
-            //                   color: Theme.of(context).extension<AppColors>()!.active,
-            //                 ),
-            //               ),
-            //             ),
-            //           ],
-            //         ),
-            //         action: SnackBarAction(
-            //           label: 'Просмотреть',
-            //           textColor: Theme.of(context).extension<AppColors>()!.primary,
-            //           onPressed: () {
-            //             Navigator.push(
-            //               context,
-            //               MaterialPageRoute(builder: (_) => ScheduleDiffPage(diff: state.latestDiff!)),
-            //             );
-            //           },
-            //         ),
-            //         duration: const Duration(seconds: 5),
-            //       ),
-            //     );
-            //   });
-            // }
           },
           buildWhen: (previous, current) =>
               current.status != ScheduleStatus.failure && current.selectedSchedule != null,
@@ -144,7 +103,6 @@ class _SchedulePageState extends State<SchedulePage> {
                 context.go('/schedule/search');
               });
             }
-
             return Scaffold(
               appBar: AppBar(
                 title: Text(_appBarTitle),
@@ -156,19 +114,6 @@ class _SchedulePageState extends State<SchedulePage> {
                     isListModeEnabled: _bloc.state.isListModeEnabled,
                     onPressed: () => _bloc.add(const ToggleListMode()),
                   ),
-
-                  // IconButton(
-                  //   icon: const Icon(Icons.calendar_view_month),
-                  //   tooltip: 'Календарь',
-                  //   onPressed: () {
-                  //     Navigator.push(
-                  //       context,
-                  //       MaterialPageRoute(
-                  //         builder: (_) => const SyncfusionCalendarScreen(),
-                  //       ),
-                  //     );
-                  //   },
-                  // ),
                 ],
               ),
               body: AnimatedSwitcher(
@@ -253,14 +198,12 @@ class _ListModeView extends StatelessWidget {
   Widget build(BuildContext context) {
     final state = context.select((ScheduleBloc bloc) => bloc.state);
     final scheduleParts = state.selectedSchedule?.schedule ?? [];
-
     final lessonsByDay = _groupLessonsByDay(scheduleParts);
     final today = Calendar.getNowWithoutTime();
     final filteredLessonsByDay = lessonsByDay.keys
         .where((day) => day.isAfter(today) || day.isAtSameMomentAs(today))
         .map((day) => MapEntry(day, lessonsByDay[day]))
         .toList();
-
     return CustomScrollView(
       slivers: [
         const SliverToBoxAdapter(
@@ -277,7 +220,6 @@ class _ListModeView extends StatelessWidget {
 
   Map<DateTime, List<SchedulePart>> _groupLessonsByDay(List<SchedulePart> scheduleParts) {
     final Map<DateTime, List<SchedulePart>> lessonsByDay = {};
-
     for (final part in scheduleParts) {
       for (final date in part.dates) {
         final day = DateTime(date.year, date.month, date.day);
@@ -288,7 +230,6 @@ class _ListModeView extends StatelessWidget {
         );
       }
     }
-
     return Map.fromEntries(
       lessonsByDay.entries.toList()..sort((a, b) => a.key.compareTo(b.key)),
     );
@@ -311,7 +252,6 @@ class _CalendarModeView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final state = context.select((ScheduleBloc bloc) => bloc.state);
-
     return NestedScrollView(
       physics: const ClampingScrollPhysics(),
       headerSliverBuilder: (_, __) => [
@@ -373,8 +313,11 @@ class _EventsPageView extends StatelessWidget {
         ),
         padding: const EdgeInsets.all(8.0),
         child: Center(
-            child: Text(breakText,
-                style: AppTextStyle.captionL.copyWith(color: Theme.of(context).extension<AppColors>()!.deactive))),
+          child: Text(
+            breakText,
+            style: AppTextStyle.captionL.copyWith(color: Theme.of(context).extension<AppColors>()!.deactive),
+          ),
+        ),
       ),
     );
   }
@@ -390,8 +333,11 @@ class _EventsPageView extends StatelessWidget {
         ),
         padding: const EdgeInsets.all(8.0),
         child: Center(
-            child: Text(windowText,
-                style: AppTextStyle.captionL.copyWith(color: Theme.of(context).extension<AppColors>()!.deactive))),
+          child: Text(
+            windowText,
+            style: AppTextStyle.captionL.copyWith(color: Theme.of(context).extension<AppColors>()!.deactive),
+          ),
+        ),
       ),
     );
   }
@@ -400,7 +346,6 @@ class _EventsPageView extends StatelessWidget {
   Widget build(BuildContext context) {
     final state = context.select((ScheduleBloc bloc) => bloc.state);
     final schedule = state.selectedSchedule?.schedule ?? [];
-
     return EventsPageView(
       controller: pageController,
       itemBuilder: (context, index) {
@@ -409,26 +354,21 @@ class _EventsPageView extends StatelessWidget {
           schedule: schedule,
           day: day,
         );
-
         final holiday = lessonsForDay.firstWhereOrNull((element) => element is HolidaySchedulePart);
         if (holiday != null) return HolidayPage(title: (holiday as HolidaySchedulePart).title);
         if (day.weekday == DateTime.sunday) return const HolidayPage(title: 'Выходной');
-
         final allLessons = lessonsForDay.whereType<LessonSchedulePart>().toList();
         final numberedLessons = allLessons.where((l) => l.lessonBells.number != null).toList();
         final unnumberedLessons = allLessons.where((l) => l.lessonBells.number == null).toList();
-
         numberedLessons
             .sort((a, b) => _toMinutes(a.lessonBells.startTime).compareTo(_toMinutes(b.lessonBells.startTime)));
         unnumberedLessons
             .sort((a, b) => _toMinutes(a.lessonBells.startTime).compareTo(_toMinutes(b.lessonBells.startTime)));
-
         final lessonsByTime = <int, List<LessonSchedulePart>>{};
         for (final l in numberedLessons) {
           final key = l.lessonBells.number!;
           lessonsByTime.putIfAbsent(key, () => []).add(l);
         }
-
         for (final l in unnumberedLessons) {
           final lessonTime = _toMinutes(l.lessonBells.startTime);
           LessonSchedulePart? previous;
@@ -447,40 +387,70 @@ class _EventsPageView extends StatelessWidget {
                   ? previous.lessonBells.number!
                   : next.lessonBells.number!)
               : previous?.lessonBells.number ?? next?.lessonBells.number ?? 0;
-          lessonsByTime.putIfAbsent(key, () => []).add(l);
-        }
-        final sortedKeys = lessonsByTime.keys.where((k) => k != 0).toList()..sort();
-        final List<Widget> widgets = [];
-        for (var i = 0; i < sortedKeys.length; i++) {
-          final key = sortedKeys[i];
-          final lessons = lessonsByTime[key]!;
-          widgets.add(
-            lessons.isNotEmpty
-                ? _buildLessonCard(context, lessons, day)
-                : showEmptyLessons
-                    ? Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                        child: EmptyLessonCard(lessonNumber: key),
-                      )
-                    : const SizedBox.shrink(),
-          );
-          if (i < sortedKeys.length - 1) {
-            final int currentKey = sortedKeys[i];
-            final int nextKey = sortedKeys[i + 1];
-            if (nextKey - currentKey == 1) {
-              widgets.add(_buildConsecutiveBreakWidget(context, lessonsByTime[currentKey]!, lessonsByTime[nextKey]!));
-            } else {
-              final windowCount = nextKey - currentKey - 1;
-              widgets.add(_buildWindowBreakWidget(context, windowCount));
-            }
+          if (key != 0) {
+            lessonsByTime.putIfAbsent(key, () => []).add(l);
           }
         }
-
-        return ListView(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          children: widgets,
-        );
+        if (showEmptyLessons) {
+          final List<Widget> widgets = [];
+          final scheduledKeys = lessonsByTime.keys.where((k) => k != 0).toList()..sort();
+          for (var lessonNumber = 1; lessonNumber <= SchedulePage.maxLessonsPerDay; lessonNumber++) {
+            final lessons = lessonsByTime[lessonNumber] ?? [];
+            if (lessons.isNotEmpty) {
+              widgets.add(_buildLessonCard(context, lessons, day));
+            } else {
+              widgets.add(
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                  child: EmptyLessonCard(lessonNumber: lessonNumber),
+                ),
+              );
+            }
+            if (scheduledKeys.contains(lessonNumber)) {
+              final indexInScheduled = scheduledKeys.indexOf(lessonNumber);
+              if (indexInScheduled < scheduledKeys.length - 1) {
+                final nextKey = scheduledKeys[indexInScheduled + 1];
+                if (nextKey - lessonNumber == 1) {
+                  widgets.add(
+                    _buildConsecutiveBreakWidget(
+                      context,
+                      lessonsByTime[lessonNumber]!,
+                      lessonsByTime[nextKey]!,
+                    ),
+                  );
+                }
+              }
+            }
+          }
+          return ListView(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            children: widgets,
+          );
+        } else {
+          final sortedKeys = lessonsByTime.keys.where((k) => k != 0).toList()..sort();
+          final List<Widget> widgets = [];
+          for (var i = 0; i < sortedKeys.length; i++) {
+            final key = sortedKeys[i];
+            final lessons = lessonsByTime[key]!;
+            widgets.add(_buildLessonCard(context, lessons, day));
+            if (i < sortedKeys.length - 1) {
+              final int currentKey = sortedKeys[i];
+              final int nextKey = sortedKeys[i + 1];
+              if (nextKey - currentKey == 1) {
+                widgets.add(_buildConsecutiveBreakWidget(context, lessonsByTime[currentKey]!, lessonsByTime[nextKey]!));
+              } else {
+                final windowCount = nextKey - currentKey - 1;
+                widgets.add(_buildWindowBreakWidget(context, windowCount));
+              }
+            }
+          }
+          return ListView(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            children: widgets,
+          );
+        }
       },
     );
   }
@@ -498,7 +468,6 @@ class _EventsPageView extends StatelessWidget {
         ),
       );
     }
-
     return ExpandablePageView.builder(
       itemCount: lessons.length,
       itemBuilder: (context, index) {
@@ -530,7 +499,6 @@ class _ComparisonModeView extends StatelessWidget {
   Widget build(BuildContext context) {
     final state = context.select((ScheduleBloc bloc) => bloc.state);
     final comparisonSchedules = state.comparisonSchedules;
-
     if (comparisonSchedules.isEmpty) {
       return Center(
         child: Text(
@@ -539,21 +507,17 @@ class _ComparisonModeView extends StatelessWidget {
         ),
       );
     }
-
     final allLessons = comparisonSchedules
         .expand(
           (schedule) => schedule.schedule.whereType<LessonSchedulePart>(),
         )
         .toList();
-
     final lessonsByDay = _groupLessonsByDay(allLessons);
-
     final today = Calendar.getNowWithoutTime();
     final filteredLessonsByDay = lessonsByDay.keys
         .where((day) => day.isAfter(today) || day.isAtSameMomentAs(today))
         .map((day) => MapEntry(day, lessonsByDay[day]))
         .toList();
-
     return CustomScrollView(
       slivers: [
         for (var entry in filteredLessonsByDay)
@@ -568,7 +532,6 @@ class _ComparisonModeView extends StatelessWidget {
 
   Map<DateTime, List<SchedulePart>> _groupLessonsByDay(List<LessonSchedulePart> scheduleParts) {
     final Map<DateTime, List<SchedulePart>> lessonsByDay = {};
-
     for (final part in scheduleParts) {
       for (final date in part.dates) {
         final day = DateTime(date.year, date.month, date.day);
@@ -579,7 +542,6 @@ class _ComparisonModeView extends StatelessWidget {
         );
       }
     }
-
     return Map.fromEntries(
       lessonsByDay.entries.toList()..sort((a, b) => a.key.compareTo(b.key)),
     );
