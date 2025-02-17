@@ -298,50 +298,6 @@ class _EventsPageView extends StatelessWidget {
     );
   }
 
-  Widget _buildConsecutiveBreakWidget(
-      BuildContext context, List<LessonSchedulePart> currentLessons, List<LessonSchedulePart> nextLessons) {
-    final currentMax = currentLessons.map((l) => _toMinutes(l.lessonBells.endTime)).reduce((a, b) => a > b ? a : b);
-    final nextMin = nextLessons.map((l) => _toMinutes(l.lessonBells.startTime)).reduce((a, b) => a < b ? a : b);
-    final breakDuration = nextMin - currentMax;
-    final breakText = breakDuration > 0 ? 'Перерыв $breakDuration мин' : 'Перерыв отсутствует';
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
-      child: Container(
-        decoration: BoxDecoration(
-          border: Border.all(color: Theme.of(context).extension<AppColors>()!.deactiveDarker),
-          borderRadius: BorderRadius.circular(8.0),
-        ),
-        padding: const EdgeInsets.all(8.0),
-        child: Center(
-          child: Text(
-            breakText,
-            style: AppTextStyle.captionL.copyWith(color: Theme.of(context).extension<AppColors>()!.deactive),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildWindowBreakWidget(BuildContext context, int windowCount) {
-    final windowText = 'Окно в ${_pluralizeWindow(windowCount)}';
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
-      child: Container(
-        decoration: BoxDecoration(
-          border: Border.all(color: Theme.of(context).extension<AppColors>()!.deactiveDarker),
-          borderRadius: BorderRadius.circular(8.0),
-        ),
-        padding: const EdgeInsets.all(8.0),
-        child: Center(
-          child: Text(
-            windowText,
-            style: AppTextStyle.captionL.copyWith(color: Theme.of(context).extension<AppColors>()!.deactive),
-          ),
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final state = context.select((ScheduleBloc bloc) => bloc.state);
@@ -412,10 +368,9 @@ class _EventsPageView extends StatelessWidget {
                 final nextKey = scheduledKeys[indexInScheduled + 1];
                 if (nextKey - lessonNumber == 1) {
                   widgets.add(
-                    _buildConsecutiveBreakWidget(
-                      context,
-                      lessonsByTime[lessonNumber]!,
-                      lessonsByTime[nextKey]!,
+                    ConsecutiveBreakWidget(
+                      currentLessons: lessonsByTime[lessonNumber]!,
+                      nextLessons: lessonsByTime[nextKey]!,
                     ),
                   );
                 }
@@ -438,10 +393,17 @@ class _EventsPageView extends StatelessWidget {
               final int currentKey = sortedKeys[i];
               final int nextKey = sortedKeys[i + 1];
               if (nextKey - currentKey == 1) {
-                widgets.add(_buildConsecutiveBreakWidget(context, lessonsByTime[currentKey]!, lessonsByTime[nextKey]!));
+                widgets.add(
+                  ConsecutiveBreakWidget(
+                    currentLessons: lessonsByTime[currentKey]!,
+                    nextLessons: lessonsByTime[nextKey]!,
+                  ),
+                );
               } else {
                 final windowCount = nextKey - currentKey - 1;
-                widgets.add(_buildWindowBreakWidget(context, windowCount));
+                widgets.add(
+                  WindowBreakWidget(windowCount: windowCount),
+                );
               }
             }
           }

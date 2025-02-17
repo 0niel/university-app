@@ -18,3 +18,4 @@ export 'comparison_lessons_table.dart';
 export 'comparison_sticky_header.dart';
 export 'calendar_stories_app_bar.dart';
 export 'schedule_diff_dialog.dart';
+export 'break_widgets.dart';

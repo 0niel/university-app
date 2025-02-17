@@ -10,7 +10,7 @@ import 'package:university_app_server_api/client.dart';
 import 'package:intl/intl.dart';
 import '../schedule.dart';
 
-class LessonCard extends StatelessWidget {
+class LessonCard extends StatefulWidget {
   const LessonCard({
     super.key,
     required this.lesson,
@@ -75,6 +75,11 @@ class LessonCard extends StatelessWidget {
     }
   }
 
+  @override
+  State<LessonCard> createState() => _LessonCardState();
+}
+
+class _LessonCardState extends State<LessonCard> {
   String _getClassroomNames(List<Classroom> classrooms) {
     return classrooms
         .map((e) => e.name + (e.campus != null ? ' (${e.campus?.shortName ?? e.campus?.name ?? ''})' : ''))
@@ -83,7 +88,7 @@ class LessonCard extends StatelessWidget {
 
   Widget _buildCommentAlert(BuildContext context, List<LessonComment> comments) {
     final comment = comments.firstWhereOrNull(
-      (comment) => lesson.dates.contains(comment.lessonDate) && comment.lessonBells == lesson.lessonBells,
+      (comment) => widget.lesson.dates.contains(comment.lessonDate) && comment.lessonBells == widget.lesson.lessonBells,
     );
 
     if (comment == null) {
@@ -138,7 +143,7 @@ class LessonCard extends StatelessWidget {
         child: PlatformInkWell(
           borderRadius: BorderRadius.circular(12),
           onTap: () {
-            onTap?.call(lesson);
+            widget.onTap?.call(widget.lesson);
           },
           child: Container(
             constraints: const BoxConstraints(minHeight: 75),
@@ -157,7 +162,7 @@ class LessonCard extends StatelessWidget {
                             alignment: Alignment.center,
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(4),
-                              color: getColorByType(lesson.lessonType),
+                              color: LessonCard.getColorByType(widget.lesson.lessonType),
                             ),
                             height: 7,
                             width: 7,
@@ -169,8 +174,8 @@ class LessonCard extends StatelessWidget {
                             duration: const Duration(milliseconds: 150),
                             builder: (_, value, __) => Text(
                               state.isMiniature
-                                  ? '${getLessonTypeName(lesson.lessonType)} в ${lesson.classrooms.map((e) => e.name).join(', ')}'
-                                  : getLessonTypeName(lesson.lessonType),
+                                  ? '${LessonCard.getLessonTypeName(widget.lesson.lessonType)} в ${widget.lesson.classrooms.map((e) => e.name).join(', ')}'
+                                  : LessonCard.getLessonTypeName(widget.lesson.lessonType),
                               style: AppTextStyle.captionL.copyWith(
                                 color: Theme.of(context).extension<AppColors>()!.deactive,
                               ),
@@ -182,7 +187,7 @@ class LessonCard extends StatelessWidget {
                         height: 4,
                       ),
                       Text(
-                        lesson.subject,
+                        widget.lesson.subject,
                         style: AppTextStyle.titleM,
                         maxLines: 8,
                         overflow: TextOverflow.visible,
@@ -195,12 +200,12 @@ class LessonCard extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           Text(
-                            '${lesson.lessonBells.number} пара',
+                            '${widget.lesson.lessonBells.number} пара',
                             style:
                                 AppTextStyle.body.copyWith(color: Theme.of(context).extension<AppColors>()!.colorful03),
                           ),
                           Text(
-                            '${lesson.lessonBells.startTime} - ${lesson.lessonBells.endTime}',
+                            '${widget.lesson.lessonBells.startTime} - ${widget.lesson.lessonBells.endTime}',
                             style: AppTextStyle.body.copyWith(
                               color: Theme.of(context).extension<AppColors>()!.colorful03,
                             ),
@@ -211,7 +216,7 @@ class LessonCard extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           const Divider(height: 18),
-                          if (lesson.classrooms.isNotEmpty) ...[
+                          if (widget.lesson.classrooms.isNotEmpty) ...[
                             const SizedBox(
                               height: 4,
                             ),
@@ -228,7 +233,7 @@ class LessonCard extends StatelessWidget {
                                 ),
                                 Expanded(
                                   child: Text(
-                                    _getClassroomNames(lesson.classrooms),
+                                    _getClassroomNames(widget.lesson.classrooms),
                                     style: AppTextStyle.body
                                         .copyWith(color: Theme.of(context).extension<AppColors>()!.active),
                                     maxLines: 2,
@@ -241,9 +246,10 @@ class LessonCard extends StatelessWidget {
                           // Dont show groups if there is only one group for
                           // SelectedGroupSchedule because this is the group
                           // that was selected.
-                          if (lesson.groups != null &&
-                              ((state.selectedSchedule is! SelectedGroupSchedule && lesson.groups!.isNotEmpty) ||
-                                  (state.selectedSchedule is SelectedGroupSchedule && lesson.groups!.length > 1))) ...[
+                          if (widget.lesson.groups != null &&
+                              ((state.selectedSchedule is! SelectedGroupSchedule && widget.lesson.groups!.isNotEmpty) ||
+                                  (state.selectedSchedule is SelectedGroupSchedule &&
+                                      widget.lesson.groups!.length > 1))) ...[
                             const SizedBox(
                               height: 4,
                             ),
@@ -263,7 +269,7 @@ class LessonCard extends StatelessWidget {
                                 ),
                                 Expanded(
                                   child: Text(
-                                    lesson.groups?.join(', ') ?? '',
+                                    widget.lesson.groups?.join(', ') ?? '',
                                     style: AppTextStyle.body
                                         .copyWith(color: Theme.of(context).extension<AppColors>()!.deactive),
                                   ),
@@ -271,7 +277,7 @@ class LessonCard extends StatelessWidget {
                               ],
                             ),
                           ],
-                          if (lesson.teachers.isNotEmpty) ...[
+                          if (widget.lesson.teachers.isNotEmpty) ...[
                             const SizedBox(
                               height: 4,
                             ),
@@ -289,7 +295,7 @@ class LessonCard extends StatelessWidget {
                                 const SizedBox(width: 6),
                                 Expanded(
                                   child: Text(
-                                    lesson.teachers.map((e) => e.name).join(', '),
+                                    widget.lesson.teachers.map((e) => e.name).join(', '),
                                     style: AppTextStyle.body
                                         .copyWith(color: Theme.of(context).extension<AppColors>()!.deactive),
                                   ),
@@ -328,7 +334,7 @@ class LessonCard extends StatelessWidget {
   }
 
   Widget _buildGroupIndicator() {
-    if (indexInGroup == null || countInGroup == null) {
+    if (widget.indexInGroup == null || widget.countInGroup == null) {
       return const SizedBox.shrink();
     }
 
@@ -337,21 +343,23 @@ class LessonCard extends StatelessWidget {
       child: Row(
         children: [
           Text(
-            '$countInGroup ${Intl.plural(countInGroup!, one: 'пара', few: 'пары', many: 'пар', other: 'пар')} в это время',
+            '${widget.countInGroup} ${Intl.plural(widget.countInGroup!, one: 'пара', few: 'пары', many: 'пар', other: 'пар')} в это время',
             style: AppTextStyle.captionL.copyWith(
-              color: AppColors.dark.colorful03,
+              color: Theme.of(context).extension<AppColors>()!.colorful03,
             ),
           ),
           const SizedBox(
             width: 8,
           ),
-          for (var i = 0; i < countInGroup!; i++)
+          for (var i = 0; i < widget.countInGroup!; i++)
             Container(
               width: 8,
               height: 8,
               margin: const EdgeInsets.only(right: 4),
               decoration: BoxDecoration(
-                color: i == indexInGroup! ? AppColors.dark.colorful03 : AppColors.dark.colorful03.withOpacity(0.3),
+                color: i == widget.indexInGroup!
+                    ? Theme.of(context).extension<AppColors>()!.colorful03
+                    : Theme.of(context).extension<AppColors>()!.colorful03.withOpacity(0.3),
                 shape: BoxShape.circle,
               ),
             ),
