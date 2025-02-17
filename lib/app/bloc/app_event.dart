@@ -19,3 +19,12 @@ class RecieveInteractedMessage extends AppEvent {
   @override
   List<Object?> get props => [message];
 }
+
+class ThemeChanged extends AppEvent {
+  final bool isAmoled;
+
+  const ThemeChanged(this.isAmoled);
+
+  @override
+  List<Object?> get props => [isAmoled];
+}

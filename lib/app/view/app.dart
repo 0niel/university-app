@@ -18,6 +18,7 @@ import 'package:rtu_mirea_app/neon/neon.dart';
 import 'package:rtu_mirea_app/nfc_pass/bloc/nfc_pass_cubit.dart';
 import 'package:rtu_mirea_app/schedule_management/bloc/schedule_exporter_cubit.dart';
 import 'package:rtu_mirea_app/service_locator.dart';
+import 'package:rtu_mirea_app/app/theme/theme_mode.dart';
 import 'package:schedule_exporter_repository/schedule_exporter_repository.dart';
 import 'package:schedule_repository/schedule_repository.dart';
 import 'package:flutter/services.dart';
@@ -228,12 +229,13 @@ class _AppViewState extends State<_AppView> {
 
     final lightTheme = AppTheme.lightTheme.copyWith(extensions: [neonTheme, AppColors.light]);
     final darkTheme = AppTheme.darkTheme.copyWith(extensions: [neonTheme, AppColors.dark]);
+    final amoledTheme = AppTheme.amoledTheme.copyWith(extensions: [neonTheme, AppColors.amoled]);
 
     final cupertinoLightTheme = MaterialBasedCupertinoThemeData(
       materialTheme: lightTheme,
     );
     final cupertinoDarkTheme = MaterialBasedCupertinoThemeData(
-      materialTheme: darkTheme,
+      materialTheme: CustomThemeMode.isAmoled ? amoledTheme : darkTheme,
     );
 
     return PlatformProvider(
@@ -247,7 +249,7 @@ class _AppViewState extends State<_AppView> {
           return PlatformTheme(
             themeMode: theme.brightness == Brightness.light ? ThemeMode.light : ThemeMode.dark,
             materialLightTheme: lightTheme,
-            materialDarkTheme: darkTheme,
+            materialDarkTheme: CustomThemeMode.isAmoled ? amoledTheme : darkTheme,
             cupertinoLightTheme: cupertinoLightTheme,
             cupertinoDarkTheme: cupertinoDarkTheme,
             builder: (context) {
@@ -280,12 +282,13 @@ class _AppViewState extends State<_AppView> {
     );
   }
 
-  /// Configure status bar and navigation bar colors/icons according to the theme.
+  /// Hide status bar background and set transparent navigation bar while keeping top overlay visible.
   void _configureSystemUI(ThemeData theme) {
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: [SystemUiOverlay.top, SystemUiOverlay.bottom]);
     SystemChrome.setSystemUIOverlayStyle(
       SystemUiOverlayStyle(
-        systemNavigationBarColor: theme.scaffoldBackgroundColor,
         statusBarColor: theme.scaffoldBackgroundColor,
+        systemNavigationBarColor: theme.scaffoldBackgroundColor,
         statusBarIconBrightness: theme.brightness == Brightness.light ? Brightness.dark : Brightness.light,
         systemNavigationBarIconBrightness: theme.brightness == Brightness.light ? Brightness.dark : Brightness.light,
       ),

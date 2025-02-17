@@ -6,6 +6,7 @@ import 'package:hugeicons/hugeicons.dart';
 import 'package:rtu_mirea_app/ads/ads.dart';
 import 'package:rtu_mirea_app/presentation/bloc/user_bloc/user_bloc.dart';
 import 'package:app_ui/app_ui.dart';
+import 'package:rtu_mirea_app/app/theme/theme_mode.dart';
 
 import 'package:rtu_mirea_app/profile/widgets/widgets.dart';
 import 'package:rtu_mirea_app/schedule/models/models.dart';
@@ -143,6 +144,7 @@ class _InitialProfileStatePageState extends State<_InitialProfileStatePage> {
                         ? Icon(Icons.check, color: Theme.of(context).extension<AppColors>()!.active)
                         : null,
                     onTap: () {
+                      CustomThemeMode.setAmoled(false);
                       AdaptiveTheme.of(context).setLight();
                       context.pop();
                     },
@@ -150,10 +152,23 @@ class _InitialProfileStatePageState extends State<_InitialProfileStatePage> {
                   const SizedBox(height: 8),
                   ListTileThemeItem(
                     title: "Тёмная",
-                    trailing: AdaptiveTheme.of(context).mode == AdaptiveThemeMode.dark
+                    trailing: (!CustomThemeMode.isAmoled && AdaptiveTheme.of(context).mode == AdaptiveThemeMode.dark)
                         ? Icon(Icons.check, color: Theme.of(context).extension<AppColors>()!.active)
                         : null,
                     onTap: () {
+                      CustomThemeMode.setAmoled(false);
+                      AdaptiveTheme.of(context).setDark();
+                      context.pop();
+                    },
+                  ),
+                  const SizedBox(height: 8),
+                  ListTileThemeItem(
+                    title: "AMOLED",
+                    trailing: CustomThemeMode.isAmoled
+                        ? Icon(Icons.check, color: Theme.of(context).extension<AppColors>()!.active)
+                        : null,
+                    onTap: () {
+                      CustomThemeMode.setAmoled(true);
                       AdaptiveTheme.of(context).setDark();
                       context.pop();
                     },
@@ -165,6 +180,7 @@ class _InitialProfileStatePageState extends State<_InitialProfileStatePage> {
                         ? Icon(Icons.check, color: Theme.of(context).extension<AppColors>()!.active)
                         : null,
                     onTap: () {
+                      CustomThemeMode.setAmoled(false);
                       AdaptiveTheme.of(context).setSystem();
                       context.pop();
                     },

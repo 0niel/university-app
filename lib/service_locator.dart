@@ -16,7 +16,6 @@ import 'package:rtu_mirea_app/data/repositories/app_settings_repository_impl.dar
 import 'package:rtu_mirea_app/data/repositories/news_repository_impl.dart';
 import 'package:rtu_mirea_app/domain/repositories/app_settings_repository.dart';
 import 'package:rtu_mirea_app/domain/repositories/news_repository.dart';
-import 'package:rtu_mirea_app/domain/repositories/user_repository.dart';
 import 'package:rtu_mirea_app/domain/usecases/delete_schedule.dart';
 import 'package:rtu_mirea_app/domain/usecases/get_announces.dart';
 import 'package:rtu_mirea_app/domain/usecases/get_app_settings.dart';

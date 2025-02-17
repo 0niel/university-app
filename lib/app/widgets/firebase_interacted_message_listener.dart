@@ -18,12 +18,10 @@ class FirebaseInteractedMessageListener extends StatelessWidget {
     return BlocListener<AppBloc, AppState>(
       listener: (context, state) {
         Logger().i('FirebaseInteractedMessageListener: $state');
-        if (state is InteractedMessageRecieved) {
-          if (state.discoursePostIdToOpen != null) {
-            final postId = state.discoursePostIdToOpen;
-            final router = getIt<GoRouter>();
-            router.go('/services/discourse-post-overview/$postId');
-          }
+        if (state.discoursePostIdToOpen != null) {
+          final postId = state.discoursePostIdToOpen;
+          final router = getIt<GoRouter>();
+          router.go('/services/discourse-post-overview/$postId');
         }
       },
       child: child,

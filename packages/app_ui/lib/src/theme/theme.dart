@@ -1,15 +1,10 @@
 import 'package:app_ui/app_ui.dart';
-import 'package:app_ui/src/theme/theme.dart';
 import 'package:flutter/material.dart';
 
 enum AppThemeType { light, dark, black }
 
 /// [AppTheme] is a class that contains all the theme data for the app.
 ///
-/// Every time the theme is changed, the [AppTheme.theme] is updated.
-/// The [AppTheme.theme] is used to get the current theme data.
-/// To change the theme, use [AppTheme.changeThemeType] method and pass the new
-/// theme type ([AppThemeType]) as an argument.
 class AppTheme {
   static final darkTheme = ThemeData.dark().copyWith(
     extensions: <ThemeExtension<dynamic>>[AppColors.dark],
@@ -39,9 +34,7 @@ class AppTheme {
       selectedColor: AppColors.dark.background02,
       secondarySelectedColor: AppColors.dark.background02,
       padding: const EdgeInsets.all(8),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       labelStyle: AppTextStyle.chip.copyWith(color: AppColors.dark.active),
       secondaryLabelStyle: AppTextStyle.chip.copyWith(color: AppColors.dark.active),
       brightness: Brightness.dark,
@@ -50,9 +43,7 @@ class AppTheme {
       color: AppColors.dark.background03,
       elevation: 4,
       shadowColor: AppColors.dark.background02.withOpacity(0.1),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
     ),
     bottomNavigationBarTheme: ThemeData.dark().bottomNavigationBarTheme.copyWith(
           type: BottomNavigationBarType.shifting,
@@ -65,28 +56,16 @@ class AppTheme {
     listTileTheme: ListTileThemeData(
       tileColor: Colors.transparent,
       contentPadding: const EdgeInsets.symmetric(horizontal: 24),
-      leadingAndTrailingTextStyle: AppTextStyle.chip.copyWith(
-        color: AppColors.dark.active,
-      ),
-      titleTextStyle: AppTextStyle.chip.copyWith(
-        color: AppColors.dark.deactive,
-      ),
+      leadingAndTrailingTextStyle: AppTextStyle.chip.copyWith(color: AppColors.dark.active),
+      titleTextStyle: AppTextStyle.chip.copyWith(color: AppColors.dark.deactive),
       visualDensity: const VisualDensity(vertical: 4),
-      subtitleTextStyle: AppTextStyle.titleM.copyWith(
-        color: AppColors.dark.active,
-      ),
+      subtitleTextStyle: AppTextStyle.titleM.copyWith(color: AppColors.dark.active),
     ),
-    dividerTheme: DividerThemeData(
-      color: AppColors.dark.divider,
-    ),
+    dividerTheme: DividerThemeData(color: AppColors.dark.divider),
     snackBarTheme: SnackBarThemeData(
       backgroundColor: AppColors.dark.background02,
-      contentTextStyle: AppTextStyle.bodyBold.copyWith(
-        color: AppColors.dark.active,
-      ),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
+      contentTextStyle: AppTextStyle.bodyBold.copyWith(color: AppColors.dark.active),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       insetPadding: const EdgeInsets.all(16),
       elevation: 2,
     ),
@@ -107,72 +86,42 @@ class AppTheme {
         foregroundColor: WidgetStateProperty.all(AppColors.dark.white),
         backgroundColor: WidgetStateProperty.all(AppColors.dark.primary),
         shape: WidgetStateProperty.all<RoundedRectangleBorder>(
-          RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(24),
-          ),
+          RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         ),
         textStyle: WidgetStateProperty.all(
-          AppTextStyle.buttonS.copyWith(
-            color: AppColors.dark.white,
-          ),
+          AppTextStyle.buttonS.copyWith(color: AppColors.dark.white),
         ),
       ),
     ),
     popupMenuTheme: PopupMenuThemeData(
       color: AppColors.dark.background02,
-      textStyle: AppTextStyle.body.copyWith(
-        color: AppColors.dark.active,
-      ),
+      textStyle: AppTextStyle.body.copyWith(color: AppColors.dark.active),
       elevation: 4,
       shadowColor: AppColors.dark.background02.withOpacity(0.1),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
     ),
     switchTheme: SwitchThemeData(
       thumbColor: WidgetStateProperty.resolveWith<Color>(
-        (Set<WidgetState> states) {
-          if (states.contains(WidgetState.selected)) {
-            return AppColors.dark.primary;
-          }
-          return AppColors.dark.primary.withOpacity(0.5);
-        },
+        (states) =>
+            states.contains(WidgetState.selected) ? AppColors.dark.primary : AppColors.dark.primary.withOpacity(0.5),
       ),
       trackColor: WidgetStateProperty.resolveWith<Color>(
-        (Set<WidgetState> states) {
-          if (states.contains(WidgetState.selected)) {
-            return AppColors.dark.primary.withOpacity(0.5);
-          }
-          return AppColors.dark.background01;
-        },
+        (states) => states.contains(WidgetState.selected)
+            ? AppColors.dark.primary.withOpacity(0.5)
+            : AppColors.dark.background01,
       ),
       trackOutlineColor: WidgetStateProperty.all(AppColors.dark.background01),
       trackOutlineWidth: WidgetStateProperty.all(2),
     ),
     checkboxTheme: CheckboxThemeData(
       fillColor: WidgetStateProperty.resolveWith<Color>(
-        (Set<WidgetState> states) {
-          if (states.contains(WidgetState.selected)) {
-            return AppColors.dark.primary;
-          }
-          return AppColors.dark.background01;
-        },
+        (states) => states.contains(WidgetState.selected) ? AppColors.dark.primary : AppColors.dark.background01,
       ),
       checkColor: WidgetStateProperty.resolveWith<Color>(
-        (Set<WidgetState> states) {
-          if (states.contains(WidgetState.selected)) {
-            return AppColors.dark.white;
-          }
-          return AppColors.dark.background01;
-        },
+        (states) => states.contains(WidgetState.selected) ? AppColors.dark.white : AppColors.dark.background01,
       ),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(6),
-      ),
-      side: BorderSide(
-        color: AppColors.dark.primary,
-        width: 2,
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+      side: BorderSide(color: AppColors.dark.primary, width: 2),
     ),
   );
 
@@ -213,9 +162,7 @@ class AppTheme {
       selectedColor: AppColors.light.background02,
       secondarySelectedColor: AppColors.light.background02,
       padding: const EdgeInsets.all(8),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       labelStyle: AppTextStyle.chip.copyWith(color: AppColors.light.active),
       secondaryLabelStyle: AppTextStyle.chip.copyWith(color: AppColors.light.active),
       brightness: Brightness.light,
@@ -223,38 +170,24 @@ class AppTheme {
     listTileTheme: ListTileThemeData(
       tileColor: Colors.transparent,
       contentPadding: const EdgeInsets.symmetric(horizontal: 24),
-      leadingAndTrailingTextStyle: AppTextStyle.chip.copyWith(
-        color: AppColors.light.active,
-      ),
-      titleTextStyle: AppTextStyle.chip.copyWith(
-        color: AppColors.light.deactive,
-      ),
+      leadingAndTrailingTextStyle: AppTextStyle.chip.copyWith(color: AppColors.light.active),
+      titleTextStyle: AppTextStyle.chip.copyWith(color: AppColors.light.deactive),
       visualDensity: const VisualDensity(vertical: 4),
-      subtitleTextStyle: AppTextStyle.titleM.copyWith(
-        color: AppColors.light.active,
-      ),
+      subtitleTextStyle: AppTextStyle.titleM.copyWith(color: AppColors.light.active),
     ),
     snackBarTheme: SnackBarThemeData(
       backgroundColor: AppColors.light.background02,
-      contentTextStyle: AppTextStyle.bodyBold.copyWith(
-        color: AppColors.light.active,
-      ),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
+      contentTextStyle: AppTextStyle.bodyBold.copyWith(color: AppColors.light.active),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       insetPadding: const EdgeInsets.all(16),
       elevation: 2,
     ),
-    dividerTheme: DividerThemeData(
-      color: AppColors.light.divider,
-    ),
+    dividerTheme: DividerThemeData(color: AppColors.light.divider),
     cardTheme: CardTheme(
       color: AppColors.light.background02,
       elevation: 4,
       shadowColor: AppColors.light.background02.withOpacity(0.1),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
     ),
     colorScheme: ColorScheme(
       brightness: Brightness.light,
@@ -273,73 +206,162 @@ class AppTheme {
         foregroundColor: WidgetStateProperty.all(AppColors.light.white),
         backgroundColor: WidgetStateProperty.all(AppColors.light.primary),
         shape: WidgetStateProperty.all<RoundedRectangleBorder>(
-          RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(24),
-          ),
+          RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         ),
         textStyle: WidgetStateProperty.all(
-          AppTextStyle.buttonS.copyWith(
-            color: AppColors.light.white,
-          ),
+          AppTextStyle.buttonS.copyWith(color: AppColors.light.white),
         ),
       ),
     ),
     popupMenuTheme: PopupMenuThemeData(
       color: AppColors.light.background02,
-      textStyle: AppTextStyle.body.copyWith(
-        color: AppColors.light.active,
-      ),
+      textStyle: AppTextStyle.body.copyWith(color: AppColors.light.active),
       elevation: 4,
       shadowColor: AppColors.light.background02.withOpacity(0.1),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
     ),
     switchTheme: SwitchThemeData(
       thumbColor: WidgetStateProperty.resolveWith<Color>(
-        (Set<WidgetState> states) {
-          if (states.contains(WidgetState.selected)) {
-            return AppColors.light.primary;
-          }
-          return AppColors.light.primary.withOpacity(0.5);
-        },
+        (states) =>
+            states.contains(WidgetState.selected) ? AppColors.light.primary : AppColors.light.primary.withOpacity(0.5),
       ),
       trackColor: WidgetStateProperty.resolveWith<Color>(
-        (Set<WidgetState> states) {
-          if (states.contains(WidgetState.selected)) {
-            return AppColors.light.primary.withOpacity(0.5);
-          }
-          return AppColors.light.background01;
-        },
+        (states) => states.contains(WidgetState.selected)
+            ? AppColors.light.primary.withOpacity(0.5)
+            : AppColors.light.background01,
       ),
       trackOutlineColor: WidgetStateProperty.all(AppColors.light.background01),
       trackOutlineWidth: WidgetStateProperty.all(2),
     ),
     checkboxTheme: CheckboxThemeData(
       fillColor: WidgetStateProperty.resolveWith<Color>(
-        (Set<WidgetState> states) {
-          if (states.contains(WidgetState.selected)) {
-            return AppColors.light.primary;
-          }
-          return AppColors.light.background01;
-        },
+        (states) => states.contains(WidgetState.selected) ? AppColors.light.primary : AppColors.light.background01,
       ),
       checkColor: WidgetStateProperty.resolveWith<Color>(
-        (Set<WidgetState> states) {
-          if (states.contains(WidgetState.selected)) {
-            return AppColors.light.white;
-          }
-          return AppColors.light.background01;
-        },
+        (states) => states.contains(WidgetState.selected) ? AppColors.light.white : AppColors.light.background01,
       ),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(6),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+      side: BorderSide(color: AppColors.light.primary, width: 2),
+    ),
+  );
+
+  static final amoledTheme = ThemeData.dark().copyWith(
+    extensions: <ThemeExtension<dynamic>>[AppColors.amoled],
+    textTheme: ThemeData.dark().textTheme.apply(
+          bodyColor: AppColors.amoled.active,
+          displayColor: AppColors.amoled.active,
+        ),
+    textButtonTheme: TextButtonThemeData(
+      style: ButtonStyle(
+        textStyle: WidgetStateProperty.all(
+          AppTextStyle.buttonS.copyWith(color: AppColors.amoled.active),
+        ),
       ),
-      // custom padding:
-      side: BorderSide(
-        color: AppColors.light.primary,
-        width: 2,
+    ),
+    scaffoldBackgroundColor: AppColors.amoled.background01,
+    appBarTheme: AppBarTheme(
+      surfaceTintColor: Colors.transparent,
+      titleSpacing: 24,
+      backgroundColor: AppColors.amoled.background01,
+      shadowColor: Colors.transparent,
+      titleTextStyle: AppTextStyle.title.copyWith(color: AppColors.amoled.active),
+      iconTheme: IconThemeData(color: AppColors.amoled.active),
+    ),
+    chipTheme: ChipThemeData(
+      backgroundColor: AppColors.amoled.background02,
+      disabledColor: AppColors.amoled.background02,
+      selectedColor: AppColors.amoled.background02,
+      secondarySelectedColor: AppColors.amoled.background02,
+      padding: const EdgeInsets.all(8),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      labelStyle: AppTextStyle.chip.copyWith(color: AppColors.amoled.active),
+      secondaryLabelStyle: AppTextStyle.chip.copyWith(color: AppColors.amoled.active),
+      brightness: Brightness.dark,
+    ),
+    cardTheme: CardTheme(
+      color: AppColors.amoled.background03,
+      elevation: 4,
+      shadowColor: AppColors.amoled.background02.withOpacity(0.1),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+    ),
+    bottomNavigationBarTheme: ThemeData.dark().bottomNavigationBarTheme.copyWith(
+          type: BottomNavigationBarType.shifting,
+          backgroundColor: AppColors.amoled.background01,
+          selectedItemColor: AppColors.amoled.active,
+          unselectedItemColor: AppColors.amoled.deactive,
+          selectedLabelStyle: AppTextStyle.captionL,
+          unselectedLabelStyle: AppTextStyle.captionS,
+        ),
+    listTileTheme: ListTileThemeData(
+      tileColor: Colors.transparent,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 24),
+      leadingAndTrailingTextStyle: AppTextStyle.chip.copyWith(color: AppColors.amoled.active),
+      titleTextStyle: AppTextStyle.chip.copyWith(color: AppColors.amoled.deactive),
+      visualDensity: const VisualDensity(vertical: 4),
+      subtitleTextStyle: AppTextStyle.titleM.copyWith(color: AppColors.amoled.active),
+    ),
+    dividerTheme: DividerThemeData(color: AppColors.amoled.divider),
+    snackBarTheme: SnackBarThemeData(
+      backgroundColor: AppColors.amoled.background02,
+      contentTextStyle: AppTextStyle.bodyBold.copyWith(color: AppColors.amoled.active),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      insetPadding: const EdgeInsets.all(16),
+      elevation: 2,
+    ),
+    colorScheme: ColorScheme(
+      brightness: Brightness.dark,
+      primary: AppColors.amoled.primary,
+      secondary: AppColors.amoled.background02,
+      surface: AppColors.amoled.background01,
+      onSurface: AppColors.amoled.active,
+      onError: AppColors.amoled.active,
+      onPrimary: AppColors.light.white,
+      onSecondary: AppColors.amoled.active,
+      error: AppColors.amoled.colorful07,
+      surfaceTint: Colors.transparent,
+    ),
+    elevatedButtonTheme: ElevatedButtonThemeData(
+      style: ButtonStyle(
+        foregroundColor: WidgetStateProperty.all(AppColors.amoled.white),
+        backgroundColor: WidgetStateProperty.all(AppColors.amoled.primary),
+        shape: WidgetStateProperty.all<RoundedRectangleBorder>(
+          RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        ),
+        textStyle: WidgetStateProperty.all(
+          AppTextStyle.buttonS.copyWith(color: AppColors.amoled.white),
+        ),
       ),
+    ),
+    popupMenuTheme: PopupMenuThemeData(
+      color: AppColors.amoled.background02,
+      textStyle: AppTextStyle.body.copyWith(color: AppColors.amoled.active),
+      elevation: 4,
+      shadowColor: AppColors.amoled.background02.withOpacity(0.1),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+    ),
+    switchTheme: SwitchThemeData(
+      thumbColor: WidgetStateProperty.resolveWith<Color>(
+        (states) => states.contains(WidgetState.selected)
+            ? AppColors.amoled.primary
+            : AppColors.amoled.primary.withOpacity(0.5),
+      ),
+      trackColor: WidgetStateProperty.resolveWith<Color>(
+        (states) => states.contains(WidgetState.selected)
+            ? AppColors.amoled.primary.withOpacity(0.5)
+            : AppColors.amoled.background01,
+      ),
+      trackOutlineColor: WidgetStateProperty.all(AppColors.amoled.background01),
+      trackOutlineWidth: WidgetStateProperty.all(2),
+    ),
+    checkboxTheme: CheckboxThemeData(
+      fillColor: WidgetStateProperty.resolveWith<Color>(
+        (states) => states.contains(WidgetState.selected) ? AppColors.amoled.primary : AppColors.amoled.background01,
+      ),
+      checkColor: WidgetStateProperty.resolveWith<Color>(
+        (states) => states.contains(WidgetState.selected) ? AppColors.amoled.white : AppColors.amoled.background01,
+      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+      side: BorderSide(color: AppColors.amoled.primary, width: 2),
     ),
   );
 }
