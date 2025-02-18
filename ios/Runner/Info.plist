@@ -2,16 +2,10 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 	<dict>
-		<key>io.flutter.embedded_views_preview</key>
-		<true/>
-		<key>ITSAppUsesNonExemptEncryption</key>
-		<false/>
-		<key>CADisableMinimumFrameDurationOnPhone</key>
-		<true/>
 		<key>CFBundleDevelopmentRegion</key>
 		<string>$(DEVELOPMENT_LANGUAGE)</string>
 		<key>CFBundleDisplayName</key>
-		<string>Mirea App</string>
+		<string>Rtu Mirea App</string>
 		<key>CFBundleExecutable</key>
 		<string>$(EXECUTABLE_NAME)</string>
 		<key>CFBundleIdentifier</key>
@@ -26,6 +20,31 @@
 		<string>$(FLUTTER_BUILD_NAME)</string>
 		<key>CFBundleSignature</key>
 		<string>????</string>
+		<key>CFBundleVersion</key>
+		<string>$(FLUTTER_BUILD_NUMBER)</string>
+		<key>LSRequiresIPhoneOS</key>
+		<true />
+		<key>UILaunchStoryboardName</key>
+		<string>LaunchScreen</string>
+		<key>UIMainStoryboardFile</key>
+		<string>Main</string>
+		<key>UISupportedInterfaceOrientations</key>
+		<array>
+			<string>UIInterfaceOrientationPortrait</string>
+			<string>UIInterfaceOrientationLandscapeLeft</string>
+			<string>UIInterfaceOrientationLandscapeRight</string>
+		</array>
+		<key>UISupportedInterfaceOrientations~ipad</key>
+		<array>
+			<string>UIInterfaceOrientationPortrait</string>
+			<string>UIInterfaceOrientationPortraitUpsideDown</string>
+			<string>UIInterfaceOrientationLandscapeLeft</string>
+			<string>UIInterfaceOrientationLandscapeRight</string>
+		</array>
+		<key>CADisableMinimumFrameDurationOnPhone</key>
+		<true />
+		<key>UIApplicationSupportsIndirectInputEvents</key>
+		<true />
 		<key>CFBundleURLTypes</key>
 		<array>
 			<dict>
@@ -37,21 +56,15 @@
 				</array>
 			</dict>
 		</array>
-		<key>CFBundleVersion</key>
-		<string>$(FLUTTER_BUILD_NUMBER)</string>
-		<key>FLTEnableImpeller</key>
-		<true/>
-		<key>LSRequiresIPhoneOS</key>
-		<true/>
 		<key>NSAppTransportSecurity</key>
 		<dict>
 			<key>NSAllowsLocalNetworking</key>
-			<true/>
+			<true />
 		</dict>
 		<key>PermissionGroupNotification</key>
 		<string>Приложение запрашивает разрешение на отправку уведомлений</string>
 		<key>UIApplicationSupportsIndirectInputEvents</key>
-		<true/>
+		<true />
 		<key>UIBackgroundModes</key>
 		<array>
 			<string>fetch</string>
@@ -75,7 +88,7 @@
 			<string>UIInterfaceOrientationLandscapeRight</string>
 		</array>
 		<key>UIViewControllerBasedStatusBarAppearance</key>
-		<false/>
+		<false />
 		<key>NSPhotoLibraryUsageDescription</key>
 		<string>Приложение запрашивает доступ к галерее</string>
 		<key>NSCameraUsageDescription</key>
@@ -85,7 +98,7 @@
 		<key>NSCalendarsFullAccessUsageDescription</key>
 		<string>Мы используем ваш календарь для добавления событий.</string>
 		<key>UIStatusBarHidden</key>
-		<true/>
+		<true />
 		<key>SKAdNetworkItems</key>
 		<array>
 			<dict>
@@ -991,12 +1004,5 @@
 				<string>g69uk9uh2b.skadnetwork</string>
 			</dict>
 		</array>
-		<key>UIApplicationSceneManifest</key>
-		<dict>
-			<key>UIApplicationSupportsMultipleScenes</key>
-			<true/>
-			<key>UIScene Settings</key>
-			<dict/>
-		</dict>
 	</dict>
 </plist>
