@@ -2,7 +2,7 @@ name: rtu_mirea_app
 description: Mobile application for students of RTU MIREA
 publish_to: 'none'
 
-version: 1.5.13+133
+version: 1.5.13+136
 
 environment:
   sdk: ">=3.1.1"
@@ -68,9 +68,9 @@ dependencies:
   flutter_secure_storage: ^8.0.0
   flutter_nfc_kit: ^3.3.1
   app_settings: ^5.0.0
-  sentry_flutter: ^8.9.0
-  sentry_dio: ^8.9.0
-  sentry_logging: ^8.9.0
+  sentry_flutter: ^8.13.0
+  sentry_dio: ^8.13.0
+  sentry_logging: ^8.13.0
   logging: ^1.1.1
   sliver_tools: ^0.2.12
   unicons: any

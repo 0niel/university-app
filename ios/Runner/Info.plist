@@ -991,5 +991,12 @@
 				<string>g69uk9uh2b.skadnetwork</string>
 			</dict>
 		</array>
+		<key>UIApplicationSceneManifest</key>
+		<dict>
+			<key>UIApplicationSupportsMultipleScenes</key>
+			<true/>
+			<key>UIScene Settings</key>
+			<dict/>
+		</dict>
 	</dict>
 </plist>
