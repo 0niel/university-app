@@ -38,11 +38,8 @@ import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:schedule_repository/schedule_repository.dart' as schedule_repository;
 import 'package:yandex_maps_mapkit_lite/init.dart' as yandex_maps_mapkit_lite;
 
-import 'package:flutter_native_splash/flutter_native_splash.dart';
-
 Future<void> main() async {
-  WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
-  FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
+  WidgetsFlutterBinding.ensureInitialized();
 
   // Initialize Yandex Mapkit.
   try {
@@ -170,7 +167,6 @@ Future<void> main() async {
   late final DiscourseRepository discourseRepository;
   late final StoriesRepositoryImpl storiesRepository;
   late final NewsRepository newsRepository;
-  late final NotificationsRepository notificationsRepository;
   late final ScheduleExporterRepository scheduleExporterRepository;
   late final NfcPassRepository nfcPassRepository;
 
@@ -180,7 +176,6 @@ Future<void> main() async {
     discourseRepository = DiscourseRepository(apiClient: discourseApiClient);
     storiesRepository = StoriesRepositoryImpl(remoteDataSource: getIt<StrapiRemoteData>());
     newsRepository = getIt<NewsRepository>();
-    notificationsRepository = getIt<NotificationsRepository>();
     scheduleExporterRepository = ScheduleExporterRepository();
     nfcPassRepository = NfcPassRepository(storage: secureStorage);
   } catch (e, stackTrace) {
