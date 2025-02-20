@@ -452,7 +452,7 @@ packages:
       path: "packages/schedule"
       relative: true
     source: path
-    version: "1.0.0+1"
+    version: "1.0.1+2"
   shelf:
     dependency: transitive
     description:
