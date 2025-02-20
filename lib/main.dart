@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:logger/logger.dart';
 import 'package:nfc_pass_repository/nfc_pass_repository.dart';
 import 'package:notifications_repository/notifications_repository.dart';
 import 'package:persistent_storage/persistent_storage.dart';
@@ -37,15 +38,19 @@ import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:schedule_repository/schedule_repository.dart' as schedule_repository;
 import 'package:yandex_maps_mapkit_lite/init.dart' as yandex_maps_mapkit_lite;
 
+import 'package:flutter_native_splash/flutter_native_splash.dart';
+
 Future<void> main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+  WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
+  FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
 
   // Initialize Yandex Mapkit.
   try {
     await yandex_maps_mapkit_lite.initMapkit(apiKey: Env.mapkitApiKey);
   } catch (e, stackTrace) {
-    debugPrint('Yandex Mapkit initialization failed: $e');
-    await Sentry.captureException(e, stackTrace: stackTrace);
+    Logger().e('Yandex Mapkit initialization failed: $e');
+    Logger().e(stackTrace);
+    Sentry.captureException(e, stackTrace: stackTrace);
   }
 
   // Create API clients.
@@ -53,7 +58,9 @@ Future<void> main() async {
   try {
     apiClient = ApiClient();
   } catch (e, stackTrace) {
-    await Sentry.captureException(e, stackTrace: stackTrace);
+    Logger().e('ApiClient initialization failed: $e');
+    Logger().e(stackTrace);
+    Sentry.captureException(e, stackTrace: stackTrace);
     rethrow;
   }
 
@@ -61,7 +68,9 @@ Future<void> main() async {
   try {
     discourseApiClient = DiscourseApiClient(baseUrl: 'https://mirea.ninja');
   } catch (e, stackTrace) {
-    await Sentry.captureException(e, stackTrace: stackTrace);
+    Logger().e('DiscourseApiClient initialization failed: $e');
+    Logger().e(stackTrace);
+    Sentry.captureException(e, stackTrace: stackTrace);
     rethrow;
   }
 
@@ -71,7 +80,9 @@ Future<void> main() async {
       options: DefaultFirebaseOptions.currentPlatform,
     );
   } catch (e, stackTrace) {
-    await Sentry.captureException(e, stackTrace: stackTrace);
+    Logger().e('Firebase initialization failed: $e');
+    Logger().e(stackTrace);
+    Sentry.captureException(e, stackTrace: stackTrace);
     rethrow;
   }
 
@@ -79,7 +90,9 @@ Future<void> main() async {
   try {
     await dependency_injection.setup();
   } catch (e, stackTrace) {
-    await Sentry.captureException(e, stackTrace: stackTrace);
+    Logger().e('Dependency injection setup failed: $e');
+    Logger().e(stackTrace);
+    Sentry.captureException(e, stackTrace: stackTrace);
     rethrow;
   }
 
@@ -88,7 +101,9 @@ Future<void> main() async {
     try {
       await FirebaseAnalytics.instance.logAppOpen();
     } catch (e, stackTrace) {
-      await Sentry.captureException(e, stackTrace: stackTrace);
+      Logger().e('FirebaseAnalytics.logAppOpen failed: $e');
+      Logger().e(stackTrace);
+      Sentry.captureException(e, stackTrace: stackTrace);
     }
   }
 
@@ -96,7 +111,7 @@ Future<void> main() async {
   try {
     setPathUrlStrategy();
   } catch (e, stackTrace) {
-    await Sentry.captureException(e, stackTrace: stackTrace);
+    Sentry.captureException(e, stackTrace: stackTrace);
   }
 
   // Initialize locales.
@@ -108,7 +123,9 @@ Future<void> main() async {
       Intl.systemLocale = await findSystemLocale();
     }
   } catch (e, stackTrace) {
-    await Sentry.captureException(e, stackTrace: stackTrace);
+    Logger().e('Locales initialization failed: $e');
+    Logger().e(stackTrace);
+    Sentry.captureException(e, stackTrace: stackTrace);
   }
 
   // Initialize persistent storage.
@@ -118,7 +135,9 @@ Future<void> main() async {
       sharedPreferences: getIt<SharedPreferences>(),
     );
   } catch (e, stackTrace) {
-    await Sentry.captureException(e, stackTrace: stackTrace);
+    Logger().e('PersistentStorage initialization failed: $e');
+    Logger().e(stackTrace);
+    Sentry.captureException(e, stackTrace: stackTrace);
     rethrow;
   }
 
@@ -127,7 +146,9 @@ Future<void> main() async {
   try {
     secureStorage = SecureStorage(getIt<FlutterSecureStorage>());
   } catch (e, stackTrace) {
-    await Sentry.captureException(e, stackTrace: stackTrace);
+    Logger().e('SecureStorage initialization failed: $e');
+    Logger().e(stackTrace);
+    Sentry.captureException(e, stackTrace: stackTrace);
     rethrow;
   }
 
@@ -136,7 +157,9 @@ Future<void> main() async {
   try {
     analyticsRepository = AnalyticsRepository(FirebaseAnalytics.instance);
   } catch (e, stackTrace) {
-    await Sentry.captureException(e, stackTrace: stackTrace);
+    Logger().e('AnalyticsRepository initialization failed: $e');
+    Logger().e(stackTrace);
+    Sentry.captureException(e, stackTrace: stackTrace);
     // Fallback to a no-op analytics repository.
     analyticsRepository = const AnalyticsRepository();
   }
@@ -161,7 +184,9 @@ Future<void> main() async {
     scheduleExporterRepository = ScheduleExporterRepository();
     nfcPassRepository = NfcPassRepository(storage: secureStorage);
   } catch (e, stackTrace) {
-    await Sentry.captureException(e, stackTrace: stackTrace);
+    Logger().e('Repositories initialization failed: $e');
+    Logger().e(stackTrace);
+    Sentry.captureException(e, stackTrace: stackTrace);
     rethrow;
   }
 
@@ -169,14 +194,18 @@ Future<void> main() async {
   try {
     Bloc.observer = AppBlocObserver(analyticsRepository: analyticsRepository);
   } catch (e, stackTrace) {
-    await Sentry.captureException(e, stackTrace: stackTrace);
+    Logger().e('Bloc observer setup failed: $e');
+    Logger().e(stackTrace);
+    Sentry.captureException(e, stackTrace: stackTrace);
   }
 
   // Setup HydratedBloc storage.
   try {
     HydratedBloc.storage = CustomHydratedStorage(sharedPreferences: getIt<SharedPreferences>());
   } catch (e, stackTrace) {
-    await Sentry.captureException(e, stackTrace: stackTrace);
+    Logger().e('HydratedBloc storage setup failed: $e');
+    Logger().e(stackTrace);
+    Sentry.captureException(e, stackTrace: stackTrace);
   }
 
   // Initialize neon dependencies.
@@ -187,8 +216,33 @@ Future<void> main() async {
       theme: neonTheme,
     );
   } catch (e, stackTrace) {
-    await Sentry.captureException(e, stackTrace: stackTrace);
+    Logger().e('Neon dependencies initialization failed: $e');
+    Logger().e(stackTrace);
+    Sentry.captureException(e, stackTrace: stackTrace);
     rethrow;
+  }
+
+  // Define a helper to run the app.
+  void runMyApp() {
+    runApp(
+      SentryScreenshotWidget(
+        child: DefaultAssetBundle(
+          bundle: SentryAssetBundle(),
+          child: App(
+            analyticsRepository: analyticsRepository,
+            scheduleRepository: scheduleRepository,
+            communityRepository: communityRepository,
+            storiesRepository: storiesRepository,
+            discourseRepository: discourseRepository,
+            neonDependencies: neonDependencies,
+            newsRepository: newsRepository,
+            scheduleExporterRepository: scheduleExporterRepository,
+            nfcPassRepository: nfcPassRepository,
+            key: const Key('App'),
+          ),
+        ),
+      ),
+    );
   }
 
   // Initialize Sentry and run the app.
@@ -203,56 +257,20 @@ Future<void> main() async {
         options.attachScreenshot = true;
         options.addIntegration(LoggingIntegration());
       },
-      appRunner: () => runApp(
-        /// When a user experiences an error, an exception or a crash,
-        /// Sentry provides the ability to take a screenshot and include
-        /// it as an attachment.
-        SentryScreenshotWidget(
-          child: DefaultAssetBundle(
-            /// The AssetBundle instrumentation provides insight into how long
-            /// the app takes to load its assets, such as files.
-            bundle: SentryAssetBundle(),
-            child: App(
-              analyticsRepository: analyticsRepository,
-              scheduleRepository: scheduleRepository,
-              communityRepository: communityRepository,
-              storiesRepository: storiesRepository,
-              discourseRepository: discourseRepository,
-              neonDependencies: neonDependencies,
-              newsRepository: newsRepository,
-              notificationsRepository: notificationsRepository,
-              scheduleExporterRepository: scheduleExporterRepository,
-              nfcPassRepository: nfcPassRepository,
-              key: const Key('App'),
-            ),
-          ),
-        ),
-      ),
+      appRunner: runMyApp,
     );
   } catch (e, stackTrace) {
     debugPrint('Sentry initialization failed: $e');
-    await Sentry.captureException(e, stackTrace: stackTrace);
-    runApp(
-      App(
-        analyticsRepository: analyticsRepository,
-        scheduleRepository: scheduleRepository,
-        communityRepository: communityRepository,
-        storiesRepository: storiesRepository,
-        discourseRepository: discourseRepository,
-        neonDependencies: neonDependencies,
-        newsRepository: newsRepository,
-        notificationsRepository: notificationsRepository,
-        scheduleExporterRepository: scheduleExporterRepository,
-        nfcPassRepository: nfcPassRepository,
-        key: const Key('App'),
-      ),
-    );
+    Sentry.captureException(e, stackTrace: stackTrace);
+    runMyApp();
   }
 
   try {
     final Dio dio = getIt<Dio>();
     dio.addSentry();
   } catch (e, stackTrace) {
+    Logger().e('Dio Sentry integration failed: $e');
+    Logger().e(stackTrace);
     await Sentry.captureException(e, stackTrace: stackTrace);
   }
 }

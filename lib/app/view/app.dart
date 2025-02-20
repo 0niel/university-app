@@ -5,10 +5,10 @@ import 'package:discourse_repository/discourse_repository.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:go_router/go_router.dart';
 import 'package:nfc_pass_repository/nfc_pass_repository.dart';
-import 'package:notifications_repository/notifications_repository.dart';
 import 'package:platform/platform.dart';
 import 'package:rtu_mirea_app/ads/bloc/ads_bloc.dart';
 import 'package:rtu_mirea_app/ads/bloc/full_screen_ads_bloc.dart';
@@ -88,7 +88,6 @@ class App extends StatefulWidget {
     required StoriesRepositoryImpl storiesRepository,
     required DiscourseRepository discourseRepository,
     required NewsRepository newsRepository,
-    required NotificationsRepository notificationsRepository,
     required ScheduleExporterRepository scheduleExporterRepository,
     required NeonDependencies neonDependencies,
     required NfcPassRepository nfcPassRepository,
@@ -99,7 +98,6 @@ class App extends StatefulWidget {
         _storiesRepository = storiesRepository,
         _discourseRepository = discourseRepository,
         _newsRepository = newsRepository,
-        _notificationsRepository = notificationsRepository,
         _scheduleExporterRepository = scheduleExporterRepository,
         _neonDependencies = neonDependencies,
         _nfcPassRepository = nfcPassRepository;
@@ -110,7 +108,6 @@ class App extends StatefulWidget {
   final StoriesRepositoryImpl _storiesRepository;
   final DiscourseRepository _discourseRepository;
   final NewsRepository _newsRepository;
-  final NotificationsRepository _notificationsRepository;
   final ScheduleExporterRepository _scheduleExporterRepository;
   final NeonDependencies _neonDependencies;
   final NfcPassRepository _nfcPassRepository;
@@ -214,6 +211,9 @@ class _AppViewState extends State<_AppView> {
     super.initState();
     _router = getIt<GoRouter>();
     _neonLocalizationsDelegates = _buildNeonLocalizationsDelegates();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      FlutterNativeSplash.remove();
+    });
   }
 
   List<LocalizationsDelegate<dynamic>> _buildNeonLocalizationsDelegates() {

@@ -85,7 +85,7 @@
 		<key>NSCalendarsFullAccessUsageDescription</key>
 		<string>Мы используем ваш календарь для добавления событий.</string>
 		<key>UIStatusBarHidden</key>
-		<true/>
+		<false/>
 		<key>SKAdNetworkItems</key>
 		<array>
 			<dict>
