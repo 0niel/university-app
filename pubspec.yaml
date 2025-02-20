@@ -65,7 +65,7 @@ dependencies:
   firebase_analytics: ^11.4.3
   firebase_core_web: ^2.21.0
   firebase_messaging: ^15.2.3
-  flutter_secure_storage: ^8.0.0
+  flutter_secure_storage: ^9.0.0
   flutter_nfc_kit: ^3.3.1
   app_settings: ^5.0.0
   sentry_flutter: ^8.13.0
