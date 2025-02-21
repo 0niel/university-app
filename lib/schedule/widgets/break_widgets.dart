@@ -76,7 +76,7 @@ class _ConsecutiveBreakWidgetState extends State<ConsecutiveBreakWidget> with Si
         const Spacer(),
         HugeIcon(
           icon: HugeIcons.strokeRoundedTime01,
-          color: Theme.of(context).extension<AppColors>()!.deactive,
+          color: textStyle.color ?? Colors.white,
           size: 18,
         ),
         const SizedBox(width: 4),
@@ -96,10 +96,6 @@ class _ConsecutiveBreakWidgetState extends State<ConsecutiveBreakWidget> with Si
     final breakDuration = nextMin - currentMax;
     final breakText = breakDuration > 0 ? '$breakDuration мин' : 'отсутствует';
 
-    final textStyle = AppTextStyle.captionL.copyWith(
-      color: Theme.of(context).extension<AppColors>()!.deactive,
-    );
-
     if (_progress != null) {
       return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 2.0),
@@ -118,22 +114,14 @@ class _ConsecutiveBreakWidgetState extends State<ConsecutiveBreakWidget> with Si
                 ),
                 borderRadius: BorderRadius.circular(8.0),
               ),
-              child: Stack(
-                children: [
-                  Positioned.fill(
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(8.0),
-                      child: BackdropFilter(
-                        filter: ui.ImageFilter.blur(sigmaX: 3, sigmaY: 3),
-                        child: Container(color: Colors.transparent),
-                      ),
-                    ),
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: _buildContent(
+                  breakText,
+                  AppTextStyle.captionL.copyWith(
+                    color: Theme.of(context).extension<AppColors>()!.active,
                   ),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: _buildContent(breakText, textStyle),
-                  ),
-                ],
+                ),
               ),
             );
           },
@@ -148,7 +136,12 @@ class _ConsecutiveBreakWidgetState extends State<ConsecutiveBreakWidget> with Si
             borderRadius: BorderRadius.circular(8.0),
           ),
           padding: const EdgeInsets.all(8.0),
-          child: _buildContent(breakText, textStyle),
+          child: _buildContent(
+            breakText,
+            AppTextStyle.captionL.copyWith(
+              color: Theme.of(context).extension<AppColors>()!.deactive,
+            ),
+          ),
         ),
       );
     }
