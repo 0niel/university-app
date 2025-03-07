@@ -28,11 +28,13 @@ class CustomFieldsRegistry {
 
     registerField('X-META-AUDITORIUM', (value, params, event, lastEvent) {
       try {
+        final baseValue = params['NUMBER'] ?? value;
+        final campus = params['CAMPUS'];
+        final locationText = campus != null ? '$baseValue ($campus)' : baseValue;
         lastEvent['X-META-AUDITORIUM'] = [
           ...(lastEvent['X-META-AUDITORIUM'] ?? []) as Iterable,
-          value,
+          locationText,
         ];
-
         return lastEvent;
       } catch (error, stackTrace) {
         Error.throwWithStackTrace(

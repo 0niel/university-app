@@ -1,6 +1,6 @@
 name: rtu_mirea_schedule_api_client
 description: A package that provides access to the remote schedule API of the RTU MIREA
-version: 0.1.0+1
+version: 0.1.1+2
 publish_to: none
 
 environment:
