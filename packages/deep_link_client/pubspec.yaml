@@ -1,0 +1,16 @@
+name: deep_link_client
+description: A deep link client interface
+publish_to: none
+
+environment:
+  sdk: ">=3.0.0 <4.0.0"
+
+dependencies:
+  app_links: ^6.4.0
+  equatable: ^2.0.5
+  rxdart: ^0.28.0
+
+dev_dependencies:
+  mocktail: ^1.0.4
+  test: ^1.25.8
+  very_good_analysis: ^6.0.0
