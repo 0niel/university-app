@@ -1,0 +1,22 @@
+name: supabase_authentication_client
+description: A Supabase implementation of the authentication client interface
+version: 1.0.0+1
+publish_to: none
+
+environment:
+  sdk: ">=3.0.0 <4.0.0"
+
+dependencies:
+  auth_client:
+    path: ../auth_client
+  flutter:
+    sdk: flutter
+  token_storage:
+    path: ../token_storage
+  supabase_flutter: ^2.8.3
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  mocktail: ^1.0.2
+  very_good_analysis: ^6.0.0
