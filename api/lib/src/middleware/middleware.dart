@@ -1,4 +1,5 @@
 export 'community_data_source_provider.dart';
+export 'cors.dart';
 export 'logger_provider.dart';
 export 'news_data_source_provider.dart';
 export 'redis_provider.dart';

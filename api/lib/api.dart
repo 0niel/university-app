@@ -10,6 +10,7 @@ export 'src/middleware/middleware.dart'
     show
         RequestUser,
         communityDataSourceProvider,
+        corsMiddleware,
         loggerProvider,
         newsDataSourceProvider,
         redisProvider,
