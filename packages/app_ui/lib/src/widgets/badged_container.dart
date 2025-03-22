@@ -30,6 +30,8 @@ class BadgedContainer extends StatelessWidget {
                       label,
                       style: AppTextStyle.bodyBold.copyWith(
                         color: Theme.of(context).extension<AppColors>()!.deactive,
+                        fontSize: 12,
+                        letterSpacing: 0.2,
                       ),
                     ),
                     const SizedBox(height: 5),

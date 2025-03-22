@@ -21,6 +21,21 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.activeLightMode,
     required this.deactiveDarker,
     required this.divider,
+    required this.surface,
+    required this.surfaceHigh,
+    required this.surfaceLow,
+    required this.onSurface,
+    required this.accent,
+    required this.success,
+    required this.warning,
+    required this.error,
+    required this.info,
+    required this.borderLight,
+    required this.borderMedium,
+    required this.cardShadowLight,
+    required this.cardShadowDark,
+    required this.shimmerBase,
+    required this.shimmerHighlight,
   });
 
   final Color primary;
@@ -41,6 +56,21 @@ class AppColors extends ThemeExtension<AppColors> {
   final Color activeLightMode;
   final Color deactiveDarker;
   final Color divider;
+  final Color surface;
+  final Color surfaceHigh;
+  final Color surfaceLow;
+  final Color onSurface;
+  final Color accent;
+  final Color success;
+  final Color warning;
+  final Color error;
+  final Color info;
+  final Color borderLight;
+  final Color borderMedium;
+  final Color cardShadowLight;
+  final Color cardShadowDark;
+  final Color shimmerBase;
+  final Color shimmerHighlight;
 
   @override
   AppColors copyWith({
@@ -62,6 +92,21 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? activeLightMode,
     Color? deactiveDarker,
     Color? divider,
+    Color? surface,
+    Color? surfaceHigh,
+    Color? surfaceLow,
+    Color? onSurface,
+    Color? accent,
+    Color? success,
+    Color? warning,
+    Color? error,
+    Color? info,
+    Color? borderLight,
+    Color? borderMedium,
+    Color? cardShadowLight,
+    Color? cardShadowDark,
+    Color? shimmerBase,
+    Color? shimmerHighlight,
   }) {
     return AppColors(
       primary: primary ?? this.primary,
@@ -82,6 +127,21 @@ class AppColors extends ThemeExtension<AppColors> {
       activeLightMode: activeLightMode ?? this.activeLightMode,
       deactiveDarker: deactiveDarker ?? this.deactiveDarker,
       divider: divider ?? this.divider,
+      surface: surface ?? this.surface,
+      surfaceHigh: surfaceHigh ?? this.surfaceHigh,
+      surfaceLow: surfaceLow ?? this.surfaceLow,
+      onSurface: onSurface ?? this.onSurface,
+      accent: accent ?? this.accent,
+      success: success ?? this.success,
+      warning: warning ?? this.warning,
+      error: error ?? this.error,
+      info: info ?? this.info,
+      borderLight: borderLight ?? this.borderLight,
+      borderMedium: borderMedium ?? this.borderMedium,
+      cardShadowLight: cardShadowLight ?? this.cardShadowLight,
+      cardShadowDark: cardShadowDark ?? this.cardShadowDark,
+      shimmerBase: shimmerBase ?? this.shimmerBase,
+      shimmerHighlight: shimmerHighlight ?? this.shimmerHighlight,
     );
   }
 
@@ -107,6 +167,21 @@ class AppColors extends ThemeExtension<AppColors> {
       activeLightMode: Color.lerp(activeLightMode, other.activeLightMode, t)!,
       deactiveDarker: Color.lerp(deactiveDarker, other.deactiveDarker, t)!,
       divider: Color.lerp(divider, other.divider, t)!,
+      surface: Color.lerp(surface, other.surface, t)!,
+      surfaceHigh: Color.lerp(surfaceHigh, other.surfaceHigh, t)!,
+      surfaceLow: Color.lerp(surfaceLow, other.surfaceLow, t)!,
+      onSurface: Color.lerp(onSurface, other.onSurface, t)!,
+      accent: Color.lerp(accent, other.accent, t)!,
+      success: Color.lerp(success, other.success, t)!,
+      warning: Color.lerp(warning, other.warning, t)!,
+      error: Color.lerp(error, other.error, t)!,
+      info: Color.lerp(info, other.info, t)!,
+      borderLight: Color.lerp(borderLight, other.borderLight, t)!,
+      borderMedium: Color.lerp(borderMedium, other.borderMedium, t)!,
+      cardShadowLight: Color.lerp(cardShadowLight, other.cardShadowLight, t)!,
+      cardShadowDark: Color.lerp(cardShadowDark, other.cardShadowDark, t)!,
+      shimmerBase: Color.lerp(shimmerBase, other.shimmerBase, t)!,
+      shimmerHighlight: Color.lerp(shimmerHighlight, other.shimmerHighlight, t)!,
     );
   }
 
@@ -129,30 +204,24 @@ class AppColors extends ThemeExtension<AppColors> {
     activeLightMode: Color(0xFFE0E0E0),
     deactiveDarker: Color(0xFFE0E0E0),
     divider: Color(0xFFE0E0E0),
+    surface: Color(0xFFFFFFFF),
+    surfaceHigh: Color(0xFFF9F9F9),
+    surfaceLow: Color(0xFFF0F0F0),
+    onSurface: Color(0xFF2C2C2C),
+    accent: Color(0xFF4F7FFF),
+    success: Color(0xFF4CAF50),
+    warning: Color(0xFFFFC107),
+    error: Color(0xFFFF5252),
+    info: Color(0xFF2196F3),
+    borderLight: Color(0xFFEAEAEA),
+    borderMedium: Color(0xFFD0D0D0),
+    cardShadowLight: Color(0x0A000000),
+    cardShadowDark: Color(0x1A000000),
+    shimmerBase: Color(0xFFF0F0F0),
+    shimmerHighlight: Color(0xFFFFFFFF),
   );
 
   static const AppColors dark = AppColors(
-    primary: Color(0xFF246BFD),
-    secondary: Color(0xFFC25FFF),
-    background01: Color(0xFF181A20),
-    background02: Color(0xFF262A34),
-    background03: Color(0xFF1F222A),
-    colorful01: Color(0xFFB39DDB),
-    colorful02: Color(0xFFF8BBD0),
-    colorful03: Color(0xFF8E96FF),
-    colorful04: Color(0xFF80CBC4),
-    colorful05: Color(0xFFA5D6A7),
-    colorful06: Color(0xFFFFF59D),
-    colorful07: Color(0xFFFFAB91),
-    white: Color(0xFFFFFFFF),
-    active: Color(0xFFEEEEEE),
-    deactive: Color(0xFF5E6272),
-    activeLightMode: Color(0xFF200745),
-    deactiveDarker: Color(0xFF3A3D46),
-    divider: Color(0x403A3D46),
-  );
-
-  static const AppColors amoled = AppColors(
     primary: Color(0xFF4A90E2),
     secondary: Color(0xFFA48AD4),
     background01: Color(0xFF000000),
@@ -171,5 +240,20 @@ class AppColors extends ThemeExtension<AppColors> {
     activeLightMode: Color(0xFF607D8B),
     deactiveDarker: Color(0xFF78909C),
     divider: Color(0xFF333333),
+    surface: Color(0xFF121212),
+    surfaceHigh: Color(0xFF1C1C1C),
+    surfaceLow: Color(0xFF000000),
+    onSurface: Color(0xFFEEEEEE),
+    accent: Color(0xFF5B8CFF),
+    success: Color(0xFF66BB6A),
+    warning: Color(0xFFFFD54F),
+    error: Color(0xFFFF5252),
+    info: Color(0xFF42A5F5),
+    borderLight: Color(0x26FFFFFF),
+    borderMedium: Color(0x40FFFFFF),
+    cardShadowLight: Color(0x12000000),
+    cardShadowDark: Color(0x24000000),
+    shimmerBase: Color(0xFF1A1A1A),
+    shimmerHighlight: Color(0xFF2C2C2C),
   );
 }
