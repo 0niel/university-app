@@ -25,57 +25,61 @@ class ServiceCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ConstrainedBox(
-      constraints: const BoxConstraints(maxWidth: 156, maxHeight: 192),
-      child: Card(
-        color: Theme.of(context).extension<AppColors>()!.background02,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: PlatformInkWell(
-          onLongPress: onLongPress,
-          onTap: () {
-            if (onTap != null) {
-              onTap!();
-              return;
-            }
-            if (this.url == null) {
-              return;
-            }
-            final Uri url = Uri.parse(this.url!);
-            launchUrl(url, mode: launchMode);
-          },
-          borderRadius: BorderRadius.circular(12),
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                icon,
-                const SizedBox(height: 12),
-                Text(
-                  title,
-                  style: AppTextStyle.bodyBold.copyWith(
-                    color: Theme.of(context).extension<AppColors>()!.active,
-                  ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                if (description != null) ...[
-                  const SizedBox(height: 4),
-                  Expanded(
-                    child: Text(
-                      description!,
-                      style: AppTextStyle.body.copyWith(
-                        color: Theme.of(context).extension<AppColors>()!.deactive,
-                        height: 1.1,
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
+    return Padding(
+      padding: const EdgeInsets.only(right: 12),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 160, maxHeight: 192),
+        child: Card(
+          color: Theme.of(context).extension<AppColors>()!.background02,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: PlatformInkWell(
+            onLongPress: onLongPress,
+            onTap: () {
+              if (onTap != null) {
+                onTap!();
+                return;
+              }
+              if (this.url == null) {
+                return;
+              }
+              final Uri url = Uri.parse(this.url!);
+              launchUrl(url, mode: launchMode);
+            },
+            borderRadius: BorderRadius.circular(16),
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  icon,
+                  const SizedBox(height: 16),
+                  Text(
+                    title,
+                    style: AppTextStyle.bodyBold.copyWith(
+                      color: Theme.of(context).extension<AppColors>()!.active,
+                      fontSize: 16,
                     ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                   ),
+                  if (description != null) ...[
+                    const SizedBox(height: 8),
+                    Expanded(
+                      child: Text(
+                        description!,
+                        style: AppTextStyle.body.copyWith(
+                          color: Theme.of(context).extension<AppColors>()!.deactive,
+                          height: 1.2,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
                 ],
-              ],
+              ),
             ),
           ),
         ),
