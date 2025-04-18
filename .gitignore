@@ -158,3 +158,6 @@ env.g.dart
 
 # FVM Version Cache
 .fvm/
+
+# Firebase
+**/.firebaserc
