@@ -10,7 +10,7 @@ final _delegate = RtuMireaScheduleDataSource();
 Middleware scheduleDataSourceProvider() {
   return provider<ScheduleDataSource>((context) {
     final redis = context.read<RedisClient>();
-    return CachedScheduleDataSource(
+    return RedisCachedScheduleDataSource(
       delegate: _delegate,
       redisClient: redis,
     );

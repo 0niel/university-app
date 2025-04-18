@@ -5,8 +5,23 @@ import 'package:university_app_server_api/src/data/schedule/schedule_data_source
 import 'package:university_app_server_api/src/models/models.dart';
 import 'package:university_app_server_api/src/redis.dart';
 
-class CachedScheduleDataSource implements ScheduleDataSource {
-  CachedScheduleDataSource({
+/// {@template RedisCachedScheduleDataSource}
+/// A data source that caches schedule data in Redis.
+///
+/// This class implements the [ScheduleDataSource] interface and uses a
+/// Redis client to cache schedule data for a specified time-to-live (TTL).
+///
+/// The cached data is stored in Redis with a key based on the type of
+/// schedule data being requested (e.g., group, teacher, classroom).
+///
+/// The cache is used to avoid redundant network requests and improve
+/// performance. If remote data fetching fails, the cache is checked for
+/// previously stored data. If cached data is found, it is returned instead
+/// of throwing an error.
+/// {@endtemplate}
+class RedisCachedScheduleDataSource implements ScheduleDataSource {
+  /// {@macro RedisCachedScheduleDataSource}
+  RedisCachedScheduleDataSource({
     required ScheduleDataSource delegate,
     required RedisClient redisClient,
     int ttl = 1800,
@@ -18,123 +33,92 @@ class CachedScheduleDataSource implements ScheduleDataSource {
   final RedisClient _redisClient;
   final int _ttl;
 
-  @override
-  Future<List<SchedulePart>> getSchedule({required String group}) async {
-    final key = 'schedule:$group';
+  Future<T> _cacheOrFallback<T>({
+    required String key,
+    required Future<T> Function() fetch,
+    required Map<String, dynamic> Function(T) toJson,
+    required T Function(Map<String, dynamic>) fromJson,
+  }) async {
     try {
-      final schedule = await _delegate.getSchedule(group: group);
-      final scheduleData = ScheduleResponse(data: schedule).toJson();
-      await _redisClient.command.send_object(['SET', key, json.encode(scheduleData), 'EX', _ttl]);
-      return schedule;
+      final result = await fetch();
+      final encoded = json.encode(toJson(result));
+      await _redisClient.command.send_object(['SET', key, encoded, 'EX', _ttl]);
+      return result;
     } catch (e) {
       final cached = await _redisClient.command.get(key);
       if (cached != null) {
         try {
           final decoded = json.decode(cached as String) as Map<String, dynamic>;
-          return ScheduleResponse.fromJson(decoded).data;
+          return fromJson(decoded);
         } catch (_) {}
       }
       rethrow;
     }
+  }
+
+  @override
+  Future<List<SchedulePart>> getSchedule({required String group}) async {
+    final key = 'schedule:$group';
+    return _cacheOrFallback<List<SchedulePart>>(
+      key: key,
+      fetch: () => _delegate.getSchedule(group: group),
+      toJson: (data) => ScheduleResponse(data: data).toJson(),
+      fromJson: (json) => ScheduleResponse.fromJson(json).data,
+    );
   }
 
   @override
   Future<List<SchedulePart>> getTeacherSchedule({required String teacher}) async {
     final key = 'schedule:teacher:$teacher';
-    try {
-      final schedule = await _delegate.getTeacherSchedule(teacher: teacher);
-      final scheduleData = ScheduleResponse(data: schedule).toJson();
-      await _redisClient.command.send_object(['SET', key, json.encode(scheduleData), 'EX', _ttl]);
-      return schedule;
-    } catch (e) {
-      final cached = await _redisClient.command.get(key);
-      if (cached != null) {
-        try {
-          final decoded = json.decode(cached as String) as Map<String, dynamic>;
-          return ScheduleResponse.fromJson(decoded).data;
-        } catch (_) {}
-      }
-      rethrow;
-    }
+    return _cacheOrFallback<List<SchedulePart>>(
+      key: key,
+      fetch: () => _delegate.getTeacherSchedule(teacher: teacher),
+      toJson: (data) => ScheduleResponse(data: data).toJson(),
+      fromJson: (json) => ScheduleResponse.fromJson(json).data,
+    );
   }
 
   @override
   Future<List<SchedulePart>> getClassroomSchedule({required String classroom}) async {
     final key = 'schedule:classroom:$classroom';
-    try {
-      final schedule = await _delegate.getClassroomSchedule(classroom: classroom);
-      final scheduleData = ScheduleResponse(data: schedule).toJson();
-      await _redisClient.command.send_object(['SET', key, json.encode(scheduleData), 'EX', _ttl]);
-      return schedule;
-    } catch (e) {
-      final cached = await _redisClient.command.get(key);
-      if (cached != null) {
-        try {
-          final decoded = json.decode(cached as String) as Map<String, dynamic>;
-          return ScheduleResponse.fromJson(decoded).data;
-        } catch (_) {}
-      }
-      rethrow;
-    }
+    return _cacheOrFallback<List<SchedulePart>>(
+      key: key,
+      fetch: () => _delegate.getClassroomSchedule(classroom: classroom),
+      toJson: (data) => ScheduleResponse(data: data).toJson(),
+      fromJson: (json) => ScheduleResponse.fromJson(json).data,
+    );
   }
 
   @override
   Future<List<Classroom>> searchClassrooms({required String query}) async {
     final key = 'schedule:search:classrooms:$query';
-    try {
-      final result = await _delegate.searchClassrooms(query: query);
-      final encoded = json.encode(SearchClassroomsResponse(results: result).toJson());
-      await _redisClient.command.send_object(['SET', key, encoded, 'EX', _ttl]);
-      return result;
-    } catch (e) {
-      final cached = await _redisClient.command.get(key);
-      if (cached != null) {
-        try {
-          final decoded = json.decode(cached as String) as Map<String, dynamic>;
-          return SearchClassroomsResponse.fromJson(decoded).results;
-        } catch (_) {}
-      }
-      rethrow;
-    }
+    return _cacheOrFallback<List<Classroom>>(
+      key: key,
+      fetch: () => _delegate.searchClassrooms(query: query),
+      toJson: (data) => SearchClassroomsResponse(results: data).toJson(),
+      fromJson: (json) => SearchClassroomsResponse.fromJson(json).results,
+    );
   }
 
   @override
   Future<List<Group>> searchGroups({required String query}) async {
     final key = 'schedule:search:groups:$query';
-    try {
-      final result = await _delegate.searchGroups(query: query);
-      final encoded = json.encode(SearchGroupsResponse(results: result).toJson());
-      await _redisClient.command.send_object(['SET', key, encoded, 'EX', _ttl]);
-      return result;
-    } catch (e) {
-      final cached = await _redisClient.command.get(key);
-      if (cached != null) {
-        try {
-          final decoded = json.decode(cached as String) as Map<String, dynamic>;
-          return SearchGroupsResponse.fromJson(decoded).results;
-        } catch (_) {}
-      }
-      rethrow;
-    }
+    return _cacheOrFallback<List<Group>>(
+      key: key,
+      fetch: () => _delegate.searchGroups(query: query),
+      toJson: (data) => SearchGroupsResponse(results: data).toJson(),
+      fromJson: (json) => SearchGroupsResponse.fromJson(json).results,
+    );
   }
 
   @override
   Future<List<Teacher>> searchTeachers({required String query}) async {
     final key = 'schedule:search:teachers:$query';
-    try {
-      final result = await _delegate.searchTeachers(query: query);
-      final encoded = json.encode(SearchTeachersResponse(results: result).toJson());
-      await _redisClient.command.send_object(['SET', key, encoded, 'EX', _ttl]);
-      return result;
-    } catch (e) {
-      final cached = await _redisClient.command.get(key);
-      if (cached != null) {
-        try {
-          final decoded = json.decode(cached as String) as Map<String, dynamic>;
-          return SearchTeachersResponse.fromJson(decoded).results;
-        } catch (_) {}
-      }
-      rethrow;
-    }
+    return _cacheOrFallback<List<Teacher>>(
+      key: key,
+      fetch: () => _delegate.searchTeachers(query: query),
+      toJson: (data) => SearchTeachersResponse(results: data).toJson(),
+      fromJson: (json) => SearchTeachersResponse.fromJson(json).results,
+    );
   }
 }
