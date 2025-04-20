@@ -106,7 +106,7 @@ dependencies {
     implementation 'com.yandex.ads.mediation:mobileads-ironsource:8.5.0.2'
     implementation 'com.yandex.ads.mediation:mobileads-chartboost:9.3.1.15'
     implementation 'com.yandex.ads.mediation:mobileads-pangle:6.4.0.2.2'
-    implementation 'com.yandex.ads.mediation:mobileads-tapjoy:13.4.1.10'
+    implementation 'com.yandex.ads.mediation:mobileads-tapjoy:13.4.1.12'
     implementation 'com.yandex.ads.mediation:mobileads-vungle:7.4.2.2'
     implementation 'com.yandex.ads.mediation:mobileads-mintegral:16.8.61.4'
     implementation 'com.yandex.ads.mediation:mobileads-bigoads:5.0.2.2'
