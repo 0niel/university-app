@@ -99,7 +99,7 @@ dependencies {
     implementation "com.google.android.gms:play-services-location:21.1.0"
     implementation 'com.yandex.android:mobileads:7.12.1'
     implementation 'com.yandex.ads.mediation:mobileads-google:23.5.0.2'
-    implementation 'com.yandex.ads.mediation:mobileads-inmobi:10.8.0.2'
+    implementation 'com.yandex.ads.mediation:mobileads-inmobi:10.8.2.0'
     implementation 'com.yandex.ads.mediation:mobileads-mytarget:5.22.1.6'
     implementation 'com.yandex.ads.mediation:mobileads-unityads:4.12.5.2'
     implementation 'com.yandex.ads.mediation:mobileads-applovin:12.6.0.8'
