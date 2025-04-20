@@ -7,6 +7,7 @@ import 'package:university_app_server_api/src/redis.dart';
 
 final _delegate = RtuMireaScheduleDataSource();
 
+/// Provides a [ScheduleDataSource] to the current [RequestContext].
 Middleware scheduleDataSourceProvider() {
   return provider<ScheduleDataSource>((context) {
     final redis = context.read<RedisClient>();

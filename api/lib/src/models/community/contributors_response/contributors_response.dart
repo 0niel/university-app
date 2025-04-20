@@ -10,11 +10,11 @@ class ContributorsResponse extends Equatable {
     required this.contributors,
   });
 
-  factory ContributorsResponse.fromJson(Map<String, dynamic> json) => _$ContriubutorsResponseFromJson(json);
+  factory ContributorsResponse.fromJson(Map<String, dynamic> json) => _$ContributorsResponseFromJson(json);
 
   final List<Contributor> contributors;
 
-  Map<String, dynamic> toJson() => _$ContriubutorsResponseToJson(this);
+  Map<String, dynamic> toJson() => _$ContributorsResponseToJson(this);
 
   @override
   List<Object> get props => [contributors];
