@@ -102,7 +102,7 @@ dependencies {
     implementation 'com.yandex.ads.mediation:mobileads-inmobi:10.8.0.2'
     implementation 'com.yandex.ads.mediation:mobileads-mytarget:5.22.1.6'
     implementation 'com.yandex.ads.mediation:mobileads-unityads:4.12.5.2'
-    implementation 'com.yandex.ads.mediation:mobileads-applovin:12.6.0.7'
+    implementation 'com.yandex.ads.mediation:mobileads-applovin:12.6.0.8'
     implementation 'com.yandex.ads.mediation:mobileads-ironsource:8.5.0.2'
     implementation 'com.yandex.ads.mediation:mobileads-chartboost:9.3.1.15'
     implementation 'com.yandex.ads.mediation:mobileads-pangle:6.4.0.2.2'
