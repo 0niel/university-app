@@ -6,7 +6,13 @@ import 'package:university_app_server_api/src/supabase.dart';
 Middleware supabaseProvider() {
   return (handler) {
     return (context) async {
-      final supabaseManager = await SupabaseClientManager.instance;
+      final supabaseManager = SupabaseClientManager.create();
+
+      final token = context.request.headers['Authorization']?.split(' ').last;
+      if (token != null) {
+        await supabaseManager.client.auth.setSession(token);
+      }
+
       final updatedContext = context.provide<SupabaseClient>(() => supabaseManager.client);
       return handler(updatedContext);
     };

@@ -1,4 +1,3 @@
-import 'dart:async';
 
 import 'package:supabase/supabase.dart';
 import 'package:university_app_server_api/config.dart';
@@ -11,41 +10,25 @@ final _logger = getLogger('SupabaseClient');
 /// A Supabase client.
 /// {@endtemplate}
 class SupabaseClientManager {
-  SupabaseClientManager._internal();
+  /// Creates a new instance of [SupabaseClientManager].
+  SupabaseClientManager();
 
-  static SupabaseClientManager? _instance;
   SupabaseClient? _client;
 
-  /// Returns the [SupabaseClientManager] instance.
-  static Future<SupabaseClientManager> get instance async {
-    _instance ??= SupabaseClientManager._internal();
-    await _instance!._ensureConnected();
-    return _instance!;
-  }
-
-  Future<void> _ensureConnected() async {
-    if (_client == null) {
-      try {
-        _logger.i('Connecting to Supabase... ${_appConfig.supabaseUrl}');
-        _client = SupabaseClient(
-          _appConfig.supabaseUrl,
-          _appConfig.supabaseKey,
-        );
-        // Test connection
-        await _client!.from('health_check').select().limit(1);
-        _logger.i('Connected to Supabase successfully');
-      } catch (e) {
-        _logger.e('Failed to connect to Supabase', error: e);
-        // Create a fallback connection with proper error handling
-        rethrow;
-      }
+  /// Creates and returns a new [SupabaseClientManager] instance.
+  static SupabaseClientManager create() {
+    final manager = SupabaseClientManager();
+    try {
+      _logger.i('Creating Supabase client... ${_appConfig.supabaseUrl}');
+      manager._client = SupabaseClient(
+        _appConfig.supabaseUrl,
+        _appConfig.supabaseKey,
+      );
+    } catch (e) {
+      _logger.e('Failed to connect to Supabase', error: e);
+      rethrow;
     }
-  }
-
-  /// Closes the connection to the Supabase server.
-  Future<void> close() async {
-    _logger.i('Closing Supabase connection');
-    _client = null;
+    return manager;
   }
 
   /// Returns the [SupabaseClient] for operations.
