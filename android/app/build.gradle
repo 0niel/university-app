@@ -33,8 +33,8 @@ if (keystorePropertiesFile.exists()) {
 android {
     namespace "ninja.mirea.mireaapp"
 
-    compileSdkVersion 34
-    ndkVersion = "26.1.10909125"
+    compileSdkVersion 35
+    ndkVersion = "27.0.12077973"
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
@@ -67,6 +67,22 @@ android {
             storePassword keystoreProperties['storePassword']
         }
     }
+
+    flavorDimensions "default"
+    productFlavors { 
+        development {
+            dimension "default"
+            applicationIdSuffix "dev"
+            manifestPlaceholders = [appName: "Ninja Mirea [DEV]"]
+        } 
+        production {
+            dimension "default"
+            applicationIdSuffix ""
+            manifestPlaceholders = [appName: "Ninja Mirea"]
+        } 
+    }
+
+
     buildTypes {
         release {
             if (keystoreProperties['storeFile']) {

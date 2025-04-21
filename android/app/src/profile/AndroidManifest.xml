@@ -3,4 +3,6 @@
          to allow setting breakpoints, to provide hot reload, etc.
     -->
     <uses-permission android:name="android.permission.INTERNET"/>
+    <!--Required for Android 13 or above-->
+    <uses-permission android:name="com.google.android.gms.permission.AD_ID"/>
 </manifest>
