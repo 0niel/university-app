@@ -30,9 +30,6 @@ class _MeasuredStickyAdState extends State<MeasuredStickyAd> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      key: _key,
-      child: const StickyAd(),
-    );
+    return Container(key: _key, child: const StickyAd());
   }
 }

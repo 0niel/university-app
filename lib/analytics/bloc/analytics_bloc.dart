@@ -8,19 +8,15 @@ part 'analytics_event.dart';
 part 'analytics_state.dart';
 
 class AnalyticsBloc extends Bloc<AnalyticsEvent, AnalyticsState> {
-  AnalyticsBloc({
-    required analytics.AnalyticsRepository analyticsRepository,
-  })  : _analyticsRepository = analyticsRepository,
-        super(AnalyticsInitial()) {
+  AnalyticsBloc({required analytics.AnalyticsRepository analyticsRepository})
+    : _analyticsRepository = analyticsRepository,
+      super(AnalyticsInitial()) {
     on<TrackAnalyticsEvent>(_onTrackAnalyticsEvent);
   }
 
   final analytics.AnalyticsRepository _analyticsRepository;
 
-  Future<void> _onTrackAnalyticsEvent(
-    TrackAnalyticsEvent event,
-    Emitter<AnalyticsState> emit,
-  ) async {
+  Future<void> _onTrackAnalyticsEvent(TrackAnalyticsEvent event, Emitter<AnalyticsState> emit) async {
     try {
       await _analyticsRepository.track(event.event);
     } catch (error, stackTrace) {

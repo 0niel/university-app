@@ -20,15 +20,11 @@ class AdsState extends Equatable {
   @override
   List<Object?> get props => [showAds];
 
-  AdsState copyWith({bool? showAds}) => AdsState(
-        showAds: showAds ?? this.showAds,
-      );
+  AdsState copyWith({bool? showAds}) => AdsState(showAds: showAds ?? this.showAds);
 
   Map<String, dynamic> toMap() => {'showAds': showAds};
 
-  factory AdsState.fromMap(Map<String, dynamic> map) => AdsState(
-        showAds: map['showAds'] as bool? ?? true,
-      );
+  factory AdsState.fromMap(Map<String, dynamic> map) => AdsState(showAds: map['showAds'] as bool? ?? true);
 }
 
 class AdsBloc extends HydratedBloc<AdsEvent, AdsState> {
