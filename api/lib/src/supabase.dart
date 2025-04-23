@@ -1,4 +1,3 @@
-
 import 'package:supabase/supabase.dart';
 import 'package:university_app_server_api/config.dart';
 import 'package:university_app_server_api/src/logger.dart';
@@ -19,13 +18,12 @@ class SupabaseClientManager {
   static SupabaseClientManager create() {
     final manager = SupabaseClientManager();
     try {
-      _logger.i('Creating Supabase client... ${_appConfig.supabaseUrl}');
       manager._client = SupabaseClient(
         _appConfig.supabaseUrl,
         _appConfig.supabaseKey,
       );
     } catch (e) {
-      _logger.e('Failed to connect to Supabase', error: e);
+      _logger.e('Failed to connect to create Supabase client', error: e);
       rethrow;
     }
     return manager;

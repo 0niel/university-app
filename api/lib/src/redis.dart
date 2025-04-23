@@ -19,8 +19,10 @@ class RedisClient {
 
   /// Returns the [RedisClient] instance.
   static Future<RedisClient> get instance async {
-    _instance ??= RedisClient._internal();
-    await _instance!._ensureConnected();
+    if (_instance == null) {
+      _instance = RedisClient._internal();
+      await _instance!._ensureConnected();
+    }
     return _instance!;
   }
 
@@ -33,9 +35,10 @@ class RedisClient {
         _connection = conn;
         _logger.i('Connected to Redis successfully');
       } catch (e) {
-        _logger.e('Failed to connect to Redis', error: e);
-        _logger.i('Falling back to no-op Redis.');
-        // Fallback to a no-op command so that errors related to Redis are suppressed.
+        _logger
+          ..e('Failed to connect to Redis', error: e)
+          ..i('Falling back to no-op Redis.');
+
         _command = NullCommand();
       }
     }
