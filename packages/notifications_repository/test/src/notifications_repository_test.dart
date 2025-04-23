@@ -31,17 +31,9 @@ void main() {
 
       when(permissionClient.notificationsStatus).thenAnswer((_) async => PermissionStatus.denied);
 
-      when(
-        () => storage.setNotificationsEnabled(
-          enabled: any(named: 'enabled'),
-        ),
-      ).thenAnswer((_) async {});
+      when(() => storage.setNotificationsEnabled(enabled: any(named: 'enabled'))).thenAnswer((_) async {});
 
-      when(
-        () => storage.setCategoriesPreferences(
-          categories: any(named: 'categories'),
-        ),
-      ).thenAnswer((_) async {});
+      when(() => storage.setCategoriesPreferences(categories: any(named: 'categories'))).thenAnswer((_) async {});
 
       when(storage.fetchNotificationsEnabled).thenAnswer((_) async => false);
 
@@ -52,8 +44,7 @@ void main() {
     });
 
     group('constructor', () {
-      test(
-          'initializes categories preferences '
+      test('initializes categories preferences '
           'from DailyGlobeApiClient.getCategories', () async {
         when(storage.fetchCategoriesPreferences).thenAnswer((_) async => null);
 
@@ -61,9 +52,7 @@ void main() {
         const categories = ['ИКБО-40-20', 'ИКБО-30-20'];
 
         when(
-          () => storage.setCategoriesPreferences(
-            categories: any(named: 'categories'),
-          ),
+          () => storage.setCategoriesPreferences(categories: any(named: 'categories')),
         ).thenAnswer((_) async => completer.complete());
 
         final _ = NotificationsRepository(
@@ -74,40 +63,34 @@ void main() {
 
         await expectLater(completer.future, completes);
 
-        verify(
-          () => storage.setCategoriesPreferences(
-            categories: categories.toSet(),
-          ),
-        ).called(1);
+        verify(() => storage.setCategoriesPreferences(categories: categories.toSet())).called(1);
       });
 
-      test(
-          'throws an InitializeCategoriesPreferencesFailure '
+      test('throws an InitializeCategoriesPreferencesFailure '
           'when initialization fails', () async {
         Object? caughtError;
-        await runZonedGuarded(() async {
-          when(storage.fetchCategoriesPreferences).thenThrow(Exception());
+        await runZonedGuarded(
+          () async {
+            when(storage.fetchCategoriesPreferences).thenThrow(Exception());
 
-          final _ = NotificationsRepository(
-            permissionClient: permissionClient,
-            storage: storage,
-            notificationsClient: notificationsClient,
-          );
-        }, (error, stackTrace) {
-          caughtError = error;
-        });
-
-        expect(
-          caughtError,
-          isA<InitializeCategoriesPreferencesFailure>(),
+            final _ = NotificationsRepository(
+              permissionClient: permissionClient,
+              storage: storage,
+              notificationsClient: notificationsClient,
+            );
+          },
+          (error, stackTrace) {
+            caughtError = error;
+          },
         );
+
+        expect(caughtError, isA<InitializeCategoriesPreferencesFailure>());
       });
     });
 
     group('toggleNotifications', () {
       group('when enable is true', () {
-        test(
-            'calls openPermissionSettings on PermissionClient '
+        test('calls openPermissionSettings on PermissionClient '
             'when PermissionStatus is permanentlyDenied', () async {
           when(permissionClient.notificationsStatus).thenAnswer((_) async => PermissionStatus.permanentlyDenied);
 
@@ -122,8 +105,7 @@ void main() {
           verify(permissionClient.openPermissionSettings).called(1);
         });
 
-        test(
-            'calls openPermissionSettings on PermissionClient '
+        test('calls openPermissionSettings on PermissionClient '
             'when PermissionStatus is restricted', () async {
           when(permissionClient.notificationsStatus).thenAnswer((_) async => PermissionStatus.restricted);
 
@@ -138,8 +120,7 @@ void main() {
           verify(permissionClient.openPermissionSettings).called(1);
         });
 
-        test(
-            'calls requestNotifications on PermissionClient '
+        test('calls requestNotifications on PermissionClient '
             'when PermissionStatus is denied', () async {
           when(permissionClient.requestNotifications).thenAnswer((_) async => PermissionStatus.granted);
 
@@ -155,10 +136,7 @@ void main() {
         });
 
         test('subscribes to categories preferences', () async {
-          const categoriesPreferences = {
-            'ИКБО-30-20',
-            'ИКБО-40-20',
-          };
+          const categoriesPreferences = {'ИКБО-30-20', 'ИКБО-40-20'};
 
           when(storage.fetchCategoriesPreferences).thenAnswer((_) async => categoriesPreferences);
 
@@ -175,8 +153,7 @@ void main() {
           }
         });
 
-        test(
-            'calls setNotificationsEnabled with true '
+        test('calls setNotificationsEnabled with true '
             'on NotificationsStorage', () async {
           when(permissionClient.notificationsStatus).thenAnswer((_) async => PermissionStatus.granted);
 
@@ -186,18 +163,13 @@ void main() {
             notificationsClient: notificationsClient,
           ).toggleNotifications(enable: true);
 
-          verify(
-            () => storage.setNotificationsEnabled(enabled: true),
-          ).called(1);
+          verify(() => storage.setNotificationsEnabled(enabled: true)).called(1);
         });
       });
 
       group('when enabled is false', () {
         test('unsubscribes from categories preferences', () async {
-          const categoriesPreferences = {
-            'ИКБО-30-20',
-            'ИКБО-40-20',
-          };
+          const categoriesPreferences = {'ИКБО-30-20', 'ИКБО-40-20'};
 
           when(storage.fetchCategoriesPreferences).thenAnswer((_) async => categoriesPreferences);
 
@@ -208,14 +180,11 @@ void main() {
           ).toggleNotifications(enable: false);
 
           for (final category in categoriesPreferences) {
-            verify(
-              () => notificationsClient.unsubscribeFromCategory(category),
-            ).called(1);
+            verify(() => notificationsClient.unsubscribeFromCategory(category)).called(1);
           }
         });
 
-        test(
-            'calls setNotificationsEnabled with false '
+        test('calls setNotificationsEnabled with false '
             'on NotificationsStorage', () async {
           await NotificationsRepository(
             permissionClient: permissionClient,
@@ -223,14 +192,11 @@ void main() {
             notificationsClient: notificationsClient,
           ).toggleNotifications(enable: false);
 
-          verify(
-            () => storage.setNotificationsEnabled(enabled: false),
-          ).called(1);
+          verify(() => storage.setNotificationsEnabled(enabled: false)).called(1);
         });
       });
 
-      test(
-          'throws a ToggleNotificationsFailure '
+      test('throws a ToggleNotificationsFailure '
           'when toggling notifications fails', () async {
         when(permissionClient.notificationsStatus).thenThrow(Exception());
 
@@ -246,76 +212,75 @@ void main() {
     });
 
     group('fetchNotificationsEnabled', () {
-      test(
-          'returns true '
+      test('returns true '
           'when the notification permission is granted '
           'and the notification setting is enabled', () async {
         when(permissionClient.notificationsStatus).thenAnswer((_) async => PermissionStatus.granted);
 
         when(storage.fetchNotificationsEnabled).thenAnswer((_) async => true);
 
-        final result = await NotificationsRepository(
-          permissionClient: permissionClient,
-          storage: storage,
-          notificationsClient: notificationsClient,
-        ).fetchNotificationsEnabled();
+        final result =
+            await NotificationsRepository(
+              permissionClient: permissionClient,
+              storage: storage,
+              notificationsClient: notificationsClient,
+            ).fetchNotificationsEnabled();
 
         expect(result, isTrue);
       });
 
-      test(
-          'returns false '
+      test('returns false '
           'when the notification permission is not granted '
           'and the notification setting is enabled', () async {
         when(permissionClient.notificationsStatus).thenAnswer((_) async => PermissionStatus.denied);
 
         when(storage.fetchNotificationsEnabled).thenAnswer((_) async => true);
 
-        final result = await NotificationsRepository(
-          permissionClient: permissionClient,
-          storage: storage,
-          notificationsClient: notificationsClient,
-        ).fetchNotificationsEnabled();
+        final result =
+            await NotificationsRepository(
+              permissionClient: permissionClient,
+              storage: storage,
+              notificationsClient: notificationsClient,
+            ).fetchNotificationsEnabled();
 
         expect(result, isFalse);
       });
 
-      test(
-          'returns false '
+      test('returns false '
           'when the notification permission is not granted '
           'and the notification setting is disabled', () async {
         when(permissionClient.notificationsStatus).thenAnswer((_) async => PermissionStatus.denied);
 
         when(storage.fetchNotificationsEnabled).thenAnswer((_) async => false);
 
-        final result = await NotificationsRepository(
-          permissionClient: permissionClient,
-          storage: storage,
-          notificationsClient: notificationsClient,
-        ).fetchNotificationsEnabled();
+        final result =
+            await NotificationsRepository(
+              permissionClient: permissionClient,
+              storage: storage,
+              notificationsClient: notificationsClient,
+            ).fetchNotificationsEnabled();
 
         expect(result, isFalse);
       });
 
-      test(
-          'returns false '
+      test('returns false '
           'when the notification permission is granted '
           'and the notification setting is disabled', () async {
         when(permissionClient.notificationsStatus).thenAnswer((_) async => PermissionStatus.granted);
 
         when(storage.fetchNotificationsEnabled).thenAnswer((_) async => false);
 
-        final result = await NotificationsRepository(
-          permissionClient: permissionClient,
-          storage: storage,
-          notificationsClient: notificationsClient,
-        ).fetchNotificationsEnabled();
+        final result =
+            await NotificationsRepository(
+              permissionClient: permissionClient,
+              storage: storage,
+              notificationsClient: notificationsClient,
+            ).fetchNotificationsEnabled();
 
         expect(result, isFalse);
       });
 
-      test(
-          'throws a FetchNotificationsEnabledFailure '
+      test('throws a FetchNotificationsEnabledFailure '
           'when fetching notifications enabled fails', () async {
         when(permissionClient.notificationsStatus).thenThrow(Exception());
 
@@ -331,17 +296,10 @@ void main() {
     });
 
     group('setCategoriesPreferences', () {
-      const categoriesPreferences = {
-        'ИКБО-30-20',
-        'ИКБО-40-20',
-      };
+      const categoriesPreferences = {'ИКБО-30-20', 'ИКБО-40-20'};
 
       test('calls setCategoriesPreferences on NotificationsStorage', () async {
-        when(
-          () => storage.setCategoriesPreferences(
-            categories: any(named: 'categories'),
-          ),
-        ).thenAnswer((_) async {});
+        when(() => storage.setCategoriesPreferences(categories: any(named: 'categories'))).thenAnswer((_) async {});
 
         await expectLater(
           NotificationsRepository(
@@ -352,18 +310,11 @@ void main() {
           completes,
         );
 
-        verify(
-          () => storage.setCategoriesPreferences(
-            categories: categoriesPreferences,
-          ),
-        ).called(1);
+        verify(() => storage.setCategoriesPreferences(categories: categoriesPreferences)).called(1);
       });
 
       test('unsubscribes from previous categories preferences', () async {
-        const previousCategoriesPreferences = {
-          'ИКБО-30-20',
-          'ИКБО-40-20',
-        };
+        const previousCategoriesPreferences = {'ИКБО-30-20', 'ИКБО-40-20'};
 
         when(storage.fetchCategoriesPreferences).thenAnswer((_) async => previousCategoriesPreferences);
 
@@ -374,14 +325,11 @@ void main() {
         ).setCategoriesPreferences(categoriesPreferences);
 
         for (final category in previousCategoriesPreferences) {
-          verify(
-            () => notificationsClient.unsubscribeFromCategory(category),
-          ).called(1);
+          verify(() => notificationsClient.unsubscribeFromCategory(category)).called(1);
         }
       });
 
-      test(
-          'subscribes to categories preferences '
+      test('subscribes to categories preferences '
           'when notifications are enabled', () async {
         when(storage.fetchCategoriesPreferences).thenAnswer((_) async => categoriesPreferences);
 
@@ -400,14 +348,9 @@ void main() {
         }
       });
 
-      test(
-          'throws a SetCategoriesPreferencesFailure '
+      test('throws a SetCategoriesPreferencesFailure '
           'when setting categories preferences fails', () async {
-        when(
-          () => storage.setCategoriesPreferences(
-            categories: any(named: 'categories'),
-          ),
-        ).thenThrow(Exception());
+        when(() => storage.setCategoriesPreferences(categories: any(named: 'categories'))).thenThrow(Exception());
 
         expect(
           NotificationsRepository(
@@ -421,39 +364,36 @@ void main() {
     });
 
     group('fetchCategoriesPreferences', () {
-      const categoriesPreferences = {
-        'ИКБО-30-20',
-        'ИКБО-40-20',
-      };
+      const categoriesPreferences = {'ИКБО-30-20', 'ИКБО-40-20'};
 
       test('returns categories preferences from NotificationsStorage', () async {
         when(storage.fetchCategoriesPreferences).thenAnswer((_) async => categoriesPreferences);
 
-        final actualPreferences = await NotificationsRepository(
-          permissionClient: permissionClient,
-          storage: storage,
-          notificationsClient: notificationsClient,
-        ).fetchCategoriesPreferences();
+        final actualPreferences =
+            await NotificationsRepository(
+              permissionClient: permissionClient,
+              storage: storage,
+              notificationsClient: notificationsClient,
+            ).fetchCategoriesPreferences();
 
         expect(actualPreferences, equals(categoriesPreferences));
       });
 
-      test(
-          'returns null '
+      test('returns null '
           'when categories preferences do not exist in NotificationsStorage', () async {
         when(storage.fetchCategoriesPreferences).thenAnswer((_) async => null);
 
-        final preferences = await NotificationsRepository(
-          permissionClient: permissionClient,
-          storage: storage,
-          notificationsClient: notificationsClient,
-        ).fetchCategoriesPreferences();
+        final preferences =
+            await NotificationsRepository(
+              permissionClient: permissionClient,
+              storage: storage,
+              notificationsClient: notificationsClient,
+            ).fetchCategoriesPreferences();
 
         expect(preferences, isNull);
       });
 
-      test(
-          'throws a FetchCategoriesPreferencesFailure '
+      test('throws a FetchCategoriesPreferencesFailure '
           'when read fails', () async {
         final notificationsRepository = NotificationsRepository(
           permissionClient: permissionClient,
@@ -463,10 +403,7 @@ void main() {
 
         when(storage.fetchCategoriesPreferences).thenThrow(StorageException(Error()));
 
-        expect(
-          notificationsRepository.fetchCategoriesPreferences,
-          throwsA(isA<FetchCategoriesPreferencesFailure>()),
-        );
+        expect(notificationsRepository.fetchCategoriesPreferences, throwsA(isA<FetchCategoriesPreferencesFailure>()));
       });
     });
   });

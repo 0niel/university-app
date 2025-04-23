@@ -9,7 +9,7 @@ import 'package:storage/storage.dart';
 part 'notifications_storage.dart';
 
 /// {@template notifications_failure}
-/// Базовое исключение для ошибок репозитория уведомлений.
+/// Base exception for notification repository errors.
 /// {@endtemplate}
 abstract class NotificationsFailure with EquatableMixin implements Exception {
   /// {@macro notifications_failure}
@@ -23,7 +23,7 @@ abstract class NotificationsFailure with EquatableMixin implements Exception {
 }
 
 /// {@template initialize_categories_preferences_failure}
-/// Возникает при ошибке инициализации настроек категорий.
+/// Thrown when initializing category preferences fails.
 /// {@endtemplate}
 class InitializeCategoriesPreferencesFailure extends NotificationsFailure {
   /// {@macro initialize_categories_preferences_failure}
@@ -31,7 +31,7 @@ class InitializeCategoriesPreferencesFailure extends NotificationsFailure {
 }
 
 /// {@template toggle_notifications_failure}
-/// Возникает при ошибке включения или отключения уведомлений.
+/// Thrown when enabling or disabling notifications fails.
 /// {@endtemplate}
 class ToggleNotificationsFailure extends NotificationsFailure {
   /// {@macro toggle_notifications_failure}
@@ -39,7 +39,7 @@ class ToggleNotificationsFailure extends NotificationsFailure {
 }
 
 /// {@template fetch_notifications_enabled_failure}
-/// Возникает при ошибке получения статуса включенности уведомлений.
+/// Thrown when fetching the notifications enabled status fails.
 /// {@endtemplate}
 class FetchNotificationsEnabledFailure extends NotificationsFailure {
   /// {@macro fetch_notifications_enabled_failure}
@@ -47,7 +47,7 @@ class FetchNotificationsEnabledFailure extends NotificationsFailure {
 }
 
 /// {@template set_categories_preferences_failure}
-/// Возникает при ошибке установки настроек категорий.
+/// Thrown when setting category preferences fails.
 /// {@endtemplate}
 class SetCategoriesPreferencesFailure extends NotificationsFailure {
   /// {@macro set_categories_preferences_failure}
@@ -55,7 +55,7 @@ class SetCategoriesPreferencesFailure extends NotificationsFailure {
 }
 
 /// {@template fetch_categories_preferences_failure}
-/// Возникает при ошибке получения настроек категорий.
+/// Thrown when fetching category preferences fails.
 /// {@endtemplate}
 class FetchCategoriesPreferencesFailure extends NotificationsFailure {
   /// {@macro fetch_categories_preferences_failure}
@@ -63,14 +63,14 @@ class FetchCategoriesPreferencesFailure extends NotificationsFailure {
 }
 
 /// {@template notifications_repository}
-/// Репозиторий, управляющий разрешениями на уведомления и подписками на топики.
+/// Repository that manages notification permissions and topic subscriptions.
 ///
-/// Доступ к уведомлениям устройства может быть включен или отключен с помощью
-/// [toggleNotifications] и получен с помощью [fetchNotificationsEnabled].
+/// Device notifications can be enabled or disabled using [toggleNotifications]
+/// and retrieved using [fetchNotificationsEnabled].
 ///
-/// Настройки уведомлений для подписок на топики, связанные с категориями
-/// новостей, могут быть обновлены с помощью [setCategoriesPreferences] и
-/// получены с помощью [fetchCategoriesPreferences].
+/// Notification settings for topic subscriptions related to categories can be
+/// updated using [setCategoriesPreferences]
+/// and retrieved using [fetchCategoriesPreferences].
 /// {@endtemplate}
 class NotificationsRepository {
   /// {@macro notifications_repository}
@@ -78,39 +78,33 @@ class NotificationsRepository {
     required PermissionClient permissionClient,
     required NotificationsStorage storage,
     required NotificationsClient notificationsClient,
-  })  : _permissionClient = permissionClient,
-        _storage = storage,
-        _notificationsClient = notificationsClient;
+  }) : _permissionClient = permissionClient,
+       _storage = storage,
+       _notificationsClient = notificationsClient;
 
   final PermissionClient _permissionClient;
   final NotificationsStorage _storage;
   final NotificationsClient _notificationsClient;
 
-  /// Включает или отключает уведомления в зависимости от значения [enable].
+  /// Enables or disables notifications based on [enable].
   ///
-  /// Если [enable] равно `true`, то запрашивает разрешение на уведомления, если
-  /// оно ещё не предоставлено, и помечает настройку уведомлений как включенную
-  /// в [NotificationsStorage].
-  /// Подписывает пользователя на уведомления, связанные выбранными категориями.
+  /// If [enable] is `true`, requests notification permission if not already
+  /// granted, and marks the notification setting as enabled in
+  /// [NotificationsStorage]. Subscribes the user to notifications for
+  /// the selected categories.
   ///
-  /// Если [enable] равно `false`, помечает настройку уведомлений как
-  /// отключенную и отписывает пользователя от уведомлений, связанных выбранными
-  /// категориями.
+  /// If [enable] is `false`, marks the notification setting as disabled and
+  /// unsubscribes the user from notifications for the selected categories.
   Future<void> toggleNotifications({required bool enable}) async {
     try {
-      // Запрашивает разрешение на уведомления, если оно ещё не предоставлено.
       if (enable) {
-        // Получение текущего статуса разрешения на уведомления.
         final permissionStatus = await _permissionClient.notificationsStatus();
 
-        // Открывает настройки разрешений, если разрешение на уведомления
-        // запрещено или ограничено.
         if (permissionStatus.isPermanentlyDenied || permissionStatus.isRestricted) {
           await _permissionClient.openPermissionSettings();
           return;
         }
 
-        // Запрашивает разрешение, если уведомления запрещены.
         if (permissionStatus.isDenied) {
           final updatedPermissionStatus = await _permissionClient.requestNotifications();
           if (!updatedPermissionStatus.isGranted) {
@@ -119,19 +113,15 @@ class NotificationsRepository {
         }
       }
 
-      // Подписывает пользователя на уведомления, связанные выбранными
-      // категориями.
       await _toggleCategoriesPreferencesSubscriptions(enable: enable);
-
-      // Обновляет настройку уведомлений в Storage.
       await _storage.setNotificationsEnabled(enabled: enable);
     } catch (error, stackTrace) {
       Error.throwWithStackTrace(ToggleNotificationsFailure(error), stackTrace);
     }
   }
 
-  /// Возвращает `true`, если разрешение на уведомления предоставлено и
-  /// настройка уведомлений включена.
+  /// Returns `true` if notification permission is granted and the notification
+  /// setting is enabled.
   Future<bool> fetchNotificationsEnabled() async {
     try {
       final results = await Future.wait([
@@ -144,66 +134,49 @@ class NotificationsRepository {
 
       return permissionStatus.isGranted && notificationsEnabled;
     } catch (error, stackTrace) {
-      Error.throwWithStackTrace(
-        FetchNotificationsEnabledFailure(error),
-        stackTrace,
-      );
+      Error.throwWithStackTrace(FetchNotificationsEnabledFailure(error), stackTrace);
     }
   }
 
-  /// Обновляет настройки пользователя по уведомлениям и подписывает
-  /// пользователя на получение уведомлений, связанных с [categories].
+  /// Updates the user's category preferences and subscribes to notifications
+  /// for [categories].
   ///
-  /// [categories] представляет собой набор категорий (топиков), по которым
-  /// пользователь будет получать уведомления. Топиком может быть, например,
-  /// академическая группа студента или группа новостей.
+  /// [categories] is a set of category topics the user will receive
+  /// notifications for. A topic can be, for example, a student's academic
+  /// group or a news category.
   ///
-  /// Выбрасывает [SetCategoriesPreferencesFailure], когда не удалось обновить
-  /// данные.
+  /// Throws [SetCategoriesPreferencesFailure] if unable to update the
+  /// preferences.
   Future<void> setCategoriesPreferences(Set<String> categories) async {
     try {
-      // Выключает подписки на уведомления для предыдущих настроек категорий.
       await _toggleCategoriesPreferencesSubscriptions(enable: false);
 
-      // Обновляет настройки категорий в Storage.
       await _storage.setCategoriesPreferences(categories: categories);
 
-      // Подписывает пользователя на уведомления для обновленных настроек
-      // категорий.
       if (await fetchNotificationsEnabled()) {
         await _toggleCategoriesPreferencesSubscriptions(enable: true);
       }
     } catch (error, stackTrace) {
-      Error.throwWithStackTrace(
-        SetCategoriesPreferencesFailure(error),
-        stackTrace,
-      );
+      Error.throwWithStackTrace(SetCategoriesPreferencesFailure(error), stackTrace);
     }
   }
 
-  /// Получает настройки пользователя по уведомлениям для категорий.
+  /// Fetches the user's notification category preferences.
   ///
-  /// Результат представляет собой набор категорий, на которые пользователь
-  /// подписался для уведомлений.
+  /// Returns a set of categories the user is subscribed to for notifications.
   ///
-  /// Выбрасывает [FetchCategoriesPreferencesFailure], когда не удалось получить
-  /// данные.
+  /// Throws [FetchCategoriesPreferencesFailure] if unable to fetch the preferences.
   Future<Set<String>?> fetchCategoriesPreferences() async {
     try {
       return await _storage.fetchCategoriesPreferences();
     } on StorageException catch (error, stackTrace) {
-      Error.throwWithStackTrace(
-        FetchCategoriesPreferencesFailure(error),
-        stackTrace,
-      );
+      Error.throwWithStackTrace(FetchCategoriesPreferencesFailure(error), stackTrace);
     }
   }
 
-  /// Включает или отключает подписки на уведомления в зависимости от
-  /// настроек пользователя.
-  Future<void> _toggleCategoriesPreferencesSubscriptions({
-    required bool enable,
-  }) async {
+  /// Enables or disables notification subscriptions for categories based on
+  /// user preferences.
+  Future<void> _toggleCategoriesPreferencesSubscriptions({required bool enable}) async {
     final categoriesPreferences = await _storage.fetchCategoriesPreferences() ?? {};
     await Future.wait(
       categoriesPreferences.map((category) {

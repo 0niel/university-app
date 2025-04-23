@@ -1,53 +1,40 @@
 part of 'notifications_repository.dart';
 
-/// Ключи для [NotificationsStorage].
+/// Keys for [NotificationsStorage].
 abstract class NotificationsStorageKeys {
-  /// Ключ для хранения статуса включенности уведомлений.
+  /// Key for storing notifications enabled status.
   static const notificationsEnabled = '__notifications_enabled_storage_key__';
 
-  /// Ключ для хранения предпочтений категорий.
+  /// Key for storing category preferences.
   static const categoriesPreferences = '__categories_preferences_storage_key__';
 }
 
 /// {@template notifications_storage}
-/// Хранилище для [NotificationsRepository].
+/// Storage for [NotificationsRepository].
 /// {@endtemplate}
 class NotificationsStorage {
   /// {@macro notifications_storage}
-  const NotificationsStorage({
-    required Storage storage,
-  }) : _storage = storage;
+  const NotificationsStorage({required Storage storage}) : _storage = storage;
 
   final Storage _storage;
 
-  /// Устанавливает статус включенности уведомлений ([enabled]) в хранилище.
-  Future<void> setNotificationsEnabled({required bool enabled}) => _storage.write(
-        key: NotificationsStorageKeys.notificationsEnabled,
-        value: enabled.toString(),
-      );
+  /// Sets the notifications enabled status ([enabled]) in storage.
+  Future<void> setNotificationsEnabled({required bool enabled}) =>
+      _storage.write(key: NotificationsStorageKeys.notificationsEnabled, value: enabled.toString());
 
-  /// Получает статус включенности уведомлений из хранилища.
+  /// Fetches the notifications enabled status from storage.
   Future<bool> fetchNotificationsEnabled() async =>
       (await _storage.read(key: NotificationsStorageKeys.notificationsEnabled))?.parseBool() ?? false;
 
-  /// Устанавливает предпочтения категорий в [categories] в хранилище.
-  Future<void> setCategoriesPreferences({
-    required Set<String> categories,
-  }) async {
-    final categoriesEncoded = json.encode(
-      categories.map((category) => category).toList(),
-    );
-    await _storage.write(
-      key: NotificationsStorageKeys.categoriesPreferences,
-      value: categoriesEncoded,
-    );
+  /// Sets category preferences ([categories]) in storage.
+  Future<void> setCategoriesPreferences({required Set<String> categories}) async {
+    final categoriesEncoded = json.encode(categories.map((category) => category).toList());
+    await _storage.write(key: NotificationsStorageKeys.categoriesPreferences, value: categoriesEncoded);
   }
 
-  /// Получает значение предпочтений категорий из хранилища.
+  /// Fetches category preferences from storage.
   Future<Set<String>?> fetchCategoriesPreferences() async {
-    final categories = await _storage.read(
-      key: NotificationsStorageKeys.categoriesPreferences,
-    );
+    final categories = await _storage.read(key: NotificationsStorageKeys.categoriesPreferences);
     if (categories == null) {
       return null;
     }
