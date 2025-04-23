@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="widget_padding">12dp</dimen>
+    <dimen name="widget_header_padding_horizontal">12dp</dimen>
+    <dimen name="widget_header_padding_vertical">8dp</dimen>
+    <dimen name="widget_spacer_height">8dp</dimen>
+    <dimen name="widget_spacer_small">4dp</dimen>
+    <dimen name="widget_empty_padding">20dp</dimen>
+    <dimen name="widget_lesson_padding">8dp</dimen>
+    <dimen name="widget_type_indicator_padding">2dp</dimen>
+</resources> 

@@ -1,7 +1,68 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="background01">#FF181A20</color>
-    <color name="background03">#FF1F222A</color>
-    <color name="background02">#FF262A34</color>
+    <!-- Core colors from AppColors.light -->
+    <color name="background01">#FFF5F5F5</color>
+    <color name="background02">#FFFFFFFF</color>
+    <color name="background03">#FFF8F8F8</color>
+    <color name="primary">#FF246BFD</color>
+    <color name="secondary">#FFC25FFF</color>
+    <color name="active">#FF0D0D0D</color>
     <color name="deactive">#FF5E6272</color>
+    <color name="accent">#FF4F7FFF</color>
+    <color name="success">#FF4CAF50</color>
+    <color name="warning">#FFFFC107</color>
+    <color name="error">#FFFF5252</color>
+    <color name="info">#FF2196F3</color>
+    <color name="divider">#FFE0E0E0</color>
+    <color name="surface">#FFFFFFFF</color>
+    <color name="on_surface">#FF2C2C2C</color>
+    <color name="white">#FFFFFFFF</color>
+
+    <!-- Widget colors mapped to Flutter colors -->
+    <color name="widget_bg_light">@color/background01</color>
+    <color name="widget_bg_dark">#FF000000</color>
+    <color name="widget_accent">@color/primary</color>
+    <color name="widget_accent_light">@color/accent</color>
+    <color name="widget_header_bg">@color/widget_bg_light</color>
+    <color name="widget_card_bg">@color/background02</color>
+    <color name="widget_card_bg_dark">#FF121212</color>
+    <color name="widget_shadow">#0A000000</color>
+    <color name="widget_divider">@color/divider</color>
+    
+    <!-- Text colors mapped to Flutter colors -->
+    <color name="text_white">@color/white</color>
+    <color name="text_gray">@color/deactive</color>
+    <color name="text_ltgray">@color/divider</color>
+    <color name="text_dkgray">@color/on_surface</color>
+    <color name="text_primary">@color/active</color>
+    <color name="text_secondary">@color/deactive</color>
+    <color name="text_accent">@color/widget_accent</color>
+
+    <!-- Colorful palette from AppColors.dark (for lesson types) -->
+    <color name="colorful01_dark">#FFB39DDB</color>
+    <color name="colorful02_dark">#FFF8BBD0</color>
+    <color name="colorful03_dark">#FF90CAF9</color>
+    <color name="colorful04_dark">#FF80CBC4</color>
+    <color name="colorful05_dark">#FFA5D6A7</color>
+    <color name="colorful06_dark">#FFFFF59D</color>
+    <color name="colorful07_dark">#FFFFAB91</color>
+
+    <!-- Colorful palette from AppColors.light (for other UI) -->
+    <color name="colorful01">#FFA06AF9</color>
+    <color name="colorful02">#FFFBA3FF</color>
+    <color name="colorful03">#FF8E96FF</color>
+    <color name="colorful04">#FF94F0F0</color>
+    <color name="colorful05">#FF5DCD9B</color>
+    <color name="colorful06">#FFFFDD72</color>
+    <color name="colorful07">#FFFF968E</color>
+
+    <!-- Lesson type colors EXACTLY matching Flutter app (from LessonCard.getColorByType) -->
+    <color name="lesson_lecture">@color/colorful01_dark</color>
+    <color name="lesson_lab">@color/colorful02_dark</color>
+    <color name="lesson_practice">@color/colorful03_dark</color>
+    <color name="lesson_selfwork">@color/colorful07_dark</color>
+    <color name="lesson_exam">@color/colorful06_dark</color>
+    <color name="lesson_credit">@color/colorful07_dark</color>
+    <color name="lesson_consultation">@color/colorful04_dark</color>
+    <color name="lesson_coursework">@color/colorful05_dark</color>
 </resources>

@@ -1,9 +1,10 @@
 plugins {
-    id "com.android.application"
-    id "kotlin-android"
-    id "kotlinx-serialization"
-    id "dev.flutter.flutter-gradle-plugin"
-    id "com.google.gms.google-services"
+    id 'com.android.application'
+    id 'org.jetbrains.kotlin.android' version '2.1.20'
+    id 'org.jetbrains.kotlin.plugin.serialization' version '2.1.20'
+    id 'org.jetbrains.kotlin.plugin.compose' version '2.1.20'
+    id 'dev.flutter.flutter-gradle-plugin'
+    id 'com.google.gms.google-services'
 }
 
 def localProperties = new Properties()
@@ -14,15 +15,8 @@ if (localPropertiesFile.exists()) {
     }
 }
 
-def flutterVersionCode = localProperties.getProperty('flutter.versionCode')
-if (flutterVersionCode == null) {
-    flutterVersionCode = '1'
-}
-
-def flutterVersionName = localProperties.getProperty('flutter.versionName')
-if (flutterVersionName == null) {
-    flutterVersionName = '1.0'
-}
+def flutterVersionCode = localProperties.getProperty('flutter.versionCode') ?: '1'
+def flutterVersionName = localProperties.getProperty('flutter.versionName') ?: '1.0'
 
 def keystoreProperties = new Properties()
 def keystorePropertiesFile = rootProject.file('key.properties')
@@ -32,33 +26,18 @@ if (keystorePropertiesFile.exists()) {
 
 android {
     namespace "ninja.mirea.mireaapp"
-
-    compileSdkVersion 35
-    ndkVersion = "27.0.12077973"
-
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
-        coreLibraryDesugaringEnabled true
-    }
-
-    kotlinOptions {
-        jvmTarget = '1.8'
-    }
-
-    sourceSets {
-        main.java.srcDirs += 'src/main/kotlin'
-    }
+    compileSdk 35
+    ndkVersion "27.0.12077973"
 
     defaultConfig {
-        multiDexEnabled true
         applicationId "ninja.mirea.mireaapp"
-        minSdkVersion 26
-        targetSdkVersion 34
+        minSdk 26
+        targetSdk 34
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
+        multiDexEnabled true
     }
-
+    
     signingConfigs {
         release {
             keyAlias keystoreProperties['keyAlias']
@@ -69,34 +48,55 @@ android {
     }
 
     flavorDimensions "default"
-    productFlavors { 
+    productFlavors {
         development {
             dimension "default"
-            applicationIdSuffix "dev"
+            applicationIdSuffix ".dev"
             manifestPlaceholders = [appName: "Ninja Mirea [DEV]"]
-        } 
+        }
         production {
             dimension "default"
-            applicationIdSuffix ""
             manifestPlaceholders = [appName: "Ninja Mirea"]
-        } 
-    }
-
-
-    buildTypes {
-        release {
-            if (keystoreProperties['storeFile']) {
-                signingConfig signingConfigs.release
-            } else {
-                signingConfig signingConfigs.debug
-            }
         }
     }
-    
+
+    buildTypes {
+        debug {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+        release {
+            signingConfig keystoreProperties['storeFile']
+                ? signingConfigs.release
+                : signingConfigs.debug
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+        coreLibraryDesugaringEnabled true
+    }
+
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+
+    buildFeatures {
+        compose true
+    }
+
+    composeOptions {
+        kotlinCompilerExtensionVersion = "1.4.8"
+    }
+
+    sourceSets {
+        main.java.srcDirs += 'src/main/kotlin'
+    }
+
     lint {
         abortOnError false
     }
-
 }
 
 flutter {
@@ -104,26 +104,38 @@ flutter {
 }
 
 dependencies {
-    implementation("androidx.security:security-crypto:1.1.0-alpha06")
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:2.1.20"
-    implementation 'com.android.support:multidex:2.0.1'
+    // ==== DESUGARING & MULTIDEX ====
+    coreLibraryDesugaring "com.android.tools:desugar_jdk_libs:2.1.5"
+    implementation "com.android.support:multidex:2.0.1"
+
+    // ==== KOTLIN stdlib & SERIALIZATION ====
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.9.10"
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3"
-    implementation("androidx.constraintlayout:constraintlayout:2.1.4")
-    implementation("androidx.work:work-runtime-ktx:2.9.1")
-    implementation("androidx.work:work-runtime:2.9.1")
-    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.5'
-    implementation "com.google.android.gms:play-services-location:21.1.0"
-    implementation 'com.yandex.android:mobileads:7.12.1'
-    implementation 'com.yandex.ads.mediation:mobileads-google:23.5.0.2'
-    implementation 'com.yandex.ads.mediation:mobileads-inmobi:10.8.0.2'
-    implementation 'com.yandex.ads.mediation:mobileads-mytarget:5.22.1.6'
-    implementation 'com.yandex.ads.mediation:mobileads-unityads:4.12.5.2'
-    implementation 'com.yandex.ads.mediation:mobileads-applovin:12.6.0.8'
-    implementation 'com.yandex.ads.mediation:mobileads-ironsource:8.5.0.2'
-    implementation 'com.yandex.ads.mediation:mobileads-chartboost:9.3.1.15'
-    implementation 'com.yandex.ads.mediation:mobileads-pangle:6.4.0.2.2'
-    implementation 'com.yandex.ads.mediation:mobileads-tapjoy:13.4.1.10'
-    implementation 'com.yandex.ads.mediation:mobileads-vungle:7.4.2.2'
-    implementation 'com.yandex.ads.mediation:mobileads-mintegral:16.8.61.4'
-    implementation 'com.yandex.ads.mediation:mobileads-bigoads:5.0.2.2'
+
+    // ==== ANDROIDX SECURITY ====
+    implementation "androidx.security:security-crypto:1.1.0-alpha07"
+
+    // ==== CONSTRAINTLAYOUT ====
+    implementation "androidx.constraintlayout:constraintlayout:2.2.1"
+
+    // ==== WORKMANAGER ====
+    implementation "androidx.work:work-runtime-ktx:2.10.0"
+    implementation "androidx.work:work-runtime:2.10.0"
+
+    // ==== JETPACK COMPOSE & TESTING ====
+    implementation "androidx.compose.ui:ui:1.7.8"
+    implementation "androidx.compose.ui:ui-tooling-preview:1.7.8"
+    implementation "androidx.compose.material:material:1.7.8"
+    implementation "androidx.compose.ui:ui-tooling:1.7.8"
+    debugImplementation "androidx.compose.ui:ui-test-manifest:1.7.8"
+    androidTestImplementation "androidx.compose.ui:ui-test-junit4:1.7.8"
+
+    // ==== GLANCE APP WIDGET ====
+    implementation "androidx.glance:glance:1.1.1"
+    implementation "androidx.glance:glance-appwidget:1.1.1"
+
+    // ==== PLAY SERVICES & ADS ====
+    implementation "com.google.android.gms:play-services-location:21.3.0"
+    implementation "com.yandex.android:mobileads:7.12.1"
+    implementation "com.google.android.gms:play-services-ads:24.0.0"
 }

@@ -1,4 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="prefs_str">HomeWidgetProvider</string>
+    <string name="schedule_widget_description">Отображает ближайшее расписание занятий с номером недели</string>
+    <string name="widget_no_lessons">Нет занятий на ближайшие дни</string>
+    <string name="widget_tap_to_open">Нажмите, чтобы открыть приложение</string>
+    <string name="widget_week">неделя</string>
+    <string name="widget_today">Сегодня</string>
+    <string name="widget_tomorrow">Завтра</string>
+    <string name="widget_more_lessons">Ещё %d %s</string>
 </resources>
