@@ -3,25 +3,28 @@ import 'dart:async';
 import 'package:ads_ui/ads_ui.dart';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:flutter/foundation.dart';
 import 'package:platform/platform.dart';
 import 'package:yandex_mobileads/mobile_ads.dart';
 
 part 'full_screen_ads_event.dart';
 part 'full_screen_ads_state.dart';
 
-typedef YandexInterstitialAdLoader = Future<void> Function({
-  required String adUnitId,
-  required AdRequestConfiguration adRequestConfiguration,
-  required void Function(InterstitialAd ad) onAdLoaded,
-  required void Function(Object error) onAdFailedToLoad,
-});
+typedef YandexInterstitialAdLoader =
+    Future<void> Function({
+      required String adUnitId,
+      required AdRequestConfiguration adRequestConfiguration,
+      required void Function(InterstitialAd ad) onAdLoaded,
+      required void Function(Object error) onAdFailedToLoad,
+    });
 
-typedef YandexRewardedAdLoader = Future<void> Function({
-  required String adUnitId,
-  required AdRequestConfiguration adRequestConfiguration,
-  required void Function(RewardedAd ad) onAdLoaded,
-  required void Function(Object error) onAdFailedToLoad,
-});
+typedef YandexRewardedAdLoader =
+    Future<void> Function({
+      required String adUnitId,
+      required AdRequestConfiguration adRequestConfiguration,
+      required void Function(RewardedAd ad) onAdLoaded,
+      required void Function(Object error) onAdFailedToLoad,
+    });
 
 class FullScreenAdsBloc extends Bloc<FullScreenAdsEvent, FullScreenAdsState> {
   FullScreenAdsBloc({
@@ -30,12 +33,11 @@ class FullScreenAdsBloc extends Bloc<FullScreenAdsEvent, FullScreenAdsState> {
     required YandexRewardedAdLoader rewardedAdLoader,
     required LocalPlatform localPlatform,
     FullScreenAdsConfig? fullScreenAdsConfig,
-  })  : _adsRetryPolicy = adsRetryPolicy,
-        _interstitialAdLoader = interstitialAdLoader,
-        _rewardedAdLoader = rewardedAdLoader,
-        _localPlatform = localPlatform,
-        _fullScreenAdsConfig = fullScreenAdsConfig ?? const FullScreenAdsConfig(),
-        super(const FullScreenAdsState.initial()) {
+  }) : _adsRetryPolicy = adsRetryPolicy,
+       _interstitialAdLoader = interstitialAdLoader,
+       _rewardedAdLoader = rewardedAdLoader,
+       _fullScreenAdsConfig = fullScreenAdsConfig ?? const FullScreenAdsConfig(),
+       super(const FullScreenAdsState.initial()) {
     on<LoadInterstitialAdRequested>(_onLoadInterstitialAdRequested);
     on<LoadRewardedAdRequested>(_onLoadRewardedAdRequested);
     on<ShowInterstitialAdRequested>(_onShowInterstitialAdRequested);
@@ -47,7 +49,6 @@ class FullScreenAdsBloc extends Bloc<FullScreenAdsEvent, FullScreenAdsState> {
   final FullScreenAdsConfig _fullScreenAdsConfig;
   final YandexInterstitialAdLoader _interstitialAdLoader;
   final YandexRewardedAdLoader _rewardedAdLoader;
-  final LocalPlatform _localPlatform;
 
   Future<void> _onLoadInterstitialAdRequested(
     LoadInterstitialAdRequested event,
@@ -58,8 +59,9 @@ class FullScreenAdsBloc extends Bloc<FullScreenAdsEvent, FullScreenAdsState> {
 
       emit(state.copyWith(status: FullScreenAdsStatus.loadingInterstitialAd));
 
-      final adUnitId = _fullScreenAdsConfig.interstitialAdUnitId ??
-          (_localPlatform.isAndroid
+      final adUnitId =
+          _fullScreenAdsConfig.interstitialAdUnitId ??
+          (defaultTargetPlatform == TargetPlatform.android
               ? FullScreenAdsConfig.androidTestInterstitialAdUnitId
               : FullScreenAdsConfig.iosTestInterstitialAdUnitId);
 
@@ -72,18 +74,9 @@ class FullScreenAdsBloc extends Bloc<FullScreenAdsEvent, FullScreenAdsState> {
 
       final loadedAd = await adCompleter.future;
 
-      emit(
-        state.copyWith(
-          interstitialAd: loadedAd,
-          status: FullScreenAdsStatus.loadingInterstitialAdSucceeded,
-        ),
-      );
+      emit(state.copyWith(interstitialAd: loadedAd, status: FullScreenAdsStatus.loadingInterstitialAdSucceeded));
     } catch (error, stackTrace) {
-      emit(
-        state.copyWith(
-          status: FullScreenAdsStatus.loadingInterstitialAdFailed,
-        ),
-      );
+      emit(state.copyWith(status: FullScreenAdsStatus.loadingInterstitialAdFailed));
 
       addError(error, stackTrace);
 
@@ -95,17 +88,15 @@ class FullScreenAdsBloc extends Bloc<FullScreenAdsEvent, FullScreenAdsState> {
     }
   }
 
-  Future<void> _onLoadRewardedAdRequested(
-    LoadRewardedAdRequested event,
-    Emitter<FullScreenAdsState> emit,
-  ) async {
+  Future<void> _onLoadRewardedAdRequested(LoadRewardedAdRequested event, Emitter<FullScreenAdsState> emit) async {
     try {
       final adCompleter = Completer<RewardedAd>();
 
       emit(state.copyWith(status: FullScreenAdsStatus.loadingRewardedAd));
 
-      final adUnitId = _fullScreenAdsConfig.rewardedAdUnitId ??
-          (_localPlatform.isAndroid
+      final adUnitId =
+          _fullScreenAdsConfig.rewardedAdUnitId ??
+          (defaultTargetPlatform == TargetPlatform.android
               ? FullScreenAdsConfig.androidTestRewardedAdUnitId
               : FullScreenAdsConfig.iosTestRewardedAdUnitId);
 
@@ -118,18 +109,9 @@ class FullScreenAdsBloc extends Bloc<FullScreenAdsEvent, FullScreenAdsState> {
 
       final loadedAd = await adCompleter.future;
 
-      emit(
-        state.copyWith(
-          rewardedAd: loadedAd,
-          status: FullScreenAdsStatus.loadingRewardedAdSucceeded,
-        ),
-      );
+      emit(state.copyWith(rewardedAd: loadedAd, status: FullScreenAdsStatus.loadingRewardedAdSucceeded));
     } catch (error, stackTrace) {
-      emit(
-        state.copyWith(
-          status: FullScreenAdsStatus.loadingRewardedAdFailed,
-        ),
-      );
+      emit(state.copyWith(status: FullScreenAdsStatus.loadingRewardedAdFailed));
 
       addError(error, stackTrace);
 
@@ -163,27 +145,16 @@ class FullScreenAdsBloc extends Bloc<FullScreenAdsEvent, FullScreenAdsState> {
       await state.interstitialAd?.show();
       await state.interstitialAd?.waitForDismiss();
 
-      emit(
-        state.copyWith(
-          status: FullScreenAdsStatus.showingInterstitialAdSucceeded,
-        ),
-      );
+      emit(state.copyWith(status: FullScreenAdsStatus.showingInterstitialAdSucceeded));
 
       add(const LoadInterstitialAdRequested());
     } catch (error, stackTrace) {
-      emit(
-        state.copyWith(
-          status: FullScreenAdsStatus.showingInterstitialAdFailed,
-        ),
-      );
+      emit(state.copyWith(status: FullScreenAdsStatus.showingInterstitialAdFailed));
       addError(error, stackTrace);
     }
   }
 
-  Future<void> _onShowRewardedAdRequested(
-    ShowRewardedAdRequested event,
-    Emitter<FullScreenAdsState> emit,
-  ) async {
+  Future<void> _onShowRewardedAdRequested(ShowRewardedAdRequested event, Emitter<FullScreenAdsState> emit) async {
     try {
       emit(state.copyWith(status: FullScreenAdsStatus.showingRewardedAd));
 
@@ -205,26 +176,15 @@ class FullScreenAdsBloc extends Bloc<FullScreenAdsEvent, FullScreenAdsState> {
       await state.rewardedAd?.show();
       await state.rewardedAd?.waitForDismiss();
 
-      emit(
-        state.copyWith(
-          status: FullScreenAdsStatus.showingRewardedAdSucceeded,
-        ),
-      );
+      emit(state.copyWith(status: FullScreenAdsStatus.showingRewardedAdSucceeded));
 
       add(const LoadRewardedAdRequested());
     } catch (error, stackTrace) {
-      emit(
-        state.copyWith(
-          status: FullScreenAdsStatus.showingRewardedAdFailed,
-        ),
-      );
+      emit(state.copyWith(status: FullScreenAdsStatus.showingRewardedAdFailed));
       addError(error, stackTrace);
     }
   }
 
-  void _onEarnedReward(
-    EarnedReward event,
-    Emitter<FullScreenAdsState> emit,
-  ) =>
+  void _onEarnedReward(EarnedReward event, Emitter<FullScreenAdsState> emit) =>
       emit(state.copyWith(earnedReward: event.reward));
 }

@@ -8,21 +8,27 @@
     "**/.pub": true,
     "**/.dart_tool": true,
     "**/.idea": true,
+    "**/.firebase": true,
     "**/build": true,
     "**/ios": true,
     "**/android": true,
     "**/macos": true,
-    "**/web": true
+    "**/web": true,
+    "**/coverage": true,
+    "**/packages/neon": true
   },
   "files.watcherExclude": {
     "**/.fvm": true,
     "**/.pub": true,
     "**/.dart_tool": true,
+    "**/.firebase": true,
     "**/build": true,
     "**/ios": true,
     "**/android": true,
     "**/macos": true,
-    "**/web": true
+    "**/web": true,
+    "**/coverage": true,
+    "**/packages/neon": true
   },
-  "dart.flutterSdkPath": ".fvm/versions/3.27.4"
+  "dart.flutterSdkPath": ".fvm/flutter_sdk"
 }

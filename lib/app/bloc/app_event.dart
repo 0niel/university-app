@@ -28,3 +28,16 @@ class ThemeChanged extends AppEvent {
   @override
   List<Object?> get props => [isAmoled];
 }
+
+class AppUserChanged extends AppEvent {
+  const AppUserChanged(this.user);
+
+  final User user;
+
+  @override
+  List<Object> get props => [user];
+}
+
+class AppLogoutRequested extends AppEvent {
+  const AppLogoutRequested();
+}

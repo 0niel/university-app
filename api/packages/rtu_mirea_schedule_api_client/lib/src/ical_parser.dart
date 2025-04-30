@@ -110,11 +110,13 @@ class ICalParser {
         lessonType: lessonType,
         teachers: teachers.map((e) => Teacher(name: e)).toList(),
         classrooms: classrooms,
-        lessonBells: defaultLessonsBells
-            .where(
+        lessonBells: defaultLessonsBells.firstWhereOrNull(
               (element) => element.startTime == datesAndTime.timeStart && element.endTime == datesAndTime.timeEnd,
-            )
-            .first,
+            ) ??
+            LessonBells(
+              startTime: datesAndTime.timeStart,
+              endTime: datesAndTime.timeEnd,
+            ),
         dates: datesAndTime.dates,
         groups: groups,
       );

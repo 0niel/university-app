@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:go_router/go_router.dart';
+import 'package:rtu_mirea_app/services/services.dart';
 import 'package:rtu_mirea_app/top_discussions/view/view.dart';
 import 'package:rtu_mirea_app/neon/bloc/neon_bloc.dart';
 import 'package:app_ui/app_ui.dart';
 import 'package:url_launcher/url_launcher_string.dart';
-
-import '../widgets/widgets.dart';
+import 'dart:async';
 
 class ServicesPage extends StatelessWidget {
   const ServicesPage({super.key});
@@ -17,9 +16,7 @@ class ServicesPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
-        title: const Text(
-          "Сервисы",
-        ),
+        title: const Text("Сервисы"),
       ),
       body: const ServicesView(),
     );
@@ -33,19 +30,93 @@ class ServicesView extends StatefulWidget {
   State<ServicesView> createState() => _ServicesViewState();
 }
 
-class _ServicesViewState extends State<ServicesView> {
+class _ServicesViewState extends State<ServicesView> with SingleTickerProviderStateMixin {
   late final NeonBloc neonBloc;
+  late final PageController _pageController;
+  late final PageController _bannersPageController;
+  Timer? _autoScrollTimer;
+  Timer? _resumeScrollTimer;
+  bool _isUserInteracting = false;
+
+  final List<String> _categories = ["Главная", "Цифровой университет"];
+  int _selectedIndex = 0;
+  int _currentBannerIndex = 0;
+
+  late final List<ImportantServiceModel> _importantServices;
+  late final List<CommunityModel> _communities;
+  late final List<BannerModel> _banners;
+  late final List<ServiceTileModel> _mainServices;
+  late final List<HorizontalServiceModel> _studentLifeServices;
+  late final List<WideServiceModel> _usefulServices;
 
   @override
   void initState() {
-    neonBloc = NeonBloc();
     super.initState();
+    neonBloc = NeonBloc();
+    _pageController = PageController();
+    _bannersPageController = PageController();
+    _startAutoScroll();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _importantServices = ServicesConfig.getImportantServices(context);
+    _communities = ServicesConfig.getCommunities();
+    _banners = ServicesConfig.getBanners(context);
+    _mainServices = ServicesConfig.getMainServices(context);
+    _studentLifeServices = ServicesConfig.getStudentLifeServices(context);
+    _usefulServices = ServicesConfig.getUsefulServices(context);
+  }
+
+  void _startAutoScroll() {
+    _autoScrollTimer?.cancel();
+    _autoScrollTimer = Timer.periodic(const Duration(seconds: 5), (timer) {
+      if (!mounted || _isUserInteracting) return;
+
+      if (_banners.isEmpty) return;
+
+      _currentBannerIndex = (_currentBannerIndex + 1) % _banners.length;
+
+      _bannersPageController.animateToPage(
+        _currentBannerIndex,
+        duration: const Duration(milliseconds: 500),
+        curve: Curves.easeInOut,
+      );
+    });
+  }
+
+  void _pauseAutoScroll() {
+    _isUserInteracting = true;
+    _resumeScrollTimer?.cancel();
+    _resumeScrollTimer = Timer(const Duration(seconds: 5), () {
+      if (mounted) {
+        setState(() {
+          _isUserInteracting = false;
+        });
+      }
+    });
   }
 
   @override
   void dispose() {
+    _pageController.dispose();
+    _bannersPageController.dispose();
+    _autoScrollTimer?.cancel();
+    _resumeScrollTimer?.cancel();
     neonBloc.close();
     super.dispose();
+  }
+
+  void _onCategorySelected(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+    _pageController.animateToPage(
+      index,
+      duration: const Duration(milliseconds: 350),
+      curve: Curves.easeOutQuint,
+    );
   }
 
   void _showNeonAccountOffer() {
@@ -62,7 +133,7 @@ class _ServicesViewState extends State<ServicesView> {
                   size: 64,
                   color: Theme.of(context).extension<AppColors>()!.active,
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: AppSpacing.md),
                 Text(
                   'На cloud.mirea.ninja вы можете хранить до 10 ГБ бесплатно (квоту можно расширить в телеграм боте), а также делиться файлами и онлайн редактировать документы вместе с одногруппниками.',
                   style: AppTextStyle.bodyL.copyWith(
@@ -70,9 +141,9 @@ class _ServicesViewState extends State<ServicesView> {
                   ),
                   textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: AppSpacing.lg),
                 PrimaryButton(
-                  onClick: () {
+                  onPressed: () {
                     launchUrlString('https://t.me/cloud_mirea_ninja_bot', mode: LaunchMode.externalApplication);
                   },
                   text: 'Создать аккаунт',
@@ -91,191 +162,343 @@ class _ServicesViewState extends State<ServicesView> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 16),
-      child: CustomScrollView(
-        slivers: [
-          const SliverPadding(
-            padding: EdgeInsets.symmetric(horizontal: 16),
-            sliver: SliverToBoxAdapter(
-              child: Text(
-                "Популярные",
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, AppSpacing.sm),
+          child: _buildCategorySelector(),
+        ),
+        Expanded(
+          child: PageView(
+            controller: _pageController,
+            onPageChanged: (index) {
+              setState(() {
+                _selectedIndex = index;
+              });
+            },
+            children: [
+              _buildMainTab(),
+              _buildDigitalUniversityTab(),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCategorySelector() {
+    return SizedBox(
+      height: 40,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        itemCount: _categories.length,
+        itemBuilder: (context, index) {
+          final isSelected = index == _selectedIndex;
+          return GestureDetector(
+            onTap: () => _onCategorySelected(index),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              margin: const EdgeInsets.only(right: AppSpacing.sm),
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+              decoration: BoxDecoration(
+                color: isSelected
+                    ? Theme.of(context).extension<AppColors>()!.primary
+                    : Theme.of(context).extension<AppColors>()!.background02,
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Center(
+                child: Text(
+                  _categories[index],
+                  style: TextStyle(
+                    color: isSelected ? Colors.white : Theme.of(context).extension<AppColors>()!.deactive,
+                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                    fontSize: 14,
+                  ),
                 ),
               ),
             ),
-          ),
-          SliverPadding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            sliver: SliverToBoxAdapter(
-              child: SizedBox(
-                height: 152,
-                child: ListView(
-                  scrollDirection: Axis.horizontal,
-                  children: [
-                    ServiceCard(
-                      title: 'Карта МИРЭА',
-                      icon: ServiceIcon(
-                        color: Theme.of(context).extension<AppColors>()!.colorful07,
-                        iconColor: Theme.of(context).extension<AppColors>()!.active,
-                        icon: Icons.map,
-                      ),
-                      description: 'Найди нужный кабинет',
-                      onTap: () {
-                        context.go('/services/map');
-                      },
-                    ),
-                    // if (Platform.isAndroid)
-                    //   ServiceCard(
-                    //     title: 'NFC Пропуск',
-                    //     icon: ServiceIcon(
-                    //       color: Theme.of(context).extension<AppColors>()!.colorful03,
-                    //       iconColor: Theme.of(context).extension<AppColors>()!.active,
-                    //       icon: Icons.nfc,
-                    //     ),
-                    //     onTap: () {
-                    //       context.go('/services/nfc');
-                    //     },
-                    //     description: 'Смартфон как пропуск',
-                    //   ),
-                    BlocBuilder<NeonBloc, NeonState>(
-                      bloc: neonBloc,
-                      builder: (context, state) {
-                        return ServiceCard(
-                          title: 'Cloud Mirea Ninja',
-                          onTap: () {
-                            if (state.isRegisterOfferViewed == false) {
-                              _showNeonAccountOffer();
-                            } else {
-                              context.go('/services/neon');
-                            }
-                          },
-                          onLongPress: () {
-                            _showNeonAccountOffer();
-                          },
-                          icon: ServiceIcon(
-                            color: Theme.of(context).extension<AppColors>()!.colorful04,
-                            iconColor: Theme.of(context).extension<AppColors>()!.background01,
-                            icon: Icons.cloud,
-                          ),
-                        );
-                      },
-                    ),
-                    // ServiceCard(
-                    //   title: 'Бюро находок',
-                    //   url: 'https://finds.mirea.ninja/',
-                    //   icon: ServiceIcon(
-                    //     color: Theme.of(context).extension<AppColors>()!.colorful06,
-                    //     iconColor: Theme.of(context).extension<AppColors>()!.background01,
-                    //     icon: Icons.search,
-                    //   ),
-                    //   launchMode: LaunchMode.externalApplication,
-                    //   description: 'Найди свои вещи',
-                    // ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          SliverPadding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-            sliver: SliverToBoxAdapter(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    "Обсуждаемое",
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  PlatformTextButton(
-                    onPressed: () {
-                      launchUrlString('https://mirea.ninja/top', mode: LaunchMode.externalApplication);
-                    },
-                    child: const Text('Все'),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          const SliverToBoxAdapter(
-            child: TopTopicsView(),
-          ),
-          const SliverPadding(
-            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-            sliver: SliverToBoxAdapter(
-              child: Text(
-                "Сообщества",
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ),
-          SliverPadding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            sliver: SliverList(
-              delegate: SliverChildListDelegate(
-                [
-                  const CommunityCard(
-                    title: 'Mirea Ninja',
-                    url: 'https://t.me/mirea_ninja_chat',
-                    logo: CircleAvatar(
-                      foregroundImage: NetworkImage(
-                        'https://sun9-65.userapi.com/impg/bvdpBQYk7glRfRkmsR-GRMMWwK2Rw3lDIuGjzQ/l4qMdaR-HBA.jpg?size=1200x1200&quality=95&sign=427e8060dea18a64efc92e8ae7ab57da&type=album',
-                      ),
-                    ),
-                    launchMode: LaunchMode.externalApplication,
-                    description: 'Самый популярный неофициальный чат',
-                  ),
-                  const CommunityCard(
-                    title: 'Кафедра КИС',
-                    url: 'https://vk.com/kis_it_mirea',
-                    logo: CircleAvatar(
-                      foregroundImage: NetworkImage(
-                        'https://sun9-1.userapi.com/impg/JSVkx8BMQSKU2IR27bnX_yajk4Bvb_HMf530gg/QkoTZdc_2mM.jpg?size=500x500&quality=95&sign=6bfc16cfff772b175c927aae3e480aa8&type=album',
-                      ),
-                    ),
-                    launchMode: LaunchMode.externalApplication,
-                    description: 'Кафедра Корпоративных информационных систем',
-                  ),
-                  const CommunityCard(
-                    title: 'Кафедра ИППО',
-                    url: 'https://vk.com/ippo_it',
-                    logo: CircleAvatar(
-                      foregroundImage: NetworkImage(
-                        'https://sun9-21.userapi.com/impg/Sk3d5lpXhoaiHj3QZz1tt8HQKPcEaoE27WgZAw/nig2y-fcRkU.jpg?size=500x600&quality=95&sign=fa26df3e73f398f91d10029134156e5d&type=album',
-                      ),
-                    ),
-                    launchMode: LaunchMode.externalApplication,
-                    description: 'Кафедра Инструментального и прикладного программного обеспечения',
-                  ),
-                  const CommunityCard(
-                    title: 'Спортивное программирование МИРЭА',
-                    url: 'https://t.me/cp_mirea',
-                    logo: CircleAvatar(
-                      foregroundImage: NetworkImage(
-                        'https://sun9-55.userapi.com/impg/J-OyvW6fp0ZtQ3mJKhI-OxDwPgQbCLhz_PA7bQ/CicJTono2Wk.jpg?size=1920x1920&quality=96&sign=3d4ffbf9a95a4550f203c6909a1af7cf&type=album',
-                      ),
-                    ),
-                    launchMode: LaunchMode.externalApplication,
-                    description:
-                        'Здесь публикуются различные новости и апдейты по олимпиадному программированию в МИРЭА',
-                  ),
-                ],
-              ),
-            ),
-          ),
-          SliverPadding(
-            padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom),
-          ),
-        ],
+          );
+        },
       ),
+    );
+  }
+
+  Widget _buildMainTab() {
+    return ListView(
+      physics: const BouncingScrollPhysics(),
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xlg),
+          child: const SectionHeader(title: "Важные"),
+        ),
+        const SizedBox(height: AppSpacing.sm),
+        SizedBox(
+          height: 170,
+          child: ListView.builder(
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+              physics: const BouncingScrollPhysics(),
+              scrollDirection: Axis.horizontal,
+              itemCount: _importantServices.length,
+              itemBuilder: (context, index) {
+                final service = _importantServices[index];
+
+                if (service.title == 'Cloud Mirea Ninja') {
+                  return BlocBuilder<NeonBloc, NeonState>(
+                    bloc: neonBloc,
+                    builder: (context, state) {
+                      return ServiceCard(
+                        title: service.title,
+                        description: service.description,
+                        onTap: () {
+                          if (state.isRegisterOfferViewed == false) {
+                            _showNeonAccountOffer();
+                          } else {
+                            ServiceUtils.navigateToService(context, service);
+                          }
+                        },
+                        onLongPress: () {
+                          _showNeonAccountOffer();
+                        },
+                        icon: ServiceIcon(
+                          color: service.color,
+                          iconColor: Theme.of(context).extension<AppColors>()!.background01,
+                          icon: service.iconData,
+                        ),
+                      );
+                    },
+                  );
+                }
+
+                return ServiceCard(
+                  title: service.title,
+                  description: service.description,
+                  onTap: () => ServiceUtils.navigateToService(context, service),
+                  icon: ServiceIcon(
+                    color: service.color,
+                    iconColor: Theme.of(context).extension<AppColors>()!.active,
+                    icon: service.iconData,
+                  ),
+                );
+              }),
+        ),
+        const SizedBox(height: AppSpacing.xlg),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xlg),
+          child: SectionHeaderWithButton(
+            title: "Обсуждаемое",
+            buttonText: "Все",
+            onPressed: () => launchUrlString(
+              'https://mirea.ninja/top',
+              mode: LaunchMode.externalApplication,
+            ),
+          ),
+        ),
+        const SizedBox(height: AppSpacing.md),
+        const TopTopicsView(),
+        const SizedBox(height: AppSpacing.xlg),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xlg),
+          child: const SectionHeaderWithButton(
+            title: "Сообщества",
+            buttonText: "Все",
+            onPressed: _dummy,
+          ),
+        ),
+        const SizedBox(height: AppSpacing.md),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+          child: ListView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: _communities.length,
+            itemBuilder: (context, index) {
+              final community = _communities[index];
+              return Column(
+                children: [
+                  CommunityCard(
+                    title: community.title,
+                    url: community.url,
+                    logo: CircleAvatar(
+                      foregroundImage: NetworkImage(community.logoUrl),
+                    ),
+                    launchMode: LaunchMode.externalApplication,
+                    description: community.description,
+                  ),
+                  if (index < _communities.length - 1) const SizedBox(height: AppSpacing.sm),
+                ],
+              );
+            },
+          ),
+        ),
+        const SizedBox(height: AppSpacing.xlg),
+      ],
+    );
+  }
+
+  static void _dummy() {}
+
+  Widget _buildDigitalUniversityTab() {
+    return ListView(
+      physics: const BouncingScrollPhysics(),
+      padding: EdgeInsets.only(top: AppSpacing.md, bottom: MediaQuery.of(context).padding.bottom + AppSpacing.xlg),
+      children: [
+        Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xlg),
+              child: SectionHeaderWithButton(
+                title: 'Актуальное',
+                buttonText: 'Все',
+                onPressed: () => launchUrlString('https://mirea.ninja/top', mode: LaunchMode.externalApplication),
+              ),
+            ),
+            SizedBox(
+              height: 202,
+              child: GestureDetector(
+                onTap: _pauseAutoScroll,
+                onPanDown: (_) => _pauseAutoScroll(),
+                child: PageView.builder(
+                  controller: _bannersPageController,
+                  scrollDirection: Axis.horizontal,
+                  itemCount: _banners.length,
+                  onPageChanged: (index) {
+                    setState(() {
+                      _currentBannerIndex = index;
+                    });
+                  },
+                  itemBuilder: (context, index) {
+                    final banner = _banners[index];
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+                      child: VerticalBanner(
+                        title: banner.title,
+                        description: banner.description ?? '',
+                        iconData: banner.iconData,
+                        color: banner.color,
+                        action: banner.action,
+                        onTap: () => ServiceUtils.navigateToService(context, banner),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: List.generate(
+                _banners.length,
+                (index) => Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 4),
+                  width: 8,
+                  height: 8,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: index == _currentBannerIndex
+                        ? Theme.of(context).extension<AppColors>()!.primary
+                        : Theme.of(context).extension<AppColors>()!.deactive.withOpacity(0.3),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: AppSpacing.xlg),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xlg),
+          child: const SectionHeader(title: 'Основные сервисы'),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+          child: GridView.count(
+            crossAxisCount: 4,
+            mainAxisSpacing: AppSpacing.md,
+            crossAxisSpacing: AppSpacing.md,
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
+            clipBehavior: Clip.none,
+            childAspectRatio: 0.82,
+            children: _mainServices
+                .map((service) => ServiceTile(
+                      title: service.title,
+                      iconData: service.iconData,
+                      color: service.color,
+                      onTap: () => ServiceUtils.navigateToService(context, service),
+                    ))
+                .toList(),
+          ),
+        ),
+        const SizedBox(height: AppSpacing.lg),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(left: AppSpacing.xlg),
+              child: const SectionHeader(title: 'Студенческая жизнь'),
+            ),
+            const SizedBox(height: AppSpacing.md),
+            _buildHorizontalCardsList(),
+          ],
+        ),
+        const SizedBox(height: AppSpacing.xlg),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xlg),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SectionHeader(title: 'Полезное'),
+              const SizedBox(height: AppSpacing.lg),
+              _buildWideCardsList(),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildHorizontalCardsList() {
+    return SizedBox(
+      height: 140,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        physics: const BouncingScrollPhysics(),
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xlg),
+        itemCount: _studentLifeServices.length,
+        itemBuilder: (context, index) {
+          final service = _studentLifeServices[index];
+          return HorizontalServiceCard(
+            title: service.title,
+            description: service.description ?? '',
+            iconData: service.iconData,
+            color: service.color,
+            onTap: () => ServiceUtils.navigateToService(context, service),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildWideCardsList() {
+    return Column(
+      children: _usefulServices.asMap().entries.map((entry) {
+        final index = entry.key;
+        final service = entry.value;
+
+        return Column(
+          children: [
+            WideServiceCard(
+              title: service.title,
+              description: service.description ?? '',
+              iconData: service.iconData,
+              color: service.color,
+              onTap: () => ServiceUtils.navigateToService(context, service),
+            ),
+            if (index < _usefulServices.length - 1) const SizedBox(height: AppSpacing.sm),
+          ],
+        );
+      }).toList(),
     );
   }
 }

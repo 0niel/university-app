@@ -2,56 +2,80 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:http/http.dart' as http;
-import 'package:university_app_server_api/src/models/models.dart';
+import 'package:university_app_server_api/client.dart';
 
+/// {@template api_malformed_response}
+/// An exception that is thrown when the API response is malformed. For example,
+/// when the response body cannot be decoded as JSON.
+/// {@endtemplate}
 class ApiMalformedResponse implements Exception {
+  /// {@macro api_malformed_response}
   const ApiMalformedResponse({required this.error});
 
+  /// The error encountered while decoding the response.
   final Object error;
 }
 
+/// {@template api_request_failure}
+/// An exception that is thrown when the API request fails.
+/// {@endtemplate}
 class ApiRequestFailure implements Exception {
+  /// {@macro api_request_failure}
   const ApiRequestFailure({
     required this.statusCode,
     required this.body,
   });
 
+  /// The status code of the response.
   final int statusCode;
 
+  /// The body of the response.
   final Map<String, dynamic> body;
 }
 
+/// Signature for the authentication token provider.
+typedef TokenProvider = Future<String?> Function();
+
 class ApiClient {
   ApiClient({
+    required TokenProvider tokenProvider,
     http.Client? httpClient,
   }) : this._(
           baseUrl: 'https://app-api.mirea.ninja',
           httpClient: httpClient,
+          tokenProvider: tokenProvider,
         );
 
   ApiClient.localhost({
+    required TokenProvider tokenProvider,
     http.Client? httpClient,
   }) : this._(
           baseUrl: 'http://localhost:8080',
           httpClient: httpClient,
+          tokenProvider: tokenProvider,
         );
 
   /// Creates an [ApiClient] that connects to localhost on Android emulator.
   ApiClient.localhostFromEmulator({
+    required TokenProvider tokenProvider,
     http.Client? httpClient,
   }) : this._(
           baseUrl: 'http://10.0.2.2:8080',
           httpClient: httpClient,
+          tokenProvider: tokenProvider,
         );
 
   ApiClient._({
+    required TokenProvider tokenProvider,
     required String baseUrl,
     http.Client? httpClient,
   })  : _baseUrl = baseUrl,
-        _httpClient = httpClient ?? http.Client();
+        _httpClient = httpClient ?? http.Client(),
+        _tokenProvider = tokenProvider;
 
   final String _baseUrl;
   final http.Client _httpClient;
+  final TokenProvider _tokenProvider;
 
   Future<NewsFeedResponse> getNews({
     int? limit,
@@ -309,18 +333,272 @@ class ApiClient {
     return ScheduleResponse.fromJson(body);
   }
 
+  // Lost and Found API methods
+
+  /// Fetches a list of lost and found items with optional filtering.
+  Future<LostFoundItemsResponse> getLostFoundItems({
+    LostFoundItemStatus? status,
+    int? limit,
+    int? offset,
+  }) async {
+    final queryParams = <String, String>{
+      if (limit != null) 'limit': '$limit',
+      if (offset != null) 'offset': '$offset',
+      if (status != null) 'status': status.toString().split('.').last,
+    };
+
+    final uri = Uri.parse('$_baseUrl/api/v1/lost-found/items').replace(
+      queryParameters: queryParams,
+    );
+
+    final response = await _httpClient.get(
+      uri,
+      headers: await _getRequestHeaders(),
+    );
+
+    final body = response.json();
+
+    if (response.statusCode != HttpStatus.ok) {
+      throw ApiRequestFailure(
+        body: body,
+        statusCode: response.statusCode,
+      );
+    }
+
+    return LostFoundItemsResponse.fromJson(body);
+  }
+
+  /// Gets a specific lost or found item by its ID.
+  Future<LostFoundItem> getLostFoundItem({
+    required String itemId,
+  }) async {
+    final uri = Uri.parse('$_baseUrl/api/v1/lost-found/items/$itemId');
+
+    final response = await _httpClient.get(
+      uri,
+      headers: await _getRequestHeaders(),
+    );
+
+    final body = response.json();
+
+    if (response.statusCode != HttpStatus.ok) {
+      throw ApiRequestFailure(
+        body: body,
+        statusCode: response.statusCode,
+      );
+    }
+
+    return LostFoundItem.fromJson(body);
+  }
+
+  /// Creates a new lost or found item.
+  Future<LostFoundItem> createLostFoundItem({
+    required LostFoundItem item,
+  }) async {
+    final uri = Uri.parse('$_baseUrl/api/v1/lost-found/items');
+
+    final response = await _httpClient.post(
+      uri,
+      headers: await _getRequestHeaders(),
+      body: jsonEncode(item.toJson()),
+    );
+
+    final body = response.json();
+
+    if (response.statusCode != HttpStatus.created) {
+      throw ApiRequestFailure(
+        body: body,
+        statusCode: response.statusCode,
+      );
+    }
+
+    return LostFoundItem.fromJson(body);
+  }
+
+  /// Updates an existing lost or found item.
+  Future<LostFoundItem> updateLostFoundItem({
+    required String itemId,
+    required LostFoundItem item,
+  }) async {
+    final uri = Uri.parse('$_baseUrl/api/v1/lost-found/items/$itemId');
+
+    final response = await _httpClient.put(
+      uri,
+      headers: await _getRequestHeaders(),
+      body: jsonEncode(item.toJson()),
+    );
+
+    final body = response.json();
+
+    if (response.statusCode != HttpStatus.ok) {
+      throw ApiRequestFailure(
+        body: body,
+        statusCode: response.statusCode,
+      );
+    }
+
+    return LostFoundItem.fromJson(body);
+  }
+
+  /// Updates just the status of a lost or found item.
+  Future<LostFoundItem> updateLostFoundItemStatus({
+    required String itemId,
+    required LostFoundItemStatus status,
+  }) async {
+    final uri = Uri.parse('$_baseUrl/api/v1/lost-found/items/$itemId/status');
+
+    final response = await _httpClient.patch(
+      uri,
+      headers: await _getRequestHeaders(),
+      body: jsonEncode({'status': status.toString().split('.').last}),
+    );
+
+    final body = response.json();
+
+    if (response.statusCode != HttpStatus.ok) {
+      throw ApiRequestFailure(
+        body: body,
+        statusCode: response.statusCode,
+      );
+    }
+
+    return LostFoundItem.fromJson(body);
+  }
+
+  /// Deletes a lost or found item.
+  Future<void> deleteLostFoundItem({
+    required String itemId,
+  }) async {
+    final uri = Uri.parse('$_baseUrl/api/v1/lost-found/items/$itemId');
+
+    final response = await _httpClient.delete(
+      uri,
+      headers: await _getRequestHeaders(),
+    );
+
+    if (response.statusCode != HttpStatus.noContent) {
+      final body = response.json();
+      throw ApiRequestFailure(
+        body: body,
+        statusCode: response.statusCode,
+      );
+    }
+  }
+
+  /// Searches for lost and found items.
+  Future<LostFoundItemsResponse> searchLostFoundItems({
+    required String query,
+    LostFoundItemStatus? status,
+    int? limit,
+    int? offset,
+  }) async {
+    final queryParams = <String, String>{
+      'query': query,
+      if (limit != null) 'limit': '$limit',
+      if (offset != null) 'offset': '$offset',
+      if (status != null) 'status': status.toString().split('.').last,
+    };
+
+    final uri = Uri.parse('$_baseUrl/api/v1/lost-found/search').replace(
+      queryParameters: queryParams,
+    );
+
+    final response = await _httpClient.get(
+      uri,
+      headers: await _getRequestHeaders(),
+    );
+
+    final body = response.json();
+
+    if (response.statusCode != HttpStatus.ok) {
+      throw ApiRequestFailure(
+        body: body,
+        statusCode: response.statusCode,
+      );
+    }
+
+    return LostFoundItemsResponse.fromJson(body);
+  }
+
+  /// Gets items created by a specific user.
+  Future<LostFoundItemsResponse> getUserLostFoundItems({
+    required String authorId,
+    LostFoundItemStatus? status,
+    int? limit,
+    int? offset,
+  }) async {
+    final queryParams = <String, String>{
+      if (limit != null) 'limit': '$limit',
+      if (offset != null) 'offset': '$offset',
+      if (status != null) 'status': status.toString().split('.').last,
+    };
+
+    final uri = Uri.parse('$_baseUrl/api/v1/lost-found/user/$authorId').replace(
+      queryParameters: queryParams,
+    );
+
+    final response = await _httpClient.get(
+      uri,
+      headers: await _getRequestHeaders(),
+    );
+
+    final body = response.json();
+
+    if (response.statusCode != HttpStatus.ok) {
+      throw ApiRequestFailure(
+        body: body,
+        statusCode: response.statusCode,
+      );
+    }
+
+    return LostFoundItemsResponse.fromJson(body);
+  }
+
+  /// Gets the count of lost and found items.
+  Future<int> getLostFoundItemsCount({
+    LostFoundItemStatus? status,
+    String? authorId,
+    String? searchQuery,
+  }) async {
+    final queryParams = <String, String>{
+      if (status != null) 'status': status.toString().split('.').last,
+      if (authorId != null) 'author_id': authorId,
+      if (searchQuery != null) 'query': searchQuery,
+    };
+
+    final uri = Uri.parse('$_baseUrl/api/v1/lost-found/count').replace(
+      queryParameters: queryParams,
+    );
+
+    final response = await _httpClient.get(
+      uri,
+      headers: await _getRequestHeaders(),
+    );
+
+    final body = response.json();
+
+    if (response.statusCode != HttpStatus.ok) {
+      throw ApiRequestFailure(
+        body: body,
+        statusCode: response.statusCode,
+      );
+    }
+
+    return body['count'] as int;
+  }
+
   Future<Map<String, String>> _getRequestHeaders() async {
+    final token = await _tokenProvider();
     return <String, String>{
       HttpHeaders.contentTypeHeader: ContentType.json.value,
       HttpHeaders.acceptHeader: ContentType.json.value,
+      if (token != null) HttpHeaders.authorizationHeader: 'Bearer $token',
     };
   }
 }
 
-/// Расширение для [http.Response], которое позволяет получить тело ответа
-/// в виде `Map<String, dynamic>`. Если тело ответа не может быть преобразовано
-/// в `Map<String, dynamic>`, то будет сгенерировано исключение
-/// [ApiMalformedResponse].
+/// Extension on [http.Response] to decode the response body as JSON.
+/// Throws [ApiMalformedResponse] if the response body cannot be decoded.
 extension on http.Response {
   Map<String, dynamic> json() {
     try {

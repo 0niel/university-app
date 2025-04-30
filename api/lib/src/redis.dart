@@ -2,8 +2,10 @@ import 'dart:async';
 
 import 'package:redis/redis.dart';
 import 'package:university_app_server_api/config.dart';
+import 'package:university_app_server_api/src/logger.dart';
 
 final _appConfig = Config();
+final _logger = getLogger('RedisClient');
 
 /// {@template redis_client}
 /// A Redis client.
@@ -17,8 +19,10 @@ class RedisClient {
 
   /// Returns the [RedisClient] instance.
   static Future<RedisClient> get instance async {
-    _instance ??= RedisClient._internal();
-    await _instance!._ensureConnected();
+    if (_instance == null) {
+      _instance = RedisClient._internal();
+      await _instance!._ensureConnected();
+    }
     return _instance!;
   }
 
@@ -26,12 +30,15 @@ class RedisClient {
     if (_connection == null || _command == null) {
       try {
         final conn = RedisConnection();
-        print('Connecting to Redis... ${_appConfig.redisHost}, ${_appConfig.redisPort}');
+        _logger.i('Connecting to Redis... ${_appConfig.redisHost}, ${_appConfig.redisPort}');
         _command = await conn.connect(_appConfig.redisHost, _appConfig.redisPort);
         _connection = conn;
+        _logger.i('Connected to Redis successfully');
       } catch (e) {
-        print('Failed to connect to Redis: $e\nFalling back to no-op Redis.');
-        // Fallback to a no-op command so that errors related to Redis are suppressed.
+        _logger
+          ..e('Failed to connect to Redis', error: e)
+          ..i('Falling back to no-op Redis.');
+
         _command = NullCommand();
       }
     }
@@ -39,6 +46,7 @@ class RedisClient {
 
   /// Closes the connection to the Redis server.
   Future<void> close() async {
+    _logger.i('Closing Redis connection');
     await _connection?.close();
     _connection = null;
     _command = null;

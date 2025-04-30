@@ -13,7 +13,6 @@ class AppTheme {
   // Common component builders
   static OutlinedBorder defaultCardShape(AppColors colors) => RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(_cardRadius),
-        side: BorderSide(color: colors.borderLight, width: 1),
       );
 
   static BoxDecoration glassEffect(AppColors colors) => BoxDecoration(
@@ -67,8 +66,8 @@ class AppTheme {
       secondarySelectedColor: AppColors.light.surfaceHigh,
       padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 10),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(_smallRadius)),
-      labelStyle: AppTextStyle.chip.copyWith(color: AppColors.light.active),
-      secondaryLabelStyle: AppTextStyle.chip.copyWith(color: AppColors.light.active),
+      labelStyle: AppTextStyle.body.copyWith(color: AppColors.light.active),
+      secondaryLabelStyle: AppTextStyle.body.copyWith(color: AppColors.light.active),
       brightness: Brightness.light,
       side: BorderSide(color: AppColors.light.borderLight, width: 0.5),
     ),
@@ -372,8 +371,8 @@ class AppTheme {
       secondarySelectedColor: AppColors.dark.surfaceHigh,
       padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 10),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(_smallRadius)),
-      labelStyle: AppTextStyle.chip.copyWith(color: AppColors.dark.active),
-      secondaryLabelStyle: AppTextStyle.chip.copyWith(color: AppColors.dark.active),
+      labelStyle: AppTextStyle.body.copyWith(color: AppColors.dark.active),
+      secondaryLabelStyle: AppTextStyle.body.copyWith(color: AppColors.dark.active),
       brightness: Brightness.dark,
       side: BorderSide(color: AppColors.dark.borderLight, width: 0.5),
     ),
@@ -668,10 +667,6 @@ class AppTheme {
     return BoxDecoration(
       color: isActive ? accentColor.withOpacity(0.05) : colors.surface,
       borderRadius: BorderRadius.circular(_cardRadius),
-      border: Border.all(
-        color: isActive ? accentColor.withOpacity(0.7) : colors.borderLight,
-        width: isActive ? 1.5 : 1,
-      ),
     );
   }
 

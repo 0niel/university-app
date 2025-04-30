@@ -17,12 +17,7 @@ enum FullScreenAdsStatus {
 }
 
 class FullScreenAdsState extends Equatable {
-  const FullScreenAdsState({
-    required this.status,
-    this.interstitialAd,
-    this.rewardedAd,
-    this.earnedReward,
-  });
+  const FullScreenAdsState({required this.status, this.interstitialAd, this.rewardedAd, this.earnedReward});
 
   const FullScreenAdsState.initial() : this(status: FullScreenAdsStatus.initial);
 
@@ -39,20 +34,16 @@ class FullScreenAdsState extends Equatable {
     RewardedAd? rewardedAd,
     Reward? earnedReward,
     FullScreenAdsStatus? status,
-  }) =>
-      FullScreenAdsState(
-        interstitialAd: interstitialAd ?? this.interstitialAd,
-        rewardedAd: rewardedAd ?? this.rewardedAd,
-        earnedReward: earnedReward ?? this.earnedReward,
-        status: status ?? this.status,
-      );
+  }) => FullScreenAdsState(
+    interstitialAd: interstitialAd ?? this.interstitialAd,
+    rewardedAd: rewardedAd ?? this.rewardedAd,
+    earnedReward: earnedReward ?? this.earnedReward,
+    status: status ?? this.status,
+  );
 }
 
 class FullScreenAdsConfig {
-  const FullScreenAdsConfig({
-    this.interstitialAdUnitId,
-    this.rewardedAdUnitId,
-  });
+  const FullScreenAdsConfig({this.interstitialAdUnitId, this.rewardedAdUnitId});
 
   /// The unit id of an interstitial ad.
   final String? interstitialAdUnitId;

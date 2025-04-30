@@ -14,10 +14,7 @@ class StickyAd extends StatefulWidget {
   /// {@macro sticky_ad}
   const StickyAd({super.key});
 
-  static const padding = EdgeInsets.symmetric(
-    horizontal: AppSpacing.lg + AppSpacing.xs,
-    vertical: AppSpacing.lg,
-  );
+  static const padding = EdgeInsets.symmetric(horizontal: AppSpacing.lg + AppSpacing.xs, vertical: AppSpacing.lg);
 
   @override
   State<StickyAd> createState() => _StickyAdState();
@@ -60,11 +57,7 @@ class _StickyAdState extends State<StickyAd> {
 
 @visibleForTesting
 class StickyAdContainer extends StatelessWidget {
-  const StickyAdContainer({
-    required this.child,
-    required this.shadowEnabled,
-    super.key,
-  });
+  const StickyAdContainer({required this.child, required this.shadowEnabled, super.key});
 
   final Widget child;
   final bool shadowEnabled;
@@ -72,19 +65,14 @@ class StickyAdContainer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DecoratedBox(
-      decoration: BoxDecoration(
-        color: Theme.of(context).extension<AppColors>()!.background01,
-      ),
+      decoration: BoxDecoration(color: Theme.of(context).extension<AppColors>()!.background01),
       child: child,
     );
   }
 }
 
 class StickyAdCloseIcon extends StatelessWidget {
-  const StickyAdCloseIcon({
-    required this.onAdClosed,
-    super.key,
-  });
+  const StickyAdCloseIcon({required this.onAdClosed, super.key});
 
   final VoidCallback onAdClosed;
 
@@ -111,9 +99,7 @@ class StickyAdCloseIcon extends StatelessWidget {
 
 @visibleForTesting
 class StickyAdCloseIconBackground extends StatelessWidget {
-  const StickyAdCloseIconBackground({
-    super.key,
-  });
+  const StickyAdCloseIconBackground({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -123,12 +109,7 @@ class StickyAdCloseIconBackground extends StatelessWidget {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.3),
-              blurRadius: 3,
-              spreadRadius: 1,
-              offset: const Offset(0, 1),
-            ),
+            BoxShadow(color: Colors.black.withOpacity(0.3), blurRadius: 3, spreadRadius: 1, offset: const Offset(0, 1)),
           ],
         ),
         child: const Padding(
