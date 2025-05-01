@@ -47,7 +47,10 @@ void main() {
         'when shareProvider not provided ', () async {
       var called = false;
       SharePlatform.instance = MockSharePlatform();
-      when(() => SharePlatform.instance.share(any(that: isA<String>()))).thenAnswer((_) async => called = true);
+      when(() => SharePlatform.instance.share(any(that: isA<String>()))).thenAnswer((_) async {
+        called = true;
+        return ShareResult('text', ShareResultStatus.success);
+      });
 
       await ShareLauncher().share(text: 'text');
 
