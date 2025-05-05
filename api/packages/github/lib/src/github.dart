@@ -20,10 +20,7 @@ class GithubApiMalformedResponse implements Exception {
 /// {@endtemplate}
 class GithubApiRequestFailure implements Exception {
   /// {@macro github_api_request_failure}
-  const GithubApiRequestFailure({
-    required this.statusCode,
-    required this.body,
-  });
+  const GithubApiRequestFailure({required this.statusCode, required this.body});
 
   /// The response status code.
   final int statusCode;
@@ -37,18 +34,11 @@ class GithubApiRequestFailure implements Exception {
 /// {@endtemplate}
 class GithubClient {
   /// {@macro github_api_client}
-  GithubClient({
-    http.Client? httpClient,
-  }) : this._(
-          baseUrl: 'https://api.github.com',
-          httpClient: httpClient,
-        );
+  GithubClient({http.Client? httpClient}) : this._(baseUrl: 'https://api.github.com', httpClient: httpClient);
 
-  GithubClient._({
-    required String baseUrl,
-    http.Client? httpClient,
-  })  : _baseUrl = baseUrl,
-        _httpClient = httpClient ?? http.Client();
+  GithubClient._({required String baseUrl, http.Client? httpClient})
+    : _baseUrl = baseUrl,
+      _httpClient = httpClient ?? http.Client();
 
   final String _baseUrl;
   final http.Client _httpClient;
@@ -58,24 +48,15 @@ class GithubClient {
   /// Throws a [GithubApiRequestFailure] if the request fails.
   /// Throws a [GithubApiMalformedResponse] if the response body is not a
   /// valid JSON object.
-  Future<List<Contributor>> getContributors({
-    String owner = '0niel',
-    String repo = 'university-app',
-  }) async {
+  Future<List<Contributor>> getContributors({String owner = '0niel', String repo = 'university-app'}) async {
     final uri = Uri.parse('$_baseUrl/repos/$owner/$repo/contributors');
 
-    final response = await _httpClient.get(
-      uri,
-      headers: await _getRequestHeaders(),
-    );
+    final response = await _httpClient.get(uri, headers: await _getRequestHeaders());
 
     final body = response.jsonArray();
 
     if (response.statusCode != HttpStatus.ok) {
-      throw GithubApiRequestFailure(
-        body: response.body,
-        statusCode: response.statusCode,
-      );
+      throw GithubApiRequestFailure(body: response.body, statusCode: response.statusCode);
     }
 
     return body.map(Contributor.fromJson).toList();

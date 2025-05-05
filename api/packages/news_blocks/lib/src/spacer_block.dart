@@ -38,8 +38,7 @@ class SpacerBlock with EquatableMixin implements NewsBlock {
   });
 
   /// Converts a `Map<String, dynamic>` into a [SpacerBlock] instance.
-  factory SpacerBlock.fromJson(Map<String, dynamic> json) =>
-      _$SpacerBlockFromJson(json);
+  factory SpacerBlock.fromJson(Map<String, dynamic> json) => _$SpacerBlockFromJson(json);
 
   /// The spacer block type identifier.
   static const identifier = '__spacer__';

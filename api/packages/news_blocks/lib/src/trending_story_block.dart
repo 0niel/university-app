@@ -17,8 +17,7 @@ class TrendingStoryBlock with EquatableMixin implements NewsBlock {
   });
 
   /// Converts a `Map<String, dynamic>` into a [TrendingStoryBlock] instance.
-  factory TrendingStoryBlock.fromJson(Map<String, dynamic> json) =>
-      _$TrendingStoryBlockFromJson(json);
+  factory TrendingStoryBlock.fromJson(Map<String, dynamic> json) => _$TrendingStoryBlockFromJson(json);
 
   /// The trending story block type identifier.
   static const identifier = '__trending_story__';

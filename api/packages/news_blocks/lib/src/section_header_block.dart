@@ -18,8 +18,7 @@ class SectionHeaderBlock with EquatableMixin implements NewsBlock {
   });
 
   /// Converts a `Map<String, dynamic>` into a [SectionHeaderBlock] instance.
-  factory SectionHeaderBlock.fromJson(Map<String, dynamic> json) =>
-      _$SectionHeaderBlockFromJson(json);
+  factory SectionHeaderBlock.fromJson(Map<String, dynamic> json) => _$SectionHeaderBlockFromJson(json);
 
   /// The section header block type identifier.
   static const identifier = '__section_header__';

@@ -13,17 +13,14 @@ SpacerBlock _$SpacerBlockFromJson(Map<String, dynamic> json) => $checkedCreate(
       json,
       ($checkedConvert) {
         final val = SpacerBlock(
-          spacing: $checkedConvert(
-              'spacing', (v) => $enumDecode(_$SpacingEnumMap, v)),
-          type: $checkedConvert(
-              'type', (v) => v as String? ?? SpacerBlock.identifier),
+          spacing: $checkedConvert('spacing', (v) => $enumDecode(_$SpacingEnumMap, v)),
+          type: $checkedConvert('type', (v) => v as String? ?? SpacerBlock.identifier),
         );
         return val;
       },
     );
 
-Map<String, dynamic> _$SpacerBlockToJson(SpacerBlock instance) =>
-    <String, dynamic>{
+Map<String, dynamic> _$SpacerBlockToJson(SpacerBlock instance) => <String, dynamic>{
       'spacing': _$SpacingEnumMap[instance.spacing]!,
       'type': instance.type,
     };

@@ -8,20 +8,17 @@ part of 'newsletter_block.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-NewsletterBlock _$NewsletterBlockFromJson(Map<String, dynamic> json) =>
-    $checkedCreate(
+NewsletterBlock _$NewsletterBlockFromJson(Map<String, dynamic> json) => $checkedCreate(
       'NewsletterBlock',
       json,
       ($checkedConvert) {
         final val = NewsletterBlock(
-          type: $checkedConvert(
-              'type', (v) => v as String? ?? NewsletterBlock.identifier),
+          type: $checkedConvert('type', (v) => v as String? ?? NewsletterBlock.identifier),
         );
         return val;
       },
     );
 
-Map<String, dynamic> _$NewsletterBlockToJson(NewsletterBlock instance) =>
-    <String, dynamic>{
+Map<String, dynamic> _$NewsletterBlockToJson(NewsletterBlock instance) => <String, dynamic>{
       'type': instance.type,
     };

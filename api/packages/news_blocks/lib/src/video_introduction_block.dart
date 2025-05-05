@@ -20,8 +20,7 @@ class VideoIntroductionBlock with EquatableMixin implements NewsBlock {
 
   /// Converts a `Map<String, dynamic>`
   /// into a [VideoIntroductionBlock] instance.
-  factory VideoIntroductionBlock.fromJson(Map<String, dynamic> json) =>
-      _$VideoIntroductionBlockFromJson(json);
+  factory VideoIntroductionBlock.fromJson(Map<String, dynamic> json) => _$VideoIntroductionBlockFromJson(json);
 
   /// The video introduction block type identifier.
   static const identifier = '__video_introduction__';

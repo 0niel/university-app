@@ -64,8 +64,7 @@ class NavigateToArticleAction with EquatableMixin implements BlockAction {
 
   /// Converts a `Map<String, dynamic>`
   /// into a [NavigateToArticleAction] instance.
-  factory NavigateToArticleAction.fromJson(Map<String, dynamic> json) =>
-      _$NavigateToArticleActionFromJson(json);
+  factory NavigateToArticleAction.fromJson(Map<String, dynamic> json) => _$NavigateToArticleActionFromJson(json);
 
   /// The identifier of this block action.
   static const identifier = '__navigate_to_article__';
@@ -171,8 +170,7 @@ class NavigateToSlideshowAction with EquatableMixin implements BlockAction {
 
   /// Converts a `Map<String, dynamic>`
   /// into a [NavigateToSlideshowAction] instance.
-  factory NavigateToSlideshowAction.fromJson(Map<String, dynamic> json) =>
-      _$NavigateToSlideshowActionFromJson(json);
+  factory NavigateToSlideshowAction.fromJson(Map<String, dynamic> json) => _$NavigateToSlideshowActionFromJson(json);
 
   /// The identifier of this block action.
   static const identifier = '__navigate_to_slideshow__';
@@ -207,8 +205,7 @@ class UnknownBlockAction with EquatableMixin implements BlockAction {
   });
 
   /// Converts a `Map<String, dynamic>` into a [UnknownBlock] instance.
-  factory UnknownBlockAction.fromJson(Map<String, dynamic> json) =>
-      _$UnknownBlockActionFromJson(json);
+  factory UnknownBlockAction.fromJson(Map<String, dynamic> json) => _$UnknownBlockActionFromJson(json);
 
   /// The identifier of this block action.
   static const identifier = '__unknown__';

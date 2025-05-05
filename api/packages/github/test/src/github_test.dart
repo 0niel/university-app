@@ -38,34 +38,17 @@ void main() {
 
         final response = http.Response(
           jsonEncode([
-            {
-              'login': 'user1',
-              'contributions': 10,
-              'avatar_url': 'http://avatar.com',
-              'html_url': 'http://html.com',
-            },
-            {
-              'login': 'user2',
-              'contributions': 5,
-              'avatar_url': 'http://avatar.com',
-              'html_url': 'http://html.com',
-            },
+            {'login': 'user1', 'contributions': 10, 'avatar_url': 'http://avatar.com', 'html_url': 'http://html.com'},
+            {'login': 'user2', 'contributions': 5, 'avatar_url': 'http://avatar.com', 'html_url': 'http://html.com'},
           ]),
           HttpStatus.ok,
         );
 
-        when(() => httpClient.get(any(), headers: any(named: 'headers'))).thenAnswer(
-          (_) async => response,
-        );
+        when(() => httpClient.get(any(), headers: any(named: 'headers'))).thenAnswer((_) async => response);
 
         await githubClient.getContributors();
 
-        verify(
-          () => httpClient.get(
-            any(that: isAUriHaving(path: path)),
-            headers: any(named: 'headers'),
-          ),
-        ).called(1);
+        verify(() => httpClient.get(any(that: isAUriHaving(path: path)), headers: any(named: 'headers'))).called(1);
       });
     });
   });

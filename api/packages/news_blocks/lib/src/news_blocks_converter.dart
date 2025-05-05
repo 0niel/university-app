@@ -4,8 +4,7 @@ import 'package:news_blocks/news_blocks.dart';
 /// {@template news_blocks_converter}
 /// A [JsonConverter] that supports (de)serializing a `List<NewsBlock>`.
 /// {@endtemplate}
-class NewsBlocksConverter
-    implements JsonConverter<List<NewsBlock>, List<dynamic>> {
+class NewsBlocksConverter implements JsonConverter<List<NewsBlock>, List<dynamic>> {
   /// {@macro news_blocks_converter}
   const NewsBlocksConverter();
 
@@ -16,8 +15,6 @@ class NewsBlocksConverter
 
   @override
   List<NewsBlock> fromJson(List<dynamic> jsonString) {
-    return jsonString
-        .map((dynamic e) => NewsBlock.fromJson(e as Map<String, dynamic>))
-        .toList();
+    return jsonString.map((dynamic e) => NewsBlock.fromJson(e as Map<String, dynamic>)).toList();
   }
 }

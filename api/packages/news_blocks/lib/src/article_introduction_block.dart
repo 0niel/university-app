@@ -23,8 +23,7 @@ class ArticleIntroductionBlock with EquatableMixin implements NewsBlock {
 
   /// Converts a `Map<String, dynamic>`
   /// into a [ArticleIntroductionBlock] instance.
-  factory ArticleIntroductionBlock.fromJson(Map<String, dynamic> json) =>
-      _$ArticleIntroductionBlockFromJson(json);
+  factory ArticleIntroductionBlock.fromJson(Map<String, dynamic> json) => _$ArticleIntroductionBlockFromJson(json);
 
   /// The article introduction block type identifier.
   static const identifier = '__article_introduction__';

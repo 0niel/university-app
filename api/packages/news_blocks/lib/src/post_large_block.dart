@@ -25,8 +25,7 @@ class PostLargeBlock extends PostBlock {
   });
 
   /// Converts a `Map<String, dynamic>` into a [PostLargeBlock] instance.
-  factory PostLargeBlock.fromJson(Map<String, dynamic> json) =>
-      _$PostLargeBlockFromJson(json);
+  factory PostLargeBlock.fromJson(Map<String, dynamic> json) => _$PostLargeBlockFromJson(json);
 
   /// The large post block type identifier.
   static const identifier = '__post_large__';

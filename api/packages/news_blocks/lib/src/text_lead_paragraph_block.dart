@@ -18,8 +18,7 @@ class TextLeadParagraphBlock with EquatableMixin implements NewsBlock {
 
   /// Converts a `Map<String, dynamic>`
   /// into a [TextLeadParagraphBlock] instance.
-  factory TextLeadParagraphBlock.fromJson(Map<String, dynamic> json) =>
-      _$TextLeadParagraphBlockFromJson(json);
+  factory TextLeadParagraphBlock.fromJson(Map<String, dynamic> json) => _$TextLeadParagraphBlockFromJson(json);
 
   /// The text lead paragraph block type identifier.
   static const identifier = '__text_lead_paragraph__';

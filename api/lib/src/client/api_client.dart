@@ -587,6 +587,26 @@ class ApiClient {
     return body['count'] as int;
   }
 
+  Future<SplashVideoResponse> getSplashVideo() async {
+    final uri = Uri.parse('$_baseUrl/api/v1/splash-video');
+
+    final response = await _httpClient.get(
+      uri,
+      headers: await _getRequestHeaders(),
+    );
+
+    final body = response.json();
+
+    if (response.statusCode != HttpStatus.ok) {
+      throw ApiRequestFailure(
+        body: body,
+        statusCode: response.statusCode,
+      );
+    }
+
+    return SplashVideoResponse.fromJson(body);
+  }
+
   Future<Map<String, String>> _getRequestHeaders() async {
     final token = await _tokenProvider();
     return <String, String>{

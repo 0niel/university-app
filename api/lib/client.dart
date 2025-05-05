@@ -16,3 +16,4 @@ export 'src/models/models.dart'
         SearchGroupsResponse,
         SearchTeachersResponse,
         SponsorsResponse;
+export 'src/models/splash_video_response.dart' show SplashVideoResponse;

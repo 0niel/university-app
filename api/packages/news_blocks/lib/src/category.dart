@@ -16,8 +16,7 @@ class Category extends Equatable {
 
   /// Converts a `Map<String, dynamic>` into
   /// a [Category] instance.
-  factory Category.fromJson(Map<String, dynamic> json) =>
-      _$CategoryFromJson(json);
+  factory Category.fromJson(Map<String, dynamic> json) => _$CategoryFromJson(json);
 
   /// Category id.
   final String id;

@@ -17,8 +17,7 @@ class TextHeadlineBlock with EquatableMixin implements NewsBlock {
   });
 
   /// Converts a `Map<String, dynamic>` into a [TextHeadlineBlock] instance.
-  factory TextHeadlineBlock.fromJson(Map<String, dynamic> json) =>
-      _$TextHeadlineBlockFromJson(json);
+  factory TextHeadlineBlock.fromJson(Map<String, dynamic> json) => _$TextHeadlineBlockFromJson(json);
 
   /// The text headline block type identifier.
   static const identifier = '__text_headline__';

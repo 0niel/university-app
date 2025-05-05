@@ -25,8 +25,7 @@ class PostMediumBlock extends PostBlock {
   });
 
   /// Converts a `Map<String, dynamic>` into a [PostMediumBlock] instance.
-  factory PostMediumBlock.fromJson(Map<String, dynamic> json) =>
-      _$PostMediumBlockFromJson(json);
+  factory PostMediumBlock.fromJson(Map<String, dynamic> json) => _$PostMediumBlockFromJson(json);
 
   /// The medium post block type identifier.
   static const identifier = '__post_medium__';

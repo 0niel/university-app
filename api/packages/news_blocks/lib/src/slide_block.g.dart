@@ -17,19 +17,14 @@ SlideBlock _$SlideBlockFromJson(Map<String, dynamic> json) => $checkedCreate(
           description: $checkedConvert('description', (v) => v as String),
           photoCredit: $checkedConvert('photo_credit', (v) => v as String),
           imageUrl: $checkedConvert('image_url', (v) => v as String),
-          type: $checkedConvert(
-              'type', (v) => v as String? ?? SlideBlock.identifier),
+          type: $checkedConvert('type', (v) => v as String? ?? SlideBlock.identifier),
         );
         return val;
       },
-      fieldKeyMap: const {
-        'photoCredit': 'photo_credit',
-        'imageUrl': 'image_url'
-      },
+      fieldKeyMap: const {'photoCredit': 'photo_credit', 'imageUrl': 'image_url'},
     );
 
-Map<String, dynamic> _$SlideBlockToJson(SlideBlock instance) =>
-    <String, dynamic>{
+Map<String, dynamic> _$SlideBlockToJson(SlideBlock instance) => <String, dynamic>{
       'caption': instance.caption,
       'description': instance.description,
       'photo_credit': instance.photoCredit,

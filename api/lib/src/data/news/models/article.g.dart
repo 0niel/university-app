@@ -10,8 +10,11 @@ Article _$ArticleFromJson(Map<String, dynamic> json) => Article(
       title: json['title'] as String,
       htmlContent: json['htmlContent'] as String,
       publishedAt: DateTime.parse(json['publishedAt'] as String),
-      imageUrls: (json['imageUrls'] as List<dynamic>).map((e) => e as String).toList(),
-      categories: (json['categories'] as List<dynamic>).map((e) => e as String).toList(),
+      imageUrls:
+          (json['imageUrls'] as List<dynamic>).map((e) => e as String).toList(),
+      categories: (json['categories'] as List<dynamic>)
+          .map((e) => e as String)
+          .toList(),
       url: json['url'] as String?,
     );
 

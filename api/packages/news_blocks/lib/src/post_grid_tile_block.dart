@@ -26,8 +26,7 @@ class PostGridTileBlock extends PostBlock {
   }) : super(isContentOverlaid: true);
 
   /// Converts a `Map<String, dynamic>` into a [PostGridTileBlock] instance.
-  factory PostGridTileBlock.fromJson(Map<String, dynamic> json) =>
-      _$PostGridTileBlockFromJson(json);
+  factory PostGridTileBlock.fromJson(Map<String, dynamic> json) => _$PostGridTileBlockFromJson(json);
 
   /// The post grid tile block type identifier.
   static const identifier = '__post_grid_tile__';

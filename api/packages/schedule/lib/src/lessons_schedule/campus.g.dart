@@ -16,7 +16,8 @@ Campus _$CampusFromJson(Map<String, dynamic> json) => $checkedCreate(
           name: $checkedConvert('name', (v) => v as String),
           shortName: $checkedConvert('short_name', (v) => v as String?),
           latitude: $checkedConvert('latitude', (v) => (v as num?)?.toDouble()),
-          longitude: $checkedConvert('longitude', (v) => (v as num?)?.toDouble()),
+          longitude:
+              $checkedConvert('longitude', (v) => (v as num?)?.toDouble()),
           uid: $checkedConvert('uid', (v) => v as String?),
         );
         return val;

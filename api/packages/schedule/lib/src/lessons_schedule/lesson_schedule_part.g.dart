@@ -8,25 +8,40 @@ part of 'lesson_schedule_part.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-LessonSchedulePart _$LessonSchedulePartFromJson(Map<String, dynamic> json) => $checkedCreate(
+LessonSchedulePart _$LessonSchedulePartFromJson(Map<String, dynamic> json) =>
+    $checkedCreate(
       'LessonSchedulePart',
       json,
       ($checkedConvert) {
         final val = LessonSchedulePart(
           subject: $checkedConvert('subject', (v) => v as String),
-          lessonType: $checkedConvert('lesson_type', (v) => $enumDecode(_$LessonTypeEnumMap, v)),
+          lessonType: $checkedConvert(
+              'lesson_type', (v) => $enumDecode(_$LessonTypeEnumMap, v)),
           teachers: $checkedConvert(
-              'teachers', (v) => (v as List<dynamic>).map((e) => Teacher.fromJson(e as Map<String, dynamic>)).toList()),
-          classrooms: $checkedConvert('classrooms',
-              (v) => (v as List<dynamic>).map((e) => Classroom.fromJson(e as Map<String, dynamic>)).toList()),
-          lessonBells: $checkedConvert('lesson_bells', (v) => LessonBells.fromJson(v as Map<String, dynamic>)),
-          dates: $checkedConvert('dates', (v) => const DatesConverter().fromJson(v as List)),
-          groups: $checkedConvert('groups', (v) => (v as List<dynamic>?)?.map((e) => e as String).toList()),
-          type: $checkedConvert('type', (v) => v as String? ?? LessonSchedulePart.identifier),
+              'teachers',
+              (v) => (v as List<dynamic>)
+                  .map((e) => Teacher.fromJson(e as Map<String, dynamic>))
+                  .toList()),
+          classrooms: $checkedConvert(
+              'classrooms',
+              (v) => (v as List<dynamic>)
+                  .map((e) => Classroom.fromJson(e as Map<String, dynamic>))
+                  .toList()),
+          lessonBells: $checkedConvert('lesson_bells',
+              (v) => LessonBells.fromJson(v as Map<String, dynamic>)),
+          dates: $checkedConvert(
+              'dates', (v) => const DatesConverter().fromJson(v as List)),
+          groups: $checkedConvert('groups',
+              (v) => (v as List<dynamic>?)?.map((e) => e as String).toList()),
+          type: $checkedConvert(
+              'type', (v) => v as String? ?? LessonSchedulePart.identifier),
         );
         return val;
       },
-      fieldKeyMap: const {'lessonType': 'lesson_type', 'lessonBells': 'lesson_bells'},
+      fieldKeyMap: const {
+        'lessonType': 'lesson_type',
+        'lessonBells': 'lesson_bells'
+      },
     );
 
 Map<String, dynamic> _$LessonSchedulePartToJson(LessonSchedulePart instance) {

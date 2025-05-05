@@ -8,8 +8,7 @@ part of 'post_medium_block.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-PostMediumBlock _$PostMediumBlockFromJson(Map<String, dynamic> json) =>
-    $checkedCreate(
+PostMediumBlock _$PostMediumBlockFromJson(Map<String, dynamic> json) => $checkedCreate(
       'PostMediumBlock',
       json,
       ($checkedConvert) {
@@ -17,20 +16,14 @@ PostMediumBlock _$PostMediumBlockFromJson(Map<String, dynamic> json) =>
           id: $checkedConvert('id', (v) => v as String),
           categoryId: $checkedConvert('category_id', (v) => v as String),
           author: $checkedConvert('author', (v) => v as String),
-          publishedAt: $checkedConvert(
-              'published_at', (v) => DateTime.parse(v as String)),
+          publishedAt: $checkedConvert('published_at', (v) => DateTime.parse(v as String)),
           imageUrl: $checkedConvert('image_url', (v) => v as String),
           title: $checkedConvert('title', (v) => v as String),
           description: $checkedConvert('description', (v) => v as String?),
-          action: $checkedConvert(
-              'action',
-              (v) => const BlockActionConverter()
-                  .fromJson(v as Map<String, dynamic>?)),
-          type: $checkedConvert(
-              'type', (v) => v as String? ?? PostMediumBlock.identifier),
+          action: $checkedConvert('action', (v) => const BlockActionConverter().fromJson(v as Map<String, dynamic>?)),
+          type: $checkedConvert('type', (v) => v as String? ?? PostMediumBlock.identifier),
           isPremium: $checkedConvert('is_premium', (v) => v as bool? ?? false),
-          isContentOverlaid: $checkedConvert(
-              'is_content_overlaid', (v) => v as bool? ?? false),
+          isContentOverlaid: $checkedConvert('is_content_overlaid', (v) => v as bool? ?? false),
         );
         return val;
       },

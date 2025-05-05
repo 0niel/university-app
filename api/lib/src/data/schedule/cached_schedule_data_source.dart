@@ -45,6 +45,7 @@ class RedisCachedScheduleDataSource implements ScheduleDataSource {
       await _redisClient.command.send_object(['SET', key, encoded, 'EX', _ttl]);
       return result;
     } catch (e) {
+      print(e);
       final cached = await _redisClient.command.get(key);
       if (cached != null) {
         try {
@@ -68,7 +69,8 @@ class RedisCachedScheduleDataSource implements ScheduleDataSource {
   }
 
   @override
-  Future<List<SchedulePart>> getTeacherSchedule({required String teacher}) async {
+  Future<List<SchedulePart>> getTeacherSchedule(
+      {required String teacher,}) async {
     final key = 'schedule:teacher:$teacher';
     return _cacheOrFallback<List<SchedulePart>>(
       key: key,
@@ -79,7 +81,8 @@ class RedisCachedScheduleDataSource implements ScheduleDataSource {
   }
 
   @override
-  Future<List<SchedulePart>> getClassroomSchedule({required String classroom}) async {
+  Future<List<SchedulePart>> getClassroomSchedule(
+      {required String classroom,}) async {
     final key = 'schedule:classroom:$classroom';
     return _cacheOrFallback<List<SchedulePart>>(
       key: key,

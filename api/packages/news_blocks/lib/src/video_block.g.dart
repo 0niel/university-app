@@ -14,16 +14,14 @@ VideoBlock _$VideoBlockFromJson(Map<String, dynamic> json) => $checkedCreate(
       ($checkedConvert) {
         final val = VideoBlock(
           videoUrl: $checkedConvert('video_url', (v) => v as String),
-          type: $checkedConvert(
-              'type', (v) => v as String? ?? VideoBlock.identifier),
+          type: $checkedConvert('type', (v) => v as String? ?? VideoBlock.identifier),
         );
         return val;
       },
       fieldKeyMap: const {'videoUrl': 'video_url'},
     );
 
-Map<String, dynamic> _$VideoBlockToJson(VideoBlock instance) =>
-    <String, dynamic>{
+Map<String, dynamic> _$VideoBlockToJson(VideoBlock instance) => <String, dynamic>{
       'video_url': instance.videoUrl,
       'type': instance.type,
     };

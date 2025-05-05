@@ -88,7 +88,8 @@ END:VCALENDAR
     });
 
     test('get LessonSchedulePart if calendar data is valid', () {
-      iCalParser = ICalParser.fromString('''BEGIN:VCALENDAR
+      iCalParser = ICalParser.fromString('''
+BEGIN:VCALENDAR
 PRODID:-//github.com/ical-org/ical.net//NONSGML ical.net 4.0//EN
 VERSION:2.0
 BEGIN:VEVENT

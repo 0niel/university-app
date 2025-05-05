@@ -17,8 +17,7 @@ class DividerHorizontalBlock with EquatableMixin implements NewsBlock {
 
   /// Converts a `Map<String, dynamic>` into
   /// a [DividerHorizontalBlock] instance.
-  factory DividerHorizontalBlock.fromJson(Map<String, dynamic> json) =>
-      _$DividerHorizontalBlockFromJson(json);
+  factory DividerHorizontalBlock.fromJson(Map<String, dynamic> json) => _$DividerHorizontalBlockFromJson(json);
 
   /// The divider horizontal block type identifier.
   static const identifier = '__divider_horizontal__';

@@ -17,8 +17,7 @@ class ImageBlock with EquatableMixin implements NewsBlock {
   });
 
   /// Converts a `Map<String, dynamic>` into a [ImageBlock] instance.
-  factory ImageBlock.fromJson(Map<String, dynamic> json) =>
-      _$ImageBlockFromJson(json);
+  factory ImageBlock.fromJson(Map<String, dynamic> json) => _$ImageBlockFromJson(json);
 
   /// The image block type identifier.
   static const identifier = '__image__';

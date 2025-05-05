@@ -27,8 +27,7 @@ class TextCaptionBlock with EquatableMixin implements NewsBlock {
   });
 
   /// Converts a `Map<String, dynamic>` into a [TextCaptionBlock] instance.
-  factory TextCaptionBlock.fromJson(Map<String, dynamic> json) =>
-      _$TextCaptionBlockFromJson(json);
+  factory TextCaptionBlock.fromJson(Map<String, dynamic> json) => _$TextCaptionBlockFromJson(json);
 
   /// The text caption block type identifier.
   static const identifier = '__text_caption__';

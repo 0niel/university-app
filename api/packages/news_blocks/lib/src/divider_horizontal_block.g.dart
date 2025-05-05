@@ -8,22 +8,17 @@ part of 'divider_horizontal_block.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-DividerHorizontalBlock _$DividerHorizontalBlockFromJson(
-        Map<String, dynamic> json) =>
-    $checkedCreate(
+DividerHorizontalBlock _$DividerHorizontalBlockFromJson(Map<String, dynamic> json) => $checkedCreate(
       'DividerHorizontalBlock',
       json,
       ($checkedConvert) {
         final val = DividerHorizontalBlock(
-          type: $checkedConvert(
-              'type', (v) => v as String? ?? DividerHorizontalBlock.identifier),
+          type: $checkedConvert('type', (v) => v as String? ?? DividerHorizontalBlock.identifier),
         );
         return val;
       },
     );
 
-Map<String, dynamic> _$DividerHorizontalBlockToJson(
-        DividerHorizontalBlock instance) =>
-    <String, dynamic>{
+Map<String, dynamic> _$DividerHorizontalBlockToJson(DividerHorizontalBlock instance) => <String, dynamic>{
       'type': instance.type,
     };

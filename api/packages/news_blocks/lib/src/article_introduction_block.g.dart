@@ -8,20 +8,16 @@ part of 'article_introduction_block.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-ArticleIntroductionBlock _$ArticleIntroductionBlockFromJson(
-        Map<String, dynamic> json) =>
-    $checkedCreate(
+ArticleIntroductionBlock _$ArticleIntroductionBlockFromJson(Map<String, dynamic> json) => $checkedCreate(
       'ArticleIntroductionBlock',
       json,
       ($checkedConvert) {
         final val = ArticleIntroductionBlock(
           categoryId: $checkedConvert('category_id', (v) => v as String),
           author: $checkedConvert('author', (v) => v as String),
-          publishedAt: $checkedConvert(
-              'published_at', (v) => DateTime.parse(v as String)),
+          publishedAt: $checkedConvert('published_at', (v) => DateTime.parse(v as String)),
           title: $checkedConvert('title', (v) => v as String),
-          type: $checkedConvert('type',
-              (v) => v as String? ?? ArticleIntroductionBlock.identifier),
+          type: $checkedConvert('type', (v) => v as String? ?? ArticleIntroductionBlock.identifier),
           imageUrl: $checkedConvert('image_url', (v) => v as String?),
           isPremium: $checkedConvert('is_premium', (v) => v as bool? ?? false),
         );
@@ -35,8 +31,7 @@ ArticleIntroductionBlock _$ArticleIntroductionBlockFromJson(
       },
     );
 
-Map<String, dynamic> _$ArticleIntroductionBlockToJson(
-    ArticleIntroductionBlock instance) {
+Map<String, dynamic> _$ArticleIntroductionBlockToJson(ArticleIntroductionBlock instance) {
   final val = <String, dynamic>{
     'category_id': instance.categoryId,
     'author': instance.author,

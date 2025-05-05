@@ -9,12 +9,7 @@ part 'contributor.g.dart';
 @JsonSerializable()
 class Contributor extends Equatable {
   /// {@macro contributor}
-  const Contributor({
-    required this.login,
-    required this.avatarUrl,
-    required this.htmlUrl,
-    required this.contributions,
-  });
+  const Contributor({required this.login, required this.avatarUrl, required this.htmlUrl, required this.contributions});
 
   /// Converts a `Map<String, dynamic>` into a [Contributor] instance.
   factory Contributor.fromJson(Map<String, dynamic> json) => _$ContributorFromJson(json);

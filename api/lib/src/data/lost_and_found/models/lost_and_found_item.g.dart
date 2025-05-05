@@ -6,7 +6,8 @@ part of 'lost_and_found_item.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-LostFoundItem _$LostFoundItemFromJson(Map<String, dynamic> json) => LostFoundItem(
+LostFoundItem _$LostFoundItemFromJson(Map<String, dynamic> json) =>
+    LostFoundItem(
       authorId: json['author_id'] as String,
       itemName: json['item_name'] as String,
       authorEmail: json['author_email'] as String,
@@ -16,11 +17,15 @@ LostFoundItem _$LostFoundItemFromJson(Map<String, dynamic> json) => LostFoundIte
       description: json['description'] as String?,
       telegramContactInfo: json['telegram_contact_info'] as String?,
       phoneNumberContactInfo: json['phone_number_contact_info'] as String?,
-      updatedAt: json['updated_at'] == null ? null : DateTime.parse(json['updated_at'] as String),
-      images: (json['images'] as List<dynamic>?)?.map((e) => e as String).toList(),
+      updatedAt: json['updated_at'] == null
+          ? null
+          : DateTime.parse(json['updated_at'] as String),
+      images:
+          (json['images'] as List<dynamic>?)?.map((e) => e as String).toList(),
     );
 
-Map<String, dynamic> _$LostFoundItemToJson(LostFoundItem instance) => <String, dynamic>{
+Map<String, dynamic> _$LostFoundItemToJson(LostFoundItem instance) =>
+    <String, dynamic>{
       'id': instance.id,
       'author_id': instance.authorId,
       'item_name': instance.itemName,

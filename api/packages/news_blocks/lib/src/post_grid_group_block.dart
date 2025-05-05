@@ -18,8 +18,7 @@ class PostGridGroupBlock with EquatableMixin implements NewsBlock {
   });
 
   /// Converts a `Map<String, dynamic>` into a [PostGridGroupBlock] instance.
-  factory PostGridGroupBlock.fromJson(Map<String, dynamic> json) =>
-      _$PostGridGroupBlockFromJson(json);
+  factory PostGridGroupBlock.fromJson(Map<String, dynamic> json) => _$PostGridGroupBlockFromJson(json);
 
   /// The post grid block type identifier.
   static const identifier = '__post_grid_group__';

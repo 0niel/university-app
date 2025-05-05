@@ -14,8 +14,7 @@ HtmlBlock _$HtmlBlockFromJson(Map<String, dynamic> json) => $checkedCreate(
       ($checkedConvert) {
         final val = HtmlBlock(
           content: $checkedConvert('content', (v) => v as String),
-          type: $checkedConvert(
-              'type', (v) => v as String? ?? HtmlBlock.identifier),
+          type: $checkedConvert('type', (v) => v as String? ?? HtmlBlock.identifier),
         );
         return val;
       },

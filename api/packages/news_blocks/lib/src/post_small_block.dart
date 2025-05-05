@@ -24,8 +24,7 @@ class PostSmallBlock extends PostBlock {
   });
 
   /// Converts a `Map<String, dynamic>` into a [PostSmallBlock] instance.
-  factory PostSmallBlock.fromJson(Map<String, dynamic> json) =>
-      _$PostSmallBlockFromJson(json);
+  factory PostSmallBlock.fromJson(Map<String, dynamic> json) => _$PostSmallBlockFromJson(json);
 
   /// The small post block type identifier.
   static const identifier = '__post_small__';

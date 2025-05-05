@@ -48,12 +48,7 @@ void main() {
       final props = contributor.props;
 
       expect(props, isA<List<Object?>>());
-      expect(props, [
-        contributor.login,
-        contributor.avatarUrl,
-        contributor.htmlUrl,
-        contributor.contributions,
-      ]);
+      expect(props, [contributor.login, contributor.avatarUrl, contributor.htmlUrl, contributor.contributions]);
     });
   });
 }

@@ -15,7 +15,11 @@ Classroom _$ClassroomFromJson(Map<String, dynamic> json) => $checkedCreate(
         final val = Classroom(
           name: $checkedConvert('name', (v) => v as String),
           uid: $checkedConvert('uid', (v) => v as String?),
-          campus: $checkedConvert('campus', (v) => v == null ? null : Campus.fromJson(v as Map<String, dynamic>)),
+          campus: $checkedConvert(
+              'campus',
+              (v) => v == null
+                  ? null
+                  : Campus.fromJson(v as Map<String, dynamic>)),
         );
         return val;
       },

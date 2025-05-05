@@ -17,8 +17,7 @@ class NewsletterBlock with EquatableMixin implements NewsBlock {
 
   /// Converts a `Map<String, dynamic>` into
   /// a [NewsletterBlock] instance.
-  factory NewsletterBlock.fromJson(Map<String, dynamic> json) =>
-      _$NewsletterBlockFromJson(json);
+  factory NewsletterBlock.fromJson(Map<String, dynamic> json) => _$NewsletterBlockFromJson(json);
 
   /// The newsletter block type identifier.
   static const identifier = '__newsletter__';

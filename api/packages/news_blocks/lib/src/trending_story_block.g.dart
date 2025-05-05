@@ -8,23 +8,19 @@ part of 'trending_story_block.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-TrendingStoryBlock _$TrendingStoryBlockFromJson(Map<String, dynamic> json) =>
-    $checkedCreate(
+TrendingStoryBlock _$TrendingStoryBlockFromJson(Map<String, dynamic> json) => $checkedCreate(
       'TrendingStoryBlock',
       json,
       ($checkedConvert) {
         final val = TrendingStoryBlock(
-          content: $checkedConvert('content',
-              (v) => PostSmallBlock.fromJson(v as Map<String, dynamic>)),
-          type: $checkedConvert(
-              'type', (v) => v as String? ?? TrendingStoryBlock.identifier),
+          content: $checkedConvert('content', (v) => PostSmallBlock.fromJson(v as Map<String, dynamic>)),
+          type: $checkedConvert('type', (v) => v as String? ?? TrendingStoryBlock.identifier),
         );
         return val;
       },
     );
 
-Map<String, dynamic> _$TrendingStoryBlockToJson(TrendingStoryBlock instance) =>
-    <String, dynamic>{
+Map<String, dynamic> _$TrendingStoryBlockToJson(TrendingStoryBlock instance) => <String, dynamic>{
       'content': instance.content.toJson(),
       'type': instance.type,
     };
