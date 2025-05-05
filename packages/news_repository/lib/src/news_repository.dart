@@ -34,7 +34,7 @@ class NewsRepository {
 
   final ApiClient _apiClient;
 
-  Future<NewsFeedResponse> getSponsors({
+  Future<NewsFeedResponse> getNews({
     int? limit,
     int? offset,
     String? category,

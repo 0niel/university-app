@@ -2,10 +2,10 @@ name: rtu_mirea_app
 description: Mobile application for students of RTU MIREA
 publish_to: 'none'
 
-version: 1.5.15+141
+version: 1.6.0+145
 
 environment:
-  sdk: ">=3.1.1"
+  sdk: ">=3.7.0"
 
 dependencies:
   flutter:
@@ -21,21 +21,20 @@ dependencies:
     path: packages/academic_calendar
   analytics_repository:
     path: packages/analytics_repository
-  flutter_animate: ^4.3.0
+  flutter_animate: ^4.5.0
   latlong2: ^0.9.0
   adaptive_theme: ^3.5.0
   very_good_infinite_list: ^0.9.0
   hydrated_bloc: ^9.1.2
   bloc_concurrency: ^0.2.2
   provider: ^6.0.5
-  intl: ^0.18.0
+  intl: ^0.18.1
   dio: ^5.1.2
   shared_preferences: ^2.0.11
   bloc: ^8.1.1
   flutter_bloc: ^8.1.2
   flutter_svg: ^2.0.5
   equatable: ^2.0.5
-  get_it: ^8.0.0
   photo_view: ^0.15.0
   material_floating_search_bar_2: ^0.5.0
   dartz: ^0.10.0-nullsafety.2
@@ -51,7 +50,7 @@ dependencies:
   story: ^1.1.0
   extended_image: ^8.1.0
   cached_network_image: ^3.2.0
-  url_launcher: ^6.0.17
+  url_launcher: ^6.1.12
   carousel_slider: ^5.0.0
   salomon_bottom_bar: ^3.3.2
   url_strategy: ^0.3.0
@@ -59,7 +58,7 @@ dependencies:
   after_layout: ^1.1.0
   get:
   get_storage:
-  home_widget: ^0.7.0
+  home_widget: ^0.7.0+1
   freezed_annotation: ^2.1.0
   firebase_core: ^3.12.0
   firebase_analytics: ^11.4.3
@@ -74,7 +73,7 @@ dependencies:
   logging: ^1.1.1
   sliver_tools: ^0.2.12
   unicons: any
-  go_router: ^14.0.0
+  go_router: ^15.0.0
   notifications_repository:
     path: packages/notifications_repository
   permission_client:
@@ -115,7 +114,7 @@ dependencies:
     git:
       url: https://github.com/0niel/dot_navigation_bar.git
       ref: master
-  yandex_maps_mapkit_lite: ^4.10.1-beta
+  flutter_map: ^6.1.0
   envied: ^1.1.1
   flutter_sticky_header: ^0.6.5
   schedule_exporter_repository:
@@ -160,7 +159,32 @@ dependencies:
   syncfusion_flutter_calendar: ^28.2.5
   syncfusion_localizations: ^28.2.5
   flutter_native_splash: ^2.4.3
-
+  supabase_flutter: ^2.8.3
+  lost_and_found_repository:
+    path: packages/lost_and_found_repository
+  supabase_authentication_client:
+    path: packages/auth_client/supabase_authentication_client
+  deep_link_client:
+    path: packages/deep_link_client
+  user_repository:
+    path: packages/user_repository
+  package_info_client:
+    path: packages/package_info_client
+  token_storage:
+    path: packages/auth_client/token_storage
+  formz: ^0.8.0
+  flutter_screenutil: ^5.9.3
+  flutter_staggered_grid_view: ^0.7.0
+  flutter_staggered_animations: ^1.1.0
+  share_plus: ^10.0.0
+  shimmer: ^3.0.0
+  fl_chart: ^0.70.2
+  responsive_framework: ^1.5.1
+  smooth_sheets: ^0.11.0
+  flutter_layout_grid: ^2.0.8
+  skeletonizer: ^1.4.3
+  splash_video_repository:
+    path: packages/splash_video_repository
 
 dependency_overrides:
   web: ^0.5.1

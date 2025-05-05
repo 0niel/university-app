@@ -3,19 +3,36 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 abstract class MiniApp {
+  /// Идентификатор модуля
   String get id;
 
+  /// Название модуля
   String get name;
 
-  String get author => 'Unknown';
+  /// Автор модуля
+  String get author;
 
+  /// Версия модуля
+  String get version;
+
+  /// Маршруты для go_router
   List<GoRoute> get routes;
 
-  List<BlocProvider>? get globalBlocProviders => [];
+  /// Локализационные делегаты
+  List<LocalizationsDelegate> get localizationDelegates;
 
-  List<LocalizationsDelegate<dynamic>>? get localizationsDelegates => [];
+  /// Bloc-провайдеры для модуля
+  List<BlocProvider> get blocProviders;
 
-  Future<void> registerDependencies();
+  /// Регистрация зависимостей (например, через DI)
+  void registerDependencies();
 
-  bool get enabled => true;
+  /// Построение основного виджета модуля
+  Widget buildWidget(BuildContext context);
+
+  /// Хуки жизненного цикла
+  void onInit();
+  void onPause();
+  void onResume();
+  void onDispose();
 }

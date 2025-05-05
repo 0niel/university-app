@@ -1,0 +1,6 @@
+# melos_managed_dependency_overrides: app_ui,news_blocks
+dependency_overrides:
+  app_ui:
+    path: ..\\app_ui
+  news_blocks:
+    path: ..\\..\\api\\packages\\news_blocks

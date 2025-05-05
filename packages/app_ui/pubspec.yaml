@@ -24,6 +24,8 @@ dependencies:
   intl: ^0.20.2
   calendar_date_picker2: ^1.1.8
   flutter_screenutil: ^5.9.3
+  smooth_sheets: ^0.11.0
+  flutter_cache_manager: ^3.4.1
 
 dev_dependencies:
   flutter_test:

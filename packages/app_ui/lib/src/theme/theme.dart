@@ -116,12 +116,10 @@ class AppTheme {
       primary: AppColors.light.primary,
       secondary: AppColors.light.secondary,
       surface: AppColors.light.surface,
-      background: AppColors.light.background01,
       error: AppColors.light.error,
       onPrimary: AppColors.light.white,
       onSecondary: AppColors.light.white,
       onSurface: AppColors.light.onSurface,
-      onBackground: AppColors.light.active,
       onError: AppColors.light.white,
       surfaceTint: Colors.transparent,
       tertiary: AppColors.light.accent,
@@ -147,24 +145,12 @@ class AppTheme {
       ),
     ),
     outlinedButtonTheme: OutlinedButtonThemeData(
-      style: ButtonStyle(
-        foregroundColor: WidgetStateProperty.all(AppColors.light.primary),
-        side: WidgetStateProperty.all(
-          BorderSide(color: AppColors.light.borderMedium, width: 1),
+      style: OutlinedButton.styleFrom(
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        side: BorderSide(color: AppColors.light.background03),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppSpacing.md),
         ),
-        shape: WidgetStateProperty.all<RoundedRectangleBorder>(
-          RoundedRectangleBorder(borderRadius: BorderRadius.circular(_buttonRadius)),
-        ),
-        textStyle: WidgetStateProperty.all(
-          AppTextStyle.buttonS.copyWith(
-            color: AppColors.light.active,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        padding: WidgetStateProperty.all(
-          const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
-        ),
-        overlayColor: WidgetStateProperty.all(AppColors.light.primary.withOpacity(0.1)),
       ),
     ),
     inputDecorationTheme: InputDecorationTheme(
@@ -291,14 +277,14 @@ class AppTheme {
     navigationBarTheme: NavigationBarThemeData(
       backgroundColor: AppColors.light.surfaceHigh,
       indicatorColor: AppColors.light.primary.withOpacity(0.1),
-      iconTheme: MaterialStateProperty.resolveWith((states) {
-        if (states.contains(MaterialState.selected)) {
+      iconTheme: WidgetStateProperty.resolveWith((states) {
+        if (states.contains(WidgetState.selected)) {
           return IconThemeData(color: AppColors.light.primary);
         }
         return IconThemeData(color: AppColors.light.deactive);
       }),
-      labelTextStyle: MaterialStateProperty.resolveWith((states) {
-        if (states.contains(MaterialState.selected)) {
+      labelTextStyle: WidgetStateProperty.resolveWith((states) {
+        if (states.contains(WidgetState.selected)) {
           return AppTextStyle.captionL.copyWith(
             color: AppColors.light.primary,
             fontWeight: FontWeight.w600,
@@ -334,7 +320,6 @@ class AppTheme {
   );
 
   static final darkTheme = ThemeData.dark().copyWith(
-    useMaterial3: true,
     extensions: <ThemeExtension<dynamic>>[AppColors.dark],
     textTheme: ThemeData.dark().textTheme.apply(
           bodyColor: AppColors.dark.active,
@@ -421,12 +406,10 @@ class AppTheme {
       primary: AppColors.dark.primary,
       secondary: AppColors.dark.secondary,
       surface: AppColors.dark.surface,
-      background: AppColors.dark.background01,
       error: AppColors.dark.error,
       onPrimary: AppColors.dark.white,
       onSecondary: AppColors.dark.white,
       onSurface: AppColors.dark.onSurface,
-      onBackground: AppColors.dark.active,
       onError: AppColors.dark.white,
       surfaceTint: Colors.transparent,
       tertiary: AppColors.dark.accent,
@@ -452,24 +435,12 @@ class AppTheme {
       ),
     ),
     outlinedButtonTheme: OutlinedButtonThemeData(
-      style: ButtonStyle(
-        foregroundColor: WidgetStateProperty.all(AppColors.dark.primary),
-        side: WidgetStateProperty.all(
-          BorderSide(color: AppColors.dark.borderMedium, width: 1),
+      style: OutlinedButton.styleFrom(
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        side: BorderSide(color: AppColors.dark.background03),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppSpacing.md),
         ),
-        shape: WidgetStateProperty.all<RoundedRectangleBorder>(
-          RoundedRectangleBorder(borderRadius: BorderRadius.circular(_buttonRadius)),
-        ),
-        textStyle: WidgetStateProperty.all(
-          AppTextStyle.buttonS.copyWith(
-            color: AppColors.dark.active,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        padding: WidgetStateProperty.all(
-          const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
-        ),
-        overlayColor: WidgetStateProperty.all(AppColors.dark.primary.withOpacity(0.1)),
       ),
     ),
     inputDecorationTheme: InputDecorationTheme(
@@ -596,14 +567,14 @@ class AppTheme {
     navigationBarTheme: NavigationBarThemeData(
       backgroundColor: AppColors.dark.surfaceHigh,
       indicatorColor: AppColors.dark.primary.withOpacity(0.1),
-      iconTheme: MaterialStateProperty.resolveWith((states) {
-        if (states.contains(MaterialState.selected)) {
+      iconTheme: WidgetStateProperty.resolveWith((states) {
+        if (states.contains(WidgetState.selected)) {
           return IconThemeData(color: AppColors.dark.primary);
         }
         return IconThemeData(color: AppColors.dark.deactive);
       }),
-      labelTextStyle: MaterialStateProperty.resolveWith((states) {
-        if (states.contains(MaterialState.selected)) {
+      labelTextStyle: WidgetStateProperty.resolveWith((states) {
+        if (states.contains(WidgetState.selected)) {
           return AppTextStyle.captionL.copyWith(
             color: AppColors.dark.primary,
             fontWeight: FontWeight.w600,
@@ -679,7 +650,6 @@ class AppTheme {
       borderRadius: BorderRadius.circular(_smallRadius),
       border: Border.all(
         color: isSelected ? chipColor.withOpacity(0.5) : colors.borderLight,
-        width: 1,
       ),
     );
   }

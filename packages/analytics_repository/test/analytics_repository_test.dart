@@ -57,73 +57,73 @@ void main() {
         verify(
           () => firebaseAnalytics.logEvent(
             name: event.name,
-            parameters: event.properties,
+            parameters: event.properties?.map((key, value) => MapEntry(key, value as Object)),
           ),
         ).called(1);
-      });
 
-      test(
-          'throws TrackEventFailure '
-          'when logEvent throws exception', () async {
-        when(
-          () => firebaseAnalytics.logEvent(
-            name: any(named: 'name'),
-            parameters: any(named: 'parameters'),
-          ),
-        ).thenThrow(Exception());
+        test(
+            'throws TrackEventFailure '
+            'when logEvent throws exception', () async {
+          when(
+            () => firebaseAnalytics.logEvent(
+              name: any(named: 'name'),
+              parameters: any(named: 'parameters'),
+            ),
+          ).thenThrow(Exception());
 
-        const analyticEvent1 = AnalyticsEvent(
-          'event1',
-          properties: <String, dynamic>{
-            'property1': 'value1',
-            'property2': 'value2',
-          },
-        );
+          const analyticEvent1 = AnalyticsEvent(
+            'event1',
+            properties: <String, dynamic>{
+              'property1': 'value1',
+              'property2': 'value2',
+            },
+          );
 
-        expect(
-          () => analyticsRepository.track(analyticEvent1),
-          throwsA(isA<TrackEventFailure>()),
-        );
-      });
-    });
-
-    group('setUserId', () {
-      test('sets user identifier successfully', () {
-        const userId = 'userId';
-
-        analyticsRepository.setUserId(userId);
-
-        verify(
-          () => firebaseAnalytics.setUserId(id: userId),
-        ).called(1);
-      });
-
-      test(
-          'throws SetUserIdFailure '
-          'when setUserId throws exception', () async {
-        when(
-          () => firebaseAnalytics.setUserId(id: any(named: 'id')),
-        ).thenThrow(Exception());
-
-        expect(
-          () => analyticsRepository.setUserId('userId'),
-          throwsA(isA<SetUserIdFailure>()),
-        );
-      });
-    });
-
-    group('AnalyticsFailure', () {
-      final error = Exception('errorMessage');
-
-      group('TrackEventFailure', () {
-        test('has correct props', () {
-          expect(TrackEventFailure(error).props, [error]);
+          expect(
+            () => analyticsRepository.track(analyticEvent1),
+            throwsA(isA<TrackEventFailure>()),
+          );
         });
       });
 
-      group('SetUserIdFailure', () {
-        test('has correct props', () {
-          expect(SetUserIdFailure(error).props, [error]);
+      group('setUserId', () {
+        test('sets user identifier successfully', () {
+          const userId = 'userId';
+
+          analyticsRepository.setUserId(userId);
+
+          verify(
+            () => firebaseAnalytics.setUserId(id: userId),
+          ).called(1);
+        });
+
+        test(
+            'throws SetUserIdFailure '
+            'when setUserId throws exception', () async {
+          when(
+            () => firebaseAnalytics.setUserId(id: any(named: 'id')),
+          ).thenThrow(Exception());
+
+          expect(
+            () => analyticsRepository.setUserId('userId'),
+            throwsA(isA<SetUserIdFailure>()),
+          );
+        });
+      });
+
+      group('AnalyticsFailure', () {
+        final error = Exception('errorMessage');
+
+        group('TrackEventFailure', () {
+          test('has correct props', () {
+            expect(TrackEventFailure(error).props, [error]);
+          });
+        });
+
+        group('SetUserIdFailure', () {
+          test('has correct props', () {
+            expect(SetUserIdFailure(error).props, [error]);
+          });
         });
       });
     });

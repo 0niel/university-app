@@ -19,6 +19,7 @@ class TextOutlinedButton extends StatelessWidget {
       width: width,
       height: 45,
       child: PlatformElevatedButton(
+        color: Theme.of(context).extension<AppColors>()!.background01,
         onPressed: onPressed,
         material: (_, __) => MaterialElevatedButtonData(
           style: ElevatedButton.styleFrom(

@@ -7,7 +7,7 @@ class PrimaryButton extends StatelessWidget {
     required this.text,
     super.key,
     this.icon,
-    this.onClick,
+    this.onPressed,
     this.onLongPress,
     this.enabled = true,
   });
@@ -15,7 +15,7 @@ class PrimaryButton extends StatelessWidget {
   final String text;
   final bool enabled;
   final Widget? icon;
-  final VoidCallback? onClick;
+  final VoidCallback? onPressed;
   final VoidCallback? onLongPress;
 
   @override
@@ -37,7 +37,7 @@ class PrimaryButton extends StatelessWidget {
           borderRadius: BorderRadius.circular(24),
           color: enabled ? Theme.of(context).extension<AppColors>()!.primary : Colors.grey,
         ),
-        onPressed: enabled ? onClick : null,
+        onPressed: enabled ? onPressed : null,
         color: enabled ? Theme.of(context).extension<AppColors>()!.primary : Colors.grey,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,

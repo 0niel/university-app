@@ -1,0 +1,24 @@
+name: splash_video_repository
+description: Flutter package to manage splash video content
+version: 0.1.0
+publish_to: none
+
+environment:
+  sdk: ">=3.0.0 <4.0.0"
+  flutter: ">=3.10.0"
+
+dependencies:
+  equatable: ^2.0.5
+  flutter:
+    sdk: flutter
+  http: ^1.1.0
+  path_provider: ^2.1.1
+  storage:
+    path: ../storage/storage
+  university_app_server_api:
+    path: ../../api
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  very_good_analysis: ^5.0.0 

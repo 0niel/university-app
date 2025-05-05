@@ -34,32 +34,16 @@ void main() {
     });
 
     Matcher permissionWasRequested(Permission permission) => contains(
-          isA<MethodCall>()
-              .having(
-                (c) => c.method,
-                'method',
-                'requestPermissions',
-              )
-              .having(
-                (c) => c.arguments,
-                'arguments',
-                contains(permission.value),
-              ),
-        );
+      isA<MethodCall>()
+          .having((c) => c.method, 'method', 'requestPermissions')
+          .having((c) => c.arguments, 'arguments', contains(permission.value)),
+    );
 
     Matcher permissionWasChecked(Permission permission) => contains(
-          isA<MethodCall>()
-              .having(
-                (c) => c.method,
-                'method',
-                'checkPermissionStatus',
-              )
-              .having(
-                (c) => c.arguments,
-                'arguments',
-                equals(permission.value),
-              ),
-        );
+      isA<MethodCall>()
+          .having((c) => c.method, 'method', 'checkPermissionStatus')
+          .having((c) => c.arguments, 'arguments', equals(permission.value)),
+    );
 
     group('requestNotifications', () {
       test('calls correct method', () async {
@@ -79,16 +63,7 @@ void main() {
       test('calls correct method', () async {
         await permissionClient.openPermissionSettings();
 
-        expect(
-          calls,
-          contains(
-            isA<MethodCall>().having(
-              (c) => c.method,
-              'method',
-              'openAppSettings',
-            ),
-          ),
-        );
+        expect(calls, contains(isA<MethodCall>().having((c) => c.method, 'method', 'openAppSettings')));
       });
     });
   });

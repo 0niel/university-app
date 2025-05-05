@@ -1,13 +1,8 @@
-import 'package:flutter/material.dart';
 import 'package:app_ui/app_ui.dart';
+import 'package:flutter/material.dart';
 
 /// A skeleton widget that shows a shimmering loading effect
 class ImagePlaceholder extends StatelessWidget {
-  final double? height;
-  final double? width;
-  final BoxShape shape;
-  final BorderRadius? borderRadius;
-
   const ImagePlaceholder({
     super.key,
     this.height,
@@ -15,6 +10,10 @@ class ImagePlaceholder extends StatelessWidget {
     this.shape = BoxShape.rectangle,
     this.borderRadius,
   });
+  final double? height;
+  final double? width;
+  final BoxShape shape;
+  final BorderRadius? borderRadius;
 
   @override
   Widget build(BuildContext context) {

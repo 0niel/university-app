@@ -1,0 +1,27 @@
+name: lost_and_found_repository
+description: A service that allows students and staff to post findings or losses
+version: 0.1.0+1
+publish_to: none
+
+environment:
+  sdk: ^3.5.0
+  flutter: ^3.24.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  university_app_server_api:
+    path: ../../api
+  freezed_annotation: ^2.4.4
+  supabase_flutter: ^2.8.3  
+  json_annotation: ^4.9.0
+  equatable: ^2.0.7
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  mocktail: ^1.0.4
+  very_good_analysis: ^6.0.0
+  json_serializable: ^6.8.0
+  freezed: ^2.4.5
+  build_runner: ^2.4.15
