@@ -11,10 +11,7 @@ class LoadAttendance extends AttendanceEvent {
   final String startDate;
   final String endDate;
 
-  const LoadAttendance({
-    required this.startDate,
-    required this.endDate,
-  });
+  const LoadAttendance({required this.startDate, required this.endDate});
 
   @override
   List<Object> get props => [startDate, endDate];

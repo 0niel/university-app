@@ -35,12 +35,7 @@ class LessonComment extends Equatable {
   /// Comment text.
   final String text;
 
-  LessonComment copyWith({
-    String? subjectName,
-    DateTime? lessonDate,
-    LessonBells? lessonBells,
-    String? text,
-  }) {
+  LessonComment copyWith({String? subjectName, DateTime? lessonDate, LessonBells? lessonBells, String? text}) {
     return LessonComment(
       subjectName: subjectName ?? this.subjectName,
       lessonDate: lessonDate ?? this.lessonDate,
@@ -50,10 +45,5 @@ class LessonComment extends Equatable {
   }
 
   @override
-  List<Object?> get props => [
-        subjectName,
-        lessonDate,
-        lessonBells,
-        text,
-      ];
+  List<Object?> get props => [subjectName, lessonDate, lessonBells, text];
 }

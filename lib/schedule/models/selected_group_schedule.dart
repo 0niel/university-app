@@ -11,11 +11,7 @@ part 'selected_group_schedule.g.dart';
 class SelectedGroupSchedule with EquatableMixin implements SelectedSchedule {
   factory SelectedGroupSchedule.fromJson(Map<String, dynamic> json) => _$SelectedGroupScheduleFromJson(json);
 
-  const SelectedGroupSchedule({
-    required this.group,
-    required this.schedule,
-    this.type = 'group',
-  });
+  const SelectedGroupSchedule({required this.group, required this.schedule, this.type = 'group'});
 
   final Group group;
 
@@ -30,4 +26,7 @@ class SelectedGroupSchedule with EquatableMixin implements SelectedSchedule {
 
   @override
   List<Object> get props => [type, group, schedule];
+
+  @override
+  String get name => group.name;
 }

@@ -18,19 +18,27 @@ class ServicesConfig {
         routePath: '/services/map',
       ),
       ImportantServiceModel(
+        title: 'NFC-пропуск',
+        description: 'Пропуск для входа в университет',
+        iconData: Icons.nfc,
+        color: colors.colorful04,
+        isExternal: false,
+        routePath: '/services/nfc',
+      ),
+      // ImportantServiceModel(
+      //   title: 'Бюро находок',
+      //   description: 'Найди потерянные вещи',
+      //   iconData: Icons.search_rounded,
+      //   color: colors.colorful01,
+      //   isExternal: false,
+      //   routePath: '/services/lost-and-found',
+      // ),
+      ImportantServiceModel(
         title: 'Cloud Mirea Ninja',
         iconData: Icons.cloud,
         color: colors.colorful04,
         isExternal: false,
         routePath: '/services/neon',
-      ),
-      ImportantServiceModel(
-        title: 'Бюро находок',
-        description: 'Найди потерянные вещи',
-        iconData: Icons.search_rounded,
-        color: colors.colorful01,
-        isExternal: false,
-        routePath: '/services/lost-and-found',
       ),
     ];
   }
@@ -91,12 +99,12 @@ class ServicesConfig {
         action: 'Перейти',
       ),
       BannerModel(
-        title: 'Оплата обучения',
-        description: 'Оплата договора, общежития и других услуг',
-        iconData: Icons.payment_rounded,
-        color: colors.accent,
-        url: 'https://oplata.mirea.ru/',
-        action: 'Оплатить',
+        title: 'Электронный журнал',
+        description: 'Проверка посещаемости, расписание',
+        iconData: Icons.book_rounded,
+        color: colors.colorful01,
+        url: 'https://attendance-app.mirea.ru',
+        action: 'Перейти',
       ),
     ];
   }

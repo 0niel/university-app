@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:logger/logger.dart';
 import 'package:rtu_mirea_app/common/hydrated_storage.dart';
+import 'package:rtu_mirea_app/firebase_options.dart';
 import 'package:rtu_mirea_app/main/bootstrap/app_bloc_observer.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -19,7 +20,7 @@ Future<void> bootstrap(AppBuilder builder) async {
     () async {
       WidgetsFlutterBinding.ensureInitialized();
 
-      await Firebase.initializeApp();
+      await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
       // Initialize analytics repository
       late final AnalyticsRepository analyticsRepository;

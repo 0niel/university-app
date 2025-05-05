@@ -9,24 +9,17 @@ class NeonBloc extends HydratedBloc<NeonEvent, NeonState> {
     on<VieweRegisterOffer>(_vieweRegisterOffer);
   }
 
-  void _vieweRegisterOffer(
-    VieweRegisterOffer event,
-    Emitter<NeonState> emit,
-  ) {
+  void _vieweRegisterOffer(VieweRegisterOffer event, Emitter<NeonState> emit) {
     emit(state.copyWith(isRegisterOfferViewed: true));
   }
 
   @override
   NeonState? fromJson(Map<String, dynamic> json) {
-    return NeonState(
-      isRegisterOfferViewed: json['isRegisterOfferViewed'] as bool,
-    );
+    return NeonState(isRegisterOfferViewed: json['isRegisterOfferViewed'] as bool);
   }
 
   @override
   Map<String, dynamic>? toJson(NeonState state) {
-    return {
-      'isRegisterOfferViewed': state.isRegisterOfferViewed,
-    };
+    return {'isRegisterOfferViewed': state.isRegisterOfferViewed};
   }
 }

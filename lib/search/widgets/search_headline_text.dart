@@ -12,9 +12,7 @@ class SearchHeadlineText extends StatelessWidget {
       padding: const EdgeInsets.only(top: 16, left: 12),
       child: Text(
         headerText.toUpperCase(),
-        style: AppTextStyle.chip.copyWith(
-          color: Theme.of(context).extension<AppColors>()!.deactive,
-        ),
+        style: AppTextStyle.chip.copyWith(color: Theme.of(context).extension<AppColors>()!.deactive),
       ),
     );
   }

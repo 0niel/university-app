@@ -21,12 +21,8 @@ class UserBloc extends HydratedBloc<UserEvent, UserState> {
   final GetUserData getUserData;
   final GetAuthToken getAuthToken;
 
-  UserBloc({
-    required this.logIn,
-    required this.logOut,
-    required this.getUserData,
-    required this.getAuthToken,
-  }) : super(const UserState()) {
+  UserBloc({required this.logIn, required this.logOut, required this.getUserData, required this.getAuthToken})
+    : super(const UserState()) {
     on<LogInEvent>(_onLogInEvent);
     on<LogOutEvent>(_onLogOutEvent);
     on<Started>(_onGetUserDataEvent);
@@ -34,10 +30,7 @@ class UserBloc extends HydratedBloc<UserEvent, UserState> {
     on<SetAuthenticatedData>(_onSetAuntificatedDataEvent);
   }
 
-  void _onSetAuntificatedDataEvent(
-    SetAuthenticatedData event,
-    Emitter<UserState> emit,
-  ) async {
+  void _onSetAuntificatedDataEvent(SetAuthenticatedData event, Emitter<UserState> emit) async {
     emit(state.copyWith(status: UserStatus.authorized, user: event.user));
   }
 
@@ -45,10 +38,7 @@ class UserBloc extends HydratedBloc<UserEvent, UserState> {
     Sentry.configureScope((scope) => scope.setUser(SentryUser(id: id, email: email, data: {'group': group})));
   }
 
-  void _onLogInEvent(
-    UserEvent event,
-    Emitter<UserState> emit,
-  ) async {
+  void _onLogInEvent(UserEvent event, Emitter<UserState> emit) async {
     if (state.status == UserStatus.authorized) return;
 
     // We use oauth2 to get token. So we don't need to pass login and password
@@ -58,33 +48,24 @@ class UserBloc extends HydratedBloc<UserEvent, UserState> {
 
     final logInRes = await logIn();
 
-    logInRes.fold(
-      (failure) => emit(state.copyWith(status: UserStatus.authorizeError)),
-      (res) {
-        loggedIn = true;
-      },
-    );
+    logInRes.fold((failure) => emit(state.copyWith(status: UserStatus.authorizeError)), (res) {
+      loggedIn = true;
+    });
 
     if (loggedIn) {
       emit(state.copyWith(status: UserStatus.loading));
       final user = await getUserData();
 
-      user.fold(
-        (failure) => emit(state.copyWith(status: UserStatus.unauthorized)),
-        (user) {
-          var student = getActiveStudent(user);
+      user.fold((failure) => emit(state.copyWith(status: UserStatus.unauthorized)), (user) {
+        var student = getActiveStudent(user);
 
-          _setSentryUserIdentity(user.id.toString(), user.login, student.academicGroup);
-          emit(state.copyWith(status: UserStatus.authorized, user: user));
-        },
-      );
+        _setSentryUserIdentity(user.id.toString(), user.login, student.academicGroup);
+        emit(state.copyWith(status: UserStatus.authorized, user: user));
+      });
     }
   }
 
-  void _onLogOutEvent(
-    UserEvent event,
-    Emitter<UserState> emit,
-  ) async {
+  void _onLogOutEvent(UserEvent event, Emitter<UserState> emit) async {
     await logOut();
     emit(const UserState(status: UserStatus.unauthorized));
   }
@@ -95,10 +76,7 @@ class UserBloc extends HydratedBloc<UserEvent, UserState> {
     return student;
   }
 
-  void _onGetUserDataEvent(
-    UserEvent event,
-    Emitter<UserState> emit,
-  ) async {
+  void _onGetUserDataEvent(UserEvent event, Emitter<UserState> emit) async {
     if (state.status == UserStatus.authorized) return;
 
     final token = await getAuthToken();

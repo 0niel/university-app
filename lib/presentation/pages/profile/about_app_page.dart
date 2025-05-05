@@ -5,9 +5,7 @@ import 'package:rtu_mirea_app/sponsors/view/sponsors_view.dart';
 import 'package:unicons/unicons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:package_info_plus/package_info_plus.dart';
 import 'package:app_ui/app_ui.dart';
-import 'package:rtu_mirea_app/service_locator.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 class AboutAppPage extends StatelessWidget {
@@ -16,9 +14,7 @@ class AboutAppPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("О приложении"),
-      ),
+      appBar: AppBar(title: const Text("О приложении")),
       body: SafeArea(
         bottom: false,
         child: CustomScrollView(
@@ -54,7 +50,7 @@ class AboutAppPage extends StatelessWidget {
             '100% бесплатными и Open Source продуктами. Мы с огромным '
             'удовольствием примем любые ваши предложения и сообщения, а '
             'также мы рады любому вашему участию в проекте!',
-            style: AppTextStyle.bodyRegular,
+            style: AppTextStyle.body,
           ),
           const SizedBox(height: 16),
           _buildSocialIcons(context),
@@ -69,46 +65,43 @@ class AboutAppPage extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Text('Open Source', style: AppTextStyle.h4),
-        PopupMenuButton<String>(
-          color: Theme.of(context).extension<AppColors>()!.background03,
-          onSelected: (value) {},
-          itemBuilder: (BuildContext context) {
-            return [
-              PopupMenuItem(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Версия приложения:', style: AppTextStyle.body),
-                    const SizedBox(height: 4),
-                    Text(getIt<PackageInfo>().version, style: AppTextStyle.bodyRegular),
-                  ],
-                ),
-              ),
-              const PopupMenuDivider(),
-              PopupMenuItem(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Номер сборки:', style: AppTextStyle.body),
-                    const SizedBox(height: 4),
-                    Text(getIt<PackageInfo>().buildNumber, style: AppTextStyle.bodyRegular),
-                  ],
-                ),
-              ),
-            ];
-          },
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              borderRadius: const BorderRadius.all(Radius.circular(4)),
-              color: Theme.of(context).extension<AppColors>()!.primary,
-            ),
-            child: Text(
-              getIt<PackageInfo>().version,
-              style: AppTextStyle.buttonS,
-            ),
-          ),
-        ),
+        // PopupMenuButton<String>(
+        //   color: Theme.of(context).extension<AppColors>()!.background03,
+        //   onSelected: (value) {},
+        //   itemBuilder: (BuildContext context) {
+        //     return [
+        //       PopupMenuItem(
+        //         child: Column(
+        //           crossAxisAlignment: CrossAxisAlignment.start,
+        //           children: [
+        //             Text('Версия приложения:', style: AppTextStyle.body),
+        //             const SizedBox(height: 4),
+        //             Text(getIt<PackageInfo>().version, style: AppTextStyle.body),
+        //           ],
+        //         ),
+        //       ),
+        //       const PopupMenuDivider(),
+        //       PopupMenuItem(
+        //         child: Column(
+        //           crossAxisAlignment: CrossAxisAlignment.start,
+        //           children: [
+        //             Text('Номер сборки:', style: AppTextStyle.body),
+        //             const SizedBox(height: 4),
+        //             Text(getIt<PackageInfo>().buildNumber, style: AppTextStyle.body),
+        //           ],
+        //         ),
+        //       ),
+        //     ];
+        //   },
+        //   child: Container(
+        //     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        //     decoration: BoxDecoration(
+        //       borderRadius: const BorderRadius.all(Radius.circular(4)),
+        //       color: Theme.of(context).extension<AppColors>()!.primary,
+        //     ),
+        //     child: Text(getIt<PackageInfo>().version, style: AppTextStyle.buttonS),
+        //   ),
+        // ),
       ],
     );
   }
@@ -123,7 +116,7 @@ class AboutAppPage extends StatelessWidget {
           child: SocialIconButton(
             icon: Icon(UniconsLine.github, color: Theme.of(context).colorScheme.onSurface),
             onClick: () {
-              launchUrlString('https://github.com/0niel/rtu-mirea-mobile', mode: LaunchMode.externalApplication);
+              launchUrlString('https://github.com/0niel/university-app', mode: LaunchMode.externalApplication);
             },
           ),
         ),
@@ -147,11 +140,7 @@ class AboutAppPage extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text('Поддержавшие 💜', style: AppTextStyle.h6),
-          const SizedBox(height: 16),
-          const SponsorsView(),
-        ],
+        children: [Text('Поддержавшие 💜', style: AppTextStyle.h6), const SizedBox(height: 16), const SponsorsView()],
       ),
     );
   }

@@ -28,13 +28,18 @@ class StoryItem extends StatelessWidget {
             borderRadius: BorderRadius.circular(12),
             image: DecorationImage(
               fit: BoxFit.cover,
-              image: stories[storyIndex].preview.formats != null
-                  ? CachedNetworkImageProvider(stories[storyIndex].preview.formats!.small != null
-                      ? stories[storyIndex].preview.formats!.small!.url
-                      : stories[storyIndex].preview.formats!.thumbnail.url)
-                  : CachedNetworkImageProvider(stories[storyIndex].preview.url),
+              image:
+                  stories[storyIndex].preview.formats != null
+                      ? CachedNetworkImageProvider(
+                        stories[storyIndex].preview.formats!.small != null
+                            ? stories[storyIndex].preview.formats!.small!.url
+                            : stories[storyIndex].preview.formats!.thumbnail.url,
+                      )
+                      : CachedNetworkImageProvider(stories[storyIndex].preview.url),
               colorFilter: ColorFilter.mode(
-                  Theme.of(context).extension<AppColors>()!.background02.withOpacity(0.15), BlendMode.dstOut),
+                Theme.of(context).extension<AppColors>()!.background02.withOpacity(0.15),
+                BlendMode.dstOut,
+              ),
             ),
           ),
           child: Material(
@@ -43,13 +48,7 @@ class StoryItem extends StatelessWidget {
               stories[storyIndex].title,
               style: AppTextStyle.chip.copyWith(
                 color: Colors.white,
-                shadows: [
-                  Shadow(
-                    color: Colors.black.withOpacity(0.5),
-                    offset: const Offset(0, 2),
-                    blurRadius: 4,
-                  ),
-                ],
+                shadows: [Shadow(color: Colors.black.withOpacity(0.5), offset: const Offset(0, 2), blurRadius: 4)],
               ),
             ),
           ),

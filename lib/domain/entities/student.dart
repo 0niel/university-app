@@ -37,15 +37,15 @@ class Student extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        isActive,
-        course,
-        personalNumber,
-        educationStartDate,
-        educationEndDate,
-        academicGroup,
-        code,
-        eduProgram,
-        status,
-      ];
+    id,
+    isActive,
+    course,
+    personalNumber,
+    educationStartDate,
+    educationEndDate,
+    academicGroup,
+    code,
+    eduProgram,
+    status,
+  ];
 }

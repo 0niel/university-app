@@ -60,11 +60,9 @@ abstract class CalendarUtils {
   /// Get the last date of the semester
   static DateTime getSemesterLastDay({DateTime? mCurrentDate, final Clock clock = const Clock()}) {
     return getDaysInWeek(
-        kMaxWeekInSemester,
-        _CurrentSemesterStart.getCurrentSemesterStart(
-          mCurrentDate: mCurrentDate,
-          clock: clock,
-        )).last;
+      kMaxWeekInSemester,
+      _CurrentSemesterStart.getCurrentSemesterStart(mCurrentDate: mCurrentDate, clock: clock),
+    ).last;
   }
 
   /// Calculates number of weeks for a given year as per https://en.wikipedia.org/wiki/ISO_week_date#Weeks_per_year

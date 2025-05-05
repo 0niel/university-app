@@ -27,23 +27,13 @@ class SelectedScheduleItemButton extends StatelessWidget {
           padding: const EdgeInsets.only(left: 10),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              width: 1.5,
-              color: isSelected ? AppColors.dark.colorful05 : AppColors.dark.colorful06,
-            ),
+            border: Border.all(width: 1.5, color: isSelected ? AppColors.dark.colorful05 : AppColors.dark.colorful06),
           ),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Expanded(
-                child: Text(
-                  text,
-                  style: AppTextStyle.buttonL,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
+              Expanded(child: Text(text, style: AppTextStyle.buttonL, maxLines: 1, overflow: TextOverflow.ellipsis)),
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -55,8 +45,10 @@ class SelectedScheduleItemButton extends StatelessWidget {
                     },
                     shape: const CircleBorder(),
                     constraints: const BoxConstraints(minWidth: 36.0, minHeight: 36.0),
-                    child: Icon(Icons.refresh_rounded,
-                        color: isSelected ? AppColors.dark.colorful05 : AppColors.dark.colorful06),
+                    child: Icon(
+                      Icons.refresh_rounded,
+                      color: isSelected ? AppColors.dark.colorful05 : AppColors.dark.colorful06,
+                    ),
                   ),
                 ],
               ),
@@ -78,14 +70,7 @@ class SelectedScheduleItemButton extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Expanded(
-              child: Text(
-                text,
-                style: AppTextStyle.buttonL,
-                overflow: TextOverflow.ellipsis,
-                maxLines: 1,
-              ),
-            ),
+            Expanded(child: Text(text, style: AppTextStyle.buttonL, overflow: TextOverflow.ellipsis, maxLines: 1)),
             Row(
               children: [
                 RawMaterialButton(

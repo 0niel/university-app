@@ -10,9 +10,9 @@ class SponsorsView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider<SponsorsBloc>(
-      create: (context) => SponsorsBloc(
-        communityRepository: context.read<CommunityRepository>(),
-      )..add(const SponsorsLoadRequest()),
+      create:
+          (context) =>
+              SponsorsBloc(communityRepository: context.read<CommunityRepository>())..add(const SponsorsLoadRequest()),
       child: const _SponsorsView(),
     );
   }
@@ -28,31 +28,19 @@ class _SponsorsView extends StatelessWidget {
         if (state.status == SponsorsStatus.failure) {
           ScaffoldMessenger.of(context)
             ..hideCurrentSnackBar()
-            ..showSnackBar(
-              const SnackBar(
-                content: Text('Ошибка при загрузке спонсоров'),
-              ),
-            );
+            ..showSnackBar(const SnackBar(content: Text('Ошибка при загрузке спонсоров')));
         }
       },
       builder: (context, state) {
         if (state.status == SponsorsStatus.loading) {
-          return Column(
-            children: List.generate(
-              1,
-              (index) => const SkeletonSponsorCard(),
-            ),
-          );
+          return Column(children: List.generate(1, (index) => const SkeletonSponsorCard()));
         } else if (state.status == SponsorsStatus.loaded) {
           return Column(
-            children: List.generate(
-              state.sponsors.sponsors.length,
-              (index) {
-                final sponsor = state.sponsors.sponsors[index];
+            children: List.generate(state.sponsors.sponsors.length, (index) {
+              final sponsor = state.sponsors.sponsors[index];
 
-                return SponsorCard(sponsor: sponsor);
-              },
-            ).animate(interval: 80.ms).fade(duration: 200.ms),
+              return SponsorCard(sponsor: sponsor);
+            }).animate(interval: 80.ms).fade(duration: 200.ms),
           );
         } else {
           return const SizedBox.shrink();

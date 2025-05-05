@@ -5,10 +5,7 @@ abstract class RatingSystemEvent extends Equatable {
 }
 
 class UpdateSubjectsByCurrentSchedule extends RatingSystemEvent {
-  const UpdateSubjectsByCurrentSchedule({
-    required this.group,
-    required this.subjects,
-  });
+  const UpdateSubjectsByCurrentSchedule({required this.group, required this.subjects});
 
   final Group group;
   final List<Subject> subjects;

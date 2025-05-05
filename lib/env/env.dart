@@ -2,12 +2,12 @@ import 'package:envied/envied.dart';
 
 part 'env.g.dart';
 
-@Envied(requireEnvFile: false, environment: true)
+@Envied(requireEnvFile: false, environment: false)
 abstract class Env {
-  @EnviedField(varName: 'MAPKIT_API_KEY')
-  static const String mapkitApiKey = _Env.mapkitApiKey;
-  @EnviedField(varName: 'STORYLY_ID')
-  static const String storylyId = _Env.storylyId;
   @EnviedField(varName: 'SENTRY_DSN')
   static const String sentryDsn = _Env.sentryDsn;
+  @EnviedField(varName: 'SUPABASE_URL')
+  static const String supabaseUrl = _Env.supabaseUrl;
+  @EnviedField(varName: 'SUPABASE_ANON_KEY')
+  static const String supabaseAnonKey = _Env.supabaseAnonKey;
 }

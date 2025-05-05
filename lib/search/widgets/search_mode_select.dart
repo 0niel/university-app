@@ -29,24 +29,27 @@ class SearchModeSelect extends StatelessWidget {
                   isActive: state.searchMode == SearchMode.groups,
                   text: "Группы",
                   mode: SearchMode.groups,
-                  icon: Assets.icons.hugeicons.userGroup
-                      .svg(color: _getIconColor(context, state.searchMode == SearchMode.groups)),
+                  icon: Assets.icons.hugeicons.userGroup.svg(
+                    color: _getIconColor(context, state.searchMode == SearchMode.groups),
+                  ),
                 ),
                 _buildModeButton(
                   context,
                   isActive: state.searchMode == SearchMode.teachers,
                   text: "Преподаватели",
                   mode: SearchMode.teachers,
-                  icon: Assets.icons.hugeicons.teaching
-                      .svg(color: _getIconColor(context, state.searchMode == SearchMode.teachers)),
+                  icon: Assets.icons.hugeicons.teaching.svg(
+                    color: _getIconColor(context, state.searchMode == SearchMode.teachers),
+                  ),
                 ),
                 _buildModeButton(
                   context,
                   isActive: state.searchMode == SearchMode.classrooms,
                   text: "Аудитории",
                   mode: SearchMode.classrooms,
-                  icon: Assets.icons.hugeicons.building06
-                      .svg(color: _getIconColor(context, state.searchMode == SearchMode.classrooms)),
+                  icon: Assets.icons.hugeicons.building06.svg(
+                    color: _getIconColor(context, state.searchMode == SearchMode.classrooms),
+                  ),
                 ),
               ],
             ),
@@ -56,8 +59,13 @@ class SearchModeSelect extends StatelessWidget {
     );
   }
 
-  Widget _buildModeButton(BuildContext context,
-      {required bool isActive, required String text, required SearchMode mode, Widget? icon}) {
+  Widget _buildModeButton(
+    BuildContext context, {
+    required bool isActive,
+    required String text,
+    required SearchMode mode,
+    Widget? icon,
+  }) {
     return ModeSelectButton(
       isActive: isActive,
       text: text,

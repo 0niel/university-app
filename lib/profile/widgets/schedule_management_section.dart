@@ -5,7 +5,6 @@ import 'package:go_router/go_router.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:app_ui/app_ui.dart';
 import 'package:rtu_mirea_app/profile/widgets/widgets.dart';
-import 'package:rtu_mirea_app/schedule/models/models.dart';
 import 'package:rtu_mirea_app/schedule/schedule.dart';
 import 'package:rtu_mirea_app/schedule_management/bloc/schedule_exporter_cubit.dart';
 import 'package:university_app_server_api/client.dart';
@@ -40,103 +39,116 @@ class ScheduleManagementSection extends StatelessWidget {
       },
       child: BlocBuilder<ScheduleBloc, ScheduleState>(
         builder: (context, state) {
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              ProfileButton(
-                text: 'Группы',
-                icon: HugeIcon(
-                    icon: HugeIcons.strokeRoundedUserGroup, color: Theme.of(context).extension<AppColors>()!.active),
-                onPressed: () => context.go('/profile/schedule-management'),
-                trailing: Padding(
-                  padding: const EdgeInsets.only(right: 8.0),
-                  child: Text(
-                    _getTotalSavedSchedules(context).toString(),
-                    style: AppTextStyle.bodyL.copyWith(color: Theme.of(context).extension<AppColors>()!.active),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 8),
-              ProfileButton(
-                text: "Компактный вид",
-                icon: Assets.icons.hugeicons.listView.svg(color: Theme.of(context).extension<AppColors>()!.active),
-                trailing: PlatformSwitch(
-                  value: state.isMiniature,
-                  onChanged: (value) {
-                    context.read<ScheduleBloc>().add(ScheduleSetDisplayMode(isMiniature: value));
-                  },
-                ),
-                onPressed: () {
-                  final newValue = !state.isMiniature;
-                  context.read<ScheduleBloc>().add(ScheduleSetDisplayMode(isMiniature: newValue));
-                },
-              ),
-              const SizedBox(height: 8),
-              ProfileButton(
-                text: "Пустые пары",
-                icon: Assets.icons.hugeicons.listView.svg(color: Theme.of(context).extension<AppColors>()!.active),
-                trailing: PlatformSwitch(
-                  value: state.showEmptyLessons,
-                  onChanged: (value) {
-                    context.read<ScheduleBloc>().add(ScheduleSetEmptyLessonsDisplaying(showEmptyLessons: value));
-                  },
-                ),
-                onPressed: () {
-                  final newValue = !state.showEmptyLessons;
-                  context.read<ScheduleBloc>().add(ScheduleSetEmptyLessonsDisplaying(showEmptyLessons: newValue));
-                },
-              ),
-              const SizedBox(height: 8),
-              ProfileButton(
-                text: "Индикатор заметок",
-                icon: Padding(
-                  padding: const EdgeInsets.only(left: 4, right: 4),
-                  child: Icon(
-                    Icons.circle,
-                    color: Theme.of(context).extension<AppColors>()!.active,
-                    size: 18,
-                  ),
-                ),
-                trailing: PlatformSwitch(
-                  value: state.showCommentsIndicators,
-                  onChanged: (value) {
-                    context.read<ScheduleBloc>().add(SetShowCommentsIndicator(showCommentsIndicators: value));
-                  },
-                ),
-                onPressed: () {
-                  final newValue = !state.showCommentsIndicators;
-                  context.read<ScheduleBloc>().add(SetShowCommentsIndicator(showCommentsIndicators: newValue));
-                },
-              ),
-              if (state.selectedSchedule != null) ...[
-                const SizedBox(height: 8),
-                ProfileButton(
-                  text: "Экспорт в календарь",
-                  icon: Assets.icons.hugeicons.calendarCheckOut01
-                      .svg(color: Theme.of(context).extension<AppColors>()!.active),
-                  onPressed: () async {
-                    final calendarName = _getCalendarName(state.selectedSchedule!);
-                    final lessons = state.selectedSchedule!.schedule.whereType<LessonSchedulePart>().toList();
-
-                    BottomModalSheet.show(
-                      context,
-                      title: 'Экспорт в календарь',
-                      description: 'Выберите настройки для экспорта расписания в календарь вашего устройства.',
-                      child: ExportScheduleModalContent(
-                        calendarName: calendarName,
-                        lessons: lessons,
+          return Card(
+            margin: EdgeInsets.zero,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            elevation: 0,
+            color: Theme.of(context).extension<AppColors>()!.background02,
+            child: Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  ProfileButton(
+                    text: 'Группы',
+                    icon: HugeIcon(
+                      icon: HugeIcons.strokeRoundedUserGroup,
+                      size: 26,
+                      color: Theme.of(context).extension<AppColors>()!.primary,
+                    ),
+                    onPressed: () => context.go('/profile/schedule-management'),
+                    trailing: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).extension<AppColors>()!.primary.withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(12),
                       ),
-                    );
-                  },
-                ),
-              ],
-              const SizedBox(height: 8),
-              ProfileButton(
-                text: "Проблемы с расписанием",
-                icon: Assets.icons.hugeicons.share01.svg(color: Theme.of(context).extension<AppColors>()!.active),
-                onPressed: () => onFeedbackTap(context),
+                      child: Text(
+                        _getTotalSavedSchedules(context).toString(),
+                        style: AppTextStyle.bodyL.copyWith(
+                          color: Theme.of(context).extension<AppColors>()!.primary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const Divider(height: 24, thickness: 0.5),
+                  _SettingToggleRow(
+                    title: "Компактный вид",
+                    icon: Assets.icons.hugeicons.listView.svg(
+                      color: Theme.of(context).extension<AppColors>()!.primary,
+                      height: 24,
+                    ),
+                    value: state.isMiniature,
+                    onChanged: (value) {
+                      context.read<ScheduleBloc>().add(ScheduleSetDisplayMode(isMiniature: value));
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  _SettingToggleRow(
+                    title: "Пустые пары",
+                    icon: Icon(
+                      Icons.event_busy_outlined,
+                      color: Theme.of(context).extension<AppColors>()!.primary,
+                      size: 24,
+                    ),
+                    value: state.showEmptyLessons,
+                    onChanged: (value) {
+                      context.read<ScheduleBloc>().add(ScheduleSetEmptyLessonsDisplaying(showEmptyLessons: value));
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  _SettingToggleRow(
+                    title: "Индикатор заметок",
+                    icon: Container(
+                      padding: const EdgeInsets.all(3),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Theme.of(context).extension<AppColors>()!.primary, width: 2),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(Icons.circle, color: Theme.of(context).extension<AppColors>()!.primary, size: 14),
+                    ),
+                    value: state.showCommentsIndicators,
+                    onChanged: (value) {
+                      context.read<ScheduleBloc>().add(SetShowCommentsIndicator(showCommentsIndicators: value));
+                    },
+                  ),
+                  if (state.selectedSchedule != null) ...[
+                    const Divider(height: 32, thickness: 0.5),
+                    ProfileButton(
+                      text: "Экспорт в календарь",
+                      icon: Assets.icons.hugeicons.calendarCheckOut01.svg(
+                        color: Theme.of(context).extension<AppColors>()!.primary,
+                        height: 24,
+                      ),
+                      onPressed: () async {
+                        final calendarName = _getCalendarName(state.selectedSchedule!);
+                        final lessons = state.selectedSchedule!.schedule.whereType<LessonSchedulePart>().toList();
+
+                        BottomModalSheet.show(
+                          context,
+                          title: 'Экспорт в календарь',
+                          isExpandable: true,
+                          isDismissible: true,
+                          showFullScreen: true,
+                          minFraction: 0.33,
+                          child: ExportScheduleModalContent(calendarName: calendarName, lessons: lessons),
+                        );
+                      },
+                    ),
+                  ],
+                  const Divider(height: 32, thickness: 0.5),
+                  ProfileButton(
+                    text: "Проблемы с расписанием",
+                    icon: Assets.icons.hugeicons.share01.svg(
+                      color: Theme.of(context).extension<AppColors>()!.colorful07,
+                      height: 24,
+                    ),
+                    onPressed: () => onFeedbackTap(context),
+                  ),
+                ],
               ),
-            ],
+            ),
           );
         },
       ),
@@ -162,5 +174,44 @@ class ScheduleManagementSection extends StatelessWidget {
     final nameParts = teacherName.split(' ');
     if (nameParts.length < 2) return teacherName;
     return '${nameParts[0]} ${nameParts[1][0]}.';
+  }
+}
+
+class _SettingToggleRow extends StatelessWidget {
+  final String title;
+  final Widget icon;
+  final bool value;
+  final ValueChanged<bool> onChanged;
+
+  const _SettingToggleRow({required this.title, required this.icon, required this.value, required this.onChanged});
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: () => onChanged(!value),
+      borderRadius: BorderRadius.circular(12),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Theme.of(context).extension<AppColors>()!.background03,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: icon,
+            ),
+            const SizedBox(width: 16),
+            Expanded(child: Text(title, style: AppTextStyle.bodyL.copyWith(fontWeight: FontWeight.w500))),
+            PlatformSwitch(
+              value: value,
+              onChanged: onChanged,
+              activeColor: Theme.of(context).extension<AppColors>()!.primary,
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

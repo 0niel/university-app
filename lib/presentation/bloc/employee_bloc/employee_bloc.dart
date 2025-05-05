@@ -14,10 +14,7 @@ class EmployeeBloc extends Bloc<EmployeeEvent, EmployeeState> {
     on<LoadEmployees>(_onLoadEmployees);
   }
 
-  void _onLoadEmployees(
-    LoadEmployees event,
-    Emitter<EmployeeState> emit,
-  ) async {
+  void _onLoadEmployees(LoadEmployees event, Emitter<EmployeeState> emit) async {
     if (event.name.length > 2) {
       emit(EmployeeLoading());
 

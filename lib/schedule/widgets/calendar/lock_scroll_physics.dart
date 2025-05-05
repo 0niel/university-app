@@ -1,83 +1,45 @@
 import 'package:flutter/material.dart';
 
-// ignore: must_be_immutable
+/// A scroll physics that always locks the scroll to the closest page.
 class LockScrollPhysics extends ScrollPhysics {
-  /// Lock swipe on drag-drop gesture
-  /// If it is a user gesture, [applyPhysicsToUserOffset] is called before [applyBoundaryConditions];
-  /// If it is a programming gesture eg. `controller.animateTo(index)`, [applyPhysicsToUserOffset] is not called.
-  bool _lock = false;
-
-  /// Lock scroll to the left
-  final bool lockLeft;
-
-  /// Lock scroll to the right
-  final bool lockRight;
-
   /// Creates physics for a [PageView].
-  /// [lockLeft] Lock scroll to the left
-  /// [lockRight] Lock scroll to the right
-  LockScrollPhysics({super.parent, this.lockLeft = false, this.lockRight = false});
+  const LockScrollPhysics({super.parent});
 
   @override
   LockScrollPhysics applyTo(ScrollPhysics? ancestor) {
-    return LockScrollPhysics(parent: buildParent(ancestor), lockLeft: lockLeft, lockRight: lockRight);
+    return LockScrollPhysics(parent: buildParent(ancestor));
   }
 
   @override
-  double applyPhysicsToUserOffset(ScrollMetrics position, double offset) {
-    if ((lockRight && offset < 0) || (lockLeft && offset > 0)) {
-      _lock = true;
-      return 0.0;
-    }
-
-    return offset;
-  }
+  SpringDescription get spring => const SpringDescription(mass: 80, stiffness: 100, damping: 1);
 
   @override
-  double applyBoundaryConditions(ScrollMetrics position, double value) {
-    assert(() {
-      if (value == position.pixels) {
-        throw FlutterError('$runtimeType.applyBoundaryConditions() was called redundantly.\n'
-            'The proposed new position, $value, is exactly equal to the current position of the '
-            'given ${position.runtimeType}, ${position.pixels}.\n'
-            'The applyBoundaryConditions method should only be called when the value is '
-            'going to actually change the pixels, otherwise it is redundant.\n'
-            'The physics object in question was:\n'
-            '  $this\n'
-            'The position object in question was:\n'
-            '  $position\n');
-      }
-      return true;
-    }());
+  bool get allowImplicitScrolling => false;
 
-    /*
-     * Handle the hard boundaries (min and max extents)
-     * (identical to ClampingScrollPhysics)
-     */
-    // under-scroll
-    if (value < position.pixels && position.pixels <= position.minScrollExtent) {
-      return value - position.pixels;
-    }
-    // over-scroll
-    else if (position.maxScrollExtent <= position.pixels && position.pixels < value) {
-      return value - position.pixels;
-    }
-    // hit top edge
-    else if (value < position.minScrollExtent && position.minScrollExtent < position.pixels) {
-      return value - position.pixels;
-    }
-    // hit bottom edge
-    else if (position.pixels < position.maxScrollExtent && position.maxScrollExtent < value) {
-      return value - position.pixels;
+  @override
+  Simulation? createBallisticSimulation(ScrollMetrics position, double velocity) {
+    // If we're out of range and not headed back in range, then we should animate to the closest page boundary.
+    if ((velocity <= 0.0 && position.pixels <= position.minScrollExtent) ||
+        (velocity >= 0.0 && position.pixels >= position.maxScrollExtent)) {
+      return super.createBallisticSimulation(position, velocity);
     }
 
-    var isGoingLeft = value <= position.pixels;
-    var isGoingRight = value >= position.pixels;
-    if (_lock && ((lockLeft && isGoingLeft) || (lockRight && isGoingRight))) {
-      _lock = false;
-      return value - position.pixels;
+    final Tolerance tolerance = this.tolerance;
+    final double target = _getTargetPixels(position, tolerance, velocity);
+    if (target != position.pixels) {
+      return ScrollSpringSimulation(spring, position.pixels, target, velocity, tolerance: tolerance);
     }
+    return null;
+  }
 
-    return 0.0;
+  double _getTargetPixels(ScrollMetrics position, Tolerance tolerance, double velocity) {
+    final page = (position.pixels + 0.5 * position.viewportDimension) / position.viewportDimension;
+    final targetPage =
+        velocity < -tolerance.velocity
+            ? page.floor()
+            : velocity > tolerance.velocity
+            ? page.ceil()
+            : page.round();
+    return targetPage * position.viewportDimension;
   }
 }

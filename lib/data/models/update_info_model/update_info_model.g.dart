@@ -7,17 +7,17 @@ part of 'update_info_model.dart';
 // **************************************************************************
 
 _$UpdateInfoModelImpl _$$UpdateInfoModelImplFromJson(Map<String, dynamic> json) => _$UpdateInfoModelImpl(
-      title: json['title'] as String,
-      description: json['description'] as String?,
-      text: json['text'] as String,
-      appVersion: json['appVersion'] as String,
-      buildNumber: (json['buildNumber'] as num).toInt(),
-    );
+  title: json['title'] as String,
+  description: json['description'] as String?,
+  text: json['text'] as String,
+  appVersion: json['appVersion'] as String,
+  buildNumber: (json['buildNumber'] as num).toInt(),
+);
 
 Map<String, dynamic> _$$UpdateInfoModelImplToJson(_$UpdateInfoModelImpl instance) => <String, dynamic>{
-      'title': instance.title,
-      'description': instance.description,
-      'text': instance.text,
-      'appVersion': instance.appVersion,
-      'buildNumber': instance.buildNumber,
-    };
+  'title': instance.title,
+  'description': instance.description,
+  'text': instance.text,
+  'appVersion': instance.appVersion,
+  'buildNumber': instance.buildNumber,
+};

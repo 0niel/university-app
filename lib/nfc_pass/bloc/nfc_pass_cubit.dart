@@ -5,21 +5,10 @@ import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:nfc_pass_repository/nfc_pass_repository.dart';
 
-enum NfcPassStatus {
-  initial,
-  loading,
-  codeSent,
-  bound,
-  error,
-}
+enum NfcPassStatus { initial, loading, codeSent, bound, error }
 
 class NfcPassState extends Equatable {
-  const NfcPassState({
-    this.status = NfcPassStatus.initial,
-    this.passId,
-    this.errorMessage,
-    this.localFilePath,
-  });
+  const NfcPassState({this.status = NfcPassStatus.initial, this.passId, this.errorMessage, this.localFilePath});
 
   final NfcPassStatus status;
   final int? passId;
@@ -37,12 +26,7 @@ class NfcPassState extends Equatable {
   @override
   List<Object?> get props => [status, passId, errorMessage, localFilePath];
 
-  NfcPassState copyWith({
-    NfcPassStatus? status,
-    int? passId,
-    String? errorMessage,
-    String? localFilePath,
-  }) {
+  NfcPassState copyWith({NfcPassStatus? status, int? passId, String? errorMessage, String? localFilePath}) {
     return NfcPassState(
       status: status ?? this.status,
       passId: passId ?? this.passId,
@@ -53,12 +37,10 @@ class NfcPassState extends Equatable {
 }
 
 class NfcPassCubit extends HydratedCubit<NfcPassState> {
-  NfcPassCubit({
-    required NfcPassRepository repository,
-    ImagePicker? imagePicker,
-  })  : _repository = repository,
-        _imagePicker = imagePicker ?? ImagePicker(),
-        super(const NfcPassState());
+  NfcPassCubit({required NfcPassRepository repository, ImagePicker? imagePicker})
+    : _repository = repository,
+      _imagePicker = imagePicker ?? ImagePicker(),
+      super(const NfcPassState());
 
   final NfcPassRepository _repository;
   final ImagePicker _imagePicker;
@@ -71,16 +53,10 @@ class NfcPassCubit extends HydratedCubit<NfcPassState> {
         emit(state.copyWith(status: NfcPassStatus.initial, passId: null));
       } else {
         final passId = await _repository.getPassId();
-        emit(state.copyWith(
-          status: NfcPassStatus.bound,
-          passId: passId,
-        ));
+        emit(state.copyWith(status: NfcPassStatus.bound, passId: passId));
       }
     } catch (e) {
-      emit(state.copyWith(
-        status: NfcPassStatus.error,
-        errorMessage: e.toString(),
-      ));
+      emit(state.copyWith(status: NfcPassStatus.error, errorMessage: e.toString()));
     }
   }
 
@@ -90,32 +66,17 @@ class NfcPassCubit extends HydratedCubit<NfcPassState> {
       await _repository.bindPass();
       emit(state.copyWith(status: NfcPassStatus.codeSent));
     } catch (e) {
-      emit(state.copyWith(
-        status: NfcPassStatus.error,
-        errorMessage: e.toString(),
-      ));
+      emit(state.copyWith(status: NfcPassStatus.error, errorMessage: e.toString()));
     }
   }
 
-  Future<void> confirmBinding({
-    required String sixDigitCode,
-    required String deviceName,
-  }) async {
+  Future<void> confirmBinding({required String sixDigitCode, required String deviceName}) async {
     emit(state.copyWith(status: NfcPassStatus.loading, errorMessage: null));
     try {
-      final passId = await _repository.confirmBinding(
-        sixDigitCode: sixDigitCode,
-        deviceName: deviceName,
-      );
-      emit(state.copyWith(
-        status: NfcPassStatus.bound,
-        passId: passId,
-      ));
+      final passId = await _repository.confirmBinding(sixDigitCode: sixDigitCode, deviceName: deviceName);
+      emit(state.copyWith(status: NfcPassStatus.bound, passId: passId));
     } catch (e) {
-      emit(state.copyWith(
-        status: NfcPassStatus.error,
-        errorMessage: e.toString(),
-      ));
+      emit(state.copyWith(status: NfcPassStatus.error, errorMessage: e.toString()));
     }
   }
 
@@ -125,10 +86,7 @@ class NfcPassCubit extends HydratedCubit<NfcPassState> {
       await _repository.unbindPass();
       emit(const NfcPassState(status: NfcPassStatus.initial));
     } catch (e) {
-      emit(state.copyWith(
-        status: NfcPassStatus.error,
-        errorMessage: e.toString(),
-      ));
+      emit(state.copyWith(status: NfcPassStatus.error, errorMessage: e.toString()));
     }
   }
 

@@ -1,23 +1,10 @@
 part of 'search_bloc.dart';
 
-enum SearchStatus {
-  initial,
-  loading,
-  populated,
-  failure,
-}
+enum SearchStatus { initial, loading, populated, failure }
 
-enum SearchType {
-  popular,
-  relevant,
-}
+enum SearchType { popular, relevant }
 
-enum SearchMode {
-  all,
-  groups,
-  teachers,
-  classrooms,
-}
+enum SearchMode { all, groups, teachers, classrooms }
 
 @JsonSerializable()
 class SearchState extends Equatable {
@@ -28,12 +15,12 @@ class SearchState extends Equatable {
     List<String>? searchHisoty,
     SearchStatus? status,
     SearchMode? searchMode,
-  })  : groups = groups ?? const SearchGroupsResponse(results: []),
-        teachers = teachers ?? const SearchTeachersResponse(results: []),
-        classrooms = classrooms ?? const SearchClassroomsResponse(results: []),
-        searchHisoty = searchHisoty ?? const [],
-        status = status ?? SearchStatus.initial,
-        searchMode = searchMode ?? SearchMode.all;
+  }) : groups = groups ?? const SearchGroupsResponse(results: []),
+       teachers = teachers ?? const SearchTeachersResponse(results: []),
+       classrooms = classrooms ?? const SearchClassroomsResponse(results: []),
+       searchHisoty = searchHisoty ?? const [],
+       status = status ?? SearchStatus.initial,
+       searchMode = searchMode ?? SearchMode.all;
 
   const SearchState.initial() : this();
 

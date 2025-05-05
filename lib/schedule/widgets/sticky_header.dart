@@ -8,11 +8,7 @@ import 'package:rtu_mirea_app/schedule/schedule.dart';
 import 'package:university_app_server_api/client.dart';
 
 class StickyHeader extends StatelessWidget {
-  const StickyHeader({
-    super.key,
-    required this.day,
-    required this.lessons,
-  });
+  const StickyHeader({super.key, required this.day, required this.lessons});
 
   final DateTime day;
   final List<LessonSchedulePart> lessons;
@@ -27,34 +23,25 @@ class StickyHeader extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            const Icon(
-              HugeIcons.strokeRoundedCalendar04,
-              size: 17.5,
-            ),
+            const Icon(HugeIcons.strokeRoundedCalendar04, size: 17.5),
             const SizedBox(width: 8),
-            Text(
-              DateFormat('EEEE, d MMMM', 'ru').format(day),
-              style: AppTextStyle.bodyBold,
-            ),
+            Text(DateFormat('EEEE, d MMMM', 'ru').format(day), style: AppTextStyle.bodyBold),
           ],
         ),
       ),
       sliver: SliverList(
-        delegate: SliverChildBuilderDelegate(
-          (context, index) {
-            final lessonPart = lessons[index];
-            return Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-              child: LessonCard(
-                lesson: lessonPart,
-                onTap: (lesson) {
-                  context.go('/schedule/details', extra: (lesson, day));
-                },
-              ),
-            );
-          },
-          childCount: lessons.length,
-        ),
+        delegate: SliverChildBuilderDelegate((context, index) {
+          final lessonPart = lessons[index];
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            child: LessonCard(
+              lesson: lessonPart,
+              onTap: (lesson) {
+                context.go('/schedule/details', extra: (lesson, day));
+              },
+            ),
+          );
+        }, childCount: lessons.length),
       ),
     );
   }

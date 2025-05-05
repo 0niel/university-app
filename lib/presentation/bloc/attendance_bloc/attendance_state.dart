@@ -17,10 +17,7 @@ class AttendanceLoaded extends AttendanceState {
   final int visitsCount;
   final List<Attendance> attendance;
 
-  const AttendanceLoaded({
-    required this.attendance,
-    required this.visitsCount,
-  });
+  const AttendanceLoaded({required this.attendance, required this.visitsCount});
 
   @override
   List<Object> get props => [attendance, visitsCount];

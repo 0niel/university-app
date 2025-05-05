@@ -28,13 +28,7 @@ class Score extends Equatable {
   });
 
   @override
-  List<Object> get props => [
-        subjectName,
-        result,
-        type,
-        date,
-        year,
-      ];
+  List<Object> get props => [subjectName, result, type, date, year];
 
   Score copyWith({
     String? subjectName,

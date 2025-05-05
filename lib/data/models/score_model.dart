@@ -14,16 +14,16 @@ class ScoreModel extends Score {
     required exam,
     required credit,
   }) : super(
-          subjectName: subjectName,
-          result: result,
-          type: type,
-          comission: comission,
-          courseWork: courseWork,
-          exam: exam,
-          credit: credit,
-          date: date,
-          year: year,
-        );
+         subjectName: subjectName,
+         result: result,
+         type: type,
+         comission: comission,
+         courseWork: courseWork,
+         exam: exam,
+         credit: credit,
+         date: date,
+         year: year,
+       );
 
   factory ScoreModel.fromRawJson(String str) => ScoreModel.fromJson(json.decode(str));
 

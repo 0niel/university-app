@@ -4,10 +4,7 @@ import 'package:hugeicons/hugeicons.dart';
 import 'package:app_ui/app_ui.dart';
 
 class SettingsButton extends StatelessWidget {
-  const SettingsButton({
-    super.key,
-    required this.onPressed,
-  });
+  const SettingsButton({super.key, required this.onPressed});
 
   final VoidCallback onPressed;
 
@@ -19,10 +16,8 @@ class SettingsButton extends StatelessWidget {
         size: 24,
         color: Theme.of(context).extension<AppColors>()!.active,
       ),
-      material: (_, __) => MaterialIconButtonData(
-        padding: const EdgeInsets.all(16.0),
-        tooltip: 'Управление расписанием',
-      ),
+      material:
+          (_, __) => MaterialIconButtonData(padding: const EdgeInsets.all(16.0), tooltip: 'Управление расписанием'),
       onPressed: onPressed,
     );
   }

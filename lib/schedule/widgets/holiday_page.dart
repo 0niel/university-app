@@ -20,39 +20,22 @@ class HolidayPage extends StatelessWidget {
           // Добавляем анимацию к изображению
           Assets.images.saly18
               .image(height: 225.0)
-              .animate(
-                onPlay: (controller) => controller.repeat(reverse: true),
-              )
-              .moveY(
-                begin: 0,
-                end: -40,
-                duration: 5000.ms,
-                curve: Curves.easeInOut,
-              )
+              .animate(onPlay: (controller) => controller.repeat(reverse: true))
+              .moveY(begin: 0, end: -40, duration: 5000.ms, curve: Curves.easeInOut)
               .scale(
                 begin: const Offset(1, 1),
                 end: const Offset(1.07, 1.07),
                 duration: 4000.ms,
                 curve: Curves.easeInOut,
               )
-              .rotate(
-                begin: 0.0349,
-                end: -0.0349,
-                duration: 5000.ms,
-                curve: Curves.easeInOut,
-              ),
+              .rotate(begin: 0.0349, end: -0.0349, duration: 5000.ms, curve: Curves.easeInOut),
 
           const SizedBox(
             height: 16, // Увеличиваем отступ для лучшей визуализации
           ),
           Text(title, style: AppTextStyle.title),
-          const SizedBox(
-            height: 8,
-          ),
-          Text(
-            "Пар в этот день нет!",
-            style: AppTextStyle.bodyL,
-          ),
+          const SizedBox(height: 8),
+          Text("Пар в этот день нет!", style: AppTextStyle.bodyL),
         ],
       ),
     );

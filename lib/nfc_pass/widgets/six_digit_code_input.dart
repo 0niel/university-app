@@ -56,41 +56,26 @@ class _SixDigitCodeInputState extends State<SixDigitCodeInput> {
             decoration: InputDecoration(
               counterText: '',
               border: const OutlineInputBorder(),
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 12,
-              ),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(
-                  color: Theme.of(context).extension<AppColors>()!.primary,
-                ),
+                borderSide: BorderSide(color: Theme.of(context).extension<AppColors>()!.primary),
               ),
               focusedErrorBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(
-                  color: Theme.of(context).extension<AppColors>()!.colorful07,
-                ),
+                borderSide: BorderSide(color: Theme.of(context).extension<AppColors>()!.colorful07),
               ),
               disabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(
-                  color: Colors.transparent,
-                  width: 0,
-                ),
+                borderSide: const BorderSide(color: Colors.transparent, width: 0),
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(
-                  color: Colors.transparent,
-                  width: 0,
-                ),
+                borderSide: const BorderSide(color: Colors.transparent, width: 0),
               ),
               errorBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(
-                  color: Theme.of(context).extension<AppColors>()!.colorful07,
-                ),
+                borderSide: BorderSide(color: Theme.of(context).extension<AppColors>()!.colorful07),
               ),
               fillColor: Theme.of(context).extension<AppColors>()!.background01,
               filled: true,

@@ -4,10 +4,7 @@ import 'package:app_ui/app_ui.dart';
 class AddScheduleJsonBottomSheetContent extends StatefulWidget {
   final Function(String) onConfirm;
 
-  const AddScheduleJsonBottomSheetContent({
-    super.key,
-    required this.onConfirm,
-  });
+  const AddScheduleJsonBottomSheetContent({super.key, required this.onConfirm});
 
   @override
   State<AddScheduleJsonBottomSheetContent> createState() => _AddScheduleJsonBottomSheetContentState();
@@ -48,10 +45,7 @@ class _AddScheduleJsonBottomSheetContentState extends State<AddScheduleJsonBotto
           maxLines: 8,
         ),
         const SizedBox(height: 24),
-        PrimaryButton(
-          onClick: _addScheduleFromJson,
-          text: 'Добавить',
-        ),
+        PrimaryButton(onPressed: _addScheduleFromJson, text: 'Добавить'),
         const SizedBox(height: 16),
       ],
     );

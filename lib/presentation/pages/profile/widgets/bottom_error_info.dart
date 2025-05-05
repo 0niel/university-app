@@ -14,15 +14,12 @@ class BottomErrorInfo extends StatelessWidget {
             colors: [
               Theme.of(context).extension<AppColors>()!.secondary,
               Theme.of(context).extension<AppColors>()!.deactive,
-              Theme.of(context).extension<AppColors>()!.background01
+              Theme.of(context).extension<AppColors>()!.background01,
             ],
             begin: const Alignment(-1, -1),
             end: const Alignment(-1, 1),
           ),
-          borderRadius: const BorderRadius.only(
-            topLeft: Radius.circular(25.0),
-            topRight: Radius.circular(25.0),
-          ),
+          borderRadius: const BorderRadius.only(topLeft: Radius.circular(25.0), topRight: Radius.circular(25.0)),
         ),
         child: Padding(
           padding: const EdgeInsets.all(3.0),
@@ -40,11 +37,7 @@ class BottomErrorInfo extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(vertical: 40),
                   child: Assets.images.saly39.image(height: 205.0),
                 ),
-                Text(
-                  "Профиль теперь недоступен",
-                  style: AppTextStyle.h5,
-                  textAlign: TextAlign.center,
-                ),
+                Text("Профиль теперь недоступен", style: AppTextStyle.h5, textAlign: TextAlign.center),
                 const SizedBox(height: 8),
                 Text(
                   "Разработчики, отвечающие за API ЛКС, отключили возможность производить аутентификацию и получать данные своего аккаунта. Пожалуйста, используйте lk.mirea.ru",
@@ -58,18 +51,13 @@ class BottomErrorInfo extends StatelessWidget {
                     style: ButtonStyle(
                       backgroundColor: WidgetStateProperty.all(Theme.of(context).extension<AppColors>()!.primary),
                       shape: WidgetStateProperty.all<RoundedRectangleBorder>(
-                        RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(24.0),
-                        ),
+                        RoundedRectangleBorder(borderRadius: BorderRadius.circular(24.0)),
                       ),
                     ),
                     onPressed: () {
                       Navigator.of(context).pop();
                     },
-                    child: Text(
-                      'Понятно!',
-                      style: AppTextStyle.buttonS,
-                    ),
+                    child: Text('Понятно!', style: AppTextStyle.buttonS),
                   ),
                 ),
               ],

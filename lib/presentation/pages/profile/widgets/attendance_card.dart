@@ -33,23 +33,25 @@ class AttendanceCard extends StatelessWidget {
               child: Container(
                 width: 24,
                 height: 24,
-                decoration: type == "Вход"
-                    ? const BoxDecoration(
-                        shape: BoxShape.circle,
-                        gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [Color(0xff99db7e), Color(0xff6da95b)],
+                decoration:
+                    type == "Вход"
+                        ? const BoxDecoration(
+                          shape: BoxShape.circle,
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [Color(0xff99db7e), Color(0xff6da95b)],
+                          ),
+                        )
+                        : BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Theme.of(context).extension<AppColors>()!.colorful02,
                         ),
-                      )
-                    : BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Theme.of(context).extension<AppColors>()!.colorful02,
-                      ),
                 alignment: Alignment.center,
-                child: type == "Вход"
-                    ? const Icon(FontAwesomeIcons.rightToBracket, size: 15)
-                    : const Icon(FontAwesomeIcons.rightFromBracket, size: 15),
+                child:
+                    type == "Вход"
+                        ? const Icon(FontAwesomeIcons.rightToBracket, size: 15)
+                        : const Icon(FontAwesomeIcons.rightFromBracket, size: 15),
               ),
             ),
             const SizedBox(width: 55.50),
@@ -58,16 +60,15 @@ class AttendanceCard extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  type,
-                  style: AppTextStyle.bodyBold,
-                ),
+                Text(type, style: AppTextStyle.bodyBold),
                 Text(
                   '$date, $time',
                   style: AppTextStyle.captionL.copyWith(
-                      color: type == "Вход"
-                          ? Theme.of(context).extension<AppColors>()!.colorful05
-                          : Theme.of(context).extension<AppColors>()!.colorful02),
+                    color:
+                        type == "Вход"
+                            ? Theme.of(context).extension<AppColors>()!.colorful05
+                            : Theme.of(context).extension<AppColors>()!.colorful02,
+                  ),
                 ),
               ],
             ),

@@ -10,9 +10,7 @@ class ProfileSettingsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Настройки"),
-      ),
+      appBar: AppBar(title: const Text("Настройки")),
       body: SafeArea(
         bottom: false,
         child: ListView(
@@ -25,46 +23,50 @@ class ProfileSettingsPage extends StatelessWidget {
               onTap: () {
                 showDialog(
                   context: context,
-                  builder: (context) => SimpleDialog(
-                    title: Text("Выбор темы", style: AppTextStyle.titleS),
-                    contentPadding: const EdgeInsets.all(16),
-                    backgroundColor: Theme.of(context).extension<AppColors>()!.background02,
-                    elevation: 0,
-                    children: [
-                      _ListTileThemeItem(
-                        title: "Светлая",
-                        trailing: AdaptiveTheme.of(context).mode == AdaptiveThemeMode.light
-                            ? Icon(Icons.check, color: Theme.of(context).extension<AppColors>()!.active)
-                            : null,
-                        onTap: () {
-                          AdaptiveTheme.of(context).setLight();
-                          context.pop();
-                        },
+                  builder:
+                      (context) => SimpleDialog(
+                        title: Text("Выбор темы", style: AppTextStyle.titleS),
+                        contentPadding: const EdgeInsets.all(16),
+                        backgroundColor: Theme.of(context).extension<AppColors>()!.background02,
+                        elevation: 0,
+                        children: [
+                          _ListTileThemeItem(
+                            title: "Светлая",
+                            trailing:
+                                AdaptiveTheme.of(context).mode == AdaptiveThemeMode.light
+                                    ? Icon(Icons.check, color: Theme.of(context).extension<AppColors>()!.active)
+                                    : null,
+                            onTap: () {
+                              AdaptiveTheme.of(context).setLight();
+                              context.pop();
+                            },
+                          ),
+                          const SizedBox(height: 8),
+                          _ListTileThemeItem(
+                            title: "Тёмная",
+                            trailing:
+                                AdaptiveTheme.of(context).mode == AdaptiveThemeMode.dark
+                                    ? Icon(Icons.check, color: Theme.of(context).extension<AppColors>()!.active)
+                                    : null,
+                            onTap: () {
+                              AdaptiveTheme.of(context).setDark();
+                              context.pop();
+                            },
+                          ),
+                          const SizedBox(height: 8),
+                          _ListTileThemeItem(
+                            title: "Как в системе",
+                            trailing:
+                                AdaptiveTheme.of(context).mode == AdaptiveThemeMode.system
+                                    ? Icon(Icons.check, color: Theme.of(context).extension<AppColors>()!.active)
+                                    : null,
+                            onTap: () {
+                              AdaptiveTheme.of(context).setSystem();
+                              context.pop();
+                            },
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: 8),
-                      _ListTileThemeItem(
-                        title: "Тёмная",
-                        trailing: AdaptiveTheme.of(context).mode == AdaptiveThemeMode.dark
-                            ? Icon(Icons.check, color: Theme.of(context).extension<AppColors>()!.active)
-                            : null,
-                        onTap: () {
-                          AdaptiveTheme.of(context).setDark();
-                          context.pop();
-                        },
-                      ),
-                      const SizedBox(height: 8),
-                      _ListTileThemeItem(
-                        title: "Как в системе",
-                        trailing: AdaptiveTheme.of(context).mode == AdaptiveThemeMode.system
-                            ? Icon(Icons.check, color: Theme.of(context).extension<AppColors>()!.active)
-                            : null,
-                        onTap: () {
-                          AdaptiveTheme.of(context).setSystem();
-                          context.pop();
-                        },
-                      ),
-                    ],
-                  ),
                 );
               },
             ),
@@ -85,11 +87,7 @@ class ProfileSettingsPage extends StatelessWidget {
 }
 
 class _ListTileThemeItem extends StatelessWidget {
-  const _ListTileThemeItem({
-    required this.title,
-    required this.onTap,
-    this.trailing,
-  });
+  const _ListTileThemeItem({required this.title, required this.onTap, this.trailing});
 
   final String title;
   final Widget? trailing;
@@ -98,20 +96,13 @@ class _ListTileThemeItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      title: Text(
-        title,
-        style: AppTextStyle.body.copyWith(
-          color: Theme.of(context).extension<AppColors>()!.active,
-        ),
-      ),
+      title: Text(title, style: AppTextStyle.body.copyWith(color: Theme.of(context).extension<AppColors>()!.active)),
       contentPadding: const EdgeInsets.symmetric(horizontal: 8),
       dense: true,
       onTap: () {
         onTap();
       },
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       trailing: trailing,
     );
   }

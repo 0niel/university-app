@@ -4,13 +4,7 @@ import 'package:app_ui/app_ui.dart';
 /// A service tile widget that displays an icon and title in a grid layout
 class ServiceTile extends StatelessWidget {
   /// Creates a service tile.
-  const ServiceTile({
-    super.key,
-    required this.title,
-    required this.iconData,
-    required this.color,
-    required this.onTap,
-  });
+  const ServiceTile({super.key, required this.title, required this.iconData, required this.color, required this.onTap});
 
   /// The title of the service
   final String title;
@@ -37,15 +31,8 @@ class ServiceTile extends StatelessWidget {
             child: Container(
               width: 52,
               height: 52,
-              decoration: BoxDecoration(
-                color: color.withOpacity(0.15),
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Icon(
-                iconData,
-                color: color,
-                size: 24,
-              ),
+              decoration: BoxDecoration(color: color.withOpacity(0.15), borderRadius: BorderRadius.circular(16)),
+              child: Icon(iconData, color: color, size: 24),
             ),
           ),
           const SizedBox(height: AppSpacing.sm),

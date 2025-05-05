@@ -32,10 +32,7 @@ class ScoresBloc extends HydratedBloc<ScoresEvent, ScoresState> {
     on<ChangeSelectedScoresSemester>(_onChangeSelectedScoresSemester);
   }
 
-  void _onChangeSelectedScoresSemester(
-    ChangeSelectedScoresSemester event,
-    Emitter<ScoresState> emit,
-  ) async {
+  void _onChangeSelectedScoresSemester(ChangeSelectedScoresSemester event, Emitter<ScoresState> emit) async {
     if (state.status == ScoresStatus.loaded) {
       emit(state.copyWith(selectedSemester: event.semester));
     }
@@ -44,8 +41,8 @@ class ScoresBloc extends HydratedBloc<ScoresEvent, ScoresState> {
   Map<String, List<Score>> _sortScores(Map<String, List<Score>> scores) {
     Map<String, List<Score>> newMap = {};
 
-    final sortedKeys = scores.keys.toList()
-      ..sort((a, b) => int.parse(a.split(' ')[0]).compareTo(int.parse(b.split(' ')[0])));
+    final sortedKeys =
+        scores.keys.toList()..sort((a, b) => int.parse(a.split(' ')[0]).compareTo(int.parse(b.split(' ')[0])));
 
     for (final key in sortedKeys) {
       newMap[key] = scores[key]!;
@@ -54,10 +51,7 @@ class ScoresBloc extends HydratedBloc<ScoresEvent, ScoresState> {
     return newMap;
   }
 
-  void _onLoadScores(
-    LoadScores event,
-    Emitter<ScoresState> emit,
-  ) async {
+  void _onLoadScores(LoadScores event, Emitter<ScoresState> emit) async {
     if (state.status != ScoresStatus.loaded) {
       emit(state.copyWith(status: ScoresStatus.loading));
 
@@ -73,11 +67,7 @@ class ScoresBloc extends HydratedBloc<ScoresEvent, ScoresState> {
         }
 
         emit(
-          state.copyWith(
-            scores: _sortScores(scores),
-            selectedSemester: scores.keys.last,
-            status: ScoresStatus.loaded,
-          ),
+          state.copyWith(scores: _sortScores(scores), selectedSemester: scores.keys.last, status: ScoresStatus.loaded),
         );
       });
     }

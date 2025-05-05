@@ -3,17 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:app_ui/app_ui.dart';
-import 'package:rtu_mirea_app/schedule/models/models.dart';
 import 'package:rtu_mirea_app/schedule/schedule.dart';
 import 'package:university_app_server_api/client.dart';
 
 class ComparisonLessonsTable extends StatelessWidget {
-  const ComparisonLessonsTable({
-    super.key,
-    required this.day,
-    required this.schedules,
-    required this.lessonParts,
-  });
+  const ComparisonLessonsTable({super.key, required this.day, required this.schedules, required this.lessonParts});
 
   final DateTime day;
   final List<SelectedSchedule> schedules;
@@ -25,11 +19,7 @@ class ComparisonLessonsTable extends StatelessWidget {
 
     final Map<SelectedSchedule, List<LessonSchedulePart>> lessonsPerSchedule = {
       for (var schedule in schedules)
-        schedule: lessonParts
-            .where(
-              (lesson) => schedule.schedule.contains(lesson),
-            )
-            .toList()
+        schedule: lessonParts.where((lesson) => schedule.schedule.contains(lesson)).toList(),
     };
 
     final int maxLessons = _getMaxLessonsPerDay(schedules);
@@ -39,51 +29,45 @@ class ComparisonLessonsTable extends StatelessWidget {
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         child: Table(
-          columnWidths: {
-            for (int i = 0; i < schedules.length; i++) i: const FixedColumnWidth(220),
-          },
+          columnWidths: {for (int i = 0; i < schedules.length; i++) i: const FixedColumnWidth(220)},
           defaultVerticalAlignment: TableCellVerticalAlignment.top,
           children: [
-            TableRow(
-              children: schedules
-                  .map(
-                    (schedule) => _ComparisonScheduleLegend(schedule: schedule),
-                  )
-                  .toList(),
-            ),
+            TableRow(children: schedules.map((schedule) => _ComparisonScheduleLegend(schedule: schedule)).toList()),
             for (int lessonIndex = 0; lessonIndex < maxLessons; lessonIndex++)
               TableRow(
-                children: schedules.map((schedule) {
-                  final lesson = lessonsPerSchedule[schedule]?.firstWhereOrNull(
-                    (lesson) => lesson.lessonBells.number == (lessonIndex + 1),
-                  );
-                  return Padding(
-                    padding: const EdgeInsets.all(4.0),
-                    child: lesson != null
-                        ? Container(
-                            decoration: BoxDecoration(
-                              color: _getBackgroundColor(blocState, schedule),
-                              borderRadius: BorderRadius.circular(8.0),
-                            ),
-                            padding: const EdgeInsets.all(8.0),
-                            child: LessonCard(
-                              lesson: lesson,
-                              onTap: (lesson) {
-                                context.go('/schedule/details', extra: (lesson, day));
-                              },
-                            ),
-                          )
-                        : Container(
-                            height: 80,
-                            decoration: BoxDecoration(
-                              color: _getBackgroundColor(blocState, schedule).withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(8.0),
-                            ),
-                            padding: const EdgeInsets.all(8.0),
-                            child: EmptyLessonCard(lessonNumber: lessonIndex + 1),
-                          ),
-                  );
-                }).toList(),
+                children:
+                    schedules.map((schedule) {
+                      final lesson = lessonsPerSchedule[schedule]?.firstWhereOrNull(
+                        (lesson) => lesson.lessonBells.number == (lessonIndex + 1),
+                      );
+                      return Padding(
+                        padding: const EdgeInsets.all(4.0),
+                        child:
+                            lesson != null
+                                ? Container(
+                                  decoration: BoxDecoration(
+                                    color: _getBackgroundColor(blocState, schedule),
+                                    borderRadius: BorderRadius.circular(8.0),
+                                  ),
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: LessonCard(
+                                    lesson: lesson,
+                                    onTap: (lesson) {
+                                      context.go('/schedule/details', extra: (lesson, day));
+                                    },
+                                  ),
+                                )
+                                : Container(
+                                  height: 80,
+                                  decoration: BoxDecoration(
+                                    color: _getBackgroundColor(blocState, schedule).withOpacity(0.1),
+                                    borderRadius: BorderRadius.circular(8.0),
+                                  ),
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: EmptyLessonCard(lessonNumber: lessonIndex + 1),
+                                ),
+                      );
+                    }).toList(),
               ),
           ],
         ),
@@ -112,11 +96,7 @@ class ComparisonLessonsTable extends StatelessWidget {
       for (final part in schedule.schedule.whereType<LessonSchedulePart>()) {
         for (final date in part.dates) {
           final day = DateTime(date.year, date.month, date.day);
-          lessonsByDay.update(
-            day,
-            (existing) => existing..add(part),
-            ifAbsent: () => [part],
-          );
+          lessonsByDay.update(day, (existing) => existing..add(part), ifAbsent: () => [part]);
         }
       }
       for (var lessons in lessonsByDay.values) {
@@ -128,9 +108,7 @@ class ComparisonLessonsTable extends StatelessWidget {
 }
 
 class _ComparisonScheduleLegend extends StatelessWidget {
-  const _ComparisonScheduleLegend({
-    required this.schedule,
-  });
+  const _ComparisonScheduleLegend({required this.schedule});
 
   final SelectedSchedule schedule;
 
@@ -144,16 +122,10 @@ class _ComparisonScheduleLegend extends StatelessWidget {
           Container(
             width: 16,
             height: 16,
-            decoration: BoxDecoration(
-              color: _getLegendColor(context),
-              shape: BoxShape.circle,
-            ),
+            decoration: BoxDecoration(color: _getLegendColor(context), shape: BoxShape.circle),
           ),
           const SizedBox(width: 4),
-          Text(
-            _getScheduleTitle(schedule),
-            style: AppTextStyle.captionL,
-          ),
+          Text(_getScheduleTitle(schedule), style: AppTextStyle.captionL),
         ],
       ),
     );

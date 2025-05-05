@@ -25,12 +25,7 @@ class NoSelectedScheduleMessage extends StatelessWidget {
                 child: Assets.images.saly2
                     .image(height: 200)
                     .animate(onPlay: (controller) => controller.repeat(reverse: true))
-                    .rotate(
-                      duration: 3000.ms,
-                      begin: -0.03,
-                      end: 0.03,
-                      curve: Curves.easeInOut,
-                    )
+                    .rotate(duration: 3000.ms, begin: -0.03, end: 0.03, curve: Curves.easeInOut)
                     .move(
                       duration: 3000.ms,
                       begin: const Offset(0, -10),
@@ -39,24 +34,24 @@ class NoSelectedScheduleMessage extends StatelessWidget {
                     ),
               ),
               const SizedBox(height: 8),
-              Text(
-                "Не установлена активная группа",
-                style: AppTextStyle.h5,
-              ),
+              Text("Не установлена активная группа", style: AppTextStyle.h5),
               const SizedBox(height: 8),
               Text(
                 "Скачайте расписание по крайней мере для одной группы, чтобы отобразить календарь.",
-                style: AppTextStyle.captionL.copyWith(
-                  color: Theme.of(context).extension<AppColors>()!.deactive,
-                ),
+                style: AppTextStyle.captionL.copyWith(color: Theme.of(context).extension<AppColors>()!.deactive),
               ),
               const SizedBox(height: 24),
               SizedBox(
                 width: isTable ? 420 : double.infinity,
-                child: ColorfulButton(
-                  text: "Настроить",
-                  onClick: onTap,
-                  backgroundColor: Theme.of(context).extension<AppColors>()!.primary,
+                child: Column(
+                  crossAxisAlignment: isTable ? CrossAxisAlignment.center : CrossAxisAlignment.stretch,
+                  children: [
+                    ColorfulButton(
+                      text: "Настроить",
+                      onClick: onTap,
+                      backgroundColor: Theme.of(context).extension<AppColors>()!.primary,
+                    ),
+                  ],
                 ),
               ),
             ],

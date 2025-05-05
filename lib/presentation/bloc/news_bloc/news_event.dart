@@ -17,12 +17,7 @@ class NewsLoadEvent extends NewsEvent with AnalyticsEventMixin {
   const NewsLoadEvent({required this.isImportant, this.refresh, this.tag});
 
   @override
-  AnalyticsEvent get event => AnalyticsEvent(
-        'NewsLoad',
-        properties: {
-          'tag': tag,
-        },
-      );
+  AnalyticsEvent get event => AnalyticsEvent('NewsLoad', properties: {'tag': tag});
 
   @override
   List<Object> get props => [isImportant];

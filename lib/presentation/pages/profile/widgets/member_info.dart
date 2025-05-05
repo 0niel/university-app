@@ -12,22 +12,18 @@ class MemberInfo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      child: Column(children: [
-        CachedNetworkImage(
-          progressIndicatorBuilder: (context, url, progress) => const SizedBox(width: 60, height: 60),
-          imageUrl: avatarUrl,
-          errorWidget: (context, url, error) => const Icon(Icons.error),
-          imageBuilder: (context, imageProvider) => CircleAvatar(
-            radius: 30,
-            backgroundImage: imageProvider,
+      child: Column(
+        children: [
+          CachedNetworkImage(
+            progressIndicatorBuilder: (context, url, progress) => const SizedBox(width: 60, height: 60),
+            imageUrl: avatarUrl,
+            errorWidget: (context, url, error) => const Icon(Icons.error),
+            imageBuilder: (context, imageProvider) => CircleAvatar(radius: 30, backgroundImage: imageProvider),
           ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          username,
-          style: AppTextStyle.bodyBold,
-        ),
-      ]),
+          const SizedBox(height: 8),
+          Text(username, style: AppTextStyle.bodyBold),
+        ],
+      ),
       onTap: () {
         launchUrlString(profileUrl);
       },

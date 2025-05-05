@@ -58,12 +58,5 @@ class Subject extends Equatable {
   }
 
   @override
-  List<Object?> get props => [
-        name,
-        dates,
-        mainScore,
-        additionalScore,
-        classScore,
-        visitedDays,
-      ];
+  List<Object?> get props => [name, dates, mainScore, additionalScore, classScore, visitedDays];
 }

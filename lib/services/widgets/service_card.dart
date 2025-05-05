@@ -31,9 +31,7 @@ class ServiceCard extends StatelessWidget {
         constraints: const BoxConstraints(maxWidth: 160, maxHeight: 192),
         child: Card(
           color: Theme.of(context).extension<AppColors>()!.background02,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           child: PlatformInkWell(
             onLongPress: onLongPress,
             onTap: () {

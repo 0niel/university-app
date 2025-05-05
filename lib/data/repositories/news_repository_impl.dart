@@ -8,9 +8,7 @@ import 'package:rtu_mirea_app/domain/repositories/news_repository.dart';
 class NewsRepositoryImpl implements NewsRepository {
   final NewsRemoteData remoteDataSource;
 
-  NewsRepositoryImpl({
-    required this.remoteDataSource,
-  });
+  NewsRepositoryImpl({required this.remoteDataSource});
 
   @override
   Future<Either<Failure, List<NewsItem>>> getNews(int page, int pageSize, bool isImportant, [String? tag]) async {

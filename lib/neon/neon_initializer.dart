@@ -62,26 +62,17 @@ Future<NeonDependencies> initializeNeonDependencies({
     storage: accountStorage,
   );
 
-  final globalOptions = GlobalOptions(
-    packageInfo,
-    BuiltList<String>(),
-  );
+  final globalOptions = GlobalOptions(packageInfo, BuiltList<String>());
 
   await accountRepository.loadAccounts(
     initialAccount: globalOptions.initialAccount.value,
     rememberLastUsedAccount: globalOptions.rememberLastUsedAccount.value,
   );
 
-  final accountsBloc = AccountsBloc(
-    allAppImplementations: appImplementations,
-    accountRepository: accountRepository,
-  );
+  final accountsBloc = AccountsBloc(allAppImplementations: appImplementations, accountRepository: accountRepository);
 
   final firstLaunchBloc = FirstLaunchBloc();
-  final nextPushBloc = NextPushBloc(
-    accountsSubject: accountsBloc.accounts,
-    globalOptions: globalOptions,
-  );
+  final nextPushBloc = NextPushBloc(accountsSubject: accountsBloc.accounts, globalOptions: globalOptions);
 
   return NeonDependencies(
     appImplementations: appImplementations,

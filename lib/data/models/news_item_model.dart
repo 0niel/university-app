@@ -2,19 +2,8 @@ import 'package:intl/intl.dart';
 import 'package:rtu_mirea_app/domain/entities/news_item.dart';
 
 class NewsItemModel extends NewsItem {
-  const NewsItemModel({
-    required title,
-    required text,
-    required date,
-    required images,
-    required tags,
-  }) : super(
-          title: title,
-          text: text,
-          date: date,
-          images: images,
-          tags: tags,
-        );
+  const NewsItemModel({required title, required text, required date, required images, required tags})
+    : super(title: title, text: text, date: date, images: images, tags: tags);
 
   factory NewsItemModel.fromJson(Map<String, dynamic> json) {
     return NewsItemModel(

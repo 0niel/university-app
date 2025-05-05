@@ -22,12 +22,7 @@ class GetNewsParams extends Equatable {
   final bool isImportant;
   final String? tag;
 
-  const GetNewsParams({
-    required this.page,
-    required this.pageSize,
-    required this.isImportant,
-    this.tag,
-  });
+  const GetNewsParams({required this.page, required this.pageSize, required this.isImportant, this.tag});
 
   @override
   List<Object?> get props => [page, pageSize, isImportant, tag];

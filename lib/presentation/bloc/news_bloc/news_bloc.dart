@@ -10,10 +10,7 @@ part 'news_event.dart';
 part 'news_state.dart';
 
 class NewsBloc extends Bloc<NewsEvent, NewsState> {
-  NewsBloc({
-    required this.getNews,
-    required this.getNewsTags,
-  }) : super(NewsInitial()) {
+  NewsBloc({required this.getNews, required this.getNewsTags}) : super(NewsInitial()) {
     on<NewsLoadEvent>(
       _onNewsLoadEvent,
 
@@ -61,47 +58,30 @@ class NewsBloc extends Bloc<NewsEvent, NewsState> {
         ),
       );
 
-      newsEither.fold(
-        (l) => emit(NewsLoadError()),
-        (r) {
-          emit(NewsLoaded(
+      newsEither.fold((l) => emit(NewsLoadError()), (r) {
+        emit(
+          NewsLoaded(
             news: event.refresh == true ? r : (st.news + r).toSet().toList(),
             tags: st.tags,
             selectedTag: event.tag,
             page: st.page + 1,
-          ));
-        },
-      );
+          ),
+        );
+      });
     } else {
       emit(NewsLoading(isFirstFetch: event.refresh == true));
 
       final newsEither = await getNews(
-        GetNewsParams(
-          page: 1,
-          pageSize: pageSize,
-          isImportant: event.isImportant,
-          tag: _getTagOrNull(event.tag),
-        ),
+        GetNewsParams(page: 1, pageSize: pageSize, isImportant: event.isImportant, tag: _getTagOrNull(event.tag)),
       );
 
       final tagsEither = await getNewsTags();
 
-      newsEither.fold(
-        (l) => emit(NewsLoadError()),
-        (r) {
-          tagsEither.fold(
-            (l) => emit(NewsLoadError()),
-            (tags) {
-              emit(NewsLoaded(
-                news: r,
-                tags: tags,
-                selectedTag: event.tag,
-                page: 1,
-              ));
-            },
-          );
-        },
-      );
+      newsEither.fold((l) => emit(NewsLoadError()), (r) {
+        tagsEither.fold((l) => emit(NewsLoadError()), (tags) {
+          emit(NewsLoaded(news: r, tags: tags, selectedTag: event.tag, page: 1));
+        });
+      });
     }
   }
 }

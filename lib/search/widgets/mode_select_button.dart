@@ -24,13 +24,12 @@ class _ModeSelectButtonState extends State<ModeSelectButton> {
           widget.onClick();
         },
         style: ButtonStyle(
-          backgroundColor: widget.isActive
-              ? WidgetStateProperty.all<Color>(Theme.of(context).extension<AppColors>()!.primary)
-              : WidgetStateProperty.all<Color>(Theme.of(context).extension<AppColors>()!.background02),
+          backgroundColor:
+              widget.isActive
+                  ? WidgetStateProperty.all<Color>(Theme.of(context).extension<AppColors>()!.primary)
+                  : WidgetStateProperty.all<Color>(Theme.of(context).extension<AppColors>()!.background02),
           shape: WidgetStateProperty.all<RoundedRectangleBorder>(
-            RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(50.0),
-            ),
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(50.0)),
           ),
           padding: WidgetStateProperty.all<EdgeInsetsGeometry>(const EdgeInsets.symmetric(horizontal: 8)),
           shadowColor: WidgetStateProperty.all<Color>(Colors.transparent),
@@ -41,9 +40,10 @@ class _ModeSelectButtonState extends State<ModeSelectButton> {
               Theme(
                 data: ThemeData(
                   iconTheme: IconThemeData(
-                    color: widget.isActive
-                        ? Theme.of(context).extension<AppColors>()!.active
-                        : Theme.of(context).extension<AppColors>()!.deactive,
+                    color:
+                        widget.isActive
+                            ? Theme.of(context).extension<AppColors>()!.active
+                            : Theme.of(context).extension<AppColors>()!.deactive,
                   ),
                 ),
                 child: widget.icon!,
@@ -53,9 +53,10 @@ class _ModeSelectButtonState extends State<ModeSelectButton> {
             Text(
               widget.text,
               style: AppTextStyle.titleS.copyWith(
-                color: widget.isActive
-                    ? Theme.of(context).extension<AppColors>()!.active
-                    : Theme.of(context).extension<AppColors>()!.deactive,
+                color:
+                    widget.isActive
+                        ? Theme.of(context).extension<AppColors>()!.active
+                        : Theme.of(context).extension<AppColors>()!.deactive,
               ),
             ),
           ],

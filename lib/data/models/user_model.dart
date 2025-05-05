@@ -17,18 +17,18 @@ class UserModel extends User {
     required lastLoginDate,
     required students,
   }) : super(
-          id: id,
-          login: login,
-          email: email,
-          name: name,
-          lastName: lastName,
-          secondName: secondName,
-          birthday: birthday,
-          photoUrl: photoUrl,
-          registerDate: registerDate,
-          lastLoginDate: lastLoginDate,
-          students: students,
-        );
+         id: id,
+         login: login,
+         email: email,
+         name: name,
+         lastName: lastName,
+         secondName: secondName,
+         birthday: birthday,
+         photoUrl: photoUrl,
+         registerDate: registerDate,
+         lastLoginDate: lastLoginDate,
+         students: students,
+       );
 
   factory UserModel.fromRawJson(String str) => UserModel.fromJson(json.decode(str));
 

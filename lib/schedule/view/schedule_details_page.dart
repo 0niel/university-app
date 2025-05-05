@@ -1,23 +1,22 @@
-import 'package:adaptive_theme/adaptive_theme.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide TimeOfDay;
+import 'package:flutter/services.dart' hide TextInput;
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
+import 'package:hugeicons/hugeicons.dart';
 import 'package:app_ui/app_ui.dart';
-import 'package:rtu_mirea_app/schedule/models/models.dart';
+import 'package:intl/intl.dart';
 import 'package:rtu_mirea_app/schedule/schedule.dart';
+import 'package:rtu_mirea_app/schedule/widgets/custom_schedule_selector.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:university_app_server_api/client.dart';
 import 'package:url_launcher/url_launcher_string.dart';
-import 'package:yandex_maps_mapkit_lite/mapkit.dart';
-import 'package:yandex_maps_mapkit_lite/mapkit_factory.dart';
-import 'package:yandex_maps_mapkit_lite/yandex_map.dart';
+// Используем карту на всех платформах
+import 'package:rtu_mirea_app/schedule/widgets/map_view.dart';
 
 class ScheduleDetailsPage extends StatefulWidget {
-  const ScheduleDetailsPage({
-    super.key,
-    required this.lesson,
-    required this.selectedDate,
-  });
+  const ScheduleDetailsPage({super.key, required this.lesson, required this.selectedDate});
 
   final LessonSchedulePart lesson;
 
@@ -29,32 +28,62 @@ class ScheduleDetailsPage extends StatefulWidget {
   State<ScheduleDetailsPage> createState() => _ScheduleDetailsPageState();
 }
 
-/// Listener for user interactions with the map.
-final class _MapInputListener extends MapInputListener {
-  @override
-  void onMapTap(Map map, Point point) {
-    launchUrlString(
-      'https://yandex.ru/maps/?ll=${point.longitude},${point.latitude}&z=15&mode=whatshere&whatshere%5Bpoint%5D=${point.longitude},${point.latitude}&whatshere%5Bzoom%5D=15&whatshere%5Bdirection%5D=down&whatshere%5Bviewport%5D=%5B${point.longitude - 0.0001},${point.latitude - 0.0001}%2C${point.longitude + 0.0001},${point.latitude + 0.0001}%5D&basemap=map',
+class _ScheduleDetailsPageState extends State<ScheduleDetailsPage> with SingleTickerProviderStateMixin {
+  late final TextEditingController _textController;
+  late final AnimationController _animationController;
+  final ScrollController _scrollController = ScrollController();
+  bool _isCollapsed = false;
+
+  DateTime get _now => DateTime.now();
+  bool get _isLessonActive =>
+      widget.selectedDate.year == _now.year &&
+      widget.selectedDate.month == _now.month &&
+      widget.selectedDate.day == _now.day &&
+      _isTimeInRange(
+        _now,
+        _getTimeFromTimeOfDay(widget.lesson.lessonBells.startTime),
+        _getTimeFromTimeOfDay(widget.lesson.lessonBells.endTime),
+      );
+
+  double get _lessonProgress {
+    if (!_isLessonActive) return 0.0;
+
+    final startTime = _getTimeFromTimeOfDay(widget.lesson.lessonBells.startTime);
+    final endTime = _getTimeFromTimeOfDay(widget.lesson.lessonBells.endTime);
+    final now = _now;
+
+    final totalDuration = endTime.difference(startTime).inSeconds;
+    final elapsedDuration = now.difference(startTime).inSeconds;
+
+    return elapsedDuration / totalDuration;
+  }
+
+  DateTime _getTimeFromTimeOfDay(TimeOfDay time) {
+    return DateTime(
+      widget.selectedDate.year,
+      widget.selectedDate.month,
+      widget.selectedDate.day,
+      time.hour,
+      time.minute,
     );
   }
 
-  @override
-  void onMapLongTap(Map map, Point point) {}
-}
-
-class _ScheduleDetailsPageState extends State<ScheduleDetailsPage> {
-  late final TextEditingController _textController;
+  bool _isTimeInRange(DateTime time, DateTime start, DateTime end) {
+    return time.isAfter(start) && time.isBefore(end);
+  }
 
   @override
   void initState() {
     super.initState();
     _textController = TextEditingController();
+    _animationController = AnimationController(vsync: this, duration: const Duration(milliseconds: 300));
 
     final comment = _getComment();
-
     if (comment != null) {
       _textController.text = comment.text;
     }
+
+    _scrollController.addListener(_onScroll);
 
     _textController.addListener(() {
       if (_textController.text.length > 500 && _textErrorText == null) {
@@ -82,6 +111,15 @@ class _ScheduleDetailsPageState extends State<ScheduleDetailsPage> {
     });
   }
 
+  void _onScroll() {
+    final shouldBeCollapsed = _scrollController.hasClients && _scrollController.offset > 140;
+    if (shouldBeCollapsed != _isCollapsed) {
+      setState(() {
+        _isCollapsed = shouldBeCollapsed;
+      });
+    }
+  }
+
   LessonComment? _getComment() {
     final bloc = context.read<ScheduleBloc>();
 
@@ -93,214 +131,430 @@ class _ScheduleDetailsPageState extends State<ScheduleDetailsPage> {
   @override
   void dispose() {
     _textController.dispose();
+    _animationController.dispose();
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
     super.dispose();
   }
 
   String? _textErrorText;
+  bool _isFavorite = false;
+
+  void _shareLessonDetails() {
+    final lessonType = LessonCard.getLessonTypeName(widget.lesson.lessonType);
+    final time = '${widget.lesson.lessonBells.startTime} - ${widget.lesson.lessonBells.endTime}';
+    final date = DateFormat('dd.MM.yyyy').format(widget.selectedDate);
+
+    final classrooms = widget.lesson.classrooms
+        .map((e) => e.name + (e.campus != null ? ' (${e.campus?.shortName ?? e.campus?.name ?? ''})' : ''))
+        .join(', ');
+
+    final teachers = widget.lesson.teachers.map((e) => e.name).join(', ');
+    final groups = widget.lesson.groups?.join(', ') ?? '';
+
+    final shareText =
+        '''
+Занятие: ${widget.lesson.subject}
+Тип: $lessonType
+Дата: $date
+Время: $time
+${classrooms.isNotEmpty ? 'Аудитория: $classrooms\n' : ''}${teachers.isNotEmpty ? 'Преподаватель: $teachers\n' : ''}${groups.isNotEmpty ? 'Группы: $groups\n' : ''}
+    '''.trim();
+
+    Share.share(shareText);
+    HapticFeedback.lightImpact();
+  }
 
   @override
   Widget build(BuildContext context) {
+    final lessonColor = LessonCard.getColorByType(widget.lesson.lessonType);
+    final textColor = Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black;
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final backgroundColor = Theme.of(context).scaffoldBackgroundColor;
+
     return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          'Предмет',
-        ),
-      ),
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: _buildPageContent(),
-        ),
-      ),
-    );
-  }
+      body: CustomScrollView(
+        controller: _scrollController,
+        physics: const BouncingScrollPhysics(),
+        slivers: [
+          // SliverAppBar с эффектом как в iOS
+          SliverAppBar(
+            expandedHeight: 240,
+            pinned: true,
+            stretch: true,
+            backgroundColor: lessonColor,
+            elevation: 0,
+            automaticallyImplyLeading: false,
+            flexibleSpace: FlexibleSpaceBar(
+              background: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [lessonColor, lessonColor.withOpacity(0.8)],
+                  ),
+                ),
+                child: Padding(
+                  padding: EdgeInsets.only(
+                    top: MediaQuery.of(context).padding.top + 56,
+                    left: 24,
+                    right: 24,
+                    bottom: 40,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        widget.lesson.subject,
+                        style: AppTextStyle.h5.copyWith(color: Colors.white, fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 20),
 
-  List<Widget> _buildPageContent() {
-    List<Widget> content = [];
-
-    content.addAll([
-      _buildLessonTitle(),
-      const Divider(),
-      _buildLessonType(),
-      const Divider(),
-      ..._buildClassroomDetails(),
-    ]);
-
-    if (widget.lesson.groups != null && widget.lesson.groups!.isNotEmpty) {
-      content.addAll([
-        _buildGroups(),
-        const Divider(height: 16),
-      ]);
-    }
-
-    if (widget.lesson.teachers.isNotEmpty) {
-      content.addAll([
-        _buildTeachers(),
-        const Divider(height: 8),
-      ]);
-    }
-
-    content.addAll([
-      ListTile(
-        title: Text('Комментарий'.toUpperCase()),
-        subtitle: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8),
-          child: TextInput(
-              hintText: 'Введите комментарий',
-              controller: _textController,
-              errorText: _textErrorText,
-              maxLines: 5,
-              fillColor: AdaptiveTheme.of(context).mode.isDark
-                  ? Theme.of(context).extension<AppColors>()!.background03
-                  : Colors.white),
-        ),
-      ),
-      const Divider(),
-      const SizedBox(height: 48),
-    ]);
-
-    return content;
-  }
-
-  ListTile _buildLessonTitle() {
-    return ListTile(
-      title: Text(
-        'Название предмета'.toUpperCase(),
-      ),
-      subtitle: Text(widget.lesson.subject),
-    );
-  }
-
-  ListTile _buildLessonType() {
-    return ListTile(
-      title: Text('Тип занятия'.toUpperCase()),
-      subtitle: Row(
-        children: [
-          Container(
-            height: 7,
-            width: 7,
-            decoration: BoxDecoration(
-              color: LessonCard.getColorByType(widget.lesson.lessonType),
-              borderRadius: BorderRadius.circular(7),
+                      // Информационные чипы
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _buildInfoCard(
+                              HugeIcons.strokeRoundedClock01,
+                              '${widget.lesson.lessonBells.startTime} - ${widget.lesson.lessonBells.endTime}',
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: _buildInfoCard(
+                              HugeIcons.strokeRoundedNotebook01,
+                              LessonCard.getLessonTypeName(widget.lesson.lessonType),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              collapseMode: CollapseMode.parallax,
             ),
-          ),
-          const SizedBox(width: 8),
-          Text(
-            LessonCard.getLessonTypeName(widget.lesson.lessonType),
-            style: AppTextStyle.titleM,
-          ),
-        ],
-      ),
-    );
-  }
-
-  List<Widget> _buildClassroomDetails() {
-    return widget.lesson.classrooms.map((classroom) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          ListTile(
-            title: Text('Аудитория'.toUpperCase()),
-            subtitle: Text(classroom.name),
-            trailing: const Icon(
-              Icons.chevron_right_sharp,
-              size: 24,
-            ),
-            onTap: () => context.go('/schedule/search', extra: classroom.name),
-          ),
-          const Divider(),
-          if (classroom.campus != null && classroom.campus?.latitude != null) ...[
-            ListTile(
-              title: Text('Кампус'.toUpperCase()),
-              subtitle: Text(classroom.campus!.name),
-            ),
-            _buildClassroomMap(classroom),
-            const Divider(
-              height: 32,
-            ),
-          ],
-        ],
-      );
-    }).toList();
-  }
-
-  SizedBox _buildClassroomMap(Classroom classroom) {
-    return SizedBox(
-      height: 200,
-      child: YandexMap(onMapCreated: (mapWindow) {
-        mapkit.onStart();
-        mapWindow.map.move(
-          CameraPosition(
-            Point(latitude: classroom.campus!.latitude!, longitude: classroom.campus!.longitude!),
-            zoom: 16.0,
-            azimuth: 0.0,
-            tilt: 30.0,
-          ),
-        );
-        mapWindow.map.addInputListener(_MapInputListener());
-        mapWindow.map.mapObjects.addPlacemark().geometry = Point(
-          latitude: classroom.campus!.latitude!,
-          longitude: classroom.campus!.longitude!,
-        );
-      }),
-    );
-  }
-
-  ListTile _buildGroups() {
-    return ListTile(
-      title: Text('Группы'.toUpperCase()),
-      subtitle: Wrap(
-        spacing: 8,
-        runSpacing: 4,
-        children: widget.lesson.groups?.map((group) {
-              return InputChip(
-                label: Text(group),
-                onPressed: () => context.go('/schedule/search', extra: group),
-                side: BorderSide(color: Theme.of(context).extension<AppColors>()!.deactiveDarker),
-              );
-            }).toList() ??
-            [],
-      ),
-    );
-  }
-
-  ListTile _buildTeachers() {
-    return ListTile(
-      title: Padding(
-        padding: EdgeInsets.symmetric(
-          horizontal: Theme.of(context).listTileTheme.contentPadding!.horizontal / 2,
-        ),
-        child: Text('Преподаватели'.toUpperCase()),
-      ),
-      contentPadding: EdgeInsets.zero,
-      subtitle: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: widget.lesson.teachers.map((teacher) {
-          return ListTile(
-            title: Text(
-              teacher.name,
-              style: AppTextStyle.titleM.copyWith(
-                color: Theme.of(context).extension<AppColors>()!.active,
+            bottom: PreferredSize(
+              preferredSize: const Size.fromHeight(30),
+              child: Container(
+                height: 30,
+                decoration: BoxDecoration(
+                  color: backgroundColor,
+                  borderRadius: const BorderRadius.only(topLeft: Radius.circular(30), topRight: Radius.circular(30)),
+                ),
               ),
             ),
-            subtitle: teacher.post != null
-                ? Text(
-                    teacher.post!,
-                    style: AppTextStyle.captionS.copyWith(
-                      color: Theme.of(context).extension<AppColors>()!.deactive,
-                    ),
-                  )
-                : null,
-            dense: true,
-            visualDensity: VisualDensity.compact,
-            trailing: const Icon(
-              Icons.chevron_right_sharp,
-              size: 24,
+            actions: [
+              _buildIconButton(HugeIcons.strokeRoundedAdd01, _showAddToCustomScheduleModal, Colors.white),
+              _buildIconButton(
+                _isFavorite ? Icons.bookmark_rounded : Icons.bookmark_outline_rounded,
+                () => setState(() => _isFavorite = !_isFavorite),
+                Colors.white,
+              ),
+              _buildIconButton(Icons.share_outlined, _shareLessonDetails, Colors.white),
+            ],
+            leading: _buildIconButton(Icons.arrow_back_ios_new, () => Navigator.of(context).pop(), Colors.white),
+            title:
+                _isCollapsed
+                    ? Text(
+                      widget.lesson.subject,
+                      style: AppTextStyle.titleS.copyWith(color: Colors.white, fontWeight: FontWeight.w600),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    )
+                    : null,
+          ),
+
+          // Секции с контентом
+          SliverPadding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            sliver: SliverList(
+              delegate: SliverChildListDelegate([
+                _buildClassroomInfo(),
+                if (widget.lesson.groups != null && widget.lesson.groups!.isNotEmpty) _buildGroups(),
+                if (widget.lesson.teachers.isNotEmpty) _buildTeachers(),
+                _buildComments(),
+                SizedBox(height: MediaQuery.of(context).padding.bottom + 16),
+              ]),
             ),
-            onTap: () => context.go('/schedule/search', extra: teacher.name),
-          );
-        }).toList(),
+          ),
+        ],
       ),
     );
+  }
+
+  Widget _buildIconButton(IconData icon, VoidCallback onPressed, Color color) {
+    return IconButton(
+      icon: Icon(icon, size: 20),
+      color: color,
+      onPressed: onPressed,
+      style: IconButton.styleFrom(
+        backgroundColor: Colors.transparent,
+        padding: const EdgeInsets.all(8),
+        minimumSize: const Size(36, 36),
+      ),
+    );
+  }
+
+  Widget _buildInfoCard(IconData icon, String text) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+      decoration: BoxDecoration(color: Colors.white.withOpacity(0.2), borderRadius: BorderRadius.circular(12)),
+      child: Row(
+        children: [
+          HugeIcon(icon: icon, size: 18, color: Colors.white),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              text,
+              style: AppTextStyle.bodyL.copyWith(color: Colors.white, fontWeight: FontWeight.w500),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showAddToCustomScheduleModal() {
+    BottomModalSheet.show(
+      context,
+      child: CustomScheduleSelector(lesson: widget.lesson),
+      title: 'Добавить в расписание',
+      showFullScreen: true,
+      sheetHeight: MediaQuery.of(context).size.height,
+      isExpandable: true,
+      scrollable: true,
+    );
+  }
+
+  Widget _buildClassroomInfo() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children:
+          widget.lesson.classrooms.map((classroom) {
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 24.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Аудитория',
+                    style: AppTextStyle.captionL.copyWith(
+                      color: Theme.of(context).extension<AppColors>()!.deactive,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  GestureDetector(
+                    onTap: () => context.go('/schedule/search', extra: classroom.name),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(classroom.name, style: AppTextStyle.title.copyWith(fontWeight: FontWeight.w600)),
+                              if (classroom.campus != null)
+                                Text(
+                                  classroom.campus!.name,
+                                  style: AppTextStyle.body.copyWith(
+                                    color: Theme.of(context).extension<AppColors>()!.deactive,
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+                        Icon(
+                          Icons.arrow_forward_ios,
+                          size: 16,
+                          color: Theme.of(context).extension<AppColors>()!.deactive,
+                        ),
+                      ],
+                    ),
+                  ),
+                  if (classroom.campus != null && classroom.campus?.latitude != null) ...[
+                    const SizedBox(height: 16),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: SizedBox(
+                        height: 180,
+                        child: CampusMapView(
+                          latitude: classroom.campus!.latitude!,
+                          longitude: classroom.campus!.longitude!,
+                        ),
+                      ),
+                    ).animate().fadeIn(duration: 500.ms).slideY(begin: 0.1, end: 0),
+                    const SizedBox(height: 8),
+                    TextButton.icon(
+                      onPressed: () {
+                        launchUrlString(
+                          'https://www.openstreetmap.org/?mlat=${classroom.campus!.latitude}&mlon=${classroom.campus!.longitude}&zoom=15',
+                        );
+                      },
+                      icon: const Icon(Icons.directions, size: 18),
+                      label: const Text('Построить маршрут'),
+                      style: TextButton.styleFrom(padding: EdgeInsets.zero, alignment: Alignment.centerLeft),
+                    ),
+                  ],
+                ],
+              ),
+            );
+          }).toList(),
+    );
+  }
+
+  Widget _buildGroups() {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 24.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Группы',
+            style: AppTextStyle.captionL.copyWith(
+              color: Theme.of(context).extension<AppColors>()!.deactive,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children:
+                widget.lesson.groups?.map((group) {
+                  return CustomChip.ChipButton(
+                    label: group,
+                    onTap: () {
+                      context.go('/schedule/search', extra: group);
+                    },
+                  );
+                }).toList() ??
+                [],
+          ),
+        ],
+      ),
+    ).animate().fadeIn(duration: 400.ms).slideY(begin: 0.05, end: 0);
+  }
+
+  Widget _buildTeachers() {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 24.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Преподаватели',
+            style: AppTextStyle.captionL.copyWith(
+              color: Theme.of(context).extension<AppColors>()!.deactive,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const SizedBox(height: 12),
+          ...widget.lesson.teachers.asMap().entries.map((entry) {
+            final index = entry.key;
+            final teacher = entry.value;
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 16.0),
+              child: InkWell(
+                onTap: () => context.go('/schedule/search', extra: teacher.name),
+                borderRadius: BorderRadius.circular(8),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).extension<AppColors>()!.background03.withOpacity(0.5),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Center(
+                        child: Text(
+                          teacher.name.isNotEmpty ? teacher.name[0] : '?',
+                          style: AppTextStyle.titleM.copyWith(
+                            fontWeight: FontWeight.w600,
+                            color: Theme.of(context).extension<AppColors>()!.active,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(teacher.name, style: AppTextStyle.titleS.copyWith(fontWeight: FontWeight.w600)),
+                          if (teacher.post != null)
+                            Text(
+                              teacher.post!,
+                              style: AppTextStyle.captionL.copyWith(
+                                color: Theme.of(context).extension<AppColors>()!.deactive,
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                    Icon(Icons.arrow_forward_ios, size: 16, color: Theme.of(context).extension<AppColors>()!.deactive),
+                  ],
+                ),
+              ),
+            ).animate(delay: (index * 70).ms).fadeIn(duration: 300.ms).slideX(begin: 0.05, end: 0);
+          }),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildComments() {
+    final colors = Theme.of(context).extension<AppColors>()!;
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 24.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Комментарий',
+            style: AppTextStyle.captionL.copyWith(color: colors.deactive, fontWeight: FontWeight.w500),
+          ),
+          const SizedBox(height: 8),
+          TextInput(
+            hintText: 'Введите комментарий к занятию...',
+            controller: _textController,
+            errorText: _textErrorText,
+            maxLines: 5,
+            fillColor: Theme.of(context).brightness == Brightness.dark ? colors.background02 : Colors.grey.shade50,
+          ),
+          if (_textController.text.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 8.0),
+              child: Text(
+                '${_textController.text.length}/500',
+                style: AppTextStyle.captionL.copyWith(color: Theme.of(context).extension<AppColors>()!.deactive),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class StatusIndicator extends StatelessWidget {
+  final bool isActive;
+  final Color color;
+
+  const StatusIndicator({super.key, required this.isActive, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+          width: 8,
+          height: 8,
+          decoration: BoxDecoration(color: isActive ? Colors.green : Colors.grey, shape: BoxShape.circle),
+        )
+        .animate(onPlay: (controller) => controller.repeat())
+        .scaleXY(begin: 1, end: 1.3, duration: 1000.ms, curve: Curves.easeInOut)
+        .then()
+        .scaleXY(begin: 1.3, end: 1, duration: 1000.ms, curve: Curves.easeInOut);
   }
 }

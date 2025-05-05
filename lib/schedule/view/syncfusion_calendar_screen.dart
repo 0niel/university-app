@@ -11,11 +11,6 @@ class SyncfusionCalendarScreen extends StatelessWidget {
     final state = context.read<ScheduleBloc>().state;
     final lessons = state.selectedSchedule?.schedule.toList() ?? [];
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Календарь'),
-      ),
-      body: SyncfusionCalendarView(lessons: lessons),
-    );
+    return Scaffold(appBar: AppBar(title: const Text('Календарь')), body: SyncfusionCalendarView(lessons: lessons));
   }
 }

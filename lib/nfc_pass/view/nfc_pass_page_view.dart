@@ -37,11 +37,15 @@ class _NfcPassPageViewState extends State<NfcPassPageView> {
   }
 
   Future<void> _openSettings() async {
-    await BottomModalSheet.show(
+    BottomModalSheet.show(
       context,
-      child: const NfcCardSettingsDialog(),
       title: 'Настройки карточки',
-      description: 'Выберите видео или изображение, которое будет отображаться на карточке',
+      scrollable: true,
+      isExpandable: true,
+      isDismissible: true,
+      backgroundColor: Theme.of(context).extension<AppColors>()!.background01,
+
+      child: const NfcCardSettingsDialog(),
     );
   }
 
@@ -58,10 +62,7 @@ class _NfcPassPageViewState extends State<NfcPassPageView> {
 
               if (!mounted) return;
 
-              context.read<NfcPassCubit>().confirmBinding(
-                    sixDigitCode: code,
-                    deviceName: deviceName,
-                  );
+              context.read<NfcPassCubit>().confirmBinding(sixDigitCode: code, deviceName: deviceName);
 
               context.pop();
             },
@@ -87,9 +88,7 @@ class _NfcPassPageViewState extends State<NfcPassPageView> {
     return BlocConsumer<NfcPassCubit, NfcPassState>(
       listener: (context, state) {
         if (state.status == NfcPassStatus.error) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Ошибка: ${state.errorMessage}')),
-          );
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Ошибка: ${state.errorMessage}')));
         } else if (state.status == NfcPassStatus.codeSent) {
           _showCodeInputSheet();
         }
@@ -98,12 +97,7 @@ class _NfcPassPageViewState extends State<NfcPassPageView> {
         return Scaffold(
           appBar: AppBar(
             title: const Text("NFC-пропуск"),
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.settings),
-                onPressed: _openSettings,
-              ),
-            ],
+            actions: [IconButton(icon: const Icon(Icons.settings), onPressed: _openSettings)],
           ),
           body: SafeArea(
             bottom: false,
@@ -112,10 +106,7 @@ class _NfcPassPageViewState extends State<NfcPassPageView> {
               child: AnimatedSwitcher(
                 duration: const Duration(milliseconds: 500),
                 transitionBuilder: (Widget child, Animation<double> animation) {
-                  return FadeTransition(
-                    opacity: animation,
-                    child: child,
-                  ).animate().fadeIn(duration: 500.ms);
+                  return FadeTransition(opacity: animation, child: child).animate().fadeIn(duration: 500.ms);
                 },
                 switchInCurve: Curves.easeIn,
                 switchOutCurve: Curves.easeOut,
@@ -150,10 +141,7 @@ class _NfcPassPageViewState extends State<NfcPassPageView> {
                 icon: HugeIcons.strokeRoundedMail02,
                 size: 64,
                 color: AppColors.light.colorful04,
-              ).animate().scale(
-                    duration: 500.ms,
-                    curve: Curves.easeOutBack,
-                  ),
+              ).animate().scale(duration: 500.ms, curve: Curves.easeOutBack),
               const SizedBox(height: 24),
               Text(
                 'Сервис журнала отправил вам код на почту, привязанную к студенческому аккаунту. Пожалуйста, введите его.',
@@ -207,10 +195,7 @@ class _NfcPassPageViewState extends State<NfcPassPageView> {
 
   VideoPlayerController? _buildVideoController(String? path, bool isVideo) {
     if (path != null && isVideo) {
-      return VideoPlayerController.file(
-        io.File(path),
-        videoPlayerOptions: VideoPlayerOptions(mixWithOthers: true),
-      )
+      return VideoPlayerController.file(io.File(path), videoPlayerOptions: VideoPlayerOptions(mixWithOthers: true))
         ..setVolume(0)
         ..setLooping(true);
     }
@@ -248,10 +233,7 @@ class _NfcPassPageViewState extends State<NfcPassPageView> {
 }
 
 class NfcNotConnected extends StatelessWidget {
-  const NfcNotConnected({
-    super.key,
-    required this.onPressed,
-  });
+  const NfcNotConnected({super.key, required this.onPressed});
 
   final VoidCallback onPressed;
 
@@ -260,9 +242,11 @@ class NfcNotConnected extends StatelessWidget {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        HugeIcon(icon: HugeIcons.strokeRoundedConnect, size: 64, color: AppColors.dark.colorful04)
-            .animate()
-            .fadeIn(duration: 500.ms),
+        HugeIcon(
+          icon: HugeIcons.strokeRoundedConnect,
+          size: 64,
+          color: AppColors.dark.colorful04,
+        ).animate().fadeIn(duration: 500.ms),
         const SizedBox(height: 16),
         Text(
           "Пропуск не подключен",

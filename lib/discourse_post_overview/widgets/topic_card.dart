@@ -14,10 +14,7 @@ class TopicCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ConstrainedBox(
-      constraints: BoxConstraints(
-        minWidth: 320,
-        maxWidth: MediaQuery.of(context).size.width - 64,
-      ),
+      constraints: BoxConstraints(minWidth: 320, maxWidth: MediaQuery.of(context).size.width - 64),
       child: Card(
         child: PlatformInkWell(
           onTap: () {
@@ -33,41 +30,40 @@ class TopicCard extends StatelessWidget {
                   children: [
                     SizedBox(
                       height: 128,
-                      child: topic.imageUrl != null
-                          ? CachedNetworkImage(
-                              imageUrl: topic.imageUrl!,
-                              placeholder: (context, url) => const ImagePlaceholder(),
-                              errorWidget: (context, url, error) => const ImagePlaceholder(),
-                              imageBuilder: (context, imageProvider) => Container(
+                      child:
+                          topic.imageUrl != null
+                              ? CachedNetworkImage(
+                                imageUrl: topic.imageUrl!,
+                                placeholder: (context, url) => const ImagePlaceholder(),
+                                errorWidget: (context, url, error) => const ImagePlaceholder(),
+                                imageBuilder:
+                                    (context, imageProvider) => Container(
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(16),
+                                        image: DecorationImage(image: imageProvider, fit: BoxFit.cover),
+                                      ),
+                                    ),
+                              )
+                              : Container(
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(16),
-                                  image: DecorationImage(
-                                    image: imageProvider,
-                                    fit: BoxFit.cover,
+                                  gradient: const LinearGradient(
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                    colors: [
+                                      Color(0xFFFFB8E0),
+                                      Color(0xFFBE9EFF),
+                                      Color(0xFF88C0FC),
+                                      Color(0xFF86FF99),
+                                    ],
+                                  ),
+                                ),
+                                child: Center(
+                                  child: Assets.icons.imagePlaceholder.svg(
+                                    color: Theme.of(context).colorScheme.onPrimary,
                                   ),
                                 ),
                               ),
-                            )
-                          : Container(
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(16),
-                                gradient: const LinearGradient(
-                                  begin: Alignment.topLeft,
-                                  end: Alignment.bottomRight,
-                                  colors: [
-                                    Color(0xFFFFB8E0),
-                                    Color(0xFFBE9EFF),
-                                    Color(0xFF88C0FC),
-                                    Color(0xFF86FF99),
-                                  ],
-                                ),
-                              ),
-                              child: Center(
-                                child: Assets.icons.imagePlaceholder.svg(
-                                  color: Theme.of(context).colorScheme.onPrimary,
-                                ),
-                              ),
-                            ),
                     ),
                   ],
                 ),
@@ -85,12 +81,7 @@ class TopicCard extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            topic.title,
-                            style: AppTextStyle.titleM,
-                            overflow: TextOverflow.ellipsis,
-                            maxLines: 2,
-                          ),
+                          Text(topic.title, style: AppTextStyle.titleM, overflow: TextOverflow.ellipsis, maxLines: 2),
                           Row(
                             children: [
                               Expanded(
@@ -113,8 +104,9 @@ class TopicCard extends StatelessWidget {
                                       ),
                                       Text(
                                         topic.views.toString(),
-                                        style: AppTextStyle.captionS
-                                            .copyWith(color: Theme.of(context).extension<AppColors>()!.deactive),
+                                        style: AppTextStyle.captionS.copyWith(
+                                          color: Theme.of(context).extension<AppColors>()!.deactive,
+                                        ),
                                       ),
                                     ],
                                   ),
@@ -127,8 +119,9 @@ class TopicCard extends StatelessWidget {
                                       ),
                                       Text(
                                         topic.likeCount.toString(),
-                                        style: AppTextStyle.captionS
-                                            .copyWith(color: Theme.of(context).extension<AppColors>()!.deactive),
+                                        style: AppTextStyle.captionS.copyWith(
+                                          color: Theme.of(context).extension<AppColors>()!.deactive,
+                                        ),
                                       ),
                                     ],
                                   ),

@@ -4,10 +4,7 @@ import 'package:watch_connectivity/watch_connectivity.dart';
 import 'package:rtu_mirea_app/nfc_pass/bloc/nfc_pass_cubit.dart';
 
 class WatchConnectivityWrapper extends StatefulWidget {
-  const WatchConnectivityWrapper({
-    super.key,
-    required this.child,
-  });
+  const WatchConnectivityWrapper({super.key, required this.child});
 
   final Widget child;
 

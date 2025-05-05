@@ -9,8 +9,9 @@ import 'package:app_ui/app_ui.dart';
 import 'package:rtu_mirea_app/app/theme/theme_mode.dart';
 
 import 'package:rtu_mirea_app/profile/widgets/widgets.dart';
-import 'package:rtu_mirea_app/schedule/models/models.dart';
 import 'package:rtu_mirea_app/schedule/schedule.dart';
+
+enum ThemeOption { light, dark, system }
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
@@ -18,9 +19,7 @@ class ProfilePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Профиль"),
-      ),
+      appBar: AppBar(title: const Text("Профиль")),
       body: SafeArea(
         bottom: false,
         child: LayoutBuilder(
@@ -29,9 +28,7 @@ class ProfilePage extends StatelessWidget {
               slivers: [
                 SliverPadding(
                   padding: EdgeInsets.symmetric(horizontal: 24),
-                  sliver: SliverToBoxAdapter(
-                    child: _InitialProfileStatePage(),
-                  ),
+                  sliver: SliverToBoxAdapter(child: _InitialProfileStatePage()),
                 ),
               ],
             );
@@ -50,6 +47,48 @@ class _InitialProfileStatePage extends StatefulWidget {
 }
 
 class _InitialProfileStatePageState extends State<_InitialProfileStatePage> {
+  late ThemeOption _selectedTheme;
+  bool _initialized = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_initialized) {
+      _selectedTheme = _getCurrentThemeOption();
+      _initialized = true;
+    }
+  }
+
+  ThemeOption _getCurrentThemeOption() {
+    final mode = AdaptiveTheme.of(context).mode;
+    if (mode == AdaptiveThemeMode.light) {
+      return ThemeOption.light;
+    } else if (mode == AdaptiveThemeMode.dark) {
+      return ThemeOption.dark;
+    } else {
+      return ThemeOption.system;
+    }
+  }
+
+  void _setTheme(ThemeOption option) {
+    setState(() => _selectedTheme = option);
+
+    switch (option) {
+      case ThemeOption.light:
+        CustomThemeMode.setAmoled(false);
+        AdaptiveTheme.of(context).setLight();
+        break;
+      case ThemeOption.dark:
+        CustomThemeMode.setAmoled(false);
+        AdaptiveTheme.of(context).setDark();
+        break;
+      case ThemeOption.system:
+        CustomThemeMode.setAmoled(false);
+        AdaptiveTheme.of(context).setSystem();
+        break;
+    }
+  }
+
   void _onFeedbackTap(BuildContext context) {
     var defaultText = 'Возникла проблема с расписанием';
     final state = context.read<ScheduleBloc>().state;
@@ -67,134 +106,127 @@ class _InitialProfileStatePageState extends State<_InitialProfileStatePage> {
     final userBloc = context.read<UserBloc>();
 
     if (userBloc.state.status == UserStatus.authorized) {
-      FeedbackBottomModalSheet.show(
-        context,
-        defaultText: defaultText,
-        defaultEmail: userBloc.state.user!.email,
-      );
+      FeedbackBottomModalSheet.show(context, defaultText: defaultText, defaultEmail: userBloc.state.user!.email);
     } else {
-      FeedbackBottomModalSheet.show(
-        context,
-        defaultText: defaultText,
-      );
+      FeedbackBottomModalSheet.show(context, defaultText: defaultText);
     }
   }
 
   void _onAdsSettingTap(BuildContext context) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Поддержите наш сервис'),
-        content: const Text(
-          'Реклама помогает нам бесплатно развивать приложение, добавлять новые возможности и поддерживать качественную работу сервиса. Отключая рекламу, вы лишаете нас важного источника поддержки. Вы уверены, что хотите отключить показ рекламы?',
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Поддержите наш сервис'),
+            content: const Text(
+              'Реклама помогает нам бесплатно развивать приложение, добавлять новые возможности и поддерживать качественную работу сервиса. Отключая рекламу, вы лишаете нас важного источника поддержки. Вы уверены, что хотите отключить показ рекламы?',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  context.read<AdsBloc>().add(const SetAdsVisibility(showAds: true));
+                  Navigator.of(context).pop();
+                },
+                child: const Text('Оставить рекламу'),
+              ),
+              TextButton(
+                onPressed: () {
+                  context.read<AdsBloc>().add(const SetAdsVisibility(showAds: false));
+                  Navigator.of(context).pop();
+                },
+                child: const Text('Отключить'),
+              ),
+            ],
+          ),
+    );
+  }
+
+  Widget _buildThemeOption(ThemeOption option, String title, IconData icon) {
+    final colors = Theme.of(context).extension<AppColors>()!;
+    final isSelected = _selectedTheme == option;
+
+    return InkWell(
+      onTap: () => _setTheme(option),
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+        decoration: BoxDecoration(
+          color: isSelected ? colors.primary.withOpacity(0.1) : colors.background03,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: isSelected ? colors.primary : colors.background03, width: 2),
         ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              context.read<AdsBloc>().add(const SetAdsVisibility(showAds: true));
-              Navigator.of(context).pop();
-            },
-            child: const Text('Оставить рекламу'),
-          ),
-          TextButton(
-            onPressed: () {
-              context.read<AdsBloc>().add(const SetAdsVisibility(showAds: false));
-              Navigator.of(context).pop();
-            },
-            child: const Text('Отключить'),
-          ),
-        ],
+        child: Column(
+          children: [
+            Icon(icon, color: isSelected ? colors.primary : colors.active, size: 24),
+            const SizedBox(height: 8),
+            Text(
+              title,
+              style: AppTextStyle.body.copyWith(
+                color: isSelected ? colors.primary : colors.active,
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<AppColors>()!;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const ContainerLabel(label: "Управление расписанием"),
-        const SizedBox(height: 8),
-        ScheduleManagementSection(onFeedbackTap: _onFeedbackTap),
+        ScheduleSectionWrapper(
+          title: "Управление расписанием",
+          scheduleSection: ScheduleManagementSection(onFeedbackTap: _onFeedbackTap),
+        ),
         const SizedBox(height: 24),
-        const ContainerLabel(label: "Общее"),
-        const SizedBox(height: 8),
-        ProfileButton(
-          text: 'О приложении',
-          icon:
-              HugeIcon(icon: HugeIcons.strokeRoundedCoffee02, color: Theme.of(context).extension<AppColors>()!.active),
-          onPressed: () => context.go('/profile/about'),
-        ),
-        const SizedBox(height: 8),
-        ProfileButton(
-          text: 'Тема',
-          icon: HugeIcon(icon: HugeIcons.strokeRoundedMoon02, color: Theme.of(context).extension<AppColors>()!.active),
-          onPressed: () {
-            showDialog(
-              context: context,
-              builder: (context) => SimpleDialog(
-                title: Text("Выбор темы", style: AppTextStyle.titleS),
-                contentPadding: const EdgeInsets.all(16),
-                backgroundColor: Theme.of(context).extension<AppColors>()!.background02,
-                elevation: 0,
-                children: [
-                  ListTileThemeItem(
-                    title: "Светлая",
-                    trailing: AdaptiveTheme.of(context).mode == AdaptiveThemeMode.light
-                        ? Icon(Icons.check, color: Theme.of(context).extension<AppColors>()!.active)
-                        : null,
-                    onTap: () {
-                      CustomThemeMode.setAmoled(false);
-                      AdaptiveTheme.of(context).setLight();
-                      context.pop();
-                    },
+        SettingsSection(
+          title: "Общее",
+          children: [
+            SettingsItem(
+              text: 'О приложении',
+              icon: HugeIcon(icon: HugeIcons.strokeRoundedCoffee02, color: colors.active),
+              onPressed: () => context.go('/profile/about'),
+              trailing: Icon(Icons.chevron_right, color: colors.deactive),
+            ),
+            const Divider(height: 24, thickness: 0.5),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                  child: Text(
+                    'Тема приложения',
+                    style: AppTextStyle.titleM.copyWith(color: colors.active, fontWeight: FontWeight.w500),
                   ),
-                  const SizedBox(height: 8),
-                  ListTileThemeItem(
-                    title: "Тёмная",
-                    trailing: (!CustomThemeMode.isAmoled && AdaptiveTheme.of(context).mode == AdaptiveThemeMode.dark)
-                        ? Icon(Icons.check, color: Theme.of(context).extension<AppColors>()!.active)
-                        : null,
-                    onTap: () {
-                      CustomThemeMode.setAmoled(false);
-                      AdaptiveTheme.of(context).setDark();
-                      context.pop();
-                    },
-                  ),
-                  const SizedBox(height: 8),
-                  ListTileThemeItem(
-                    title: "AMOLED",
-                    trailing: CustomThemeMode.isAmoled
-                        ? Icon(Icons.check, color: Theme.of(context).extension<AppColors>()!.active)
-                        : null,
-                    onTap: () {
-                      CustomThemeMode.setAmoled(true);
-                      AdaptiveTheme.of(context).setDark();
-                      context.pop();
-                    },
-                  ),
-                  const SizedBox(height: 8),
-                  ListTileThemeItem(
-                    title: "Как в системе",
-                    trailing: AdaptiveTheme.of(context).mode == AdaptiveThemeMode.system
-                        ? Icon(Icons.check, color: Theme.of(context).extension<AppColors>()!.active)
-                        : null,
-                    onTap: () {
-                      CustomThemeMode.setAmoled(false);
-                      AdaptiveTheme.of(context).setSystem();
-                      context.pop();
-                    },
-                  ),
-                ],
-              ),
-            );
-          },
-        ),
-        const SizedBox(height: 8),
-        ProfileButton(
-          text: 'Управление рекламой',
-          icon: const Icon(Icons.ad_units, size: 24, color: Colors.blue),
-          onPressed: () => _onAdsSettingTap(context),
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(child: _buildThemeOption(ThemeOption.light, 'Светлая', Icons.wb_sunny_outlined)),
+                    const SizedBox(width: 8),
+                    Expanded(child: _buildThemeOption(ThemeOption.dark, 'Тёмная', Icons.nightlight_outlined)),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: _buildThemeOption(ThemeOption.system, 'Системная', Icons.settings_suggest_outlined),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            const Divider(height: 24, thickness: 0.5),
+            SettingsItem(
+              text: 'Управление рекламой',
+              icon: Icon(Icons.ad_units, color: Colors.blue, size: 24),
+              onPressed: () => _onAdsSettingTap(context),
+              trailing: Icon(Icons.chevron_right, color: colors.deactive),
+            ),
+          ],
         ),
         SizedBox(height: MediaQuery.of(context).padding.bottom),
       ],

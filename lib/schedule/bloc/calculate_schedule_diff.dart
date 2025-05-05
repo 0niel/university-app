@@ -25,10 +25,7 @@ bool areTeachersEqual(List<Teacher> a, List<Teacher> b) {
   return setA.length == setB.length && setA.containsAll(setB);
 }
 
-LessonSchedulePart? findMatchingLesson(
-  LessonSchedulePart lesson,
-  List<LessonSchedulePart> list,
-) {
+LessonSchedulePart? findMatchingLesson(LessonSchedulePart lesson, List<LessonSchedulePart> list) {
   final candidates = list.where((l) => l.subject == lesson.subject).toList();
   if (candidates.isEmpty) return null;
   candidates.sort((a, b) {
@@ -39,10 +36,7 @@ LessonSchedulePart? findMatchingLesson(
   return candidates.first;
 }
 
-ScheduleDiff? calculateScheduleDiff(
-  List<SchedulePart> oldParts,
-  List<SchedulePart> newParts,
-) {
+ScheduleDiff? calculateScheduleDiff(List<SchedulePart> oldParts, List<SchedulePart> newParts) {
   final oldLessons = oldParts.whereType<LessonSchedulePart>().toList();
   final newLessons = newParts.whereType<LessonSchedulePart>().toList();
 
@@ -59,28 +53,12 @@ ScheduleDiff? calculateScheduleDiff(
           addedDates: [],
           unchangedDates: [],
         ),
-        FieldDiff(
-          fieldName: 'Аудитории',
-          oldValue: formatClassrooms(oldLesson.classrooms),
-          newValue: '',
-        ),
-        FieldDiff(
-          fieldName: 'Преподаватели',
-          oldValue: formatTeachers(oldLesson.teachers),
-          newValue: '',
-        ),
-        FieldDiff(
-          fieldName: 'Время пары',
-          oldValue: formatLessonBells(oldLesson.lessonBells),
-          newValue: '',
-        ),
+        FieldDiff(fieldName: 'Аудитории', oldValue: formatClassrooms(oldLesson.classrooms), newValue: ''),
+        FieldDiff(fieldName: 'Преподаватели', oldValue: formatTeachers(oldLesson.teachers), newValue: ''),
+        FieldDiff(fieldName: 'Время пары', oldValue: formatLessonBells(oldLesson.lessonBells), newValue: ''),
       ];
 
-      changes.add(ScheduleChange(
-        type: ChangeType.removed,
-        subject: oldLesson.subject,
-        fieldDiffs: fieldDiffs,
-      ));
+      changes.add(ScheduleChange(type: ChangeType.removed, subject: oldLesson.subject, fieldDiffs: fieldDiffs));
     } else {
       final index = newLessons.indexOf(candidate);
       if (index != -1) matchedNewIndices.add(index);
@@ -95,42 +73,46 @@ ScheduleDiff? calculateScheduleDiff(
       final List<DateTime> unchangedDates = oldDatesSet.intersection(newDatesSet).toList()..sort();
 
       if (removedDates.isNotEmpty || addedDates.isNotEmpty) {
-        fieldDiffs.add(FieldDiff(
-          fieldName: 'Даты',
-          addedDates: addedDates,
-          removedDates: removedDates,
-          unchangedDates: unchangedDates,
-        ));
+        fieldDiffs.add(
+          FieldDiff(
+            fieldName: 'Даты',
+            addedDates: addedDates,
+            removedDates: removedDates,
+            unchangedDates: unchangedDates,
+          ),
+        );
       }
 
       if (!areClassroomsEqual(oldLesson.classrooms, candidate.classrooms)) {
-        fieldDiffs.add(FieldDiff(
-          fieldName: 'Аудитории',
-          oldValue: formatClassrooms(oldLesson.classrooms),
-          newValue: formatClassrooms(candidate.classrooms),
-        ));
+        fieldDiffs.add(
+          FieldDiff(
+            fieldName: 'Аудитории',
+            oldValue: formatClassrooms(oldLesson.classrooms),
+            newValue: formatClassrooms(candidate.classrooms),
+          ),
+        );
       }
       if (!areTeachersEqual(oldLesson.teachers, candidate.teachers)) {
-        fieldDiffs.add(FieldDiff(
-          fieldName: 'Преподаватели',
-          oldValue: formatTeachers(oldLesson.teachers),
-          newValue: formatTeachers(candidate.teachers),
-        ));
+        fieldDiffs.add(
+          FieldDiff(
+            fieldName: 'Преподаватели',
+            oldValue: formatTeachers(oldLesson.teachers),
+            newValue: formatTeachers(candidate.teachers),
+          ),
+        );
       }
       if (oldLesson.lessonBells != candidate.lessonBells) {
-        fieldDiffs.add(FieldDiff(
-          fieldName: 'Время пары',
-          oldValue: formatLessonBells(oldLesson.lessonBells),
-          newValue: formatLessonBells(candidate.lessonBells),
-        ));
+        fieldDiffs.add(
+          FieldDiff(
+            fieldName: 'Время пары',
+            oldValue: formatLessonBells(oldLesson.lessonBells),
+            newValue: formatLessonBells(candidate.lessonBells),
+          ),
+        );
       }
 
       if (fieldDiffs.isNotEmpty) {
-        changes.add(ScheduleChange(
-          type: ChangeType.modified,
-          subject: oldLesson.subject,
-          fieldDiffs: fieldDiffs,
-        ));
+        changes.add(ScheduleChange(type: ChangeType.modified, subject: oldLesson.subject, fieldDiffs: fieldDiffs));
       }
     }
   }
@@ -146,28 +128,12 @@ ScheduleDiff? calculateScheduleDiff(
         removedDates: [],
         unchangedDates: [],
       ),
-      FieldDiff(
-        fieldName: 'Аудитории',
-        oldValue: '',
-        newValue: formatClassrooms(newLesson.classrooms),
-      ),
-      FieldDiff(
-        fieldName: 'Преподаватели',
-        oldValue: '',
-        newValue: formatTeachers(newLesson.teachers),
-      ),
-      FieldDiff(
-        fieldName: 'Время пары',
-        oldValue: '',
-        newValue: formatLessonBells(newLesson.lessonBells),
-      ),
+      FieldDiff(fieldName: 'Аудитории', oldValue: '', newValue: formatClassrooms(newLesson.classrooms)),
+      FieldDiff(fieldName: 'Преподаватели', oldValue: '', newValue: formatTeachers(newLesson.teachers)),
+      FieldDiff(fieldName: 'Время пары', oldValue: '', newValue: formatLessonBells(newLesson.lessonBells)),
     ];
 
-    changes.add(ScheduleChange(
-      type: ChangeType.added,
-      subject: newLesson.subject,
-      fieldDiffs: fieldDiffs,
-    ));
+    changes.add(ScheduleChange(type: ChangeType.added, subject: newLesson.subject, fieldDiffs: fieldDiffs));
   }
 
   return changes.isEmpty ? null : ScheduleDiff(changes: changes);

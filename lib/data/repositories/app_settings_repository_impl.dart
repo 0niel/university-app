@@ -7,9 +7,7 @@ import 'package:rtu_mirea_app/domain/repositories/app_settings_repository.dart';
 class AppSettingsRepositoryImpl implements AppSettingsRepository {
   final AppSettingsLocal localDataSource;
 
-  AppSettingsRepositoryImpl({
-    required this.localDataSource,
-  });
+  AppSettingsRepositoryImpl({required this.localDataSource});
 
   @override
   Future<AppSettings> getSettings() async {
@@ -18,11 +16,7 @@ class AppSettingsRepositoryImpl implements AppSettingsRepository {
 
       return settings;
     } on CacheException {
-      const newLocalSettings = AppSettingsModel(
-        onboardingShown: false,
-        lastUpdateVersion: '',
-        theme: 'dark',
-      );
+      const newLocalSettings = AppSettingsModel(onboardingShown: false, lastUpdateVersion: '', theme: 'dark');
       await localDataSource.setSettingsToCache(newLocalSettings);
       return newLocalSettings;
     }

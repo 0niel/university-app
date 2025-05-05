@@ -2,12 +2,13 @@ part of 'schedule_bloc.dart';
 
 abstract class ScheduleEvent extends Equatable {
   const ScheduleEvent();
+
+  @override
+  List<Object> get props => [];
 }
 
 class SetLessonComment extends ScheduleEvent with AnalyticsEventMixin {
-  const SetLessonComment({
-    required this.comment,
-  });
+  const SetLessonComment({required this.comment});
 
   final LessonComment comment;
 
@@ -19,58 +20,39 @@ class SetLessonComment extends ScheduleEvent with AnalyticsEventMixin {
 }
 
 class ScheduleRequested extends ScheduleEvent with AnalyticsEventMixin {
-  const ScheduleRequested({
-    required this.group,
-  });
+  const ScheduleRequested({required this.group});
 
   final Group group;
 
   @override
-  AnalyticsEvent get event => AnalyticsEvent(
-        'ScheduleRequested',
-        properties: {
-          'group': group.name,
-        },
-      );
+  AnalyticsEvent get event => AnalyticsEvent('ScheduleRequested', properties: {'group': group.name});
 
   @override
   List<Object> get props => [group];
 }
 
 class ClassroomScheduleRequested extends ScheduleEvent with AnalyticsEventMixin {
-  const ClassroomScheduleRequested({
-    required this.classroom,
-  });
+  const ClassroomScheduleRequested({required this.classroom});
 
   final Classroom classroom;
 
   @override
   AnalyticsEvent get event => AnalyticsEvent(
-        'ClassroomScheduleRequested',
-        properties: {
-          'classroom': classroom.name,
-          'campus': classroom.campus?.name,
-        },
-      );
+    'ClassroomScheduleRequested',
+    properties: {'classroom': classroom.name, 'campus': classroom.campus?.name},
+  );
 
   @override
   List<Object> get props => [classroom];
 }
 
 class TeacherScheduleRequested extends ScheduleEvent with AnalyticsEventMixin {
-  const TeacherScheduleRequested({
-    required this.teacher,
-  });
+  const TeacherScheduleRequested({required this.teacher});
 
   final Teacher teacher;
 
   @override
-  AnalyticsEvent get event => AnalyticsEvent(
-        'TeacherScheduleRequested',
-        properties: {
-          'teacher': teacher.name,
-        },
-      );
+  AnalyticsEvent get event => AnalyticsEvent('TeacherScheduleRequested', properties: {'teacher': teacher.name});
 
   @override
   List<Object> get props => [teacher];
@@ -84,9 +66,7 @@ class RefreshSelectedScheduleData extends ScheduleEvent {
 }
 
 class ScheduleSetDisplayMode extends ScheduleEvent {
-  const ScheduleSetDisplayMode({
-    required this.isMiniature,
-  });
+  const ScheduleSetDisplayMode({required this.isMiniature});
 
   final bool isMiniature;
 
@@ -95,9 +75,7 @@ class ScheduleSetDisplayMode extends ScheduleEvent {
 }
 
 class ScheduleSetEmptyLessonsDisplaying extends ScheduleEvent {
-  const ScheduleSetEmptyLessonsDisplaying({
-    required this.showEmptyLessons,
-  });
+  const ScheduleSetEmptyLessonsDisplaying({required this.showEmptyLessons});
 
   final bool showEmptyLessons;
 
@@ -106,9 +84,7 @@ class ScheduleSetEmptyLessonsDisplaying extends ScheduleEvent {
 }
 
 class SetShowCommentsIndicator extends ScheduleEvent {
-  const SetShowCommentsIndicator({
-    required this.showCommentsIndicators,
-  });
+  const SetShowCommentsIndicator({required this.showCommentsIndicators});
 
   final bool showCommentsIndicators;
 
@@ -117,9 +93,7 @@ class SetShowCommentsIndicator extends ScheduleEvent {
 }
 
 class SetSelectedSchedule extends ScheduleEvent with AnalyticsEventMixin {
-  const SetSelectedSchedule({
-    required this.selectedSchedule,
-  });
+  const SetSelectedSchedule({required this.selectedSchedule});
 
   final SelectedSchedule selectedSchedule;
 
@@ -130,20 +104,16 @@ class SetSelectedSchedule extends ScheduleEvent with AnalyticsEventMixin {
   AnalyticsEvent get event {
     if (selectedSchedule is SelectedGroupSchedule) {
       final group = (selectedSchedule as SelectedGroupSchedule).group;
-      return AnalyticsEvent('SetSelectedGroupSchedule', properties: {
-        'group': group.name,
-      });
+      return AnalyticsEvent('SetSelectedGroupSchedule', properties: {'group': group.name});
     } else if (selectedSchedule is SelectedClassroomSchedule) {
       final classroom = (selectedSchedule as SelectedClassroomSchedule).classroom;
-      return AnalyticsEvent('SetSelectedClassroomSchedule', properties: {
-        'classroom': classroom.name,
-        'campus': classroom.campus?.name,
-      });
+      return AnalyticsEvent(
+        'SetSelectedClassroomSchedule',
+        properties: {'classroom': classroom.name, 'campus': classroom.campus?.name},
+      );
     } else if (selectedSchedule is SelectedTeacherSchedule) {
       final teacher = (selectedSchedule as SelectedTeacherSchedule).teacher;
-      return AnalyticsEvent('SetSelectedTeacherSchedule', properties: {
-        'teacher': teacher.name,
-      });
+      return AnalyticsEvent('SetSelectedTeacherSchedule', properties: {'teacher': teacher.name});
     }
 
     return const AnalyticsEvent('SetSelectedSchedule');
@@ -151,10 +121,7 @@ class SetSelectedSchedule extends ScheduleEvent with AnalyticsEventMixin {
 }
 
 class DeleteSchedule extends ScheduleEvent {
-  const DeleteSchedule({
-    required this.identifier,
-    required this.target,
-  });
+  const DeleteSchedule({required this.identifier, required this.target});
 
   final UID identifier;
   final ScheduleTarget target;
@@ -176,7 +143,7 @@ class SetScheduleComment extends ScheduleEvent {
   const SetScheduleComment(this.comment);
 
   @override
-  List<Object?> get props => [comment];
+  List<Object> get props => [comment];
 }
 
 class RemoveScheduleComment extends ScheduleEvent {
@@ -185,7 +152,7 @@ class RemoveScheduleComment extends ScheduleEvent {
   const RemoveScheduleComment(this.scheduleName);
 
   @override
-  List<Object?> get props => [scheduleName];
+  List<Object> get props => [scheduleName];
 }
 
 class DeleteScheduleComment extends ScheduleEvent {
@@ -194,7 +161,7 @@ class DeleteScheduleComment extends ScheduleEvent {
   const DeleteScheduleComment(this.scheduleName);
 
   @override
-  List<Object?> get props => [scheduleName];
+  List<Object> get props => [scheduleName];
 }
 
 class ImportScheduleFromJson extends ScheduleEvent {
@@ -239,6 +206,102 @@ class ToggleComparisonMode extends ScheduleEvent {
 
 class HideScheduleDiffDialog extends ScheduleEvent {
   const HideScheduleDiffDialog();
+
+  @override
+  List<Object> get props => [];
+}
+
+class ToggleSplitView extends ScheduleEvent {
+  const ToggleSplitView();
+}
+
+class SetAnalyticsVisibility extends ScheduleEvent {
+  final bool showAnalytics;
+
+  const SetAnalyticsVisibility({required this.showAnalytics});
+
+  @override
+  List<Object> get props => [showAnalytics];
+}
+
+// Custom schedule events
+class CreateCustomSchedule extends ScheduleEvent with AnalyticsEventMixin {
+  final String name;
+  final String? description;
+
+  const CreateCustomSchedule({required this.name, this.description});
+
+  @override
+  AnalyticsEvent get event => const AnalyticsEvent('CreateCustomSchedule');
+
+  @override
+  List<Object> get props => [name, if (description != null) description!];
+}
+
+class DeleteCustomSchedule extends ScheduleEvent with AnalyticsEventMixin {
+  final String scheduleId;
+
+  const DeleteCustomSchedule({required this.scheduleId});
+
+  @override
+  AnalyticsEvent get event => const AnalyticsEvent('DeleteCustomSchedule');
+
+  @override
+  List<Object> get props => [scheduleId];
+}
+
+class UpdateCustomSchedule extends ScheduleEvent with AnalyticsEventMixin {
+  final CustomSchedule schedule;
+
+  const UpdateCustomSchedule({required this.schedule});
+
+  @override
+  AnalyticsEvent get event => const AnalyticsEvent('UpdateCustomSchedule');
+
+  @override
+  List<Object> get props => [schedule];
+}
+
+class AddLessonToCustomSchedule extends ScheduleEvent with AnalyticsEventMixin {
+  final String scheduleId;
+  final LessonSchedulePart lesson;
+
+  const AddLessonToCustomSchedule({required this.scheduleId, required this.lesson});
+
+  @override
+  AnalyticsEvent get event => const AnalyticsEvent('AddLessonToCustomSchedule');
+
+  @override
+  List<Object> get props => [scheduleId, lesson];
+}
+
+class RemoveLessonFromCustomSchedule extends ScheduleEvent with AnalyticsEventMixin {
+  final String scheduleId;
+  final LessonSchedulePart lesson;
+
+  const RemoveLessonFromCustomSchedule({required this.scheduleId, required this.lesson});
+
+  @override
+  AnalyticsEvent get event => const AnalyticsEvent('RemoveLessonFromCustomSchedule');
+
+  @override
+  List<Object> get props => [scheduleId, lesson];
+}
+
+class SelectCustomSchedule extends ScheduleEvent with AnalyticsEventMixin {
+  final String scheduleId;
+
+  const SelectCustomSchedule({required this.scheduleId});
+
+  @override
+  AnalyticsEvent get event => const AnalyticsEvent('SelectCustomSchedule');
+
+  @override
+  List<Object> get props => [scheduleId];
+}
+
+class ToggleCustomScheduleMode extends ScheduleEvent {
+  const ToggleCustomScheduleMode();
 
   @override
   List<Object> get props => [];

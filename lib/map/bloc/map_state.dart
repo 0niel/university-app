@@ -32,12 +32,7 @@ class MapLoaded extends MapState {
   final List<RoomModel> rooms;
   final Rect? boundingRect;
 
-  const MapLoaded({
-    required this.selectedCampus,
-    required this.selectedFloor,
-    required this.rooms,
-    this.boundingRect,
-  });
+  const MapLoaded({required this.selectedCampus, required this.selectedFloor, required this.rooms, this.boundingRect});
 
   MapLoaded copyWith({
     CampusModel? selectedCampus,

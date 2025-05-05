@@ -11,13 +11,13 @@ class EmployeeModel extends Employee {
     required institute,
     required department,
   }) : super(
-          name: name,
-          secondName: secondName,
-          lastName: lastName,
-          email: email,
-          institute: institute,
-          department: department,
-        );
+         name: name,
+         secondName: secondName,
+         lastName: lastName,
+         email: email,
+         institute: institute,
+         department: department,
+       );
 
   factory EmployeeModel.fromRawJson(String str) => EmployeeModel.fromJson(json.decode(str));
 

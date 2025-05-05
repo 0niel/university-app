@@ -5,11 +5,7 @@ class FloorModel extends Equatable {
   final int number;
   final String svgPath;
 
-  const FloorModel({
-    required this.id,
-    required this.number,
-    required this.svgPath,
-  });
+  const FloorModel({required this.id, required this.number, required this.svgPath});
 
   @override
   List<Object?> get props => [id, number, svgPath];

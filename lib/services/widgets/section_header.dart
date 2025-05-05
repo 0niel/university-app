@@ -4,10 +4,7 @@ import 'package:app_ui/app_ui.dart';
 /// A section header with a title
 class SectionHeader extends StatelessWidget {
   /// Creates a section header.
-  const SectionHeader({
-    super.key,
-    required this.title,
-  });
+  const SectionHeader({super.key, required this.title});
 
   /// The title of the section
   final String title;
@@ -27,12 +24,7 @@ class SectionHeader extends StatelessWidget {
 /// A section header with title and optional button
 class SectionHeaderWithButton extends StatelessWidget {
   /// Creates a section header with an action button.
-  const SectionHeaderWithButton({
-    super.key,
-    required this.title,
-    required this.buttonText,
-    required this.onPressed,
-  });
+  const SectionHeaderWithButton({super.key, required this.title, required this.buttonText, required this.onPressed});
 
   /// The title of the section
   final String title;

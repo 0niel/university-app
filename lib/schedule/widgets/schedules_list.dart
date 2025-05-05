@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:app_ui/app_ui.dart';
-import 'package:rtu_mirea_app/schedule/models/models.dart';
 import 'package:rtu_mirea_app/schedule/schedule.dart';
 import 'package:university_app_server_api/client.dart';
 
@@ -33,17 +32,9 @@ class SchedulesList extends StatelessWidget {
   }
 
   void _showSnackbar(BuildContext context, String message, IconData icon) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Row(
-          children: [
-            Icon(icon),
-            const SizedBox(width: 8),
-            Text(message),
-          ],
-        ),
-      ),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Row(children: [Icon(icon), const SizedBox(width: 8), Text(message)])));
   }
 
   @override
@@ -66,90 +57,75 @@ class SchedulesList extends StatelessWidget {
                 SelectedScheduleItemButton(
                   text: _getNameBySelectedSchedule(state.selectedSchedule!),
                   isSelected: true,
-                  onRefreshPressed: () => context.read<ScheduleBloc>().add(
-                        const RefreshSelectedScheduleData(),
-                      ),
+                  onRefreshPressed: () => context.read<ScheduleBloc>().add(const RefreshSelectedScheduleData()),
                 ),
-              ...state.groupsSchedule.where((el) => el.$1 != _getSelectedScheduleUid(state.selectedSchedule)).map(
+              ...state.groupsSchedule
+                  .where((el) => el.$1 != _getSelectedScheduleUid(state.selectedSchedule))
+                  .map(
                     (el) => SelectedScheduleItemButton(
                       text: el.$2.name,
                       isSelected: false,
                       onRefreshPressed: () => {},
                       onDeletePressed: () {
                         context.read<ScheduleBloc>().add(
-                              DeleteSchedule(
-                                identifier: el.$1,
-                                target: ScheduleTarget.group,
-                              ),
-                            );
+                          DeleteSchedule(identifier: el.$1, target: ScheduleTarget.group),
+                        );
                         _showSnackbar(context, "Удалено расписание группы ${el.$2.name}", Icons.delete);
                       },
                       onSelectedPressed: () {
                         context.read<ScheduleBloc>().add(
-                              SetSelectedSchedule(
-                                selectedSchedule: SelectedGroupSchedule(
-                                  group: el.$2,
-                                  schedule: el.$3,
-                                ),
-                              ),
-                            );
+                          SetSelectedSchedule(selectedSchedule: SelectedGroupSchedule(group: el.$2, schedule: el.$3)),
+                        );
                         _showSnackbar(context, "Выбрано расписание группы ${el.$2.name}", Icons.check);
                       },
                     ),
                   ),
-              ...state.teachersSchedule.where((el) => el.$1 != _getSelectedScheduleUid(state.selectedSchedule)).map(
+              ...state.teachersSchedule
+                  .where((el) => el.$1 != _getSelectedScheduleUid(state.selectedSchedule))
+                  .map(
                     (el) => SelectedScheduleItemButton(
-                        text: el.$2.name,
-                        isSelected: false,
-                        onRefreshPressed: () => {},
-                        onDeletePressed: () {
-                          context.read<ScheduleBloc>().add(
-                                DeleteSchedule(
-                                  identifier: el.$1,
-                                  target: ScheduleTarget.teacher,
-                                ),
-                              );
-                          _showSnackbar(context, "Удалено расписание преподавателя ${el.$2.name}", Icons.delete);
-                        },
-                        onSelectedPressed: () {
-                          context.read<ScheduleBloc>().add(
-                                SetSelectedSchedule(
-                                  selectedSchedule: SelectedTeacherSchedule(
-                                    teacher: el.$2,
-                                    schedule: el.$3,
-                                  ),
-                                ),
-                              );
-                          _showSnackbar(context, "Выбрано расписание преподавателя ${el.$2.name}", Icons.check);
-                        }),
+                      text: el.$2.name,
+                      isSelected: false,
+                      onRefreshPressed: () => {},
+                      onDeletePressed: () {
+                        context.read<ScheduleBloc>().add(
+                          DeleteSchedule(identifier: el.$1, target: ScheduleTarget.teacher),
+                        );
+                        _showSnackbar(context, "Удалено расписание преподавателя ${el.$2.name}", Icons.delete);
+                      },
+                      onSelectedPressed: () {
+                        context.read<ScheduleBloc>().add(
+                          SetSelectedSchedule(
+                            selectedSchedule: SelectedTeacherSchedule(teacher: el.$2, schedule: el.$3),
+                          ),
+                        );
+                        _showSnackbar(context, "Выбрано расписание преподавателя ${el.$2.name}", Icons.check);
+                      },
+                    ),
                   ),
-              ...state.classroomsSchedule.where((el) => el.$1 != _getSelectedScheduleUid(state.selectedSchedule)).map(
+              ...state.classroomsSchedule
+                  .where((el) => el.$1 != _getSelectedScheduleUid(state.selectedSchedule))
+                  .map(
                     (el) => SelectedScheduleItemButton(
                       text: el.$2.name,
                       isSelected: false,
                       onRefreshPressed: () => {},
                       onSelectedPressed: () {
                         context.read<ScheduleBloc>().add(
-                              SetSelectedSchedule(
-                                selectedSchedule: SelectedClassroomSchedule(
-                                  classroom: el.$2,
-                                  schedule: el.$3,
-                                ),
-                              ),
-                            );
+                          SetSelectedSchedule(
+                            selectedSchedule: SelectedClassroomSchedule(classroom: el.$2, schedule: el.$3),
+                          ),
+                        );
                         _showSnackbar(context, "Выбрано расписание аудитории ${el.$2.name}", Icons.check);
                       },
                       onDeletePressed: () {
                         context.read<ScheduleBloc>().add(
-                              DeleteSchedule(
-                                identifier: el.$1,
-                                target: ScheduleTarget.classroom,
-                              ),
-                            );
+                          DeleteSchedule(identifier: el.$1, target: ScheduleTarget.classroom),
+                        );
                         _showSnackbar(context, "Удалено расписание аудитории ${el.$2.name}", Icons.delete);
                       },
                     ),
-                  )
+                  ),
             ],
           ),
         );

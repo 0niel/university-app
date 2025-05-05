@@ -18,10 +18,7 @@ class SvgInteractiveMap extends StatefulWidget {
   /// Creates an instance of [SvgInteractiveMap].
   ///
   /// [svgAssetPath] is the path to the SVG file that will be displayed as the map.
-  const SvgInteractiveMap({
-    super.key,
-    required this.svgAssetPath,
-  });
+  const SvgInteractiveMap({super.key, required this.svgAssetPath});
 
   @override
   State<SvgInteractiveMap> createState() => _SvgInteractiveMapState();
@@ -63,12 +60,8 @@ class _SvgInteractiveMapState extends State<SvgInteractiveMap> with TickerProvid
   @override
   void initState() {
     super.initState();
-
-    // Initialize the zoom animation controller.
-    _zoomAnimationController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 300),
-    )..addListener(() {
+    _zoomAnimationController = AnimationController(vsync: this, duration: const Duration(milliseconds: 300))
+      ..addListener(() {
         if (_zoomAnimation != null) {
           _transformationController.value = _zoomAnimation!.value;
         }
@@ -96,10 +89,9 @@ class _SvgInteractiveMapState extends State<SvgInteractiveMap> with TickerProvid
     // If the SVG asset path changes, reset the scale to fit the screen.
     if (oldWidget.svgAssetPath != widget.svgAssetPath) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        _fitToScreen(BoxConstraints(
-          maxWidth: MediaQuery.of(context).size.width,
-          maxHeight: MediaQuery.of(context).size.height,
-        ));
+        _fitToScreen(
+          BoxConstraints(maxWidth: MediaQuery.of(context).size.width, maxHeight: MediaQuery.of(context).size.height),
+        );
       });
 
       setState(() {
@@ -131,9 +123,7 @@ class _SvgInteractiveMapState extends State<SvgInteractiveMap> with TickerProvid
         }
 
         return GestureDetector(
-          // Handle single tap events.
           onTapDown: (details) => _handleTapDown(details, constraints),
-          // Handle double-tap events.
           onDoubleTapDown: _handleDoubleTapDown,
           onDoubleTap: _handleDoubleTap,
 
@@ -185,12 +175,7 @@ class _SvgInteractiveMapState extends State<SvgInteractiveMap> with TickerProvid
 
                     // A CustomPaint overlay to highlight the selected room.
                     Positioned.fill(
-                      child: CustomPaint(
-                        painter: _RoomsHighlightPainter(
-                          rooms,
-                          selectedRoomId: _selectedRoomId,
-                        ),
-                      ),
+                      child: CustomPaint(painter: _RoomsHighlightPainter(rooms, selectedRoomId: _selectedRoomId)),
                     ),
                   ],
                 ),
@@ -220,10 +205,7 @@ class _SvgInteractiveMapState extends State<SvgInteractiveMap> with TickerProvid
                       child: Container(
                         width: 40,
                         height: 40,
-                        decoration: BoxDecoration(
-                          color: Colors.grey.withOpacity(0.4),
-                          shape: BoxShape.circle,
-                        ),
+                        decoration: BoxDecoration(color: Colors.grey.withOpacity(0.4), shape: BoxShape.circle),
                       ),
                     ),
                   ),
@@ -235,10 +217,6 @@ class _SvgInteractiveMapState extends State<SvgInteractiveMap> with TickerProvid
       },
     );
   }
-
-  //------------------------------------------------------------------------------
-  // Single Tap Handling
-  //------------------------------------------------------------------------------
 
   /// Handles a single tap event on the map.
   /// If a room is tapped, it is selected, and a ripple animation is triggered.
@@ -282,13 +260,10 @@ class _SvgInteractiveMapState extends State<SvgInteractiveMap> with TickerProvid
 
     context.read<MapBloc>().add(RoomTapped(selected.roomId));
 
-    // Start the tap ripple animation.
     _startTapAnimation(localPos);
 
-    // Provide haptic feedback.
     HapticFeedback.selectionClick();
 
-    // Show a bottom modal sheet with room details.
     BottomModalSheet.show(
       context,
       child: _buildBottomSheetSelectedRoomContent(roomName: selected.name),
@@ -304,20 +279,16 @@ class _SvgInteractiveMapState extends State<SvgInteractiveMap> with TickerProvid
       children: [
         const SizedBox(height: 24),
         PrimaryButton(
-          onClick: () {
+          onPressed: () {
             context.go('/schedule/search', extra: roomName);
             context.pop();
           },
-          text: 'Search',
+          text: 'Поиск',
         ),
         const SizedBox(height: 16),
       ],
     );
   }
-
-  //------------------------------------------------------------------------------
-  // Double Tap Handling
-  //------------------------------------------------------------------------------
 
   /// Records the position of a double-tap for zooming.
   void _handleDoubleTapDown(TapDownDetails details) {
@@ -343,10 +314,11 @@ class _SvgInteractiveMapState extends State<SvgInteractiveMap> with TickerProvid
     }
 
     // Create a transformation matrix for the zoom.
-    final incremental = Matrix4.identity()
-      ..translate(focalPointScene.dx, focalPointScene.dy)
-      ..scale(nextScale / currentScale)
-      ..translate(-focalPointScene.dx, -focalPointScene.dy);
+    final incremental =
+        Matrix4.identity()
+          ..translate(focalPointScene.dx, focalPointScene.dy)
+          ..scale(nextScale / currentScale)
+          ..translate(-focalPointScene.dx, -focalPointScene.dy);
 
     // Apply the transformation to the current matrix.
     final zoomMatrix = currentMatrix.clone()..multiply(incremental);
@@ -358,12 +330,7 @@ class _SvgInteractiveMapState extends State<SvgInteractiveMap> with TickerProvid
     _zoomAnimation = Matrix4Tween(
       begin: currentMatrix,
       end: clampedMatrix,
-    ).animate(
-      CurvedAnimation(
-        parent: _zoomAnimationController,
-        curve: Curves.easeInOut,
-      ),
-    );
+    ).animate(CurvedAnimation(parent: _zoomAnimationController, curve: Curves.easeInOut));
     _zoomAnimationController.forward(from: 0);
   }
 
@@ -391,9 +358,10 @@ class _SvgInteractiveMapState extends State<SvgInteractiveMap> with TickerProvid
     final translateY = (sh - h * scale) / 2;
 
     // Create a transformation matrix for scaling and translating.
-    final matrix = Matrix4.identity()
-      ..scale(scale, scale)
-      ..translate(translateX / scale, translateY / scale);
+    final matrix =
+        Matrix4.identity()
+          ..scale(scale, scale)
+          ..translate(translateX / scale, translateY / scale);
 
     developer.log('FitToScreen => scale=$scale, matrix=$matrix');
 
@@ -415,21 +383,11 @@ class _SvgInteractiveMapState extends State<SvgInteractiveMap> with TickerProvid
 
   /// Starts a ripple animation at the specified screen position.
   void _startTapAnimation(Offset screenPos) {
-    final controller = AnimationController(
-      duration: const Duration(milliseconds: 200),
-      vsync: this,
-    );
+    final controller = AnimationController(duration: const Duration(milliseconds: 200), vsync: this);
 
-    final animation = CurvedAnimation(
-      parent: controller,
-      curve: Curves.easeOut,
-    );
+    final animation = CurvedAnimation(parent: controller, curve: Curves.easeOut);
 
-    final tapAnimation = _TapAnimation(
-      position: screenPos,
-      animation: animation,
-      controller: controller,
-    );
+    final tapAnimation = _TapAnimation(position: screenPos, animation: animation, controller: controller);
 
     setState(() {
       _tapAnimations.add(tapAnimation);
@@ -456,9 +414,10 @@ class _RoomsHighlightPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final highlightPaint = Paint()
-      ..color = Colors.yellow.withOpacity(0.3)
-      ..style = PaintingStyle.fill;
+    final highlightPaint =
+        Paint()
+          ..color = Colors.yellow.withOpacity(0.3)
+          ..style = PaintingStyle.fill;
 
     // Highlight the selected room.
     for (final r in rooms) {
@@ -474,15 +433,10 @@ class _RoomsHighlightPainter extends CustomPainter {
   }
 }
 
-/// Represents a tap animation (e.g., a ripple effect).
 class _TapAnimation {
-  final Offset position; // The position of the tap.
-  final Animation<double> animation; // The animation controller.
-  final AnimationController controller; // The animation itself.
+  final Offset position;
+  final Animation<double> animation;
+  final AnimationController controller;
 
-  _TapAnimation({
-    required this.position,
-    required this.animation,
-    required this.controller,
-  });
+  _TapAnimation({required this.position, required this.animation, required this.controller});
 }

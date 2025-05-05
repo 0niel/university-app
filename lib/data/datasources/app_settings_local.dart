@@ -10,9 +10,7 @@ abstract class AppSettingsLocal {
 class AppSettingsLocalImpl implements AppSettingsLocal {
   final SharedPreferences sharedPreferences;
 
-  AppSettingsLocalImpl({
-    required this.sharedPreferences,
-  });
+  AppSettingsLocalImpl({required this.sharedPreferences});
 
   @override
   Future<AppSettingsModel> getSettingsFromCache() {

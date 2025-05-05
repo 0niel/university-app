@@ -12,13 +12,8 @@ class SkeletonSponsorCard extends StatelessWidget {
       highlightColor: Theme.of(context).extension<AppColors>()!.background02,
       child: Card(
         color: Theme.of(context).extension<AppColors>()!.background02,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: const SizedBox(
-          height: 72,
-          width: double.infinity,
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        child: const SizedBox(height: 72, width: double.infinity),
       ),
     );
   }

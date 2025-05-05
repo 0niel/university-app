@@ -19,9 +19,7 @@ class LoadScores extends ScoresEvent with AnalyticsEventMixin {
 class ChangeSelectedScoresSemester extends ScoresEvent {
   final String semester;
 
-  const ChangeSelectedScoresSemester({
-    required this.semester,
-  });
+  const ChangeSelectedScoresSemester({required this.semester});
 
   @override
   List<Object> get props => [semester];

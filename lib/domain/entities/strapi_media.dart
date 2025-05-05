@@ -26,12 +26,7 @@ class StrapiMedia extends Equatable {
 }
 
 class Formats extends Equatable {
-  const Formats({
-    required this.large,
-    required this.small,
-    required this.medium,
-    required this.thumbnail,
-  });
+  const Formats({required this.large, required this.small, required this.medium, required this.thumbnail});
 
   final StrapiImage? large;
   final StrapiImage? medium;

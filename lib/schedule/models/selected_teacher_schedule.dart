@@ -12,11 +12,7 @@ class SelectedTeacherSchedule with EquatableMixin implements SelectedSchedule {
   @override
   Map<String, dynamic> toJson() => _$SelectedTeacherScheduleToJson(this);
 
-  const SelectedTeacherSchedule({
-    required this.teacher,
-    required this.schedule,
-    this.type = 'teacher',
-  });
+  const SelectedTeacherSchedule({required this.teacher, required this.schedule, this.type = 'teacher'});
 
   @override
   final String type;
@@ -30,4 +26,7 @@ class SelectedTeacherSchedule with EquatableMixin implements SelectedSchedule {
 
   @override
   List<Object> get props => [type, teacher, schedule];
+
+  @override
+  String get name => teacher.name;
 }

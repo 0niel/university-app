@@ -14,9 +14,7 @@ class ClearSearchHistoryButton extends StatelessWidget {
         onPressed: () {
           context.read<SearchBloc>().add(const ClearSearchHistory());
         },
-        child: const Text(
-          "Очистить",
-        ),
+        child: const Text("Очистить"),
       ),
     );
   }

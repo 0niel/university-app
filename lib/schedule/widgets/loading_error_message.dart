@@ -18,35 +18,18 @@ class LoadingErrorMessage extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: isTable ? CrossAxisAlignment.center : CrossAxisAlignment.start,
           children: [
-            Center(
-              child: Assets.images.saly2.image(height: 200),
-            ),
-            const SizedBox(
-              height: 8,
-            ),
-            Text(
-              "Произошла ошибка",
-              style: AppTextStyle.h5,
-            ),
-            const SizedBox(
-              height: 8,
-            ),
+            Center(child: Assets.images.saly2.image(height: 200)),
+            const SizedBox(height: 8),
+            Text("Произошла ошибка", style: AppTextStyle.h5),
+            const SizedBox(height: 8),
             Text(
               "Во время получения расписания произошла ошибка. Попробуйте повторить попытку.",
-              style: AppTextStyle.captionL.copyWith(
-                color: AppColors.dark.deactive,
-              ),
+              style: AppTextStyle.captionL.copyWith(color: AppColors.dark.deactive),
             ),
-            const SizedBox(
-              height: 24,
-            ),
+            const SizedBox(height: 24),
             SizedBox(
               width: isTable ? 420 : double.infinity,
-              child: ColorfulButton(
-                text: "Повторить",
-                onClick: onTap,
-                backgroundColor: AppColors.dark.primary,
-              ),
+              child: ColorfulButton(text: "Повторить", onClick: onTap, backgroundColor: AppColors.dark.primary),
             ),
           ],
         ),

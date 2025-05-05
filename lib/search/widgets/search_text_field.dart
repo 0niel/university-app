@@ -18,29 +18,17 @@ class SearchTextField extends StatelessWidget {
         ),
         child: TextField(
           controller: controller,
-          style: AppTextStyle.titleS.copyWith(
-            color: Theme.of(context).extension<AppColors>()!.active,
-          ),
+          style: AppTextStyle.titleS.copyWith(color: Theme.of(context).extension<AppColors>()!.active),
           decoration: InputDecoration(
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 12,
-            ),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             border: InputBorder.none,
             hintText: 'Поиск',
-            hintStyle: AppTextStyle.titleS.copyWith(
-              color: Theme.of(context).extension<AppColors>()!.deactive,
-            ),
+            hintStyle: AppTextStyle.titleS.copyWith(color: Theme.of(context).extension<AppColors>()!.deactive),
             prefixIcon: Padding(
               padding: const EdgeInsets.only(right: 8, left: 16),
-              child: Assets.icons.hugeicons.search.svg(
-                color: Theme.of(context).extension<AppColors>()!.active,
-              ),
+              child: Assets.icons.hugeicons.search.svg(color: Theme.of(context).extension<AppColors>()!.active),
             ),
-            prefixIconConstraints: const BoxConstraints(
-              maxWidth: 48,
-              maxHeight: 48,
-            ),
+            prefixIconConstraints: const BoxConstraints(maxWidth: 48, maxHeight: 48),
           ),
         ),
       ),

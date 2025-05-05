@@ -32,17 +32,17 @@ class NextButton extends StatelessWidget {
       ),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        padding: isLastPage
-            ? const EdgeInsets.symmetric(vertical: 12.0, horizontal: 32.0)
-            : const EdgeInsets.symmetric(vertical: 12.0, horizontal: 5),
-        child: isLastPage
-            ? Text(
-                "Начать!",
-                style: AppTextStyle.buttonS.copyWith(
-                  color: Theme.of(context).extension<AppColors>()!.white,
-                ),
-              )
-            : Icon(Icons.arrow_forward_ios, color: Theme.of(context).extension<AppColors>()!.active),
+        padding:
+            isLastPage
+                ? const EdgeInsets.symmetric(vertical: 12.0, horizontal: 32.0)
+                : const EdgeInsets.symmetric(vertical: 12.0, horizontal: 5),
+        child:
+            isLastPage
+                ? Text(
+                  "Начать!",
+                  style: AppTextStyle.buttonS.copyWith(color: Theme.of(context).extension<AppColors>()!.white),
+                )
+                : Icon(Icons.arrow_forward_ios, color: Theme.of(context).extension<AppColors>()!.active),
       ),
     );
   }

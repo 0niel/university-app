@@ -1,22 +1,16 @@
 import 'package:analytics_repository/analytics_repository.dart';
-import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:rtu_mirea_app/analytics/bloc/analytics_bloc.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 import 'package:dismissible_page/dismissible_page.dart';
-import 'package:rtu_mirea_app/common/utils/utils.dart';
 import 'package:rtu_mirea_app/domain/entities/story.dart';
 import 'package:app_ui/app_ui.dart';
 import 'package:story/story.dart';
 
 class StoriesPageView extends StatefulWidget {
-  const StoriesPageView({
-    super.key,
-    required this.stories,
-    required this.storyIndex,
-  });
+  const StoriesPageView({super.key, required this.stories, required this.storyIndex});
 
   final List<Story> stories;
   final int storyIndex;
@@ -63,12 +57,8 @@ class _StoriesPageViewState extends State<StoriesPageView> {
                         if (pageIndex != _prevStoryIndex) {
                           _prevStoryIndex = pageIndex;
                           context.read<AnalyticsBloc>().add(
-                                TrackAnalyticsEvent(
-                                  ViewStory(
-                                    storyTitle: widget.stories[pageIndex].title,
-                                  ),
-                                ),
-                              );
+                            TrackAnalyticsEvent(ViewStory(storyTitle: widget.stories[pageIndex].title)),
+                          );
                         }
 
                         if (_currentPageIndex != pageIndex || _currentStoryIndex != storyIndex) {
@@ -95,10 +85,7 @@ class _StoriesPageViewState extends State<StoriesPageView> {
                 ),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-              child: _buildActionButtons(),
-            ),
+            Padding(padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16), child: _buildActionButtons()),
           ],
         ),
       ),
@@ -108,22 +95,19 @@ class _StoriesPageViewState extends State<StoriesPageView> {
   Widget _buildStoryPage(Author author, StoryPage page) {
     return Stack(
       children: [
-        Positioned.fill(
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: page.media.formats != null
-                ? ExtendedImage.network(
-                    StrapiUtils.getLargestImageUrl(page.media.formats!),
-                    fit: BoxFit.cover,
-                    cache: true,
-                  )
-                : ExtendedImage.network(
-                    page.media.url,
-                    fit: BoxFit.cover,
-                    cache: true,
-                  ),
-          ),
-        ),
+        // Positioned.fill(
+        //   child: ClipRRect(
+        //     borderRadius: BorderRadius.circular(8),
+        //     child:
+        //         page.media.formats != null
+        //             ? ExtendedImage.network(
+        //               StrapiUtils.getLargestImageUrl(page.media.formats!),
+        //               fit: BoxFit.cover,
+        //               cache: true,
+        //             )
+        //             : ExtendedImage.network(page.media.url, fit: BoxFit.cover, cache: true),
+        //   ),
+        // ),
         Positioned.fill(
           child: Container(
             decoration: BoxDecoration(
@@ -145,21 +129,17 @@ class _StoriesPageViewState extends State<StoriesPageView> {
                 width: 32,
                 decoration: BoxDecoration(
                   image: DecorationImage(
-                    image: author.logo.formats != null
-                        ? NetworkImage(
-                            author.logo.formats!.small?.url ?? author.logo.formats!.thumbnail.url,
-                          )
-                        : NetworkImage(author.logo.url),
+                    image:
+                        author.logo.formats != null
+                            ? NetworkImage(author.logo.formats!.small?.url ?? author.logo.formats!.thumbnail.url)
+                            : NetworkImage(author.logo.url),
                     fit: BoxFit.cover,
                   ),
                   shape: BoxShape.circle,
                 ),
               ),
               const SizedBox(width: 8),
-              Text(
-                author.name,
-                style: AppTextStyle.bodyBold.copyWith(color: Colors.white),
-              ),
+              Text(author.name, style: AppTextStyle.bodyBold.copyWith(color: Colors.white)),
             ],
           ),
         ),
@@ -179,10 +159,7 @@ class _StoriesPageViewState extends State<StoriesPageView> {
                 ),
               if (page.text != null) ...[
                 const SizedBox(height: 8),
-                Text(
-                  page.text!,
-                  style: AppTextStyle.bodyBold.copyWith(color: Colors.white),
-                ),
+                Text(page.text!, style: AppTextStyle.bodyBold.copyWith(color: Colors.white)),
               ],
             ],
           ),
@@ -206,20 +183,18 @@ class _StoriesPageViewState extends State<StoriesPageView> {
 
     return Column(
       mainAxisSize: MainAxisSize.min,
-      children: actions.map((action) {
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 8),
-          child: PrimaryButton(
-            text: action.title,
-            onClick: () {
-              launchUrlString(
-                action.url,
-                mode: LaunchMode.externalApplication,
-              );
-            },
-          ),
-        );
-      }).toList(),
+      children:
+          actions.map((action) {
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: PrimaryButton(
+                text: action.title,
+                onPressed: () {
+                  launchUrlString(action.url, mode: LaunchMode.externalApplication);
+                },
+              ),
+            );
+          }).toList(),
     );
   }
 

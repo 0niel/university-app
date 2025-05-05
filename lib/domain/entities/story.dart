@@ -21,24 +21,12 @@ class Story extends Equatable {
 
   @override
   List<Object> get props {
-    return [
-      title,
-      pages,
-      stopShowDate,
-      preview,
-      author,
-      publishedAt,
-    ];
+    return [title, pages, stopShowDate, preview, author, publishedAt];
   }
 }
 
 class StoryPage extends Equatable {
-  const StoryPage({
-    required this.title,
-    required this.text,
-    required this.media,
-    required this.actions,
-  });
+  const StoryPage({required this.title, required this.text, required this.media, required this.actions});
 
   final String? title;
   final String? text;
@@ -50,11 +38,7 @@ class StoryPage extends Equatable {
 }
 
 class Author extends Equatable {
-  const Author({
-    required this.name,
-    required this.url,
-    required this.logo,
-  });
+  const Author({required this.name, required this.url, required this.logo});
 
   final String name;
   final String? url;
@@ -68,10 +52,7 @@ class StoryPageAction extends Equatable {
   final String title;
   final String url;
 
-  const StoryPageAction({
-    required this.title,
-    required this.url,
-  });
+  const StoryPageAction({required this.title, required this.url});
 
   @override
   List<Object?> get props => [title, url];

@@ -36,9 +36,7 @@ class VerticalBanner extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(24),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onTap,
@@ -46,10 +44,7 @@ class VerticalBanner extends StatelessWidget {
           width: MediaQuery.of(context).size.width - AppSpacing.xlg * 2,
           decoration: BoxDecoration(
             gradient: LinearGradient(
-              colors: [
-                color,
-                color.withOpacity(0.7),
-              ],
+              colors: [color, color.withOpacity(0.7)],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
@@ -65,26 +60,14 @@ class VerticalBanner extends StatelessWidget {
                   color: Colors.white.withOpacity(0.2),
                   borderRadius: BorderRadius.circular(14),
                 ),
-                child: Icon(
-                  iconData,
-                  color: Colors.white,
-                  size: 24,
-                ),
+                child: Icon(iconData, color: Colors.white, size: 24),
               ),
               const SizedBox(height: AppSpacing.sm),
-              Text(
-                title,
-                style: AppTextStyle.h6.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+              Text(title, style: AppTextStyle.h6.copyWith(color: Colors.white, fontWeight: FontWeight.bold)),
               const SizedBox(height: AppSpacing.sm),
               Text(
                 description,
-                style: AppTextStyle.body.copyWith(
-                  color: Colors.white.withOpacity(0.9),
-                ),
+                style: AppTextStyle.body.copyWith(color: Colors.white.withOpacity(0.9)),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -95,12 +78,7 @@ class VerticalBanner extends StatelessWidget {
                   color: Colors.white.withOpacity(0.2),
                   borderRadius: BorderRadius.circular(30),
                 ),
-                child: Text(
-                  action,
-                  style: AppTextStyle.bodyBold.copyWith(
-                    color: Colors.white,
-                  ),
-                ),
+                child: Text(action, style: AppTextStyle.bodyBold.copyWith(color: Colors.white)),
               ),
             ],
           ),

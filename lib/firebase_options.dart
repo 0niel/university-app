@@ -41,9 +41,7 @@ class DefaultFirebaseOptions {
       return web;
     }
 
-    throw UnsupportedError(
-      'DefaultFirebaseOptions are not supported for this platform.',
-    );
+    throw UnsupportedError('DefaultFirebaseOptions are not supported for this platform.');
   }
 
   static const FirebaseOptions web = FirebaseOptions(

@@ -11,11 +11,7 @@ part 'selected_classroom_schedule.g.dart';
 class SelectedClassroomSchedule with EquatableMixin implements SelectedSchedule {
   factory SelectedClassroomSchedule.fromJson(Map<String, dynamic> json) => _$SelectedClassroomScheduleFromJson(json);
 
-  const SelectedClassroomSchedule({
-    required this.classroom,
-    required this.schedule,
-    this.type = 'classroom',
-  });
+  const SelectedClassroomSchedule({required this.classroom, required this.schedule, this.type = 'classroom'});
 
   final Classroom classroom;
 
@@ -30,4 +26,7 @@ class SelectedClassroomSchedule with EquatableMixin implements SelectedSchedule 
 
   @override
   List<Object> get props => [type, classroom, schedule];
+
+  @override
+  String get name => classroom.name;
 }

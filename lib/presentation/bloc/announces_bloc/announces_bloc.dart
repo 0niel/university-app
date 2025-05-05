@@ -13,10 +13,7 @@ class AnnouncesBloc extends Bloc<AnnouncesEvent, AnnouncesState> {
 
   final GetAnnounces getAnnounces;
 
-  void _onLoadAnnounces(
-    LoadAnnounces event,
-    Emitter<AnnouncesState> emit,
-  ) async {
+  void _onLoadAnnounces(LoadAnnounces event, Emitter<AnnouncesState> emit) async {
     emit(AnnouncesLoading());
 
     final announces = await getAnnounces();

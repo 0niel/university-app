@@ -5,6 +5,7 @@ import 'package:university_app_server_api/client.dart';
 import 'selected_classroom_schedule.dart';
 import 'selected_group_schedule.dart';
 import 'selected_teacher_schedule.dart';
+import 'selected_custom_schedule.dart';
 
 @immutable
 @JsonSerializable()
@@ -19,6 +20,8 @@ abstract class SelectedSchedule extends Equatable {
         return SelectedGroupSchedule.fromJson(json);
       case 'teacher':
         return SelectedTeacherSchedule.fromJson(json);
+      case 'custom':
+        return SelectedCustomSchedule.fromJson(json);
       default:
         throw Exception('Unknown type: ${json['type']}');
     }
@@ -60,12 +63,9 @@ abstract class SelectedSchedule extends Equatable {
     return false;
   }
 
-  static String getScheduleName<T>(T scheduleEntity) {
-    if (scheduleEntity is Group) return scheduleEntity.name;
-    if (scheduleEntity is Teacher) return scheduleEntity.name;
-    if (scheduleEntity is Classroom) return scheduleEntity.name;
-    return '';
-  }
+  /// The name of the schedule. For example, for a group schedule, it would be
+  /// the group name.
+  String get name;
 
   final String type;
 

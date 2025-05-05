@@ -24,11 +24,7 @@ import 'package:window_manager/window_manager.dart';
 
 class NeonAppProvider extends StatefulWidget {
   /// Создаёт новое приложение Neon.
-  const NeonAppProvider({
-    required this.neonDependencies,
-    required this.child,
-    super.key,
-  });
+  const NeonAppProvider({required this.neonDependencies, required this.child, super.key});
 
   final NeonDependencies neonDependencies;
   final Widget child;
@@ -120,76 +116,65 @@ class _NeonAppProviderState extends State<NeonAppProvider> with WidgetsBindingOb
   @override
   Widget build(BuildContext context) {
     return DynamicColorBuilder(
-      builder: (deviceThemeLight, deviceThemeDark) => OptionsCollectionBuilder(
-        valueListenable: _globalOptions,
-        builder: (context, options, _) => StreamBuilder(
-          stream: _accountsBloc.activeAccount,
-          builder: (context, activeAccountSnapshot) {
-            return MultiProvider(
-              providers: [
-                Provider<NextPushBloc>.value(
-                  value: widget.neonDependencies.nextPushBloc,
+      builder:
+          (deviceThemeLight, deviceThemeDark) => OptionsCollectionBuilder(
+            valueListenable: _globalOptions,
+            builder:
+                (context, options, _) => StreamBuilder(
+                  stream: _accountsBloc.activeAccount,
+                  builder: (context, activeAccountSnapshot) {
+                    return MultiProvider(
+                      providers: [
+                        Provider<NextPushBloc>.value(value: widget.neonDependencies.nextPushBloc),
+                        Provider<AccountRepository>.value(value: widget.neonDependencies.accountRepository),
+                        NeonProvider<AccountsBloc>.value(value: _accountsBloc),
+                        NeonProvider<FirstLaunchBloc>.value(value: widget.neonDependencies.firstLaunchBloc),
+                        NeonProvider.value(
+                          value:
+                              widget.neonDependencies.appImplementations.firstWhere((app) => app.id == 'files').options,
+                        ),
+                        Provider<BuiltSet<AppImplementation>>(
+                          create: (_) => _appImplementations,
+                          dispose: (_, appImplementations) => appImplementations,
+                        ),
+                        for (final appImplementation in _appImplementations) appImplementation.optionsProvider,
+                        if (activeAccountSnapshot.hasData) ...[
+                          Provider<Account>.value(value: activeAccountSnapshot.data!),
+                          NeonProvider<AccountOptions>.value(
+                            value: _accountsBloc.getOptionsFor(activeAccountSnapshot.data!),
+                          ),
+                          NeonProvider<AppsBloc>.value(
+                            value: _accountsBloc.getAppsBlocFor(activeAccountSnapshot.data!),
+                          ),
+                          NeonProvider<CapabilitiesBloc>.value(
+                            value: _accountsBloc.getCapabilitiesBlocFor(activeAccountSnapshot.data!),
+                          ),
+                          NeonProvider<UserDetailsBloc>.value(
+                            value: _accountsBloc.getUserDetailsBlocFor(activeAccountSnapshot.data!),
+                          ),
+                          NeonProvider<UserStatusBloc>.value(
+                            value: _accountsBloc.getUserStatusBlocFor(activeAccountSnapshot.data!),
+                          ),
+                          NeonProvider<UnifiedSearchBloc>.value(
+                            value: _accountsBloc.getUnifiedSearchBlocFor(activeAccountSnapshot.data!),
+                          ),
+                          NeonProvider<WeatherStatusBloc>.value(
+                            value: _accountsBloc.getWeatherStatusBlocFor(activeAccountSnapshot.data!),
+                          ),
+                          NeonProvider<MaintenanceModeBloc>.value(
+                            value: _accountsBloc.getMaintenanceModeBlocFor(activeAccountSnapshot.data!),
+                          ),
+                          NeonProvider<ReferencesBloc>.value(
+                            value: _accountsBloc.getReferencesBlocFor(activeAccountSnapshot.data!),
+                          ),
+                          NeonProvider<GlobalOptions>.value(value: _globalOptions),
+                        ],
+                      ],
+                      child: widget.child,
+                    );
+                  },
                 ),
-                Provider<AccountRepository>.value(
-                  value: widget.neonDependencies.accountRepository,
-                ),
-                NeonProvider<AccountsBloc>.value(
-                  value: _accountsBloc,
-                ),
-                NeonProvider<FirstLaunchBloc>.value(
-                  value: widget.neonDependencies.firstLaunchBloc,
-                ),
-                NeonProvider.value(
-                  value: widget.neonDependencies.appImplementations
-                      .firstWhere(
-                        (app) => app.id == 'files',
-                      )
-                      .options,
-                ),
-                Provider<BuiltSet<AppImplementation>>(
-                    create: (_) => _appImplementations, dispose: (_, appImplementations) => appImplementations),
-                for (final appImplementation in _appImplementations) appImplementation.optionsProvider,
-                if (activeAccountSnapshot.hasData) ...[
-                  Provider<Account>.value(
-                    value: activeAccountSnapshot.data!,
-                  ),
-                  NeonProvider<AccountOptions>.value(
-                    value: _accountsBloc.getOptionsFor(activeAccountSnapshot.data!),
-                  ),
-                  NeonProvider<AppsBloc>.value(
-                    value: _accountsBloc.getAppsBlocFor(activeAccountSnapshot.data!),
-                  ),
-                  NeonProvider<CapabilitiesBloc>.value(
-                    value: _accountsBloc.getCapabilitiesBlocFor(activeAccountSnapshot.data!),
-                  ),
-                  NeonProvider<UserDetailsBloc>.value(
-                    value: _accountsBloc.getUserDetailsBlocFor(activeAccountSnapshot.data!),
-                  ),
-                  NeonProvider<UserStatusBloc>.value(
-                    value: _accountsBloc.getUserStatusBlocFor(activeAccountSnapshot.data!),
-                  ),
-                  NeonProvider<UnifiedSearchBloc>.value(
-                    value: _accountsBloc.getUnifiedSearchBlocFor(activeAccountSnapshot.data!),
-                  ),
-                  NeonProvider<WeatherStatusBloc>.value(
-                    value: _accountsBloc.getWeatherStatusBlocFor(activeAccountSnapshot.data!),
-                  ),
-                  NeonProvider<MaintenanceModeBloc>.value(
-                    value: _accountsBloc.getMaintenanceModeBlocFor(activeAccountSnapshot.data!),
-                  ),
-                  NeonProvider<ReferencesBloc>.value(
-                    value: _accountsBloc.getReferencesBlocFor(activeAccountSnapshot.data!),
-                  ),
-                  NeonProvider<GlobalOptions>.value(
-                    value: _globalOptions,
-                  ),
-                ],
-              ],
-              child: widget.child,
-            );
-          },
-        ),
-      ),
+          ),
     );
   }
 }

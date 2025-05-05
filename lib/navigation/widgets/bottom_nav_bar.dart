@@ -3,6 +3,46 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:app_ui/app_ui.dart';
+import 'package:rtu_mirea_app/navigation/view/scaffold_navigation_shell.dart';
+
+/// Animates the bottom navigation bar to slide up/down based on scroll direction
+class AnimatedBottomNavigationBar extends StatefulWidget {
+  const AnimatedBottomNavigationBar({super.key, required this.index, required this.onClick});
+
+  final Function(int) onClick;
+  final int index;
+
+  @override
+  State<AnimatedBottomNavigationBar> createState() => _AnimatedBottomNavigationBarState();
+}
+
+class _AnimatedBottomNavigationBarState extends State<AnimatedBottomNavigationBar> {
+  final _controller = BottomNavigationBarVisibilityController.instance;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller.addListener(() {
+      setState(() {});
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller.removeListener(() {});
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedSlide(
+      duration: const Duration(milliseconds: 200),
+      curve: Curves.easeInOut,
+      offset: Offset(0, _controller.isVisible ? 0 : 1),
+      child: AppBottomNavigationBar(index: widget.index, onClick: widget.onClick),
+    );
+  }
+}
 
 class AppBottomNavigationBar extends StatefulWidget {
   const AppBottomNavigationBar({super.key, required this.index, required this.onClick});
@@ -21,12 +61,7 @@ class _AppBottomNavigationBarState extends State<AppBottomNavigationBar> {
   Widget build(BuildContext context) {
     return DotNavigationBar(
       boxShadow: [
-        BoxShadow(
-          color: Colors.black.withOpacity(0.1),
-          spreadRadius: 1,
-          blurRadius: 12,
-          offset: const Offset(0, 4),
-        ),
+        BoxShadow(color: Colors.black.withOpacity(0.1), spreadRadius: 1, blurRadius: 12, offset: const Offset(0, 4)),
       ],
       currentIndex: widget.index,
       onTap: (index) {
@@ -44,26 +79,19 @@ class _AppBottomNavigationBarState extends State<AppBottomNavigationBar> {
       paddingR: const EdgeInsets.only(bottom: 5, top: 7),
       splashBorderRadius: 50,
       items: [
+        _buildNavBarItem(0, Assets.icons.hugeicons.news.svg(color: Theme.of(context).extension<AppColors>()!.active)),
         _buildNavBarItem(
-            0,
-            Assets.icons.hugeicons.news.svg(
-              color: Theme.of(context).extension<AppColors>()!.active,
-            )),
+          1,
+          Assets.icons.hugeicons.calendar03.svg(color: Theme.of(context).extension<AppColors>()!.active),
+        ),
         _buildNavBarItem(
-            1,
-            Assets.icons.hugeicons.calendar03.svg(
-              color: Theme.of(context).extension<AppColors>()!.active,
-            )),
+          2,
+          Assets.icons.hugeicons.dashboardSquare01.svg(color: Theme.of(context).extension<AppColors>()!.active),
+        ),
         _buildNavBarItem(
-            2,
-            Assets.icons.hugeicons.dashboardSquare01.svg(
-              color: Theme.of(context).extension<AppColors>()!.active,
-            )),
-        _buildNavBarItem(
-            3,
-            Assets.icons.hugeicons.userAccount.svg(
-              color: Theme.of(context).extension<AppColors>()!.active,
-            )),
+          3,
+          Assets.icons.hugeicons.userAccount.svg(color: Theme.of(context).extension<AppColors>()!.active),
+        ),
       ],
     );
   }
@@ -72,35 +100,26 @@ class _AppBottomNavigationBarState extends State<AppBottomNavigationBar> {
     bool isSelected = index == selectedIndex;
 
     return DotNavigationBarItem(
-      icon: isSelected
-          ? icon
-              .animate()
-              .scale(
-                begin: const Offset(1.0, 1.0),
-                end: const Offset(1.03, 1.03),
-                duration: const Duration(milliseconds: 150),
-                curve: Curves.easeInOut,
-              )
-              .moveY(
-                begin: 0,
-                end: -2,
-                duration: const Duration(milliseconds: 150),
-                curve: Curves.easeInOut,
-              )
-              .then()
-              .scale(
-                begin: const Offset(1.03, 1.03),
-                end: const Offset(1.0, 1.0),
-                duration: const Duration(milliseconds: 150),
-                curve: Curves.easeInOut,
-              )
-              .moveY(
-                begin: -2,
-                end: 0,
-                duration: const Duration(milliseconds: 150),
-                curve: Curves.easeInOut,
-              )
-          : icon,
+      icon:
+          isSelected
+              ? icon
+                  .animate()
+                  .scale(
+                    begin: const Offset(1.0, 1.0),
+                    end: const Offset(1.03, 1.03),
+                    duration: const Duration(milliseconds: 150),
+                    curve: Curves.easeInOut,
+                  )
+                  .moveY(begin: 0, end: -2, duration: const Duration(milliseconds: 150), curve: Curves.easeInOut)
+                  .then()
+                  .scale(
+                    begin: const Offset(1.03, 1.03),
+                    end: const Offset(1.0, 1.0),
+                    duration: const Duration(milliseconds: 150),
+                    curve: Curves.easeInOut,
+                  )
+                  .moveY(begin: -2, end: 0, duration: const Duration(milliseconds: 150), curve: Curves.easeInOut)
+              : icon,
       selectedColor: AppColors.dark.primary,
     );
   }

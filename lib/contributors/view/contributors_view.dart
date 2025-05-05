@@ -10,9 +10,10 @@ class ContributorsView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider<ContributorsBloc>(
-      create: (context) => ContributorsBloc(
-        communityRepository: context.read<CommunityRepository>(),
-      )..add(const ContributorsLoadRequest()),
+      create:
+          (context) =>
+              ContributorsBloc(communityRepository: context.read<CommunityRepository>())
+                ..add(const ContributorsLoadRequest()),
       child: const _ContributorsView(),
     );
   }
@@ -28,11 +29,7 @@ class _ContributorsView extends StatelessWidget {
         if (state.status == ContributorsStatus.failure) {
           ScaffoldMessenger.of(context)
             ..hideCurrentSnackBar()
-            ..showSnackBar(
-              const SnackBar(
-                content: Text('Ошибка при загрузке контрибьюторов'),
-              ),
-            );
+            ..showSnackBar(const SnackBar(content: Text('Ошибка при загрузке контрибьюторов')));
         }
       },
       builder: (context, state) {

@@ -14,10 +14,7 @@ class RatingSystemBloc extends HydratedBloc<RatingSystemEvent, RatingSystemState
     on<UpdateSubjectsByCurrentSchedule>(_onUpdateSubjectsByCurrentSchedule);
   }
 
-  void _onUpdateSubjectsByCurrentSchedule(
-    UpdateSubjectsByCurrentSchedule event,
-    Emitter<RatingSystemState> emit,
-  ) {
+  void _onUpdateSubjectsByCurrentSchedule(UpdateSubjectsByCurrentSchedule event, Emitter<RatingSystemState> emit) {
     final actualSubjects = event.subjects;
 
     final newSubjects = <(Group, Subject)>[];
@@ -28,9 +25,7 @@ class RatingSystemBloc extends HydratedBloc<RatingSystemEvent, RatingSystemState
       );
 
       if (index == -1) {
-        newSubjects.add(
-          (event.group, actualSubject),
-        );
+        newSubjects.add((event.group, actualSubject));
       } else {
         final subject = state.subjects[index];
 
@@ -42,11 +37,7 @@ class RatingSystemBloc extends HydratedBloc<RatingSystemEvent, RatingSystemState
       }
     }
 
-    emit(
-      state.copyWith(
-        subjects: newSubjects,
-      ),
-    );
+    emit(state.copyWith(subjects: newSubjects));
   }
 
   @override

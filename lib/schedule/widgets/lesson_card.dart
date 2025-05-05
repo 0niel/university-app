@@ -5,20 +5,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:app_ui/app_ui.dart';
-import 'package:rtu_mirea_app/schedule/models/models.dart';
 import 'package:university_app_server_api/client.dart';
 import 'package:intl/intl.dart';
 import 'dart:async';
 import '../schedule.dart';
 
 class LessonCard extends StatefulWidget {
-  const LessonCard({
-    super.key,
-    required this.lesson,
-    this.indexInGroup,
-    this.countInGroup,
-    this.onTap,
-  });
+  const LessonCard({super.key, required this.lesson, this.indexInGroup, this.countInGroup, this.onTap});
 
   final LessonSchedulePart lesson;
   final void Function(LessonSchedulePart)? onTap;
@@ -110,11 +103,17 @@ class _LessonCardState extends State<LessonCard> {
   void initState() {
     super.initState();
     _progress = _computeProgress();
+    if (_progress != null) {
+      _startProgressTimer();
+    }
+  }
+
+  void _startProgressTimer() {
     _timer = Timer.periodic(const Duration(seconds: 5), (_) {
       final newProgress = _computeProgress();
       if ((newProgress == null && _progress != null) ||
-          (newProgress != null && _progress == null) ||
-          (newProgress != null && _progress != null && (newProgress - _progress!).abs() > 0.01)) {
+          (newProgress != null && _progress != null && (newProgress - _progress!).abs() > 0.01) ||
+          (newProgress != null && _progress == null)) {
         setState(() {
           _progress = newProgress;
         });
@@ -139,26 +138,32 @@ class _LessonCardState extends State<LessonCard> {
       (comment) => widget.lesson.dates.contains(comment.lessonDate) && comment.lessonBells == widget.lesson.lessonBells,
     );
     if (comment == null) return const SizedBox();
+
     return Container(
-      margin: const EdgeInsets.only(top: 8),
-      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+      margin: const EdgeInsets.only(top: 12),
+      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 14),
       decoration: BoxDecoration(
-        color: AppColors.dark.colorful01.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(12),
+        color: Theme.of(context).extension<AppColors>()!.background03.withOpacity(0.5),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: AppColors.dark.colorful01.withOpacity(0.2), width: 1),
       ),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          HugeIcon(
-            icon: HugeIcons.strokeRoundedComment01,
-            color: Theme.of(context).extension<AppColors>()!.deactive,
-            size: 16,
+          Padding(
+            padding: const EdgeInsets.only(top: 2),
+            child: HugeIcon(
+              icon: HugeIcons.strokeRoundedComment01,
+              color: Theme.of(context).extension<AppColors>()!.colorful01,
+              size: 14,
+            ),
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: 10),
           Expanded(
             child: Text(
               comment.text,
-              style: AppTextStyle.body,
-              maxLines: 2,
+              style: AppTextStyle.body.copyWith(height: 1.3),
+              maxLines: 3,
               overflow: TextOverflow.ellipsis,
             ),
           ),
@@ -169,229 +174,266 @@ class _LessonCardState extends State<LessonCard> {
 
   @override
   Widget build(BuildContext context) {
+    final isDesktop = MediaQuery.of(context).size.width > 800;
     final state = context.read<ScheduleBloc>().state;
-    return Card(
-      margin: const EdgeInsets.all(0),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12.0),
-      ),
-      clipBehavior: Clip.antiAlias,
-      surfaceTintColor: Colors.transparent,
-      child: Theme(
-        data: Theme.of(context).copyWith(
-          splashColor: Colors.transparent,
-          highlightColor: Colors.transparent,
-        ),
-        child: PlatformInkWell(
-          borderRadius: BorderRadius.circular(12),
-          onTap: () => widget.onTap?.call(widget.lesson),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                constraints: const BoxConstraints(minHeight: 75),
-                padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 12),
-                                alignment: Alignment.center,
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(4),
-                                  color: LessonCard.getColorByType(widget.lesson.lessonType),
-                                ),
-                                height: 7,
-                                width: 7,
-                              ),
-                              const SizedBox(width: 8),
-                              Animate(autoPlay: false).toggle(
-                                duration: const Duration(milliseconds: 150),
-                                builder: (_, value, __) => Text(
-                                  state.isMiniature
-                                      ? '${LessonCard.getLessonTypeName(widget.lesson.lessonType)} в ${widget.lesson.classrooms.map((e) => e.name).join(', ')}'
-                                      : LessonCard.getLessonTypeName(widget.lesson.lessonType),
-                                  style: AppTextStyle.captionL.copyWith(
-                                    color: Theme.of(context).extension<AppColors>()!.deactive,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            widget.lesson.subject,
-                            style: AppTextStyle.titleM,
-                            maxLines: 8,
-                            overflow: TextOverflow.visible,
-                          ),
-                          const SizedBox(height: 4),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Text(
-                                '${widget.lesson.lessonBells.number} пара',
-                                style: AppTextStyle.body.copyWith(
-                                  color: Theme.of(context).extension<AppColors>()!.colorful03,
-                                ),
-                              ),
-                              Text(
-                                '${widget.lesson.lessonBells.startTime} - ${widget.lesson.lessonBells.endTime}',
-                                style: AppTextStyle.body.copyWith(
-                                  color: Theme.of(context).extension<AppColors>()!.colorful03,
-                                ),
-                              ),
-                            ],
-                          ),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Divider(height: 18),
-                              if (widget.lesson.classrooms.isNotEmpty) ...[
-                                const SizedBox(height: 4),
-                                Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    HugeIcon(
-                                      icon: HugeIcons.strokeRoundedUniversity,
-                                      size: 16,
-                                      color: Theme.of(context).extension<AppColors>()!.deactive,
-                                    ),
-                                    const SizedBox(width: 6),
-                                    Expanded(
-                                      child: Text(
-                                        _getClassroomNames(widget.lesson.classrooms),
-                                        style: AppTextStyle.body
-                                            .copyWith(color: Theme.of(context).extension<AppColors>()!.active),
-                                        maxLines: 2,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                              if (widget.lesson.groups != null &&
-                                  ((state.selectedSchedule is! SelectedGroupSchedule &&
-                                          widget.lesson.groups!.isNotEmpty) ||
-                                      (state.selectedSchedule is SelectedGroupSchedule &&
-                                          widget.lesson.groups!.length > 1))) ...[
-                                const SizedBox(height: 4),
-                                Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Padding(
-                                      padding: const EdgeInsets.only(top: 2),
-                                      child: HugeIcon(
-                                        icon: HugeIcons.strokeRoundedUserGroup,
-                                        size: 16,
-                                        color: Theme.of(context).extension<AppColors>()!.deactive,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 6),
-                                    Expanded(
-                                      child: Text(
-                                        widget.lesson.groups?.join(', ') ?? '',
-                                        style: AppTextStyle.body
-                                            .copyWith(color: Theme.of(context).extension<AppColors>()!.deactive),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                              if (widget.lesson.teachers.isNotEmpty) ...[
-                                const SizedBox(height: 4),
-                                Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Padding(
-                                      padding: const EdgeInsets.only(top: 3),
-                                      child: HugeIcon(
-                                        icon: HugeIcons.strokeRoundedTeacher,
-                                        size: 16,
-                                        color: Theme.of(context).extension<AppColors>()!.deactive,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 6),
-                                    Expanded(
-                                      child: Text(
-                                        widget.lesson.teachers.map((e) => e.name).join(', '),
-                                        style: AppTextStyle.body
-                                            .copyWith(color: Theme.of(context).extension<AppColors>()!.deactive),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ],
-                          ).animate(autoPlay: false).toggle(builder: (_, value, child) {
-                            return AnimatedSize(
-                              duration: const Duration(milliseconds: 150),
-                              child: state.isMiniature ? const SizedBox() : child,
-                            );
-                          }),
-                          _buildCommentAlert(context, state.comments),
-                          _buildGroupIndicator()
-                        ],
-                      ),
+    final lessonColor = LessonCard.getColorByType(widget.lesson.lessonType);
+    final isActive = _progress != null;
+
+    return RepaintBoundary(
+      child: Card(
+        margin: const EdgeInsets.all(0),
+        color: isActive ? lessonColor.withOpacity(0.05) : Theme.of(context).extension<AppColors>()!.surface,
+        surfaceTintColor: Colors.transparent,
+        child: Theme(
+          data: Theme.of(
+            context,
+          ).copyWith(splashColor: lessonColor.withOpacity(0.1), highlightColor: Colors.transparent),
+          child: PlatformInkWell(
+            borderRadius: BorderRadius.circular(14),
+            onTap: () => widget.onTap?.call(widget.lesson),
+            child: Stack(
+              children: [
+                if (_progress != null)
+                  Positioned(
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    child: TweenAnimationBuilder<double>(
+                      tween: Tween<double>(begin: _progress!, end: _progress!),
+                      duration: const Duration(milliseconds: 300),
+                      builder: (context, animatedProgress, child) {
+                        return GradientProgressBar(
+                          progress: animatedProgress,
+                          height: 3,
+                          startColor: lessonColor,
+                          endColor: lessonColor.withOpacity(0.7),
+                        );
+                      },
                     ),
-                    const SizedBox(width: 8),
-                  ],
+                  ),
+                Container(
+                  constraints: const BoxConstraints(minHeight: 75),
+                  padding: EdgeInsets.only(
+                    top: _progress != null ? (isDesktop ? 12 : 16) : (isDesktop ? 8 : 12),
+                    bottom: isDesktop ? 8 : 12,
+                    left: isDesktop ? 12 : 16,
+                    right: isDesktop ? 12 : 16,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        widget.lesson.subject,
+                        style: AppTextStyle.titleM.copyWith(height: 1.3, fontWeight: FontWeight.w600),
+                        maxLines: 3,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 10),
+                      SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          children: [
+                            _buildTag(
+                              context,
+                              '${widget.lesson.lessonBells.startTime} - ${widget.lesson.lessonBells.endTime}',
+                              lessonColor,
+                              isHighlighted: true,
+                              icon: HugeIcons.strokeRoundedClock01,
+                            ),
+                            const SizedBox(width: 8),
+                            _buildTag(
+                              context,
+                              '${widget.lesson.lessonBells.number} пара',
+                              lessonColor.withOpacity(0.7),
+                              showBorder: true,
+                            ),
+                            const SizedBox(width: 8),
+                            _buildTag(context, LessonCard.getLessonTypeName(widget.lesson.lessonType), lessonColor),
+                          ],
+                        ),
+                      ),
+                      // Details section
+                      Animate(autoPlay: false).toggle(
+                        builder: (_, value, child) {
+                          return AnimatedSize(
+                            duration: const Duration(milliseconds: 150),
+                            child: state.isMiniature ? const SizedBox() : _buildDetailsSection(context),
+                          );
+                        },
+                      ),
+                      // Comments
+                      _buildCommentAlert(context, state.comments),
+                      // Group indicator for overlapping lessons
+                      if ((widget.indexInGroup != null && widget.countInGroup != null) && widget.countInGroup! > 1)
+                        _buildGroupIndicator(context),
+                    ],
+                  ),
                 ),
-              ),
-              if (_progress != null)
-                TweenAnimationBuilder<double>(
-                  tween: Tween<double>(begin: _progress!, end: _progress!),
-                  duration: const Duration(milliseconds: 300),
-                  builder: (context, animatedProgress, child) {
-                    return GradientProgressBar(
-                      progress: animatedProgress,
-                      height: 4,
-                      startColor: Theme.of(context).extension<AppColors>()!.colorful03,
-                      endColor: Theme.of(context).extension<AppColors>()!.colorful07,
-                    );
-                  },
-                ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
     );
   }
 
-  Widget _buildGroupIndicator() {
+  Widget _buildTag(
+    BuildContext context,
+    String text,
+    Color color, {
+    bool isHighlighted = false,
+    bool showBorder = false,
+    IconData? icon,
+  }) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: icon != null ? 8 : 10, vertical: 5),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(8),
+        color:
+            isHighlighted
+                ? color.withOpacity(0.15)
+                : showBorder
+                ? Colors.transparent
+                : Theme.of(context).extension<AppColors>()!.background03,
+        border: showBorder ? Border.all(color: color.withOpacity(0.3), width: 1) : null,
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (icon != null) ...[
+            HugeIcon(
+              icon: icon,
+              size: 14,
+              color: isHighlighted ? color : Theme.of(context).extension<AppColors>()!.deactive,
+            ),
+            const SizedBox(width: 4),
+          ],
+          Text(
+            text,
+            style: AppTextStyle.captionL.copyWith(
+              color: isHighlighted ? color : Theme.of(context).extension<AppColors>()!.deactive,
+              fontWeight: isHighlighted ? FontWeight.w600 : FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDetailsSection(BuildContext context) {
+    final state = context.read<ScheduleBloc>().state;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 10),
+
+        // Location info
+        if (widget.lesson.classrooms.isNotEmpty)
+          _buildInfoRow(
+            context,
+            HugeIcons.strokeRoundedUniversity,
+            _getClassroomNames(widget.lesson.classrooms),
+            Theme.of(context).extension<AppColors>()!.active,
+          ),
+
+        // Groups info
+        if (widget.lesson.groups != null &&
+            ((state.selectedSchedule is! SelectedGroupSchedule && widget.lesson.groups!.isNotEmpty) ||
+                (state.selectedSchedule is SelectedGroupSchedule && widget.lesson.groups!.length > 1)))
+          _buildInfoRow(
+            context,
+            HugeIcons.strokeRoundedUserGroup,
+            widget.lesson.groups?.join(', ') ?? '',
+            Theme.of(context).extension<AppColors>()!.deactive,
+          ),
+
+        // Teacher info
+        if (widget.lesson.teachers.isNotEmpty)
+          _buildInfoRow(
+            context,
+            HugeIcons.strokeRoundedTeacher,
+            widget.lesson.teachers.map((e) => e.name).join(', '),
+            Theme.of(context).extension<AppColors>()!.deactive,
+          ),
+      ],
+    );
+  }
+
+  Widget _buildInfoRow(BuildContext context, IconData icon, String text, Color textColor) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 24,
+            height: 24,
+            decoration: BoxDecoration(
+              color: Theme.of(context).extension<AppColors>()!.background03.withOpacity(0.7),
+              borderRadius: BorderRadius.circular(6),
+            ),
+            child: Center(
+              child: HugeIcon(icon: icon, size: 14, color: Theme.of(context).extension<AppColors>()!.deactive),
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.only(top: 3),
+              child: Text(
+                text,
+                style: AppTextStyle.body.copyWith(color: textColor, height: 1.3),
+                maxLines: 3,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildGroupIndicator(BuildContext context) {
     if (widget.indexInGroup == null || widget.countInGroup == null) {
       return const SizedBox.shrink();
     }
+
+    final lessonColor = LessonCard.getColorByType(widget.lesson.lessonType);
+
     return Padding(
-      padding: const EdgeInsets.only(top: 8),
+      padding: const EdgeInsets.only(top: 12),
       child: Row(
         children: [
-          Text(
-            '${widget.countInGroup} ${Intl.plural(widget.countInGroup!, one: 'пара', few: 'пары', many: 'пар', other: 'пар')} в это время',
-            style: AppTextStyle.captionL.copyWith(
-              color: Theme.of(context).extension<AppColors>()!.colorful03,
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            decoration: BoxDecoration(
+              color: Theme.of(context).extension<AppColors>()!.background03.withOpacity(0.7),
+              borderRadius: BorderRadius.circular(8),
             ),
-          ),
-          const SizedBox(width: 8),
-          for (var i = 0; i < widget.countInGroup!; i++)
-            Container(
-              width: 8,
-              height: 8,
-              margin: const EdgeInsets.only(right: 4),
-              decoration: BoxDecoration(
-                color: i == widget.indexInGroup!
-                    ? Theme.of(context).extension<AppColors>()!.colorful03
-                    : Theme.of(context).extension<AppColors>()!.colorful03.withOpacity(0.3),
-                shape: BoxShape.circle,
+            child: Text(
+              '${widget.indexInGroup! + 1}/${widget.countInGroup} ${Intl.plural(widget.countInGroup!, one: 'пара', few: 'пары', many: 'пар', other: 'пар')}',
+              style: AppTextStyle.captionL.copyWith(
+                color: Theme.of(context).extension<AppColors>()!.deactive,
+                fontWeight: FontWeight.w500,
               ),
             ),
+          ),
+          const SizedBox(width: 12),
+          Row(
+            children: List.generate(
+              widget.countInGroup!,
+              (i) => Container(
+                width: 6,
+                height: 6,
+                margin: const EdgeInsets.only(right: 4),
+                decoration: BoxDecoration(
+                  color: i == widget.indexInGroup! ? lessonColor : lessonColor.withOpacity(0.2),
+                  shape: BoxShape.circle,
+                ),
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -403,48 +445,48 @@ class GradientProgressBar extends StatelessWidget {
   final double height;
   final Color startColor;
   final Color endColor;
-  final Color backgroundColor;
 
   const GradientProgressBar({
     super.key,
     required this.progress,
-    this.height = 4,
+    this.height = 3,
     required this.startColor,
     required this.endColor,
-    this.backgroundColor = const Color(0xFFE0E0E0),
   });
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(builder: (context, constraints) {
-      final fullWidth = constraints.maxWidth;
-      return Container(
-        width: fullWidth,
-        height: height,
-        decoration: BoxDecoration(
-          color: backgroundColor,
-          borderRadius: BorderRadius.vertical(
-            bottom: Radius.circular(height / 2),
-          ),
-        ),
-        child: Align(
-          alignment: Alignment.centerLeft,
-          child: Container(
-            width: fullWidth * progress,
-            height: height,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [startColor, endColor],
-                begin: Alignment.centerLeft,
-                end: Alignment.centerRight,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final fullWidth = constraints.maxWidth;
+        return SizedBox(
+          width: fullWidth,
+          height: height,
+          child: Stack(
+            children: [
+              // Background
+              Container(
+                width: fullWidth,
+                height: height,
+                color: Theme.of(context).extension<AppColors>()!.background03.withOpacity(0.3),
               ),
-              borderRadius: BorderRadius.vertical(
-                bottom: Radius.circular(height / 2),
+
+              // Progress
+              Container(
+                width: fullWidth * progress,
+                height: height,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [startColor, endColor],
+                    begin: Alignment.centerLeft,
+                    end: Alignment.centerRight,
+                  ),
+                ),
               ),
-            ),
+            ],
           ),
-        ),
-      );
-    });
+        );
+      },
+    );
   }
 }

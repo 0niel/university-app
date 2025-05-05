@@ -8,33 +8,20 @@ part 'discourse_event.dart';
 part 'discourse_state.dart';
 
 class DiscourseBloc extends Bloc<DiscourseEvent, DiscourseState> {
-  DiscourseBloc({
-    required DiscourseRepository discourseRepository,
-  })  : _discourseRepository = discourseRepository,
-        super(const DiscourseState.initial()) {
+  DiscourseBloc({required DiscourseRepository discourseRepository})
+    : _discourseRepository = discourseRepository,
+      super(const DiscourseState.initial()) {
     on<DiscourseTopTopicsLoadRequest>(_onTopTopicsRequested);
   }
 
   final DiscourseRepository _discourseRepository;
 
-  FutureOr<void> _onTopTopicsRequested(
-    DiscourseTopTopicsLoadRequest event,
-    Emitter<DiscourseState> emit,
-  ) async {
-    emit(
-      state.copyWith(
-        status: DiscourseStatus.loading,
-      ),
-    );
+  FutureOr<void> _onTopTopicsRequested(DiscourseTopTopicsLoadRequest event, Emitter<DiscourseState> emit) async {
+    emit(state.copyWith(status: DiscourseStatus.loading));
     try {
       final results = await _discourseRepository.getTop();
 
-      emit(
-        state.copyWith(
-          topTopics: results,
-          status: DiscourseStatus.loaded,
-        ),
-      );
+      emit(state.copyWith(topTopics: results, status: DiscourseStatus.loaded));
     } catch (error, stackTrace) {
       emit(state.copyWith(status: DiscourseStatus.failure));
       addError(error, stackTrace);

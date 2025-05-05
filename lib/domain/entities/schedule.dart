@@ -3,11 +3,7 @@ import 'package:equatable/equatable.dart';
 import 'lesson.dart';
 
 class Schedule extends Equatable {
-  const Schedule({
-    required this.isRemote,
-    required this.group,
-    required this.schedule,
-  });
+  const Schedule({required this.isRemote, required this.group, required this.schedule});
 
   final bool isRemote;
   final String group;
@@ -18,9 +14,7 @@ class Schedule extends Equatable {
 }
 
 class ScheduleWeekdayValue extends Equatable {
-  const ScheduleWeekdayValue({
-    required this.lessons,
-  });
+  const ScheduleWeekdayValue({required this.lessons});
 
   final List<List<Lesson>> lessons;
 

@@ -193,24 +193,7 @@ class SvgRoomsParser {
             final d = values[3];
             final e = values[4];
             final f = values[5];
-            current.setValues(
-              a,
-              c,
-              0,
-              e,
-              b,
-              d,
-              0,
-              f,
-              0,
-              0,
-              1,
-              0,
-              0,
-              0,
-              0,
-              1,
-            );
+            current.setValues(a, c, 0, e, b, d, 0, f, 0, 0, 1, 0, 0, 0, 0, 1);
           }
           break;
 

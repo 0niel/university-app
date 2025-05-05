@@ -4,11 +4,7 @@ enum ScoresStatus { initial, loading, loaded, error }
 
 @JsonSerializable()
 class ScoresState extends Equatable {
-  const ScoresState({
-    this.scores,
-    this.selectedSemester,
-    this.status = ScoresStatus.initial,
-  });
+  const ScoresState({this.scores, this.selectedSemester, this.status = ScoresStatus.initial});
   final Map<String, List<Score>>? scores;
   final String? selectedSemester;
   final ScoresStatus status;
@@ -40,11 +36,7 @@ class ScoresState extends Equatable {
     return rating;
   }
 
-  ScoresState copyWith({
-    Map<String, List<Score>>? scores,
-    String? selectedSemester,
-    ScoresStatus? status,
-  }) {
+  ScoresState copyWith({Map<String, List<Score>>? scores, String? selectedSemester, ScoresStatus? status}) {
     return ScoresState(
       scores: scores ?? this.scores,
       selectedSemester: selectedSemester ?? this.selectedSemester,

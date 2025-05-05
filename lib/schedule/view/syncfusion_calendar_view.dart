@@ -6,10 +6,7 @@ import 'package:university_app_server_api/client.dart';
 
 class SyncfusionCalendarView extends StatefulWidget {
   final List<SchedulePart> lessons;
-  const SyncfusionCalendarView({
-    super.key,
-    required this.lessons,
-  });
+  const SyncfusionCalendarView({super.key, required this.lessons});
 
   @override
   State<SyncfusionCalendarView> createState() => _SyncfusionCalendarViewState();
@@ -81,9 +78,7 @@ class _SyncfusionCalendarViewState extends State<SyncfusionCalendarView> {
       ),
       headerStyle: CalendarHeaderStyle(
         textAlign: TextAlign.center,
-        textStyle: AppTextStyle.titleM.copyWith(
-          color: Theme.of(context).extension<AppColors>()!.active,
-        ),
+        textStyle: AppTextStyle.titleM.copyWith(color: Theme.of(context).extension<AppColors>()!.active),
         backgroundColor: Theme.of(context).extension<AppColors>()!.background01,
       ),
       cellBorderColor: Theme.of(context).extension<AppColors>()!.divider,
@@ -95,9 +90,7 @@ class _SyncfusionCalendarViewState extends State<SyncfusionCalendarView> {
       showCurrentTimeIndicator: true,
       showWeekNumber: false,
       viewNavigationMode: ViewNavigationMode.snap,
-      monthViewSettings: const MonthViewSettings(
-        appointmentDisplayMode: MonthAppointmentDisplayMode.appointment,
-      ),
+      monthViewSettings: const MonthViewSettings(appointmentDisplayMode: MonthAppointmentDisplayMode.appointment),
     );
   }
 

@@ -3,6 +3,4 @@ import 'package:files_app/files_app.dart';
 import 'package:neon_framework/models.dart';
 
 /// The collection of clients enabled for the Neon app.
-final BuiltSet<AppImplementation> appImplementations = BuiltSet({
-  FilesApp(),
-});
+final BuiltSet<AppImplementation> appImplementations = BuiltSet({FilesApp()});

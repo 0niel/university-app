@@ -25,9 +25,7 @@ class CommunityCard extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 12),
       child: Card(
         color: Theme.of(context).extension<AppColors>()!.background02,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         child: PlatformInkWell(
           onTap: () {
             final Uri url = Uri.parse(this.url);
@@ -40,14 +38,7 @@ class CommunityCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                SizedBox(
-                  width: 48,
-                  height: 48,
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child: logo,
-                  ),
-                ),
+                SizedBox(width: 48, height: 48, child: ClipRRect(borderRadius: BorderRadius.circular(12), child: logo)),
                 const SizedBox(width: 16),
                 Expanded(
                   child: Column(

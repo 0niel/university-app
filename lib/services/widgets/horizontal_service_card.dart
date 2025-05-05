@@ -35,9 +35,7 @@ class HorizontalServiceCard extends StatelessWidget {
       margin: const EdgeInsets.only(right: AppSpacing.md),
       child: Card(
         elevation: 0,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         color: Theme.of(context).extension<AppColors>()!.background02,
         child: InkWell(
           borderRadius: BorderRadius.circular(16),
@@ -56,35 +54,23 @@ class HorizontalServiceCard extends StatelessWidget {
                         color: color.withOpacity(0.15),
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      child: Icon(
-                        iconData,
-                        color: color,
-                        size: 22,
-                      ),
+                      child: Icon(iconData, color: color, size: 22),
                     ),
                     const Spacer(),
-                    Icon(
-                      Icons.arrow_forward_ios,
-                      size: 14,
-                      color: Theme.of(context).extension<AppColors>()!.deactive,
-                    ),
+                    Icon(Icons.arrow_forward_ios, size: 14, color: Theme.of(context).extension<AppColors>()!.deactive),
                   ],
                 ),
                 const Spacer(),
                 Text(
                   title,
-                  style: AppTextStyle.bodyBold.copyWith(
-                    color: Theme.of(context).extension<AppColors>()!.active,
-                  ),
+                  style: AppTextStyle.bodyBold.copyWith(color: Theme.of(context).extension<AppColors>()!.active),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: AppSpacing.xs),
                 Text(
                   description,
-                  style: AppTextStyle.captionL.copyWith(
-                    color: Theme.of(context).extension<AppColors>()!.deactive,
-                  ),
+                  style: AppTextStyle.captionL.copyWith(color: Theme.of(context).extension<AppColors>()!.deactive),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),

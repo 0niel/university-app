@@ -9,9 +9,7 @@ import 'package:rtu_mirea_app/domain/repositories/stories_repository.dart';
 class StoriesRepositoryImpl implements StoriesRepository {
   final StrapiRemoteData remoteDataSource;
 
-  StoriesRepositoryImpl({
-    required this.remoteDataSource,
-  });
+  StoriesRepositoryImpl({required this.remoteDataSource});
 
   @override
   Future<Either<Failure, List<Story>>> getStories() async {

@@ -14,9 +14,7 @@ class ContributorCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       color: Theme.of(context).extension<AppColors>()!.background02,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: PlatformInkWell(
         borderRadius: BorderRadius.circular(12),
         child: Padding(
@@ -31,13 +29,10 @@ class ContributorCard extends StatelessWidget {
                 backgroundImage: NetworkImage(contributor.avatarUrl),
               ),
               const SizedBox(height: 16),
-              Text(
-                contributor.login,
-                style: AppTextStyle.bodyBold,
-              ),
+              Text(contributor.login, style: AppTextStyle.bodyBold),
               Text(
                 '${contributor.contributions} ${Intl.plural(contributor.contributions, one: 'коммит', few: 'коммита', many: 'коммитов', other: 'коммитов')}',
-                style: AppTextStyle.bodyRegular,
+                style: AppTextStyle.body,
               ),
             ],
           ),

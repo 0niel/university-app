@@ -3,11 +3,8 @@ import 'dart:convert';
 import 'package:rtu_mirea_app/domain/entities/attendance.dart';
 
 class AttendanceModel extends Attendance {
-  const AttendanceModel({
-    required date,
-    required time,
-    required eventType,
-  }) : super(date: date, time: time, eventType: eventType);
+  const AttendanceModel({required date, required time, required eventType})
+    : super(date: date, time: time, eventType: eventType);
 
   factory AttendanceModel.fromRawJson(String str) => AttendanceModel.fromJson(json.decode(str));
 
@@ -19,15 +16,7 @@ class AttendanceModel extends Attendance {
     );
   }
 
-  AttendanceModel copyWith({
-    String? date,
-    String? time,
-    String? eventType,
-  }) {
-    return AttendanceModel(
-      date: date ?? this.date,
-      time: time ?? this.time,
-      eventType: eventType ?? this.eventType,
-    );
+  AttendanceModel copyWith({String? date, String? time, String? eventType}) {
+    return AttendanceModel(date: date ?? this.date, time: time ?? this.time, eventType: eventType ?? this.eventType);
   }
 }

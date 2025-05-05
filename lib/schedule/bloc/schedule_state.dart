@@ -1,11 +1,6 @@
 part of 'schedule_bloc.dart';
 
-enum ScheduleStatus {
-  initial,
-  loading,
-  failure,
-  loaded,
-}
+enum ScheduleStatus { initial, loading, failure, loaded }
 
 @freezed
 class FieldDiff with _$FieldDiff {
@@ -28,11 +23,7 @@ class FieldDiff with _$FieldDiff {
   }) = _FieldDiff;
 }
 
-enum ChangeType {
-  added,
-  removed,
-  modified,
-}
+enum ChangeType { added, removed, modified }
 
 @freezed
 class ScheduleChange with _$ScheduleChange {
@@ -75,6 +66,14 @@ class ScheduleState with _$ScheduleState {
     @Default(false) @JsonKey(includeFromJson: false, includeToJson: false) bool isComparisonModeEnabled,
     @Default(null) @JsonKey(includeFromJson: false, includeToJson: false) ScheduleDiff? latestDiff,
     @Default(false) @JsonKey(includeFromJson: false, includeToJson: false) bool showScheduleDiffDialog,
+
+    // Desktop mode state properties
+    @Default(false) @JsonKey(includeFromJson: false, includeToJson: false) bool isSplitViewEnabled,
+    @Default(true) @JsonKey(includeFromJson: false, includeToJson: false) bool showAnalytics,
+
+    // Custom schedules
+    @Default([]) List<CustomSchedule> customSchedules,
+    @Default(false) @JsonKey(includeFromJson: false, includeToJson: false) bool isCustomScheduleModeEnabled,
   }) = _ScheduleState;
 
   const ScheduleState._();

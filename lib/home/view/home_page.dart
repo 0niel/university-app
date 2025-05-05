@@ -8,16 +8,21 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    context.read<HomeCubit>().checkOnboarding();
-    return BlocConsumer<HomeCubit, HomeState>(builder: (context, state) {
-      return Container();
-    }, listener: (context, state) {
-      if (state is AppOnboarding) {
-        // replace to avoid display bottom nav bar
-        context.replace('/onboarding');
-      } else {
-        context.go('/schedule');
-      }
-    });
+    return BlocProvider(
+      create: (context) => HomeCubit()..checkOnboarding(),
+      child: BlocConsumer<HomeCubit, HomeState>(
+        builder: (context, state) {
+          return Container();
+        },
+        listener: (context, state) {
+          if (state is AppOnboarding) {
+            // replace to avoid display bottom nav bar
+            context.replace('/onboarding');
+          } else {
+            context.go('/schedule');
+          }
+        },
+      ),
+    );
   }
 }

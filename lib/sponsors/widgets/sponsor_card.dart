@@ -13,9 +13,7 @@ class SponsorCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: PlatformInkWell(
         onTap: () {},
         borderRadius: BorderRadius.circular(16),
@@ -38,15 +36,14 @@ class SponsorCard extends StatelessWidget {
             color: Theme.of(context).colorScheme.surface,
             child: PlatformInkWell(
               borderRadius: BorderRadius.circular(16),
-              onTap: sponsor.url != null
-                  ? () {
-                      launchUrl(Uri.parse(sponsor.url!), mode: LaunchMode.externalApplication);
-                    }
-                  : null,
+              onTap:
+                  sponsor.url != null
+                      ? () {
+                        launchUrl(Uri.parse(sponsor.url!), mode: LaunchMode.externalApplication);
+                      }
+                      : null,
               child: Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(16),
-                ),
+                decoration: BoxDecoration(borderRadius: BorderRadius.circular(16)),
                 padding: const EdgeInsets.all(16),
                 child: Stack(
                   children: [
@@ -64,10 +61,7 @@ class SponsorCard extends StatelessWidget {
                             mainAxisAlignment: MainAxisAlignment.center,
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                sponsor.username,
-                                style: AppTextStyle.titleM,
-                              ),
+                              Text(sponsor.username, style: AppTextStyle.titleM),
                               if (sponsor.about != null)
                                 Text(
                                   sponsor.about.toString(),

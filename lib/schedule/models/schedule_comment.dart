@@ -10,10 +10,7 @@ part 'schedule_comment.g.dart';
 @JsonSerializable()
 class ScheduleComment extends Equatable {
   /// {@macro schedule_comment}
-  const ScheduleComment({
-    required this.scheduleName,
-    required this.text,
-  });
+  const ScheduleComment({required this.scheduleName, required this.text});
 
   /// {@macro from_json}
   factory ScheduleComment.fromJson(Map<String, dynamic> json) => _$ScheduleCommentFromJson(json);
@@ -27,19 +24,10 @@ class ScheduleComment extends Equatable {
   /// Comment text.
   final String text;
 
-  ScheduleComment copyWith({
-    String? scheduleName,
-    String? text,
-  }) {
-    return ScheduleComment(
-      scheduleName: scheduleName ?? this.scheduleName,
-      text: text ?? this.text,
-    );
+  ScheduleComment copyWith({String? scheduleName, String? text}) {
+    return ScheduleComment(scheduleName: scheduleName ?? this.scheduleName, text: text ?? this.text);
   }
 
   @override
-  List<Object?> get props => [
-        scheduleName,
-        text,
-      ];
+  List<Object?> get props => [scheduleName, text];
 }

@@ -50,34 +50,18 @@ class NfcPassCard extends StatelessWidget {
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(16),
               color: localFilePath == null ? Colors.blueAccent : null,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.25),
-                  offset: const Offset(0, 4),
-                  blurRadius: 4,
-                ),
-              ],
+              boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.25), offset: const Offset(0, 4), blurRadius: 4)],
             ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(16),
               child: Stack(
-                children: [
-                  Positioned.fill(
-                    child: _buildCardBackground(),
-                  ),
-                  Positioned.fill(
-                    child: _buildCardContent(),
-                  ),
-                ],
+                children: [Positioned.fill(child: _buildCardBackground()), Positioned.fill(child: _buildCardContent())],
               ),
             ),
           ),
         ),
         const SizedBox(height: 48),
-        ElevatedButton(
-          onPressed: onClick,
-          child: const Text("Отвязать устройство"),
-        ).animate().fadeIn(duration: 500.ms),
+        ElevatedButton(onPressed: onClick, child: const Text("Отвязать устройство")).animate().fadeIn(duration: 500.ms),
         const SizedBox(height: 16),
       ],
     );
@@ -110,9 +94,7 @@ class NfcPassCard extends StatelessWidget {
                   ),
                 ),
                 Container(
-                  decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.6),
-                  ),
+                  decoration: BoxDecoration(color: Colors.black.withOpacity(0.6)),
                 ).animate().fadeIn(duration: 500.ms),
               ],
             );
@@ -130,11 +112,7 @@ class NfcPassCard extends StatelessWidget {
             width: double.infinity,
             height: double.infinity,
           ).animate().fadeIn(duration: 500.ms),
-          Container(
-            decoration: BoxDecoration(
-              color: Colors.black.withOpacity(0.6),
-            ),
-          ).animate().fadeIn(duration: 500.ms),
+          Container(decoration: BoxDecoration(color: Colors.black.withOpacity(0.6))).animate().fadeIn(duration: 500.ms),
         ],
       );
     }
@@ -143,12 +121,13 @@ class NfcPassCard extends StatelessWidget {
   Widget _buildCardContent() {
     String displayId = deviceId;
 
-    displayId = displayId.split('').mapIndexed((index, char) {
-      if (index < displayId.length / 2) {
-        return char;
-      }
-      return '*';
-    }).join();
+    displayId =
+        displayId.split('').mapIndexed((index, char) {
+          if (index < displayId.length / 2) {
+            return char;
+          }
+          return '*';
+        }).join();
 
     return Padding(
       padding: const EdgeInsets.all(16.0),
@@ -181,21 +160,25 @@ class NfcPassCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text("ID", style: AppTextStyle.bodyBold.copyWith(color: Colors.white))
-                    .animate()
-                    .fadeIn(delay: 200.ms, duration: 500.ms),
+                Text(
+                  "ID",
+                  style: AppTextStyle.bodyBold.copyWith(color: Colors.white),
+                ).animate().fadeIn(delay: 200.ms, duration: 500.ms),
                 const SizedBox(height: 4),
-                Text(displayId, style: AppTextStyle.body.copyWith(color: Colors.white))
-                    .animate()
-                    .fadeIn(delay: 300.ms, duration: 500.ms),
+                Text(
+                  displayId,
+                  style: AppTextStyle.body.copyWith(color: Colors.white),
+                ).animate().fadeIn(delay: 300.ms, duration: 500.ms),
                 const SizedBox(height: 16),
-                Text("Устройство", style: AppTextStyle.bodyBold.copyWith(color: Colors.white))
-                    .animate()
-                    .fadeIn(delay: 400.ms, duration: 500.ms),
+                Text(
+                  "Устройство",
+                  style: AppTextStyle.bodyBold.copyWith(color: Colors.white),
+                ).animate().fadeIn(delay: 400.ms, duration: 500.ms),
                 const SizedBox(height: 4),
-                Text(deviceName, style: AppTextStyle.body.copyWith(color: Colors.white))
-                    .animate()
-                    .fadeIn(delay: 500.ms, duration: 500.ms),
+                Text(
+                  deviceName,
+                  style: AppTextStyle.body.copyWith(color: Colors.white),
+                ).animate().fadeIn(delay: 500.ms, duration: 500.ms),
               ],
             ),
           ),
@@ -210,11 +193,7 @@ class _AnimatedRainbowBorder extends StatelessWidget {
   final double borderWidth;
   final double borderRadius;
 
-  const _AnimatedRainbowBorder({
-    required this.child,
-    this.borderWidth = 4,
-    this.borderRadius = 16,
-  });
+  const _AnimatedRainbowBorder({required this.child, this.borderWidth = 4, this.borderRadius = 16});
 
   @override
   Widget build(BuildContext context) {
@@ -248,10 +227,7 @@ class _AnimatedRainbowBorder extends StatelessWidget {
                   ],
                 ),
               ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(borderRadius),
-                child: child,
-              ),
+              child: ClipRRect(borderRadius: BorderRadius.circular(borderRadius), child: child),
             );
           },
         ),

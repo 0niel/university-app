@@ -10,12 +10,12 @@ class EduProgramModel extends EduProgram {
     required prodDepartment,
     required type,
   }) : super(
-          eduProgram: eduProgram,
-          eduProgramCode: eduProgramCode,
-          department: department,
-          prodDepartment: prodDepartment,
-          type: type,
-        );
+         eduProgram: eduProgram,
+         eduProgramCode: eduProgramCode,
+         department: department,
+         prodDepartment: prodDepartment,
+         type: type,
+       );
 
   factory EduProgramModel.fromRawJson(String str) => EduProgramModel.fromJson(json.decode(str));
 

@@ -19,10 +19,7 @@ enum Category {
   group,
 }
 
-const visibleCategoryNames = {
-  Category.announcements: 'Объявления',
-  Category.scheduleUpdates: 'Обновления расписания',
-};
+const visibleCategoryNames = {Category.announcements: 'Объявления', Category.scheduleUpdates: 'Обновления расписания'};
 
 /// Транслитерирует название группы для использования в качестве названия
 /// категории уведомлений.
@@ -70,10 +67,7 @@ String transletirateGroupName(String groupName) {
 /// используется при подписке на уведомления. [fromString] возвращает объект
 /// [Topic] из названия категории.
 class Topic extends Equatable {
-  Topic({
-    required this.topic,
-    String? groupName,
-  }) {
+  Topic({required this.topic, String? groupName}) {
     if (topic == Category.group || topic == Category.scheduleUpdates) {
       assert(groupName != null);
 
@@ -114,15 +108,9 @@ class Topic extends Equatable {
       case 'Объявления':
         return Topic(topic: Category.announcements);
       case 'Обновления расписания':
-        return Topic(
-          topic: Category.scheduleUpdates,
-          groupName: groupName,
-        );
+        return Topic(topic: Category.scheduleUpdates, groupName: groupName);
       default:
-        return Topic(
-          topic: Category.group,
-          groupName: name,
-        );
+        return Topic(topic: Category.group, groupName: name);
     }
   }
 
@@ -134,15 +122,9 @@ class Topic extends Equatable {
       case 'Announcements':
         return Topic(topic: Category.announcements);
       case 'ScheduleUpdates':
-        return Topic(
-          topic: Category.scheduleUpdates,
-          groupName: categoryParts[1],
-        );
+        return Topic(topic: Category.scheduleUpdates, groupName: categoryParts[1]);
       default:
-        return Topic(
-          topic: Category.group,
-          groupName: category,
-        );
+        return Topic(topic: Category.group, groupName: category);
     }
   }
 
@@ -151,18 +133,11 @@ class Topic extends Equatable {
 }
 
 class NotificationPreferencesBloc extends Bloc<NotificationPreferencesEvent, NotificationPreferencesState> {
-  NotificationPreferencesBloc({
-    required NotificationsRepository notificationsRepository,
-  })  : _notificationsRepository = notificationsRepository,
-        super(
-          NotificationPreferencesState.initial(),
-        ) {
-    on<CategoriesPreferenceToggled>(
-      _onCategoriesPreferenceToggled,
-    );
-    on<InitialCategoriesPreferencesRequested>(
-      _onInitialCategoriesPreferencesRequested,
-    );
+  NotificationPreferencesBloc({required NotificationsRepository notificationsRepository})
+    : _notificationsRepository = notificationsRepository,
+      super(NotificationPreferencesState.initial()) {
+    on<CategoriesPreferenceToggled>(_onCategoriesPreferenceToggled);
+    on<InitialCategoriesPreferencesRequested>(_onInitialCategoriesPreferencesRequested);
   }
 
   final NotificationsRepository _notificationsRepository;
@@ -186,9 +161,7 @@ class NotificationPreferencesBloc extends Bloc<NotificationPreferencesEvent, Not
       /// Добавляем в категории названия академической группы для подписки на
       /// уведомления для группы. Это обязательная категория, которую
       /// пользователь не может отключить.
-      categoriesToSubscribe.add(
-        Topic(topic: Category.group, groupName: event.group),
-      );
+      categoriesToSubscribe.add(Topic(topic: Category.group, groupName: event.group));
 
       /// Убираем те категории, название которых содержит название группы, но
       /// не совпадает с названием группы в [event.group].
@@ -203,18 +176,11 @@ class NotificationPreferencesBloc extends Bloc<NotificationPreferencesEvent, Not
         return groupName != eventGroupName;
       });
 
-      emit(
-        state.copyWith(
-          status: NotificationPreferencesStatus.success,
-          selectedCategories: updatedCategories,
-        ),
-      );
+      emit(state.copyWith(status: NotificationPreferencesStatus.success, selectedCategories: updatedCategories));
 
       await _notificationsRepository.setCategoriesPreferences(categoriesToSubscribe.map((e) => e.toString()).toSet());
     } catch (error, stackTrace) {
-      emit(
-        state.copyWith(status: NotificationPreferencesStatus.failure),
-      );
+      emit(state.copyWith(status: NotificationPreferencesStatus.failure));
       addError(error, stackTrace);
     }
   }
@@ -226,27 +192,21 @@ class NotificationPreferencesBloc extends Bloc<NotificationPreferencesEvent, Not
     emit(state.copyWith(status: NotificationPreferencesStatus.loading));
 
     try {
-      Set<Topic> selectedCategories = await _notificationsRepository
-          .fetchCategoriesPreferences()
-          .then((categories) => categories?.map((e) => Topic.fromString(e)).toSet() ?? {});
+      Set<Topic> selectedCategories = await _notificationsRepository.fetchCategoriesPreferences().then(
+        (categories) => categories?.map((e) => Topic.fromString(e)).toSet() ?? {},
+      );
 
       /// Подписываемся на уведомления для группы [event.group] и отписываемся
       /// от уведомлений для других групп.
-      if (!selectedCategories.contains(
-        Topic(topic: Category.group, groupName: event.group),
-      )) {
+      if (!selectedCategories.contains(Topic(topic: Category.group, groupName: event.group))) {
         selectedCategories = selectedCategories.where((category) => category.topic != Category.group).toSet();
 
-        selectedCategories.add(
-          Topic(topic: Category.group, groupName: event.group),
-        );
+        selectedCategories.add(Topic(topic: Category.group, groupName: event.group));
 
         await _notificationsRepository.setCategoriesPreferences(selectedCategories.map((e) => e.toString()).toSet());
       }
 
-      await _notificationsRepository.toggleNotifications(
-        enable: selectedCategories.isNotEmpty,
-      );
+      await _notificationsRepository.toggleNotifications(enable: selectedCategories.isNotEmpty);
 
       emit(
         state.copyWith(
@@ -256,9 +216,7 @@ class NotificationPreferencesBloc extends Bloc<NotificationPreferencesEvent, Not
         ),
       );
     } catch (error, stackTrace) {
-      emit(
-        state.copyWith(status: NotificationPreferencesStatus.failure),
-      );
+      emit(state.copyWith(status: NotificationPreferencesStatus.failure));
       addError(error, stackTrace);
     }
   }

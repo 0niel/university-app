@@ -12,7 +12,8 @@ part of 'schedule_bloc.dart';
 T _$identity<T>(T value) => value;
 
 final _privateConstructorUsedError = UnsupportedError(
-    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
+  'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models',
+);
 
 /// @nodoc
 mixin _$FieldDiff {
@@ -42,13 +43,14 @@ mixin _$FieldDiff {
 abstract class $FieldDiffCopyWith<$Res> {
   factory $FieldDiffCopyWith(FieldDiff value, $Res Function(FieldDiff) then) = _$FieldDiffCopyWithImpl<$Res, FieldDiff>;
   @useResult
-  $Res call(
-      {String fieldName,
-      String? oldValue,
-      String? newValue,
-      List<DateTime>? addedDates,
-      List<DateTime>? removedDates,
-      List<DateTime>? unchangedDates});
+  $Res call({
+    String fieldName,
+    String? oldValue,
+    String? newValue,
+    List<DateTime>? addedDates,
+    List<DateTime>? removedDates,
+    List<DateTime>? unchangedDates,
+  });
 }
 
 /// @nodoc
@@ -72,32 +74,41 @@ class _$FieldDiffCopyWithImpl<$Res, $Val extends FieldDiff> implements $FieldDif
     Object? removedDates = freezed,
     Object? unchangedDates = freezed,
   }) {
-    return _then(_value.copyWith(
-      fieldName: null == fieldName
-          ? _value.fieldName
-          : fieldName // ignore: cast_nullable_to_non_nullable
-              as String,
-      oldValue: freezed == oldValue
-          ? _value.oldValue
-          : oldValue // ignore: cast_nullable_to_non_nullable
-              as String?,
-      newValue: freezed == newValue
-          ? _value.newValue
-          : newValue // ignore: cast_nullable_to_non_nullable
-              as String?,
-      addedDates: freezed == addedDates
-          ? _value.addedDates
-          : addedDates // ignore: cast_nullable_to_non_nullable
-              as List<DateTime>?,
-      removedDates: freezed == removedDates
-          ? _value.removedDates
-          : removedDates // ignore: cast_nullable_to_non_nullable
-              as List<DateTime>?,
-      unchangedDates: freezed == unchangedDates
-          ? _value.unchangedDates
-          : unchangedDates // ignore: cast_nullable_to_non_nullable
-              as List<DateTime>?,
-    ) as $Val);
+    return _then(
+      _value.copyWith(
+            fieldName:
+                null == fieldName
+                    ? _value.fieldName
+                    : fieldName // ignore: cast_nullable_to_non_nullable
+                        as String,
+            oldValue:
+                freezed == oldValue
+                    ? _value.oldValue
+                    : oldValue // ignore: cast_nullable_to_non_nullable
+                        as String?,
+            newValue:
+                freezed == newValue
+                    ? _value.newValue
+                    : newValue // ignore: cast_nullable_to_non_nullable
+                        as String?,
+            addedDates:
+                freezed == addedDates
+                    ? _value.addedDates
+                    : addedDates // ignore: cast_nullable_to_non_nullable
+                        as List<DateTime>?,
+            removedDates:
+                freezed == removedDates
+                    ? _value.removedDates
+                    : removedDates // ignore: cast_nullable_to_non_nullable
+                        as List<DateTime>?,
+            unchangedDates:
+                freezed == unchangedDates
+                    ? _value.unchangedDates
+                    : unchangedDates // ignore: cast_nullable_to_non_nullable
+                        as List<DateTime>?,
+          )
+          as $Val,
+    );
   }
 }
 
@@ -107,13 +118,14 @@ abstract class _$$FieldDiffImplCopyWith<$Res> implements $FieldDiffCopyWith<$Res
       __$$FieldDiffImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call(
-      {String fieldName,
-      String? oldValue,
-      String? newValue,
-      List<DateTime>? addedDates,
-      List<DateTime>? removedDates,
-      List<DateTime>? unchangedDates});
+  $Res call({
+    String fieldName,
+    String? oldValue,
+    String? newValue,
+    List<DateTime>? addedDates,
+    List<DateTime>? removedDates,
+    List<DateTime>? unchangedDates,
+  });
 }
 
 /// @nodoc
@@ -133,48 +145,56 @@ class __$$FieldDiffImplCopyWithImpl<$Res> extends _$FieldDiffCopyWithImpl<$Res, 
     Object? removedDates = freezed,
     Object? unchangedDates = freezed,
   }) {
-    return _then(_$FieldDiffImpl(
-      fieldName: null == fieldName
-          ? _value.fieldName
-          : fieldName // ignore: cast_nullable_to_non_nullable
-              as String,
-      oldValue: freezed == oldValue
-          ? _value.oldValue
-          : oldValue // ignore: cast_nullable_to_non_nullable
-              as String?,
-      newValue: freezed == newValue
-          ? _value.newValue
-          : newValue // ignore: cast_nullable_to_non_nullable
-              as String?,
-      addedDates: freezed == addedDates
-          ? _value._addedDates
-          : addedDates // ignore: cast_nullable_to_non_nullable
-              as List<DateTime>?,
-      removedDates: freezed == removedDates
-          ? _value._removedDates
-          : removedDates // ignore: cast_nullable_to_non_nullable
-              as List<DateTime>?,
-      unchangedDates: freezed == unchangedDates
-          ? _value._unchangedDates
-          : unchangedDates // ignore: cast_nullable_to_non_nullable
-              as List<DateTime>?,
-    ));
+    return _then(
+      _$FieldDiffImpl(
+        fieldName:
+            null == fieldName
+                ? _value.fieldName
+                : fieldName // ignore: cast_nullable_to_non_nullable
+                    as String,
+        oldValue:
+            freezed == oldValue
+                ? _value.oldValue
+                : oldValue // ignore: cast_nullable_to_non_nullable
+                    as String?,
+        newValue:
+            freezed == newValue
+                ? _value.newValue
+                : newValue // ignore: cast_nullable_to_non_nullable
+                    as String?,
+        addedDates:
+            freezed == addedDates
+                ? _value._addedDates
+                : addedDates // ignore: cast_nullable_to_non_nullable
+                    as List<DateTime>?,
+        removedDates:
+            freezed == removedDates
+                ? _value._removedDates
+                : removedDates // ignore: cast_nullable_to_non_nullable
+                    as List<DateTime>?,
+        unchangedDates:
+            freezed == unchangedDates
+                ? _value._unchangedDates
+                : unchangedDates // ignore: cast_nullable_to_non_nullable
+                    as List<DateTime>?,
+      ),
+    );
   }
 }
 
 /// @nodoc
 
 class _$FieldDiffImpl implements _FieldDiff {
-  const _$FieldDiffImpl(
-      {required this.fieldName,
-      this.oldValue,
-      this.newValue,
-      final List<DateTime>? addedDates,
-      final List<DateTime>? removedDates,
-      final List<DateTime>? unchangedDates})
-      : _addedDates = addedDates,
-        _removedDates = removedDates,
-        _unchangedDates = unchangedDates;
+  const _$FieldDiffImpl({
+    required this.fieldName,
+    this.oldValue,
+    this.newValue,
+    final List<DateTime>? addedDates,
+    final List<DateTime>? removedDates,
+    final List<DateTime>? unchangedDates,
+  }) : _addedDates = addedDates,
+       _removedDates = removedDates,
+       _unchangedDates = unchangedDates;
 
   /// Имя поля (например, "Даты", "Аудитории", "Преподаватели", "Время/номер пары")
   @override
@@ -245,13 +265,14 @@ class _$FieldDiffImpl implements _FieldDiff {
 
   @override
   int get hashCode => Object.hash(
-      runtimeType,
-      fieldName,
-      oldValue,
-      newValue,
-      const DeepCollectionEquality().hash(_addedDates),
-      const DeepCollectionEquality().hash(_removedDates),
-      const DeepCollectionEquality().hash(_unchangedDates));
+    runtimeType,
+    fieldName,
+    oldValue,
+    newValue,
+    const DeepCollectionEquality().hash(_addedDates),
+    const DeepCollectionEquality().hash(_removedDates),
+    const DeepCollectionEquality().hash(_unchangedDates),
+  );
 
   /// Create a copy of FieldDiff
   /// with the given fields replaced by the non-null parameter values.
@@ -263,13 +284,14 @@ class _$FieldDiffImpl implements _FieldDiff {
 }
 
 abstract class _FieldDiff implements FieldDiff {
-  const factory _FieldDiff(
-      {required final String fieldName,
-      final String? oldValue,
-      final String? newValue,
-      final List<DateTime>? addedDates,
-      final List<DateTime>? removedDates,
-      final List<DateTime>? unchangedDates}) = _$FieldDiffImpl;
+  const factory _FieldDiff({
+    required final String fieldName,
+    final String? oldValue,
+    final String? newValue,
+    final List<DateTime>? addedDates,
+    final List<DateTime>? removedDates,
+    final List<DateTime>? unchangedDates,
+  }) = _$FieldDiffImpl;
 
   /// Имя поля (например, "Даты", "Аудитории", "Преподаватели", "Время/номер пары")
   @override
@@ -339,25 +361,27 @@ class _$ScheduleChangeCopyWithImpl<$Res, $Val extends ScheduleChange> implements
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
-  $Res call({
-    Object? type = null,
-    Object? subject = null,
-    Object? fieldDiffs = null,
-  }) {
-    return _then(_value.copyWith(
-      type: null == type
-          ? _value.type
-          : type // ignore: cast_nullable_to_non_nullable
-              as ChangeType,
-      subject: null == subject
-          ? _value.subject
-          : subject // ignore: cast_nullable_to_non_nullable
-              as String,
-      fieldDiffs: null == fieldDiffs
-          ? _value.fieldDiffs
-          : fieldDiffs // ignore: cast_nullable_to_non_nullable
-              as List<FieldDiff>,
-    ) as $Val);
+  $Res call({Object? type = null, Object? subject = null, Object? fieldDiffs = null}) {
+    return _then(
+      _value.copyWith(
+            type:
+                null == type
+                    ? _value.type
+                    : type // ignore: cast_nullable_to_non_nullable
+                        as ChangeType,
+            subject:
+                null == subject
+                    ? _value.subject
+                    : subject // ignore: cast_nullable_to_non_nullable
+                        as String,
+            fieldDiffs:
+                null == fieldDiffs
+                    ? _value.fieldDiffs
+                    : fieldDiffs // ignore: cast_nullable_to_non_nullable
+                        as List<FieldDiff>,
+          )
+          as $Val,
+    );
   }
 }
 
@@ -374,31 +398,32 @@ abstract class _$$ScheduleChangeImplCopyWith<$Res> implements $ScheduleChangeCop
 class __$$ScheduleChangeImplCopyWithImpl<$Res> extends _$ScheduleChangeCopyWithImpl<$Res, _$ScheduleChangeImpl>
     implements _$$ScheduleChangeImplCopyWith<$Res> {
   __$$ScheduleChangeImplCopyWithImpl(_$ScheduleChangeImpl _value, $Res Function(_$ScheduleChangeImpl) _then)
-      : super(_value, _then);
+    : super(_value, _then);
 
   /// Create a copy of ScheduleChange
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
-  $Res call({
-    Object? type = null,
-    Object? subject = null,
-    Object? fieldDiffs = null,
-  }) {
-    return _then(_$ScheduleChangeImpl(
-      type: null == type
-          ? _value.type
-          : type // ignore: cast_nullable_to_non_nullable
-              as ChangeType,
-      subject: null == subject
-          ? _value.subject
-          : subject // ignore: cast_nullable_to_non_nullable
-              as String,
-      fieldDiffs: null == fieldDiffs
-          ? _value._fieldDiffs
-          : fieldDiffs // ignore: cast_nullable_to_non_nullable
-              as List<FieldDiff>,
-    ));
+  $Res call({Object? type = null, Object? subject = null, Object? fieldDiffs = null}) {
+    return _then(
+      _$ScheduleChangeImpl(
+        type:
+            null == type
+                ? _value.type
+                : type // ignore: cast_nullable_to_non_nullable
+                    as ChangeType,
+        subject:
+            null == subject
+                ? _value.subject
+                : subject // ignore: cast_nullable_to_non_nullable
+                    as String,
+        fieldDiffs:
+            null == fieldDiffs
+                ? _value._fieldDiffs
+                : fieldDiffs // ignore: cast_nullable_to_non_nullable
+                    as List<FieldDiff>,
+      ),
+    );
   }
 }
 
@@ -406,7 +431,7 @@ class __$$ScheduleChangeImplCopyWithImpl<$Res> extends _$ScheduleChangeCopyWithI
 
 class _$ScheduleChangeImpl implements _ScheduleChange {
   const _$ScheduleChangeImpl({required this.type, required this.subject, required final List<FieldDiff> fieldDiffs})
-      : _fieldDiffs = fieldDiffs;
+    : _fieldDiffs = fieldDiffs;
 
   /// Тип изменения: добавление, удаление, модификация
   @override
@@ -457,10 +482,11 @@ class _$ScheduleChangeImpl implements _ScheduleChange {
 }
 
 abstract class _ScheduleChange implements ScheduleChange {
-  const factory _ScheduleChange(
-      {required final ChangeType type,
-      required final String subject,
-      required final List<FieldDiff> fieldDiffs}) = _$ScheduleChangeImpl;
+  const factory _ScheduleChange({
+    required final ChangeType type,
+    required final String subject,
+    required final List<FieldDiff> fieldDiffs,
+  }) = _$ScheduleChangeImpl;
 
   /// Тип изменения: добавление, удаление, модификация
   @override
@@ -514,15 +540,17 @@ class _$ScheduleDiffCopyWithImpl<$Res, $Val extends ScheduleDiff> implements $Sc
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
-  $Res call({
-    Object? changes = null,
-  }) {
-    return _then(_value.copyWith(
-      changes: null == changes
-          ? _value.changes
-          : changes // ignore: cast_nullable_to_non_nullable
-              as Set<ScheduleChange>,
-    ) as $Val);
+  $Res call({Object? changes = null}) {
+    return _then(
+      _value.copyWith(
+            changes:
+                null == changes
+                    ? _value.changes
+                    : changes // ignore: cast_nullable_to_non_nullable
+                        as Set<ScheduleChange>,
+          )
+          as $Val,
+    );
   }
 }
 
@@ -539,21 +567,22 @@ abstract class _$$ScheduleDiffImplCopyWith<$Res> implements $ScheduleDiffCopyWit
 class __$$ScheduleDiffImplCopyWithImpl<$Res> extends _$ScheduleDiffCopyWithImpl<$Res, _$ScheduleDiffImpl>
     implements _$$ScheduleDiffImplCopyWith<$Res> {
   __$$ScheduleDiffImplCopyWithImpl(_$ScheduleDiffImpl _value, $Res Function(_$ScheduleDiffImpl) _then)
-      : super(_value, _then);
+    : super(_value, _then);
 
   /// Create a copy of ScheduleDiff
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
-  $Res call({
-    Object? changes = null,
-  }) {
-    return _then(_$ScheduleDiffImpl(
-      changes: null == changes
-          ? _value._changes
-          : changes // ignore: cast_nullable_to_non_nullable
-              as Set<ScheduleChange>,
-    ));
+  $Res call({Object? changes = null}) {
+    return _then(
+      _$ScheduleDiffImpl(
+        changes:
+            null == changes
+                ? _value._changes
+                : changes // ignore: cast_nullable_to_non_nullable
+                    as Set<ScheduleChange>,
+      ),
+    );
   }
 }
 
@@ -638,7 +667,14 @@ mixin _$ScheduleState {
   @JsonKey(includeFromJson: false, includeToJson: false)
   ScheduleDiff? get latestDiff => throw _privateConstructorUsedError;
   @JsonKey(includeFromJson: false, includeToJson: false)
-  bool get showScheduleDiffDialog => throw _privateConstructorUsedError;
+  bool get showScheduleDiffDialog => throw _privateConstructorUsedError; // Desktop mode state properties
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  bool get isSplitViewEnabled => throw _privateConstructorUsedError;
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  bool get showAnalytics => throw _privateConstructorUsedError; // Custom schedules
+  List<CustomSchedule> get customSchedules => throw _privateConstructorUsedError;
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  bool get isCustomScheduleModeEnabled => throw _privateConstructorUsedError;
 
   /// Serializes this ScheduleState to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -654,22 +690,27 @@ abstract class $ScheduleStateCopyWith<$Res> {
   factory $ScheduleStateCopyWith(ScheduleState value, $Res Function(ScheduleState) then) =
       _$ScheduleStateCopyWithImpl<$Res, ScheduleState>;
   @useResult
-  $Res call(
-      {@JsonKey(includeFromJson: false, includeToJson: false) ScheduleStatus status,
-      List<(String, Classroom, List<SchedulePart>)> classroomsSchedule,
-      List<(String, Teacher, List<SchedulePart>)> teachersSchedule,
-      List<(String, Group, List<SchedulePart>)> groupsSchedule,
-      bool isMiniature,
-      List<LessonComment> comments,
-      bool showEmptyLessons,
-      bool showCommentsIndicators,
-      bool isListModeEnabled,
-      List<ScheduleComment> scheduleComments,
-      @SelectedScheduleConverter() SelectedSchedule? selectedSchedule,
-      @JsonKey(includeFromJson: false, includeToJson: false) Set<SelectedSchedule> comparisonSchedules,
-      @JsonKey(includeFromJson: false, includeToJson: false) bool isComparisonModeEnabled,
-      @JsonKey(includeFromJson: false, includeToJson: false) ScheduleDiff? latestDiff,
-      @JsonKey(includeFromJson: false, includeToJson: false) bool showScheduleDiffDialog});
+  $Res call({
+    @JsonKey(includeFromJson: false, includeToJson: false) ScheduleStatus status,
+    List<(String, Classroom, List<SchedulePart>)> classroomsSchedule,
+    List<(String, Teacher, List<SchedulePart>)> teachersSchedule,
+    List<(String, Group, List<SchedulePart>)> groupsSchedule,
+    bool isMiniature,
+    List<LessonComment> comments,
+    bool showEmptyLessons,
+    bool showCommentsIndicators,
+    bool isListModeEnabled,
+    List<ScheduleComment> scheduleComments,
+    @SelectedScheduleConverter() SelectedSchedule? selectedSchedule,
+    @JsonKey(includeFromJson: false, includeToJson: false) Set<SelectedSchedule> comparisonSchedules,
+    @JsonKey(includeFromJson: false, includeToJson: false) bool isComparisonModeEnabled,
+    @JsonKey(includeFromJson: false, includeToJson: false) ScheduleDiff? latestDiff,
+    @JsonKey(includeFromJson: false, includeToJson: false) bool showScheduleDiffDialog,
+    @JsonKey(includeFromJson: false, includeToJson: false) bool isSplitViewEnabled,
+    @JsonKey(includeFromJson: false, includeToJson: false) bool showAnalytics,
+    List<CustomSchedule> customSchedules,
+    @JsonKey(includeFromJson: false, includeToJson: false) bool isCustomScheduleModeEnabled,
+  });
 
   $ScheduleDiffCopyWith<$Res>? get latestDiff;
 }
@@ -703,69 +744,111 @@ class _$ScheduleStateCopyWithImpl<$Res, $Val extends ScheduleState> implements $
     Object? isComparisonModeEnabled = null,
     Object? latestDiff = freezed,
     Object? showScheduleDiffDialog = null,
+    Object? isSplitViewEnabled = null,
+    Object? showAnalytics = null,
+    Object? customSchedules = null,
+    Object? isCustomScheduleModeEnabled = null,
   }) {
-    return _then(_value.copyWith(
-      status: null == status
-          ? _value.status
-          : status // ignore: cast_nullable_to_non_nullable
-              as ScheduleStatus,
-      classroomsSchedule: null == classroomsSchedule
-          ? _value.classroomsSchedule
-          : classroomsSchedule // ignore: cast_nullable_to_non_nullable
-              as List<(String, Classroom, List<SchedulePart>)>,
-      teachersSchedule: null == teachersSchedule
-          ? _value.teachersSchedule
-          : teachersSchedule // ignore: cast_nullable_to_non_nullable
-              as List<(String, Teacher, List<SchedulePart>)>,
-      groupsSchedule: null == groupsSchedule
-          ? _value.groupsSchedule
-          : groupsSchedule // ignore: cast_nullable_to_non_nullable
-              as List<(String, Group, List<SchedulePart>)>,
-      isMiniature: null == isMiniature
-          ? _value.isMiniature
-          : isMiniature // ignore: cast_nullable_to_non_nullable
-              as bool,
-      comments: null == comments
-          ? _value.comments
-          : comments // ignore: cast_nullable_to_non_nullable
-              as List<LessonComment>,
-      showEmptyLessons: null == showEmptyLessons
-          ? _value.showEmptyLessons
-          : showEmptyLessons // ignore: cast_nullable_to_non_nullable
-              as bool,
-      showCommentsIndicators: null == showCommentsIndicators
-          ? _value.showCommentsIndicators
-          : showCommentsIndicators // ignore: cast_nullable_to_non_nullable
-              as bool,
-      isListModeEnabled: null == isListModeEnabled
-          ? _value.isListModeEnabled
-          : isListModeEnabled // ignore: cast_nullable_to_non_nullable
-              as bool,
-      scheduleComments: null == scheduleComments
-          ? _value.scheduleComments
-          : scheduleComments // ignore: cast_nullable_to_non_nullable
-              as List<ScheduleComment>,
-      selectedSchedule: freezed == selectedSchedule
-          ? _value.selectedSchedule
-          : selectedSchedule // ignore: cast_nullable_to_non_nullable
-              as SelectedSchedule?,
-      comparisonSchedules: null == comparisonSchedules
-          ? _value.comparisonSchedules
-          : comparisonSchedules // ignore: cast_nullable_to_non_nullable
-              as Set<SelectedSchedule>,
-      isComparisonModeEnabled: null == isComparisonModeEnabled
-          ? _value.isComparisonModeEnabled
-          : isComparisonModeEnabled // ignore: cast_nullable_to_non_nullable
-              as bool,
-      latestDiff: freezed == latestDiff
-          ? _value.latestDiff
-          : latestDiff // ignore: cast_nullable_to_non_nullable
-              as ScheduleDiff?,
-      showScheduleDiffDialog: null == showScheduleDiffDialog
-          ? _value.showScheduleDiffDialog
-          : showScheduleDiffDialog // ignore: cast_nullable_to_non_nullable
-              as bool,
-    ) as $Val);
+    return _then(
+      _value.copyWith(
+            status:
+                null == status
+                    ? _value.status
+                    : status // ignore: cast_nullable_to_non_nullable
+                        as ScheduleStatus,
+            classroomsSchedule:
+                null == classroomsSchedule
+                    ? _value.classroomsSchedule
+                    : classroomsSchedule // ignore: cast_nullable_to_non_nullable
+                        as List<(String, Classroom, List<SchedulePart>)>,
+            teachersSchedule:
+                null == teachersSchedule
+                    ? _value.teachersSchedule
+                    : teachersSchedule // ignore: cast_nullable_to_non_nullable
+                        as List<(String, Teacher, List<SchedulePart>)>,
+            groupsSchedule:
+                null == groupsSchedule
+                    ? _value.groupsSchedule
+                    : groupsSchedule // ignore: cast_nullable_to_non_nullable
+                        as List<(String, Group, List<SchedulePart>)>,
+            isMiniature:
+                null == isMiniature
+                    ? _value.isMiniature
+                    : isMiniature // ignore: cast_nullable_to_non_nullable
+                        as bool,
+            comments:
+                null == comments
+                    ? _value.comments
+                    : comments // ignore: cast_nullable_to_non_nullable
+                        as List<LessonComment>,
+            showEmptyLessons:
+                null == showEmptyLessons
+                    ? _value.showEmptyLessons
+                    : showEmptyLessons // ignore: cast_nullable_to_non_nullable
+                        as bool,
+            showCommentsIndicators:
+                null == showCommentsIndicators
+                    ? _value.showCommentsIndicators
+                    : showCommentsIndicators // ignore: cast_nullable_to_non_nullable
+                        as bool,
+            isListModeEnabled:
+                null == isListModeEnabled
+                    ? _value.isListModeEnabled
+                    : isListModeEnabled // ignore: cast_nullable_to_non_nullable
+                        as bool,
+            scheduleComments:
+                null == scheduleComments
+                    ? _value.scheduleComments
+                    : scheduleComments // ignore: cast_nullable_to_non_nullable
+                        as List<ScheduleComment>,
+            selectedSchedule:
+                freezed == selectedSchedule
+                    ? _value.selectedSchedule
+                    : selectedSchedule // ignore: cast_nullable_to_non_nullable
+                        as SelectedSchedule?,
+            comparisonSchedules:
+                null == comparisonSchedules
+                    ? _value.comparisonSchedules
+                    : comparisonSchedules // ignore: cast_nullable_to_non_nullable
+                        as Set<SelectedSchedule>,
+            isComparisonModeEnabled:
+                null == isComparisonModeEnabled
+                    ? _value.isComparisonModeEnabled
+                    : isComparisonModeEnabled // ignore: cast_nullable_to_non_nullable
+                        as bool,
+            latestDiff:
+                freezed == latestDiff
+                    ? _value.latestDiff
+                    : latestDiff // ignore: cast_nullable_to_non_nullable
+                        as ScheduleDiff?,
+            showScheduleDiffDialog:
+                null == showScheduleDiffDialog
+                    ? _value.showScheduleDiffDialog
+                    : showScheduleDiffDialog // ignore: cast_nullable_to_non_nullable
+                        as bool,
+            isSplitViewEnabled:
+                null == isSplitViewEnabled
+                    ? _value.isSplitViewEnabled
+                    : isSplitViewEnabled // ignore: cast_nullable_to_non_nullable
+                        as bool,
+            showAnalytics:
+                null == showAnalytics
+                    ? _value.showAnalytics
+                    : showAnalytics // ignore: cast_nullable_to_non_nullable
+                        as bool,
+            customSchedules:
+                null == customSchedules
+                    ? _value.customSchedules
+                    : customSchedules // ignore: cast_nullable_to_non_nullable
+                        as List<CustomSchedule>,
+            isCustomScheduleModeEnabled:
+                null == isCustomScheduleModeEnabled
+                    ? _value.isCustomScheduleModeEnabled
+                    : isCustomScheduleModeEnabled // ignore: cast_nullable_to_non_nullable
+                        as bool,
+          )
+          as $Val,
+    );
   }
 
   /// Create a copy of ScheduleState
@@ -789,22 +872,27 @@ abstract class _$$ScheduleStateImplCopyWith<$Res> implements $ScheduleStateCopyW
       __$$ScheduleStateImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call(
-      {@JsonKey(includeFromJson: false, includeToJson: false) ScheduleStatus status,
-      List<(String, Classroom, List<SchedulePart>)> classroomsSchedule,
-      List<(String, Teacher, List<SchedulePart>)> teachersSchedule,
-      List<(String, Group, List<SchedulePart>)> groupsSchedule,
-      bool isMiniature,
-      List<LessonComment> comments,
-      bool showEmptyLessons,
-      bool showCommentsIndicators,
-      bool isListModeEnabled,
-      List<ScheduleComment> scheduleComments,
-      @SelectedScheduleConverter() SelectedSchedule? selectedSchedule,
-      @JsonKey(includeFromJson: false, includeToJson: false) Set<SelectedSchedule> comparisonSchedules,
-      @JsonKey(includeFromJson: false, includeToJson: false) bool isComparisonModeEnabled,
-      @JsonKey(includeFromJson: false, includeToJson: false) ScheduleDiff? latestDiff,
-      @JsonKey(includeFromJson: false, includeToJson: false) bool showScheduleDiffDialog});
+  $Res call({
+    @JsonKey(includeFromJson: false, includeToJson: false) ScheduleStatus status,
+    List<(String, Classroom, List<SchedulePart>)> classroomsSchedule,
+    List<(String, Teacher, List<SchedulePart>)> teachersSchedule,
+    List<(String, Group, List<SchedulePart>)> groupsSchedule,
+    bool isMiniature,
+    List<LessonComment> comments,
+    bool showEmptyLessons,
+    bool showCommentsIndicators,
+    bool isListModeEnabled,
+    List<ScheduleComment> scheduleComments,
+    @SelectedScheduleConverter() SelectedSchedule? selectedSchedule,
+    @JsonKey(includeFromJson: false, includeToJson: false) Set<SelectedSchedule> comparisonSchedules,
+    @JsonKey(includeFromJson: false, includeToJson: false) bool isComparisonModeEnabled,
+    @JsonKey(includeFromJson: false, includeToJson: false) ScheduleDiff? latestDiff,
+    @JsonKey(includeFromJson: false, includeToJson: false) bool showScheduleDiffDialog,
+    @JsonKey(includeFromJson: false, includeToJson: false) bool isSplitViewEnabled,
+    @JsonKey(includeFromJson: false, includeToJson: false) bool showAnalytics,
+    List<CustomSchedule> customSchedules,
+    @JsonKey(includeFromJson: false, includeToJson: false) bool isCustomScheduleModeEnabled,
+  });
 
   @override
   $ScheduleDiffCopyWith<$Res>? get latestDiff;
@@ -814,7 +902,7 @@ abstract class _$$ScheduleStateImplCopyWith<$Res> implements $ScheduleStateCopyW
 class __$$ScheduleStateImplCopyWithImpl<$Res> extends _$ScheduleStateCopyWithImpl<$Res, _$ScheduleStateImpl>
     implements _$$ScheduleStateImplCopyWith<$Res> {
   __$$ScheduleStateImplCopyWithImpl(_$ScheduleStateImpl _value, $Res Function(_$ScheduleStateImpl) _then)
-      : super(_value, _then);
+    : super(_value, _then);
 
   /// Create a copy of ScheduleState
   /// with the given fields replaced by the non-null parameter values.
@@ -836,98 +924,144 @@ class __$$ScheduleStateImplCopyWithImpl<$Res> extends _$ScheduleStateCopyWithImp
     Object? isComparisonModeEnabled = null,
     Object? latestDiff = freezed,
     Object? showScheduleDiffDialog = null,
+    Object? isSplitViewEnabled = null,
+    Object? showAnalytics = null,
+    Object? customSchedules = null,
+    Object? isCustomScheduleModeEnabled = null,
   }) {
-    return _then(_$ScheduleStateImpl(
-      status: null == status
-          ? _value.status
-          : status // ignore: cast_nullable_to_non_nullable
-              as ScheduleStatus,
-      classroomsSchedule: null == classroomsSchedule
-          ? _value._classroomsSchedule
-          : classroomsSchedule // ignore: cast_nullable_to_non_nullable
-              as List<(String, Classroom, List<SchedulePart>)>,
-      teachersSchedule: null == teachersSchedule
-          ? _value._teachersSchedule
-          : teachersSchedule // ignore: cast_nullable_to_non_nullable
-              as List<(String, Teacher, List<SchedulePart>)>,
-      groupsSchedule: null == groupsSchedule
-          ? _value._groupsSchedule
-          : groupsSchedule // ignore: cast_nullable_to_non_nullable
-              as List<(String, Group, List<SchedulePart>)>,
-      isMiniature: null == isMiniature
-          ? _value.isMiniature
-          : isMiniature // ignore: cast_nullable_to_non_nullable
-              as bool,
-      comments: null == comments
-          ? _value._comments
-          : comments // ignore: cast_nullable_to_non_nullable
-              as List<LessonComment>,
-      showEmptyLessons: null == showEmptyLessons
-          ? _value.showEmptyLessons
-          : showEmptyLessons // ignore: cast_nullable_to_non_nullable
-              as bool,
-      showCommentsIndicators: null == showCommentsIndicators
-          ? _value.showCommentsIndicators
-          : showCommentsIndicators // ignore: cast_nullable_to_non_nullable
-              as bool,
-      isListModeEnabled: null == isListModeEnabled
-          ? _value.isListModeEnabled
-          : isListModeEnabled // ignore: cast_nullable_to_non_nullable
-              as bool,
-      scheduleComments: null == scheduleComments
-          ? _value._scheduleComments
-          : scheduleComments // ignore: cast_nullable_to_non_nullable
-              as List<ScheduleComment>,
-      selectedSchedule: freezed == selectedSchedule
-          ? _value.selectedSchedule
-          : selectedSchedule // ignore: cast_nullable_to_non_nullable
-              as SelectedSchedule?,
-      comparisonSchedules: null == comparisonSchedules
-          ? _value._comparisonSchedules
-          : comparisonSchedules // ignore: cast_nullable_to_non_nullable
-              as Set<SelectedSchedule>,
-      isComparisonModeEnabled: null == isComparisonModeEnabled
-          ? _value.isComparisonModeEnabled
-          : isComparisonModeEnabled // ignore: cast_nullable_to_non_nullable
-              as bool,
-      latestDiff: freezed == latestDiff
-          ? _value.latestDiff
-          : latestDiff // ignore: cast_nullable_to_non_nullable
-              as ScheduleDiff?,
-      showScheduleDiffDialog: null == showScheduleDiffDialog
-          ? _value.showScheduleDiffDialog
-          : showScheduleDiffDialog // ignore: cast_nullable_to_non_nullable
-              as bool,
-    ));
+    return _then(
+      _$ScheduleStateImpl(
+        status:
+            null == status
+                ? _value.status
+                : status // ignore: cast_nullable_to_non_nullable
+                    as ScheduleStatus,
+        classroomsSchedule:
+            null == classroomsSchedule
+                ? _value._classroomsSchedule
+                : classroomsSchedule // ignore: cast_nullable_to_non_nullable
+                    as List<(String, Classroom, List<SchedulePart>)>,
+        teachersSchedule:
+            null == teachersSchedule
+                ? _value._teachersSchedule
+                : teachersSchedule // ignore: cast_nullable_to_non_nullable
+                    as List<(String, Teacher, List<SchedulePart>)>,
+        groupsSchedule:
+            null == groupsSchedule
+                ? _value._groupsSchedule
+                : groupsSchedule // ignore: cast_nullable_to_non_nullable
+                    as List<(String, Group, List<SchedulePart>)>,
+        isMiniature:
+            null == isMiniature
+                ? _value.isMiniature
+                : isMiniature // ignore: cast_nullable_to_non_nullable
+                    as bool,
+        comments:
+            null == comments
+                ? _value._comments
+                : comments // ignore: cast_nullable_to_non_nullable
+                    as List<LessonComment>,
+        showEmptyLessons:
+            null == showEmptyLessons
+                ? _value.showEmptyLessons
+                : showEmptyLessons // ignore: cast_nullable_to_non_nullable
+                    as bool,
+        showCommentsIndicators:
+            null == showCommentsIndicators
+                ? _value.showCommentsIndicators
+                : showCommentsIndicators // ignore: cast_nullable_to_non_nullable
+                    as bool,
+        isListModeEnabled:
+            null == isListModeEnabled
+                ? _value.isListModeEnabled
+                : isListModeEnabled // ignore: cast_nullable_to_non_nullable
+                    as bool,
+        scheduleComments:
+            null == scheduleComments
+                ? _value._scheduleComments
+                : scheduleComments // ignore: cast_nullable_to_non_nullable
+                    as List<ScheduleComment>,
+        selectedSchedule:
+            freezed == selectedSchedule
+                ? _value.selectedSchedule
+                : selectedSchedule // ignore: cast_nullable_to_non_nullable
+                    as SelectedSchedule?,
+        comparisonSchedules:
+            null == comparisonSchedules
+                ? _value._comparisonSchedules
+                : comparisonSchedules // ignore: cast_nullable_to_non_nullable
+                    as Set<SelectedSchedule>,
+        isComparisonModeEnabled:
+            null == isComparisonModeEnabled
+                ? _value.isComparisonModeEnabled
+                : isComparisonModeEnabled // ignore: cast_nullable_to_non_nullable
+                    as bool,
+        latestDiff:
+            freezed == latestDiff
+                ? _value.latestDiff
+                : latestDiff // ignore: cast_nullable_to_non_nullable
+                    as ScheduleDiff?,
+        showScheduleDiffDialog:
+            null == showScheduleDiffDialog
+                ? _value.showScheduleDiffDialog
+                : showScheduleDiffDialog // ignore: cast_nullable_to_non_nullable
+                    as bool,
+        isSplitViewEnabled:
+            null == isSplitViewEnabled
+                ? _value.isSplitViewEnabled
+                : isSplitViewEnabled // ignore: cast_nullable_to_non_nullable
+                    as bool,
+        showAnalytics:
+            null == showAnalytics
+                ? _value.showAnalytics
+                : showAnalytics // ignore: cast_nullable_to_non_nullable
+                    as bool,
+        customSchedules:
+            null == customSchedules
+                ? _value._customSchedules
+                : customSchedules // ignore: cast_nullable_to_non_nullable
+                    as List<CustomSchedule>,
+        isCustomScheduleModeEnabled:
+            null == isCustomScheduleModeEnabled
+                ? _value.isCustomScheduleModeEnabled
+                : isCustomScheduleModeEnabled // ignore: cast_nullable_to_non_nullable
+                    as bool,
+      ),
+    );
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class _$ScheduleStateImpl extends _ScheduleState {
-  const _$ScheduleStateImpl(
-      {@JsonKey(includeFromJson: false, includeToJson: false) this.status = ScheduleStatus.initial,
-      final List<(String, Classroom, List<SchedulePart>)> classroomsSchedule = const [],
-      final List<(String, Teacher, List<SchedulePart>)> teachersSchedule = const [],
-      final List<(String, Group, List<SchedulePart>)> groupsSchedule = const [],
-      this.isMiniature = false,
-      final List<LessonComment> comments = const [],
-      this.showEmptyLessons = false,
-      this.showCommentsIndicators = true,
-      this.isListModeEnabled = false,
-      final List<ScheduleComment> scheduleComments = const [],
-      @SelectedScheduleConverter() this.selectedSchedule,
-      @JsonKey(includeFromJson: false, includeToJson: false) final Set<SelectedSchedule> comparisonSchedules = const {},
-      @JsonKey(includeFromJson: false, includeToJson: false) this.isComparisonModeEnabled = false,
-      @JsonKey(includeFromJson: false, includeToJson: false) this.latestDiff = null,
-      @JsonKey(includeFromJson: false, includeToJson: false) this.showScheduleDiffDialog = false})
-      : _classroomsSchedule = classroomsSchedule,
-        _teachersSchedule = teachersSchedule,
-        _groupsSchedule = groupsSchedule,
-        _comments = comments,
-        _scheduleComments = scheduleComments,
-        _comparisonSchedules = comparisonSchedules,
-        super._();
+  const _$ScheduleStateImpl({
+    @JsonKey(includeFromJson: false, includeToJson: false) this.status = ScheduleStatus.initial,
+    final List<(String, Classroom, List<SchedulePart>)> classroomsSchedule = const [],
+    final List<(String, Teacher, List<SchedulePart>)> teachersSchedule = const [],
+    final List<(String, Group, List<SchedulePart>)> groupsSchedule = const [],
+    this.isMiniature = false,
+    final List<LessonComment> comments = const [],
+    this.showEmptyLessons = false,
+    this.showCommentsIndicators = true,
+    this.isListModeEnabled = false,
+    final List<ScheduleComment> scheduleComments = const [],
+    @SelectedScheduleConverter() this.selectedSchedule,
+    @JsonKey(includeFromJson: false, includeToJson: false) final Set<SelectedSchedule> comparisonSchedules = const {},
+    @JsonKey(includeFromJson: false, includeToJson: false) this.isComparisonModeEnabled = false,
+    @JsonKey(includeFromJson: false, includeToJson: false) this.latestDiff = null,
+    @JsonKey(includeFromJson: false, includeToJson: false) this.showScheduleDiffDialog = false,
+    @JsonKey(includeFromJson: false, includeToJson: false) this.isSplitViewEnabled = false,
+    @JsonKey(includeFromJson: false, includeToJson: false) this.showAnalytics = true,
+    final List<CustomSchedule> customSchedules = const [],
+    @JsonKey(includeFromJson: false, includeToJson: false) this.isCustomScheduleModeEnabled = false,
+  }) : _classroomsSchedule = classroomsSchedule,
+       _teachersSchedule = teachersSchedule,
+       _groupsSchedule = groupsSchedule,
+       _comments = comments,
+       _scheduleComments = scheduleComments,
+       _comparisonSchedules = comparisonSchedules,
+       _customSchedules = customSchedules,
+       super._();
 
   factory _$ScheduleStateImpl.fromJson(Map<String, dynamic> json) => _$$ScheduleStateImplFromJson(json);
 
@@ -1012,10 +1146,31 @@ class _$ScheduleStateImpl extends _ScheduleState {
   @override
   @JsonKey(includeFromJson: false, includeToJson: false)
   final bool showScheduleDiffDialog;
+  // Desktop mode state properties
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  final bool isSplitViewEnabled;
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  final bool showAnalytics;
+  // Custom schedules
+  final List<CustomSchedule> _customSchedules;
+  // Custom schedules
+  @override
+  @JsonKey()
+  List<CustomSchedule> get customSchedules {
+    if (_customSchedules is EqualUnmodifiableListView) return _customSchedules;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_customSchedules);
+  }
+
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  final bool isCustomScheduleModeEnabled;
 
   @override
   String toString() {
-    return 'ScheduleState(status: $status, classroomsSchedule: $classroomsSchedule, teachersSchedule: $teachersSchedule, groupsSchedule: $groupsSchedule, isMiniature: $isMiniature, comments: $comments, showEmptyLessons: $showEmptyLessons, showCommentsIndicators: $showCommentsIndicators, isListModeEnabled: $isListModeEnabled, scheduleComments: $scheduleComments, selectedSchedule: $selectedSchedule, comparisonSchedules: $comparisonSchedules, isComparisonModeEnabled: $isComparisonModeEnabled, latestDiff: $latestDiff, showScheduleDiffDialog: $showScheduleDiffDialog)';
+    return 'ScheduleState(status: $status, classroomsSchedule: $classroomsSchedule, teachersSchedule: $teachersSchedule, groupsSchedule: $groupsSchedule, isMiniature: $isMiniature, comments: $comments, showEmptyLessons: $showEmptyLessons, showCommentsIndicators: $showCommentsIndicators, isListModeEnabled: $isListModeEnabled, scheduleComments: $scheduleComments, selectedSchedule: $selectedSchedule, comparisonSchedules: $comparisonSchedules, isComparisonModeEnabled: $isComparisonModeEnabled, latestDiff: $latestDiff, showScheduleDiffDialog: $showScheduleDiffDialog, isSplitViewEnabled: $isSplitViewEnabled, showAnalytics: $showAnalytics, customSchedules: $customSchedules, isCustomScheduleModeEnabled: $isCustomScheduleModeEnabled)';
   }
 
   @override
@@ -1040,28 +1195,39 @@ class _$ScheduleStateImpl extends _ScheduleState {
                 other.isComparisonModeEnabled == isComparisonModeEnabled) &&
             (identical(other.latestDiff, latestDiff) || other.latestDiff == latestDiff) &&
             (identical(other.showScheduleDiffDialog, showScheduleDiffDialog) ||
-                other.showScheduleDiffDialog == showScheduleDiffDialog));
+                other.showScheduleDiffDialog == showScheduleDiffDialog) &&
+            (identical(other.isSplitViewEnabled, isSplitViewEnabled) ||
+                other.isSplitViewEnabled == isSplitViewEnabled) &&
+            (identical(other.showAnalytics, showAnalytics) || other.showAnalytics == showAnalytics) &&
+            const DeepCollectionEquality().equals(other._customSchedules, _customSchedules) &&
+            (identical(other.isCustomScheduleModeEnabled, isCustomScheduleModeEnabled) ||
+                other.isCustomScheduleModeEnabled == isCustomScheduleModeEnabled));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(
-      runtimeType,
-      status,
-      const DeepCollectionEquality().hash(_classroomsSchedule),
-      const DeepCollectionEquality().hash(_teachersSchedule),
-      const DeepCollectionEquality().hash(_groupsSchedule),
-      isMiniature,
-      const DeepCollectionEquality().hash(_comments),
-      showEmptyLessons,
-      showCommentsIndicators,
-      isListModeEnabled,
-      const DeepCollectionEquality().hash(_scheduleComments),
-      selectedSchedule,
-      const DeepCollectionEquality().hash(_comparisonSchedules),
-      isComparisonModeEnabled,
-      latestDiff,
-      showScheduleDiffDialog);
+  int get hashCode => Object.hashAll([
+    runtimeType,
+    status,
+    const DeepCollectionEquality().hash(_classroomsSchedule),
+    const DeepCollectionEquality().hash(_teachersSchedule),
+    const DeepCollectionEquality().hash(_groupsSchedule),
+    isMiniature,
+    const DeepCollectionEquality().hash(_comments),
+    showEmptyLessons,
+    showCommentsIndicators,
+    isListModeEnabled,
+    const DeepCollectionEquality().hash(_scheduleComments),
+    selectedSchedule,
+    const DeepCollectionEquality().hash(_comparisonSchedules),
+    isComparisonModeEnabled,
+    latestDiff,
+    showScheduleDiffDialog,
+    isSplitViewEnabled,
+    showAnalytics,
+    const DeepCollectionEquality().hash(_customSchedules),
+    isCustomScheduleModeEnabled,
+  ]);
 
   /// Create a copy of ScheduleState
   /// with the given fields replaced by the non-null parameter values.
@@ -1073,29 +1239,32 @@ class _$ScheduleStateImpl extends _ScheduleState {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$ScheduleStateImplToJson(
-      this,
-    );
+    return _$$ScheduleStateImplToJson(this);
   }
 }
 
 abstract class _ScheduleState extends ScheduleState {
-  const factory _ScheduleState(
-      {@JsonKey(includeFromJson: false, includeToJson: false) final ScheduleStatus status,
-      final List<(String, Classroom, List<SchedulePart>)> classroomsSchedule,
-      final List<(String, Teacher, List<SchedulePart>)> teachersSchedule,
-      final List<(String, Group, List<SchedulePart>)> groupsSchedule,
-      final bool isMiniature,
-      final List<LessonComment> comments,
-      final bool showEmptyLessons,
-      final bool showCommentsIndicators,
-      final bool isListModeEnabled,
-      final List<ScheduleComment> scheduleComments,
-      @SelectedScheduleConverter() final SelectedSchedule? selectedSchedule,
-      @JsonKey(includeFromJson: false, includeToJson: false) final Set<SelectedSchedule> comparisonSchedules,
-      @JsonKey(includeFromJson: false, includeToJson: false) final bool isComparisonModeEnabled,
-      @JsonKey(includeFromJson: false, includeToJson: false) final ScheduleDiff? latestDiff,
-      @JsonKey(includeFromJson: false, includeToJson: false) final bool showScheduleDiffDialog}) = _$ScheduleStateImpl;
+  const factory _ScheduleState({
+    @JsonKey(includeFromJson: false, includeToJson: false) final ScheduleStatus status,
+    final List<(String, Classroom, List<SchedulePart>)> classroomsSchedule,
+    final List<(String, Teacher, List<SchedulePart>)> teachersSchedule,
+    final List<(String, Group, List<SchedulePart>)> groupsSchedule,
+    final bool isMiniature,
+    final List<LessonComment> comments,
+    final bool showEmptyLessons,
+    final bool showCommentsIndicators,
+    final bool isListModeEnabled,
+    final List<ScheduleComment> scheduleComments,
+    @SelectedScheduleConverter() final SelectedSchedule? selectedSchedule,
+    @JsonKey(includeFromJson: false, includeToJson: false) final Set<SelectedSchedule> comparisonSchedules,
+    @JsonKey(includeFromJson: false, includeToJson: false) final bool isComparisonModeEnabled,
+    @JsonKey(includeFromJson: false, includeToJson: false) final ScheduleDiff? latestDiff,
+    @JsonKey(includeFromJson: false, includeToJson: false) final bool showScheduleDiffDialog,
+    @JsonKey(includeFromJson: false, includeToJson: false) final bool isSplitViewEnabled,
+    @JsonKey(includeFromJson: false, includeToJson: false) final bool showAnalytics,
+    final List<CustomSchedule> customSchedules,
+    @JsonKey(includeFromJson: false, includeToJson: false) final bool isCustomScheduleModeEnabled,
+  }) = _$ScheduleStateImpl;
   const _ScheduleState._() : super._();
 
   factory _ScheduleState.fromJson(Map<String, dynamic> json) = _$ScheduleStateImpl.fromJson;
@@ -1135,7 +1304,18 @@ abstract class _ScheduleState extends ScheduleState {
   ScheduleDiff? get latestDiff;
   @override
   @JsonKey(includeFromJson: false, includeToJson: false)
-  bool get showScheduleDiffDialog;
+  bool get showScheduleDiffDialog; // Desktop mode state properties
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  bool get isSplitViewEnabled;
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  bool get showAnalytics; // Custom schedules
+  @override
+  List<CustomSchedule> get customSchedules;
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  bool get isCustomScheduleModeEnabled;
 
   /// Create a copy of ScheduleState
   /// with the given fields replaced by the non-null parameter values.

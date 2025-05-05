@@ -5,11 +5,7 @@ import 'package:hugeicons/hugeicons.dart';
 import 'package:app_ui/app_ui.dart';
 
 class ViewToggleButton extends StatelessWidget {
-  const ViewToggleButton({
-    super.key,
-    required this.isListModeEnabled,
-    required this.onPressed,
-  });
+  const ViewToggleButton({super.key, required this.isListModeEnabled, required this.onPressed});
 
   final bool isListModeEnabled;
   final VoidCallback onPressed;
@@ -18,14 +14,10 @@ class ViewToggleButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return PlatformIconButton(
       onPressed: onPressed,
-      material: (_, __) => MaterialIconButtonData(
-        iconSize: 24,
-        padding: const EdgeInsets.all(16.0),
-        tooltip: 'Переключить вид',
-      ),
-      cupertino: (_, __) => CupertinoIconButtonData(
-        padding: const EdgeInsets.all(16.0),
-      ),
+      material:
+          (_, __) =>
+              MaterialIconButtonData(iconSize: 24, padding: const EdgeInsets.all(16.0), tooltip: 'Переключить вид'),
+      cupertino: (_, __) => CupertinoIconButtonData(padding: const EdgeInsets.all(16.0)),
       icon: AnimatedSwitcher(
         duration: 300.ms,
         transitionBuilder: (Widget child, Animation<double> animation) {

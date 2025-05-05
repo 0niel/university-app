@@ -47,11 +47,7 @@ import 'package:rtu_mirea_app/rating_system_calculator/models/models.dart';
 //           )
 
 class SubjectCard extends StatelessWidget {
-  const SubjectCard({
-    super.key,
-    required this.subject,
-    required this.onTap,
-  });
+  const SubjectCard({super.key, required this.subject, required this.onTap});
 
   final Subject subject;
   final void Function(Subject) onTap;
@@ -64,9 +60,7 @@ class SubjectCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       color: AppColors.dark.background02,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: InkWell(
         onTap: () => onTap(subject),
         borderRadius: BorderRadius.circular(16),
@@ -83,36 +77,23 @@ class SubjectCard extends StatelessWidget {
                   gradient: const LinearGradient(
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
-                    colors: [
-                      Color(0xFF9ADB7F),
-                      Color(0xFF6EA95C),
-                    ],
+                    colors: [Color(0xFF9ADB7F), Color(0xFF6EA95C)],
                   ),
                 ),
-                child: const Icon(
-                  Icons.school,
-                  color: Colors.white,
-                ),
+                child: const Icon(Icons.school, color: Colors.white),
               ),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
                   subject.name,
-                  style: AppTextStyle.buttonL.copyWith(
-                    fontSize: 14,
-                  ),
+                  style: AppTextStyle.buttonL.copyWith(fontSize: 14),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
               Padding(
                 padding: const EdgeInsets.only(right: 18.0),
-                child: Text(
-                  score.toString(),
-                  style: AppTextStyle.buttonL.copyWith(
-                    color: AppColors.dark.colorful05,
-                  ),
-                ),
+                child: Text(score.toString(), style: AppTextStyle.buttonL.copyWith(color: AppColors.dark.colorful05)),
               ),
               const Icon(Icons.arrow_forward_ios),
             ],

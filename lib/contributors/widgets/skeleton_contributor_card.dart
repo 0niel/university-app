@@ -13,22 +13,11 @@ class SkeletonContributorCard extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            CircleAvatar(
-              radius: 37,
-              backgroundColor: AppColors.dark.deactive,
-            ),
+            CircleAvatar(radius: 37, backgroundColor: AppColors.dark.deactive),
             const SizedBox(height: 16),
-            Container(
-              width: 100,
-              height: 16,
-              color: AppColors.dark.background03,
-            ),
+            Container(width: 100, height: 16, color: AppColors.dark.background03),
             const SizedBox(height: 8),
-            Container(
-              width: 100,
-              height: 16,
-              color: AppColors.dark.background03,
-            ),
+            Container(width: 100, height: 16, color: AppColors.dark.background03),
           ],
         ),
       ),

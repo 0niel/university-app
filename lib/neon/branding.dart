@@ -9,10 +9,7 @@ import 'package:http/http.dart' as http;
 import 'package:vector_graphics_compiler/vector_graphics_compiler.dart';
 
 /// The custom theme used in the Neon app.
-final neonTheme = NeonTheme(
-  branding: branding,
-  colorScheme: colorScheme,
-);
+final neonTheme = NeonTheme(branding: branding, colorScheme: colorScheme);
 
 /// The custom branding used in the Neon app.
 final branding = Branding(
@@ -22,10 +19,7 @@ final branding = Branding(
   logo: VectorGraphic(
     width: 100,
     height: 100,
-    colorFilter: ColorFilter.mode(
-      AppColors.dark.primary,
-      painting.BlendMode.srcIn,
-    ),
+    colorFilter: ColorFilter.mode(AppColors.dark.primary, painting.BlendMode.srcIn),
     loader: const NetworkSvgLoader(
       'https://cdn2.mirea.ninja/original/2X/7/78bcc63aff95d9ad39e6a4de12937f45c97c8cb5.svg',
     ),
@@ -37,9 +31,7 @@ final branding = Branding(
 );
 
 /// The custom color scheme used in the Neon app.
-final colorScheme = NeonColorScheme(
-  primary: AppColors.dark.primary,
-);
+final colorScheme = NeonColorScheme(primary: AppColors.dark.primary);
 
 class NetworkSvgLoader extends BytesLoader {
   const NetworkSvgLoader(this.url);
@@ -48,19 +40,23 @@ class NetworkSvgLoader extends BytesLoader {
 
   @override
   Future<ByteData> loadBytes(BuildContext? context) async {
-    return await compute((String svgUrl) async {
-      final http.Response request = await http.get(Uri.parse(svgUrl));
-      final TimelineTask task = TimelineTask()..start('encodeSvg');
-      final Uint8List compiledBytes = encodeSvg(
-        xml: request.body,
-        debugName: svgUrl,
-        enableClippingOptimizer: false,
-        enableMaskingOptimizer: false,
-        enableOverdrawOptimizer: false,
-      );
-      task.finish();
-      return compiledBytes.buffer.asByteData();
-    }, url, debugLabel: 'Load Bytes');
+    return await compute(
+      (String svgUrl) async {
+        final http.Response request = await http.get(Uri.parse(svgUrl));
+        final TimelineTask task = TimelineTask()..start('encodeSvg');
+        final Uint8List compiledBytes = encodeSvg(
+          xml: request.body,
+          debugName: svgUrl,
+          enableClippingOptimizer: false,
+          enableMaskingOptimizer: false,
+          enableOverdrawOptimizer: false,
+        );
+        task.finish();
+        return compiledBytes.buffer.asByteData();
+      },
+      url,
+      debugLabel: 'Load Bytes',
+    );
   }
 
   @override

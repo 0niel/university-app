@@ -11,9 +11,7 @@ abstract class HydratedStorageKeys {
 
 /// A custom hydrated storage implementation using the [storage] package.
 class CustomHydratedStorage implements Storage {
-  const CustomHydratedStorage({
-    required SharedPreferences sharedPreferences,
-  }) : _storage = sharedPreferences;
+  const CustomHydratedStorage({required SharedPreferences sharedPreferences}) : _storage = sharedPreferences;
 
   final SharedPreferences _storage;
 

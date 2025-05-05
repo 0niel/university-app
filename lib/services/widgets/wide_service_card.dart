@@ -33,9 +33,7 @@ class WideServiceCard extends StatelessWidget {
     return Card(
       elevation: 0,
       margin: EdgeInsets.zero,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       color: Theme.of(context).extension<AppColors>()!.background02,
       child: InkWell(
         borderRadius: BorderRadius.circular(16),
@@ -47,15 +45,8 @@ class WideServiceCard extends StatelessWidget {
               Container(
                 width: 48,
                 height: 48,
-                decoration: BoxDecoration(
-                  color: color.withOpacity(0.15),
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                child: Icon(
-                  iconData,
-                  color: color,
-                  size: 24,
-                ),
+                decoration: BoxDecoration(color: color.withOpacity(0.15), borderRadius: BorderRadius.circular(14)),
+                child: Icon(iconData, color: color, size: 24),
               ),
               const SizedBox(width: AppSpacing.lg),
               Expanded(
@@ -64,29 +55,21 @@ class WideServiceCard extends StatelessWidget {
                   children: [
                     Text(
                       title,
-                      style: AppTextStyle.bodyBold.copyWith(
-                        color: Theme.of(context).extension<AppColors>()!.active,
-                      ),
+                      style: AppTextStyle.bodyBold.copyWith(color: Theme.of(context).extension<AppColors>()!.active),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: AppSpacing.xs),
                     Text(
                       description,
-                      style: AppTextStyle.captionL.copyWith(
-                        color: Theme.of(context).extension<AppColors>()!.deactive,
-                      ),
+                      style: AppTextStyle.captionL.copyWith(color: Theme.of(context).extension<AppColors>()!.deactive),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
                   ],
                 ),
               ),
-              Icon(
-                Icons.arrow_forward_ios,
-                size: 16,
-                color: Theme.of(context).extension<AppColors>()!.deactive,
-              ),
+              Icon(Icons.arrow_forward_ios, size: 16, color: Theme.of(context).extension<AppColors>()!.deactive),
             ],
           ),
         ),

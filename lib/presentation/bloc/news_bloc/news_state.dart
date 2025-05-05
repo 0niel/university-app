@@ -25,12 +25,7 @@ class NewsLoaded extends NewsState {
 
   final int page;
 
-  const NewsLoaded({
-    required this.news,
-    required this.tags,
-    this.selectedTag,
-    required this.page,
-  });
+  const NewsLoaded({required this.news, required this.tags, this.selectedTag, required this.page});
 
   @override
   List<Object> get props => [news, tags, page];

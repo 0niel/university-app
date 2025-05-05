@@ -25,9 +25,10 @@ class MapCanvas extends CustomPainter {
     final offsetX = (size.width - bounds.width * scale) / 2 - bounds.left * scale;
     final offsetY = (size.height - bounds.height * scale) / 2 - bounds.top * scale;
 
-    final transform = Matrix4.identity()
-      ..translate(offsetX, offsetY)
-      ..scale(scale, scale);
+    final transform =
+        Matrix4.identity()
+          ..translate(offsetX, offsetY)
+          ..scale(scale, scale);
 
     final Paint paint = Paint()..style = PaintingStyle.fill;
 
@@ -38,17 +39,19 @@ class MapCanvas extends CustomPainter {
       paint.color = room.isSelected ? Colors.greenAccent : Colors.grey.shade300;
       canvas.drawPath(room.path, paint);
 
-      final borderPaint = Paint()
-        ..color = Colors.black
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 1.0 / scale;
+      final borderPaint =
+          Paint()
+            ..color = Colors.black
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = 1.0 / scale;
       canvas.drawPath(room.path, borderPaint);
     }
 
-    final debugBorderPaint = Paint()
-      ..color = Colors.red
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 2.0 / scale;
+    final debugBorderPaint =
+        Paint()
+          ..color = Colors.red
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 2.0 / scale;
     canvas.drawRect(Rect.fromLTWH(bounds.left, bounds.top, bounds.width, bounds.height), debugBorderPaint);
 
     canvas.restore();

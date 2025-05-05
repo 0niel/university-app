@@ -3,11 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:rtu_mirea_app/ads/ads.dart';
 
 class CalendarStoriesAppBar extends StatefulWidget {
-  const CalendarStoriesAppBar({
-    super.key,
-    required this.isStoriesVisible,
-    required this.onStoriesLoaded,
-  });
+  const CalendarStoriesAppBar({super.key, required this.isStoriesVisible, required this.onStoriesLoaded});
 
   final bool isStoriesVisible;
   final ValueChanged<bool> onStoriesLoaded;

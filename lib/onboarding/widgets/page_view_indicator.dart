@@ -18,11 +18,7 @@ class PageViewIndicator extends StatelessWidget {
         borderRadius: const BorderRadius.all(Radius.circular(12.0)),
         boxShadow: <BoxShadow>[
           isActive
-              ? BoxShadow(
-                  color: Colors.black.withOpacity(0.25),
-                  offset: const Offset(0.0, 2.0),
-                  blurRadius: 4.0,
-                )
+              ? BoxShadow(color: Colors.black.withOpacity(0.25), offset: const Offset(0.0, 2.0), blurRadius: 4.0)
               : const BoxShadow(color: Colors.transparent),
         ],
       ),

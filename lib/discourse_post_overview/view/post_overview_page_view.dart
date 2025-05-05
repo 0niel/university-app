@@ -17,13 +17,12 @@ class DiscoursePostOverviewPageView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Пост'),
-      ),
+      appBar: AppBar(title: const Text('Пост')),
       body: BlocProvider<PostOverviewBloc>(
-        create: (context) => PostOverviewBloc(
-          discourseRepository: context.read<DiscourseRepository>(),
-        )..add(PostRequested(postId: postId)),
+        create:
+            (context) =>
+                PostOverviewBloc(discourseRepository: context.read<DiscourseRepository>())
+                  ..add(PostRequested(postId: postId)),
         child: const _PostOverview(),
       ),
     );
@@ -38,9 +37,7 @@ class _PostOverview extends StatelessWidget {
     return BlocBuilder<PostOverviewBloc, PostOverviewState>(
       builder: (context, state) {
         if (state.status == PostOverviewStatus.loading) {
-          return const Center(
-            child: CircularProgressIndicator(),
-          );
+          return const Center(child: CircularProgressIndicator());
         } else if (state.status == PostOverviewStatus.loaded) {
           return SingleChildScrollView(
             child: Padding(
@@ -58,16 +55,15 @@ class _PostOverview extends StatelessWidget {
                       const SizedBox(width: 16),
                       Text(state.post!.username, style: AppTextStyle.title),
                       const Spacer(),
-                      Text(DateFormat('dd.MM.yyyy HH:mm').format(DateTime.parse(state.post!.createdAt)),
-                          style: AppTextStyle.bodyBold),
+                      Text(
+                        DateFormat('dd.MM.yyyy HH:mm').format(DateTime.parse(state.post!.createdAt)),
+                        style: AppTextStyle.bodyBold,
+                      ),
                     ],
                   ),
                   Html(
                     data: state.post!.cooked,
-                    extensions: const [
-                      TableHtmlExtension(),
-                      VideoHtmlExtension(),
-                    ],
+                    extensions: const [TableHtmlExtension(), VideoHtmlExtension()],
                     style: {
                       "h1": Style(
                         color: Theme.of(context).extension<AppColors>()!.active,
@@ -107,27 +103,25 @@ class _PostOverview extends StatelessWidget {
                       ),
                       "body": Style(
                         color: Theme.of(context).extension<AppColors>()!.active,
-                        fontStyle: AppTextStyle.bodyRegular
-                            .copyWith(
-                              color: Theme.of(context).extension<AppColors>()!.active,
-                            )
-                            .fontStyle,
+                        fontStyle:
+                            AppTextStyle.body
+                                .copyWith(color: Theme.of(context).extension<AppColors>()!.active)
+                                .fontStyle,
                         fontSize: FontSize(16),
                         lineHeight: const LineHeight(1.5),
                       ),
                       "a": Style(
                         color: Theme.of(context).extension<AppColors>()!.colorful03,
-                        fontStyle: AppTextStyle.bodyRegular.fontStyle,
+                        fontStyle: AppTextStyle.body.fontStyle,
                         fontSize: FontSize(16),
                         lineHeight: const LineHeight(1.5),
                       ),
                       "p": Style(
                         color: Theme.of(context).extension<AppColors>()!.active,
-                        fontStyle: AppTextStyle.bodyRegular
-                            .copyWith(
-                              color: Theme.of(context).extension<AppColors>()!.active,
-                            )
-                            .fontStyle,
+                        fontStyle:
+                            AppTextStyle.body
+                                .copyWith(color: Theme.of(context).extension<AppColors>()!.active)
+                                .fontStyle,
                         fontSize: FontSize(16),
                         lineHeight: const LineHeight(1.5),
                       ),
@@ -143,13 +137,9 @@ class _PostOverview extends StatelessWidget {
             ),
           );
         } else if (state.status == PostOverviewStatus.failure) {
-          return const Center(
-            child: Text('Ошибка при загрузке поста'),
-          );
+          return const Center(child: Text('Ошибка при загрузке поста'));
         } else {
-          return const Center(
-            child: Text('Ошибка при загрузке поста'),
-          );
+          return const Center(child: Text('Ошибка при загрузке поста'));
         }
       },
     );

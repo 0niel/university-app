@@ -24,14 +24,9 @@ class _TopicCardState extends State<TopicCard> {
     final cardMinWidth = math.min(320, availableWidth);
 
     return ConstrainedBox(
-      constraints: BoxConstraints(
-        minWidth: cardMinWidth.toDouble(),
-        maxWidth: availableWidth,
-      ),
+      constraints: BoxConstraints(minWidth: cardMinWidth.toDouble(), maxWidth: availableWidth),
       child: Card(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         elevation: 2,
         child: PlatformInkWell(
           onTap: () {
@@ -69,34 +64,30 @@ class _TopicCardState extends State<TopicCard> {
       child: SizedBox(
         height: 128,
         width: double.infinity,
-        child: widget.topic.imageUrl != null
-            ? CachedNetworkImage(
-                imageUrl: widget.topic.imageUrl!,
-                placeholder: (context, url) => const ImagePlaceholder(),
-                errorWidget: (context, url, error) => const ImagePlaceholder(),
-                fit: BoxFit.cover,
-              )
-            : Container(
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      Color(0xFFFFB8E0),
-                      Color(0xFFBE9EFF),
-                      Color(0xFF88C0FC),
-                      Color(0xFF86FF99),
-                    ],
+        child:
+            widget.topic.imageUrl != null
+                ? CachedNetworkImage(
+                  imageUrl: widget.topic.imageUrl!,
+                  placeholder: (context, url) => const ImagePlaceholder(),
+                  errorWidget: (context, url, error) => const ImagePlaceholder(),
+                  fit: BoxFit.cover,
+                )
+                : Container(
+                  decoration: const BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [Color(0xFFFFB8E0), Color(0xFFBE9EFF), Color(0xFF88C0FC), Color(0xFF86FF99)],
+                    ),
+                  ),
+                  child: Center(
+                    child: Assets.icons.imagePlaceholder.svg(
+                      color: Theme.of(context).colorScheme.onPrimary,
+                      width: 48,
+                      height: 48,
+                    ),
                   ),
                 ),
-                child: Center(
-                  child: Assets.icons.imagePlaceholder.svg(
-                    color: Theme.of(context).colorScheme.onPrimary,
-                    width: 48,
-                    height: 48,
-                  ),
-                ),
-              ),
       ),
     );
   }
@@ -106,11 +97,12 @@ class _TopicCardState extends State<TopicCard> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         CircleAvatar(
-          backgroundImage: widget.author != null
-              ? CachedNetworkImageProvider(
-                  'https://mirea.ninja/${widget.author!.avatarTemplate.replaceAll('{size}', '64')}',
-                )
-              : null,
+          backgroundImage:
+              widget.author != null
+                  ? CachedNetworkImageProvider(
+                    'https://mirea.ninja/${widget.author!.avatarTemplate.replaceAll('{size}', '64')}',
+                  )
+                  : null,
           radius: 24,
         ),
         const SizedBox(width: 12),
@@ -118,18 +110,11 @@ class _TopicCardState extends State<TopicCard> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                widget.topic.title,
-                style: AppTextStyle.titleM,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
+              Text(widget.topic.title, style: AppTextStyle.titleM, maxLines: 2, overflow: TextOverflow.ellipsis),
               if (widget.author != null)
                 Text(
                   widget.author!.username,
-                  style: AppTextStyle.captionS.copyWith(
-                    color: Theme.of(context).extension<AppColors>()!.deactive,
-                  ),
+                  style: AppTextStyle.captionS.copyWith(color: Theme.of(context).extension<AppColors>()!.deactive),
                 ),
             ],
           ),
@@ -143,23 +128,15 @@ class _TopicCardState extends State<TopicCard> {
       children: [
         Text(
           DateFormat.yMMMd().format(DateTime.parse(widget.topic.createdAt)),
-          style: AppTextStyle.captionS.copyWith(
-            color: Theme.of(context).extension<AppColors>()!.deactive,
-          ),
+          style: AppTextStyle.captionS.copyWith(color: Theme.of(context).extension<AppColors>()!.deactive),
         ),
         const Spacer(),
         Row(
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
-            _IconStat(
-              icon: Icons.remove_red_eye_rounded,
-              count: widget.topic.views,
-            ),
+            _IconStat(icon: Icons.remove_red_eye_rounded, count: widget.topic.views),
             const SizedBox(width: 16),
-            _IconStat(
-              icon: Icons.favorite_rounded,
-              count: widget.topic.likeCount,
-            ),
+            _IconStat(icon: Icons.favorite_rounded, count: widget.topic.likeCount),
           ],
         ),
       ],
@@ -168,10 +145,7 @@ class _TopicCardState extends State<TopicCard> {
 }
 
 class _IconStat extends StatelessWidget {
-  const _IconStat({
-    required this.icon,
-    required this.count,
-  });
+  const _IconStat({required this.icon, required this.count});
 
   final IconData icon;
   final int count;
@@ -180,17 +154,11 @@ class _IconStat extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Icon(
-          icon,
-          size: 18,
-          color: Theme.of(context).extension<AppColors>()!.deactive,
-        ),
+        Icon(icon, size: 18, color: Theme.of(context).extension<AppColors>()!.deactive),
         const SizedBox(width: 4),
         Text(
           '$count',
-          style: AppTextStyle.captionS.copyWith(
-            color: Theme.of(context).extension<AppColors>()!.deactive,
-          ),
+          style: AppTextStyle.captionS.copyWith(color: Theme.of(context).extension<AppColors>()!.deactive),
         ),
       ],
     );

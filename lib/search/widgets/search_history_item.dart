@@ -3,12 +3,7 @@ import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:app_ui/app_ui.dart';
 
 class SearchHistoryItem extends StatelessWidget {
-  const SearchHistoryItem({
-    super.key,
-    required this.query,
-    required this.onPressed,
-    required this.onClear,
-  });
+  const SearchHistoryItem({super.key, required this.query, required this.onPressed, required this.onClear});
 
   final String query;
   final void Function(String) onPressed;
@@ -26,9 +21,7 @@ class SearchHistoryItem extends StatelessWidget {
           alignment: Alignment.centerLeft,
           child: Text(
             query,
-            style: AppTextStyle.titleS.copyWith(
-              color: Theme.of(context).extension<AppColors>()!.active,
-            ),
+            style: AppTextStyle.titleS.copyWith(color: Theme.of(context).extension<AppColors>()!.active),
           ),
         ),
       ),

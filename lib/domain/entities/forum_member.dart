@@ -31,17 +31,17 @@ class ForumMember extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        username,
-        name,
-        avatarTemplate,
-        primaryGroupName,
-        flairName,
-        flairUrl,
-        trustLevel,
-        title,
-        lastPostedAt,
-        lastSeenAt,
-        addedAt
-      ];
+    id,
+    username,
+    name,
+    avatarTemplate,
+    primaryGroupName,
+    flairName,
+    flairUrl,
+    trustLevel,
+    title,
+    lastPostedAt,
+    lastSeenAt,
+    addedAt,
+  ];
 }

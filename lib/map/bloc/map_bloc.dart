@@ -26,12 +26,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
       final campus = availableCampuses.first;
       final floor = campus.floors.first;
       final (rooms, rect) = await _parseFloor(floor);
-      emit(MapLoaded(
-        selectedCampus: campus,
-        selectedFloor: floor,
-        rooms: rooms,
-        boundingRect: rect,
-      ));
+      emit(MapLoaded(selectedCampus: campus, selectedFloor: floor, rooms: rooms, boundingRect: rect));
     } catch (e) {
       emit(MapError('Ошибка инициализации карты: $e'));
     }
@@ -42,12 +37,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
     try {
       final floor = event.selectedCampus.floors.first;
       final (rooms, rect) = await _parseFloor(floor);
-      emit(MapLoaded(
-        selectedCampus: event.selectedCampus,
-        selectedFloor: floor,
-        rooms: rooms,
-        boundingRect: rect,
-      ));
+      emit(MapLoaded(selectedCampus: event.selectedCampus, selectedFloor: floor, rooms: rooms, boundingRect: rect));
     } catch (e) {
       emit(MapError('Ошибка загрузки кампуса: $e'));
     }
@@ -57,12 +47,14 @@ class MapBloc extends Bloc<MapEvent, MapState> {
     emit(const MapLoading());
     try {
       final (rooms, rect) = await _parseFloor(event.selectedFloor);
-      emit(MapLoaded(
-        selectedCampus: event.selectedCampus,
-        selectedFloor: event.selectedFloor,
-        rooms: rooms,
-        boundingRect: rect,
-      ));
+      emit(
+        MapLoaded(
+          selectedCampus: event.selectedCampus,
+          selectedFloor: event.selectedFloor,
+          rooms: rooms,
+          boundingRect: rect,
+        ),
+      );
     } catch (e) {
       emit(MapError('Ошибка загрузки этажа: $e'));
     }
@@ -71,12 +63,13 @@ class MapBloc extends Bloc<MapEvent, MapState> {
   void _onRoomTapped(RoomTapped event, Emitter<MapState> emit) {
     if (state is MapLoaded) {
       final currentState = state as MapLoaded;
-      final updatedRooms = currentState.rooms.map((room) {
-        if (room.roomId == event.roomId) {
-          return room.copyWith(isSelected: !room.isSelected);
-        }
-        return room;
-      }).toList();
+      final updatedRooms =
+          currentState.rooms.map((room) {
+            if (room.roomId == event.roomId) {
+              return room.copyWith(isSelected: !room.isSelected);
+            }
+            return room;
+          }).toList();
 
       emit(currentState.copyWith(rooms: updatedRooms));
     }
@@ -84,17 +77,13 @@ class MapBloc extends Bloc<MapEvent, MapState> {
 
   Future<(List<RoomModel>, Rect)> _parseFloor(FloorModel floor) async {
     final (parsedRooms, boundingRect) = await SvgRoomsParser.parseSvg(floor.svgPath);
-    final rooms = parsedRooms.map((room) {
-      final idParts = room.roomId.split('__r__');
-      final id = idParts.length > 1 ? idParts[1] : '';
-      final name = room.name.isNotEmpty ? room.name : objectsService.getNameById(id) ?? '';
-      return RoomModel(
-        roomId: room.roomId,
-        name: name,
-        path: room.path,
-        isSelected: room.isSelected,
-      );
-    }).toList();
+    final rooms =
+        parsedRooms.map((room) {
+          final idParts = room.roomId.split('__r__');
+          final id = idParts.length > 1 ? idParts[1] : '';
+          final name = room.name.isNotEmpty ? room.name : objectsService.getNameById(id) ?? '';
+          return RoomModel(roomId: room.roomId, name: name, path: room.path, isSelected: room.isSelected);
+        }).toList();
     return (rooms, boundingRect);
   }
 }

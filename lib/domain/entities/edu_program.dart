@@ -24,11 +24,5 @@ class EduProgram extends Equatable {
   Map<String, dynamic> toJson() => _$EduProgramToJson(this);
 
   @override
-  List<Object?> get props => [
-        eduProgram,
-        eduProgramCode,
-        department,
-        prodDepartment,
-        type,
-      ];
+  List<Object?> get props => [eduProgram, eduProgramCode, department, prodDepartment, type];
 }

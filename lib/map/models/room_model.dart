@@ -6,19 +6,9 @@ class RoomModel {
   final bool isSelected;
   Path path;
 
-  RoomModel({
-    required this.roomId,
-    required this.path,
-    this.name = '',
-    this.isSelected = false,
-  });
+  RoomModel({required this.roomId, required this.path, this.name = '', this.isSelected = false});
 
-  RoomModel copyWith({
-    String? roomId,
-    String? name,
-    Path? path,
-    bool? isSelected,
-  }) {
+  RoomModel copyWith({String? roomId, String? name, Path? path, bool? isSelected}) {
     return RoomModel(
       roomId: roomId ?? this.roomId,
       name: name ?? this.name,

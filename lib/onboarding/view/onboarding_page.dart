@@ -88,8 +88,10 @@ class _OnBoardingPageState extends State<OnBoardingPage> {
               left: 0,
               right: 0,
               child: Center(
-                child:
-                    Padding(padding: EdgeInsets.only(top: getImageTopPadding(index)), child: containersImages[index]),
+                child: Padding(
+                  padding: EdgeInsets.only(top: getImageTopPadding(index)),
+                  child: containersImages[index],
+                ),
               ),
             ),
             Positioned(
@@ -99,10 +101,7 @@ class _OnBoardingPageState extends State<OnBoardingPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    titlesTexts[index],
-                    style: AppTextStyle.h4,
-                  ),
+                  Text(titlesTexts[index], style: AppTextStyle.h4),
                   const SizedBox(height: 8.0),
                   Text(contentTexts[index], style: AppTextStyle.bodyL),
                 ],
@@ -121,10 +120,7 @@ class _OnBoardingPageState extends State<OnBoardingPage> {
     final Widget pageIndicator = PageIndicators(
       key: pageStateKey,
       onClick: () {
-        _pageController.nextPage(
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.ease,
-        );
+        _pageController.nextPage(duration: const Duration(milliseconds: 300), curve: Curves.ease);
       },
       dotsNum: _numPages,
     );
@@ -156,11 +152,7 @@ class _OnBoardingPageState extends State<OnBoardingPage> {
 }
 
 class PageIndicators extends StatefulWidget {
-  const PageIndicators({
-    super.key,
-    required this.onClick,
-    required this.dotsNum,
-  });
+  const PageIndicators({super.key, required this.onClick, required this.dotsNum});
 
   final VoidCallback onClick;
   final int dotsNum;
@@ -200,36 +192,26 @@ class _PageIndicatorsState extends State<PageIndicators> {
             transitionBuilder: (Widget child, Animation<double> animation) {
               return FadeTransition(
                 opacity: animation,
-                child: SizeTransition(
-                  sizeFactor: animation,
-                  axis: Axis.horizontal,
-                  child: child,
-                ),
+                child: SizeTransition(sizeFactor: animation, axis: Axis.horizontal, child: child),
               );
             },
-            child: widget.dotsNum - 1 == _currentPage
-                ? const SizedBox.shrink()
-                : TextButton(
-                    key: const ValueKey("skipButton"),
-                    onPressed: () {
-                      context.read<HomeCubit>().closeOnboarding();
-                      context.go('/schedule');
-                    },
-                    child: Text(
-                      "Пропустить",
-                      style: AppTextStyle.buttonS.copyWith(
-                        color: Theme.of(context).extension<AppColors>()!.active,
+            child:
+                widget.dotsNum - 1 == _currentPage
+                    ? const SizedBox.shrink()
+                    : TextButton(
+                      key: const ValueKey("skipButton"),
+                      onPressed: () {
+                        context.read<HomeCubit>().closeOnboarding();
+                        context.go('/schedule');
+                      },
+                      child: Text(
+                        "Пропустить",
+                        style: AppTextStyle.buttonS.copyWith(color: Theme.of(context).extension<AppColors>()!.active),
                       ),
                     ),
-                  ),
           ),
-          Row(
-            children: _buildPageIndicators(_currentPage),
-          ),
-          NextButton(
-            isLastPage: widget.dotsNum - 1 == _currentPage,
-            onClick: widget.onClick,
-          ),
+          Row(children: _buildPageIndicators(_currentPage)),
+          NextButton(isLastPage: widget.dotsNum - 1 == _currentPage, onClick: widget.onClick),
         ],
       ),
     );

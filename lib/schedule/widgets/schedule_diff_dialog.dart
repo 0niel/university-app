@@ -38,12 +38,7 @@ class ScheduleDiffPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Изменения в расписании'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.close),
-            onPressed: () => Navigator.of(context).pop(),
-          )
-        ],
+        actions: [IconButton(icon: const Icon(Icons.close), onPressed: () => Navigator.of(context).pop())],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
@@ -80,28 +75,34 @@ class ScheduleDiffPage extends StatelessWidget {
                       // Removed dates
                       if ((fieldDiff.removedDates?.isNotEmpty ?? false)) {
                         for (var date in fieldDiff.removedDates!) {
-                          dateWidgets.add(Text(
-                            '- ${DateFormat("dd.MM").format(date)}',
-                            style: AppTextStyle.body.copyWith(color: AppColors.light.colorful07),
-                          ));
+                          dateWidgets.add(
+                            Text(
+                              '- ${DateFormat("dd.MM").format(date)}',
+                              style: AppTextStyle.body.copyWith(color: AppColors.light.colorful07),
+                            ),
+                          );
                         }
                       }
                       // Unchanged dates
                       if ((fieldDiff.unchangedDates?.isNotEmpty ?? false)) {
                         for (var date in fieldDiff.unchangedDates!) {
-                          dateWidgets.add(Text(
-                            DateFormat("dd.MM").format(date),
-                            style: AppTextStyle.body.copyWith(color: Colors.grey[600]),
-                          ));
+                          dateWidgets.add(
+                            Text(
+                              DateFormat("dd.MM").format(date),
+                              style: AppTextStyle.body.copyWith(color: Colors.grey[600]),
+                            ),
+                          );
                         }
                       }
                       // Added dates
                       if ((fieldDiff.addedDates?.isNotEmpty ?? false)) {
                         for (var date in fieldDiff.addedDates!) {
-                          dateWidgets.add(Text(
-                            '+ ${DateFormat("dd.MM").format(date)}',
-                            style: AppTextStyle.body.copyWith(color: AppColors.light.colorful04),
-                          ));
+                          dateWidgets.add(
+                            Text(
+                              '+ ${DateFormat("dd.MM").format(date)}',
+                              style: AppTextStyle.body.copyWith(color: AppColors.light.colorful04),
+                            ),
+                          );
                         }
                       }
                       return Column(
@@ -113,11 +114,7 @@ class ScheduleDiffPage extends StatelessWidget {
                           ),
                           Padding(
                             padding: const EdgeInsets.only(left: 32.0),
-                            child: Wrap(
-                              spacing: 12.0,
-                              runSpacing: 4.0,
-                              children: dateWidgets,
-                            ),
+                            child: Wrap(spacing: 12.0, runSpacing: 4.0, children: dateWidgets),
                           ),
                         ],
                       );
@@ -132,8 +129,9 @@ class ScheduleDiffPage extends StatelessWidget {
                               children: [
                                 TextSpan(text: '${fieldDiff.fieldName}: ', style: AppTextStyle.bodyBold),
                                 TextSpan(
-                                    text: '+ ${fieldDiff.newValue}',
-                                    style: AppTextStyle.body.copyWith(color: AppColors.light.colorful04)),
+                                  text: '+ ${fieldDiff.newValue}',
+                                  style: AppTextStyle.body.copyWith(color: AppColors.light.colorful04),
+                                ),
                               ],
                             ),
                           ),
@@ -147,8 +145,9 @@ class ScheduleDiffPage extends StatelessWidget {
                               children: [
                                 TextSpan(text: '${fieldDiff.fieldName}: ', style: AppTextStyle.bodyBold),
                                 TextSpan(
-                                    text: '– ${fieldDiff.oldValue}',
-                                    style: AppTextStyle.body.copyWith(color: AppColors.light.colorful07)),
+                                  text: '– ${fieldDiff.oldValue}',
+                                  style: AppTextStyle.body.copyWith(color: AppColors.light.colorful07),
+                                ),
                               ],
                             ),
                           ),
@@ -162,12 +161,14 @@ class ScheduleDiffPage extends StatelessWidget {
                               children: [
                                 TextSpan(text: '${fieldDiff.fieldName}: ', style: AppTextStyle.bodyBold),
                                 TextSpan(
-                                    text: '- ${fieldDiff.oldValue}',
-                                    style: AppTextStyle.body.copyWith(color: AppColors.light.colorful07)),
+                                  text: '- ${fieldDiff.oldValue}',
+                                  style: AppTextStyle.body.copyWith(color: AppColors.light.colorful07),
+                                ),
                                 const TextSpan(text: '  →  '),
                                 TextSpan(
-                                    text: '+ ${fieldDiff.newValue}',
-                                    style: AppTextStyle.body.copyWith(color: AppColors.light.colorful04)),
+                                  text: '+ ${fieldDiff.newValue}',
+                                  style: AppTextStyle.body.copyWith(color: AppColors.light.colorful04),
+                                ),
                               ],
                             ),
                           ),
