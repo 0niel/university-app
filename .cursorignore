@@ -1,0 +1,70 @@
+# Flutter/Dart specific
+.dart_tool/
+.packages
+.pub/
+.flutter-plugins
+.pub-cache/
+app.*.symbols
+build/
+.flutter-plugins
+.flutter-plugins-dependencies
+.metadata
+
+# Build outputs
+**/build/
+**/android/app/build/
+**/ios/build/
+**/macos/build/
+**/linux/build/
+**/windows/build/
+**/web/build/
+
+# Dependencies
+pubspec.lock
+**/node_modules/
+.pnp
+.pnp.js
+
+# Environment files
+.env
+
+# Web
+**/web/manifest.json
+
+# IDE
+.vscode/
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# System files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Coverage
+coverage/
+**/coverage/
+
+# Temporary files
+*.tmp
+*.temp
+
+# Firebase
+**/firebase-debug.log
+**/firestore-debug.log
+**/ui-debug.log
+
+# FVM
+.fvm/flutter_sdk
