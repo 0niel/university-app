@@ -54,9 +54,9 @@ LessonType getLessonTypeFromText(String lessonType) {
     return parsedLessonType;
   }
 
-  if (lessonType.contains('Экзамен')) {
+  if (lessonType.contains('Экзамен') || lessonType.contains('Э')) {
     return LessonType.exam;
-  } else if (lessonType.contains('Зачет')) {
+  } else if (lessonType.contains('Зачет') || lessonType.contains('З')) {
     return LessonType.credit;
   } else if (lessonType.contains('Консультация')) {
     return LessonType.consultation;
