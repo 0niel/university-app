@@ -48,25 +48,7 @@ List<Classroom> getClassroomsFromLocationText(String location) {
 
 /// Parse lesson type from the text.
 LessonType getLessonTypeFromText(String lessonType) {
-  final parsedLessonType = _getLessonTypeByAbbreviation(lessonType.trim());
-
-  if (parsedLessonType != LessonType.unknown) {
-    return parsedLessonType;
-  }
-
-  if (lessonType.contains('Экзамен')) {
-    return LessonType.exam;
-  } else if (lessonType.contains('Зачет')) {
-    return LessonType.credit;
-  } else if (lessonType.contains('Консультация')) {
-    return LessonType.consultation;
-  } else if (lessonType.contains('Курсовая работа')) {
-    return LessonType.courseWork;
-  } else if (lessonType.contains('Курсовой проект')) {
-    return LessonType.courseProject;
-  }
-
-  return LessonType.unknown;
+  return _getLessonTypeByAbbreviation(lessonType.trim());
 }
 
 LessonType _getLessonTypeByAbbreviation(String abbreviation) {
@@ -84,11 +66,15 @@ LessonType _getLessonTypeByAbbreviation(String abbreviation) {
     case 'КР':
       return LessonType.courseProject;
     case 'ЭКЗ':
+    case 'Э':
       return LessonType.exam;
     case 'ЗАЧ':
+    case 'З':
       return LessonType.credit;
     case 'ЛАБ':
       return LessonType.laboratoryWork;
+    case 'КТ':
+      return LessonType.consultation;
 
     default:
       return LessonType.unknown;
