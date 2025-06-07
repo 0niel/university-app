@@ -32,6 +32,7 @@ import 'package:rtu_mirea_app/analytics/bloc/analytics_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:rtu_mirea_app/data/repositories/stories_repository_impl.dart';
 import 'package:rtu_mirea_app/home/cubit/home_cubit.dart';
+import 'package:rtu_mirea_app/l10n/l10n.dart';
 
 import 'package:rtu_mirea_app/presentation/bloc/news_bloc/news_bloc.dart';
 
@@ -254,6 +255,7 @@ class _AppViewState extends State<_AppView> {
                       final app = PlatformApp.router(
                         restorationScopeId: 'app',
                         localizationsDelegates: [
+                          AppLocalizations.delegate,
                           GlobalMaterialLocalizations.delegate,
                           GlobalWidgetsLocalizations.delegate,
                           GlobalCupertinoLocalizations.delegate,

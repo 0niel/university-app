@@ -1,0 +1,1778 @@
+{
+  "@@locale": "en",
+  
+  "scheduleAppBarTitle": "Schedule",
+  "@scheduleAppBarTitle": {
+    "description": "Title for the schedule page"
+  },
+  
+  "loadingError": "Loading error",
+  "@loadingError": {
+    "description": "Error message when loading fails"
+  },
+  
+  "imageViewer": "Image viewer",
+  "@imageViewer": {
+    "description": "Title for image viewer"
+  },
+  
+  "selectDate": "Select date",
+  "@selectDate": {
+    "description": "Button text to select a date"
+  },
+  
+  "selectDates": "Select dates",
+  "@selectDates": {
+    "description": "Button text to select date range"
+  },
+  
+  "enableComparisonMode": "Enable comparison mode",
+  "@enableComparisonMode": {
+    "description": "Tooltip for enabling comparison mode"
+  },
+  
+  "disableComparisonMode": "Disable comparison mode",
+  "@disableComparisonMode": {
+    "description": "Tooltip for disabling comparison mode"
+  },
+  
+  "compareSchedules": "Compare schedules",
+  "@compareSchedules": {
+    "description": "Button text for comparing schedules"
+  },
+  
+  "noClassesToday": "No classes today",
+  "@noClassesToday": {
+    "description": "Message when there are no classes"
+  },
+  
+  "selectTime": "Select time",
+  "@selectTime": {
+    "description": "Placeholder for time selection"
+  },
+  
+  "clear": "Clear",
+  "@clear": {
+    "description": "Button text to clear selection"
+  },
+  
+  "month": "Month",
+  "@month": {
+    "description": "Calendar format - month view"
+  },
+  
+  "week": "Week",
+  "@week": {
+    "description": "Calendar format - week view"
+  },
+  
+  "apply": "Apply",
+  "@apply": {
+    "description": "Button text to apply changes"
+  },
+  
+  "previousDay": "Previous day",
+  "@previousDay": {
+    "description": "Tooltip for previous day button"
+  },
+  
+  "nextDay": "Next day",
+  "@nextDay": {
+    "description": "Tooltip for next day button"
+  },
+  
+  "today": "Today",
+  "@today": {
+    "description": "Button text for today"
+  },
+  
+  "refreshData": "Refresh data",
+  "@refreshData": {
+    "description": "Tooltip for refresh button"
+  },
+  
+  "scheduleComparison": "Schedule comparison",
+  "@scheduleComparison": {
+    "description": "Tooltip for schedule comparison"
+  },
+  
+  "scheduleAnalytics": "Schedule analytics",
+  "@scheduleAnalytics": {
+    "description": "Tooltip for schedule analytics"
+  },
+  
+  "allClassesList": "All classes list",
+  "@allClassesList": {
+    "description": "Tooltip for all classes list"
+  },
+  
+  "scheduleNotSelected": "Schedule not selected",
+  "@scheduleNotSelected": {
+    "description": "Message when no schedule is selected"
+  },
+  
+  "findSchedule": "Find schedule",
+  "@findSchedule": {
+    "description": "Button text to find schedule"
+  },
+  
+  "scheduleForSelectedDay": "Schedule for selected day",
+  "@scheduleForSelectedDay": {
+    "description": "Title for schedule content"
+  },
+  
+  "tomorrow": "tomorrow",
+  "@tomorrow": {
+    "description": "Text for tomorrow"
+  },
+  
+  "showEmptyClasses": "Show empty classes",
+  "@showEmptyClasses": {
+    "description": "Checkbox label for showing empty classes"
+  },
+  
+  "emptyClasses": "Empty classes",
+  "@emptyClasses": {
+    "description": "Label for empty classes section"
+  },
+  
+  "analytics": "Analytics",
+  "@analytics": {
+    "description": "Label for analytics section"
+  },
+  
+  "weekend": "Weekend",
+  "@weekend": {
+    "description": "Title for weekend page"
+  },
+  
+  "noClassesThisDay": "No classes this day",
+  "@noClassesThisDay": {
+    "description": "Message when there are no classes on a specific day"
+  },
+  
+  "canRestOrStudy": "You can rest or do independent work",
+  "@canRestOrStudy": {
+    "description": "Suggestion for free time"
+  },
+  
+  "goToAnotherDay": "Go to another day",
+  "@goToAnotherDay": {
+    "description": "Button text to navigate to another day"
+  },
+  
+  "classesCount": "{count, plural, =1{class} few{classes} other{classes}}",
+  "@classesCount": {
+    "description": "Plural form for classes count",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  
+  "noClass": "No class",
+  "@noClass": {
+    "description": "Text when there's no class"
+  },
+  
+  "displaySettings": "Display settings",
+  "@displaySettings": {
+    "description": "Title for display settings"
+  },
+  
+  "showCommentIndicators": "Show comment indicators",
+  "@showCommentIndicators": {
+    "description": "Checkbox label for showing comment indicators"
+  },
+  
+  "compactCardMode": "Compact card mode",
+  "@compactCardMode": {
+    "description": "Checkbox label for compact card mode"
+  },
+  
+  "lecture": "Lecture",
+  "@lecture": {
+    "description": "Lesson type - lecture"
+  },
+  
+  "laboratory": "Laboratory",
+  "@laboratory": {
+    "description": "Lesson type - laboratory"
+  },
+  
+  "practice": "Practice",
+  "@practice": {
+    "description": "Lesson type - practice"
+  },
+  
+  "exam": "Exam",
+  "@exam": {
+    "description": "Lesson type - exam"
+  },
+  
+  "consultation": "Consultation",
+  "@consultation": {
+    "description": "Lesson type - consultation"
+  },
+  
+  "credit": "Credit",
+  "@credit": {
+    "description": "Lesson type - credit"
+  },
+  
+  "unknown": "Unknown",
+  "@unknown": {
+    "description": "Unknown lesson type"
+  },
+  
+  "lessonType": "Lesson type",
+  "@lessonType": {
+    "description": "Label for lesson type selector"
+  },
+  
+  "individual": "Individual",
+  "@individual": {
+    "description": "Lesson type - individual work"
+  },
+  
+  "physicalEducation": "Physical Education",
+  "@physicalEducation": {
+    "description": "Lesson type - physical education"
+  },
+  
+  "courseWork": "Course Work",
+  "@courseWork": {
+    "description": "Lesson type - course work"
+  },
+  
+  "courseProject": "Course Project",
+  "@courseProject": {
+    "description": "Lesson type - course project"
+  },
+  
+  "mapsOnlyOnMobile": "Maps are only available on mobile devices",
+  "@mapsOnlyOnMobile": {
+    "description": "Message for desktop users about maps"
+  },
+  
+  "scheduleAnalyticsTitle": "Schedule Analytics",
+  "@scheduleAnalyticsTitle": {
+    "description": "Title for schedule analytics page"
+  },
+  
+  "scheduleAnalyticsDescription": "Statistics and analysis of your academic schedule",
+  "@scheduleAnalyticsDescription": {
+    "description": "Description for schedule analytics"
+  },
+  
+  "loadByDays": "Load by days",
+  "@loadByDays": {
+    "description": "Chart title for daily load"
+  },
+  
+  "lessonTypes": "Lesson types",
+  "@lessonTypes": {
+    "description": "Chart title for lesson types"
+  },
+  
+  "teachers": "Teachers",
+  "@teachers": {
+    "description": "Chart title for teachers"
+  },
+  
+  "classrooms": "Classrooms",
+  "@classrooms": {
+    "description": "Chart title for classrooms"
+  },
+  
+  "noDataForAnalytics": "No data for analytics",
+  "@noDataForAnalytics": {
+    "description": "Message when there's no data for analytics"
+  },
+  
+  "selectAnotherSchedule": "Select another schedule or check for classes",
+  "@selectAnotherSchedule": {
+    "description": "Suggestion when no analytics data"
+  },
+  
+  "exportData": "Export data",
+  "@exportData": {
+    "description": "Button text for data export"
+  },
+  
+  "fullReportWithCharts": "Full report with all charts",
+  "@fullReportWithCharts": {
+    "description": "Export option description"
+  },
+  
+  "dataInTableFormat": "Data in table format",
+  "@dataInTableFormat": {
+    "description": "Export option description"
+  },
+  
+  "shareImage": "Share image",
+  "@shareImage": {
+    "description": "Export option title"
+  },
+  
+  "currentOrAllCharts": "Current chart or all",
+  "@currentOrAllCharts": {
+    "description": "Export option description"
+  },
+  
+  "export": "Export",
+  "@export": {
+    "description": "Button text for export"
+  },
+  
+  "monday": "Monday",
+  "@monday": {
+    "description": "Day of week - Monday"
+  },
+  
+  "tuesday": "Tuesday",
+  "@tuesday": {
+    "description": "Day of week - Tuesday"
+  },
+  
+  "wednesday": "Wednesday",
+  "@wednesday": {
+    "description": "Day of week - Wednesday"
+  },
+  
+  "thursday": "Thursday",
+  "@thursday": {
+    "description": "Day of week - Thursday"
+  },
+  
+  "friday": "Friday",
+  "@friday": {
+    "description": "Day of week - Friday"
+  },
+  
+  "scheduleChanges": "Schedule changes",
+  "@scheduleChanges": {
+    "description": "Title for schedule changes dialog"
+  },
+  
+  "calendar": "Calendar",
+  "@calendar": {
+    "description": "Title for calendar page"
+  },
+  
+  "scheduleLoadingError": "Error loading schedule",
+  "@scheduleLoadingError": {
+    "description": "Error message for schedule loading"
+  },
+  
+  "addSchedulesForComparison": "Add schedules for comparison",
+  "@addSchedulesForComparison": {
+    "description": "Message when no schedules for comparison"
+  },
+  
+  "buildRoute": "Build route",
+  "@buildRoute": {
+    "description": "Button text to build route"
+  },
+  
+  "mySchedules": "My schedules",
+  "@mySchedules": {
+    "description": "Title for custom schedules page"
+  },
+  
+  "createSchedule": "Create schedule",
+  "@createSchedule": {
+    "description": "Button text to create schedule"
+  },
+  
+  "addClass": "Add class",
+  "@addClass": {
+    "description": "Button text to add class"
+  },
+  
+  "classesList": "Classes list",
+  "@classesList": {
+    "description": "Button text for classes list"
+  },
+  
+  "classLabel": "Class",
+  "@classLabel": {
+    "description": "Label for single class"
+  },
+  
+  "open": "Open",
+  "@open": {
+    "description": "Button text to open"
+  },
+  
+  "edit": "Edit",
+  "@edit": {
+    "description": "Menu item to edit"
+  },
+  
+  "delete": "Delete",
+  "@delete": {
+    "description": "Menu item to delete"
+  },
+  
+  "editSchedule": "Edit schedule",
+  "@editSchedule": {
+    "description": "Dialog title for editing schedule"
+  },
+  
+  "cancel": "Cancel",
+  "@cancel": {
+    "description": "Button text to cancel"
+  },
+  
+  "save": "Save",
+  "@save": {
+    "description": "Button text to save"
+  },
+  
+  "deleteSchedule": "Delete schedule",
+  "@deleteSchedule": {
+    "description": "Dialog title for deleting schedule"
+  },
+  
+  "deleteScheduleConfirmation": "Are you sure you want to delete schedule \"{scheduleName}\"?",
+  "@deleteScheduleConfirmation": {
+    "description": "Confirmation message for deleting schedule",
+    "placeholders": {
+      "scheduleName": {
+        "type": "String"
+      }
+    }
+  },
+  
+  "createNewClass": "Create new class",
+  "@createNewClass": {
+    "description": "Button text to create new class"
+  },
+  
+  "noAddedClasses": "No added classes",
+  "@noAddedClasses": {
+    "description": "Message when no classes are added"
+  },
+  
+  "deleteClass": "Delete class",
+  "@deleteClass": {
+    "description": "Dialog title for deleting class"
+  },
+  
+  "deleteClassConfirmation": "Are you sure you want to delete class \"{subject}\" from schedule?",
+  "@deleteClassConfirmation": {
+    "description": "Confirmation message for deleting class",
+    "placeholders": {
+      "subject": {
+        "type": "String"
+      }
+    }
+  },
+  
+  "start": "Start",
+  "@start": {
+    "description": "Label for start time"
+  },
+  
+  "end": "End",
+  "@end": {
+    "description": "Label for end time"
+  },
+  
+  "endTimeMustBeAfterStart": "End time must be after start time",
+  "@endTimeMustBeAfterStart": {
+    "description": "Error message for invalid time range"
+  },
+  
+  "classNumber": "Class number",
+  "@classNumber": {
+    "description": "Label for class number"
+  },
+  
+  "none": "None",
+  "@none": {
+    "description": "Option for no class number"
+  },
+  
+  "groups": "Groups",
+  "@groups": {
+    "description": "Label for groups section"
+  },
+  
+  "noTeachersSelected": "No teachers selected",
+  "@noTeachersSelected": {
+    "description": "Message when no teachers are selected"
+  },
+  
+  "addTeacher": "Add teacher",
+  "@addTeacher": {
+    "description": "Dialog title for adding teacher"
+  },
+  
+  "add": "Add",
+  "@add": {
+    "description": "Button text to add"
+  },
+  
+  "selectAtLeastOneDate": "Select at least one date",
+  "@selectAtLeastOneDate": {
+    "description": "Error message for date selection"
+  },
+  
+  "addAtLeastOneClassroom": "Add at least one classroom or make the class online",
+  "@addAtLeastOneClassroom": {
+    "description": "Error message for classroom selection"
+  },
+  
+  "noSelectedDates": "No selected dates",
+  "@noSelectedDates": {
+    "description": "Message when no dates are selected"
+  },
+  
+  "selectDatesButton": "Select dates",
+  "@selectDatesButton": {
+    "description": "Button text to select dates"
+  },
+  
+  "noSelectedClassrooms": "No selected classrooms",
+  "@noSelectedClassrooms": {
+    "description": "Message when no classrooms are selected"
+  },
+  
+  "addClassroom": "Add classroom",
+  "@addClassroom": {
+    "description": "Button text to add classroom"
+  },
+  
+  "noGroupsSelected": "No groups selected",
+  "@noGroupsSelected": {
+    "description": "Message when no groups are selected"
+  },
+  
+  "addGroup": "Add group",
+  "@addGroup": {
+    "description": "Dialog title for adding group"
+  },
+  
+  "exampleClassNames": "Example class names:",
+  "@exampleClassNames": {
+    "description": "Label for example class names"
+  },
+  
+  "textCopied": "Text copied!",
+  "@textCopied": {
+    "description": "Message when text is copied"
+  },
+  
+  "failedToOpenImage": "Failed to open image: {error}",
+  "@failedToOpenImage": {
+    "description": "Error message when image fails to open",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  
+  "loginFailed": "Login failed",
+  "@loginFailed": {
+    "description": "Error message for login failure"
+  },
+  
+  "next": "Next",
+  "@next": {
+    "description": "Button text for next"
+  },
+  
+  "errorLoadingSponsors": "Error loading sponsors",
+  "@errorLoadingSponsors": {
+    "description": "Error message for sponsors loading"
+  },
+  
+  "login": "Login",
+  "@login": {
+    "description": "Button text for login"
+  },
+  
+  "loginToContinue": "Login to continue",
+  "@loginToContinue": {
+    "description": "Message to prompt login"
+  },
+  
+  "deleteScheduleTitle": "Delete schedule",
+  "@deleteScheduleTitle": {
+    "description": "Title for delete schedule dialog"
+  },
+  
+  "deleteScheduleMessage": "Are you sure you want to delete this schedule?",
+  "@deleteScheduleMessage": {
+    "description": "Message for delete schedule confirmation"
+  },
+  
+  "makeActive": "Make active",
+  "@makeActive": {
+    "description": "Menu item to make schedule active"
+  },
+  
+  "comment": "Comment",
+  "@comment": {
+    "description": "Label for comment field"
+  },
+  
+  "schedules": "Schedules",
+  "@schedules": {
+    "description": "Title for schedules page"
+  },
+  
+  "loadingSchedules": "Loading schedules...",
+  "@loadingSchedules": {
+    "description": "Message while loading schedules"
+  },
+  
+  "addedClass": "Added class:",
+  "@addedClass": {
+    "description": "Label for added class"
+  },
+  
+  "createNewSchedule": "Create new schedule",
+  "@createNewSchedule": {
+    "description": "Button text to create new schedule"
+  },
+  
+  "selectSchedule": "Select schedule:",
+  "@selectSchedule": {
+    "description": "Label for schedule selection"
+  },
+  
+  "classAddedToSchedule": "Class added to schedule \"{scheduleName}\"",
+  "@classAddedToSchedule": {
+    "description": "Success message when class is added",
+    "placeholders": {
+      "scheduleName": {
+        "type": "String"
+      }
+    }
+  },
+  
+  "legends": "Legends",
+  "@legends": {
+    "description": "Label for calendar legends"
+  },
+  
+  "maxThreeSchedules": "Maximum 3 schedules for comparison",
+  "@maxThreeSchedules": {
+    "description": "Error message for schedule comparison limit"
+  },
+  
+  "university": "University",
+  "@university": {
+    "description": "Label for university"
+  },
+
+  "search": "Search",
+  "@search": {
+    "description": "Search placeholder text"
+  },
+
+  "error": "Error",
+  "@error": {
+    "description": "Error title"
+  },
+
+  "searchFailed": "Failed to perform search",
+  "@searchFailed": {
+    "description": "Search error message"
+  },
+
+  "enterCommentText": "Enter comment text...",
+  "@enterCommentText": {
+    "description": "Comment input placeholder"
+  },
+
+  "remove": "Remove",
+  "@remove": {
+    "description": "Remove button text"
+  },
+
+  "noAvailableSchedules": "No available schedules",
+  "@noAvailableSchedules": {
+    "description": "Message when no schedules available"
+  },
+
+  "scheduleDeleted": "Schedule deleted",
+  "@scheduleDeleted": {
+    "description": "Success message when schedule deleted"
+  },
+
+  "deleteScheduleConfirmationDialog": "Are you sure you want to delete this schedule?",
+  "@deleteScheduleConfirmationDialog": {
+    "description": "Delete schedule confirmation message"
+  },
+
+  "active": "Active",
+  "@active": {
+    "description": "Active status label"
+  },
+
+  "comments": "Comments",
+  "@comments": {
+    "description": "Comments label plural"
+  },
+
+  "activate": "Activate",
+  "@activate": {
+    "description": "Activate button text"
+  },
+
+  "group": "Group",
+  "@group": {
+    "description": "Group label"
+  },
+
+  "teacher": "Teacher",
+  "@teacher": {
+    "description": "Teacher label"
+  },
+
+  "classroom": "Classroom",
+  "@classroom": {
+    "description": "Classroom label"
+  },
+
+  "schedule": "Schedule",
+  "@schedule": {
+    "description": "Schedule label"
+  },
+
+  "commentDeleted": "Comment deleted",
+  "@commentDeleted": {
+    "description": "Success message when comment deleted"
+  },
+
+  "commentSaved": "Comment saved",
+  "@commentSaved": {
+    "description": "Success message when comment saved"
+  },
+
+  "scheduleComment": "Schedule comment",
+  "@scheduleComment": {
+    "description": "Schedule comment title"
+  },
+
+  "addOrEditNote": "Add or edit a note to the schedule",
+  "@addOrEditNote": {
+    "description": "Schedule comment description"
+  },
+
+  "editComment": "Edit comment",
+  "@editComment": {
+    "description": "Edit comment menu item"
+  },
+
+  "addComment": "Add comment",
+  "@addComment": {
+    "description": "Add comment menu item"
+  },
+
+  "groups": "Groups",
+  "@groups": {
+    "description": "Groups section title"
+  },
+
+  "teachers": "Teachers",
+  "@teachers": {
+    "description": "Teachers section title"
+  },
+
+  "classrooms": "Classrooms",
+  "@classrooms": {
+    "description": "Classrooms section title"
+  },
+
+  "addSchedule": "Add schedule",
+  "@addSchedule": {
+    "description": "Add schedule tooltip"
+  },
+
+  "activeSchedule": "Active schedule",
+  "@activeSchedule": {
+    "description": "Active schedule label"
+  },
+
+  "goToView": "Go to view",
+  "@goToView": {
+    "description": "Go to view tooltip"
+  },
+
+  "noAddedGroups": "No added groups",
+  "@noAddedGroups": {
+    "description": "Message when no groups added"
+  },
+
+  "addGroupToSeeSchedule": "Add a group to see its schedule",
+  "@addGroupToSeeSchedule": {
+    "description": "Instruction to add group"
+  },
+
+  "noAddedTeachers": "No added teachers",
+  "@noAddedTeachers": {
+    "description": "Message when no teachers added"
+  },
+
+  "addTeacherToSeeSchedule": "Add a teacher to see their schedule",
+  "@addTeacherToSeeSchedule": {
+    "description": "Instruction to add teacher"
+  },
+
+  "noAddedClassrooms": "No added classrooms",
+  "@noAddedClassrooms": {
+    "description": "Message when no classrooms added"
+  },
+
+  "addClassroomToSeeSchedule": "Add a classroom to see its schedule",
+  "@addClassroomToSeeSchedule": {
+    "description": "Instruction to add classroom"
+  },
+
+  "failedToLoadSchedules": "Failed to load schedules",
+  "@failedToLoadSchedules": {
+    "description": "Error message when schedules fail to load"
+  },
+
+  "checkInternetConnection": "Check your internet connection",
+  "@checkInternetConnection": {
+    "description": "Internet connection error description"
+  },
+
+  "enterJsonString": "Please enter JSON string",
+  "@enterJsonString": {
+    "description": "JSON input validation message"
+  },
+
+  "enterJsonStringPlaceholder": "Enter JSON string...",
+  "@enterJsonStringPlaceholder": {
+    "description": "JSON input placeholder"
+  },
+
+  "tabs": "Tabs",
+  "@tabs": {
+    "description": "Tabs label"
+  },
+
+  "scheduleChangesTitle": "Schedule changes",
+  "@scheduleChangesTitle": {
+    "description": "Schedule changes dialog title"
+  },
+
+  "loadByDaysChart": "Load by days",
+  "@loadByDaysChart": {
+    "description": "Daily load chart title"
+  },
+
+  "lessonTypesChart": "Lesson types",
+  "@lessonTypesChart": {
+    "description": "Lesson types chart title"
+  },
+
+  "teachersChart": "Teachers",
+  "@teachersChart": {
+    "description": "Teachers chart title"
+  },
+
+  "classroomsChart": "Classrooms",
+  "@classroomsChart": {
+    "description": "Classrooms chart title"
+  },
+
+  "fullReportWithAllCharts": "Full report with all charts",
+  "@fullReportWithAllCharts": {
+    "description": "Export option description"
+  },
+
+  "dataInTableFormatExport": "Data in table format",
+  "@dataInTableFormatExport": {
+    "description": "Export option description"
+  },
+
+  "shareImageExport": "Share image",
+  "@shareImageExport": {
+    "description": "Export option title"
+  },
+
+  "currentOrAllChartsExport": "Current chart or all",
+  "@currentOrAllChartsExport": {
+    "description": "Export option description"
+  },
+
+  "totalClasses": "Total classes",
+  "@totalClasses": {
+    "description": "Total classes statistics label"
+  },
+
+  "forEntirePeriod": "For the entire period",
+  "@forEntirePeriod": {
+    "description": "Statistics period description"
+  },
+
+  "averagePerDay": "Average per day",
+  "@averagePerDay": {
+    "description": "Average per day statistics label"
+  },
+
+  "academicLoad": "Academic load",
+  "@academicLoad": {
+    "description": "Academic load description"
+  },
+
+  "maximumPerDay": "Maximum per day",
+  "@maximumPerDay": {
+    "description": "Maximum per day statistics label"
+  },
+
+  "busiestDay": "Busiest day",
+  "@busiestDay": {
+    "description": "Busiest day description"
+  },
+
+  "showEmptyClassesSettings": "Show empty classes",
+  "@showEmptyClassesSettings": {
+    "description": "Show empty classes setting"
+  },
+
+  "showCommentIndicatorsSettings": "Show comment indicators",
+  "@showCommentIndicatorsSettings": {
+    "description": "Show comment indicators setting"
+  },
+
+  "compactCardModeSettings": "Compact card mode",
+  "@compactCardModeSettings": {
+    "description": "Compact card mode setting"
+  },
+
+  "holiday": "Holiday",
+  "@holiday": {
+    "description": "Holiday page title"
+  },
+
+  "selectExisting": "Select existing",
+  "@selectExisting": {
+    "description": "Select existing option"
+  },
+
+  "createNew": "Create new",
+  "@createNew": {
+    "description": "Create new option"
+  },
+
+  "scheduleName": "Schedule name",
+  "@scheduleName": {
+    "description": "Schedule name field label"
+  },
+
+  "scheduleNamePlaceholder": "For example: My main schedule",
+  "@scheduleNamePlaceholder": {
+    "description": "Schedule name placeholder"
+  },
+
+  "descriptionOptional": "Description (optional)",
+  "@descriptionOptional": {
+    "description": "Description field label"
+  },
+
+  "addScheduleDescription": "Add schedule description",
+  "@addScheduleDescription": {
+    "description": "Description field placeholder"
+  },
+
+  "openSchedule": "Open",
+  "@openSchedule": {
+    "description": "Open schedule button"
+  },
+
+  "selectWeek": "Select week",
+  "@selectWeek": {
+    "description": "Week selection title"
+  },
+
+  "quickWayToWeek": "Quick way to go to a specific week",
+  "@quickWayToWeek": {
+    "description": "Week selection description"
+  },
+
+  "scheduleComparison": "Schedule comparison",
+  "@scheduleComparison": {
+    "description": "Schedule comparison title"
+  },
+
+  "selectUpToFourSchedules": "Select up to 4 schedules to compare them by days",
+  "@selectUpToFourSchedules": {
+    "description": "Schedule comparison description"
+  },
+
+  "addToSchedule": "Add to schedule",
+  "@addToSchedule": {
+    "description": "Add to schedule title"
+  },
+
+  "enterLessonComment": "Enter lesson comment...",
+  "@enterLessonComment": {
+    "description": "Lesson comment placeholder"
+  },
+
+  "noOwnSchedules": "You don't have your own schedules yet",
+  "@noOwnSchedules": {
+    "description": "No custom schedules message"
+  },
+
+  "createCustomSchedule": "Create a custom schedule by adding classes from different available schedules",
+  "@createCustomSchedule": {
+    "description": "Custom schedule creation description"
+  },
+
+  "scheduleCreation": "Schedule creation",
+  "@scheduleCreation": {
+    "description": "Schedule creation title"
+  },
+
+  "enterNameAndDescription": "Enter name and description for the new schedule",
+  "@enterNameAndDescription": {
+    "description": "Schedule creation description"
+  },
+
+  "scheduleNameLabel": "Schedule name",
+  "@scheduleNameLabel": {
+    "description": "Schedule name label"
+  },
+
+  "scheduleNameExample": "For example: My schedule",
+  "@scheduleNameExample": {
+    "description": "Schedule name example"
+  },
+
+  "descriptionOptionalLabel": "Description (optional)",
+  "@descriptionOptionalLabel": {
+    "description": "Description optional label"
+  },
+
+  "addScheduleDescriptionPlaceholder": "Add schedule description",
+  "@addScheduleDescriptionPlaceholder": {
+    "description": "Description placeholder"
+  },
+
+  "editScheduleTitle": "Edit schedule",
+  "@editScheduleTitle": {
+    "description": "Edit schedule title"
+  },
+
+  "classesListTitle": "Classes list",
+  "@classesListTitle": {
+    "description": "Classes list title"
+  },
+
+  "addNewClassToSchedule": "You can add a new class to schedule {scheduleName}",
+  "@addNewClassToSchedule": {
+    "description": "Add new class description",
+    "placeholders": {
+      "scheduleName": {
+        "type": "String"
+      }
+    }
+  },
+
+  "offline": "Offline",
+  "@offline": {
+    "description": "Offline mode label"
+  },
+
+  "online": "Online",
+  "@online": {
+    "description": "Online mode label"
+  },
+
+  "subjectName": "Subject name",
+  "@subjectName": {
+    "description": "Subject name field label"
+  },
+
+  "enterSubjectName": "Enter subject name",
+  "@enterSubjectName": {
+    "description": "Subject name placeholder"
+  },
+
+  "teacherFullName": "Teacher full name",
+  "@teacherFullName": {
+    "description": "Teacher name field label"
+  },
+
+  "teacherNameExample": "For example: Ivanov Ivan Ivanovich",
+  "@teacherNameExample": {
+    "description": "Teacher name example"
+  },
+
+  "endTimeMustBeAfterStartTime": "End time must be after start time",
+  "@endTimeMustBeAfterStartTime": {
+    "description": "Time validation error"
+  },
+
+  "selectAtLeastOneDateError": "Select at least one date",
+  "@selectAtLeastOneDateError": {
+    "description": "Date selection error"
+  },
+
+  "addAtLeastOneClassroomError": "Add at least one classroom or make the class online",
+  "@addAtLeastOneClassroomError": {
+    "description": "Classroom selection error"
+  },
+
+  "selectDatesButtonText": "Select dates",
+  "@selectDatesButtonText": {
+    "description": "Select dates button text"
+  },
+
+  "onlineClassLink": "Online class link",
+  "@onlineClassLink": {
+    "description": "Online class link field label"
+  },
+
+  "enterConnectionUrl": "Enter connection URL",
+  "@enterConnectionUrl": {
+    "description": "Connection URL placeholder"
+  },
+
+  "classroomNumber": "Classroom number",
+  "@classroomNumber": {
+    "description": "Classroom number field label"
+  },
+
+  "classroomExample": "For example: A-123",
+  "@classroomExample": {
+    "description": "Classroom number example"
+  },
+
+  "campusNameOptional": "Campus name (optional)",
+  "@campusNameOptional": {
+    "description": "Campus name field label"
+  },
+
+  "campusExample": "For example: B-78",
+  "@campusExample": {
+    "description": "Campus name example"
+  },
+
+  "addClassroomDialog": "Add classroom",
+  "@addClassroomDialog": {
+    "description": "Add classroom dialog title"
+  },
+
+  "groupName": "Group name",
+  "@groupName": {
+    "description": "Group name field label"
+  },
+
+  "groupNameExample": "For example: IKBO-01-21",
+  "@groupNameExample": {
+    "description": "Group name example"
+  },
+
+  "addGroupDialog": "Add group",
+  "@addGroupDialog": {
+    "description": "Add group dialog title"
+  },
+
+  "retry": "Retry",
+  "@retry": {
+    "description": "Retry button text"
+  },
+
+  "resetFilter": "Reset filter",
+  "@resetFilter": {
+    "description": "Reset filter button text"
+  },
+
+  "supportOurService": "Support our service",
+  "@supportOurService": {
+    "description": "Support service title"
+  },
+
+  "leaveAd": "Leave ad",
+  "@leaveAd": {
+    "description": "Leave ad button text"
+  },
+
+  "disable": "Disable",
+  "@disable": {
+    "description": "Disable button text"
+  },
+
+  "errorWithMessage": "Error: {message}",
+  "@errorWithMessage": {
+    "description": "Error message with details",
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+
+  "map": "Map",
+  "@map": {
+    "description": "Map page title"
+  },
+
+  "tryAgain": "Try again",
+  "@tryAgain": {
+    "description": "Try again button text"
+  },
+
+  "announcement": "Announcement",
+  "@announcement": {
+    "description": "Announcement label"
+  },
+
+  "contact": "Contact",
+  "@contact": {
+    "description": "Contact button text"
+  },
+
+  "copiedToClipboard": "{title} copied to clipboard",
+  "@copiedToClipboard": {
+    "description": "Copied to clipboard message",
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+
+  "post": "Post",
+  "@post": {
+    "description": "Post page title"
+  },
+
+  "errorLoadingPost": "Error loading post",
+  "@errorLoadingPost": {
+    "description": "Error loading post message"
+  },
+
+  "errorLoadingContributors": "Error loading contributors",
+  "@errorLoadingContributors": {
+    "description": "Error loading contributors message"
+  },
+
+  "mireaMap": "MIREA Map",
+  "@mireaMap": {
+    "description": "MIREA Map service title"
+  },
+
+  "findNeededClassroom": "Find the needed classroom",
+  "@findNeededClassroom": {
+    "description": "MIREA Map service description"
+  },
+
+  "nfcPass": "NFC Pass",
+  "@nfcPass": {
+    "description": "NFC Pass service title"
+  },
+
+  "passForUniversityEntry": "Pass for university entry",
+  "@passForUniversityEntry": {
+    "description": "NFC Pass service description"
+  },
+
+  "cloudMireaNinja": "Cloud Mirea Ninja",
+  "@cloudMireaNinja": {
+    "description": "Cloud service title"
+  },
+
+  "mireaNinja": "Mirea Ninja",
+  "@mireaNinja": {
+    "description": "Mirea Ninja community title"
+  },
+
+  "mostPopularUnofficialChat": "Most popular unofficial chat",
+  "@mostPopularUnofficialChat": {
+    "description": "Mirea Ninja community description"
+  },
+
+  "kisDepartment": "KIS Department",
+  "@kisDepartment": {
+    "description": "KIS Department title"
+  },
+
+  "corporateInformationSystems": "Corporate Information Systems Department",
+  "@corporateInformationSystems": {
+    "description": "KIS Department description"
+  },
+
+  "ippoDepartment": "IPPO Department",
+  "@ippoDepartment": {
+    "description": "IPPO Department title"
+  },
+
+  "instrumentalAndAppliedSoftware": "Instrumental and Applied Software Department",
+  "@instrumentalAndAppliedSoftware": {
+    "description": "IPPO Department description"
+  },
+
+  "competitiveProgrammingMirea": "Competitive Programming MIREA",
+  "@competitiveProgrammingMirea": {
+    "description": "Competitive programming title"
+  },
+
+  "competitiveProgrammingDescription": "Various news and updates on competitive programming at MIREA are published here",
+  "@competitiveProgrammingDescription": {
+    "description": "Competitive programming description"
+  },
+
+  "personalAccount": "Personal Account",
+  "@personalAccount": {
+    "description": "Personal account service title"
+  },
+
+  "accessToGradesAndServices": "Access to grades, applications and other services",
+  "@accessToGradesAndServices": {
+    "description": "Personal account description"
+  },
+
+  "openAction": "Open",
+  "@openAction": {
+    "description": "Open action button"
+  },
+
+  "educationalPortal": "Educational Portal",
+  "@educationalPortal": {
+    "description": "Educational portal title"
+  },
+
+  "accessToCoursesAndMaterials": "Access to courses and materials",
+  "@accessToCoursesAndMaterials": {
+    "description": "Educational portal description"
+  },
+
+  "goToAction": "Go to",
+  "@goToAction": {
+    "description": "Go to action button"
+  },
+
+  "electronicJournal": "Electronic Journal",
+  "@electronicJournal": {
+    "description": "Electronic journal title"
+  },
+
+  "attendanceCheckSchedule": "Attendance check, schedule",
+  "@attendanceCheckSchedule": {
+    "description": "Electronic journal description"
+  },
+
+  "library": "Library",
+  "@library": {
+    "description": "Library service title"
+  },
+
+  "freeSoftware": "Free Software",
+  "@freeSoftware": {
+    "description": "Free software service title"
+  },
+
+  "cyberzone": "Cyberzone",
+  "@cyberzone": {
+    "description": "Cyberzone service title"
+  },
+
+  "handbook": "Handbook",
+  "@handbook": {
+    "description": "Handbook service title"
+  },
+
+  "scholarships": "Scholarships",
+  "@scholarships": {
+    "description": "Scholarships service title"
+  },
+
+  "militaryRegistration": "Military Registration",
+  "@militaryRegistration": {
+    "description": "Military registration service title"
+  },
+
+  "dormitories": "Dormitories",
+  "@dormitories": {
+    "description": "Dormitories service title"
+  },
+
+  "studentOffice": "Student Office",
+  "@studentOffice": {
+    "description": "Student office service title"
+  },
+
+  "certificatesDocumentsQuestions": "Certificates, documents, questions",
+  "@certificatesDocumentsQuestions": {
+    "description": "Student office description"
+  },
+
+  "careerCenter": "Career Center",
+  "@careerCenter": {
+    "description": "Career center service title"
+  },
+
+  "vacanciesAndInternships": "Vacancies and internships",
+  "@vacanciesAndInternships": {
+    "description": "Career center description"
+  },
+
+  "initiativeService": "Initiative Service",
+  "@initiativeService": {
+    "description": "Initiative service title"
+  },
+
+  "ideasAndSuggestions": "Ideas and suggestions",
+  "@ideasAndSuggestions": {
+    "description": "Initiative service description"
+  },
+
+  "virtualTour": "Virtual Tour",
+  "@virtualTour": {
+    "description": "Virtual tour service title"
+  },
+
+  "interactiveUniversityTour": "Interactive tour of university buildings",
+  "@interactiveUniversityTour": {
+    "description": "Virtual tour description"
+  },
+
+  "startupAccelerator": "Startup Accelerator",
+  "@startupAccelerator": {
+    "description": "Startup accelerator service title"
+  },
+
+  "startupSupport": "Startup and entrepreneurial ideas support",
+  "@startupSupport": {
+    "description": "Startup accelerator description"
+  },
+
+  "corporatePortal": "Corporate Portal",
+  "@corporatePortal": {
+    "description": "Corporate portal service title"
+  },
+
+  "accessForTeachersAndStaff": "Access for teachers and staff",
+  "@accessForTeachersAndStaff": {
+    "description": "Corporate portal description"
+  },
+
+  "mainServices": "Main services",
+  "@mainServices": {
+    "description": "Main services section title"
+  },
+
+  "studentLife": "Student life",
+  "@studentLife": {
+    "description": "Student life section title"
+  },
+
+  "useful": "Useful",
+  "@useful": {
+    "description": "Useful section title"
+  },
+
+  "createAccount": "Create account",
+  "@createAccount": {
+    "description": "Create account button text"
+  },
+
+  "createAccountTitle": "Create an account",
+  "@createAccountTitle": {
+    "description": "Create account dialog title"
+  },
+
+  "createAccountDescription": "We offer you to create a free account in our cloud storage so you can store your files and documents!",
+  "@createAccountDescription": {
+    "description": "Create account dialog description"
+  },
+
+  "cloudStorageDescription": "On cloud.mirea.ninja you can store up to 10 GB for free (quota can be expanded in the telegram bot), as well as share files and edit documents online together with classmates.",
+  "@cloudStorageDescription": {
+    "description": "Cloud storage service description"
+  },
+
+  "searchPlaceholder": "Search",
+  "@searchPlaceholder": {
+    "description": "Search input placeholder"
+  },
+
+  "searchInAnnouncements": "Search in announcements...",
+  "@searchInAnnouncements": {
+    "description": "Search in announcements placeholder"
+  },
+
+  "itemName": "Item name",
+  "@itemName": {
+    "description": "Item name field label"
+  },
+
+  "itemNameExample": "For example: Keys with keychain",
+  "@itemNameExample": {
+    "description": "Item name example"
+  },
+
+  "description": "Description",
+  "@description": {
+    "description": "Description field label"
+  },
+
+  "itemDescription": "Details about the item, where and when it was found/lost...",
+  "@itemDescription": {
+    "description": "Item description placeholder"
+  },
+
+  "telegram": "Telegram",
+  "@telegram": {
+    "description": "Telegram field label"
+  },
+
+  "phone": "Phone",
+  "@phone": {
+    "description": "Phone field label"
+  },
+
+  "leaveFeedback": "Leave feedback",
+  "@leaveFeedback": {
+    "description": "Leave feedback title"
+  },
+
+  "yourEmail": "Your email",
+  "@yourEmail": {
+    "description": "Email field label"
+  },
+
+  "enterEmail": "Enter email",
+  "@enterEmail": {
+    "description": "Email field placeholder"
+  },
+
+  "whatHappened": "What happened?",
+  "@whatHappened": {
+    "description": "Feedback question label"
+  },
+
+  "feedbackPlaceholder": "When I press \"X\" \"Y\" happens",
+  "@feedbackPlaceholder": {
+    "description": "Feedback placeholder text"
+  },
+
+  "exportToCalendar": "Export to calendar",
+  "@exportToCalendar": {
+    "description": "Export to calendar title"
+  },
+
+  "scheduleExported": "Schedule exported",
+  "@scheduleExported": {
+    "description": "Schedule exported success message"
+  },
+
+  "failedToExportSchedule": "Failed to export schedule",
+  "@failedToExportSchedule": {
+    "description": "Export schedule error message"
+  },
+
+  "exportSettings": "Export settings",
+  "@exportSettings": {
+    "description": "Export settings title"
+  },
+
+  "emojiInLessonTypes": "Emoji in lesson types",
+  "@emojiInLessonTypes": {
+    "description": "Emoji setting title"
+  },
+
+  "emojiExample": "Example: \"📚 Lecture\" instead of \"Lecture\"",
+  "@emojiExample": {
+    "description": "Emoji setting description"
+  },
+
+  "shortLessonTypeNames": "Short lesson type names",
+  "@shortLessonTypeNames": {
+    "description": "Short names setting title"
+  },
+
+  "shortNamesExample": "Example: \"Lec.\" instead of \"Lecture\"",
+  "@shortNamesExample": {
+    "description": "Short names setting description"
+  },
+
+  "preview": "Preview",
+  "@preview": {
+    "description": "Preview section title"
+  },
+
+  "fullTypeName": "Full type name",
+  "@fullTypeName": {
+    "description": "Full type name subtitle"
+  },
+
+  "shortTypeName": "Short type name",
+  "@shortTypeName": {
+    "description": "Short type name subtitle"
+  },
+
+  "subjectSelection": "Subject selection",
+  "@subjectSelection": {
+    "description": "Subject selection title"
+  },
+
+  "standardReminders": "Standard reminders",
+  "@standardReminders": {
+    "description": "Standard reminders title"
+  },
+
+  "cardSettings": "Card settings",
+  "@cardSettings": {
+    "description": "Card settings title"
+  },
+
+  "codeFromEmail": "Code from email",
+  "@codeFromEmail": {
+    "description": "Code from email title"
+  },
+
+  "news": "News",
+  "@news": {
+    "description": "News navigation item"
+  },
+
+  "services": "Services",
+  "@services": {
+    "description": "Services navigation item"
+  },
+
+  "profile": "Profile",
+  "@profile": {
+    "description": "Profile navigation item"
+  },
+
+  "aboutApp": "About app",
+  "@aboutApp": {
+    "description": "About app navigation item"
+  },
+
+  "settings": "Settings",
+  "@settings": {
+    "description": "Settings navigation item"
+  },
+
+  "classroomNumber": "Classroom {name}",
+  "@classroomNumber": {
+    "description": "Classroom number title",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+
+  "findScheduleForClassroom": "You can quickly find a schedule for this classroom using schedule search.",
+  "@findScheduleForClassroom": {
+    "description": "Classroom schedule search description"
+  },
+
+  "rtuMireaApp": "RTU MIREA App",
+  "@rtuMireaApp": {
+    "description": "App title"
+  },
+
+  "newYearHolidays": "New Year holidays",
+  "@newYearHolidays": {
+    "description": "New Year holidays title"
+  },
+
+  "winterVacation": "Winter vacation",
+  "@winterVacation": {
+    "description": "Winter vacation title"
+  },
+
+  "defenderOfFatherlandDay": "Defender of the Fatherland Day",
+  "@defenderOfFatherlandDay": {
+    "description": "Defender of the Fatherland Day title"
+  },
+
+  "internationalWomensDay": "International Women's Day",
+  "@internationalWomensDay": {
+    "description": "International Women's Day title"
+  },
+
+  "springAndLaborDay": "Spring and Labor Day",
+  "@springAndLaborDay": {
+    "description": "Spring and Labor Day title"
+  },
+
+  "victoryDay": "Victory Day",
+  "@victoryDay": {
+    "description": "Victory Day title"
+  },
+
+  "russiaDay": "Russia Day",
+  "@russiaDay": {
+    "description": "Russia Day title"
+  },
+
+  "nationalUnityDay": "National Unity Day",
+  "@nationalUnityDay": {
+    "description": "National Unity Day title"
+  },
+
+  "newYear": "New Year",
+  "@newYear": {
+    "description": "New Year title"
+  },
+
+  "total": "Total",
+  "@total": {
+    "description": "Total label"
+  },
+
+  "lectures": "Lectures",
+  "@lectures": {
+    "description": "Lectures label"
+  },
+
+  "practicals": "Practicals",
+  "@practicals": {
+    "description": "Practicals label"
+  },
+
+  "labs": "Labs",
+  "@labs": {
+    "description": "Labs label"
+  },
+
+  "justNow": "just now",
+  "@justNow": {
+    "description": "Just now time label"
+  },
+
+  "unknown": "Unknown",
+  "@unknown": {
+    "description": "Unknown author label"
+  },
+
+  "status": "Status",
+  "@status": {
+    "description": "Status label"
+  },
+
+  "active": "Active",
+  "@active": {
+    "description": "Active status"
+  },
+
+  "phoneContact": "Phone: {phoneNumber}",
+  "@phoneContact": {
+    "description": "Phone contact label",
+    "placeholders": {
+      "phoneNumber": {
+        "type": "String"
+      }
+    }
+  }
+}
