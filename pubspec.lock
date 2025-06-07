@@ -30,7 +30,7 @@ packages:
     source: path
     version: "0.1.1+2"
   account_repository:
-    dependency: "direct main"
+    dependency: "direct overridden"
     description:
       path: "packages/neon/packages/neon_framework/packages/account_repository"
       relative: true
@@ -165,10 +165,10 @@ packages:
     dependency: transitive
     description:
       name: asn1lib
-      sha256: "1c296cd268f486cabcc3930e9b93a8133169305f18d722916e675959a88f6d2c"
+      sha256: "0511d6be23b007e95105ae023db599aea731df604608978dada7f9faf2637623"
       url: "https://pub.dev"
     source: hosted
-    version: "1.5.9"
+    version: "1.6.4"
   async:
     dependency: transitive
     description:
@@ -325,26 +325,26 @@ packages:
     dependency: transitive
     description:
       name: camera_android_camerax
-      sha256: "7cc6adf1868bdcf4e63a56b24b41692dfbad2bec1cdceea451c77798f6a605c3"
+      sha256: "0bd3d1645df00af2540a22df13ba466ac5fb2838a09bce4089cecdb1712a9e94"
       url: "https://pub.dev"
     source: hosted
-    version: "0.6.13"
+    version: "0.6.18"
   camera_avfoundation:
     dependency: transitive
     description:
       name: camera_avfoundation
-      sha256: "1eeb9ce7c9a397e312343fd7db337d95f35c3e65ad5a62ff637c8abce5102b98"
+      sha256: fdc0e668f65c8ddfb3be6c10ef4737fb6274cd04d8053a9525d410642f7989c0
       url: "https://pub.dev"
     source: hosted
-    version: "0.9.18+8"
+    version: "0.9.19+1"
   camera_platform_interface:
     dependency: transitive
     description:
       name: camera_platform_interface
-      sha256: "953e7baed3a7c8fae92f7200afeb2be503ff1a17c3b4e4ed7b76f008c2810a31"
+      sha256: "2f757024a48696ff4814a789b0bd90f5660c0fb25f393ab4564fb483327930e2"
       url: "https://pub.dev"
     source: hosted
-    version: "2.9.0"
+    version: "2.10.0"
   camera_web:
     dependency: transitive
     description:
@@ -475,11 +475,9 @@ packages:
   cookie_store:
     dependency: transitive
     description:
-      path: "packages/cookie_store"
-      ref: HEAD
-      resolved-ref: "6de0eacd85300b225e5edff0eb0920f1e3c31528"
-      url: "https://github.com/nextcloud/neon"
-    source: git
+      path: "packages/neon/packages/cookie_store"
+      relative: true
+    source: path
     version: "0.1.0"
   coverage:
     dependency: transitive
@@ -628,10 +626,10 @@ packages:
     dependency: transitive
     description:
       name: dev_build
-      sha256: "6cb4c65446aedd671ffdaacbede599b6fb9c462b17d006f11f7b82fe90706bff"
+      sha256: fda8a54458b2a873a84e0cd1513f4323a1fb0599ed5455245359bc0398bad9ee
       url: "https://pub.dev"
     source: hosted
-    version: "1.1.1+8"
+    version: "1.1.2+11"
   device_calendar:
     dependency: "direct main"
     description:
@@ -714,7 +712,7 @@ packages:
     source: git
     version: "1.7.0"
   dynamite_runtime:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: dynamite_runtime
       sha256: "4027734d43e2f31e2733a845cbd732889faf4f8e2705df5b561443eddcac2d1f"
@@ -802,13 +800,13 @@ packages:
     source: hosted
     version: "7.0.1"
   file_picker:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: file_picker
-      sha256: "8986dec4581b4bcd4b6df5d75a2ea0bede3db802f500635d05fa8be298f9467f"
+      sha256: "77f8e81d22d2a07d0dee2c62e1dda71dc1da73bf43bb2d45af09727406167964"
       url: "https://pub.dev"
     source: hosted
-    version: "10.1.2"
+    version: "10.1.9"
   file_selector_linux:
     dependency: transitive
     description:
@@ -842,14 +840,14 @@ packages:
     source: hosted
     version: "0.9.3+4"
   files_app:
-    dependency: "direct main"
+    dependency: "direct overridden"
     description:
       path: "packages/neon/packages/neon_framework/packages/files_app"
       relative: true
     source: path
     version: "1.0.0"
   filesize:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: filesize
       sha256: f53df1f27ff60e466eefcd9df239e02d4722d5e2debee92a87dfd99ac66de2af
@@ -977,10 +975,10 @@ packages:
     dependency: transitive
     description:
       name: flutter_blurhash
-      sha256: d472467141a279885be558335fe36a782e515f96cc5e372eee2c558ff2c2fb39
+      sha256: e97b9aff13b9930bbaa74d0d899fec76e3f320aba3190322dcc5d32104e3d25d
       url: "https://pub.dev"
     source: hosted
-    version: "0.9.0"
+    version: "0.9.1"
   flutter_cache_manager:
     dependency: "direct main"
     description:
@@ -1185,10 +1183,10 @@ packages:
     dependency: transitive
     description:
       name: flutter_local_notifications
-      sha256: "33b3e0269ae9d51669957a923f2376bee96299b09915d856395af8c4238aebfa"
+      sha256: b94a50aabbe56ef254f95f3be75640f99120429f0a153b2dc30143cffc9bfdf3
       url: "https://pub.dev"
     source: hosted
-    version: "19.1.0"
+    version: "19.2.1"
   flutter_local_notifications_linux:
     dependency: transitive
     description:
@@ -1235,7 +1233,7 @@ packages:
     source: hosted
     version: "0.7.6+2"
   flutter_material_design_icons:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: flutter_material_design_icons
       sha256: ffb0be14d206cb4cd8501ce738bdfc5654130cb5f70911905694a2c1ee9f05b1
@@ -1392,10 +1390,10 @@ packages:
     dependency: transitive
     description:
       name: flutter_zxing
-      sha256: "5b2670f151a6d96643204ff3a781e073739c23a91ef5fc39742bf13fb8287b4c"
+      sha256: "90de8b25947111e090214c0409a3363561b444d395cb3feab9207ac4ee247c94"
       url: "https://pub.dev"
     source: hosted
-    version: "1.8.2"
+    version: "2.1.0"
   font_awesome_flutter:
     dependency: "direct main"
     description:
@@ -1751,11 +1749,9 @@ packages:
   interceptor_http_client:
     dependency: transitive
     description:
-      path: "packages/interceptor_http_client"
-      ref: HEAD
-      resolved-ref: "6de0eacd85300b225e5edff0eb0920f1e3c31528"
-      url: "https://github.com/nextcloud/neon"
-    source: git
+      path: "packages/neon/packages/interceptor_http_client"
+      relative: true
+    source: path
     version: "0.1.0"
   intl:
     dependency: "direct main"
@@ -1949,7 +1945,7 @@ packages:
     source: hosted
     version: "6.3.2"
   meta:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: meta
       sha256: e3641ec5d63ebf0d9b41bd43201a66e3fc79a65db5f61fc181f04cd27aab950c
@@ -1997,7 +1993,7 @@ packages:
     source: hosted
     version: "0.3.4"
   neon_framework:
-    dependency: "direct main"
+    dependency: "direct overridden"
     description:
       path: "packages/neon/packages/neon_framework"
       relative: true
@@ -2033,12 +2029,12 @@ packages:
     source: path
     version: "1.0.0+1"
   nextcloud:
-    dependency: "direct overridden"
+    dependency: "direct main"
     description:
       path: "packages/nextcloud"
-      ref: c4be1b2
-      resolved-ref: c4be1b2328c1e788dfb162e4a0db3eec69255306
-      url: "https://github.com/nextcloud/neon"
+      ref: main
+      resolved-ref: "3b3f43fa004a708f391068b1925356b23aff8748"
+      url: "https://github.com/0niel/neon"
     source: git
     version: "8.1.0"
   nfc_pass_client:
@@ -2073,11 +2069,9 @@ packages:
   notifications_push_repository:
     dependency: transitive
     description:
-      path: "packages/neon_framework/packages/notifications_push_repository"
-      ref: HEAD
-      resolved-ref: "6de0eacd85300b225e5edff0eb0920f1e3c31528"
-      url: "https://github.com/nextcloud/neon"
-    source: git
+      path: "packages/neon/packages/neon_framework/packages/notifications_push_repository"
+      relative: true
+    source: path
     version: "0.1.0"
   notifications_repository:
     dependency: "direct main"
@@ -2097,12 +2091,11 @@ packages:
   open_filex:
     dependency: "direct main"
     description:
-      path: "."
-      ref: HEAD
-      resolved-ref: "7ec56421afc37bb2cc3cb751b9775999cd2d9a61"
-      url: "https://github.com/mufassalhussain/open_filex"
-    source: git
-    version: "4.6.0"
+      name: open_filex
+      sha256: "9976da61b6a72302cf3b1efbce259200cd40232643a467aac7370addf94d6900"
+      url: "https://pub.dev"
+    source: hosted
+    version: "4.7.0"
   package_config:
     dependency: transitive
     description:
@@ -2135,7 +2128,7 @@ packages:
     source: hosted
     version: "3.1.0"
   path:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: path
       sha256: "75cca69d1490965be98c73ceaea117e8a04dd21217b37b292c9ddbec0d955bc5"
@@ -2384,10 +2377,10 @@ packages:
     dependency: transitive
     description:
       name: process_run
-      sha256: a68fa9727392edad97a2a96a77ce8b0c17d28336ba1b284b1dfac9595a4299ea
+      sha256: "6ec839cdd3e6de4685318e7686cd4abb523c3d3a55af0e8d32a12ae19bc66622"
       url: "https://pub.dev"
     source: hosted
-    version: "1.2.2+1"
+    version: "1.2.4"
   proj4dart:
     dependency: transitive
     description:
@@ -2453,7 +2446,7 @@ packages:
     source: hosted
     version: "1.5.0"
   queue:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: queue
       sha256: "9bc29632072f4dac6cd0056acbb63361f654e2def9ceb4b08cfe0f9cf5618409"
@@ -2472,10 +2465,10 @@ packages:
     dependency: transitive
     description:
       name: quick_actions_android
-      sha256: "926e50d6f879287b34d21934e6c9457f0d851f554179f2a9e8136c4acd1b7062"
+      sha256: "8d88e90a236ffe92f1026ecc3b85acfefedffccb0c1be1c94c1c0298e8483ad8"
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.18"
+    version: "1.0.21"
   quick_actions_ios:
     dependency: transitive
     description:
@@ -2564,7 +2557,7 @@ packages:
     source: path
     version: "0.1.1+2"
   rxdart:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: rxdart
       sha256: "5c3004a4a8dbb94bd4bf5412a4def4acdaa12e12f269737a5751369e12d1a962"
@@ -2706,18 +2699,18 @@ packages:
     dependency: "direct main"
     description:
       name: share_plus
-      sha256: fce43200aa03ea87b91ce4c3ac79f0cecd52e2a7a56c7a4185023c271fbfa6da
+      sha256: b2961506569e28948d75ec346c28775bb111986bb69dc6a20754a457e3d97fa0
       url: "https://pub.dev"
     source: hosted
-    version: "10.1.4"
+    version: "11.0.0"
   share_plus_platform_interface:
     dependency: transitive
     description:
       name: share_plus_platform_interface
-      sha256: cc012a23fc2d479854e6c80150696c4a5f5bb62cb89af4de1c505cf78d0a5d0b
+      sha256: "1032d392bc5d2095a77447a805aa3f804d2ae6a4d5eef5e6ebb3bd94c1bc19ef"
       url: "https://pub.dev"
     source: hosted
-    version: "5.0.2"
+    version: "6.0.0"
   shared_preferences:
     dependency: "direct main"
     description:
@@ -2862,11 +2855,9 @@ packages:
   sort_box:
     dependency: transitive
     description:
-      path: "packages/neon_framework/packages/sort_box"
-      ref: HEAD
-      resolved-ref: "6de0eacd85300b225e5edff0eb0920f1e3c31528"
-      url: "https://github.com/nextcloud/neon"
-    source: git
+      path: "packages/neon/packages/neon_framework/packages/sort_box"
+      relative: true
+    source: path
     version: "1.0.0"
   source_gen:
     dependency: transitive
@@ -2951,10 +2942,10 @@ packages:
     dependency: transitive
     description:
       name: sqflite_common_ffi
-      sha256: "883dd810b2b49e6e8c3b980df1829ef550a94e3f87deab5d864917d27ca6bf36"
+      sha256: "1f3ef3888d3bfbb47785cc1dda0dc7dd7ebd8c1955d32a9e8e9dae1e38d1c4c1"
       url: "https://pub.dev"
     source: hosted
-    version: "2.3.4+4"
+    version: "2.3.5"
   sqflite_common_ffi_web:
     dependency: transitive
     description:
@@ -2983,10 +2974,10 @@ packages:
     dependency: transitive
     description:
       name: sqlite3
-      sha256: "32b632dda27d664f85520093ed6f735ae5c49b5b75345afb8b19411bc59bb53d"
+      sha256: c0503c69b44d5714e6abbf4c1f51a3c3cc42b75ce785f44404765e4635481d38
       url: "https://pub.dev"
     source: hosted
-    version: "2.7.4"
+    version: "2.7.6"
   stack_trace:
     dependency: transitive
     description:
@@ -3229,28 +3220,28 @@ packages:
     dependency: transitive
     description:
       name: unifiedpush
-      sha256: "6dbed5a6305ca33f1865c7a3d814ae39476b79a2d23ca76a5708f023f405730f"
+      sha256: "1418375efb580af9640de4eaf4209cb6481f9a48792648ced3051f30e67d9568"
       url: "https://pub.dev"
     source: hosted
-    version: "5.0.2"
+    version: "6.0.2"
   unifiedpush_android:
     dependency: transitive
     description:
       name: unifiedpush_android
-      sha256: "7443dece0a850ae956514f809983eb2b39fc518c2c7d24dbfe817198bec89134"
+      sha256: "0dddc0440c7d310f2069d184e09785e67a9f001e064a046a305859612fe84d0d"
       url: "https://pub.dev"
     source: hosted
-    version: "2.3.0"
+    version: "3.1.0"
   unifiedpush_platform_interface:
     dependency: transitive
     description:
       name: unifiedpush_platform_interface
-      sha256: dd588d78a8b2bfc10430e30035526e98caa543d0b7364a6344b5eb4815721c6d
+      sha256: bb49d2748211520e35e0374ab816faa8a2c635267e71909d334ad868d532eba5
       url: "https://pub.dev"
     source: hosted
-    version: "2.0.2"
+    version: "3.0.1"
   universal_io:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: universal_io
       sha256: "1722b2dcc462b4b2f3ee7d188dad008b6eb4c40bbd03a3de451d82c78bba9aad"
@@ -3602,10 +3593,10 @@ packages:
     dependency: transitive
     description:
       name: window_manager
-      sha256: "732896e1416297c63c9e3fb95aea72d0355f61390263982a47fd519169dc5059"
+      sha256: "51d50168ab267d344b975b15390426b1243600d436770d3f13de67e55b05ec16"
       url: "https://pub.dev"
     source: hosted
-    version: "0.4.3"
+    version: "0.5.0"
   wkt_parser:
     dependency: transitive
     description:
@@ -3672,4 +3663,4 @@ packages:
     version: "2.0.3"
 sdks:
   dart: ">=3.7.0 <4.0.0"
-  flutter: ">=3.27.0"
+  flutter: ">=3.29.0"

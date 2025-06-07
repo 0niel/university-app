@@ -13,8 +13,8 @@ dependency_overrides:
   value_layout_builder: ^0.4.0
   nextcloud:
     git:
-      url: https://github.com/nextcloud/neon
-      ref: c4be1b2
+      url: https://github.com/0niel/neon
+      ref: main
       path: packages/nextcloud
   bloc_concurrency: ^0.3.0
   hydrated_bloc:
@@ -32,8 +32,7 @@ dependency_overrides:
       url: https://github.com/0niel/bloc
       path: packages/flutter_bloc
       ref: master
-  open_filex:
-    git:
-      url: https://github.com/mufassalhussain/open_filex
+  open_filex: ^4.7.0
   flutter_secure_storage: ^9.2.2
   flutter_native_splash: ^2.4.3
+

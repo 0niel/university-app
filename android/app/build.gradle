@@ -51,7 +51,6 @@ android {
     productFlavors {
         development {
             dimension "default"
-            applicationIdSuffix ".dev"
             manifestPlaceholders = [appName: "Ninja Mirea [DEV]"]
         }
         production {
@@ -101,6 +100,21 @@ android {
 
 flutter {
     source '../..'
+}
+
+configurations.all {
+    resolutionStrategy {
+        force 'com.google.crypto.tink:tink-android:1.9.0'
+        
+        // Exclude the conflicting tink library
+        eachDependency { details ->
+            if (details.requested.group == 'com.google.crypto.tink' && details.requested.name == 'tink') {
+                details.useTarget group: 'com.google.crypto.tink', name: 'tink-android', version: '1.9.0'
+            }
+        }
+    }
+
+    exclude group: 'com.google.crypto.tink', module: 'tink'
 }
 
 dependencies {
