@@ -8,22 +8,36 @@ class EmptyLessonCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDesktop = MediaQuery.of(context).size.width > 800;
+
     return Card(
       margin: const EdgeInsets.all(0),
-      color:
-          Theme.of(context).brightness == Brightness.dark
-              ? Theme.of(context).extension<AppColors>()!.background03
-              : Theme.of(context).extension<AppColors>()!.background02,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
+      color: Theme.of(context).extension<AppColors>()!.surface.withOpacity(0.3),
       surfaceTintColor: Colors.transparent,
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: Theme.of(context).extension<AppColors>()!.background03.withOpacity(0.3), width: 1),
+      ),
       child: Container(
-        constraints: const BoxConstraints(minHeight: 60),
-        padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
+        constraints: const BoxConstraints(minHeight: 52),
+        padding: EdgeInsets.symmetric(vertical: isDesktop ? 10 : 12, horizontal: isDesktop ? 12 : 16),
         child: Row(
           children: [
             Text(
               '$lessonNumber пара',
-              style: AppTextStyle.body.copyWith(color: Theme.of(context).extension<AppColors>()!.colorful03),
+              style: AppTextStyle.captionL.copyWith(
+                color: Theme.of(context).extension<AppColors>()!.deactive.withOpacity(0.8),
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const Spacer(),
+            Text(
+              'Свободно',
+              style: AppTextStyle.captionL.copyWith(
+                color: Theme.of(context).extension<AppColors>()!.deactive.withOpacity(0.6),
+                fontWeight: FontWeight.w400,
+              ),
             ),
           ],
         ),
