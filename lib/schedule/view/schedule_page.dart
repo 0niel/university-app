@@ -429,6 +429,25 @@ class _ListModeView extends StatelessWidget {
             .where((day) => day.isAfter(today) || day.isAtSameMomentAs(today))
             .map((day) => MapEntry(day, lessonsByDay[day]))
             .toList();
+
+    final hasUpcomingLessons = filteredLessonsByDay.any(
+      (entry) => entry.value?.whereType<LessonSchedulePart>().isNotEmpty == true,
+    );
+
+    if (!hasUpcomingLessons) {
+      return FailureScreen(
+        title: 'Нет предстоящих занятий',
+        description:
+            'В ближайшее время занятий не запланировано. Переключитесь на календарь, чтобы посмотреть расписание за другие дни.',
+        icon: Icons.event_busy,
+        buttonText: 'Переключиться на календарь',
+        buttonIcon: Icons.calendar_month,
+        onButtonPressed: () {
+          context.read<ScheduleBloc>().add(const ToggleListMode());
+        },
+      );
+    }
+
     return CustomScrollView(
       slivers: [
         const SliverToBoxAdapter(child: StickyAd()),

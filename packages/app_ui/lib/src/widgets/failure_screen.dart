@@ -10,7 +10,8 @@ class FailureScreen extends StatelessWidget {
   ///
   /// The [title] parameter is required.
   const FailureScreen({
-    required this.title, super.key,
+    required this.title,
+    super.key,
     this.description,
     this.icon,
     this.iconSize = 40,
@@ -102,7 +103,7 @@ class FailureScreen extends StatelessWidget {
               PrimaryButton(
                 onPressed: onButtonPressed,
                 icon: Icon(buttonIcon ?? Icons.add),
-                text: title,
+                text: buttonText!,
               ),
             ],
           ],
