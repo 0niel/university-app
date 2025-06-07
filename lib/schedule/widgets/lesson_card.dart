@@ -182,94 +182,99 @@ class _LessonCardState extends State<LessonCard> {
     return RepaintBoundary(
       child: Card(
         margin: const EdgeInsets.all(0),
-        color: isActive ? lessonColor.withOpacity(0.05) : Theme.of(context).extension<AppColors>()!.surface,
+        color: Theme.of(context).extension<AppColors>()!.surface,
         surfaceTintColor: Colors.transparent,
-        child: Theme(
-          data: Theme.of(
-            context,
-          ).copyWith(splashColor: lessonColor.withOpacity(0.1), highlightColor: Colors.transparent),
-          child: PlatformInkWell(
-            borderRadius: BorderRadius.circular(14),
-            onTap: () => widget.onTap?.call(widget.lesson),
-            child: Stack(
-              children: [
-                if (_progress != null)
-                  Positioned(
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    child: TweenAnimationBuilder<double>(
-                      tween: Tween<double>(begin: _progress!, end: _progress!),
-                      duration: const Duration(milliseconds: 300),
-                      builder: (context, animatedProgress, child) {
-                        return GradientProgressBar(
-                          progress: animatedProgress,
-                          height: 3,
-                          startColor: lessonColor,
-                          endColor: lessonColor.withOpacity(0.7),
-                        );
-                      },
-                    ),
-                  ),
-                Container(
-                  constraints: const BoxConstraints(minHeight: 75),
-                  padding: EdgeInsets.only(
-                    top: _progress != null ? (isDesktop ? 12 : 16) : (isDesktop ? 8 : 12),
-                    bottom: isDesktop ? 8 : 12,
-                    left: isDesktop ? 12 : 16,
-                    right: isDesktop ? 12 : 16,
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        widget.lesson.subject,
-                        style: AppTextStyle.titleM.copyWith(height: 1.3, fontWeight: FontWeight.w600),
-                        maxLines: 3,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: 10),
-                      SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        child: Row(
-                          children: [
-                            _buildTag(
-                              context,
-                              '${widget.lesson.lessonBells.startTime} - ${widget.lesson.lessonBells.endTime}',
-                              lessonColor,
-                              isHighlighted: true,
-                              icon: HugeIcons.strokeRoundedClock01,
-                            ),
-                            const SizedBox(width: 8),
-                            _buildTag(
-                              context,
-                              '${widget.lesson.lessonBells.number} пара',
-                              lessonColor.withOpacity(0.7),
-                              showBorder: true,
-                            ),
-                            const SizedBox(width: 8),
-                            _buildTag(context, LessonCard.getLessonTypeName(widget.lesson.lessonType), lessonColor),
-                          ],
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(14),
+          child: Container(
+            decoration: BoxDecoration(color: isActive ? lessonColor.withOpacity(0.02) : Colors.transparent),
+            child: Theme(
+              data: Theme.of(
+                context,
+              ).copyWith(splashColor: lessonColor.withOpacity(0.1), highlightColor: Colors.transparent),
+              child: PlatformInkWell(
+                borderRadius: BorderRadius.circular(14),
+                onTap: () => widget.onTap?.call(widget.lesson),
+                child: Stack(
+                  children: [
+                    if (_progress != null)
+                      Positioned(
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        child: TweenAnimationBuilder<double>(
+                          tween: Tween<double>(begin: _progress!, end: _progress!),
+                          duration: const Duration(milliseconds: 300),
+                          builder: (context, animatedProgress, child) {
+                            return GradientProgressBar(
+                              progress: animatedProgress,
+                              height: 3,
+                              startColor: lessonColor,
+                              endColor: lessonColor.withOpacity(0.7),
+                            );
+                          },
                         ),
                       ),
-                      // Details section
-                      Animate(autoPlay: false).toggle(
-                        builder: (_, value, child) {
-                          return AnimatedSize(
-                            duration: const Duration(milliseconds: 150),
-                            child: state.isMiniature ? const SizedBox() : _buildDetailsSection(context),
-                          );
-                        },
+                    Container(
+                      constraints: const BoxConstraints(minHeight: 75),
+                      padding: EdgeInsets.only(
+                        top: _progress != null ? (isDesktop ? 12 : 16) : (isDesktop ? 8 : 12),
+                        bottom: isDesktop ? 8 : 12,
+                        left: isDesktop ? 12 : 16,
+                        right: isDesktop ? 12 : 16,
                       ),
-                      // Comments
-                      _buildCommentAlert(context, state.comments),
-                      // Group indicator for overlapping lessons
-                      if ((widget.indexInGroup != null && widget.countInGroup != null) && widget.countInGroup! > 1)
-                        _buildGroupIndicator(context),
-                    ],
-                  ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            widget.lesson.subject,
+                            style: AppTextStyle.titleM.copyWith(height: 1.3, fontWeight: FontWeight.w600),
+                            maxLines: 3,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 10),
+                          SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            child: Row(
+                              children: [
+                                _buildTag(
+                                  context,
+                                  '${widget.lesson.lessonBells.startTime} - ${widget.lesson.lessonBells.endTime}',
+                                  lessonColor,
+                                  isHighlighted: true,
+                                  icon: HugeIcons.strokeRoundedClock01,
+                                ),
+                                const SizedBox(width: 8),
+                                _buildTag(
+                                  context,
+                                  '${widget.lesson.lessonBells.number} пара',
+                                  lessonColor.withOpacity(0.7),
+                                  showBorder: true,
+                                ),
+                                const SizedBox(width: 8),
+                                _buildTag(context, LessonCard.getLessonTypeName(widget.lesson.lessonType), lessonColor),
+                              ],
+                            ),
+                          ),
+                          Animate(autoPlay: false).toggle(
+                            builder: (_, value, child) {
+                              return AnimatedSize(
+                                duration: const Duration(milliseconds: 150),
+                                child: state.isMiniature ? const SizedBox() : _buildDetailsSection(context),
+                              );
+                            },
+                          ),
+                          // Comments
+                          _buildCommentAlert(context, state.comments),
+                          // Group indicator for overlapping lessons
+                          if ((widget.indexInGroup != null && widget.countInGroup != null) && widget.countInGroup! > 1)
+                            _buildGroupIndicator(context),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
           ),
         ),
