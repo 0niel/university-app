@@ -1,0 +1,193 @@
+{
+  "folders": [
+    {
+      "name": "📱 Flutter App",
+      "path": "./"
+    },
+    {
+      "name": "🔧 API Server",
+      "path": "./api"
+    },
+    {
+      "name": "📦 Flutter Packages",
+      "path": "./packages"
+    },
+    {
+      "name": "🌐 API Packages",
+      "path": "./api/packages"
+    },
+    {
+      "name": "⚡ Supabase Functions",
+      "path": "./supabase/functions"
+    },
+    {
+      "name": "⌚ Wear OS",
+      "path": "./wear"
+    },
+    {
+      "name": "🔐 Supabase Config",
+      "path": "./supabase"
+    }
+  ],
+  "settings": {
+    "files.exclude": {
+      "**/.git": true,
+      "**/.svn": true,
+      "**/.hg": true,
+      "**/CVS": true,
+      "**/.DS_Store": true,
+      "**/Thumbs.db": true,
+      "**/.dart_tool": true,
+      "**/build": true,
+      "**/.flutter-plugins": true,
+      "**/.flutter-plugins-dependencies": true,
+      "**/.packages": true,
+      "**/pubspec.lock": false,
+      "**/*.g.dart": false,
+      "**/*.freezed.dart": false
+    },
+    "search.exclude": {
+      "**/node_modules": true,
+      "**/build": true,
+      "**/.dart_tool": true,
+      "**/coverage": true,
+      "**/dist": true
+    },
+    "dart.flutterSdkPath": null,
+    "dart.analysisExcludedFolders": ["build", ".dart_tool"],
+    "editor.codeActionsOnSave": {
+      "source.fixAll": "explicit",
+      "source.organizeImports": "explicit"
+    },
+    "editor.formatOnSave": true,
+    "dart.lineLength": 80,
+    "dart.insertArgumentPlaceholders": false,
+    "dart.enableSdkFormatter": true,
+    "dart.previewFlutterUiGuides": true,
+    "dart.previewFlutterUiGuidesCustomTracking": true,
+    "files.associations": {
+      "*.arb": "json",
+      "pubspec.yaml": "yaml",
+      "analysis_options.yaml": "yaml",
+      "*.freezed.dart": "dart",
+      "*.g.dart": "dart"
+    }
+  },
+  "extensions": {
+    "recommendations": [
+      "dart-code.dart-code",
+      "dart-code.flutter",
+      "ms-vscode.vscode-json",
+      "redhat.vscode-yaml",
+      "ms-vscode.vscode-typescript-next",
+      "bradlc.vscode-tailwindcss",
+      "esbenp.prettier-vscode",
+      "usernamehw.errorlens",
+      "christian-kohler.path-intellisense",
+      "formulahendry.auto-rename-tag",
+      "ms-vscode.vscode-todo-highlight",
+      "gruntfuggly.todo-tree"
+    ]
+  },
+  "launch": {
+    "version": "0.2.0",
+    "configurations": [
+      {
+        "name": "Flutter (Development)",
+        "type": "dart",
+        "request": "launch",
+        "program": "lib/main/bootstrap.dart",
+        "args": ["--flavor", "development", "--dart-define=FLAVOR=development"]
+      },
+      {
+        "name": "Flutter (Staging)",
+        "type": "dart",
+        "request": "launch",
+        "program": "lib/main/bootstrap.dart",
+        "args": ["--flavor", "staging", "--dart-define=FLAVOR=staging"]
+      },
+      {
+        "name": "Flutter (Production)",
+        "type": "dart",
+        "request": "launch",
+        "program": "lib/main/bootstrap.dart",
+        "args": ["--flavor", "production", "--dart-define=FLAVOR=production"]
+      },
+      {
+        "name": "Wear OS App",
+        "type": "dart",
+        "request": "launch",
+        "program": "wear/lib/main.dart",
+        "cwd": "wear/"
+      }
+    ]
+  },
+  "tasks": {
+    "version": "2.0.0",
+    "tasks": [
+      {
+        "label": "Flutter: Clean & Get Dependencies",
+        "type": "shell",
+        "command": "flutter",
+        "args": ["clean"],
+        "group": "build",
+        "presentation": {
+          "echo": true,
+          "reveal": "always",
+          "focus": false,
+          "panel": "shared"
+        },
+        "dependsOrder": "sequence",
+        "dependsOn": ["Flutter: Get Dependencies"]
+      },
+      {
+        "label": "Flutter: Get Dependencies",
+        "type": "shell",
+        "command": "flutter",
+        "args": ["pub", "get"],
+        "group": "build"
+      },
+      {
+        "label": "Melos: Bootstrap",
+        "type": "shell",
+        "command": "melos",
+        "args": ["bootstrap"],
+        "group": "build",
+        "presentation": {
+          "echo": true,
+          "reveal": "always",
+          "focus": false,
+          "panel": "shared"
+        }
+      },
+      {
+        "label": "Melos: Clean",
+        "type": "shell",
+        "command": "melos",
+        "args": ["clean"],
+        "group": "build"
+      },
+      {
+        "label": "Flutter: Build Runner",
+        "type": "shell",
+        "command": "flutter",
+        "args": [
+          "packages",
+          "pub",
+          "run",
+          "build_runner",
+          "build",
+          "--delete-conflicting-outputs"
+        ],
+        "group": "build"
+      },
+      {
+        "label": "Flutter: Generate L10n",
+        "type": "shell",
+        "command": "flutter",
+        "args": ["gen-l10n"],
+        "group": "build"
+      }
+    ]
+  }
+}
