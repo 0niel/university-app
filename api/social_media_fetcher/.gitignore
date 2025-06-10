@@ -1,0 +1,133 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Environment files
+.env.local
+.env.development
+.env.production
+.env.staging
+.env.social-media
+
+# Session files and authentication data
+*.session
+*.session-journal
+data/
+sessions/
+auth/
+
+# Logs
+*.log
+logs/
+log/
+
+# Cache
+.cache/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Docker
+.dockerignore
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.bak
+*.backup
+
+# Media files downloaded by the service
+downloads/
+media/
+attachments/
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Configuration backups
+config.backup
+settings.backup
+
+# SSL certificates
+*.pem
+*.key
+*.crt
+*.cert
+
+# Sensitive data
+secrets/
+private/
+credentials/
+
+# Runtime
+*.pid
+*.lock
+
+# Test coverage
+.coverage.*
+coverage.xml
+*.cover
+.hypothesis/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# pyenv
+.python-version
+
+# pipenv
+Pipfile.lock
+
+# Poetry
+poetry.lock
+
+# Monitoring and profiling
+.prof

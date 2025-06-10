@@ -1,0 +1,42 @@
+# Core web framework
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+
+# Telegram client
+pyrogram==2.0.106
+tgcrypto==1.2.5
+
+# VK API client
+vk-api==11.9.9
+
+# HTTP client and web scraping
+httpx==0.25.2
+aiohttp==3.9.1
+beautifulsoup4==4.12.2
+lxml==4.9.3
+
+# Data processing
+pydantic==2.5.0
+pydantic-settings==2.1.0
+python-multipart==0.0.6
+
+# Database and caching
+redis==5.0.1
+aioredis==2.0.1
+
+# Utilities
+python-dotenv==1.0.0
+loguru==0.7.2
+schedule==1.2.0
+
+# Date and time handling
+python-dateutil==2.8.2
+
+# JSON handling
+orjson==3.9.10
+
+# Rate limiting
+slowapi==0.1.9
+
+# Health checks
+psutil==5.9.6 
