@@ -10,10 +10,10 @@ from pyrogram import Client, enums, filters
 from pyrogram.errors import FloodWait, RPCError
 from pyrogram.types import Message
 
-from .config import Settings
-from .interfaces import SocialMediaClient
+from ...config import Settings
+from ...models import SocialMediaPost
+from ..base.interfaces import SocialMediaClient
 from .models import (
-    SocialMediaPost,
     TelegramChannelInfo,
     TelegramEntity,
     TelegramMedia,
@@ -26,9 +26,16 @@ class TelegramFetcher(SocialMediaClient):
 
     def __init__(self, config: Optional[Settings] = None):
         """Initialize the Telegram fetcher."""
-        super().__init__(name="Telegram Fetcher", client_type="telegram")
-
         self.config = config or Settings()
+        client_config = self.config.get_client_config("telegram")
+        auto_sync_enabled = client_config.get("auto_sync_enabled", True)
+        
+        super().__init__(
+            name="Telegram Fetcher", 
+            client_type="telegram",
+            auto_sync_enabled=auto_sync_enabled
+        )
+
         self.client: Optional[Client] = None
         self.session_dir = "./sessions"
 
@@ -41,31 +48,49 @@ class TelegramFetcher(SocialMediaClient):
         return self.config.telegram_configured
 
     async def initialize(self) -> None:
-        """Initialize the Telegram client."""
+        """Initialize the Telegram client in user mode only."""
+        logger.info(f"Attempting to initialize {self.name}")
+        
         if not self.is_configured:
             logger.warning("Telegram not configured - skipping initialization")
+            logger.debug(f"API ID: {self.config.TELEGRAM_API_ID}, API Hash present: {bool(self.config.TELEGRAM_API_HASH)}")
             return
 
         try:
             client_config = self.config.get_client_config("telegram")
+            logger.debug(f"Client config: API ID={client_config['api_id']}, has API Hash={bool(client_config['api_hash'])}")
 
+            # Use session file instead of session string if available
+            session_string = client_config.get("session_string")
+            if session_string and len(session_string) < 100:
+                # Session string too short, likely corrupted
+                logger.warning("Session string appears corrupted, ignoring")
+                session_string = None
+            elif session_string:
+                logger.info(f"Using session string (length: {len(session_string)})")
+            else:
+                logger.info("No session string provided, will use session files")
+
+            # Only user mode - no bot support
+            logger.info("Initializing Telegram client in user mode")
             self.client = Client(
                 name="social_fetcher",
                 api_id=client_config["api_id"],
                 api_hash=client_config["api_hash"],
-                bot_token=client_config.get("bot_token"),
-                session_string=client_config.get("session_string"),
+                session_string=session_string,
                 workdir=self.session_dir,
                 proxy=client_config.get("proxy"),
             )
 
+            logger.info("Starting Telegram client...")
             await self.client.start()
             self._initialized = True
-            logger.info(f"{self.name} initialized successfully")
+            logger.info(f"{self.name} initialized successfully in user mode")
 
         except Exception as e:
-            logger.error(f"Failed to initialize {self.name}: {e}")
-            raise
+            logger.warning(f"Failed to initialize {self.name}: {e}")
+            logger.info("Telegram client will be skipped in auto-sync")
+            # Don't raise exception, just mark as not initialized
 
     async def close(self) -> None:
         """Close the Telegram client."""
@@ -82,19 +107,27 @@ class TelegramFetcher(SocialMediaClient):
         self, source_id: str, limit: int = 20, **kwargs
     ) -> List[SocialMediaPost]:
         """Fetch posts from a Telegram channel in unified format."""
-        if not self._initialized:
-            raise RuntimeError(f"{self.name} not initialized")
+        logger.info(f"Fetching posts from Telegram channel: {source_id}")
+        logger.debug(f"Client state - initialized: {self._initialized}, client exists: {self.client is not None}")
+        
+        if not self._initialized or not self.client:
+            logger.warning(f"{self.name} not initialized properly")
+            return []
 
         try:
             # Get channel info
+            logger.debug("Getting channel info...")
             channel_info = await self._get_channel_info_internal(source_id)
 
             # Get messages
+            logger.debug("Getting channel messages...")
+            offset_id = kwargs.get("offset_id") if kwargs.get("offset_id") is not None else None
             messages = await self._get_channel_messages_internal(
-                source_id, limit, kwargs.get("offset_id")
+                source_id, limit, offset_id
             )
 
             # Convert to unified format
+            logger.debug(f"Converting {len(messages)} messages to unified format")
             posts = []
             for message in messages:
                 try:
@@ -103,16 +136,27 @@ class TelegramFetcher(SocialMediaClient):
                 except Exception as e:
                     logger.warning(f"Error converting message {message.id}: {e}")
 
+            logger.info(f"Successfully fetched {len(posts)} posts from {source_id}")
             return posts
 
         except Exception as e:
             logger.error(f"Error fetching posts from @{source_id}: {e}")
-            raise
+            import traceback
+            logger.debug(f"Full traceback: {traceback.format_exc()}")
+            return []
 
     async def get_source_info(self, source_id: str) -> Dict[str, Any]:
         """Get information about a Telegram channel."""
-        if not self._initialized:
-            raise RuntimeError(f"{self.name} not initialized")
+        logger.debug(f"Getting source info for {source_id}")
+        
+        if not self._initialized or not self.client:
+            logger.warning(f"{self.name} not initialized properly")
+            return {
+                "id": source_id,
+                "username": source_id,
+                "title": source_id,
+                "type": "telegram_channel",
+            }
 
         try:
             channel_info = await self._get_channel_info_internal(source_id)
@@ -128,11 +172,16 @@ class TelegramFetcher(SocialMediaClient):
             }
         except Exception as e:
             logger.error(f"Error getting channel info for @{source_id}: {e}")
-            raise
+            return {
+                "id": source_id,
+                "username": source_id,
+                "title": source_id,
+                "type": "telegram_channel",
+            }
 
     async def validate_source(self, source_id: str) -> bool:
         """Validate if a Telegram channel exists and is accessible."""
-        if not self._initialized:
+        if not self._initialized or not self.client:
             return False
 
         try:
@@ -169,15 +218,22 @@ class TelegramFetcher(SocialMediaClient):
         self, channel_username: str
     ) -> TelegramChannelInfo:
         """Internal method to get channel information."""
+        logger.debug(f"Getting channel info for {channel_username}")
+        logger.debug(f"Client initialized: {self._initialized}, Client exists: {self.client is not None}")
+        
         if not self.client:
+            logger.error("Telegram client is None in _get_channel_info_internal")
             raise RuntimeError("Telegram client not initialized")
 
         try:
             # Clean username
             clean_username = channel_username.lstrip("@")
+            logger.debug(f"Clean username: {clean_username}")
 
             # Get channel
+            logger.debug("Calling client.get_chat...")
             channel = await self.client.get_chat(clean_username)
+            logger.debug(f"Got channel: {channel}")
 
             # Get photo URL if available
             photo_url = None
@@ -206,6 +262,8 @@ class TelegramFetcher(SocialMediaClient):
 
         except Exception as e:
             logger.error(f"Error getting channel info for @{channel_username}: {e}")
+            import traceback
+            logger.debug(f"Full traceback: {traceback.format_exc()}")
             raise
 
     async def _get_channel_messages_internal(
@@ -215,15 +273,24 @@ class TelegramFetcher(SocialMediaClient):
         offset_id: Optional[int] = None,
     ) -> List[TelegramMessage]:
         """Internal method to get channel messages."""
+        logger.debug(f"Getting messages from {channel_username}, limit={limit}")
+        
         if not self.client:
+            logger.error("Telegram client is None in _get_channel_messages_internal")
             raise RuntimeError("Telegram client not initialized")
 
         try:
             clean_username = channel_username.lstrip("@")
+            logger.debug(f"Getting history for {clean_username}, offset_id={offset_id}")
             messages = []
 
+            # Only pass offset_id if it's not None
+            chat_history_kwargs = {"limit": limit}
+            if offset_id is not None:
+                chat_history_kwargs["offset_id"] = offset_id
+
             async for message in self.client.get_chat_history(
-                clean_username, limit=limit, offset_id=offset_id
+                clean_username, **chat_history_kwargs
             ):
                 try:
                     telegram_message = await self._convert_message(message)
@@ -232,6 +299,7 @@ class TelegramFetcher(SocialMediaClient):
                 except Exception as e:
                     logger.warning(f"Error converting message {message.id}: {e}")
 
+            logger.debug(f"Retrieved {len(messages)} messages")
             return messages
 
         except FloodWait as e:
@@ -240,6 +308,8 @@ class TelegramFetcher(SocialMediaClient):
             raise
         except Exception as e:
             logger.error(f"Error getting messages from @{channel_username}: {e}")
+            import traceback
+            logger.debug(f"Full traceback: {traceback.format_exc()}")
             raise
 
     async def _convert_message(self, message: Message) -> Optional[TelegramMessage]:

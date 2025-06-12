@@ -4,7 +4,8 @@ from typing import Any, Dict, Optional, Type
 
 from loguru import logger
 
-from .interfaces import ServiceRegistryProtocol, SocialMediaClient
+from .clients.base.interfaces import SocialMediaClient
+from .interfaces import ServiceRegistryProtocol
 
 
 class ServiceRegistry(ServiceRegistryProtocol):

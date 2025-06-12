@@ -21,12 +21,13 @@ class Settings(BaseSettings, Configuration):
 
     TELEGRAM_API_ID: Optional[int] = Field(default=None, env="TELEGRAM_API_ID")
     TELEGRAM_API_HASH: Optional[str] = Field(default=None, env="TELEGRAM_API_HASH")
-    TELEGRAM_BOT_TOKEN: Optional[str] = Field(default=None, env="TELEGRAM_BOT_TOKEN")
     TELEGRAM_SESSION_STRING: Optional[str] = Field(
         default=None, env="TELEGRAM_SESSION_STRING"
     )
+    TELEGRAM_AUTO_SYNC: bool = Field(default=True, env="TELEGRAM_AUTO_SYNC")
 
     VK_ACCESS_TOKEN: Optional[str] = Field(default=None, env="VK_ACCESS_TOKEN")
+    VK_AUTO_SYNC: bool = Field(default=True, env="VK_AUTO_SYNC")
 
     SUPABASE_URL: Optional[str] = Field(default=None, env="SUPABASE_URL")
     SUPABASE_SERVICE_KEY: Optional[str] = Field(
@@ -56,6 +57,8 @@ class Settings(BaseSettings, Configuration):
     PROXY_USERNAME: Optional[str] = Field(default=None, env="PROXY_USERNAME")
     PROXY_PASSWORD: Optional[str] = Field(default=None, env="PROXY_PASSWORD")
 
+    CLIENT_TIMEOUT: int = Field(default=30, env="CLIENT_TIMEOUT")
+
     class Config:
         """Pydantic configuration."""
 
@@ -79,16 +82,17 @@ class Settings(BaseSettings, Configuration):
             return {
                 "api_id": self.TELEGRAM_API_ID,
                 "api_hash": self.TELEGRAM_API_HASH,
-                "bot_token": self.TELEGRAM_BOT_TOKEN,
                 "session_string": self.TELEGRAM_SESSION_STRING,
                 "proxy": self.get_proxy_dict(),
                 "max_messages_per_request": self.MAX_MESSAGES_PER_REQUEST,
+                "auto_sync_enabled": self.TELEGRAM_AUTO_SYNC,
             }
         elif client_type == "vk":
             return {
                 "access_token": self.VK_ACCESS_TOKEN,
                 "proxy": self.get_proxy_dict(),
                 "max_posts_per_request": self.MAX_POSTS_PER_REQUEST,
+                "auto_sync_enabled": self.VK_AUTO_SYNC,
             }
         else:
             return {}

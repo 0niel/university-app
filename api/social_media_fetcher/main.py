@@ -5,13 +5,13 @@ from contextlib import asynccontextmanager
 from typing import Any, Dict, List, Optional
 
 import uvicorn
-from fastapi import Depends, FastAPI, HTTPException, status
+from fastapi import Depends, FastAPI, HTTPException, status, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, HTMLResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
 from loguru import logger
-from src.client_factory import setup_clients
 from src.config import Settings
-from src.interfaces import Configuration, ServiceRegistryProtocol, SocialMediaClient
 from src.media_storage import MediaStorage
 from src.models import (
     AddSourceRequest,
@@ -23,32 +23,42 @@ from src.models import (
     StatisticsResponse,
     UpdateSourceRequest,
 )
-from src.registry import service_registry
 from src.scheduler import BackgroundScheduler
+from src.services import ServiceContainer
 from src.supabase_client import SupabaseNewsClient
+from src.clients.telegram import TelegramFetcher
+from src.clients.vk import VKFetcher
 
 settings = Settings()
 
+# Global service container
+services = ServiceContainer()
 scheduler = None
-client_factory = None
+
+# Templates and static files
+templates = Jinja2Templates(directory="templates")
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Application lifespan handler."""
-    global scheduler, client_factory
+    global scheduler
 
     logger.info("Starting Social Media Fetcher API...")
 
     try:
         await setup_services()
-
-        await service_registry.initialize_all_clients()
+        await services.initialize_all()
 
         scheduler_config = settings.get_scheduler_config()
         if scheduler_config.get("enabled", False):
-            scheduler = service_registry.get_service("scheduler")
-            if scheduler:
+            if services.database and services.media_storage:
+                scheduler = BackgroundScheduler(
+                    services.database,
+                    services.media_storage,
+                    services.client_registry,
+                    settings
+                )
                 await scheduler.start()
                 logger.info("Background scheduler started")
 
@@ -65,32 +75,35 @@ async def lifespan(app: FastAPI):
             await scheduler.stop()
             logger.info("Background scheduler stopped")
 
-        await service_registry.close_all_clients()
+        await services.close_all()
         logger.info("Application shutdown complete")
 
 
 async def setup_services():
     """Setup all services and register them."""
-    global client_factory
-
     if settings.supabase_configured:
+        # Setup database
         db_client = SupabaseNewsClient(settings)
-        await db_client.initialize()
-        service_registry.register_service("database", db_client)
+        services.database = db_client
         logger.info("Database client registered")
+
+        # Setup media storage
+        media_storage = MediaStorage(settings, db_client.client)
+        services.media_storage = media_storage
+        logger.info("Media storage registered")
     else:
-        logger.warning("Supabase not configured - database features disabled")
+        logger.warning("Supabase not configured - database and media storage features disabled")
 
-    media_storage = MediaStorage(settings)
-    service_registry.register_service("media_storage", media_storage)
-    logger.info("Media storage registered")
+    # Setup clients
+    if settings.telegram_configured:
+        telegram_client = TelegramFetcher(settings)
+        services.client_registry.register_client(telegram_client)
+        logger.info("Telegram client registered")
 
-    client_factory = setup_clients(settings, service_registry)
-    service_registry.register_service("client_factory", client_factory)
-
-    scheduler = BackgroundScheduler(service_registry, settings)
-    service_registry.register_service("scheduler", scheduler)
-    logger.info("Scheduler registered")
+    if settings.vk_configured:
+        vk_client = VKFetcher(settings)
+        services.client_registry.register_client(vk_client)
+        logger.info("VK client registered")
 
 
 app = FastAPI(
@@ -99,6 +112,9 @@ app = FastAPI(
     version="2.0.0",
     lifespan=lifespan,
 )
+
+# Mount static files
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
 server_config = settings.get_server_config()
 app.add_middleware(
@@ -112,8 +128,8 @@ app.add_middleware(
 
 def get_database() -> SupabaseNewsClient:
     """Get database client dependency."""
-    if db := service_registry.get_service("database"):
-        return db
+    if services.database:
+        return services.database
     else:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
@@ -123,7 +139,7 @@ def get_database() -> SupabaseNewsClient:
 
 def get_scheduler() -> BackgroundScheduler:
     """Get scheduler dependency."""
-    if scheduler := service_registry.get_service("scheduler"):
+    if scheduler:
         return scheduler
     else:
         raise HTTPException(
@@ -132,48 +148,83 @@ def get_scheduler() -> BackgroundScheduler:
         )
 
 
-@app.get("/", response_model=Dict[str, Any])
-async def root():
-    """Root endpoint with API information."""
+# Frontend routes
+@app.get("/dashboard", response_class=HTMLResponse)
+async def dashboard(request: Request):
+    """Dashboard page."""
+    return templates.TemplateResponse("dashboard.html", {"request": request})
+
+@app.get("/sources-page", response_class=HTMLResponse)
+async def sources_page(request: Request):
+    """Sources management page."""
+    return templates.TemplateResponse("sources.html", {"request": request})
+
+@app.get("/news-page", response_class=HTMLResponse)
+async def news_page(request: Request):
+    """News viewing page."""
+    return templates.TemplateResponse("news.html", {"request": request})
+
+@app.get("/analytics", response_class=HTMLResponse)
+async def analytics_page(request: Request):
+    """Analytics page."""
+    return templates.TemplateResponse("analytics.html", {"request": request})
+
+@app.get("/settings", response_class=HTMLResponse)
+async def settings_page(request: Request):
+    """Settings page."""
+    return templates.TemplateResponse("settings.html", {"request": request})
+
+# Redirect root to dashboard
+@app.get("/", response_class=HTMLResponse)
+async def root_redirect(request: Request):
+    """Redirect root to dashboard."""
+    return templates.TemplateResponse("dashboard.html", {"request": request})
+
+# API routes
+@app.get("/api", response_model=Dict[str, Any])
+async def api_root():
+    """Root API endpoint with service information."""
     return {
         "message": "Social Media Fetcher API",
         "version": "2.0.0",
         "status": "running",
-        "available_clients": service_registry.get_available_client_types(),
-        "registry_status": service_registry.get_status(),
+        "available_clients": list(services.client_registry.get_all_clients().keys()),
+        "enabled_clients": list(services.client_registry.get_enabled_clients().keys()),
+        "auto_sync_clients": list(services.client_registry.get_auto_sync_clients().keys()),
     }
 
-
-@app.get("/health", response_model=Dict[str, Any])
+@app.get("/api/health", response_model=Dict[str, Any])
 async def health_check():
     """Health check endpoint."""
-    db = service_registry.get_service("database")
-    services_status = {"database": "available" if db else "unavailable"}
+    services_status = {
+        "database": "available" if services.database else "unavailable",
+        "media_storage": "available" if services.media_storage else "unavailable",
+    }
 
-    clients = service_registry.get_all_clients()
+    clients = services.client_registry.get_all_clients()
     services_status["clients"] = {
         client_type: "initialized" if client._initialized else "not_initialized"
         for client_type, client in clients.items()
     }
 
-    scheduler = service_registry.get_service("scheduler")
     services_status["scheduler"] = "available" if scheduler else "unavailable"
 
     return {
         "status": "healthy",
         "services": services_status,
-        "registry": service_registry.get_status(),
+        "enabled_clients": list(services.client_registry.get_enabled_clients().keys()),
+        "auto_sync_clients": list(services.client_registry.get_auto_sync_clients().keys()),
     }
 
 
-@app.post("/sources", response_model=SourceResponse)
+@app.post("/api/sources", response_model=SourceResponse)
 async def add_source(
     request: AddSourceRequest,
     db: SupabaseNewsClient = Depends(get_database),
 ):
     """Add a new social media source."""
     try:
-        client = service_registry.get_client(request.source_type)
+        client = services.client_registry.get_client(request.source_type)
         if client and client._initialized:
             is_valid = await client.validate_source(request.source_id)
             if not is_valid:
@@ -201,7 +252,7 @@ async def add_source(
         ) from e
 
 
-@app.get("/sources", response_model=List[SourceResponse])
+@app.get("/api/sources", response_model=List[SourceResponse])
 async def get_sources(
     source_type: Optional[str] = None,
     category: Optional[str] = None,
@@ -225,7 +276,7 @@ async def get_sources(
         ) from e
 
 
-@app.put("/sources/{source_id}", response_model=SourceResponse)
+@app.put("/api/sources/{source_id}", response_model=SourceResponse)
 async def update_source(
     source_id: int,
     request: UpdateSourceRequest,
@@ -244,7 +295,7 @@ async def update_source(
         ) from e
 
 
-@app.delete("/sources/{source_id}")
+@app.delete("/api/sources/{source_id}")
 async def delete_source(
     source_id: int,
     db: SupabaseNewsClient = Depends(get_database),
@@ -262,7 +313,7 @@ async def delete_source(
         ) from e
 
 
-@app.get("/news", response_model=NewsListResponse)
+@app.get("/api/news", response_model=NewsListResponse)
 async def get_news(
     limit: int = 20,
     offset: int = 0,
@@ -298,13 +349,21 @@ async def get_news(
         ) from e
 
 
-@app.get("/scheduler/status", response_model=SchedulerStatusResponse)
-async def get_scheduler_status(
-    scheduler: BackgroundScheduler = Depends(get_scheduler),
-):
+@app.get("/api/scheduler/status", response_model=SchedulerStatusResponse)
+async def get_scheduler_status():
     """Get scheduler status."""
     try:
-        status_info = await scheduler.get_status()
+        if services.database:
+            status_info = await services.database.get_status()
+        else:
+            status_info = {
+                "is_enabled": False,
+                "sync_interval_minutes": 30,
+                "last_sync_at": None,
+                "next_sync_at": None,
+                "total_synced": 0,
+                "errors_count": 0,
+            }
         return SchedulerStatusResponse(**status_info)
 
     except Exception as e:
@@ -315,7 +374,7 @@ async def get_scheduler_status(
         ) from e
 
 
-@app.post("/scheduler/start")
+@app.post("/api/scheduler/start")
 async def start_scheduler(
     scheduler: BackgroundScheduler = Depends(get_scheduler),
 ):
@@ -332,7 +391,7 @@ async def start_scheduler(
         ) from e
 
 
-@app.post("/scheduler/stop")
+@app.post("/api/scheduler/stop")
 async def stop_scheduler(
     scheduler: BackgroundScheduler = Depends(get_scheduler),
 ):
@@ -349,7 +408,7 @@ async def stop_scheduler(
         ) from e
 
 
-@app.get("/statistics", response_model=StatisticsResponse)
+@app.get("/api/statistics", response_model=StatisticsResponse)
 async def get_statistics(
     db: SupabaseNewsClient = Depends(get_database),
 ):
@@ -366,7 +425,7 @@ async def get_statistics(
         ) from e
 
 
-@app.post("/fetch")
+@app.post("/api/fetch")
 async def manual_fetch(
     source_type: str,
     source_id: str,
@@ -374,7 +433,7 @@ async def manual_fetch(
 ):
     """Manually fetch posts from a source (for testing)."""
     try:
-        client = service_registry.get_client(source_type)
+        client = services.client_registry.get_client(source_type)
         if not client:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,

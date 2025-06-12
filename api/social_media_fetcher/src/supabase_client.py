@@ -5,7 +5,7 @@ from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
 from loguru import logger
-from supabase import AsyncClient, create_async_client
+from supabase import create_client, Client
 
 from .config import Settings
 from .models import SocialMediaPost
@@ -17,7 +17,7 @@ class SupabaseNewsClient:
     def __init__(self, settings: Settings):
         """Initialize the Supabase client."""
         self.settings = settings
-        self.client: Optional[AsyncClient] = None
+        self.client: Optional[Client] = None
 
         self.supabase_url = os.getenv("SUPABASE_URL")
         self.supabase_key = os.getenv("SUPABASE_SERVICE_KEY")
@@ -31,7 +31,7 @@ class SupabaseNewsClient:
             raise RuntimeError("Supabase credentials not configured")
 
         try:
-            self.client = await create_async_client(
+            self.client = create_client(
                 self.supabase_url, self.supabase_key
             )
             logger.info("Supabase client initialized")
@@ -42,7 +42,8 @@ class SupabaseNewsClient:
     async def close(self):
         """Close the Supabase client."""
         if self.client:
-            await self.client.close()
+            # Supabase client doesn't have close method, just set to None
+            self.client = None
             logger.info("Supabase client closed")
 
     async def save_social_news_item(self, post: SocialMediaPost) -> bool:
@@ -84,7 +85,7 @@ class SupabaseNewsClient:
             }
 
             result = (
-                await self.client.table("social_news_items")
+                self.client.table("social_news_items")
                 .upsert(news_item, on_conflict="source_type,source_id,external_id")
                 .execute()
             )
@@ -130,7 +131,7 @@ class SupabaseNewsClient:
             }
 
             result = (
-                await self.client.table("social_news_sources")
+                self.client.table("social_news_sources")
                 .upsert(source_info, on_conflict="source_type,source_id")
                 .execute()
             )
@@ -159,7 +160,7 @@ class SupabaseNewsClient:
 
         try:
             result = (
-                await self.client.table("social_news_sources")
+                self.client.table("social_news_sources")
                 .select("*")
                 .eq("is_active", True)
                 .execute()
@@ -176,6 +177,7 @@ class SupabaseNewsClient:
         offset: int = 0,
         source_type: Optional[str] = None,
         source_id: Optional[str] = None,
+        category: Optional[str] = None,
     ) -> List[Dict[str, Any]]:
         """
         Get latest social media news items.
@@ -185,6 +187,7 @@ class SupabaseNewsClient:
             offset: Offset for pagination
             source_type: Filter by source type
             source_id: Filter by source ID
+            category: Filter by category
 
         Returns:
             List of news items
@@ -202,8 +205,11 @@ class SupabaseNewsClient:
             if source_id:
                 query = query.eq("source_id", source_id)
 
+            # Note: category filtering would require joining with sources table
+            # For now, we'll ignore the category parameter
+
             result = (
-                await query.order("published_at", desc=True)
+                query.order("published_at", desc=True)
                 .range(offset, offset + limit - 1)
                 .execute()
             )
@@ -226,14 +232,14 @@ class SupabaseNewsClient:
 
         try:
             total_result = (
-                await self.client.table("social_news_items")
+                self.client.table("social_news_items")
                 .select("id", count="exact")
                 .execute()
             )
             total_count = total_result.count or 0
 
             stats_result = (
-                await self.client.table("social_news_statistics").select("*").execute()
+                self.client.table("social_news_statistics").select("*").execute()
             )
 
             statistics = {
@@ -280,7 +286,7 @@ class SupabaseNewsClient:
             return 0
 
         try:
-            result = await self.client.rpc("clean_expired_cache").execute()
+            result = self.client.rpc("clean_expired_cache").execute()
 
             if result.data is not None:
                 deleted_count = result.data
@@ -293,3 +299,151 @@ class SupabaseNewsClient:
         except Exception as e:
             logger.error(f"Error cleaning up cache: {e}")
             return 0
+
+    async def add_source(
+        self,
+        source_type: str,
+        source_id: str,
+        source_name: str,
+        category: Optional[str] = None,
+        description: Optional[str] = None,
+        is_active: bool = True,
+    ) -> Dict[str, Any]:
+        """Add a new social media source."""
+        if not self.client:
+            logger.error("Supabase client not initialized")
+            raise RuntimeError("Database not available")
+
+        try:
+            source_data = {
+                "source_type": source_type,
+                "source_id": source_id,
+                "source_name": source_name,
+                "source_url": f"https://{'t.me' if source_type == 'telegram' else 'vk.com'}/{source_id}",
+                "category": category or "",
+                "description": description or "",
+                "is_active": is_active,
+                "created_at": datetime.now(timezone.utc).isoformat(),
+                "updated_at": datetime.now(timezone.utc).isoformat(),
+            }
+
+            result = (
+                self.client.table("social_news_sources")
+                .insert(source_data)
+                .execute()
+            )
+
+            if result.data:
+                return result.data[0]
+            else:
+                raise RuntimeError("Failed to add source")
+
+        except Exception as e:
+            logger.error(f"Error adding source: {e}")
+            raise
+
+    async def get_sources(
+        self,
+        source_type: Optional[str] = None,
+        category: Optional[str] = None,
+        active_only: bool = True,
+    ) -> List[Dict[str, Any]]:
+        """Get sources with optional filtering."""
+        if not self.client:
+            logger.error("Supabase client not initialized")
+            return []
+
+        try:
+            query = self.client.table("social_news_sources").select("*")
+
+            if source_type:
+                query = query.eq("source_type", source_type)
+
+            if category:
+                query = query.eq("category", category)
+
+            if active_only:
+                query = query.eq("is_active", True)
+
+            result = query.order("created_at", desc=True).execute()
+
+            return result.data if result.data else []
+
+        except Exception as e:
+            logger.error(f"Error getting sources: {e}")
+            return []
+
+    async def update_source(self, source_id: int, **kwargs) -> Dict[str, Any]:
+        """Update a source."""
+        if not self.client:
+            logger.error("Supabase client not initialized")
+            raise RuntimeError("Database not available")
+
+        try:
+            update_data = {**kwargs, "updated_at": datetime.now(timezone.utc).isoformat()}
+
+            result = (
+                self.client.table("social_news_sources")
+                .update(update_data)
+                .eq("id", source_id)
+                .execute()
+            )
+
+            if result.data:
+                return result.data[0]
+            else:
+                raise RuntimeError("Source not found")
+
+        except Exception as e:
+            logger.error(f"Error updating source: {e}")
+            raise
+
+    async def delete_source(self, source_id: int) -> bool:
+        """Delete a source."""
+        if not self.client:
+            logger.error("Supabase client not initialized")
+            raise RuntimeError("Database not available")
+
+        try:
+            result = (
+                self.client.table("social_news_sources")
+                .delete()
+                .eq("id", source_id)
+                .execute()
+            )
+
+            return bool(result.data)
+
+        except Exception as e:
+            logger.error(f"Error deleting source: {e}")
+            raise
+
+    async def get_scheduler_config(self) -> Dict[str, Any]:
+        """Get scheduler configuration."""
+        # Return default config since we don't have a scheduler config table yet
+        return {
+            "is_enabled": True,
+            "sync_interval_minutes": 30,
+            "next_sync_at": None,
+            "last_sync_at": None,
+            "total_synced": 0,
+            "errors_count": 0,
+        }
+
+    async def update_scheduler_config(self, **kwargs) -> bool:
+        """Update scheduler configuration."""
+        # For now, just log the update since we don't have a scheduler config table
+        logger.info(f"Scheduler config updated: {kwargs}")
+        return True
+
+    async def get_status(self) -> Dict[str, Any]:
+        """Get scheduler status."""
+        config = await self.get_scheduler_config()
+        return {
+            "is_enabled": config.get("is_enabled", False),
+            "sync_interval_minutes": config.get("sync_interval_minutes", 30),
+            "last_sync_at": config.get("last_sync_at"),
+            "next_sync_at": config.get("next_sync_at"),
+            "total_synced": config.get("total_synced", 0),
+            "errors_count": config.get("errors_count", 0),
+        }

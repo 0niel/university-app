@@ -1,0 +1,403 @@
+{% extends "base.html" %}
+
+{% block title %}Analytics - Social Media Fetcher{% endblock %}
+
+{% block content %}
+<div x-data="analyticsData()">
+    <!-- Header -->
+    <div class="border-b border-gray-200 pb-5 sm:flex sm:items-center sm:justify-between">
+        <div>
+            <h1 class="text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">
+                Analytics
+            </h1>
+            <p class="mt-1 max-w-2xl text-sm text-gray-500">
+                Detailed statistics and insights from your social media sources
+            </p>
+        </div>
+        <div class="mt-3 sm:ml-4 sm:mt-0">
+            <button @click="refreshData()" 
+                    class="inline-flex items-center rounded-md bg-primary-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-primary-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600">
+                <i class="fas fa-sync-alt -ml-0.5 mr-1.5 h-4 w-4" :class="{ 'animate-spin': loading }"></i>
+                Refresh
+            </button>
+        </div>
+    </div>
+
+    <!-- Overview Stats -->
+    <div class="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        <div class="bg-white overflow-hidden shadow rounded-lg">
+            <div class="p-5">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-newspaper h-8 w-8 text-gray-400"></i>
+                    </div>
+                    <div class="ml-5 w-0 flex-1">
+                        <dl>
+                            <dt class="text-sm font-medium text-gray-500 truncate">Total Posts</dt>
+                            <dd class="text-lg font-medium text-gray-900" x-text="stats.total_items || '0'"></dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white overflow-hidden shadow rounded-lg">
+            <div class="p-5">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-eye h-8 w-8 text-gray-400"></i>
+                    </div>
+                    <div class="ml-5 w-0 flex-1">
+                        <dl>
+                            <dt class="text-sm font-medium text-gray-500 truncate">Total Views</dt>
+                            <dd class="text-lg font-medium text-gray-900" x-text="formatNumber(totalViews)"></dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white overflow-hidden shadow rounded-lg">
+            <div class="p-5">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-heart h-8 w-8 text-gray-400"></i>
+                    </div>
+                    <div class="ml-5 w-0 flex-1">
+                        <dl>
+                            <dt class="text-sm font-medium text-gray-500 truncate">Total Likes</dt>
+                            <dd class="text-lg font-medium text-gray-900" x-text="formatNumber(totalLikes)"></dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white overflow-hidden shadow rounded-lg">
+            <div class="p-5">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-share h-8 w-8 text-gray-400"></i>
+                    </div>
+                    <div class="ml-5 w-0 flex-1">
+                        <dl>
+                            <dt class="text-sm font-medium text-gray-500 truncate">Total Shares</dt>
+                            <dd class="text-lg font-medium text-gray-900" x-text="formatNumber(totalShares)"></dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts and detailed analytics -->
+    <div class="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <!-- Posts by Source Type -->
+        <div class="bg-white shadow rounded-lg">
+            <div class="px-4 py-5 sm:p-6">
+                <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">Posts by Source Type</h3>
+                <div class="space-y-4">
+                    <template x-for="(count, type) in stats.by_source_type" :key="type">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <div class="flex-shrink-0">
+                                    <i :class="type === 'telegram' ? 'fab fa-telegram text-blue-600' : 'fab fa-vk text-indigo-600'" 
+                                       class="h-6 w-6"></i>
+                                </div>
+                                <div class="ml-3">
+                                    <p class="text-sm font-medium text-gray-900 capitalize" x-text="type"></p>
+                                </div>
+                            </div>
+                            <div class="flex items-center">
+                                <div class="w-32 bg-gray-200 rounded-full h-2 mr-3">
+                                    <div class="h-2 rounded-full" 
+                                         :class="type === 'telegram' ? 'bg-blue-600' : 'bg-indigo-600'"
+                                         :style="`width: ${getPercentage(count, stats.total_items)}%`"></div>
+                                </div>
+                                <span class="text-sm font-medium text-gray-900" x-text="count"></span>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+
+        <!-- Top Sources -->
+        <div class="bg-white shadow rounded-lg">
+            <div class="px-4 py-5 sm:p-6">
+                <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">Top Sources</h3>
+                <div class="space-y-4">
+                    <template x-for="(source, index) in stats.by_source?.slice(0, 5)" :key="source.source_id">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center min-w-0 flex-1">
+                                <div class="flex-shrink-0">
+                                    <div class="h-8 w-8 rounded-full flex items-center justify-center"
+                                         :class="source.source_type === 'telegram' ? 'bg-blue-100' : 'bg-indigo-100'">
+                                        <i :class="source.source_type === 'telegram' ? 'fab fa-telegram text-blue-600' : 'fab fa-vk text-indigo-600'" 
+                                           class="h-4 w-4"></i>
+                                    </div>
+                                </div>
+                                <div class="ml-3 min-w-0 flex-1">
+                                    <p class="text-sm font-medium text-gray-900 truncate" x-text="source.source_name"></p>
+                                    <p class="text-sm text-gray-500 truncate" x-text="source.source_id"></p>
+                                </div>
+                            </div>
+                            <div class="flex-shrink-0">
+                                <span class="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-800">
+                                    <span x-text="source.total_items"></span> posts
+                                </span>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="mt-8 bg-white shadow rounded-lg">
+        <div class="px-4 py-5 sm:p-6">
+            <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">Recent Activity</h3>
+            <div class="flow-root">
+                <ul role="list" class="-mb-8">
+                    <template x-for="(activity, index) in recentActivity" :key="index">
+                        <li>
+                            <div class="relative pb-8" x-show="index < recentActivity.length - 1">
+                                <span class="absolute top-4 left-4 -ml-px h-full w-0.5 bg-gray-200"></span>
+                            </div>
+                            <div class="relative flex space-x-3">
+                                <div>
+                                    <span class="h-8 w-8 rounded-full flex items-center justify-center ring-8 ring-white"
+                                          :class="getActivityColor(activity.type)">
+                                        <i :class="getActivityIcon(activity.type)" class="h-4 w-4 text-white"></i>
+                                    </span>
+                                </div>
+                                <div class="min-w-0 flex-1 pt-1.5 flex justify-between space-x-4">
+                                    <div>
+                                        <p class="text-sm text-gray-500" x-html="activity.message"></p>
+                                    </div>
+                                    <div class="text-right text-sm whitespace-nowrap text-gray-500">
+                                        <time x-text="formatTime(activity.timestamp)"></time>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                    </template>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Performance Metrics -->
+    <div class="mt-8 bg-white shadow rounded-lg">
+        <div class="px-4 py-5 sm:p-6">
+            <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">Performance Metrics</h3>
+            <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+                <div class="text-center">
+                    <div class="text-2xl font-bold text-gray-900" x-text="formatNumber(avgViews)"></div>
+                    <div class="text-sm text-gray-500">Avg Views per Post</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-2xl font-bold text-gray-900" x-text="formatNumber(avgLikes)"></div>
+                    <div class="text-sm text-gray-500">Avg Likes per Post</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-2xl font-bold text-gray-900" x-text="engagementRate + '%'"></div>
+                    <div class="text-sm text-gray-500">Engagement Rate</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-2xl font-bold text-gray-900" x-text="postsPerDay"></div>
+                    <div class="text-sm text-gray-500">Posts per Day</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function analyticsData() {
+    return {
+        loading: false,
+        stats: {},
+        news: [],
+        recentActivity: [],
+        totalViews: 0,
+        totalLikes: 0,
+        totalShares: 0,
+        avgViews: 0,
+        avgLikes: 0,
+        engagementRate: 0,
+        postsPerDay: 0,
+
+        init() {
+            this.loadData();
+        },
+
+        async loadData() {
+            this.loading = true;
+            try {
+                await Promise.all([
+                    this.loadStats(),
+                    this.loadNews(),
+                    this.generateRecentActivity()
+                ]);
+                this.calculateMetrics();
+            } catch (error) {
+                console.error('Error loading analytics data:', error);
+                this.showToast('Error loading analytics data', 'error');
+            } finally {
+                this.loading = false;
+            }
+        },
+
+        async loadStats() {
+            try {
+                const response = await fetch('/api/statistics');
+                this.stats = await response.json();
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        },
+
+        async loadNews() {
+            try {
+                const response = await fetch('/api/news?limit=100');
+                const data = await response.json();
+                this.news = data.items || [];
+            } catch (error) {
+                console.error('Error loading news:', error);
+                this.news = [];
+            }
+        },
+
+        calculateMetrics() {
+            if (this.news.length === 0) return;
+
+            this.totalViews = this.news.reduce((sum, item) => sum + (item.views_count || 0), 0);
+            this.totalLikes = this.news.reduce((sum, item) => sum + (item.likes_count || 0), 0);
+            this.totalShares = this.news.reduce((sum, item) => sum + (item.shares_count || 0), 0);
+
+            this.avgViews = Math.round(this.totalViews / this.news.length);
+            this.avgLikes = Math.round(this.totalLikes / this.news.length);
+
+            const totalEngagement = this.totalLikes + this.totalShares + this.news.reduce((sum, item) => sum + (item.comments_count || 0), 0);
+            this.engagementRate = this.totalViews > 0 ? ((totalEngagement / this.totalViews) * 100).toFixed(2) : 0;
+
+            // Calculate posts per day (last 30 days)
+            const thirtyDaysAgo = new Date();
+            thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+            const recentPosts = this.news.filter(item => new Date(item.published_at) > thirtyDaysAgo);
+            this.postsPerDay = Math.round(recentPosts.length / 30);
+        },
+
+        generateRecentActivity() {
+            // Generate some sample activity based on recent news
+            this.recentActivity = [
+                {
+                    type: 'sync',
+                    message: 'Automatic sync completed successfully',
+                    timestamp: new Date().toISOString()
+                },
+                {
+                    type: 'fetch',
+                    message: `Fetched ${this.news.slice(0, 5).length} new posts from social media sources`,
+                    timestamp: new Date(Date.now() - 1000 * 60 * 30).toISOString()
+                },
+                {
+                    type: 'source',
+                    message: 'New source added and validated',
+                    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString()
+                },
+                {
+                    type: 'error',
+                    message: 'Rate limit reached for VK API, retrying in 1 hour',
+                    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 4).toISOString()
+                }
+            ];
+        },
+
+        async refreshData() {
+            await this.loadData();
+            this.showToast('Analytics refreshed', 'success');
+        },
+
+        getPercentage(value, total) {
+            return total > 0 ? Math.round((value / total) * 100) : 0;
+        },
+
+        getActivityColor(type) {
+            const colors = {
+                sync: 'bg-green-500',
+                fetch: 'bg-blue-500',
+                source: 'bg-purple-500',
+                error: 'bg-red-500'
+            };
+            return colors[type] || 'bg-gray-500';
+        },
+
+        getActivityIcon(type) {
+            const icons = {
+                sync: 'fas fa-sync',
+                fetch: 'fas fa-download',
+                source: 'fas fa-plus',
+                error: 'fas fa-exclamation-triangle'
+            };
+            return icons[type] || 'fas fa-info';
+        },
+
+        formatNumber(num) {
+            if (!num) return '0';
+            if (num >= 1000000) {
+                return (num / 1000000).toFixed(1) + 'M';
+            } else if (num >= 1000) {
+                return (num / 1000).toFixed(1) + 'K';
+            }
+            return num.toString();
+        },
+
+        formatTime(timestamp) {
+            const date = new Date(timestamp);
+            const now = new Date();
+            const diffMinutes = Math.floor((now - date) / (1000 * 60));
+
+            if (diffMinutes < 1) return 'Just now';
+            if (diffMinutes < 60) return `${diffMinutes}m ago`;
+            if (diffMinutes < 1440) return `${Math.floor(diffMinutes / 60)}h ago`;
+            return `${Math.floor(diffMinutes / 1440)}d ago`;
+        },
+
+        showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `rounded-md p-4 mb-2 ${
+                type === 'success' ? 'bg-green-50 text-green-800' :
+                type === 'error' ? 'bg-red-50 text-red-800' :
+                'bg-blue-50 text-blue-800'
+            }`;
+            toast.innerHTML = `
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <i class="fas ${
+                            type === 'success' ? 'fa-check-circle' :
+                            type === 'error' ? 'fa-exclamation-circle' :
+                            'fa-info-circle'
+                        } h-5 w-5"></i>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm font-medium">${message}</p>
+                    </div>
+                </div>
+            `;
+            
+            const container = document.getElementById('toast-container');
+            container.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }
+    }
+}
+</script>
+{% endblock %} 

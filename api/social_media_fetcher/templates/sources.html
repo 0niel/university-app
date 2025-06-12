@@ -1,0 +1,428 @@
+{% extends "base.html" %}
+
+{% block title %}Sources - Social Media Fetcher{% endblock %}
+
+{% block content %}
+<div x-data="sourcesData()">
+    <!-- Header -->
+    <div class="border-b border-gray-200 pb-5 sm:flex sm:items-center sm:justify-between">
+        <div>
+            <h1 class="text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">
+                Sources
+            </h1>
+            <p class="mt-1 max-w-2xl text-sm text-gray-500">
+                Manage your social media sources for content fetching
+            </p>
+        </div>
+        <div class="mt-3 sm:ml-4 sm:mt-0">
+            <button @click="showAddModal = true" 
+                    class="inline-flex items-center rounded-md bg-primary-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-primary-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600">
+                <i class="fas fa-plus -ml-0.5 mr-1.5 h-4 w-4"></i>
+                Add Source
+            </button>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="mt-6 flex flex-col sm:flex-row gap-4">
+        <div class="flex-1">
+            <input type="text" 
+                   x-model="searchQuery"
+                   @input="filterSources()"
+                   placeholder="Search sources..."
+                   class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-primary-600 sm:text-sm sm:leading-6">
+        </div>
+        <div>
+            <select x-model="filterType" 
+                    @change="filterSources()"
+                    class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-primary-600 sm:text-sm sm:leading-6">
+                <option value="">All Types</option>
+                <option value="telegram">Telegram</option>
+                <option value="vk">VK</option>
+            </select>
+        </div>
+        <div>
+            <select x-model="filterStatus" 
+                    @change="filterSources()"
+                    class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-primary-600 sm:text-sm sm:leading-6">
+                <option value="">All Status</option>
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Sources List -->
+    <div class="mt-8 bg-white shadow overflow-hidden sm:rounded-lg">
+        <div class="px-4 py-5 sm:p-6">
+            <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                <template x-for="source in filteredSources" :key="source.id">
+                    <div class="relative rounded-lg border border-gray-300 bg-white px-6 py-5 shadow-sm hover:border-gray-400">
+                        <!-- Status indicator -->
+                        <div class="absolute top-2 right-2">
+                            <div class="h-3 w-3 rounded-full" 
+                                 :class="source.is_active ? 'bg-green-400' : 'bg-red-400'"></div>
+                        </div>
+                        
+                        <!-- Source icon -->
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0">
+                                <div class="h-10 w-10 rounded-lg flex items-center justify-center"
+                                     :class="source.source_type === 'telegram' ? 'bg-blue-100' : 'bg-indigo-100'">
+                                    <i :class="source.source_type === 'telegram' ? 'fab fa-telegram text-blue-600' : 'fab fa-vk text-indigo-600'" 
+                                       class="h-6 w-6"></i>
+                                </div>
+                            </div>
+                            <div class="ml-4 flex-1 min-w-0">
+                                <p class="text-sm font-medium text-gray-900 truncate" x-text="source.source_name"></p>
+                                <p class="text-sm text-gray-500 truncate" x-text="source.source_id"></p>
+                            </div>
+                        </div>
+                        
+                        <!-- Source details -->
+                        <div class="mt-4">
+                            <p class="text-xs text-gray-500 uppercase tracking-wide" x-text="source.source_type"></p>
+                            <p class="text-sm text-gray-600 mt-1" x-text="source.category || 'No category'"></p>
+                            <p class="text-xs text-gray-400 mt-2" x-text="'Added ' + formatDate(source.created_at)"></p>
+                        </div>
+                        
+                        <!-- Actions -->
+                        <div class="mt-4 flex justify-between items-center">
+                            <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium"
+                                  :class="source.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'">
+                                <span x-text="source.is_active ? 'Active' : 'Inactive'"></span>
+                            </span>
+                            
+                            <div class="flex space-x-2">
+                                <button @click="editSource(source)" 
+                                        class="text-gray-400 hover:text-gray-600">
+                                    <i class="fas fa-edit h-4 w-4"></i>
+                                </button>
+                                <button @click="toggleSource(source)" 
+                                        class="text-gray-400 hover:text-yellow-600">
+                                    <i :class="source.is_active ? 'fas fa-pause' : 'fas fa-play'" class="h-4 w-4"></i>
+                                </button>
+                                <button @click="deleteSource(source)" 
+                                        class="text-gray-400 hover:text-red-600">
+                                    <i class="fas fa-trash h-4 w-4"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+            </div>
+            
+            <div x-show="filteredSources.length === 0" class="text-center py-12">
+                <i class="fas fa-inbox h-12 w-12 text-gray-400 mx-auto"></i>
+                <h3 class="mt-2 text-sm font-medium text-gray-900">No sources found</h3>
+                <p class="mt-1 text-sm text-gray-500">Get started by adding a new social media source.</p>
+                <div class="mt-6">
+                    <button @click="showAddModal = true"
+                            class="inline-flex items-center rounded-md bg-primary-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-primary-500">
+                        <i class="fas fa-plus -ml-0.5 mr-1.5 h-4 w-4"></i>
+                        Add Source
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Source Modal -->
+    <div class="relative z-50" x-show="showAddModal || editingSource" 
+         x-transition.opacity style="display: none;">
+        <div class="fixed inset-0 bg-gray-500 bg-opacity-75"></div>
+        <div class="fixed inset-0 z-10 overflow-y-auto">
+            <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+                <div class="relative transform overflow-hidden rounded-lg bg-white px-4 pb-4 pt-5 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:p-6">
+                    <div>
+                        <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-primary-100">
+                            <i class="fas fa-plus h-6 w-6 text-primary-600"></i>
+                        </div>
+                        <div class="mt-3 text-center sm:mt-5">
+                            <h3 class="text-base font-semibold leading-6 text-gray-900" 
+                                x-text="editingSource ? 'Edit Source' : 'Add New Source'"></h3>
+                        </div>
+                    </div>
+                    
+                    <form @submit.prevent="saveSource()" class="mt-6 space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium leading-6 text-gray-900">Source Type</label>
+                            <select x-model="formData.source_type" 
+                                    :disabled="editingSource"
+                                    class="mt-2 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-primary-600 sm:text-sm sm:leading-6">
+                                <option value="">Select type</option>
+                                <option value="telegram">Telegram</option>
+                                <option value="vk">VK</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium leading-6 text-gray-900">Source ID</label>
+                            <input type="text" 
+                                   x-model="formData.source_id"
+                                   :placeholder="formData.source_type === 'telegram' ? '@channelname' : 'group_id'"
+                                   class="mt-2 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-primary-600 sm:text-sm sm:leading-6">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium leading-6 text-gray-900">Source Name</label>
+                            <input type="text" 
+                                   x-model="formData.source_name"
+                                   placeholder="Display name"
+                                   class="mt-2 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-primary-600 sm:text-sm sm:leading-6">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium leading-6 text-gray-900">Category</label>
+                            <input type="text" 
+                                   x-model="formData.category"
+                                   placeholder="e.g., News, Tech, Entertainment"
+                                   class="mt-2 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-primary-600 sm:text-sm sm:leading-6">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium leading-6 text-gray-900">Description</label>
+                            <textarea x-model="formData.description"
+                                      rows="3"
+                                      placeholder="Optional description"
+                                      class="mt-2 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-primary-600 sm:text-sm sm:leading-6"></textarea>
+                        </div>
+                        
+                        <div class="flex items-center">
+                            <input type="checkbox" 
+                                   x-model="formData.is_active"
+                                   class="h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-600">
+                            <label class="ml-2 block text-sm text-gray-900">Active</label>
+                        </div>
+                    </form>
+                    
+                    <div class="mt-5 sm:mt-6 sm:grid sm:grid-flow-row-dense sm:grid-cols-2 sm:gap-3">
+                        <button @click="saveSource()"
+                                :disabled="saving"
+                                class="inline-flex w-full justify-center rounded-md bg-primary-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-primary-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600 sm:col-start-2">
+                            <i class="fas fa-spinner animate-spin -ml-1 mr-2 h-4 w-4" x-show="saving"></i>
+                            <span x-text="editingSource ? 'Update' : 'Add Source'"></span>
+                        </button>
+                        <button @click="closeModal()"
+                                class="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:col-start-1 sm:mt-0">
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function sourcesData() {
+    return {
+        sources: [],
+        filteredSources: [],
+        searchQuery: '',
+        filterType: '',
+        filterStatus: '',
+        showAddModal: false,
+        editingSource: null,
+        saving: false,
+        formData: {
+            source_type: '',
+            source_id: '',
+            source_name: '',
+            category: '',
+            description: '',
+            is_active: true
+        },
+
+        init() {
+            this.loadSources();
+        },
+
+        async loadSources() {
+            try {
+                const response = await fetch('/api/sources');
+                this.sources = await response.json();
+                this.filterSources();
+            } catch (error) {
+                console.error('Error loading sources:', error);
+                this.showToast('Error loading sources', 'error');
+            }
+        },
+
+        filterSources() {
+            this.filteredSources = this.sources.filter(source => {
+                const matchesSearch = !this.searchQuery || 
+                    source.source_name.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+                    source.source_id.toLowerCase().includes(this.searchQuery.toLowerCase());
+                
+                const matchesType = !this.filterType || source.source_type === this.filterType;
+                
+                const matchesStatus = !this.filterStatus || 
+                    (this.filterStatus === 'active' && source.is_active) ||
+                    (this.filterStatus === 'inactive' && !source.is_active);
+                
+                return matchesSearch && matchesType && matchesStatus;
+            });
+        },
+
+        editSource(source) {
+            this.editingSource = source;
+            this.formData = {
+                source_type: source.source_type,
+                source_id: source.source_id,
+                source_name: source.source_name,
+                category: source.category || '',
+                description: source.description || '',
+                is_active: source.is_active
+            };
+        },
+
+        closeModal() {
+            this.showAddModal = false;
+            this.editingSource = null;
+            this.formData = {
+                source_type: '',
+                source_id: '',
+                source_name: '',
+                category: '',
+                description: '',
+                is_active: true
+            };
+        },
+
+        async saveSource() {
+            if (!this.formData.source_type || !this.formData.source_id || !this.formData.source_name) {
+                this.showToast('Please fill in all required fields', 'error');
+                return;
+            }
+
+            this.saving = true;
+            try {
+                let response;
+                if (this.editingSource) {
+                    response = await fetch(`/api/sources/${this.editingSource.id}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(this.formData)
+                    });
+                } else {
+                    response = await fetch('/api/sources', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(this.formData)
+                    });
+                }
+
+                if (response.ok) {
+                    await this.loadSources();
+                    this.closeModal();
+                    this.showToast(
+                        this.editingSource ? 'Source updated successfully' : 'Source added successfully',
+                        'success'
+                    );
+                } else {
+                    const error = await response.json();
+                    throw new Error(error.detail || 'Failed to save source');
+                }
+            } catch (error) {
+                console.error('Error saving source:', error);
+                this.showToast(error.message, 'error');
+            } finally {
+                this.saving = false;
+            }
+        },
+
+        async toggleSource(source) {
+            try {
+                const response = await fetch(`/api/sources/${source.id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        is_active: !source.is_active
+                    })
+                });
+
+                if (response.ok) {
+                    await this.loadSources();
+                    this.showToast(
+                        `Source ${!source.is_active ? 'activated' : 'deactivated'}`,
+                        'success'
+                    );
+                } else {
+                    throw new Error('Failed to toggle source');
+                }
+            } catch (error) {
+                console.error('Error toggling source:', error);
+                this.showToast('Error updating source', 'error');
+            }
+        },
+
+        async deleteSource(source) {
+            if (!confirm(`Are you sure you want to delete "${source.source_name}"?`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/sources/${source.id}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    await this.loadSources();
+                    this.showToast('Source deleted successfully', 'success');
+                } else {
+                    throw new Error('Failed to delete source');
+                }
+            } catch (error) {
+                console.error('Error deleting source:', error);
+                this.showToast('Error deleting source', 'error');
+            }
+        },
+
+        formatDate(dateString) {
+            if (!dateString) return 'Unknown';
+            const date = new Date(dateString);
+            return date.toLocaleDateString();
+        },
+
+        showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `rounded-md p-4 mb-2 ${
+                type === 'success' ? 'bg-green-50 text-green-800' :
+                type === 'error' ? 'bg-red-50 text-red-800' :
+                'bg-blue-50 text-blue-800'
+            }`;
+            toast.innerHTML = `
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <i class="fas ${
+                            type === 'success' ? 'fa-check-circle' :
+                            type === 'error' ? 'fa-exclamation-circle' :
+                            'fa-info-circle'
+                        } h-5 w-5"></i>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm font-medium">${message}</p>
+                    </div>
+                </div>
+            `;
+            
+            const container = document.getElementById('toast-container');
+            container.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }
+    }
+}
+</script>
+{% endblock %} 

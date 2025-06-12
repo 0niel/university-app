@@ -7,9 +7,10 @@ from typing import Any, Dict, List, Optional
 import vk_api
 from loguru import logger
 
-from .config import Settings
-from .interfaces import SocialMediaClient
-from .models import SocialMediaPost, VKAttachment, VKGroupInfo, VKPost
+from ...config import Settings
+from ...models import SocialMediaPost
+from ..base.interfaces import SocialMediaClient
+from .models import VKAttachment, VKGroupInfo, VKPost
 
 
 class VKFetcher(SocialMediaClient):
@@ -17,9 +18,16 @@ class VKFetcher(SocialMediaClient):
 
     def __init__(self, config: Optional[Settings] = None):
         """Initialize the VK fetcher."""
-        super().__init__(name="VK Fetcher", client_type="vk")
-
         self.config = config or Settings()
+        client_config = self.config.get_client_config("vk")
+        auto_sync_enabled = client_config.get("auto_sync_enabled", True)
+        
+        super().__init__(
+            name="VK Fetcher", 
+            client_type="vk",
+            auto_sync_enabled=auto_sync_enabled
+        )
+
         self.vk_session = None
         self.vk = None
 
@@ -61,8 +69,9 @@ class VKFetcher(SocialMediaClient):
         self, source_id: str, limit: int = 20, **kwargs
     ) -> List[SocialMediaPost]:
         """Fetch posts from a VK group in unified format."""
-        if not self._initialized:
-            raise RuntimeError(f"{self.name} not initialized")
+        if not self._initialized or not self.vk:
+            logger.warning(f"{self.name} not initialized properly")
+            return []
 
         try:
             group_info = await self.get_group_info(source_id)
@@ -83,12 +92,18 @@ class VKFetcher(SocialMediaClient):
 
         except Exception as e:
             logger.error(f"Error fetching posts from {source_id}: {e}")
-            raise
+            return []
 
     async def get_source_info(self, source_id: str) -> Dict[str, Any]:
         """Get information about a VK group."""
-        if not self._initialized:
-            raise RuntimeError(f"{self.name} not initialized")
+        if not self._initialized or not self.vk:
+            logger.warning(f"{self.name} not initialized properly")
+            return {
+                "id": source_id,
+                "screen_name": source_id,
+                "name": source_id,
+                "type": "vk_group",
+            }
 
         try:
             group_info = await self.get_group_info(source_id)
@@ -104,11 +119,16 @@ class VKFetcher(SocialMediaClient):
             }
         except Exception as e:
             logger.error(f"Error getting group info for {source_id}: {e}")
-            raise
+            return {
+                "id": source_id,
+                "screen_name": source_id,
+                "name": source_id,
+                "type": "vk_group",
+            }
 
     async def validate_source(self, source_id: str) -> bool:
         """Validate if a VK group exists and is accessible."""
-        if not self._initialized:
+        if not self._initialized or not self.vk:
             return False
 
         try:

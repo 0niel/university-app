@@ -5,10 +5,10 @@ from typing import Type
 from loguru import logger
 
 from .config import Settings
-from .interfaces import SocialMediaClient
+from .clients.base.interfaces import SocialMediaClient
+from .clients.telegram import TelegramFetcher
+from .clients.vk import VKFetcher
 from .registry import ServiceRegistry
-from .telegram_client import TelegramFetcher
-from .vk_client import VKFetcher
 
 
 class ClientFactory:

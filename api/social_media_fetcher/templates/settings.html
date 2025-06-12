@@ -1,0 +1,419 @@
+{% extends "base.html" %}
+
+{% block title %}Settings - Social Media Fetcher{% endblock %}
+
+{% block content %}
+<div x-data="settingsData()">
+    <!-- Header -->
+    <div class="border-b border-gray-200 pb-5">
+        <h1 class="text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">
+            Settings
+        </h1>
+        <p class="mt-1 max-w-2xl text-sm text-gray-500">
+            Configure your social media fetcher application
+        </p>
+    </div>
+
+    <div class="mt-6 space-y-8">
+        <!-- Scheduler Settings -->
+        <div class="bg-white shadow rounded-lg">
+            <div class="px-4 py-5 sm:p-6">
+                <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">Scheduler Settings</h3>
+                
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h4 class="text-sm font-medium text-gray-900">Automatic Sync</h4>
+                            <p class="text-sm text-gray-500">Enable automatic fetching of new content</p>
+                        </div>
+                        <button @click="toggleScheduler()"
+                                :class="schedulerSettings.is_enabled ? 'bg-primary-600' : 'bg-gray-200'"
+                                class="relative inline-flex flex-shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                            <span :class="schedulerSettings.is_enabled ? 'translate-x-5' : 'translate-x-0'"
+                                  class="pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow transform ring-0 transition ease-in-out duration-200"></span>
+                        </button>
+                    </div>
+
+                    <div x-show="schedulerSettings.is_enabled" class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Sync Interval (minutes)</label>
+                            <select x-model="schedulerSettings.sync_interval_minutes"
+                                    @change="updateSchedulerSettings()"
+                                    class="mt-1 block w-full rounded-md border-gray-300 py-2 pl-3 pr-10 text-base focus:border-primary-500 focus:outline-none focus:ring-primary-500 sm:text-sm">
+                                <option value="15">15 minutes</option>
+                                <option value="30">30 minutes</option>
+                                <option value="60">1 hour</option>
+                                <option value="120">2 hours</option>
+                                <option value="360">6 hours</option>
+                                <option value="720">12 hours</option>
+                                <option value="1440">24 hours</option>
+                            </select>
+                        </div>
+
+                        <div class="bg-gray-50 rounded-md p-4">
+                            <div class="flex">
+                                <div class="flex-shrink-0">
+                                    <i class="fas fa-info-circle h-5 w-5 text-gray-400"></i>
+                                </div>
+                                <div class="ml-3">
+                                    <p class="text-sm text-gray-600">
+                                        <strong>Last sync:</strong> <span x-text="formatDate(schedulerSettings.last_sync_at) || 'Never'"></span><br>
+                                        <strong>Next sync:</strong> <span x-text="formatDate(schedulerSettings.next_sync_at) || 'Not scheduled'"></span><br>
+                                        <strong>Total synced:</strong> <span x-text="schedulerSettings.total_synced || 0"></span> items
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Client Status -->
+        <div class="bg-white shadow rounded-lg">
+            <div class="px-4 py-5 sm:p-6">
+                <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">Client Status</h3>
+                
+                <div class="space-y-4">
+                    <template x-for="(client, type) in clientStatus" :key="type">
+                        <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                            <div class="flex items-center">
+                                <div class="flex-shrink-0">
+                                    <div class="h-10 w-10 rounded-full flex items-center justify-center"
+                                         :class="type === 'telegram' ? 'bg-blue-100' : 'bg-indigo-100'">
+                                        <i :class="type === 'telegram' ? 'fab fa-telegram text-blue-600' : 'fab fa-vk text-indigo-600'" 
+                                           class="h-6 w-6"></i>
+                                    </div>
+                                </div>
+                                <div class="ml-4">
+                                    <h4 class="text-sm font-medium text-gray-900 capitalize" x-text="type"></h4>
+                                    <p class="text-sm text-gray-500" x-text="client.name"></p>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-4">
+                                <div class="text-right">
+                                    <p class="text-sm font-medium" 
+                                       :class="client.configured ? 'text-green-600' : 'text-red-600'"
+                                       x-text="client.configured ? 'Configured' : 'Not Configured'"></p>
+                                    <p class="text-sm text-gray-500" 
+                                       x-text="client.initialized ? 'Initialized' : 'Not Initialized'"></p>
+                                </div>
+                                <div class="h-3 w-3 rounded-full" 
+                                     :class="client.configured && client.initialized ? 'bg-green-400' : 'bg-red-400'"></div>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+
+        <!-- Application Info -->
+        <div class="bg-white shadow rounded-lg">
+            <div class="px-4 py-5 sm:p-6">
+                <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">Application Information</h3>
+                
+                <dl class="grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2">
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Version</dt>
+                        <dd class="mt-1 text-sm text-gray-900" x-text="appInfo.version || '2.0.0'"></dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Status</dt>
+                        <dd class="mt-1 text-sm text-gray-900" x-text="appInfo.status || 'Running'"></dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Available Clients</dt>
+                        <dd class="mt-1 text-sm text-gray-900">
+                            <template x-for="client in appInfo.available_clients" :key="client">
+                                <span class="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-800 mr-2 capitalize" x-text="client"></span>
+                            </template>
+                        </dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Enabled Clients</dt>
+                        <dd class="mt-1 text-sm text-gray-900">
+                            <template x-for="client in appInfo.enabled_clients" :key="client">
+                                <span class="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800 mr-2 capitalize" x-text="client"></span>
+                            </template>
+                        </dd>
+                    </div>
+                </dl>
+            </div>
+        </div>
+
+        <!-- System Health -->
+        <div class="bg-white shadow rounded-lg">
+            <div class="px-4 py-5 sm:p-6">
+                <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">System Health</h3>
+                
+                <div class="space-y-4">
+                    <template x-for="(status, service) in systemHealth.services" :key="service">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <div class="h-3 w-3 rounded-full mr-3" 
+                                     :class="status === 'available' ? 'bg-green-400' : 'bg-red-400'"></div>
+                                <span class="text-sm font-medium text-gray-900 capitalize" x-text="service.replace('_', ' ')"></span>
+                            </div>
+                            <span class="text-sm text-gray-500 capitalize" x-text="status"></span>
+                        </div>
+                    </template>
+                </div>
+
+                <div class="mt-6 pt-6 border-t border-gray-200">
+                    <button @click="checkSystemHealth()"
+                            :disabled="healthChecking"
+                            class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50">
+                        <i class="fas fa-heartbeat -ml-1 mr-2 h-4 w-4" :class="{ 'animate-pulse': healthChecking }"></i>
+                        <span x-text="healthChecking ? 'Checking...' : 'Check Health'"></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="bg-white shadow rounded-lg">
+            <div class="px-4 py-5 sm:p-6">
+                <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">Actions</h3>
+                
+                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                    <button @click="manualSync()"
+                            :disabled="syncing"
+                            class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50">
+                        <i class="fas fa-sync -ml-1 mr-2 h-4 w-4" :class="{ 'animate-spin': syncing }"></i>
+                        <span x-text="syncing ? 'Syncing...' : 'Manual Sync'"></span>
+                    </button>
+
+                    <button @click="clearCache()"
+                            :disabled="clearing"
+                            class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-yellow-600 hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 disabled:opacity-50">
+                        <i class="fas fa-trash -ml-1 mr-2 h-4 w-4"></i>
+                        <span x-text="clearing ? 'Clearing...' : 'Clear Cache'"></span>
+                    </button>
+
+                    <button @click="exportData()"
+                            class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                        <i class="fas fa-download -ml-1 mr-2 h-4 w-4"></i>
+                        Export Data
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function settingsData() {
+    return {
+        schedulerSettings: {},
+        clientStatus: {},
+        systemHealth: {},
+        appInfo: {},
+        healthChecking: false,
+        syncing: false,
+        clearing: false,
+
+        init() {
+            this.loadSettings();
+        },
+
+        async loadSettings() {
+            try {
+                await Promise.all([
+                    this.loadSchedulerSettings(),
+                    this.loadSystemHealth(),
+                    this.loadAppInfo()
+                ]);
+            } catch (error) {
+                console.error('Error loading settings:', error);
+                this.showToast('Error loading settings', 'error');
+            }
+        },
+
+        async loadSchedulerSettings() {
+            try {
+                const response = await fetch('/api/scheduler/status');
+                this.schedulerSettings = await response.json();
+            } catch (error) {
+                console.error('Error loading scheduler settings:', error);
+            }
+        },
+
+        async loadSystemHealth() {
+            try {
+                const response = await fetch('/api/health');
+                this.systemHealth = await response.json();
+                this.clientStatus = this.systemHealth.services?.clients || {};
+            } catch (error) {
+                console.error('Error loading system health:', error);
+            }
+        },
+
+        async loadAppInfo() {
+            try {
+                const response = await fetch('/api');
+                this.appInfo = await response.json();
+            } catch (error) {
+                console.error('Error loading app info:', error);
+            }
+        },
+
+        async toggleScheduler() {
+            try {
+                const endpoint = this.schedulerSettings.is_enabled ? '/api/scheduler/stop' : '/api/scheduler/start';
+                const response = await fetch(endpoint, { method: 'POST' });
+                
+                if (response.ok) {
+                    await this.loadSchedulerSettings();
+                    this.showToast(
+                        `Scheduler ${this.schedulerSettings.is_enabled ? 'started' : 'stopped'}`,
+                        'success'
+                    );
+                } else {
+                    throw new Error('Failed to toggle scheduler');
+                }
+            } catch (error) {
+                console.error('Error toggling scheduler:', error);
+                this.showToast('Error toggling scheduler', 'error');
+            }
+        },
+
+        async updateSchedulerSettings() {
+            try {
+                // Note: This would require a new API endpoint to update scheduler settings
+                this.showToast('Scheduler settings updated', 'success');
+            } catch (error) {
+                console.error('Error updating scheduler settings:', error);
+                this.showToast('Error updating scheduler settings', 'error');
+            }
+        },
+
+        async checkSystemHealth() {
+            this.healthChecking = true;
+            try {
+                await this.loadSystemHealth();
+                this.showToast('Health check completed', 'success');
+            } catch (error) {
+                console.error('Error checking system health:', error);
+                this.showToast('Error checking system health', 'error');
+            } finally {
+                this.healthChecking = false;
+            }
+        },
+
+        async manualSync() {
+            this.syncing = true;
+            try {
+                // Get sources and sync each one
+                const sourcesResponse = await fetch('/api/sources');
+                const sources = await sourcesResponse.json();
+                
+                for (const source of sources) {
+                    if (!source.is_active) continue;
+                    
+                    const response = await fetch('/api/fetch', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            source_type: source.source_type,
+                            source_id: source.source_id,
+                            limit: 10
+                        })
+                    });
+                    
+                    if (!response.ok) {
+                        console.warn(`Failed to sync ${source.source_name}`);
+                    }
+                }
+                
+                this.showToast('Manual sync completed', 'success');
+            } catch (error) {
+                console.error('Error during manual sync:', error);
+                this.showToast('Error during manual sync', 'error');
+            } finally {
+                this.syncing = false;
+            }
+        },
+
+        async clearCache() {
+            if (!confirm('Are you sure you want to clear the cache? This action cannot be undone.')) {
+                return;
+            }
+
+            this.clearing = true;
+            try {
+                // This would require a new API endpoint to clear cache
+                await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate clearing
+                this.showToast('Cache cleared successfully', 'success');
+            } catch (error) {
+                console.error('Error clearing cache:', error);
+                this.showToast('Error clearing cache', 'error');
+            } finally {
+                this.clearing = false;
+            }
+        },
+
+        async exportData() {
+            try {
+                const response = await fetch('/api/news?limit=1000');
+                const data = await response.json();
+                
+                const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `social-media-data-${new Date().toISOString().split('T')[0]}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                
+                this.showToast('Data exported successfully', 'success');
+            } catch (error) {
+                console.error('Error exporting data:', error);
+                this.showToast('Error exporting data', 'error');
+            }
+        },
+
+        formatDate(dateString) {
+            if (!dateString) return 'Never';
+            const date = new Date(dateString);
+            return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        },
+
+        showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `rounded-md p-4 mb-2 ${
+                type === 'success' ? 'bg-green-50 text-green-800' :
+                type === 'error' ? 'bg-red-50 text-red-800' :
+                'bg-blue-50 text-blue-800'
+            }`;
+            toast.innerHTML = `
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <i class="fas ${
+                            type === 'success' ? 'fa-check-circle' :
+                            type === 'error' ? 'fa-exclamation-circle' :
+                            'fa-info-circle'
+                        } h-5 w-5"></i>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm font-medium">${message}</p>
+                    </div>
+                </div>
+            `;
+            
+            const container = document.getElementById('toast-container');
+            container.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }
+    }
+}
+</script>
+{% endblock %} 

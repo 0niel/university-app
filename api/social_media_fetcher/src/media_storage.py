@@ -11,7 +11,7 @@ from urllib.parse import urlparse
 import aiohttp
 from loguru import logger
 from PIL import Image
-from supabase import AsyncClient
+from supabase import Client
 
 from .config import Settings
 
@@ -19,7 +19,7 @@ from .config import Settings
 class MediaStorage:
     """Handler for downloading and storing media files in Supabase Storage."""
 
-    def __init__(self, settings: Settings, supabase_client: AsyncClient):
+    def __init__(self, settings: Settings, supabase_client: Client):
         """Initialize the media storage handler."""
         self.settings = settings
         self.supabase = supabase_client
@@ -49,11 +49,11 @@ class MediaStorage:
 
         for bucket_name in buckets:
             try:
-                await self.supabase.storage.get_bucket(bucket_name)
+                self.supabase.storage.get_bucket(bucket_name)
                 logger.debug(f"Bucket {bucket_name} exists")
             except Exception:
                 try:
-                    await self.supabase.storage.create_bucket(
+                    self.supabase.storage.create_bucket(
                         bucket_name,
                         options={
                             "public": True,
@@ -129,7 +129,7 @@ class MediaStorage:
                 file_data, content_type, file_type
             )
 
-            result = await self.supabase.storage.from_(bucket_name).upload(
+            result = self.supabase.storage.from_(bucket_name).upload(
                 file_path_storage,
                 processed_data,
                 file_options={
@@ -203,7 +203,7 @@ class MediaStorage:
                 file_data, content_type, file_type
             )
 
-            result = await self.supabase.storage.from_(bucket_name).upload(
+            result = self.supabase.storage.from_(bucket_name).upload(
                 file_path,
                 processed_data,
                 file_options={

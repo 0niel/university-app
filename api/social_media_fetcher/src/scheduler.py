@@ -9,30 +9,24 @@ from typing import Dict, List, Optional
 from loguru import logger
 
 from .config import Settings
-from .media_storage import MediaStorage
-from .supabase_client import SupabaseNewsClient
-from .telegram_client import TelegramFetcher
-from .vk_client import VKFetcher
+from .services import DatabaseService, MediaStorageService, ClientRegistry
 
 
 class BackgroundScheduler:
     """Background scheduler for automatic social media content fetching."""
 
     def __init__(
-        self,
-        settings: Settings,
-        telegram_fetcher: TelegramFetcher,
-        vk_fetcher: VKFetcher,
-        supabase_client: SupabaseNewsClient,
-        media_storage: MediaStorage,
+        self, 
+        database: DatabaseService,
+        media_storage: MediaStorageService,
+        client_registry: ClientRegistry,
+        settings: Settings
     ):
         """Initialize the scheduler."""
-        self.settings = settings
-        self.telegram_fetcher = telegram_fetcher
-        self.vk_fetcher = vk_fetcher
-        self.supabase_client = supabase_client
+        self.database = database
         self.media_storage = media_storage
-
+        self.client_registry = client_registry
+        self.settings = settings
         self.running = False
         self.task: Optional[asyncio.Task] = None
 
@@ -64,7 +58,7 @@ class BackgroundScheduler:
 
         while self.running:
             try:
-                config = await self.supabase_client.get_scheduler_config()
+                config = await self.database.get_scheduler_config()
 
                 if not config.get("is_enabled", False):
                     logger.debug("Scheduler disabled, sleeping...")
@@ -88,7 +82,7 @@ class BackgroundScheduler:
                 sync_results = await self._sync_all_sources()
 
                 next_sync_time = now + timedelta(minutes=interval_minutes)
-                await self.supabase_client.update_scheduler_config(
+                await self.database.update_scheduler_config(
                     last_sync_at=now.isoformat(),
                     next_sync_at=next_sync_time.isoformat(),
                     total_synced=config.get("total_synced", 0)
@@ -110,12 +104,19 @@ class BackgroundScheduler:
                 await asyncio.sleep(60)
 
     async def _sync_all_sources(self) -> Dict:
-        """Sync all active sources."""
+        """Sync all active sources using auto-sync enabled clients."""
         try:
-            sources = await self.supabase_client.get_active_sources()
+            sources = await self.database.get_active_sources()
 
             if not sources:
                 logger.info("No active sources found")
+                return {"total_items": 0, "errors": []}
+
+            # Get only clients that have auto sync enabled
+            auto_sync_clients = self.client_registry.get_auto_sync_clients()
+            
+            if not auto_sync_clients:
+                logger.info("No auto-sync clients available")
                 return {"total_items": 0, "errors": []}
 
             total_items = 0
@@ -127,28 +128,18 @@ class BackgroundScheduler:
                     source_id = source["source_id"]
                     source_name = source["source_name"]
 
+                    # Check if we have a client for this source type
+                    client = auto_sync_clients.get(source_type)
+                    if not client:
+                        logger.debug(f"No auto-sync client available for {source_type}")
+                        continue
+
                     logger.info(f"Syncing {source_type} source: {source_id}")
 
-                    if source_type == "telegram":
-                        items_count = await self._sync_telegram_source(
-                            source_id,
-                            source_name,
-                            self.supabase_client,
-                            self.media_storage,
-                        )
-                        total_items += items_count
-
-                    elif source_type == "vk":
-                        items_count = await self._sync_vk_source(
-                            source_id,
-                            source_name,
-                            self.supabase_client,
-                            self.media_storage,
-                        )
-                        total_items += items_count
-
-                    else:
-                        logger.warning(f"Unknown source type: {source_type}")
+                    items_count = await self._sync_source_with_client(
+                        client, source_id, source_name
+                    )
+                    total_items += items_count
 
                 except Exception as e:
                     error_msg = f"Error syncing {source.get('source_type', 'unknown')} source {source.get('source_id', 'unknown')}: {str(e)}"
@@ -165,124 +156,66 @@ class BackgroundScheduler:
             logger.error(f"Error in sync all sources: {e}")
             return {"total_items": 0, "errors": [str(e)]}
 
-    async def _sync_telegram_source(
-        self, channel_username: str, channel_name: str, supabase_client, media_storage
+    async def _sync_source_with_client(
+        self, client, source_id: str, source_name: str
     ) -> int:
-        """Sync a Telegram channel."""
+        """Universal method to sync a source with any client."""
         try:
-            channel_info = await self.telegram_fetcher.get_channel_info(
-                channel_username
-            )
-
-            messages = await self.telegram_fetcher.get_channel_messages(
-                channel_username=channel_username,
-                limit=self.settings.MAX_MESSAGES_PER_REQUEST,
-            )
-
-            stored_count = 0
-            for message in messages:
-                try:
-                    social_post = self.telegram_fetcher.convert_to_social_media_post(
-                        message, channel_info
-                    )
-
-                    source_info = {
-                        "source_type": "telegram",
-                        "source_id": channel_username,
-                    }
-
-                    if social_post.image_urls:
-                        processed_images = await media_storage.process_media_urls(
-                            social_post.image_urls,
-                            "image",
-                            source_info,
-                            self.telegram_fetcher,
-                        )
-                        social_post.image_urls = processed_images
-
-                    if social_post.video_urls:
-                        processed_videos = await media_storage.process_media_urls(
-                            social_post.video_urls,
-                            "video",
-                            source_info,
-                            self.telegram_fetcher,
-                        )
-                        social_post.video_urls = processed_videos
-
-                    if await supabase_client.save_social_news_item(social_post):
-                        stored_count += 1
-
-                except Exception as e:
-                    logger.warning(
-                        f"Error processing Telegram message {message.id}: {e}"
-                    )
-
-            await supabase_client.save_source_info(
-                "telegram",
-                channel_username,
-                channel_info.title,
-                f"https://t.me/{channel_username}",
-            )
-
-            logger.info(
-                f"Synced Telegram channel @{channel_username}: {stored_count}/{len(messages)} messages stored"
-            )
-            return stored_count
-
-        except Exception as e:
-            logger.error(f"Error syncing Telegram channel @{channel_username}: {e}")
-            raise
-
-    async def _sync_vk_source(
-        self, group_id: str, group_name: str, supabase_client, media_storage
-    ) -> int:
-        """Sync a VK group."""
-        try:
-            group_info = await self.vk_fetcher.get_group_info(group_id)
-
-            posts = await self.vk_fetcher.get_group_posts(
-                group_id=group_id, count=self.settings.MAX_POSTS_PER_REQUEST
-            )
+            # Get source info
+            source_info = await client.get_source_info(source_id)
+            
+            # Fetch posts using the unified interface
+            posts = await client.fetch_posts(source_id, limit=50)
 
             stored_count = 0
             for post in posts:
                 try:
-                    social_post = self.vk_fetcher.convert_to_social_media_post(
-                        post, group_info
-                    )
+                    # Process media URLs if any
+                    source_info_for_media = {
+                        "source_type": client.client_type,
+                        "source_id": source_id,
+                    }
 
-                    source_info = {"source_type": "vk", "source_id": group_id}
-
-                    if social_post.image_urls:
-                        processed_images = await media_storage.process_media_urls(
-                            social_post.image_urls, "image", source_info
+                    if post.image_urls:
+                        processed_images = await self.media_storage.process_media_urls(
+                            post.image_urls,
+                            "image",
+                            source_info_for_media,
+                            client if client.client_type == "telegram" else None,
                         )
-                        social_post.image_urls = processed_images
+                        post.image_urls = processed_images
 
-                    if social_post.video_urls:
-                        processed_videos = await media_storage.process_media_urls(
-                            social_post.video_urls, "video", source_info
+                    if post.video_urls:
+                        processed_videos = await self.media_storage.process_media_urls(
+                            post.video_urls,
+                            "video", 
+                            source_info_for_media,
+                            client if client.client_type == "telegram" else None,
                         )
-                        social_post.video_urls = processed_videos
+                        post.video_urls = processed_videos
 
-                    if await supabase_client.save_social_news_item(social_post):
+                    # Save to database
+                    if await self.database.save_social_news_item(post):
                         stored_count += 1
 
                 except Exception as e:
-                    logger.warning(f"Error processing VK post {post.id}: {e}")
+                    logger.warning(f"Error processing post {post.id}: {e}")
 
-            await supabase_client.save_source_info(
-                "vk",
-                group_id,
-                group_info.name,
-                f"https://vk.com/{group_info.screen_name}",
+            # Save source info
+            await self.database.save_source_info(
+                client.client_type,
+                source_id,
+                source_name,
+                post.original_url if posts else f"https://example.com/{source_id}",
             )
 
             logger.info(
-                f"Synced VK group {group_id}: {stored_count}/{len(posts)} posts stored"
+                f"Synced {client.client_type} source {source_id}: {stored_count}/{len(posts)} items stored"
             )
             return stored_count
 
         except Exception as e:
-            logger.error(f"Error syncing VK group {group_id}: {e}")
+            logger.error(f"Error syncing {client.client_type} source {source_id}: {e}")
             raise
+
+
