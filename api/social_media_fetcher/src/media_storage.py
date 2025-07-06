@@ -25,16 +25,17 @@ class MediaStorage:
         self.supabase = supabase_client
         self.session: Optional[aiohttp.ClientSession] = None
 
-        self.images_bucket = "social-media-images"
-        self.videos_bucket = "social-media-videos"
-        self.documents_bucket = "social-media-documents"
+        self.images_bucket_name = settings.SUPABASE_BUCKET_IMAGES
+        self.videos_bucket_name = settings.SUPABASE_BUCKET_VIDEOS
+        self.documents_bucket_name = settings.SUPABASE_BUCKET_DOCUMENTS
+        self._bucket_id_cache: Dict[str, str] = {}
 
     async def initialize(self):
         """Initialize the storage and HTTP session."""
         timeout = aiohttp.ClientTimeout(total=self.settings.CLIENT_TIMEOUT)
         self.session = aiohttp.ClientSession(timeout=timeout)
 
-        await self._ensure_buckets_exist()
+        await self._populate_bucket_cache()
         logger.info("Media storage initialized")
 
     async def close(self):
@@ -43,65 +44,79 @@ class MediaStorage:
             await self.session.close()
             logger.info("Media storage closed")
 
-    async def _ensure_buckets_exist(self):
-        """Ensure required storage buckets exist."""
-        buckets = [self.images_bucket, self.videos_bucket, self.documents_bucket]
+    async def _populate_bucket_cache(self):
+        """Fetch all buckets and cache their names and IDs."""
+        if not (hasattr(self.supabase, 'storage') and self.supabase.storage):
+            logger.warning("Supabase storage not available, skipping bucket cache.")
+            return
+        
+        try:
+            buckets = self.supabase.storage.list_buckets()
+            self._bucket_id_cache = {b.name: b.id for b in buckets}
+            logger.info(f"Successfully cached bucket IDs: {list(self._bucket_id_cache.keys())}")
+            
+            # Verify that required buckets are in the cache
+            required_buckets = [self.images_bucket_name, self.videos_bucket_name, self.documents_bucket_name]
+            for bucket_name in required_buckets:
+                if bucket_name not in self._bucket_id_cache:
+                    logger.warning(f"Required bucket '{bucket_name}' not found in accessible buckets.")
+                    
+        except Exception as e:
+            logger.error(
+                f"Could not list storage buckets to populate cache: {e}. "
+                f"Please ensure the service key has 'storage.buckets.list' permissions."
+            )
 
-        for bucket_name in buckets:
-            try:
-                self.supabase.storage.get_bucket(bucket_name)
-                logger.debug(f"Bucket {bucket_name} exists")
-            except Exception:
-                try:
-                    self.supabase.storage.create_bucket(
-                        bucket_name,
-                        options={
-                            "public": True,
-                            "file_size_limit": 50 * 1024 * 1024,
-                            "allowed_mime_types": self._get_allowed_mime_types(
-                                bucket_name
-                            ),
-                        },
-                    )
-                    logger.info(f"Created bucket: {bucket_name}")
-                except Exception as e:
-                    logger.warning(f"Could not create bucket {bucket_name}: {e}")
+    def _get_bucket_id(self, bucket_name: str) -> Optional[str]:
+        """Get bucket ID from cache by its name."""
+        return self._bucket_id_cache.get(bucket_name)
+
+    def _get_bucket_name_for_type(self, file_type: str) -> str:
+        """Get the appropriate bucket name for file type."""
+        if file_type == "image":
+            return self.images_bucket_name
+        elif file_type == "video":
+            return self.videos_bucket_name
+        else:
+            return self.documents_bucket_name
 
     def _get_allowed_mime_types(self, bucket_name: str) -> list:
         """Get allowed MIME types for a bucket."""
-        if bucket_name == self.images_bucket:
+        if bucket_name == self.images_bucket_name:
             return ["image/*"]
-        elif bucket_name == self.videos_bucket:
+        elif bucket_name == self.videos_bucket_name:
             return ["video/*"]
-        elif bucket_name == self.documents_bucket:
+        elif bucket_name == self.documents_bucket_name:
             return ["application/*", "text/*"]
         return ["*/*"]
 
     async def download_telegram_file(
         self,
-        file_id: str,
+        media_object: Any,
         telegram_client,
         source_info: Optional[Dict[str, Any]] = None,
     ) -> Optional[str]:
         """
-        Download a Telegram file using file_id and store it in Supabase Storage.
+        Download a Telegram file using its media object and store it in Supabase Storage.
 
         Args:
-            file_id: Telegram file ID
+            media_object: Telegram media object (e.g., message.media)
             telegram_client: Telegram client instance
             source_info: Additional info about the source
 
         Returns:
             Public URL of the stored file, or None if failed
         """
+        file_path = None
         try:
             if not telegram_client or not telegram_client._initialized:
                 logger.warning("Telegram client not initialized")
                 return None
 
-            file_path = await telegram_client.client.download_media(file_id)
+            file_path = await telegram_client.client.download_media(media_object)
             if not file_path:
-                logger.warning(f"Could not download Telegram file: {file_id}")
+                file_id = getattr(media_object, 'id', 'unknown_id')
+                logger.warning(f"Could not download Telegram file from media object: {file_id}")
                 return None
 
             with open(file_path, "rb") as f:
@@ -120,61 +135,72 @@ class MediaStorage:
             else:
                 file_type = "document"
 
+            bucket_name = self._get_bucket_name_for_type(file_type)
+            bucket_id = self._get_bucket_id(bucket_name)
+
+            if not bucket_id:
+                logger.error(f"Bucket '{bucket_name}' not found or is not accessible. Cannot upload file.")
+                return None
+
             file_path_storage = self._generate_file_path(
-                f"telegram_file_{file_id}", file_type, content_type, source_info
+                file_path, file_type, content_type, source_info
             )
-            bucket_name = self._get_bucket_for_type(file_type)
 
             processed_data = await self._process_file(
                 file_data, content_type, file_type
             )
-
-            result = self.supabase.storage.from_(bucket_name).upload(
+            
+            logger.info(f"Bucket ID: {bucket_id}")
+            
+            result = self.supabase.storage.from_(bucket_id).upload(
                 file_path_storage,
                 processed_data,
                 file_options={
                     "content-type": content_type,
                     "cache-control": "3600",
-                    "upsert": True,
+                    "upsert": "true",
                 },
             )
+            
+            logger.info(f"Upload result: {result}")
 
-            if result.error:
+            if isinstance(result, Exception):
                 logger.error(
-                    f"Failed to upload Telegram file {file_path_storage}: {result.error}"
+                    f"Failed to upload Telegram file {file_path_storage}: {result}"
                 )
                 return None
 
-            public_url = self.supabase.storage.from_(bucket_name).get_public_url(
+            public_url = self.supabase.storage.from_(bucket_id).get_public_url(
                 file_path_storage
             )
-
-            try:
-                import os
-
-                os.unlink(file_path)
-            except Exception as e:
-                logger.warning(f"Could not clean up temporary file {file_path}: {e}")
-
+            
             logger.info(f"Successfully stored Telegram file: {file_path_storage}")
             return public_url
 
         except Exception as e:
+            file_id = getattr(media_object, 'id', 'unknown_id')
             logger.error(f"Error downloading/storing Telegram file {file_id}: {e}")
             return None
+        finally:
+            # Гарантированно удаляем временный файл, если он был создан
+            if file_path and os.path.exists(file_path):
+                try:
+                    os.unlink(file_path)
+                    logger.debug(f"Cleaned up temporary file: {file_path}")
+                except Exception as e:
+                    logger.warning(f"Could not clean up temporary file {file_path}: {e}")
 
     async def download_and_store_file(
         self,
-        url: str,
+        url_or_media_object: Any,
         file_type: str = "image",
         source_info: Optional[Dict[str, Any]] = None,
         telegram_client=None,
     ) -> Optional[str]:
         """
-        Download a file from URL or Telegram file_id and store it in Supabase Storage.
-
+        Download a file from URL or Telegram media object and store it.
         Args:
-            url: URL of the file to download or Telegram file_id
+            url_or_media_object: URL of the file or a Telegram media object
             file_type: Type of file (image, video, document)
             source_info: Additional info about the source (for organizing files)
             telegram_client: Telegram client for downloading Telegram files
@@ -182,42 +208,50 @@ class MediaStorage:
         Returns:
             Public URL of the stored file, or None if failed
         """
-        if not url.startswith("http") and telegram_client:
-            return await self.download_telegram_file(url, telegram_client, source_info)
+        if telegram_client and not isinstance(url_or_media_object, str):
+            return await self.download_telegram_file(url_or_media_object, telegram_client, source_info)
 
         if not self.session:
             logger.error("Media storage not initialized")
             return None
+
+        url = str(url_or_media_object)
 
         try:
             file_data, content_type, file_size = await self._download_file(url)
             if not file_data:
                 return None
 
+            bucket_name = self._get_bucket_name_for_type(file_type)
+            bucket_id = self._get_bucket_id(bucket_name)
+
+            if not bucket_id:
+                logger.error(f"Bucket '{bucket_name}' not found or is not accessible. Cannot upload file.")
+                return None
+
             file_path = self._generate_file_path(
                 url, file_type, content_type, source_info
             )
-            bucket_name = self._get_bucket_for_type(file_type)
 
             processed_data = await self._process_file(
                 file_data, content_type, file_type
             )
 
-            result = self.supabase.storage.from_(bucket_name).upload(
+            result = self.supabase.storage.from_(bucket_id).upload(
                 file_path,
                 processed_data,
                 file_options={
                     "content-type": content_type,
                     "cache-control": "3600",
-                    "upsert": True,
+                    "upsert": "true",
                 },
             )
 
-            if result.error:
-                logger.error(f"Failed to upload file {file_path}: {result.error}")
+            if isinstance(result, Exception):
+                logger.error(f"Failed to upload file {file_path}: {result}")
                 return None
 
-            public_url = self.supabase.storage.from_(bucket_name).get_public_url(
+            public_url = self.supabase.storage.from_(bucket_id).get_public_url(
                 file_path
             )
 
@@ -311,15 +345,6 @@ class MediaStorage:
         }
 
         return content_type_map.get(content_type, ".bin")
-
-    def _get_bucket_for_type(self, file_type: str) -> str:
-        """Get the appropriate bucket name for file type."""
-        if file_type == "image":
-            return self.images_bucket
-        elif file_type == "video":
-            return self.videos_bucket
-        else:
-            return self.documents_bucket
 
     async def _process_file(
         self, data: bytes, content_type: str, file_type: str

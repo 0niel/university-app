@@ -2,29 +2,61 @@
 
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Union
+from urllib.parse import urlparse
 
-from pydantic import BaseModel, Field, validator
-
+from pydantic import BaseModel, Field, validator, root_validator
 
 
 class AddSourceRequest(BaseModel):
     """Request model for adding a new source."""
 
-    source_type: str = Field(..., description="Source type (telegram, vk)")
-    source_id: str = Field(
-        ..., description="Source identifier (channel username, group ID)"
+    source_url: str = Field(
+        ..., 
+        description="URL to the source (e.g., https://t.me/channel or https://vk.com/group)",
+        examples=["https://t.me/example_channel", "https://vk.com/example_group"]
     )
-    source_name: str = Field(..., description="Display name of the source")
-    source_url: Optional[str] = Field(default="", description="URL to the source")
-    category: Optional[str] = Field(default="", description="Source category")
-    description: Optional[str] = Field(default="", description="Source description")
-    is_active: bool = Field(default=True, description="Whether the source is active")
+    source_name: str = Field(
+        ..., 
+        description="Display name of the source",
+        examples=["Example Channel", "Example VK Group"]
+    )
+    
+    source_type: Optional[str] = Field(
+        default=None, 
+        description="Source type (automatically detected from URL if not provided)",
+        examples=["telegram", "vk"]
+    )
+    source_id: Optional[str] = Field(
+        default=None, 
+        description="Source identifier (automatically extracted from URL if not provided)",
+        examples=["example_channel", "example_group"]
+    )
+    category: Optional[str] = Field(
+        default="", 
+        description="Source category for organization",
+        examples=["news", "tech", "entertainment"]
+    )
+    description: Optional[str] = Field(
+        default="", 
+        description="Optional description of the source",
+        examples=["Technology news channel", "Entertainment group"]
+    )
+    is_active: bool = Field(
+        default=True, 
+        description="Whether the source should be actively monitored"
+    )
 
-    @validator("source_type")
-    def validate_source_type(cls, v):
-        if v not in ["telegram", "vk"]:
-            raise ValueError('source_type must be either "telegram" or "vk"')
-        return v
+    class Config:
+        """Pydantic configuration."""
+        json_schema_extra = {
+            "example": {
+                "source_url": "https://t.me/example_channel",
+                "source_name": "Example Channel",
+                "category": "news",
+                "description": "Technology news channel",
+                "is_active": True
+            }
+        }
 
 
 class UpdateSourceRequest(BaseModel):
@@ -199,31 +231,26 @@ class StatisticsResponse(BaseModel):
 
     total_items: int
     by_source_type: Dict[str, int]
-    by_source: List[Dict[str, Any]]
+    by_source: Optional[List[Dict[str, Any]]] = []
     last_updated: datetime
 
 
-class SocialMediaPost(BaseModel):
-    """Unified model for social media posts from any platform."""
+class NewsBlocksResponse(BaseModel):
+    """Response model for news blocks."""
 
-    id: str
-    source_type: str
-    source_id: str
-    source_name: str
-    title: str
-    content: str
-    published_at: datetime
-    original_url: str
+    items: List[Dict[str, Any]]
+    total: int
+    limit: int
+    offset: int
+    has_more: bool
 
-    image_urls: List[str] = []
-    video_urls: List[str] = []
 
-    tags: List[str] = []
+class NewsBlocksStatisticsResponse(BaseModel):
+    """Response model for news blocks statistics."""
 
-    likes_count: Optional[int] = None
-    comments_count: Optional[int] = None
-    shares_count: Optional[int] = None
-    views_count: Optional[int] = None
-
-    author_name: Optional[str] = None
-    author_url: Optional[str] = None
+    total_items: int
+    items_with_news_blocks: int
+    coverage_percentage: float
+    news_blocks_coverage: Dict[str, float]
+    by_source_type: Dict[str, int]
+    last_updated: datetime

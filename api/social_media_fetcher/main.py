@@ -3,6 +3,7 @@
 import asyncio
 from contextlib import asynccontextmanager
 from typing import Any, Dict, List, Optional
+from datetime import datetime, timezone
 
 import uvicorn
 from fastapi import Depends, FastAPI, HTTPException, status, Request
@@ -57,7 +58,7 @@ async def lifespan(app: FastAPI):
                     services.database,
                     services.media_storage,
                     services.client_registry,
-                    settings
+                    settings,
                 )
                 await scheduler.start()
                 logger.info("Background scheduler started")
@@ -92,7 +93,9 @@ async def setup_services():
         services.media_storage = media_storage
         logger.info("Media storage registered")
     else:
-        logger.warning("Supabase not configured - database and media storage features disabled")
+        logger.warning(
+            "Supabase not configured - database and media storage features disabled"
+        )
 
     # Setup clients
     if settings.telegram_configured:
@@ -112,9 +115,6 @@ app = FastAPI(
     version="2.0.0",
     lifespan=lifespan,
 )
-
-# Mount static files
-app.mount("/static", StaticFiles(directory="static"), name="static")
 
 server_config = settings.get_server_config()
 app.add_middleware(
@@ -148,38 +148,6 @@ def get_scheduler() -> BackgroundScheduler:
         )
 
 
-# Frontend routes
-@app.get("/dashboard", response_class=HTMLResponse)
-async def dashboard(request: Request):
-    """Dashboard page."""
-    return templates.TemplateResponse("dashboard.html", {"request": request})
-
-@app.get("/sources-page", response_class=HTMLResponse)
-async def sources_page(request: Request):
-    """Sources management page."""
-    return templates.TemplateResponse("sources.html", {"request": request})
-
-@app.get("/news-page", response_class=HTMLResponse)
-async def news_page(request: Request):
-    """News viewing page."""
-    return templates.TemplateResponse("news.html", {"request": request})
-
-@app.get("/analytics", response_class=HTMLResponse)
-async def analytics_page(request: Request):
-    """Analytics page."""
-    return templates.TemplateResponse("analytics.html", {"request": request})
-
-@app.get("/settings", response_class=HTMLResponse)
-async def settings_page(request: Request):
-    """Settings page."""
-    return templates.TemplateResponse("settings.html", {"request": request})
-
-# Redirect root to dashboard
-@app.get("/", response_class=HTMLResponse)
-async def root_redirect(request: Request):
-    """Redirect root to dashboard."""
-    return templates.TemplateResponse("dashboard.html", {"request": request})
-
 # API routes
 @app.get("/api", response_model=Dict[str, Any])
 async def api_root():
@@ -190,8 +158,11 @@ async def api_root():
         "status": "running",
         "available_clients": list(services.client_registry.get_all_clients().keys()),
         "enabled_clients": list(services.client_registry.get_enabled_clients().keys()),
-        "auto_sync_clients": list(services.client_registry.get_auto_sync_clients().keys()),
+        "auto_sync_clients": list(
+            services.client_registry.get_auto_sync_clients().keys()
+        ),
     }
+
 
 @app.get("/api/health", response_model=Dict[str, Any])
 async def health_check():
@@ -213,7 +184,9 @@ async def health_check():
         "status": "healthy",
         "services": services_status,
         "enabled_clients": list(services.client_registry.get_enabled_clients().keys()),
-        "auto_sync_clients": list(services.client_registry.get_auto_sync_clients().keys()),
+        "auto_sync_clients": list(
+            services.client_registry.get_auto_sync_clients().keys()
+        ),
     }
 
 
@@ -224,15 +197,55 @@ async def add_source(
 ):
     """Add a new social media source."""
     try:
+        # Import ClientFactory here to avoid circular imports
+        from src.client_factory import ClientFactory
+        from src.registry import ServiceRegistry
+        
+        # Create a temporary factory to use detection methods
+        factory = ClientFactory(settings, ServiceRegistry())
+        
+        # Auto-detect source type and extract source ID if not provided
+        if not request.source_type or not request.source_id:
+            detected_type, detected_id = factory.extract_source_info_from_url(request.source_url)
+            
+            if not detected_type:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"Could not determine source type from URL: {request.source_url}. "
+                           f"Supported platforms: {', '.join(factory.get_available_client_types())}"
+                )
+            
+            if not detected_id:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"Could not extract source ID from URL: {request.source_url}"
+                )
+            
+            # Use detected values if not provided
+            if not request.source_type:
+                request.source_type = detected_type
+            if not request.source_id:
+                request.source_id = detected_id
+        
+        # Validate that we have a client for this source type
+        if request.source_type not in factory.get_available_client_types():
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Unknown source type: {request.source_type}. "
+                       f"Available types: {', '.join(factory.get_available_client_types())}"
+            )
+        
+        # Validate the source if client is available and initialized
         client = services.client_registry.get_client(request.source_type)
         if client and client._initialized:
             is_valid = await client.validate_source(request.source_id)
             if not is_valid:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
-                    detail=f"Source {request.source_id} is not accessible",
+                    detail=f"Source {request.source_id} is not accessible or does not exist"
                 )
 
+        # Add the source to database
         source = await db.add_source(
             source_type=request.source_type,
             source_id=request.source_id,
@@ -244,6 +257,8 @@ async def add_source(
 
         return SourceResponse(**source)
 
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Error adding source: {e}")
         raise HTTPException(
@@ -278,7 +293,7 @@ async def get_sources(
 
 @app.put("/api/sources/{source_id}", response_model=SourceResponse)
 async def update_source(
-    source_id: int,
+    source_id: str,
     request: UpdateSourceRequest,
     db: SupabaseNewsClient = Depends(get_database),
 ):
@@ -295,9 +310,79 @@ async def update_source(
         ) from e
 
 
+@app.post("/api/sources/{source_id}/fetch", status_code=status.HTTP_202_ACCEPTED)
+async def manual_fetch_source(
+    source_id: str,
+    limit: int = 20,
+    db: SupabaseNewsClient = Depends(get_database),
+):
+    """Manually fetches posts from a single source and saves them."""
+    try:
+        logger.info(f"Manual fetch: source_id={source_id}, limit={limit}")
+        source = await db.get_source(source_id)
+        if not source:
+            logger.error(f"Source with ID {source_id} not found in DB")
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Source with ID {source_id} not found",
+            )
+        logger.info(f"Source found: {source}")
+
+        source_type = source["source_type"]
+        platform_source_id = source["source_id"]
+        logger.info(f"Source type: {source_type}, platform_source_id: {platform_source_id}")
+        
+        client = services.client_registry.get_client(source_type)
+        if not client:
+            logger.error(f"Client for source type '{source_type}' not available or configured.")
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Client for source type '{source_type}' not available or configured.",
+            )
+        logger.info(f"Client found: {client}")
+
+        if not client.is_initialized:
+            logger.info(f"Initializing client {source_type}")
+            await client.initialize()
+        logger.info(f"Client {source_type} initialized: {client.is_initialized}")
+
+        raw_data_list = await client.fetch_raw_data(platform_source_id, limit)
+        logger.info(f"Fetched {len(raw_data_list)} raw items from client")
+
+        saved_count = 0
+        for idx, raw_data in enumerate(raw_data_list):
+            try:
+                logger.info(f"Saving item {idx+1}/{len(raw_data_list)}: {raw_data.get('id', '')}")
+                result = await db.save_raw_data_as_news_blocks(
+                    raw_data=raw_data,
+                    source_type=source_type,
+                    source_id=platform_source_id,
+                    source_name=source["source_name"],
+                )
+                logger.info(f"Save result: {result}")
+                if result:
+                    saved_count += 1
+            except Exception as e:
+                logger.error(f"Error saving item {idx+1}: {e}")
+        
+        await db.update_source(source_id, last_fetched_at=datetime.now(timezone.utc))
+        logger.info(f"Manual fetch complete: saved {saved_count}/{len(raw_data_list)} items for source {source_id}")
+
+        return {
+            "message": f"Successfully fetched and saved {saved_count}/{len(raw_data_list)} posts for source {source_id}."
+        }
+
+    except Exception as e:
+        logger.error(f"Error during manual fetch for source {source_id}: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=str(e),
+        ) from e
+
+
 @app.delete("/api/sources/{source_id}")
 async def delete_source(
-    source_id: int,
+    source_id: str,
     db: SupabaseNewsClient = Depends(get_database),
 ):
     """Delete a source."""
@@ -324,7 +409,7 @@ async def get_news(
 ):
     """Get latest news from cached data."""
     try:
-        news_items = await db.get_latest_news(
+        news_data = await db.get_latest_news(
             limit=limit,
             offset=offset,
             source_type=source_type,
@@ -332,13 +417,16 @@ async def get_news(
             category=category,
         )
 
-        items = [NewsItemResponse(**item) for item in news_items]
+        items = [NewsItemResponse(**item) for item in news_data["items"]]
+        total_count = news_data["total"]
+        has_more = (offset + len(items)) < total_count
 
         return NewsListResponse(
             items=items,
-            total=len(items),
+            total=total_count,
             limit=limit,
             offset=offset,
+            has_more=has_more,
         )
 
     except Exception as e:
@@ -408,6 +496,85 @@ async def stop_scheduler(
         ) from e
 
 
+@app.post("/api/scheduler/config")
+async def update_scheduler_config(
+    request: SchedulerConfigRequest,
+    db: SupabaseNewsClient = Depends(get_database),
+):
+    """Update scheduler configuration."""
+    try:
+        update_data = request.dict(exclude_unset=True)
+        await db.update_scheduler_config(**update_data)
+        return {"message": "Scheduler configuration updated successfully"}
+
+    except Exception as e:
+        logger.error(f"Error updating scheduler config: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=str(e),
+        ) from e
+
+
+@app.post("/api/sources/{source_id}/auto-sync")
+async def toggle_source_auto_sync(
+    source_id: str,
+    enabled: bool,
+    db: SupabaseNewsClient = Depends(get_database),
+):
+    """Enable or disable auto-sync for a specific source."""
+    try:
+        # Update the source's is_active field to control auto-sync
+        source = await db.update_source(source_id, is_active=enabled)
+        return {
+            "message": f"Auto-sync {'enabled' if enabled else 'disabled'} for source",
+            "source": SourceResponse(**source)
+        }
+
+    except Exception as e:
+        logger.error(f"Error updating source auto-sync: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=str(e),
+        ) from e
+
+
+@app.get("/api/debug/clients")
+async def debug_clients():
+    """Debug endpoint to check client configuration and status."""
+    try:
+        clients_info = {}
+        
+        # Check configuration
+        clients_info["telegram_configured"] = settings.telegram_configured
+        clients_info["vk_configured"] = settings.vk_configured
+        
+        # Check registered clients
+        all_clients = services.client_registry.get_all_clients()
+        enabled_clients = services.client_registry.get_enabled_clients()
+        auto_sync_clients = services.client_registry.get_auto_sync_clients()
+        
+        clients_info["registered_clients"] = list(all_clients.keys())
+        clients_info["enabled_clients"] = list(enabled_clients.keys())
+        clients_info["auto_sync_clients"] = list(auto_sync_clients.keys())
+        
+        # Check individual client status
+        for client_type, client in all_clients.items():
+            clients_info[f"{client_type}_status"] = {
+                "configured": client.is_configured,
+                "initialized": client._initialized,
+                "auto_sync_enabled": client.auto_sync_enabled,
+            }
+        
+        return clients_info
+
+    except Exception as e:
+        logger.error(f"Error in debug endpoint: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=str(e),
+        ) from e
+
+
 @app.get("/api/statistics", response_model=StatisticsResponse)
 async def get_statistics(
     db: SupabaseNewsClient = Depends(get_database),
@@ -425,51 +592,57 @@ async def get_statistics(
         ) from e
 
 
-@app.post("/api/fetch")
-async def manual_fetch(
-    source_type: str,
-    source_id: str,
-    limit: int = 10,
-):
-    """Manually fetch posts from a source (for testing)."""
-    try:
-        client = services.client_registry.get_client(source_type)
-        if not client:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Client for {source_type} not available",
-            )
-
-        if not client._initialized:
-            await client.initialize()
-
-        posts = await client.fetch_posts(source_id, limit)
-
-        return {
-            "message": f"Fetched {len(posts)} posts from {source_type}:{source_id}",
-            "posts": [
-                {
-                    "id": post.id,
-                    "title": post.title,
-                    "content": (
-                        f"{post.content[:200]}..."
-                        if len(post.content) > 200
-                        else post.content
-                    ),
-                    "published_at": post.published_at.isoformat(),
-                    "image_count": len(post.image_urls),
-                    "video_count": len(post.video_urls),
-                }
-                for post in posts
+@app.get("/api/supported-sources", response_model=Dict[str, Any])
+async def get_supported_sources():
+    """Get information about supported source types and URL formats."""
+    from src.client_factory import ClientFactory
+    from src.registry import ServiceRegistry
+    
+    factory = ClientFactory(settings, ServiceRegistry())
+    
+    supported_sources = {
+        "telegram": {
+            "name": "Telegram",
+            "description": "Telegram channels and groups",
+            "url_formats": [
+                "https://t.me/channel_name",
+                "https://telegram.me/channel_name",
+                "t.me/channel_name"
             ],
+            "examples": [
+                "https://t.me/example_channel",
+                "https://t.me/s/example_channel"
+            ]
+        },
+        "vk": {
+            "name": "VKontakte",
+            "description": "VK groups and public pages",
+            "url_formats": [
+                "https://vk.com/group_name",
+                "https://vk.com/public123456",
+                "https://vk.com/club123456",
+                "vk.com/group_name"
+            ],
+            "examples": [
+                "https://vk.com/example_group",
+                "https://vk.com/public123456"
+            ]
         }
-
-    except Exception as e:
-        logger.error(f"Error during manual fetch: {e}")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=str(e),
-        ) from e
+    }
+    
+    available_types = factory.get_available_client_types()
+    enabled_types = factory.get_enabled_client_types()
+    
+    return {
+        "supported_sources": {
+            source_type: info 
+            for source_type, info in supported_sources.items() 
+            if source_type in available_types
+        },
+        "available_types": available_types,
+        "enabled_types": enabled_types,
+        "note": "You only need to provide source_url and source_name. The system will automatically detect the source type and extract the source ID."
+    }
 
 
 if __name__ == "__main__":

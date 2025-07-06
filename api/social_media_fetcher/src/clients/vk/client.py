@@ -1,457 +1,346 @@
-"""VK client implementation using vk-api."""
+"""VK client for fetching social media content."""
 
 import asyncio
-from datetime import datetime
 from typing import Any, Dict, List, Optional
+from urllib.parse import urlparse
 
-import vk_api
 from loguru import logger
 
+from ...clients.base.interfaces import SocialMediaClient
 from ...config import Settings
-from ...models import SocialMediaPost
-from ..base.interfaces import SocialMediaClient
-from .models import VKAttachment, VKGroupInfo, VKPost
+import vk_api
+from .models import VKGroupInfo as VKGroup, VKPost
+
+# Import news blocks models
+try:
+    from ...news_blocks.models import NewsBlock
+    from ...news_blocks.social_media_adapter import VKToNewsBlocksAdapter
+    BLOCKS_AVAILABLE = True
+except ImportError:
+    BLOCKS_AVAILABLE = False
+    NewsBlock = None
+    VKToNewsBlocksAdapter = None
 
 
 class VKFetcher(SocialMediaClient):
-    """VK client for fetching group information and posts."""
+    """VK client for fetching group posts."""
 
-    def __init__(self, config: Optional[Settings] = None):
-        """Initialize the VK fetcher."""
-        self.config = config or Settings()
-        client_config = self.config.get_client_config("vk")
-        auto_sync_enabled = client_config.get("auto_sync_enabled", True)
-        
-        super().__init__(
-            name="VK Fetcher", 
-            client_type="vk",
-            auto_sync_enabled=auto_sync_enabled
-        )
+    def __init__(self, config: Settings):
+        """Initialize the VK client."""
+        super().__init__("VK Fetcher", "vk", config.VK_AUTO_SYNC)
+        self.config = config
+        self.vk: Optional[vk_api.VkApi] = None
+        self.api = None
+        self.adapter = VKToNewsBlocksAdapter() if BLOCKS_AVAILABLE else None
 
-        self.vk_session = None
-        self.vk = None
+    @classmethod
+    def create_from_config(cls, config: Settings) -> "VKFetcher":
+        """Create VKFetcher from configuration."""
+        return cls(config)
 
     @property
     def is_configured(self) -> bool:
         """Check if VK is properly configured."""
-        return self.config.vk_configured
+        return bool(self.config.VK_ACCESS_TOKEN)
+
+    @classmethod
+    def can_handle_url(cls, url: str) -> bool:
+        """Check if this client can handle the given URL."""
+        try:
+            # Handle URLs with or without protocol
+            if not url.startswith(('http://', 'https://')):
+                url = 'https://' + url
+            
+            parsed = urlparse(url)
+            return parsed.netloc in ['vk.com', 'vkontakte.ru', 'm.vk.com']
+        except Exception:
+            return False
+
+    @classmethod
+    def extract_source_id_from_url(cls, url: str) -> Optional[str]:
+        """Extract group/user ID from VK URL."""
+        try:
+            # Handle URLs with or without protocol
+            if not url.startswith(('http://', 'https://')):
+                url = 'https://' + url
+            
+            parsed = urlparse(url)
+            if parsed.netloc not in ['vk.com', 'vkontakte.ru', 'm.vk.com']:
+                return None
+            
+            # Extract ID from path
+            path = parsed.path.strip('/')
+            if not path:
+                return None
+            
+            # Handle different URL formats:
+            # vk.com/groupname
+            # vk.com/public123456
+            # vk.com/club123456
+            # vk.com/id123456
+            parts = path.split('/')
+            
+            # Get the first part of the path
+            source_id = parts[0]
+            
+            # Remove common prefixes
+            if source_id.startswith('public'):
+                source_id = source_id[6:]  # Remove 'public' prefix
+            elif source_id.startswith('club'):
+                source_id = source_id[4:]  # Remove 'club' prefix
+            
+            return source_id
+            
+        except Exception as e:
+            logger.warning(f"Failed to extract VK source ID from URL {url}: {e}")
+            return None
 
     async def initialize(self) -> None:
         """Initialize the VK client."""
         if not self.is_configured:
-            logger.warning("VK not configured - skipping initialization")
-            return
+            raise RuntimeError("VK client not properly configured")
 
         try:
-            client_config = self.config.get_client_config("vk")
-
-            self.vk_session = vk_api.VkApi(token=client_config["access_token"])
-            self.vk = self.vk_session.get_api()
+            self.vk = vk_api.VkApi(token=self.config.VK_ACCESS_TOKEN)
+            self.api = self.vk.get_api()
             self._initialized = True
-            logger.info(f"{self.name} initialized successfully")
+            logger.info("VK client initialized successfully")
 
         except Exception as e:
-            logger.error(f"Failed to initialize {self.name}: {e}")
+            logger.error(f"Failed to initialize VK client: {e}")
             raise
 
     async def close(self) -> None:
         """Close the VK client."""
-        if self._initialized:
+        if self.vk:
+            # VK API doesn't have a close method
+            self.vk = None
+            self.api = None
             self._initialized = False
-            logger.info(f"{self.name} closed successfully")
+            logger.info("VK client closed")
 
-    def _ensure_initialized(self):
-        """Ensure the client is initialized."""
-        if not self._initialized:
-            raise RuntimeError(f"{self.name} not initialized")
-
-    async def fetch_posts(
+    async def fetch_news_blocks(
         self, source_id: str, limit: int = 20, **kwargs
-    ) -> List[SocialMediaPost]:
-        """Fetch posts from a VK group in unified format."""
+    ) -> List[NewsBlock]:
+        """Fetch posts from a VK group and return as news blocks."""
+        if not BLOCKS_AVAILABLE or not self.adapter:
+            logger.warning("News blocks not available for VK")
+            return []
+
+        raw_data_list = await self.fetch_raw_data(source_id, limit, **kwargs)
+        
+        all_blocks = []
+        for raw_data in raw_data_list:
+            try:
+                blocks = self.adapter.adapt_post_data(raw_data)
+                all_blocks.extend(blocks)
+            except Exception as e:
+                logger.warning(f"Error converting VK data to blocks: {e}")
+        
+        return all_blocks
+
+    async def fetch_raw_data(
+        self, source_id: str, limit: int = 20, **kwargs
+    ) -> List[Dict[str, Any]]:
+        """Fetch raw data from a VK group."""
         if not self._initialized or not self.vk:
-            logger.warning(f"{self.name} not initialized properly")
+            logger.warning("VK client not initialized")
             return []
 
         try:
+            # Get group info
             group_info = await self.get_group_info(source_id)
+            if not group_info:
+                logger.warning(f"Could not get info for group: {source_id}")
+                return []
 
+            # Fetch posts
             posts = await self.get_group_posts(
                 source_id, limit, kwargs.get("offset", 0)
             )
 
-            social_posts = []
+            raw_data_list = []
             for post in posts:
                 try:
-                    social_post = self.convert_to_social_media_post(post, group_info)
-                    social_posts.append(social_post)
+                    # Convert to raw data format
+                    raw_data = self._convert_post_to_raw_data(post, group_info)
+                    if raw_data:
+                        raw_data_list.append(raw_data)
                 except Exception as e:
                     logger.warning(f"Error converting post {post.id}: {e}")
 
-            return social_posts
+            return raw_data_list
 
         except Exception as e:
-            logger.error(f"Error fetching posts from {source_id}: {e}")
+            logger.error(f"Error fetching raw data from {source_id}: {e}")
             return []
 
-    async def get_source_info(self, source_id: str) -> Dict[str, Any]:
-        """Get information about a VK group."""
-        if not self._initialized or not self.vk:
-            logger.warning(f"{self.name} not initialized properly")
-            return {
-                "id": source_id,
-                "screen_name": source_id,
-                "name": source_id,
-                "type": "vk_group",
+    def _convert_post_to_raw_data(
+        self, post: VKPost, group_info: VKGroup
+    ) -> Optional[Dict[str, Any]]:
+        """Convert VKPost to raw data format."""
+        try:
+            # Collect media URLs
+            image_urls = []
+            video_urls = []
+            
+            for attachment in post.attachments:
+                if attachment.get('type') == 'photo':
+                    photo = attachment.get('photo', {})
+                    sizes = photo.get('sizes', [])
+                    if sizes:
+                        # Get largest size
+                        largest = max(sizes, key=lambda x: x.get('width', 0) * x.get('height', 0))
+                        image_urls.append(largest.get('url', ''))
+                
+                elif attachment.get('type') == 'video':
+                    video = attachment.get('video', {})
+                    # VK video URLs need special handling
+                    video_urls.append(f"vk_video_{video.get('owner_id', '')}_{video.get('id', '')}")
+
+            raw_data = {
+                'id': post.id,
+                'owner_id': post.owner_id,
+                'date': post.date,
+                'text': post.text,
+                'attachments': post.attachments,
+                'likes': {'count': post.likes_count},
+                'reposts': {'count': post.reposts_count},
+                'views': {'count': post.views_count},
+                'comments': {'count': post.comments_count},
+                'group_name': group_info.name,
+                'group_screen_name': group_info.screen_name,
+                'url': f"https://vk.com/wall{post.owner_id}_{post.id}",
+                'media_files': {
+                    'images': image_urls,
+                    'videos': video_urls,
+                }
             }
 
-        try:
-            group_info = await self.get_group_info(source_id)
-            return {
-                "id": group_info.id,
-                "screen_name": group_info.screen_name,
-                "name": group_info.name,
-                "description": group_info.description,
-                "members_count": group_info.members_count,
-                "photo_url": group_info.photo_url,
-                "is_verified": group_info.is_verified,
-                "type": "vk_group",
-            }
+            return raw_data
+
         except Exception as e:
-            logger.error(f"Error getting group info for {source_id}: {e}")
-            return {
-                "id": source_id,
-                "screen_name": source_id,
-                "name": source_id,
-                "type": "vk_group",
-            }
+            logger.warning(f"Error converting post to raw data: {e}")
+            return None
 
-    async def validate_source(self, source_id: str) -> bool:
-        """Validate if a VK group exists and is accessible."""
-        if not self._initialized or not self.vk:
-            return False
-
-        try:
-            await self.get_group_info(source_id)
-            return True
-        except Exception as e:
-            logger.debug(f"Group validation failed for {source_id}: {e}")
-            return False
-
-    async def get_group_info(self, group_id: str) -> VKGroupInfo:
+    async def get_group_info(self, group_id: str) -> Optional[VKGroup]:
         """Get information about a VK group."""
-        self._ensure_initialized()
+        if not self._initialized or not self.api:
+            logger.warning("VK client not initialized")
+            return None
 
         try:
-            clean_group_id = group_id.lstrip("-")
-
-            response = await asyncio.get_event_loop().run_in_executor(
-                None,
-                lambda: self.vk.groups.getById(
-                    group_ids=clean_group_id,
-                    fields=["description", "members_count", "activity", "verified"],
-                ),
+            # Convert group_id to proper format
+            if group_id.isdigit():
+                group_id = f"-{group_id}"  # Numeric IDs need minus prefix
+            
+            # Get group info
+            response = self.api.groups.getById(
+                group_ids=group_id,
+                fields='description,members_count,verified,status'
             )
-
+            
             if not response:
-                raise ValueError(f"Group {group_id} not found")
-
-            group_data = response[0]
-
-            photo_url = None
-            if "photo_200" in group_data:
-                photo_url = group_data["photo_200"]
-            elif "photo_100" in group_data:
-                photo_url = group_data["photo_100"]
-            elif "photo_50" in group_data:
-                photo_url = group_data["photo_50"]
-
-            return VKGroupInfo(
-                id=group_data["id"],
-                name=group_data["name"],
-                screen_name=group_data["screen_name"],
-                description=group_data.get("description"),
-                members_count=group_data.get("members_count"),
-                photo_url=photo_url,
-                is_closed=group_data.get("is_closed", 0) == 1,
-                is_verified=group_data.get("verified", 0) == 1,
-                activity=group_data.get("activity"),
+                return None
+            
+            group = response[0]
+            
+            return VKGroup(
+                id=group['id'],
+                name=group['name'],
+                screen_name=group.get('screen_name', ''),
+                description=group.get('description', ''),
+                members_count=group.get('members_count', 0),
+                photo_url=group.get('photo_200', ''),
+                is_verified=group.get('verified', 0) == 1,
+                is_closed=group.get('is_closed', False)
             )
-
-        except vk_api.exceptions.ApiError as e:
-            if e.code == 100:
-                raise ValueError(f"Invalid group ID: {group_id}")
-            elif e.code == 15:
-                raise ValueError(f"Access denied to group {group_id}")
-            else:
-                logger.error(f"VK API error getting group info: {e}")
-                raise
+            
         except Exception as e:
-            logger.error(f"Error getting VK group info for {group_id}: {e}")
-            raise
+            logger.error(f"Error getting group info for {group_id}: {e}")
+            return None
 
     async def get_group_posts(
         self, group_id: str, count: int = 20, offset: int = 0
     ) -> List[VKPost]:
         """Get posts from a VK group."""
-        self._ensure_initialized()
-
-        try:
-            clean_group_id = group_id.lstrip("-")
-            owner_id = f"-{clean_group_id}"
-
-            client_config = self.config.get_client_config("vk")
-            count = min(count, client_config.get("max_posts_per_request", 50))
-
-            response = await asyncio.get_event_loop().run_in_executor(
-                None,
-                lambda: self.vk.wall.get(
-                    owner_id=owner_id,
-                    count=count,
-                    offset=offset,
-                    extended=1,
-                    filter="owner",
-                ),
-            )
-
-            posts = []
-            for post_data in response["items"]:
-                vk_post = await self._convert_post(post_data)
-                if vk_post:
-                    posts.append(vk_post)
-
-            return posts
-
-        except vk_api.exceptions.ApiError as e:
-            if e.code == 100:
-                raise ValueError(f"Invalid group ID: {group_id}")
-            elif e.code == 15:
-                raise ValueError(f"Access denied to group {group_id}")
-            else:
-                logger.error(f"VK API error getting posts: {e}")
-                raise
-        except Exception as e:
-            logger.error(f"Error getting VK posts from {group_id}: {e}")
-            raise
-
-    async def search_group_posts(
-        self, group_id: str, query: str, count: int = 20
-    ) -> List[VKPost]:
-        """Search for posts in a VK group."""
-        self._ensure_initialized()
-
-        try:
-            clean_group_id = group_id.lstrip("-")
-            owner_id = f"-{clean_group_id}"
-
-            client_config = self.config.get_client_config("vk")
-            count = min(count, client_config.get("max_posts_per_request", 50))
-
-            response = await asyncio.get_event_loop().run_in_executor(
-                None,
-                lambda: self.vk.wall.search(
-                    owner_id=owner_id, query=query, count=count, extended=1
-                ),
-            )
-
-            posts = []
-            for post_data in response["items"]:
-                vk_post = await self._convert_post(post_data)
-                if vk_post:
-                    posts.append(vk_post)
-
-            return posts
-
-        except vk_api.exceptions.ApiError as e:
-            if e.code == 100:
-                raise ValueError(f"Invalid group ID: {group_id}")
-            elif e.code == 15:
-                raise ValueError(f"Access denied to group {group_id}")
-            else:
-                logger.error(f"VK API error searching posts: {e}")
-                raise
-        except Exception as e:
-            logger.error(f"Error searching VK posts in {group_id}: {e}")
-            raise
-
-    async def _convert_post(self, post_data: Dict[str, Any]) -> Optional[VKPost]:
-        """Convert VK API post data to VKPost model."""
-        try:
-            attachments = []
-            if "attachments" in post_data:
-                for attachment_data in post_data["attachments"]:
-                    if attachment := self._convert_attachment(attachment_data):
-                        attachments.append(attachment)
-
-            copy_history = post_data.get("copy_history", [])
-            return VKPost(
-                id=post_data["id"],
-                owner_id=post_data["owner_id"],
-                from_id=post_data["from_id"],
-                date=datetime.fromtimestamp(post_data["date"]),
-                text=post_data.get("text", ""),
-                attachments=attachments,
-                likes_count=post_data.get("likes", {}).get("count"),
-                comments_count=post_data.get("comments", {}).get("count"),
-                reposts_count=post_data.get("reposts", {}).get("count"),
-                views_count=post_data.get("views", {}).get("count"),
-                is_pinned=post_data.get("is_pinned", 0) == 1,
-                is_marked_as_ads=post_data.get("marked_as_ads", 0) == 1,
-                post_type=post_data.get("post_type"),
-                copy_history=copy_history,
-            )
-
-        except Exception as e:
-            logger.warning(f"Error converting VK post {post_data.get('id')}: {e}")
-            return None
-
-    def _convert_attachment(
-        self, attachment_data: Dict[str, Any]
-    ) -> Optional[VKAttachment]:
-        """Convert VK attachment data to VKAttachment model."""
-        try:
-            attachment_type = attachment_data["type"]
-            attachment_obj = attachment_data.get(attachment_type, {})
-
-            url = None
-            width = None
-            height = None
-            title = None
-            description = None
-            duration = None
-            file_size = None
-
-            if attachment_type == "photo":
-                if sizes := attachment_obj.get("sizes", []):
-                    largest = max(
-                        sizes, key=lambda x: x.get("width", 0) * x.get("height", 0)
-                    )
-                    url = largest.get("url")
-                    width = largest.get("width")
-                    height = largest.get("height")
-                else:
-                    for size in [
-                        "photo_2560",
-                        "photo_1280",
-                        "photo_807",
-                        "photo_604",
-                        "photo_130",
-                        "photo_75",
-                    ]:
-                        if size in attachment_obj:
-                            url = attachment_obj[size]
-                            break
-
-            elif attachment_type == "video":
-                title = attachment_obj.get("title")
-                description = attachment_obj.get("description")
-                duration = attachment_obj.get("duration")
-                width = attachment_obj.get("width")
-                height = attachment_obj.get("height")
-
-                if "image" in attachment_obj:
-                    images = attachment_obj["image"]
-                    if images:
-                        largest_image = max(
-                            images, key=lambda x: x.get("width", 0) * x.get("height", 0)
-                        )
-                        url = largest_image.get("url")
-
-            elif attachment_type == "doc":
-                title = attachment_obj.get("title")
-                file_size = attachment_obj.get("size")
-                url = attachment_obj.get("url")
-
-            elif attachment_type == "link":
-                url = attachment_obj.get("url")
-                title = attachment_obj.get("title")
-                description = attachment_obj.get("description")
-
-            elif attachment_type == "audio":
-                title = f"{attachment_obj.get('artist', '')} - {attachment_obj.get('title', '')}"
-                duration = attachment_obj.get("duration")
-                url = attachment_obj.get("url")
-
-            return VKAttachment(
-                type=attachment_type,
-                url=url,
-                width=width,
-                height=height,
-                title=title,
-                description=description,
-                duration=duration,
-                file_size=file_size,
-            )
-
-        except Exception as e:
-            logger.warning(f"Error converting VK attachment: {e}")
-            return None
-
-    def convert_to_social_media_post(
-        self, post: VKPost, group_info: VKGroupInfo
-    ) -> SocialMediaPost:
-        """Convert VKPost to unified SocialMediaPost format."""
-        title = self._extract_title(post.text)
-
-        tags = self._extract_hashtags(post.text)
-
-        image_urls = []
-        video_urls = []
-
-        for attachment in post.attachments:
-            if attachment.type == "photo" and attachment.url:
-                image_urls.append(attachment.url)
-            elif attachment.type == "video" and attachment.url:
-                video_urls.append(attachment.url)
-
-        original_url = f"https://vk.com/wall{post.owner_id}_{post.id}"
-
-        return SocialMediaPost(
-            id=f"vk_{group_info.screen_name}_{post.id}",
-            source_type="vk",
-            source_id=group_info.screen_name,
-            source_name=group_info.name,
-            title=title,
-            content=post.text,
-            published_at=post.date,
-            original_url=original_url,
-            image_urls=image_urls,
-            video_urls=video_urls,
-            tags=tags,
-            likes_count=post.likes_count,
-            comments_count=post.comments_count,
-            shares_count=post.reposts_count,
-            views_count=post.views_count,
-            author_name=group_info.name,
-            author_url=f"https://vk.com/{group_info.screen_name}",
-        )
-
-    def _extract_title(self, text: str) -> str:
-        """Extract title from post text."""
-        if not text:
-            return "Без заголовка"
-
-        lines = text.split("\n")
-        first_line = lines[0].strip()
-
-        if first_line and len(first_line) <= 100:
-            return first_line
-
-        truncated = text[:97] + "..." if len(text) > 100 else text
-        return truncated.replace("\n", " ").strip()
-
-    def _extract_hashtags(self, text: str) -> List[str]:
-        """Extract hashtags from text."""
-        import re
-
-        if not text:
+        if not self._initialized or not self.api:
+            logger.warning("VK client not initialized")
             return []
 
-        hashtag_pattern = r"#(\w+)"
-        matches = re.findall(hashtag_pattern, text)
-        return matches
+        try:
+            # Convert group_id to proper format for wall.get
+            if not group_id.startswith('-') and group_id.isdigit():
+                owner_id = f"-{group_id}"
+            elif group_id.startswith('club'):
+                owner_id = f"-{group_id[4:]}"
+            elif group_id.startswith('public'):
+                owner_id = f"-{group_id[6:]}"
+            else:
+                # Try to get group info first
+                group_info = await self.get_group_info(group_id)
+                if group_info:
+                    owner_id = f"-{group_info.id}"
+                else:
+                    return []
+            
+            # Get posts
+            response = self.api.wall.get(
+                owner_id=owner_id,
+                count=count,
+                offset=offset,
+                extended=0
+            )
+            
+            if not response or 'items' not in response:
+                return []
+            
+            posts = []
+            for item in response['items']:
+                try:
+                    post = VKPost(
+                        id=item['id'],
+                        owner_id=item['owner_id'],
+                        date=item['date'],
+                        text=item.get('text', ''),
+                        attachments=item.get('attachments', []),
+                        likes_count=item.get('likes', {}).get('count', 0),
+                        reposts_count=item.get('reposts', {}).get('count', 0),
+                        views_count=item.get('views', {}).get('count', 0),
+                        comments_count=item.get('comments', {}).get('count', 0)
+                    )
+                    posts.append(post)
+                except Exception as e:
+                    logger.warning(f"Error parsing post: {e}")
+            
+            return posts
+            
+        except Exception as e:
+            logger.error(f"Error getting posts from {group_id}: {e}")
+            return []
 
-    @classmethod
-    def create_from_config(cls, config: Settings) -> "VKFetcher":
-        """Factory method to create VKFetcher from configuration."""
-        return cls(config)
+    async def get_source_info(self, source_id: str) -> Dict[str, Any]:
+        """Get information about a VK group."""
+        group_info = await self.get_group_info(source_id)
+        if not group_info:
+            return {}
+
+        return {
+            "id": str(group_info.id),
+            "name": group_info.name,
+            "screen_name": group_info.screen_name,
+            "description": group_info.description,
+            "members_count": group_info.members_count,
+            "photo_url": group_info.photo_url,
+            "is_verified": group_info.is_verified,
+            "is_closed": group_info.is_closed,
+            "url": f"https://vk.com/{group_info.screen_name}",
+        }
+
+    async def validate_source(self, source_id: str) -> bool:
+        """Validate if a VK group exists and is accessible."""
+        try:
+            group_info = await self.get_group_info(source_id)
+            return group_info is not None
+        except Exception:
+            return False

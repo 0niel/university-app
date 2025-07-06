@@ -1,446 +1,394 @@
-"""Telegram client implementation using Pyrogram."""
+"""Telegram client for fetching social media content."""
 
 import asyncio
-import os
-from datetime import datetime
+import re
+from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
+from urllib.parse import urlparse
 
 from loguru import logger
-from pyrogram import Client, enums, filters
-from pyrogram.errors import FloodWait, RPCError
-from pyrogram.types import Message
-
-from ...config import Settings
-from ...models import SocialMediaPost
-from ..base.interfaces import SocialMediaClient
-from .models import (
-    TelegramChannelInfo,
-    TelegramEntity,
-    TelegramMedia,
-    TelegramMessage,
+from telethon import TelegramClient
+from telethon.errors import (
+    ChannelPrivateError,
+    FloodWaitError,
+    UsernameNotOccupiedError,
 )
+from telethon.tl.types import Channel, Chat, Message, User
+from telethon.sessions import StringSession
+
+from ...clients.base.interfaces import SocialMediaClient
+from ...config import Settings
+from .models import TelegramChannelInfo, TelegramMedia, TelegramMessage
+
+# Import news blocks models
+try:
+    from ...news_blocks.models import NewsBlock
+    from ...news_blocks.social_media_adapter import TelegramToNewsBlocksAdapter
+    BLOCKS_AVAILABLE = True
+except ImportError:
+    BLOCKS_AVAILABLE = False
+    NewsBlock = None
+    TelegramToNewsBlocksAdapter = None
 
 
 class TelegramFetcher(SocialMediaClient):
-    """Telegram client for fetching channel information and messages."""
+    """Telegram client for fetching channel messages."""
 
-    def __init__(self, config: Optional[Settings] = None):
-        """Initialize the Telegram fetcher."""
-        self.config = config or Settings()
-        client_config = self.config.get_client_config("telegram")
-        auto_sync_enabled = client_config.get("auto_sync_enabled", True)
-        
-        super().__init__(
-            name="Telegram Fetcher", 
-            client_type="telegram",
-            auto_sync_enabled=auto_sync_enabled
-        )
+    def __init__(self, config: Settings):
+        """Initialize the Telegram client."""
+        super().__init__("Telegram Fetcher", "telegram", config.TELEGRAM_AUTO_SYNC)
+        self.config = config
+        self.client: Optional[TelegramClient] = None
+        self.adapter = TelegramToNewsBlocksAdapter() if BLOCKS_AVAILABLE else None
 
-        self.client: Optional[Client] = None
-        self.session_dir = "./sessions"
-
-        # Ensure session directory exists
-        os.makedirs(self.session_dir, exist_ok=True)
+    @classmethod
+    def create_from_config(cls, config: Settings) -> "TelegramFetcher":
+        """Create TelegramFetcher from configuration."""
+        return cls(config)
 
     @property
     def is_configured(self) -> bool:
         """Check if Telegram is properly configured."""
-        return self.config.telegram_configured
+        return bool(
+            self.config.TELEGRAM_API_ID
+            and self.config.TELEGRAM_API_HASH
+            and self.config.TELEGRAM_SESSION_STRING
+        )
+
+    @classmethod
+    def can_handle_url(cls, url: str) -> bool:
+        """Check if this client can handle the given URL."""
+        try:
+            # Handle URLs with or without protocol
+            if not url.startswith(('http://', 'https://')):
+                url = 'https://' + url
+            
+            parsed = urlparse(url)
+            return parsed.netloc in ['t.me', 'telegram.me', 'telegram.org']
+        except Exception:
+            return False
+
+    @classmethod
+    def extract_source_id_from_url(cls, url: str) -> Optional[str]:
+        """Extract channel/group username from Telegram URL."""
+        try:
+            # Handle URLs with or without protocol
+            if not url.startswith(('http://', 'https://')):
+                url = 'https://' + url
+            
+            parsed = urlparse(url)
+            if parsed.netloc not in ['t.me', 'telegram.me']:
+                return None
+            
+            # Extract username from path
+            path = parsed.path.strip('/')
+            if not path:
+                return None
+            
+            # Handle different URL formats:
+            # t.me/username
+            # t.me/username/123 (with message ID)
+            # t.me/s/username (public view)
+            parts = path.split('/')
+            
+            # Skip 's' prefix for public view URLs
+            if parts[0] == 's' and len(parts) > 1:
+                return parts[1]
+            
+            # Return the username part
+            return parts[0]
+            
+        except Exception as e:
+            logger.warning(f"Failed to extract Telegram source ID from URL {url}: {e}")
+            return None
 
     async def initialize(self) -> None:
-        """Initialize the Telegram client in user mode only."""
-        logger.info(f"Attempting to initialize {self.name}")
-        
+        """Initialize the Telegram client."""
         if not self.is_configured:
-            logger.warning("Telegram not configured - skipping initialization")
-            logger.debug(f"API ID: {self.config.TELEGRAM_API_ID}, API Hash present: {bool(self.config.TELEGRAM_API_HASH)}")
-            return
+            raise RuntimeError("Telegram client not properly configured")
 
         try:
-            client_config = self.config.get_client_config("telegram")
-            logger.debug(f"Client config: API ID={client_config['api_id']}, has API Hash={bool(client_config['api_hash'])}")
-
-            # Use session file instead of session string if available
-            session_string = client_config.get("session_string")
-            if session_string and len(session_string) < 100:
-                # Session string too short, likely corrupted
-                logger.warning("Session string appears corrupted, ignoring")
-                session_string = None
-            elif session_string:
-                logger.info(f"Using session string (length: {len(session_string)})")
-            else:
-                logger.info("No session string provided, will use session files")
-
-            # Only user mode - no bot support
-            logger.info("Initializing Telegram client in user mode")
-            self.client = Client(
-                name="social_fetcher",
-                api_id=client_config["api_id"],
-                api_hash=client_config["api_hash"],
-                session_string=session_string,
-                workdir=self.session_dir,
-                proxy=client_config.get("proxy"),
+            self.client = TelegramClient(
+                StringSession(self.config.TELEGRAM_SESSION_STRING),
+                self.config.TELEGRAM_API_ID,
+                self.config.TELEGRAM_API_HASH,
             )
 
-            logger.info("Starting Telegram client...")
             await self.client.start()
+
             self._initialized = True
-            logger.info(f"{self.name} initialized successfully in user mode")
+            logger.info("Telegram client initialized successfully")
 
         except Exception as e:
-            logger.warning(f"Failed to initialize {self.name}: {e}")
-            logger.info("Telegram client will be skipped in auto-sync")
-            # Don't raise exception, just mark as not initialized
+            logger.error(f"Failed to initialize Telegram client: {e}")
+            raise
 
     async def close(self) -> None:
         """Close the Telegram client."""
         if self.client:
-            try:
-                await self.client.stop()
-                logger.info(f"{self.name} closed successfully")
-            except Exception as e:
-                logger.error(f"Error closing {self.name}: {e}")
+            await self.client.disconnect()
+            self._initialized = False
+            logger.info("Telegram client closed")
 
-        self._initialized = False
-
-    async def fetch_posts(
+    async def fetch_news_blocks(
         self, source_id: str, limit: int = 20, **kwargs
-    ) -> List[SocialMediaPost]:
-        """Fetch posts from a Telegram channel in unified format."""
-        logger.info(f"Fetching posts from Telegram channel: {source_id}")
-        logger.debug(f"Client state - initialized: {self._initialized}, client exists: {self.client is not None}")
+    ) -> List[NewsBlock]:
+        """Fetch posts from a Telegram channel and return as news blocks."""
+        if not BLOCKS_AVAILABLE or not self.adapter:
+            logger.warning("News blocks not available for Telegram")
+            return []
+
+        raw_data_list = await self.fetch_raw_data(source_id, limit, **kwargs)
         
+        all_blocks = []
+        for raw_data in raw_data_list:
+            try:
+                blocks = self.adapter.adapt_post_data(raw_data)
+                all_blocks.extend(blocks)
+            except Exception as e:
+                logger.warning(f"Error converting Telegram data to blocks: {e}")
+        
+        return all_blocks
+
+    async def fetch_raw_data(
+        self, source_id: str, limit: int = 20, **kwargs
+    ) -> List[Dict[str, Any]]:
+        """Fetch raw data from a Telegram channel."""
         if not self._initialized or not self.client:
-            logger.warning(f"{self.name} not initialized properly")
+            logger.warning("Telegram client not initialized")
             return []
 
         try:
             # Get channel info
-            logger.debug("Getting channel info...")
-            channel_info = await self._get_channel_info_internal(source_id)
+            channel_info = await self.get_channel_info(source_id)
+            if not channel_info:
+                logger.warning(f"Could not get info for channel: {source_id}")
+                return []
 
-            # Get messages
-            logger.debug("Getting channel messages...")
-            offset_id = kwargs.get("offset_id") if kwargs.get("offset_id") is not None else None
-            messages = await self._get_channel_messages_internal(
-                source_id, limit, offset_id
+            # Fetch messages
+            messages = await self.get_channel_messages(
+                source_id, limit, kwargs.get("offset_id", 0)
             )
 
-            # Convert to unified format
-            logger.debug(f"Converting {len(messages)} messages to unified format")
-            posts = []
+            raw_data_list = []
             for message in messages:
                 try:
-                    post = self._convert_to_social_media_post(message, channel_info)
-                    posts.append(post)
+                    # Convert to raw data format
+                    raw_data = await self._convert_message_to_raw_data(message, channel_info)
+                    if raw_data:
+                        raw_data_list.append(raw_data)
                 except Exception as e:
                     logger.warning(f"Error converting message {message.id}: {e}")
 
-            logger.info(f"Successfully fetched {len(posts)} posts from {source_id}")
-            return posts
+            return raw_data_list
 
         except Exception as e:
-            logger.error(f"Error fetching posts from @{source_id}: {e}")
-            import traceback
-            logger.debug(f"Full traceback: {traceback.format_exc()}")
+            logger.error(f"Error fetching raw data from {source_id}: {e}")
             return []
 
-    async def get_source_info(self, source_id: str) -> Dict[str, Any]:
-        """Get information about a Telegram channel."""
-        logger.debug(f"Getting source info for {source_id}")
-        
-        if not self._initialized or not self.client:
-            logger.warning(f"{self.name} not initialized properly")
-            return {
-                "id": source_id,
-                "username": source_id,
-                "title": source_id,
-                "type": "telegram_channel",
+    async def _convert_message_to_raw_data(
+        self, message: TelegramMessage, channel_info: TelegramChannelInfo
+    ) -> Optional[Dict[str, Any]]:
+        """Convert TelegramMessage to raw data format."""
+        try:
+            # Collect media file IDs
+            photo_file_ids = []
+            video_file_ids = []
+            
+            for media in message.media:
+                if media.type == "photo" and media.url:
+                    photo_file_ids.append(media.url)  # This is actually file_id
+                elif media.type in ["video", "animation"] and media.url:
+                    video_file_ids.append(media.url)
+
+            raw_data = {
+                'id': message.id,
+                'date': int(message.date.timestamp()),
+                'text': message.text,
+                'chat': {
+                    'id': channel_info.id,
+                    'title': channel_info.title,
+                    'username': channel_info.username,
+                    'type': 'channel',
+                    'description': channel_info.description,
+                    'participants_count': channel_info.participants_count,
+                    'photo_url': channel_info.photo_url,
+                },
+                'photo': {'file_id': photo_file_ids[0]} if photo_file_ids else None,
+                'video': {'file_id': video_file_ids[0]} if video_file_ids else None,
+                'views': message.views,
+                'forwards': message.forwards,
+                'url': f"https://t.me/{channel_info.username}/{message.id}",
+                'media_files': {
+                    'photos': photo_file_ids,
+                    'videos': video_file_ids,
+                }
             }
+
+            return raw_data
+
+        except Exception as e:
+            logger.warning(f"Error converting message to raw data: {e}")
+            return None
+
+    async def get_channel_info(self, username: str) -> Optional[TelegramChannelInfo]:
+        """Get information about a Telegram channel."""
+        if not self._initialized or not self.client:
+            logger.warning("Telegram client not initialized")
+            return None
 
         try:
-            channel_info = await self._get_channel_info_internal(source_id)
-            return {
-                "id": channel_info.id,
-                "username": channel_info.username,
-                "title": channel_info.title,
-                "description": channel_info.description,
-                "participants_count": channel_info.participants_count,
-                "photo_url": channel_info.photo_url,
-                "is_verified": channel_info.is_verified,
-                "type": "telegram_channel",
-            }
+            username = username.lstrip("@")
+            entity = await self.client.get_entity(username)
+
+            if isinstance(entity, Channel):
+                full_info = await self.client.get_entity(entity)
+
+                return TelegramChannelInfo(
+                    id=entity.id,
+                    title=entity.title,
+                    username=entity.username,
+                    description=getattr(full_info, "about", ""),
+                    participants_count=getattr(full_info, "participants_count", 0),
+                    photo_url=None,  # Would need additional API call
+                    is_verified=entity.verified,
+                    is_restricted=entity.restricted,
+                )
+            else:
+                logger.warning(f"Entity {username} is not a channel")
+                return None
+
+        except (UsernameNotOccupiedError, ValueError):
+            logger.warning(f"Channel not found: {username}")
+            return None
+        except ChannelPrivateError:
+            logger.warning(f"Channel is private: {username}")
+            return None
         except Exception as e:
-            logger.error(f"Error getting channel info for @{source_id}: {e}")
-            return {
-                "id": source_id,
-                "username": source_id,
-                "title": source_id,
-                "type": "telegram_channel",
-            }
-
-    async def validate_source(self, source_id: str) -> bool:
-        """Validate if a Telegram channel exists and is accessible."""
-        if not self._initialized or not self.client:
-            return False
-
-        try:
-            await self._get_channel_info_internal(source_id)
-            return True
-        except Exception as e:
-            logger.debug(f"Channel validation failed for @{source_id}: {e}")
-            return False
-
-    # Legacy methods for backward compatibility
-    async def get_channel_info(self, channel_username: str) -> TelegramChannelInfo:
-        """Get information about a Telegram channel."""
-        return await self._get_channel_info_internal(channel_username)
+            logger.error(f"Error getting channel info for {username}: {e}")
+            return None
 
     async def get_channel_messages(
-        self,
-        channel_username: str,
-        limit: int = 20,
-        offset_id: Optional[int] = None,
+        self, username: str, limit: int = 20, offset_id: int = 0
     ) -> List[TelegramMessage]:
         """Get messages from a Telegram channel."""
-        return await self._get_channel_messages_internal(
-            channel_username, limit, offset_id
-        )
-
-    def convert_to_social_media_post(
-        self, message: TelegramMessage, channel_info: TelegramChannelInfo
-    ) -> SocialMediaPost:
-        """Convert TelegramMessage to unified SocialMediaPost format."""
-        return self._convert_to_social_media_post(message, channel_info)
-
-    # Internal implementation methods
-    async def _get_channel_info_internal(
-        self, channel_username: str
-    ) -> TelegramChannelInfo:
-        """Internal method to get channel information."""
-        logger.debug(f"Getting channel info for {channel_username}")
-        logger.debug(f"Client initialized: {self._initialized}, Client exists: {self.client is not None}")
-        
-        if not self.client:
-            logger.error("Telegram client is None in _get_channel_info_internal")
-            raise RuntimeError("Telegram client not initialized")
+        if not self._initialized or not self.client:
+            logger.warning("Telegram client not initialized")
+            return []
 
         try:
-            # Clean username
-            clean_username = channel_username.lstrip("@")
-            logger.debug(f"Clean username: {clean_username}")
+            username = username.lstrip("@")
+            entity = await self.client.get_entity(username)
 
-            # Get channel
-            logger.debug("Calling client.get_chat...")
-            channel = await self.client.get_chat(clean_username)
-            logger.debug(f"Got channel: {channel}")
-
-            # Get photo URL if available
-            photo_url = None
-            if channel.photo:
-                try:
-                    photo = await self.client.download_media(
-                        channel.photo.big_file_id, in_memory=True
-                    )
-                    # For now, just use a placeholder URL
-                    photo_url = f"telegram_photo_{channel.id}"
-                except Exception as e:
-                    logger.debug(f"Could not download channel photo: {e}")
-
-            return TelegramChannelInfo(
-                id=channel.id,
-                username=clean_username,
-                title=channel.title or "",
-                description=channel.description,
-                participants_count=getattr(channel, "members_count", None),
-                photo_url=photo_url,
-                is_verified=getattr(channel, "is_verified", False),
-                is_scam=getattr(channel, "is_scam", False),
-                is_fake=getattr(channel, "is_fake", False),
-                is_restricted=getattr(channel, "is_restricted", False),
-            )
-
-        except Exception as e:
-            logger.error(f"Error getting channel info for @{channel_username}: {e}")
-            import traceback
-            logger.debug(f"Full traceback: {traceback.format_exc()}")
-            raise
-
-    async def _get_channel_messages_internal(
-        self,
-        channel_username: str,
-        limit: int = 20,
-        offset_id: Optional[int] = None,
-    ) -> List[TelegramMessage]:
-        """Internal method to get channel messages."""
-        logger.debug(f"Getting messages from {channel_username}, limit={limit}")
-        
-        if not self.client:
-            logger.error("Telegram client is None in _get_channel_messages_internal")
-            raise RuntimeError("Telegram client not initialized")
-
-        try:
-            clean_username = channel_username.lstrip("@")
-            logger.debug(f"Getting history for {clean_username}, offset_id={offset_id}")
             messages = []
-
-            # Only pass offset_id if it's not None
-            chat_history_kwargs = {"limit": limit}
-            if offset_id is not None:
-                chat_history_kwargs["offset_id"] = offset_id
-
-            async for message in self.client.get_chat_history(
-                clean_username, **chat_history_kwargs
+            async for message in self.client.iter_messages(
+                entity, limit=limit, offset_id=offset_id
             ):
-                try:
+                if isinstance(message, Message) and message.message:
                     telegram_message = await self._convert_message(message)
                     if telegram_message:
                         messages.append(telegram_message)
-                except Exception as e:
-                    logger.warning(f"Error converting message {message.id}: {e}")
 
-            logger.debug(f"Retrieved {len(messages)} messages")
             return messages
 
-        except FloodWait as e:
-            logger.warning(f"Rate limited, waiting {e.value} seconds")
-            await asyncio.sleep(e.value)
-            raise
+        except FloodWaitError as e:
+            logger.warning(f"Rate limited, waiting {e.seconds} seconds")
+            await asyncio.sleep(e.seconds)
+            return []
+        except (UsernameNotOccupiedError, ValueError):
+            logger.warning(f"Channel not found: {username}")
+            return []
+        except ChannelPrivateError:
+            logger.warning(f"Channel is private: {username}")
+            return []
         except Exception as e:
-            logger.error(f"Error getting messages from @{channel_username}: {e}")
-            import traceback
-            logger.debug(f"Full traceback: {traceback.format_exc()}")
-            raise
+            logger.error(f"Error getting messages from {username}: {e}")
+            return []
 
     async def _convert_message(self, message: Message) -> Optional[TelegramMessage]:
-        """Convert Pyrogram Message to TelegramMessage model."""
+        """Convert Telethon Message to TelegramMessage."""
         try:
-            # Convert media
             media_list = []
             if message.media:
                 media = await self._convert_media(message)
                 if media:
                     media_list.append(media)
 
-            # Convert entities
-            entities = []
-            if message.entities:
-                entities.extend(
-                    TelegramEntity(
-                        type=entity.type.name.lower(),
-                        offset=entity.offset,
-                        length=entity.length,
-                        url=getattr(entity, "url", None),
-                        user_id=(
-                            getattr(entity, "user", {}).get("id")
-                            if hasattr(entity, "user") and entity.user
-                            else None
-                        ),
-                    )
-                    for entity in message.entities
-                )
             return TelegramMessage(
                 id=message.id,
-                date=message.date,
-                text=message.text or message.caption or "",
-                views=getattr(message, "views", None),
-                forwards=getattr(message, "forwards", None),
-                replies=(
-                    getattr(message, "replies", {}).get("replies")
-                    if hasattr(message, "replies") and message.replies
-                    else None
-                ),
-                edit_date=message.edit_date,
-                from_id=message.from_user.id if message.from_user else None,
-                chat_id=message.chat.id,
+                text=message.message or "",
+                date=message.date.replace(tzinfo=timezone.utc),
+                views=getattr(message, "views", 0),
+                forwards=getattr(message, "forwards", 0),
                 media=media_list,
-                entities=entities,
-                reply_to_message_id=message.reply_to_message_id,
             )
 
         except Exception as e:
-            logger.warning(f"Error converting message {message.id}: {e}")
+            logger.warning(f"Error converting message: {e}")
             return None
 
     async def _convert_media(self, message: Message) -> Optional[TelegramMedia]:
-        """Convert Pyrogram media to TelegramMedia model."""
+        """Convert message media to TelegramMedia."""
         try:
             if not message.media:
                 return None
 
             media_type = "unknown"
-            file_id = ""
-            file_unique_id = ""
+            file_id = None
+            file_unique_id = None
             width = None
             height = None
             duration = None
             file_size = None
             mime_type = None
             file_name = None
-            caption = message.caption
+            caption = message.message or ""
             url = None
             thumbnail_url = None
 
-            if message.photo:
+            # Handle different media types
+            if hasattr(message.media, "photo"):
                 media_type = "photo"
-                file_id = message.photo.file_id
-                file_unique_id = message.photo.file_unique_id
-                width = message.photo.width
-                height = message.photo.height
-                file_size = message.photo.file_size
-                # Store file_id as URL for processing by media storage
-                url = file_id
+                photo = message.media.photo
+                if photo:
+                    file_id = str(photo.id)
+                    file_unique_id = str(photo.access_hash)
+                    if photo.sizes:
+                        largest_size = max(photo.sizes, key=lambda s: getattr(s, 'w', 0) * getattr(s, 'h', 0))
+                        width = getattr(largest_size, 'w', None)
+                        height = getattr(largest_size, 'h', None)
 
-            elif message.video:
-                media_type = "video"
-                file_id = message.video.file_id
-                file_unique_id = message.video.file_unique_id
-                width = message.video.width
-                height = message.video.height
-                duration = message.video.duration
-                file_size = message.video.file_size
-                mime_type = message.video.mime_type
-                file_name = message.video.file_name
-                url = file_id
+            elif hasattr(message.media, "document"):
+                document = message.media.document
+                if document:
+                    file_id = str(document.id)
+                    file_unique_id = str(document.access_hash)
+                    file_size = document.size
+                    mime_type = document.mime_type
+                    
+                    # Determine media type from MIME type
+                    if mime_type:
+                        if mime_type.startswith("video/"):
+                            media_type = "video"
+                        elif mime_type.startswith("image/"):
+                            media_type = "photo"
+                        elif mime_type.startswith("audio/"):
+                            media_type = "audio"
+                        else:
+                            media_type = "document"
+                    
+                    # Get file name from attributes
+                    for attr in document.attributes:
+                        if hasattr(attr, "file_name"):
+                            file_name = attr.file_name
+                        elif hasattr(attr, "w") and hasattr(attr, "h"):
+                            width = attr.w
+                            height = attr.h
+                        elif hasattr(attr, "duration"):
+                            duration = attr.duration
 
-            elif message.animation:
-                media_type = "animation"
-                file_id = message.animation.file_id
-                file_unique_id = message.animation.file_unique_id
-                width = message.animation.width
-                height = message.animation.height
-                duration = message.animation.duration
-                file_size = message.animation.file_size
-                mime_type = message.animation.mime_type
-                file_name = message.animation.file_name
-                url = file_id
-
-            elif message.document:
-                media_type = "document"
-                file_id = message.document.file_id
-                file_unique_id = message.document.file_unique_id
-                file_size = message.document.file_size
-                mime_type = message.document.mime_type
-                file_name = message.document.file_name
-                url = file_id
-
-            elif message.voice:
-                media_type = "voice"
-                file_id = message.voice.file_id
-                file_unique_id = message.voice.file_unique_id
-                duration = message.voice.duration
-                file_size = message.voice.file_size
-                mime_type = message.voice.mime_type
-                url = file_id
-
-            elif message.audio:
-                media_type = "audio"
-                file_id = message.audio.file_id
-                file_unique_id = message.audio.file_unique_id
-                duration = message.audio.duration
-                file_size = message.audio.file_size
-                mime_type = message.audio.mime_type
-                file_name = message.audio.file_name
+            # For Telegram, we store the file_id as URL for later processing
+            if file_id:
                 url = file_id
 
             return TelegramMedia(
@@ -462,74 +410,53 @@ class TelegramFetcher(SocialMediaClient):
             logger.warning(f"Error converting media: {e}")
             return None
 
-    def _convert_to_social_media_post(
-        self, message: TelegramMessage, channel_info: TelegramChannelInfo
-    ) -> SocialMediaPost:
-        """Convert TelegramMessage to unified SocialMediaPost format."""
-        # Extract title from text (first line or first 100 chars)
-        title = self._extract_title(message.text)
+    async def get_source_info(self, source_id: str) -> Dict[str, Any]:
+        """Get information about a Telegram channel."""
+        channel_info = await self.get_channel_info(source_id)
+        if not channel_info:
+            return {}
 
-        # Extract hashtags
-        tags = self._extract_hashtags(message.text)
+        return {
+            "id": str(channel_info.id),
+            "name": channel_info.title,
+            "username": channel_info.username,
+            "description": channel_info.description,
+            "subscribers_count": channel_info.participants_count,
+            "photo_url": channel_info.photo_url,
+            "is_verified": channel_info.is_verified,
+            "is_restricted": channel_info.is_restricted,
+            "url": f"https://t.me/{channel_info.username}",
+        }
 
-        # Collect media URLs
-        image_urls = []
-        video_urls = []
-
-        for media in message.media:
-            if media.type == "photo" and media.url:
-                # Store file_id for processing by media storage system
-                image_urls.append(media.url)
-            elif media.type in ["video", "animation"] and media.url:
-                video_urls.append(media.url)
-
-        # Create message URL
-        original_url = f"https://t.me/{channel_info.username}/{message.id}"
-
-        return SocialMediaPost(
-            id=f"telegram_{channel_info.username}_{message.id}",
-            source_type="telegram",
-            source_id=channel_info.username,
-            source_name=channel_info.title,
-            title=title,
-            content=message.text,
-            published_at=message.date,
-            original_url=original_url,
-            image_urls=image_urls,
-            video_urls=video_urls,
-            tags=tags,
-            likes_count=None,  # Telegram doesn't have likes
-            comments_count=message.replies,
-            shares_count=message.forwards,
-            views_count=message.views,
-            author_name=channel_info.title,
-            author_url=f"https://t.me/{channel_info.username}",
-        )
+    async def validate_source(self, source_id: str) -> bool:
+        """Validate if a Telegram channel exists and is accessible."""
+        try:
+            channel_info = await self.get_channel_info(source_id)
+            return channel_info is not None
+        except Exception:
+            return False
 
     def _extract_title(self, text: str) -> str:
         """Extract title from message text."""
         if not text:
-            return "Без заголовка"
+            return "Telegram Post"
 
-        # Try to get first line
+        # Take first line or first 100 characters
         lines = text.split("\n")
         first_line = lines[0].strip()
 
-        if first_line and len(first_line) <= 100:
+        if len(first_line) > 100:
+            return first_line[:100] + "..."
+        elif first_line:
             return first_line
-
-        # If first line is too long or empty, take first 100 characters
-        truncated = f"{text[:97]}..." if len(text) > 100 else text
-        return truncated.replace("\n", " ").strip()
+        else:
+            return text[:100] + "..." if len(text) > 100 else text
 
     def _extract_hashtags(self, text: str) -> List[str]:
-        """Extract hashtags from text."""
-        import re
+        """Extract hashtags from message text."""
+        if not text:
+            return []
 
-        return [] if not text else re.findall(r"#(\w+)", text)
-
-    # Factory method for service registry
-    @classmethod
-    def create_from_config(cls, config: Settings) -> "TelegramFetcher":
-        """Factory method to create TelegramFetcher from configuration."""
-        return cls(config)
+        hashtag_pattern = r"#\w+"
+        hashtags = re.findall(hashtag_pattern, text)
+        return [tag.lower() for tag in hashtags]

@@ -2,7 +2,11 @@ FROM python:3.11-slim AS builder
 
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y gcc g++ && rm -rf /var/lib/apt/lists/*
+RUN echo "deb http://cdn-fastly.deb.debian.org/debian bookworm main" > /etc/apt/sources.list && \
+    echo "deb http://cdn-fastly.deb.debian.org/debian bookworm-updates main" >> /etc/apt/sources.list && \
+    echo "deb http://security.debian.org/debian-security bookworm-security main" >> /etc/apt/sources.list && \
+    rm -f /etc/apt/sources.list.d/debian.sources && \
+    apt-get update && apt-get install -y gcc g++ && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .
 RUN pip install --no-cache-dir --user -r requirements.txt 
@@ -11,7 +15,11 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/* && \
+RUN echo "deb http://cdn-fastly.deb.debian.org/debian bookworm main" > /etc/apt/sources.list && \
+    echo "deb http://cdn-fastly.deb.debian.org/debian bookworm-updates main" >> /etc/apt/sources.list && \
+    echo "deb http://security.debian.org/debian-security bookworm-security main" >> /etc/apt/sources.list && \
+    rm -f /etc/apt/sources.list.d/debian.sources && \
+    apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/* && \
     groupadd -g 1000 appuser && \
     useradd -u 1000 -g appuser -m -s /bin/bash appuser
 

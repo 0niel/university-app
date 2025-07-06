@@ -8,7 +8,54 @@ from loguru import logger
 from supabase import create_client, Client
 
 from .config import Settings
-from .models import SocialMediaPost
+from .media_storage import MediaStorage
+
+
+try:
+    from .news_blocks.models import NewsBlock
+    from .news_blocks.social_media_adapter import adapter_registry
+
+    BLOCKS_AVAILABLE = True
+except ImportError:
+    BLOCKS_AVAILABLE = False
+    NewsBlock = None
+    adapter_registry = None
+
+
+def serialize_for_json(obj):
+    if isinstance(obj, dict):
+        return {k: serialize_for_json(v) for k, v in obj.items()}
+    elif isinstance(obj, list):
+        return [serialize_for_json(i) for i in obj]
+    elif isinstance(obj, datetime):
+        return obj.isoformat()
+    else:
+        return obj
+
+
+def fix_block_strings(block_data):
+    for k, v in block_data.items():
+        if v is None:
+            if any(
+                s in k
+                for s in [
+                    "url",
+                    "title",
+                    "description",
+                    "caption",
+                    "text",
+                    "author",
+                    "content",
+                    "photo_credit",
+                    "cover_image_url",
+                    "image_url",
+                    "video_url",
+                    "category_id",
+                    "type",
+                ]
+            ):
+                block_data[k] = ""
+    return block_data
 
 
 class SupabaseNewsClient:
@@ -18,6 +65,7 @@ class SupabaseNewsClient:
         """Initialize the Supabase client."""
         self.settings = settings
         self.client: Optional[Client] = None
+        self.media_storage: Optional[MediaStorage] = None
 
         self.supabase_url = os.getenv("SUPABASE_URL")
         self.supabase_key = os.getenv("SUPABASE_SERVICE_KEY")
@@ -31,27 +79,48 @@ class SupabaseNewsClient:
             raise RuntimeError("Supabase credentials not configured")
 
         try:
-            self.client = create_client(
-                self.supabase_url, self.supabase_key
-            )
-            logger.info("Supabase client initialized")
+            self.client = create_client(self.supabase_url, self.supabase_key)
+            self.media_storage = MediaStorage(self.settings, self.client)
+            await self.media_storage.initialize()
+            logger.info("Supabase client and Media Storage initialized")
         except Exception as e:
             logger.error(f"Failed to initialize Supabase client: {e}")
             raise
 
     async def close(self):
         """Close the Supabase client."""
+        if self.media_storage:
+            await self.media_storage.close()
         if self.client:
             # Supabase client doesn't have close method, just set to None
             self.client = None
             logger.info("Supabase client closed")
 
-    async def save_social_news_item(self, post: SocialMediaPost) -> bool:
+    async def save_news_blocks(
+        self,
+        news_blocks: List[NewsBlock],
+        source_type: str,
+        source_id: str,
+        source_name: str,
+        external_id: str,
+        original_url: str,
+        published_at: datetime,
+        raw_data: Optional[Dict[str, Any]] = None,
+        social_media_client: Optional[Any] = None,
+    ) -> bool:
         """
-        Save a social media post as a news item in Supabase.
+        Save news blocks directly to the database.
 
         Args:
-            post: The social media post to save
+            news_blocks: List of news blocks to save
+            source_type: Type of source (telegram, vk)
+            source_id: Source identifier
+            source_name: Source display name
+            external_id: External post ID
+            original_url: Original post URL
+            published_at: Publication date
+            raw_data: Raw data from the source
+            social_media_client: The client instance for handling media downloads.
 
         Returns:
             True if saved successfully, False otherwise
@@ -60,46 +129,328 @@ class SupabaseNewsClient:
             logger.error("Supabase client not initialized")
             return False
 
+        if not news_blocks:
+            logger.warning("News blocks not available or empty")
+            return False
+
         try:
+            media_map = {}
+            if social_media_client and source_type == "telegram":
+                try:
+                    message = await social_media_client.client.get_messages(
+                        source_id, ids=int(external_id)
+                    )
+                    messages_to_process = [message]
+                    if (
+                        message
+                        and hasattr(message, "grouped_id")
+                        and message.grouped_id
+                    ):
+                        album_messages = await social_media_client.client.get_messages(
+                            source_id,
+                            limit=None,
+                            min_id=message.id - 100,
+                            max_id=message.id + 100,
+                        )  # Heuristic
+                        messages_to_process = [
+                            m
+                            for m in album_messages
+                            if m and m.grouped_id == message.grouped_id
+                        ]
+
+                    # Create a map from photo/doc ID to the media object
+                    for msg in messages_to_process:
+                        if msg and msg.media:
+                            if hasattr(msg.media, "photo"):
+                                media_map[str(msg.media.photo.id)] = msg.media
+                            elif hasattr(msg.media, "document"):
+                                media_map[str(msg.media.document.id)] = msg.media
+                except Exception as e:
+                    logger.warning(
+                        f"Could not pre-fetch telegram media for {source_id}/{external_id}: {e}"
+                    )
+
+            # Convert news blocks to JSON, ensuring all values are JSON serialisable
+            news_blocks_json: List[Dict[str, Any]] = []
+
+            for block in news_blocks:
+                if hasattr(block, "model_dump"):
+                    block_data = block.model_dump(by_alias=True, mode="json")
+                else:
+                    block_data = block.dict(by_alias=True)
+                    for k, v in list(block_data.items()):
+                        if isinstance(v, datetime):
+                            block_data[k] = v.isoformat()
+                block_data = fix_block_strings(block_data)
+
+                for media_field, media_type in [
+                    ("image_url", "image"),
+                    ("imageUrl", "image"),
+                    ("video_url", "video"),
+                    ("videoUrl", "video"),
+                ]:
+                    url_val = block_data.get(media_field)
+                    if url_val and not str(url_val).startswith("http"):
+                        media_to_download = media_map.get(str(url_val))
+                        if media_to_download:
+                            stored = await self.media_storage.download_and_store_file(
+                                media_to_download,
+                                media_type,
+                                {"source_type": source_type, "source_id": source_id},
+                                telegram_client=social_media_client,
+                            )
+                            if stored:
+                                block_data[media_field] = stored
+                        else:
+                            logger.warning(
+                                f"Media object not found in pre-fetched map for ID: {url_val}"
+                            )
+
+                news_blocks_json.append(block_data)
+
+            first_block = news_blocks[0] if news_blocks else None
+            title = getattr(first_block, "title", f"Post from {source_name}")
+
             news_item = {
-                "external_id": post.id.split("_")[-1],
-                "source_type": post.source_type,
-                "source_id": post.source_id,
-                "source_name": post.source_name,
-                "title": post.title,
-                "content": post.content,
-                "original_url": post.original_url,
-                "published_at": post.published_at.isoformat(),
-                "image_urls": post.image_urls,
-                "video_urls": post.video_urls,
-                "tags": post.tags,
-                "likes_count": post.likes_count,
-                "comments_count": post.comments_count,
-                "shares_count": post.shares_count,
-                "views_count": post.views_count,
-                "raw_data": {
-                    "author_name": post.author_name,
-                    "author_url": post.author_url,
-                },
+                "external_id": external_id,
+                "source_type": source_type,
+                "source_id": source_id,
+                "source_name": source_name,
+                "title": title,
+                "original_url": original_url,
+                "published_at": published_at.isoformat(),
+                "raw_data": raw_data or {},
+                "news_blocks": news_blocks_json,
+                "news_blocks_version": "1.0.0",
                 "processed_at": datetime.now(timezone.utc).isoformat(),
             }
 
+            news_item_serialized = serialize_for_json(news_item)
+
             result = (
                 self.client.table("social_news_items")
-                .upsert(news_item, on_conflict="source_type,source_id,external_id")
+                .upsert(
+                    news_item_serialized,
+                    on_conflict="source_type,source_id,external_id",
+                )
                 .execute()
             )
 
             if result.data:
-                logger.debug(f"Saved news item: {post.id}")
+                logger.debug(
+                    f"Saved news blocks for: {source_type}:{source_id}:{external_id}"
+                )
                 return True
             else:
-                logger.error(f"Failed to save news item: {post.id}")
+                logger.error(
+                    f"Failed to save news blocks: {source_type}:{source_id}:{external_id}"
+                )
                 return False
 
         except Exception as e:
-            logger.error(f"Error saving news item {post.id}: {e}")
+            logger.error(
+                f"Error saving news blocks {source_type}:{source_id}:{external_id}: {e}"
+            )
             return False
+
+    async def save_raw_data_as_news_blocks(
+        self,
+        raw_data: Dict[str, Any],
+        source_type: str,
+        source_id: str,
+        source_name: str,
+        social_media_client: Optional[Any] = None,
+    ) -> bool:
+        """
+        Convert raw social media data to news blocks and save.
+
+        Args:
+            raw_data: Raw data from social media platform
+            source_type: Type of source (telegram, vk)
+            source_id: Source identifier
+            source_name: Source display name
+            social_media_client: The client instance for handling media downloads.
+
+        Returns:
+            True if saved successfully, False otherwise
+        """
+        if not BLOCKS_AVAILABLE or not adapter_registry:
+            logger.warning("News blocks adapter not available")
+            return False
+
+        try:
+            news_blocks = adapter_registry.adapt_data(source_type, raw_data)
+
+            if not news_blocks:
+                logger.warning(
+                    f"No news blocks generated from raw data: {source_type}:{source_id}"
+                )
+                return False
+
+            # Extract metadata from raw data
+            external_id = str(raw_data.get("id", ""))
+            original_url = raw_data.get(
+                "url", f"https://example.com/{source_id}/{external_id}"
+            )
+
+            # Parse published date
+            published_at = datetime.now(timezone.utc)
+            if "date" in raw_data:
+                if isinstance(raw_data["date"], int):
+                    published_at = datetime.fromtimestamp(
+                        raw_data["date"], tz=timezone.utc
+                    )
+                elif isinstance(raw_data["date"], str):
+                    try:
+                        published_at = datetime.fromisoformat(
+                            raw_data["date"].replace("Z", "+00:00")
+                        )
+                    except ValueError:
+                        pass
+
+            return await self.save_news_blocks(
+                news_blocks=news_blocks,
+                source_type=source_type,
+                source_id=source_id,
+                source_name=source_name,
+                external_id=external_id,
+                original_url=original_url,
+                published_at=published_at,
+                raw_data=raw_data,
+                social_media_client=social_media_client,
+            )
+
+        except Exception as e:
+            logger.error(f"Error converting and saving raw data: {e}")
+            return False
+
+    async def get_news_as_blocks(
+        self,
+        limit: int = 20,
+        offset: int = 0,
+        source_type: Optional[str] = None,
+    ) -> List[Dict[str, Any]]:
+        """
+        Get news items in news blocks format.
+
+        Args:
+            limit: Number of items to fetch
+            offset: Offset for pagination
+            source_type: Filter by source type
+
+        Returns:
+            List of news items with news blocks
+        """
+        if not self.client:
+            logger.error("Supabase client not initialized")
+            return []
+
+        try:
+            result = self.client.rpc(
+                "get_news_as_blocks",
+                {
+                    "source_type_filter": source_type,
+                    "limit_count": limit,
+                    "offset_count": offset,
+                },
+            ).execute()
+
+            return result.data if result.data else []
+
+        except Exception as e:
+            logger.error(f"Error getting news as blocks: {e}")
+            return []
+
+    async def get_news_blocks_by_type(
+        self,
+        block_type: str,
+        limit: int = 20,
+        offset: int = 0,
+    ) -> List[Dict[str, Any]]:
+        """
+        Get news items that contain specific block types.
+
+        Args:
+            block_type: Type of news block to filter by
+            limit: Number of items to fetch
+            offset: Offset for pagination
+
+        Returns:
+            List of news items containing the specified block type
+        """
+        if not self.client:
+            logger.error("Supabase client not initialized")
+            return []
+
+        try:
+            result = self.client.rpc(
+                "get_news_blocks_by_type",
+                {
+                    "block_type": block_type,
+                    "limit_count": limit,
+                    "offset_count": offset,
+                },
+            ).execute()
+
+            return result.data if result.data else []
+
+        except Exception as e:
+            logger.error(f"Error getting news blocks by type {block_type}: {e}")
+            return []
+
+    async def regenerate_news_blocks_for_item(self, item_id: str) -> bool:
+        """
+        Regenerate news blocks for a specific item using database function.
+
+        Args:
+            item_id: UUID of the item to regenerate
+
+        Returns:
+            True if regenerated successfully, False otherwise
+        """
+        if not self.client:
+            logger.error("Supabase client not initialized")
+            return False
+
+        try:
+            result = self.client.rpc(
+                "regenerate_news_blocks_for_item", {"item_id": item_id}
+            ).execute()
+
+            success = result.data if result.data is not None else False
+            if success:
+                logger.info(f"Regenerated news blocks for item {item_id}")
+            else:
+                logger.warning(f"Failed to regenerate news blocks for item {item_id}")
+
+            return success
+
+        except Exception as e:
+            logger.error(f"Error regenerating news blocks for item {item_id}: {e}")
+            return False
+
+    async def regenerate_all_news_blocks(self) -> int:
+        """
+        Regenerate news blocks for all items that don't have them.
+
+        Returns:
+            Number of items processed
+        """
+        if not self.client:
+            logger.error("Supabase client not initialized")
+            return 0
+
+        try:
+            result = self.client.rpc("regenerate_all_news_blocks").execute()
+
+            processed_count = result.data if result.data is not None else 0
+            logger.info(f"Regenerated news blocks for {processed_count} items")
+
+            return processed_count
+
+        except Exception as e:
+            logger.error(f"Error regenerating all news blocks: {e}")
+            return 0
 
     async def save_source_info(
         self, source_type: str, source_id: str, source_name: str, source_url: str
@@ -178,7 +529,8 @@ class SupabaseNewsClient:
         source_type: Optional[str] = None,
         source_id: Optional[str] = None,
         category: Optional[str] = None,
-    ) -> List[Dict[str, Any]]:
+        only_blocks: bool = True,
+    ) -> Any:
         """
         Get latest social media news items.
 
@@ -188,16 +540,18 @@ class SupabaseNewsClient:
             source_type: Filter by source type
             source_id: Filter by source ID
             category: Filter by category
+            only_blocks: If True, return only news_blocks (default)
 
         Returns:
-            List of news items
+            If only_blocks=True: List of news_blocks (flattened)
+            Else: dict with items and total
         """
         if not self.client:
             logger.error("Supabase client not initialized")
-            return []
+            return [] if only_blocks else {"items": [], "total": 0}
 
         try:
-            query = self.client.table("social_news_items").select("*")
+            query = self.client.table("social_news_items").select("*", count="exact")
 
             if source_type:
                 query = query.eq("source_type", source_type)
@@ -205,23 +559,30 @@ class SupabaseNewsClient:
             if source_id:
                 query = query.eq("source_id", source_id)
 
-            # Note: category filtering would require joining with sources table
-            # For now, we'll ignore the category parameter
-
             result = (
                 query.order("published_at", desc=True)
                 .range(offset, offset + limit - 1)
                 .execute()
             )
+            items = result.data if result.data else []
+            total_count = result.count if result.count is not None else 0
 
-            return result.data if result.data else []
+            if only_blocks:
+                all_blocks = []
+                for item in items:
+                    blocks = item.get("news_blocks")
+                    if isinstance(blocks, list):
+                        all_blocks.extend(blocks)
+                return all_blocks
+            else:
+                return {"items": items, "total": total_count}
         except Exception as e:
             logger.error(f"Error getting latest news: {e}")
-            return []
+            return [] if only_blocks else {"items": [], "total": 0}
 
     async def get_statistics(self) -> Dict[str, Any]:
         """
-        Get statistics about social media news.
+        Get statistics about social media news including news blocks coverage.
 
         Returns:
             Dictionary with statistics
@@ -231,41 +592,26 @@ class SupabaseNewsClient:
             return {}
 
         try:
-            total_result = (
-                self.client.table("social_news_items")
-                .select("id", count="exact")
-                .execute()
-            )
-            total_count = total_result.count or 0
+            result = self.client.rpc("get_social_news_aggregated_stats").execute()
 
-            stats_result = (
-                self.client.table("social_news_statistics").select("*").execute()
-            )
+            if result.data:
+                return result.data
+            else:
+                total_result = (
+                    self.client.table("social_news_items")
+                    .select("id", count="exact")
+                    .execute()
+                )
+                total_count = total_result.count or 0
 
-            statistics = {
-                "total_items": total_count,
-                "by_source_type": {},
-                "by_source": [],
-                "last_updated": datetime.now(timezone.utc).isoformat(),
-            }
-
-            if stats_result.data:
-                for stat in stats_result.data:
-                    source_type = stat["source_type"]
-                    if source_type not in statistics["by_source_type"]:
-                        statistics["by_source_type"][source_type] = 0
-                    statistics["by_source_type"][source_type] += stat["total_items"]
-
-                    statistics["by_source"].append(
-                        {
-                            "source_type": source_type,
-                            "source_id": stat["source_id"],
-                            "source_name": stat["source_name"],
-                            "total_items": stat["total_items"],
-                            "latest_published_at": stat["latest_published_at"],
-                        }
-                    )
-            return statistics
+                return {
+                    "total_items": total_count,
+                    "by_source_type": {},
+                    "by_source": [],
+                    "items_with_news_blocks": 0,
+                    "news_blocks_coverage": {},
+                    "last_updated": datetime.now(timezone.utc).isoformat(),
+                }
 
         except Exception as e:
             logger.error(f"Error getting statistics: {e}")
@@ -328,9 +674,7 @@ class SupabaseNewsClient:
             }
 
             result = (
-                self.client.table("social_news_sources")
-                .insert(source_data)
-                .execute()
+                self.client.table("social_news_sources").insert(source_data).execute()
             )
 
             if result.data:
@@ -373,14 +717,17 @@ class SupabaseNewsClient:
             logger.error(f"Error getting sources: {e}")
             return []
 
-    async def update_source(self, source_id: int, **kwargs) -> Dict[str, Any]:
+    async def update_source(self, source_id: str, **kwargs) -> Dict[str, Any]:
         """Update a source."""
         if not self.client:
             logger.error("Supabase client not initialized")
             raise RuntimeError("Database not available")
 
         try:
-            update_data = {**kwargs, "updated_at": datetime.now(timezone.utc).isoformat()}
+            update_data = {
+                **kwargs,
+                "updated_at": datetime.now(timezone.utc).isoformat(),
+            }
 
             result = (
                 self.client.table("social_news_sources")
@@ -398,7 +745,7 @@ class SupabaseNewsClient:
             logger.error(f"Error updating source: {e}")
             raise
 
-    async def delete_source(self, source_id: int) -> bool:
+    async def delete_source(self, source_id: str) -> bool:
         """Delete a source."""
         if not self.client:
             logger.error("Supabase client not initialized")
@@ -418,9 +765,27 @@ class SupabaseNewsClient:
             logger.error(f"Error deleting source: {e}")
             raise
 
+    async def get_source(self, source_id: str) -> Optional[Dict[str, Any]]:
+        """Get a single source by its database ID."""
+        if not self.client:
+            logger.error("Supabase client not initialized")
+            return None
+
+        try:
+            result = (
+                self.client.table("social_news_sources")
+                .select("*")
+                .eq("id", source_id)
+                .single()
+                .execute()
+            )
+            return result.data if result.data else None
+        except Exception as e:
+            logger.error(f"Error getting source {source_id}: {e}")
+            return None
+
     async def get_scheduler_config(self) -> Dict[str, Any]:
         """Get scheduler configuration."""
-        # Return default config since we don't have a scheduler config table yet
         return {
             "is_enabled": True,
             "sync_interval_minutes": 30,

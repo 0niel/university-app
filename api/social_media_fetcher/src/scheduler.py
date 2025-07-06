@@ -164,11 +164,11 @@ class BackgroundScheduler:
             # Get source info
             source_info = await client.get_source_info(source_id)
             
-            # Fetch posts using the unified interface
-            posts = await client.fetch_posts(source_id, limit=50)
+            # Fetch raw data using the correct method
+            raw_data_list = await client.fetch_raw_data(source_id, limit=50)
 
             stored_count = 0
-            for post in posts:
+            for raw_data in raw_data_list:
                 try:
                     # Process media URLs if any
                     source_info_for_media = {
@@ -176,41 +176,29 @@ class BackgroundScheduler:
                         "source_id": source_id,
                     }
 
-                    if post.image_urls:
-                        processed_images = await self.media_storage.process_media_urls(
-                            post.image_urls,
-                            "image",
-                            source_info_for_media,
-                            client if client.client_type == "telegram" else None,
-                        )
-                        post.image_urls = processed_images
-
-                    if post.video_urls:
-                        processed_videos = await self.media_storage.process_media_urls(
-                            post.video_urls,
-                            "video", 
-                            source_info_for_media,
-                            client if client.client_type == "telegram" else None,
-                        )
-                        post.video_urls = processed_videos
-
-                    # Save to database
-                    if await self.database.save_social_news_item(post):
+                    # Save raw data as news blocks using the enhanced Supabase client
+                    if await self.database.save_raw_data_as_news_blocks(
+                        raw_data=raw_data,
+                        source_type=client.client_type,
+                        source_id=source_id,
+                        source_name=source_name,
+                        social_media_client=client
+                    ):
                         stored_count += 1
 
                 except Exception as e:
-                    logger.warning(f"Error processing post {post.id}: {e}")
+                    logger.warning(f"Error processing raw data: {e}")
 
             # Save source info
             await self.database.save_source_info(
                 client.client_type,
                 source_id,
                 source_name,
-                post.original_url if posts else f"https://example.com/{source_id}",
+                f"https://{'t.me' if client.client_type == 'telegram' else 'vk.com'}/{source_id}",
             )
 
             logger.info(
-                f"Synced {client.client_type} source {source_id}: {stored_count}/{len(posts)} items stored"
+                f"Synced {client.client_type} source {source_id}: {stored_count}/{len(raw_data_list)} items stored"
             )
             return stored_count
 

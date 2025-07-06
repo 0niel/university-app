@@ -1,15 +1,13 @@
 """Configuration settings for the social media fetcher."""
 
 import os
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings
 
-from .interfaces import Configuration
 
-
-class Settings(BaseSettings, Configuration):
+class Settings(BaseSettings):
     """Application settings loaded from environment variables."""
 
     HOST: str = Field(default="0.0.0.0", env="HOST")
@@ -39,6 +37,9 @@ class Settings(BaseSettings, Configuration):
     SUPABASE_BUCKET_VIDEOS: str = Field(
         default="social-media-videos", env="SUPABASE_BUCKET_VIDEOS"
     )
+    SUPABASE_BUCKET_DOCUMENTS: str = Field(
+        default="social-media-documents", env="SUPABASE_BUCKET_DOCUMENTS"
+    )
 
     RATE_LIMIT_REQUESTS: int = Field(default=100, env="RATE_LIMIT_REQUESTS")
     RATE_LIMIT_WINDOW: int = Field(default=3600, env="RATE_LIMIT_WINDOW")
@@ -50,8 +51,8 @@ class Settings(BaseSettings, Configuration):
     SYNC_INTERVAL_MINUTES: int = Field(default=30, env="SYNC_INTERVAL_MINUTES")
 
     MAX_FILE_SIZE_MB: int = Field(default=50, env="MAX_FILE_SIZE_MB")
-    SUPPORTED_IMAGE_FORMATS: list = ["jpg", "jpeg", "png", "gif", "webp"]
-    SUPPORTED_VIDEO_FORMATS: list = ["mp4", "mov", "avi", "webm"]
+    SUPPORTED_IMAGE_FORMATS: List[str] = ["jpg", "jpeg", "png", "gif", "webp"]
+    SUPPORTED_VIDEO_FORMATS: List[str] = ["mp4", "mov", "avi", "webm"]
 
     PROXY_URL: Optional[str] = Field(default=None, env="PROXY_URL")
     PROXY_USERNAME: Optional[str] = Field(default=None, env="PROXY_USERNAME")
@@ -64,6 +65,7 @@ class Settings(BaseSettings, Configuration):
 
         env_file = ".env"
         env_file_encoding = "utf-8"
+        extra = "ignore"
 
     @field_validator("TELEGRAM_API_ID", mode="before")
     @classmethod
@@ -177,7 +179,7 @@ class Settings(BaseSettings, Configuration):
 
         return proxy_dict
 
-    def get_available_clients(self) -> list[str]:
+    def get_available_clients(self) -> List[str]:
         """Get list of available client types based on configuration."""
         clients = []
         if self.telegram_configured:

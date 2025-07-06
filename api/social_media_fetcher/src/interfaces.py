@@ -5,7 +5,6 @@ from datetime import datetime
 from typing import Any, Dict, List, Optional, Protocol
 
 from .clients.base.interfaces import SocialMediaClient
-from .models import SocialMediaPost
 
 
 
@@ -46,11 +45,6 @@ class DatabaseClient(ABC):
     @abstractmethod
     async def close(self) -> None:
         """Close the database client."""
-        pass
-
-    @abstractmethod
-    async def save_social_news_item(self, post: SocialMediaPost) -> bool:
-        """Save a social media post to the database."""
         pass
 
     @abstractmethod

@@ -1,6 +1,6 @@
 """Client factory for creating and registering social media clients."""
 
-from typing import Type
+from typing import Type, Optional, Tuple
 
 from loguru import logger
 
@@ -64,6 +64,42 @@ class ClientFactory:
             for client_type in self._client_classes.keys()
             if self.config.is_client_enabled(client_type)
         ]
+
+    def detect_source_type_from_url(self, url: str) -> Optional[str]:
+        """
+        Detect source type from URL by checking all registered clients.
+        
+        Args:
+            url: The URL to check
+            
+        Returns:
+            The source type that can handle this URL, or None if no client can handle it
+        """
+        for client_type, client_class in self._client_classes.items():
+            if hasattr(client_class, 'can_handle_url') and client_class.can_handle_url(url):
+                return client_type
+        return None
+
+    def extract_source_info_from_url(self, url: str) -> Tuple[Optional[str], Optional[str]]:
+        """
+        Extract source type and source ID from URL.
+        
+        Args:
+            url: The URL to process
+            
+        Returns:
+            Tuple of (source_type, source_id) or (None, None) if extraction failed
+        """
+        source_type = self.detect_source_type_from_url(url)
+        if not source_type:
+            return None, None
+        
+        client_class = self._client_classes.get(source_type)
+        if not client_class or not hasattr(client_class, 'extract_source_id_from_url'):
+            return source_type, None
+        
+        source_id = client_class.extract_source_id_from_url(url)
+        return source_type, source_id
 
     def _register_client_factory(
         self, client_type: str, client_class: Type[SocialMediaClient]

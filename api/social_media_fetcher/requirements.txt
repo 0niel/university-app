@@ -12,13 +12,13 @@ vk-api==11.9.9
 
 # HTTP client and web scraping
 httpx>=0.26,<0.29
-aiohttp>=3.11.18,<4.0.0
+aiohttp>=3.8.0
 beautifulsoup4==4.12.2
 lxml==4.9.3
 
 # Data processing
-pydantic==2.5.0
-pydantic-settings==2.1.0
+pydantic>=2.0.0
+pydantic-settings>=2.0.0
 python-multipart==0.0.6
 
 # Image processing
@@ -27,11 +27,12 @@ Pillow==10.1.0
 # Database and caching
 redis==5.0.1
 aioredis==2.0.1
-supabase==2.15.3
+supabase>=2.0.0
 
 # Utilities
-python-dotenv==1.0.0
-loguru==0.7.2
+python-dotenv>=1.0.0
+loguru>=0.7.0
+rich>=13.0.0
 schedule==1.2.0
 
 # Date and time handling
@@ -44,4 +45,12 @@ orjson==3.9.10
 slowapi==0.1.9
 
 # Health checks
-psutil==5.9.6 
+psutil==5.9.6
+
+# News blocks code generation
+jinja2==3.1.2  # Already included above for FastAPI
+pathlib2==2.3.7; python_version < '3.4'
+
+# Additional dependencies
+telethon>=1.30.0
+asyncio-throttle>=1.0.0
