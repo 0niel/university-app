@@ -51,6 +51,8 @@ async def lifespan(app: FastAPI):
         await setup_services()
         await services.initialize_all()
 
+        await _auto_register_client_sources()
+
         scheduler_config = settings.get_scheduler_config()
         if scheduler_config.get("enabled", False):
             if services.database and services.media_storage:
@@ -107,6 +109,66 @@ async def setup_services():
         vk_client = VKFetcher(settings)
         services.client_registry.register_client(vk_client)
         logger.info("VK client registered")
+
+    from src.clients.mirea.client import MireaOfficialFetcher
+    mirea_client = MireaOfficialFetcher(settings)
+    services.client_registry.register_client(mirea_client)
+    logger.info("MIREA client registered")
+
+
+async def _auto_register_client_sources():
+    """Auto-register sources for clients that support it."""
+    if not services.database:
+        logger.warning("Database not available - skipping auto-registration of sources")
+        return
+
+    # Check if database is properly initialized
+    try:
+        # Test database connection with a simple query
+        await services.database.get_sources(limit=1)
+    except Exception as e:
+        logger.warning(f"Database not properly initialized - skipping auto-registration: {e}")
+        return
+
+    all_clients = services.client_registry.get_all_clients()
+    
+    for client_type, client in all_clients.items():
+        if not client.auto_register_sources:
+            continue
+            
+        default_sources = client.get_default_sources()
+        if not default_sources:
+            continue
+            
+        logger.info(f"Auto-registering {len(default_sources)} sources for {client_type} client")
+        
+        for source_info in default_sources:
+            try:
+                existing_sources = await services.database.get_sources(
+                    source_type=client_type,
+                    active_only=False
+                )
+                
+                source_exists = any(
+                    source["source_id"] == source_info["source_id"] 
+                    for source in existing_sources
+                )
+                
+                if not source_exists:
+                    await services.database.add_source(
+                        source_type=client_type,
+                        source_id=source_info["source_id"],
+                        source_name=source_info["source_name"],
+                        description=source_info.get("description", ""),
+                        category=source_info.get("category", "general"),
+                        is_active=True
+                    )
+                    logger.info(f"Auto-registered source: {source_info['source_name']} ({client_type})")
+                else:
+                    logger.debug(f"Source already exists: {source_info['source_name']} ({client_type})")
+                    
+            except Exception as e:
+                logger.error(f"Error auto-registering source {source_info['source_name']}: {e}")
 
 
 app = FastAPI(
@@ -627,6 +689,17 @@ async def get_supported_sources():
                 "https://vk.com/example_group",
                 "https://vk.com/public123456"
             ]
+        },
+        "mirea": {
+            "name": "MIREA Official",
+            "description": "Official MIREA university news",
+            "url_formats": [
+                "https://www.mirea.ru/news/"
+            ],
+            "examples": [
+                "https://www.mirea.ru/news/"
+            ],
+            "auto_registered": True
         }
     }
     
@@ -641,7 +714,7 @@ async def get_supported_sources():
         },
         "available_types": available_types,
         "enabled_types": enabled_types,
-        "note": "You only need to provide source_url and source_name. The system will automatically detect the source type and extract the source ID."
+        "note": "You only need to provide source_url and source_name. The system will automatically detect the source type and extract the source ID. Some sources (like MIREA) are automatically registered when the service starts."
     }
 
 
