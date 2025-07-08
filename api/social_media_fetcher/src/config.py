@@ -105,6 +105,8 @@ class Settings(BaseSettings):
             return self.telegram_configured
         elif client_type == "vk":
             return self.vk_configured
+        elif client_type == "mirea":
+            return True
         else:
             return False
 
@@ -186,4 +188,5 @@ class Settings(BaseSettings):
             clients.append("telegram")
         if self.vk_configured:
             clients.append("vk")
+        clients.append("mirea")
         return clients

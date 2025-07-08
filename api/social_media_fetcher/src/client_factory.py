@@ -8,6 +8,7 @@ from .config import Settings
 from .clients.base.interfaces import SocialMediaClient
 from .clients.telegram import TelegramFetcher
 from .clients.vk import VKFetcher
+from .clients.mirea import MireaOfficialFetcher
 from .registry import ServiceRegistry
 
 
@@ -21,6 +22,7 @@ class ClientFactory:
         self._client_classes = {
             "telegram": TelegramFetcher,
             "vk": VKFetcher,
+            "mirea": MireaOfficialFetcher,
         }
 
     def register_all_available_clients(self) -> None:
@@ -29,7 +31,7 @@ class ClientFactory:
             if self.config.is_client_enabled(client_type):
                 self._register_client_factory(client_type, client_class)
             else:
-                logger.debug(f"Client {client_type} not enabled in configuration")
+                logger.debug(f"Client {client_type} not enabled in configuration: {client_type}")
 
     def register_client_type(
         self, client_type: str, client_class: Type[SocialMediaClient]

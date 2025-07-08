@@ -3,7 +3,7 @@
 import asyncio
 import re
 from datetime import datetime, timezone
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Set
 from urllib.parse import urlparse
 
 from loguru import logger
@@ -13,7 +13,7 @@ from telethon.errors import (
     FloodWaitError,
     UsernameNotOccupiedError,
 )
-from telethon.tl.types import Channel, Chat, Message, User
+from telethon.tl.types import Channel, Chat, Message, User, MessageMediaPhoto, MessageMediaDocument
 from telethon.sessions import StringSession
 
 from ...clients.base.interfaces import SocialMediaClient
@@ -59,7 +59,6 @@ class TelegramFetcher(SocialMediaClient):
     def can_handle_url(cls, url: str) -> bool:
         """Check if this client can handle the given URL."""
         try:
-            # Handle URLs with or without protocol
             if not url.startswith(('http://', 'https://')):
                 url = 'https://' + url
             
@@ -72,7 +71,6 @@ class TelegramFetcher(SocialMediaClient):
     def extract_source_id_from_url(cls, url: str) -> Optional[str]:
         """Extract channel/group username from Telegram URL."""
         try:
-            # Handle URLs with or without protocol
             if not url.startswith(('http://', 'https://')):
                 url = 'https://' + url
             
@@ -80,7 +78,6 @@ class TelegramFetcher(SocialMediaClient):
             if parsed.netloc not in ['t.me', 'telegram.me']:
                 return None
             
-            # Extract username from path
             path = parsed.path.strip('/')
             if not path:
                 return None
@@ -95,7 +92,6 @@ class TelegramFetcher(SocialMediaClient):
             if parts[0] == 's' and len(parts) > 1:
                 return parts[1]
             
-            # Return the username part
             return parts[0]
             
         except Exception as e:
@@ -159,26 +155,23 @@ class TelegramFetcher(SocialMediaClient):
             return []
 
         try:
-            # Get channel info
             channel_info = await self.get_channel_info(source_id)
             if not channel_info:
                 logger.warning(f"Could not get info for channel: {source_id}")
                 return []
 
-            # Fetch messages
-            messages = await self.get_channel_messages(
+            messages = await self.get_channel_messages_with_groups(
                 source_id, limit, kwargs.get("offset_id", 0)
             )
 
             raw_data_list = []
-            for message in messages:
+            for message_group in messages:
                 try:
-                    # Convert to raw data format
-                    raw_data = await self._convert_message_to_raw_data(message, channel_info)
+                    raw_data = await self._convert_message_group_to_raw_data(message_group, channel_info)
                     if raw_data:
                         raw_data_list.append(raw_data)
                 except Exception as e:
-                    logger.warning(f"Error converting message {message.id}: {e}")
+                    logger.warning(f"Error converting message group: {e}")
 
             return raw_data_list
 
@@ -186,25 +179,107 @@ class TelegramFetcher(SocialMediaClient):
             logger.error(f"Error fetching raw data from {source_id}: {e}")
             return []
 
-    async def _convert_message_to_raw_data(
-        self, message: TelegramMessage, channel_info: TelegramChannelInfo
-    ) -> Optional[Dict[str, Any]]:
-        """Convert TelegramMessage to raw data format."""
+    async def get_channel_messages_with_groups(
+        self, username: str, limit: int = 20, offset_id: int = 0
+    ) -> List[List[TelegramMessage]]:
+        """Get messages from a Telegram channel, grouping media albums."""
+        if not self._initialized or not self.client:
+            logger.warning("Telegram client not initialized")
+            return []
+
         try:
-            # Collect media file IDs
+            username = username.lstrip("@")
+            entity = await self.client.get_entity(username)
+
+            all_messages = []
+            grouped_messages = {}  # grouped_id -> list of messages
+            
+            async for message in self.client.iter_messages(
+                entity, limit=limit * 2, offset_id=offset_id  # Fetch more to account for grouping
+            ):
+                if isinstance(message, Message):
+                    telegram_message = await self._convert_message(message)
+                    if telegram_message:
+                        all_messages.append((message, telegram_message))
+
+            ungrouped_messages = []
+            processed_ids: Set[int] = set()
+            
+            for original_msg, telegram_msg in all_messages:
+                if telegram_msg.id in processed_ids:
+                    continue
+                    
+                if hasattr(original_msg, 'grouped_id') and original_msg.grouped_id:
+                    group_id = original_msg.grouped_id
+                    
+                    if group_id not in grouped_messages:
+                        group_msgs = []
+                        for other_orig, other_tg in all_messages:
+                            if (hasattr(other_orig, 'grouped_id') and 
+                                other_orig.grouped_id == group_id and
+                                other_tg.id not in processed_ids):
+                                group_msgs.append(other_tg)
+                                processed_ids.add(other_tg.id)
+                        
+                        if group_msgs:
+                            # Sort by message ID to maintain order
+                            group_msgs.sort(key=lambda x: x.id)
+                            grouped_messages[group_id] = group_msgs
+                            ungrouped_messages.append(group_msgs)
+                else:
+                    ungrouped_messages.append([telegram_msg])
+                    processed_ids.add(telegram_msg.id)
+
+            return ungrouped_messages[:limit]
+
+        except FloodWaitError as e:
+            logger.warning(f"Rate limited, waiting {e.seconds} seconds")
+            await asyncio.sleep(e.seconds)
+            return []
+        except (UsernameNotOccupiedError, ValueError):
+            logger.warning(f"Channel not found: {username}")
+            return []
+        except ChannelPrivateError:
+            logger.warning(f"Channel is private: {username}")
+            return []
+        except Exception as e:
+            logger.error(f"Error getting messages from {username}: {e}")
+            return []
+
+    async def _convert_message_group_to_raw_data(
+        self, message_group: List[TelegramMessage], channel_info: TelegramChannelInfo
+    ) -> Optional[Dict[str, Any]]:
+        """Convert a group of TelegramMessages to raw data format."""
+        if not message_group:
+            return None
+            
+        try:
+            primary_message = message_group[0]
+            
             photo_file_ids = []
             video_file_ids = []
+            all_text_parts = []
             
-            for media in message.media:
-                if media.type == "photo" and media.url:
-                    photo_file_ids.append(media.url)  # This is actually file_id
-                elif media.type in ["video", "animation"] and media.url:
-                    video_file_ids.append(media.url)
+            for message in message_group:
+                if message.text.strip():
+                    all_text_parts.append(message.text.strip())
+                
+                for media in message.media:
+                    if media.type == "photo" and media.url:
+                        photo_file_ids.append(media.url)
+                    elif media.type in ["video", "animation"] and media.url:
+                        video_file_ids.append(media.url)
 
+            combined_text = '\n\n'.join(all_text_parts) if all_text_parts else ''
+            
+            total_media = len(photo_file_ids) + len(video_file_ids)
+            is_story = total_media > 1
+            is_circles = total_media >= 3  # 3+ media items could be "circles" style content
+            
             raw_data = {
-                'id': message.id,
-                'date': int(message.date.timestamp()),
-                'text': message.text,
+                'id': primary_message.id,
+                'date': int(primary_message.date.timestamp()),
+                'text': combined_text,
                 'chat': {
                     'id': channel_info.id,
                     'title': channel_info.title,
@@ -216,20 +291,33 @@ class TelegramFetcher(SocialMediaClient):
                 },
                 'photo': {'file_id': photo_file_ids[0]} if photo_file_ids else None,
                 'video': {'file_id': video_file_ids[0]} if video_file_ids else None,
-                'views': message.views,
-                'forwards': message.forwards,
-                'url': f"https://t.me/{channel_info.username}/{message.id}",
+                'views': primary_message.views,
+                'forwards': primary_message.forwards,
+                'url': f"https://t.me/{channel_info.username}/{primary_message.id}",
                 'media_files': {
                     'photos': photo_file_ids,
                     'videos': video_file_ids,
-                }
+                },
+                # Add metadata for better processing
+                'is_story': is_story,
+                'is_circles': is_circles,
+                'media_group_count': len(message_group),
+                'total_media_count': total_media,
+                'grouped_message_ids': [msg.id for msg in message_group],
             }
 
             return raw_data
 
         except Exception as e:
-            logger.warning(f"Error converting message to raw data: {e}")
+            logger.warning(f"Error converting message group to raw data: {e}")
             return None
+
+    async def _convert_message_to_raw_data(
+        self, message: TelegramMessage, channel_info: TelegramChannelInfo
+    ) -> Optional[Dict[str, Any]]:
+        """Convert TelegramMessage to raw data format (legacy method)."""
+        # Convert single message to group format and use new method
+        return await self._convert_message_group_to_raw_data([message], channel_info)
 
     async def get_channel_info(self, username: str) -> Optional[TelegramChannelInfo]:
         """Get information about a Telegram channel."""
@@ -271,48 +359,34 @@ class TelegramFetcher(SocialMediaClient):
     async def get_channel_messages(
         self, username: str, limit: int = 20, offset_id: int = 0
     ) -> List[TelegramMessage]:
-        """Get messages from a Telegram channel."""
-        if not self._initialized or not self.client:
-            logger.warning("Telegram client not initialized")
-            return []
-
-        try:
-            username = username.lstrip("@")
-            entity = await self.client.get_entity(username)
-
-            messages = []
-            async for message in self.client.iter_messages(
-                entity, limit=limit, offset_id=offset_id
-            ):
-                if isinstance(message, Message) and message.message:
-                    telegram_message = await self._convert_message(message)
-                    if telegram_message:
-                        messages.append(telegram_message)
-
-            return messages
-
-        except FloodWaitError as e:
-            logger.warning(f"Rate limited, waiting {e.seconds} seconds")
-            await asyncio.sleep(e.seconds)
-            return []
-        except (UsernameNotOccupiedError, ValueError):
-            logger.warning(f"Channel not found: {username}")
-            return []
-        except ChannelPrivateError:
-            logger.warning(f"Channel is private: {username}")
-            return []
-        except Exception as e:
-            logger.error(f"Error getting messages from {username}: {e}")
-            return []
+        """Get messages from a Telegram channel (legacy method)."""
+        message_groups = await self.get_channel_messages_with_groups(username, limit, offset_id)
+        # Flatten groups for compatibility
+        messages = []
+        for group in message_groups:
+            messages.extend(group)
+        return messages[:limit]
 
     async def _convert_message(self, message: Message) -> Optional[TelegramMessage]:
         """Convert Telethon Message to TelegramMessage."""
         try:
             media_list = []
+            
             if message.media:
-                media = await self._convert_media(message)
-                if media:
-                    media_list.append(media)
+                if isinstance(message.media, MessageMediaPhoto):
+                    media = await self._convert_photo_media(message)
+                    if media:
+                        media_list.append(media)
+                
+                elif isinstance(message.media, MessageMediaDocument):
+                    media = await self._convert_document_media(message)
+                    if media:
+                        media_list.append(media)
+                
+                else:
+                    media = await self._convert_media(message)
+                    if media:
+                        media_list.append(media)
 
             return TelegramMessage(
                 id=message.id,
@@ -327,8 +401,100 @@ class TelegramFetcher(SocialMediaClient):
             logger.warning(f"Error converting message: {e}")
             return None
 
+    async def _convert_photo_media(self, message: Message) -> Optional[TelegramMedia]:
+        """Convert photo media specifically."""
+        try:
+            if not message.media or not hasattr(message.media, 'photo'):
+                return None
+                
+            photo = message.media.photo
+            if not photo:
+                return None
+
+            file_id = str(photo.id)
+            file_unique_id = str(photo.access_hash)
+            width = None
+            height = None
+            
+            if photo.sizes:
+                largest_size = max(photo.sizes, key=lambda s: getattr(s, 'w', 0) * getattr(s, 'h', 0))
+                width = getattr(largest_size, 'w', None)
+                height = getattr(largest_size, 'h', None)
+
+            return TelegramMedia(
+                type="photo",
+                file_id=file_id,
+                file_unique_id=file_unique_id,
+                width=width,
+                height=height,
+                caption=message.message or "",
+                url=file_id,  # Store file_id as URL for later processing
+            )
+
+        except Exception as e:
+            logger.warning(f"Error converting photo media: {e}")
+            return None
+
+    async def _convert_document_media(self, message: Message) -> Optional[TelegramMedia]:
+        """Convert document media (videos, gifs, etc.) specifically."""
+        try:
+            if not message.media or not hasattr(message.media, 'document'):
+                return None
+                
+            document = message.media.document
+            if not document:
+                return None
+
+            file_id = str(document.id)
+            file_unique_id = str(document.access_hash)
+            file_size = document.size
+            mime_type = document.mime_type
+            
+            media_type = "document"
+            if mime_type:
+                if mime_type.startswith("video/"):
+                    media_type = "video"
+                elif mime_type.startswith("image/"):
+                    media_type = "photo"
+                elif mime_type.startswith("audio/"):
+                    media_type = "audio"
+                elif "gif" in mime_type.lower():
+                    media_type = "animation"
+            
+            width = None
+            height = None
+            duration = None
+            file_name = None
+            
+            for attr in document.attributes:
+                if hasattr(attr, "file_name"):
+                    file_name = attr.file_name
+                elif hasattr(attr, "w") and hasattr(attr, "h"):
+                    width = attr.w
+                    height = attr.h
+                elif hasattr(attr, "duration"):
+                    duration = attr.duration
+
+            return TelegramMedia(
+                type=media_type,
+                file_id=file_id,
+                file_unique_id=file_unique_id,
+                width=width,
+                height=height,
+                duration=duration,
+                file_size=file_size,
+                mime_type=mime_type,
+                file_name=file_name,
+                caption=message.message or "",
+                url=file_id,  # Store file_id as URL for later processing
+            )
+
+        except Exception as e:
+            logger.warning(f"Error converting document media: {e}")
+            return None
+
     async def _convert_media(self, message: Message) -> Optional[TelegramMedia]:
-        """Convert message media to TelegramMedia."""
+        """Convert message media to TelegramMedia (legacy method)."""
         try:
             if not message.media:
                 return None
@@ -346,7 +512,6 @@ class TelegramFetcher(SocialMediaClient):
             url = None
             thumbnail_url = None
 
-            # Handle different media types
             if hasattr(message.media, "photo"):
                 media_type = "photo"
                 photo = message.media.photo
@@ -366,7 +531,6 @@ class TelegramFetcher(SocialMediaClient):
                     file_size = document.size
                     mime_type = document.mime_type
                     
-                    # Determine media type from MIME type
                     if mime_type:
                         if mime_type.startswith("video/"):
                             media_type = "video"
@@ -377,19 +541,20 @@ class TelegramFetcher(SocialMediaClient):
                         else:
                             media_type = "document"
                     
-                    # Get file name from attributes
                     for attr in document.attributes:
                         if hasattr(attr, "file_name"):
                             file_name = attr.file_name
                         elif hasattr(attr, "w") and hasattr(attr, "h"):
                             width = attr.w
-                            height = attr.h
                         elif hasattr(attr, "duration"):
                             duration = attr.duration
 
+            if not file_id or not file_unique_id:
+                logger.debug(f"Skipping media conversion - missing file identifiers. file_id: {file_id}, file_unique_id: {file_unique_id}")
+                return None
+
             # For Telegram, we store the file_id as URL for later processing
-            if file_id:
-                url = file_id
+            url = file_id
 
             return TelegramMedia(
                 type=media_type,
@@ -441,7 +606,6 @@ class TelegramFetcher(SocialMediaClient):
         if not text:
             return "Telegram Post"
 
-        # Take first line or first 100 characters
         lines = text.split("\n")
         first_line = lines[0].strip()
 

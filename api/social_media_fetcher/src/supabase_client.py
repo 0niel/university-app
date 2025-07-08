@@ -279,6 +279,13 @@ class SupabaseNewsClient:
             return False
 
         try:
+            # Extract metadata from raw data
+            external_id = self._extract_external_id(raw_data, source_type)
+            
+            if await self._item_exists(source_type, source_id, external_id):
+                logger.debug(f"Item already exists, skipping: {source_type}:{source_id}:{external_id}")
+                return True
+
             news_blocks = adapter_registry.adapt_data(source_type, raw_data)
 
             if not news_blocks:
@@ -287,13 +294,10 @@ class SupabaseNewsClient:
                 )
                 return False
 
-            # Extract metadata from raw data
-            external_id = str(raw_data.get("id", ""))
             original_url = raw_data.get(
                 "url", f"https://example.com/{source_id}/{external_id}"
             )
 
-            # Parse published date
             published_at = datetime.now(timezone.utc)
             if "date" in raw_data:
                 if isinstance(raw_data["date"], int):
@@ -322,6 +326,59 @@ class SupabaseNewsClient:
 
         except Exception as e:
             logger.error(f"Error converting and saving raw data: {e}")
+            return False
+
+    def _extract_external_id(self, raw_data: Dict[str, Any], source_type: str) -> str:
+        """
+        Extract external ID from raw data based on source type.
+
+        Args:
+            raw_data: Raw data from social media platform
+            source_type: Type of source (telegram, vk, mirea, etc.)
+
+        Returns:
+            External ID as string
+        """
+        if source_type == "mirea":
+            # MIREA uses uppercase "ID" field
+            return str(raw_data.get("ID", ""))
+        elif source_type in ["telegram", "vk"]:
+            # Telegram and VK use lowercase "id" field
+            return str(raw_data.get("id", ""))
+        else:
+            # Default fallback - try both cases
+            return str(raw_data.get("id", raw_data.get("ID", "")))
+
+    async def _item_exists(self, source_type: str, source_id: str, external_id: str) -> bool:
+        """
+        Check if an item already exists in the database.
+
+        Args:
+            source_type: Type of source (telegram, vk, etc.)
+            source_id: Source identifier
+            external_id: External identifier of the item
+
+        Returns:
+            True if item exists, False otherwise
+        """
+        if not self.client:
+            return False
+
+        try:
+            result = (
+                self.client.table("social_news_items")
+                .select("id")
+                .eq("source_type", source_type)
+                .eq("source_id", source_id)
+                .eq("external_id", external_id)
+                .limit(1)
+                .execute()
+            )
+
+            return bool(result.data)
+
+        except Exception as e:
+            logger.error(f"Error checking item existence: {e}")
             return False
 
     async def get_news_as_blocks(

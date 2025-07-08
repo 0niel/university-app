@@ -113,11 +113,15 @@ class MediaStorage:
                 logger.warning("Telegram client not initialized")
                 return None
 
+            file_id = getattr(media_object, 'id', 'unknown_id')
+            logger.debug(f"Starting download for Telegram file: {file_id}")
+            
             file_path = await telegram_client.client.download_media(media_object)
             if not file_path:
-                file_id = getattr(media_object, 'id', 'unknown_id')
                 logger.warning(f"Could not download Telegram file from media object: {file_id}")
                 return None
+            
+            logger.debug(f"Downloaded Telegram file to: {os.path.basename(file_path)}")
 
             with open(file_path, "rb") as f:
                 file_data = f.read()
@@ -182,13 +186,25 @@ class MediaStorage:
             logger.error(f"Error downloading/storing Telegram file {file_id}: {e}")
             return None
         finally:
-            # Гарантированно удаляем временный файл, если он был создан
-            if file_path and os.path.exists(file_path):
+
+            if file_path:
                 try:
-                    os.unlink(file_path)
-                    logger.debug(f"Cleaned up temporary file: {file_path}")
+                    if os.path.exists(file_path):
+                        file_size = os.path.getsize(file_path)
+                        os.unlink(file_path)
+                        logger.debug(f"Cleaned up temporary file: {os.path.basename(file_path)} ({file_size} bytes)")
+                    else:
+                        logger.debug(f"Temporary file already removed: {os.path.basename(file_path)}")
                 except Exception as e:
-                    logger.warning(f"Could not clean up temporary file {file_path}: {e}")
+                    logger.warning(f"Could not clean up temporary file {os.path.basename(file_path)}: {e}")
+              
+                    try:
+                        await asyncio.sleep(0.1)
+                        if os.path.exists(file_path):
+                            os.unlink(file_path)
+                            logger.debug(f"Cleaned up temporary file on retry: {os.path.basename(file_path)}")
+                    except Exception as e2:
+                        logger.error(f"Failed to clean up temporary file even on retry: {e2}")
 
     async def download_and_store_file(
         self,

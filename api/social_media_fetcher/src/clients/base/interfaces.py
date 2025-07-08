@@ -15,11 +15,12 @@ except ImportError:
 class SocialMediaClient(ABC):
     """Abstract base class for social media clients."""
 
-    def __init__(self, name: str, client_type: str, auto_sync_enabled: bool = True):
+    def __init__(self, name: str, client_type: str, auto_sync_enabled: bool = True, auto_register_sources: bool = False):
         """Initialize the client with a name and type."""
         self.name = name
         self.client_type = client_type
         self.auto_sync_enabled = auto_sync_enabled
+        self.auto_register_sources = auto_register_sources
         self._initialized = False
 
     @property
@@ -70,6 +71,17 @@ class SocialMediaClient(ABC):
             The extracted source ID or None if extraction failed
         """
         pass
+
+    def get_default_sources(self) -> List[Dict[str, Any]]:
+        """
+        Get default sources that should be automatically registered for this client.
+        
+        Override this method in subclasses that need automatic source registration.
+        
+        Returns:
+            List of source dictionaries with keys: source_id, source_name, description, category
+        """
+        return []
 
     @abstractmethod
     async def fetch_raw_data(
@@ -149,5 +161,6 @@ class SocialMediaClient(ABC):
             f"name='{self.name}', "
             f"client_type='{self.client_type}', "
             f"auto_sync_enabled={self.auto_sync_enabled}, "
+            f"auto_register_sources={self.auto_register_sources}, "
             f"initialized={self._initialized})"
         ) 
