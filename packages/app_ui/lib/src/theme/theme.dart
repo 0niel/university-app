@@ -71,7 +71,7 @@ class AppTheme {
       brightness: Brightness.light,
       side: BorderSide(color: AppColors.light.borderLight, width: 0.5),
     ),
-    cardTheme: CardTheme(
+    cardTheme: CardThemeData(
       color: AppColors.light.surface,
       elevation: 0,
       margin: EdgeInsets.zero,
@@ -223,7 +223,7 @@ class AppTheme {
         (states) => states.contains(WidgetState.selected) ? AppColors.light.primary : AppColors.light.deactive,
       ),
     ),
-    tabBarTheme: TabBarTheme(
+    tabBarTheme: TabBarThemeData(
       labelColor: AppColors.light.primary,
       unselectedLabelColor: AppColors.light.deactive,
       indicatorSize: TabBarIndicatorSize.tab,
@@ -237,7 +237,7 @@ class AppTheme {
       overlayColor: WidgetStateProperty.all(AppColors.light.primary.withOpacity(0.08)),
       dividerColor: AppColors.light.divider,
     ),
-    dialogTheme: DialogTheme(
+    dialogTheme: DialogThemeData(
       backgroundColor: AppColors.light.surfaceHigh,
       elevation: 0,
       shape: RoundedRectangleBorder(
@@ -361,7 +361,7 @@ class AppTheme {
       brightness: Brightness.dark,
       side: BorderSide(color: AppColors.dark.borderLight, width: 0.5),
     ),
-    cardTheme: CardTheme(
+    cardTheme: CardThemeData(
       color: AppColors.dark.surface,
       elevation: 0,
       margin: EdgeInsets.zero,
@@ -513,7 +513,7 @@ class AppTheme {
         (states) => states.contains(WidgetState.selected) ? AppColors.dark.primary : AppColors.dark.deactive,
       ),
     ),
-    tabBarTheme: TabBarTheme(
+    tabBarTheme: TabBarThemeData(
       labelColor: AppColors.dark.primary,
       unselectedLabelColor: AppColors.dark.deactive,
       indicatorSize: TabBarIndicatorSize.tab,
@@ -527,7 +527,7 @@ class AppTheme {
       overlayColor: WidgetStateProperty.all(AppColors.dark.primary.withOpacity(0.08)),
       dividerColor: AppColors.dark.divider,
     ),
-    dialogTheme: DialogTheme(
+    dialogTheme: DialogThemeData(
       backgroundColor: AppColors.dark.surfaceHigh,
       elevation: 0,
       shape: RoundedRectangleBorder(
@@ -628,6 +628,112 @@ class AppTheme {
       case AppThemeType.dark:
         return darkTheme;
     }
+  }
+
+  /// Generate a dynamic theme based on custom colors
+  static ThemeData generateTheme(AppColors colors, Brightness brightness) {
+    final baseTheme = brightness == Brightness.light ? lightTheme : darkTheme;
+
+    return baseTheme.copyWith(
+      extensions: <ThemeExtension<dynamic>>[colors],
+      textTheme: baseTheme.textTheme.apply(
+        bodyColor: colors.active,
+        displayColor: colors.active,
+      ),
+      textButtonTheme: TextButtonThemeData(
+        style: ButtonStyle(
+          textStyle: WidgetStateProperty.all(
+            AppTextStyle.buttonS.copyWith(color: colors.accent),
+          ),
+          overlayColor: WidgetStateProperty.all(colors.accent.withOpacity(0.08)),
+          padding: WidgetStateProperty.all(
+            const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+          ),
+        ),
+      ),
+      scaffoldBackgroundColor: colors.background01,
+      appBarTheme: AppBarTheme(
+        elevation: 0,
+        surfaceTintColor: Colors.transparent,
+        titleSpacing: 24,
+        backgroundColor: colors.background01,
+        shadowColor: Colors.transparent,
+        titleTextStyle: AppTextStyle.title.copyWith(
+          color: colors.active,
+          fontWeight: FontWeight.w600,
+        ),
+        iconTheme: IconThemeData(color: colors.active),
+        centerTitle: false,
+      ),
+      bottomNavigationBarTheme: BottomNavigationBarThemeData(
+        type: BottomNavigationBarType.fixed,
+        backgroundColor: colors.surfaceHigh,
+        selectedItemColor: colors.primary,
+        unselectedItemColor: colors.deactive,
+        selectedLabelStyle: AppTextStyle.captionL.copyWith(fontWeight: FontWeight.w600),
+        unselectedLabelStyle: AppTextStyle.captionS,
+        elevation: 0,
+      ),
+      colorScheme: ColorScheme(
+        brightness: brightness,
+        primary: colors.primary,
+        secondary: colors.secondary,
+        surface: colors.surface,
+        error: colors.error,
+        onPrimary: colors.white,
+        onSecondary: colors.white,
+        onSurface: colors.onSurface,
+        onError: colors.white,
+        surfaceTint: Colors.transparent,
+        tertiary: colors.accent,
+      ),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ButtonStyle(
+          foregroundColor: WidgetStateProperty.all(colors.white),
+          backgroundColor: WidgetStateProperty.all(colors.primary),
+          elevation: WidgetStateProperty.all(0),
+          shape: WidgetStateProperty.all<RoundedRectangleBorder>(
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(_buttonRadius)),
+          ),
+          textStyle: WidgetStateProperty.all(
+            AppTextStyle.buttonS.copyWith(
+              color: colors.white,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          padding: WidgetStateProperty.all(
+            const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+          ),
+          overlayColor: WidgetStateProperty.all(colors.white.withOpacity(0.1)),
+        ),
+      ),
+      switchTheme: SwitchThemeData(
+        thumbColor: WidgetStateProperty.resolveWith<Color>(
+          (states) => states.contains(WidgetState.selected) ? colors.primary : colors.deactive.withOpacity(0.5),
+        ),
+        trackColor: WidgetStateProperty.resolveWith<Color>(
+          (states) => states.contains(WidgetState.selected) ? colors.primary.withOpacity(0.3) : colors.surfaceHigh,
+        ),
+        trackOutlineColor: WidgetStateProperty.resolveWith<Color>(
+          (states) => states.contains(WidgetState.selected) ? Colors.transparent : colors.borderLight,
+        ),
+        trackOutlineWidth: WidgetStateProperty.all(1),
+      ),
+      tabBarTheme: TabBarThemeData(
+        labelColor: colors.primary,
+        unselectedLabelColor: colors.deactive,
+        indicatorSize: TabBarIndicatorSize.tab,
+        indicator: BoxDecoration(
+          border: Border(
+            bottom: BorderSide(color: colors.primary, width: 2),
+          ),
+        ),
+        labelStyle: AppTextStyle.bodyBold,
+        unselectedLabelStyle: AppTextStyle.body,
+        overlayColor: WidgetStateProperty.all(colors.primary.withOpacity(0.08)),
+        dividerColor: colors.divider,
+      ),
+    );
   }
 
   // Utility functions for common UI elements
