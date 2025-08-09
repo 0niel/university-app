@@ -13,10 +13,9 @@ from .media_storage import MediaStorage
 
 try:
     from .news_blocks.models import NewsBlock
-    from .news_blocks.social_media_adapter import adapter_registry
-
+    from .news_blocks.adapters.registry import adapter_registry
     BLOCKS_AVAILABLE = True
-except ImportError:
+except Exception:
     BLOCKS_AVAILABLE = False
     NewsBlock = None
     adapter_registry = None
@@ -67,11 +66,17 @@ class SupabaseNewsClient:
         self.client: Optional[Client] = None
         self.media_storage: Optional[MediaStorage] = None
 
-        self.supabase_url = os.getenv("SUPABASE_URL")
-        self.supabase_key = os.getenv("SUPABASE_SERVICE_KEY")
+        # Prefer settings (loaded from .env via pydantic-settings),
+        # fall back to OS env vars if not set there
+        self.supabase_url = (
+            self.settings.SUPABASE_URL or os.getenv("SUPABASE_URL")
+        )
+        self.supabase_key = (
+            self.settings.SUPABASE_SERVICE_KEY or os.getenv("SUPABASE_SERVICE_KEY")
+        )
 
         if not self.supabase_url or not self.supabase_key:
-            logger.warning("Supabase credentials not found in environment")
+            logger.warning("Supabase credentials not found (settings/env)")
 
     async def initialize(self):
         """Initialize the Supabase client."""
@@ -183,6 +188,7 @@ class SupabaseNewsClient:
                             block_data[k] = v.isoformat()
                 block_data = fix_block_strings(block_data)
 
+                # Upload Telegram media by file_id and also upload external HTTP media into Supabase
                 for media_field, media_type in [
                     ("image_url", "image"),
                     ("imageUrl", "image"),
@@ -190,21 +196,33 @@ class SupabaseNewsClient:
                     ("videoUrl", "video"),
                 ]:
                     url_val = block_data.get(media_field)
-                    if url_val and not str(url_val).startswith("http"):
-                        media_to_download = media_map.get(str(url_val))
-                        if media_to_download:
-                            stored = await self.media_storage.download_and_store_file(
-                                media_to_download,
-                                media_type,
-                                {"source_type": source_type, "source_id": source_id},
-                                telegram_client=social_media_client,
-                            )
-                            if stored:
-                                block_data[media_field] = stored
-                        else:
-                            logger.warning(
-                                f"Media object not found in pre-fetched map for ID: {url_val}"
-                            )
+                    if not url_val:
+                        continue
+
+                    url_str = str(url_val)
+                    is_http = url_str.startswith("http://") or url_str.startswith("https://") or url_str.startswith("//")
+
+                    if not is_http and social_media_client:
+                        # Delegate platform media resolution to the platform client
+                        uploaded = await social_media_client.upload_platform_media(
+                            source_id=source_id,
+                            external_id=external_id,
+                            media_identifier=url_str,
+                            media_type=media_type,
+                            storage=self.media_storage,
+                            source_info={"source_type": source_type, "source_id": source_id},
+                        )
+                        if uploaded:
+                            block_data[media_field] = uploaded
+                    else:
+                        # External HTTP(S) URL -> download and re-host in Supabase
+                        stored = await self.media_storage.download_and_store_file(
+                            url_str,
+                            media_type,
+                            {"source_type": source_type, "source_id": source_id},
+                        )
+                        if stored:
+                            block_data[media_field] = stored
 
                 news_blocks_json.append(block_data)
 

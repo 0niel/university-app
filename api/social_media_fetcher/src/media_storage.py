@@ -52,10 +52,10 @@ class MediaStorage:
         
         try:
             buckets = self.supabase.storage.list_buckets()
-            self._bucket_id_cache = {b.name: b.id for b in buckets}
-            logger.info(f"Successfully cached bucket IDs: {list(self._bucket_id_cache.keys())}")
+
+            self._bucket_id_cache = {b.name: b.name for b in buckets}
+            logger.info(f"Successfully cached buckets: {list(self._bucket_id_cache.keys())}")
             
-            # Verify that required buckets are in the cache
             required_buckets = [self.images_bucket_name, self.videos_bucket_name, self.documents_bucket_name]
             for bucket_name in required_buckets:
                 if bucket_name not in self._bucket_id_cache:
@@ -68,8 +68,8 @@ class MediaStorage:
             )
 
     def _get_bucket_id(self, bucket_name: str) -> Optional[str]:
-        """Get bucket ID from cache by its name."""
-        return self._bucket_id_cache.get(bucket_name)
+        """Get bucket identifier. We use bucket names directly with Supabase SDK."""
+        return bucket_name
 
     def _get_bucket_name_for_type(self, file_type: str) -> str:
         """Get the appropriate bucket name for file type."""
@@ -141,10 +141,6 @@ class MediaStorage:
 
             bucket_name = self._get_bucket_name_for_type(file_type)
             bucket_id = self._get_bucket_id(bucket_name)
-
-            if not bucket_id:
-                logger.error(f"Bucket '{bucket_name}' not found or is not accessible. Cannot upload file.")
-                return None
 
             file_path_storage = self._generate_file_path(
                 file_path, file_type, content_type, source_info
@@ -240,10 +236,6 @@ class MediaStorage:
 
             bucket_name = self._get_bucket_name_for_type(file_type)
             bucket_id = self._get_bucket_id(bucket_name)
-
-            if not bucket_id:
-                logger.error(f"Bucket '{bucket_name}' not found or is not accessible. Cannot upload file.")
-                return None
 
             file_path = self._generate_file_path(
                 url, file_type, content_type, source_info

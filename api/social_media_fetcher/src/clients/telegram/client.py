@@ -23,9 +23,9 @@ from .models import TelegramChannelInfo, TelegramMedia, TelegramMessage
 # Import news blocks models
 try:
     from ...news_blocks.models import NewsBlock
-    from ...news_blocks.social_media_adapter import TelegramToNewsBlocksAdapter
+    from ...news_blocks.adapters.telegram_adapter import TelegramToNewsBlocksAdapter
     BLOCKS_AVAILABLE = True
-except ImportError:
+except Exception:
     BLOCKS_AVAILABLE = False
     NewsBlock = None
     TelegramToNewsBlocksAdapter = None
@@ -179,6 +179,49 @@ class TelegramFetcher(SocialMediaClient):
             logger.error(f"Error fetching raw data from {source_id}: {e}")
             return []
 
+    async def upload_platform_media(
+        self,
+        *,
+        source_id: str,
+        external_id: str,
+        media_identifier: str,
+        media_type: str,
+        storage: "MediaStorage",
+        source_info: Dict[str, Any],
+    ) -> Optional[str]:
+        """Download Telegram media by file_id and upload to storage.
+
+        media_identifier is a Telegram file_id we earlier embedded in blocks.
+        """
+        try:
+            if not self._initialized or not self.client:
+                return None
+
+            # Try to fetch the message by id to reconstruct media object
+            message = await self.client.get_messages(source_id, ids=int(external_id))
+            if not message or not message.media:
+                return None
+
+            # Map file id to actual media object from message
+            # Handle photo
+            if hasattr(message.media, "photo") and message.media.photo:
+                if str(message.media.photo.id) == media_identifier:
+                    return await storage.download_and_store_file(
+                        message.media, media_type, source_info, telegram_client=self
+                    )
+
+            # Handle document (video/gif)
+            if hasattr(message.media, "document") and message.media.document:
+                if str(message.media.document.id) == media_identifier:
+                    return await storage.download_and_store_file(
+                        message.media, media_type, source_info, telegram_client=self
+                    )
+
+            return None
+        except Exception as e:
+            logger.warning(f"Failed Telegram media upload for {source_id}/{external_id}: {e}")
+            return None
+
     async def get_channel_messages_with_groups(
         self, username: str, limit: int = 20, offset_id: int = 0
     ) -> List[List[TelegramMessage]]:
@@ -274,7 +317,8 @@ class TelegramFetcher(SocialMediaClient):
             
             total_media = len(photo_file_ids) + len(video_file_ids)
             is_story = total_media > 1
-            is_circles = total_media >= 3  # 3+ media items could be "circles" style content
+            # Do not infer Telegram "circles" from count; requires explicit signal. Keep false.
+            is_circles = False
             
             raw_data = {
                 'id': primary_message.id,

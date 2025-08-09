@@ -150,6 +150,23 @@ class SocialMediaClient(ABC):
         """
         pass
 
+    async def upload_platform_media(
+        self,
+        *,
+        source_id: str,
+        external_id: str,
+        media_identifier: str,
+        media_type: str,
+        storage: "MediaStorage",
+        source_info: Dict[str, Any],
+    ) -> Optional[str]:
+        """Upload platform-specific media and return a public URL.
+
+        Default implementation returns None. Clients that support platform media
+        resolution (e.g., Telegram) should override this.
+        """
+        return None
+
     def __str__(self) -> str:
         """String representation of the client."""
         return f"{self.name} ({self.client_type})"

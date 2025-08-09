@@ -14,9 +14,9 @@ from .models import VKGroupInfo as VKGroup, VKPost
 # Import news blocks models
 try:
     from ...news_blocks.models import NewsBlock
-    from ...news_blocks.social_media_adapter import VKToNewsBlocksAdapter
+    from ...news_blocks.adapters.vk_adapter import VKToNewsBlocksAdapter
     BLOCKS_AVAILABLE = True
-except ImportError:
+except Exception:
     BLOCKS_AVAILABLE = False
     NewsBlock = None
     VKToNewsBlocksAdapter = None
