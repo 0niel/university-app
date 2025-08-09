@@ -3,8 +3,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:rtu_mirea_app/article/view/article_page.dart';
 import 'package:rtu_mirea_app/discourse_post_overview/view/view.dart';
-import 'package:rtu_mirea_app/domain/entities/news_item.dart';
+
 import 'package:rtu_mirea_app/domain/entities/story.dart';
 import 'package:rtu_mirea_app/home/view/home_page.dart';
 import 'package:rtu_mirea_app/lost_and_found/lost_and_found.dart';
@@ -12,8 +13,7 @@ import 'package:rtu_mirea_app/map/view/map_page_view.dart';
 import 'package:rtu_mirea_app/nfc_pass/view/nfc_pass_page_view.dart';
 import 'package:rtu_mirea_app/presentation/pages/profile/notifications_settings_page.dart';
 import 'package:rtu_mirea_app/navigation/view/scaffold_navigation_shell.dart';
-import 'package:rtu_mirea_app/presentation/pages/news/news_details_page.dart';
-import 'package:rtu_mirea_app/presentation/pages/news/news_page.dart';
+import 'package:rtu_mirea_app/feed/feed.dart';
 import 'package:rtu_mirea_app/onboarding/view/onboarding_page.dart';
 import 'package:rtu_mirea_app/presentation/pages/profile/about_app_page.dart';
 import 'package:rtu_mirea_app/presentation/pages/profile/profile_announces_page.dart';
@@ -32,25 +32,14 @@ import 'package:rtu_mirea_app/splash_video/splash_video.dart';
 import 'package:rtu_mirea_app/stories/stories.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:university_app_server_api/client.dart';
-import 'package:neon_framework/src/router.dart' as neon;
 import 'package:url_launcher/url_launcher_string.dart';
 
 final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'root');
-final GlobalKey<NavigatorState> _newsNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'news');
+final GlobalKey<NavigatorState> _feedNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'feed');
 final GlobalKey<NavigatorState> _scheduleNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'schedule');
 final GlobalKey<NavigatorState> _servicesNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'services');
 final GlobalKey<NavigatorState> _profileNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'profile');
 final GlobalKey<NavigatorState> _infoNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'info');
-
-String _getNeonPathInCurrentRouter(String neonRouterPath) {
-  if (neonRouterPath.startsWith('/') && neonRouterPath.length > 1) {
-    return 'neon$neonRouterPath';
-  } else if (neonRouterPath.startsWith('/') && neonRouterPath.length == 1) {
-    return 'neon';
-  } else {
-    return neonRouterPath;
-  }
-}
 
 GoRouter createRouter() => GoRouter(
   navigatorKey: _rootNavigatorKey,
@@ -65,23 +54,13 @@ GoRouter createRouter() => GoRouter(
       return '/splash-video';
     }
 
-    if (state.matchedLocation.contains('neon')) {
-      // ignore: invalid_use_of_visible_for_testing_member
-      final redirectPath = neon.redirect(context, state);
-      if (redirectPath != null) {
-        final pathInCurrentRouter = _getNeonPathInCurrentRouter(redirectPath);
-        return '/services/$pathInCurrentRouter';
-      } else if (state.matchedLocation.startsWith('neon')) {
-        return '/services/${state.uri}';
-      }
-    }
     if (state.uri.scheme == 'http' || state.uri.scheme == 'https') {
       launchUrlString(state.uri.toString());
     }
     return null;
   },
   routes: [
-    GoRoute(path: '/', redirect: (_, __) => '/schedule'),
+    GoRoute(path: '/', redirect: (_, __) => '/feed'),
     GoRoute(
       path: '/splash-video',
       builder: (context, state) {
@@ -102,20 +81,26 @@ GoRouter createRouter() => GoRouter(
               ScaffoldNavigationShell(navigationShell: navigationShell),
       branches: [
         StatefulShellBranch(
-          navigatorKey: _newsNavigatorKey,
+          navigatorKey: _feedNavigatorKey,
           routes: [
             GoRoute(
-              path: '/news',
-              builder: (context, state) => const NewsPage(),
+              path: '/feed',
+              builder: (context, state) => const FeedView(),
               routes: [
                 GoRoute(
-                  path: 'details',
-                  builder: (context, state) => NewsDetailsPage(newsItem: state.extra as NewsItem),
-                  redirect: (context, state) {
-                    if (state.extra == null) {
-                      return '/news';
-                    }
-                    return null;
+                  path: 'article/:articleId',
+                  builder: (context, state) {
+                    final articleId = state.pathParameters['articleId'] ?? '';
+                    final isVideoArticle = state.uri.queryParameters['isVideo'] == 'true';
+                    final interstitialAdBehavior =
+                        state.uri.queryParameters['adBehavior'] == 'onClose'
+                            ? InterstitialAdBehavior.onClose
+                            : InterstitialAdBehavior.onOpen;
+                    return ArticlePage(
+                      id: articleId,
+                      isVideoArticle: isVideoArticle,
+                      interstitialAdBehavior: interstitialAdBehavior,
+                    );
                   },
                 ),
               ],
@@ -175,40 +160,6 @@ GoRouter createRouter() => GoRouter(
                   ],
                 ),
                 GoRoute(path: 'lost-and-found', builder: (context, state) => const LostFoundPage()),
-                ...neon.$appRoutes.map((route) {
-                  if (route is GoRoute) {
-                    return GoRoute(
-                      path: _getNeonPathInCurrentRouter(route.path),
-                      name: route.name,
-                      builder:
-                          route.builder != null
-                              ? (context, state) {
-                                final theme = Theme.of(context).copyWith(
-                                  listTileTheme: ListTileThemeData(
-                                    tileColor: Colors.transparent,
-                                    contentPadding: const EdgeInsets.symmetric(horizontal: 24),
-                                    leadingAndTrailingTextStyle: AppTextStyle.chip.copyWith(
-                                      color: Theme.of(context).extension<AppColors>()!.active,
-                                    ),
-                                    titleTextStyle: AppTextStyle.titleM.copyWith(
-                                      color: Theme.of(context).extension<AppColors>()!.active,
-                                    ),
-                                    subtitleTextStyle: AppTextStyle.chip.copyWith(
-                                      color: Theme.of(context).extension<AppColors>()!.deactive,
-                                    ),
-                                  ),
-                                );
-                                return Theme(data: theme, child: route.builder!(context, state));
-                              }
-                              : null,
-                      redirect: route.redirect,
-                      routes: route.routes,
-                      pageBuilder: route.pageBuilder,
-                      parentNavigatorKey: route.parentNavigatorKey,
-                    );
-                  }
-                  return route;
-                }),
               ],
             ),
           ],

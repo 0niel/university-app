@@ -8,9 +8,9 @@ environment:
 
 dependencies:
   equatable: ^2.0.3
+  intl: ^0.20.2
   json_annotation: ^4.6.0
   meta: ^1.7.0
-  intl: ^0.18.0
 
 dev_dependencies:
   build_runner: ^2.0.0

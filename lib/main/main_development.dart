@@ -1,3 +1,4 @@
+import 'package:article_repository/article_repository.dart';
 import 'package:community_repository/community_repository.dart';
 import 'package:deep_link_client/deep_link_client.dart';
 import 'package:discourse_api_client/discourse_api_client.dart';
@@ -6,21 +7,18 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:logger/logger.dart';
 import 'package:lost_and_found_repository/lost_and_found_repository.dart';
+import 'package:news_repository/news_repository.dart';
 import 'package:nfc_pass_repository/nfc_pass_repository.dart';
 import 'package:package_info_client/package_info_client.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:persistent_storage/persistent_storage.dart';
 import 'package:rtu_mirea_app/app/app.dart';
 import 'package:rtu_mirea_app/common/utils/logger.dart';
-import 'package:rtu_mirea_app/data/datasources/news_remote.dart';
-import 'package:rtu_mirea_app/data/repositories/news_repository_impl.dart';
 import 'package:rtu_mirea_app/env/env.dart';
 import 'package:rtu_mirea_app/main/bootstrap/bootstrap.dart';
-import 'package:rtu_mirea_app/neon/neon.dart';
 import 'package:schedule_exporter_repository/schedule_exporter_repository.dart';
 import 'package:schedule_repository/schedule_repository.dart' as schedule_repository;
 import 'package:secure_storage/secure_storage.dart';
-import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:supabase_authentication_client/supabase_authentication_client.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:token_storage/token_storage.dart';
@@ -49,7 +47,7 @@ void main() async {
     final authClient = supabase.client.auth;
 
     // Initialize API clients
-    final apiClient = ApiClient(
+    final apiClient = ApiClient.localhostFromEmulator(
       tokenProvider: () async {
         final session = authClient.currentSession;
         return session?.accessToken;
@@ -90,21 +88,11 @@ void main() async {
     final scheduleExporterRepository = ScheduleExporterRepository();
     final communityRepository = CommunityRepository(apiClient: apiClient);
     final discourseRepository = DiscourseRepository(apiClient: discourseApiClient);
-    final newsRepository = NewsRepositoryImpl(remoteDataSource: NewsRemoteDataImpl());
+    final newsRepository = NewsRepository(apiClient: apiClient);
+    final articleStorage = ArticleStorage(storage: secureStorage);
+    final articleRepository = ArticleRepository(apiClient: apiClient, storage: articleStorage);
     final nfcPassRepository = NfcPassRepository(storage: secureStorage);
     final lostFoundRepository = LostFoundRepository(apiClient: apiClient);
-
-    // Initialize Neon dependencies for mobile platforms
-    NeonDependencies? neonDependencies;
-    if (!kIsWeb) {
-      try {
-        neonDependencies = await initializeNeonDependencies(appImplementations: appImplementations, theme: neonTheme);
-      } catch (e, stackTrace) {
-        Logger().e('Neon dependencies initialization failed: $e');
-        Logger().e(stackTrace);
-        Sentry.captureException(e, stackTrace: stackTrace);
-      }
-    }
 
     if (kDebugMode) {
       Logger().i('Running in development mode');
@@ -115,8 +103,8 @@ void main() async {
       scheduleRepository: scheduleRepository,
       communityRepository: communityRepository,
       discourseRepository: discourseRepository,
-      neonDependencies: neonDependencies,
       newsRepository: newsRepository,
+      articleRepository: articleRepository,
       scheduleExporterRepository: scheduleExporterRepository,
       nfcPassRepository: nfcPassRepository,
       lostFoundRepository: lostFoundRepository,

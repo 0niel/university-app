@@ -1,5 +1,6 @@
 import 'package:ads_ui/ads_ui.dart';
 import 'package:analytics_repository/analytics_repository.dart';
+import 'package:article_repository/article_repository.dart';
 import 'package:community_repository/community_repository.dart';
 import 'package:discourse_repository/discourse_repository.dart' hide User;
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -11,17 +12,16 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lost_and_found_repository/lost_and_found_repository.dart';
 import 'package:nfc_pass_repository/nfc_pass_repository.dart';
+import 'package:news_repository/news_repository.dart';
 import 'package:platform/platform.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:rtu_mirea_app/ads/bloc/ads_bloc.dart';
 import 'package:rtu_mirea_app/ads/bloc/full_screen_ads_bloc.dart';
 import 'package:rtu_mirea_app/app/app.dart';
-import 'package:rtu_mirea_app/domain/repositories/news_repository.dart';
-import 'package:rtu_mirea_app/domain/usecases/get_news.dart';
-import 'package:rtu_mirea_app/domain/usecases/get_news_tags.dart';
+import 'package:rtu_mirea_app/categories/categories.dart';
+import 'package:rtu_mirea_app/feed/feed.dart';
 import 'package:rtu_mirea_app/lost_and_found/lost_and_found.dart';
 import 'package:rtu_mirea_app/navigation/navigation.dart';
-import 'package:rtu_mirea_app/neon/neon.dart';
 import 'package:rtu_mirea_app/nfc_pass/bloc/nfc_pass_cubit.dart';
 import 'package:rtu_mirea_app/schedule_management/bloc/schedule_exporter_cubit.dart';
 import 'package:schedule_exporter_repository/schedule_exporter_repository.dart';
@@ -33,15 +33,13 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:rtu_mirea_app/data/repositories/stories_repository_impl.dart';
 import 'package:rtu_mirea_app/home/cubit/home_cubit.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
+import 'package:rtu_mirea_app/app/theme/cubit/theme_cubit.dart';
+import 'package:rtu_mirea_app/app/theme/cubit/theme_state.dart';
 
-import 'package:rtu_mirea_app/presentation/bloc/news_bloc/news_bloc.dart';
-
-import 'package:app_ui/app_ui.dart';
 import 'package:rtu_mirea_app/schedule/bloc/schedule_bloc.dart';
 import 'package:rtu_mirea_app/stories/bloc/stories_bloc.dart';
 
 import 'package:adaptive_theme/adaptive_theme.dart';
-import 'package:neon_framework/l10n/localizations.dart' as neon_localizations;
 import 'package:user_repository/user_repository.dart';
 import 'package:yandex_mobileads/mobile_ads.dart';
 import 'package:syncfusion_localizations/syncfusion_localizations.dart';
@@ -85,8 +83,8 @@ class App extends StatelessWidget {
     required CommunityRepository communityRepository,
     required DiscourseRepository discourseRepository,
     required NewsRepository newsRepository,
+    required ArticleRepository articleRepository,
     required ScheduleExporterRepository scheduleExporterRepository,
-    required NeonDependencies? neonDependencies,
     required NfcPassRepository nfcPassRepository,
     required LostFoundRepository lostFoundRepository,
     required UserRepository userRepository,
@@ -97,8 +95,8 @@ class App extends StatelessWidget {
        _communityRepository = communityRepository,
        _discourseRepository = discourseRepository,
        _newsRepository = newsRepository,
+       _articleRepository = articleRepository,
        _scheduleExporterRepository = scheduleExporterRepository,
-       _neonDependencies = neonDependencies,
        _nfcPassRepository = nfcPassRepository,
        _userRepository = userRepository,
        _lostFoundRepository = lostFoundRepository,
@@ -110,8 +108,8 @@ class App extends StatelessWidget {
   final CommunityRepository _communityRepository;
   final DiscourseRepository _discourseRepository;
   final NewsRepository _newsRepository;
+  final ArticleRepository _articleRepository;
   final ScheduleExporterRepository _scheduleExporterRepository;
-  final NeonDependencies? _neonDependencies;
   final NfcPassRepository _nfcPassRepository;
   final LostFoundRepository _lostFoundRepository;
   final UserRepository _userRepository;
@@ -126,6 +124,8 @@ class App extends StatelessWidget {
         RepositoryProvider.value(value: _scheduleRepository),
         RepositoryProvider.value(value: _communityRepository),
         RepositoryProvider.value(value: _discourseRepository),
+        RepositoryProvider.value(value: _newsRepository),
+        RepositoryProvider.value(value: _articleRepository),
         RepositoryProvider.value(value: _scheduleExporterRepository),
         RepositoryProvider.value(value: _nfcPassRepository),
         RepositoryProvider.value(value: _lostFoundRepository),
@@ -135,9 +135,13 @@ class App extends StatelessWidget {
       child: MultiBlocProvider(
         providers: [
           BlocProvider(create: (_) => HomeCubit()),
+          BlocProvider(create: (_) => ThemeCubit()),
           BlocProvider(
-            create: (context) => NewsBloc(getNews: GetNews(_newsRepository), getNewsTags: GetNewsTags(_newsRepository)),
+            create:
+                (context) =>
+                    CategoriesBloc(newsRepository: context.read<NewsRepository>())..add(const CategoriesRequested()),
           ),
+          BlocProvider(create: (context) => FeedBloc(newsRepository: context.read<NewsRepository>())),
           BlocProvider(create: (_) => AdsBloc()),
           BlocProvider(create: (_) => ScheduleExporterCubit(_scheduleExporterRepository)),
           BlocProvider(
@@ -184,16 +188,14 @@ class App extends StatelessWidget {
                 ),
           ),
         ],
-        child: _AppView(neonDependencies: _neonDependencies),
+        child: _AppView(),
       ),
     );
   }
 }
 
 class _AppView extends StatefulWidget {
-  const _AppView({this.neonDependencies});
-
-  final NeonDependencies? neonDependencies;
+  const _AppView();
 
   @override
   State<_AppView> createState() => _AppViewState();
@@ -201,24 +203,15 @@ class _AppView extends StatefulWidget {
 
 class _AppViewState extends State<_AppView> {
   late final GoRouter _router;
-  late final List<LocalizationsDelegate<dynamic>> _neonLocalizationsDelegates;
 
   @override
   void initState() {
     super.initState();
     _router = createRouter();
-    _neonLocalizationsDelegates = _buildNeonLocalizationsDelegates();
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       FlutterNativeSplash.remove();
     });
-  }
-
-  List<LocalizationsDelegate<dynamic>> _buildNeonLocalizationsDelegates() {
-    return [
-      if (widget.neonDependencies != null)
-        ...widget.neonDependencies!.appImplementations.map((app) => app.localizationsDelegate),
-      ...neon_localizations.NeonLocalizations.localizationsDelegates,
-    ];
   }
 
   @override
@@ -227,70 +220,62 @@ class _AppViewState extends State<_AppView> {
       minTextAdapt: true,
       splitScreenMode: true,
       builder: (_, child) {
-        final neonTheme = widget.neonDependencies?.neonTheme;
-        final List<ThemeExtension<dynamic>> lightExtensions = [AppColors.light];
-        final List<ThemeExtension<dynamic>> darkExtensions = [AppColors.dark];
-        if (neonTheme != null) {
-          lightExtensions.insert(0, neonTheme);
-          darkExtensions.insert(0, neonTheme);
-        }
-        final lightTheme = AppTheme.lightTheme.copyWith(extensions: lightExtensions);
-        final darkTheme = AppTheme.darkTheme.copyWith(extensions: darkExtensions);
-        return PlatformProvider(
-          builder:
-              (context) => AdaptiveTheme(
-                light: lightTheme,
-                dark: darkTheme,
-                initial: AdaptiveThemeMode.dark,
-                builder: (theme, darkTheme) {
-                  _configureSystemUI(theme);
+        return BlocBuilder<ThemeCubit, ThemeState>(
+          builder: (context, themeState) {
+            final themeCubit = context.read<ThemeCubit>();
 
-                  return PlatformTheme(
-                    themeMode: theme.brightness == Brightness.light ? ThemeMode.light : ThemeMode.dark,
-                    materialLightTheme: lightTheme,
-                    materialDarkTheme: darkTheme,
-                    cupertinoLightTheme: MaterialBasedCupertinoThemeData(materialTheme: lightTheme),
-                    cupertinoDarkTheme: MaterialBasedCupertinoThemeData(materialTheme: darkTheme),
-                    builder: (context) {
-                      final app = PlatformApp.router(
-                        restorationScopeId: 'app',
-                        localizationsDelegates: [
-                          AppLocalizations.delegate,
-                          GlobalMaterialLocalizations.delegate,
-                          GlobalWidgetsLocalizations.delegate,
-                          GlobalCupertinoLocalizations.delegate,
-                          ..._neonLocalizationsDelegates,
-                          SfGlobalLocalizations.delegate,
-                        ],
-                        supportedLocales: const [Locale('en'), Locale('ru')],
-                        locale: const Locale('ru'),
-                        debugShowCheckedModeBanner: false,
-                        title: 'Приложение РТУ МИРЭА',
-                        routerConfig: _router,
-                        builder:
-                            (context, child) => ResponsiveBreakpoints.builder(
-                              child: child!,
-                              breakpoints: const [
-                                Breakpoint(start: 0, end: 450, name: MOBILE),
-                                Breakpoint(start: 451, end: 800, name: TABLET),
-                                Breakpoint(start: 801, end: 1920, name: DESKTOP),
-                                Breakpoint(start: 1921, end: double.infinity, name: '4K'),
-                              ],
-                            ),
-                      );
+            final lightTheme = themeCubit.getLightTheme();
+            final darkTheme = themeCubit.getDarkTheme();
 
-                      return FirebaseInteractedMessageListener(
-                        child: WatchConnectivityWrapper(
-                          child:
-                              widget.neonDependencies != null
-                                  ? NeonAppProvider(neonDependencies: widget.neonDependencies!, child: app)
-                                  : app,
-                        ),
+            return PlatformProvider(
+              builder:
+                  (context) => AdaptiveTheme(
+                    light: lightTheme,
+                    dark: darkTheme,
+                    initial: AdaptiveThemeMode.dark,
+                    builder: (theme, darkTheme) {
+                      _configureSystemUI(theme);
+
+                      return PlatformTheme(
+                        themeMode: theme.brightness == Brightness.light ? ThemeMode.light : ThemeMode.dark,
+                        materialLightTheme: lightTheme,
+                        materialDarkTheme: darkTheme,
+                        cupertinoLightTheme: MaterialBasedCupertinoThemeData(materialTheme: lightTheme),
+                        cupertinoDarkTheme: MaterialBasedCupertinoThemeData(materialTheme: darkTheme),
+                        builder: (context) {
+                          final app = PlatformApp.router(
+                            restorationScopeId: 'app',
+                            localizationsDelegates: [
+                              AppLocalizations.delegate,
+                              GlobalMaterialLocalizations.delegate,
+                              GlobalWidgetsLocalizations.delegate,
+                              GlobalCupertinoLocalizations.delegate,
+                              SfGlobalLocalizations.delegate,
+                            ],
+                            supportedLocales: const [Locale('en'), Locale('ru')],
+                            locale: const Locale('ru'),
+                            debugShowCheckedModeBanner: false,
+                            title: 'Приложение РТУ МИРЭА',
+                            routerConfig: _router,
+                            builder:
+                                (context, child) => ResponsiveBreakpoints.builder(
+                                  child: child!,
+                                  breakpoints: const [
+                                    Breakpoint(start: 0, end: 450, name: MOBILE),
+                                    Breakpoint(start: 451, end: 800, name: TABLET),
+                                    Breakpoint(start: 801, end: 1920, name: DESKTOP),
+                                    Breakpoint(start: 1921, end: double.infinity, name: '4K'),
+                                  ],
+                                ),
+                          );
+
+                          return FirebaseInteractedMessageListener(child: WatchConnectivityWrapper(child: app));
+                        },
                       );
                     },
-                  );
-                },
-              ),
+                  ),
+            );
+          },
         );
       },
     );

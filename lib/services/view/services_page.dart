@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:rtu_mirea_app/services/services.dart';
 import 'package:rtu_mirea_app/top_discussions/view/view.dart';
-import 'package:rtu_mirea_app/neon/bloc/neon_bloc.dart';
 import 'package:app_ui/app_ui.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 import 'package:flutter_layout_grid/flutter_layout_grid.dart';
@@ -25,7 +23,6 @@ class ServicesView extends StatefulWidget {
 }
 
 class _ServicesViewState extends State<ServicesView> with SingleTickerProviderStateMixin, WidgetsBindingObserver {
-  late final NeonBloc neonBloc;
   late final PageController _pageController;
   late final PageController _bannersPageController;
   Timer? _autoScrollTimer;
@@ -48,7 +45,7 @@ class _ServicesViewState extends State<ServicesView> with SingleTickerProviderSt
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    neonBloc = NeonBloc();
+
     _pageController = PageController();
     _bannersPageController = PageController();
     _bannersPageController.addListener(_syncBannerIndex);
@@ -61,7 +58,7 @@ class _ServicesViewState extends State<ServicesView> with SingleTickerProviderSt
   void didChangeDependencies() {
     super.didChangeDependencies();
     _importantServices = ServicesConfig.getImportantServices(context);
-    _communities = ServicesConfig.getCommunities();
+    _communities = ServicesConfig.getCommunities(context);
     _banners = ServicesConfig.getBanners(context);
     _mainServices = ServicesConfig.getMainServices(context);
     _studentLifeServices = ServicesConfig.getStudentLifeServices(context);
@@ -137,7 +134,6 @@ class _ServicesViewState extends State<ServicesView> with SingleTickerProviderSt
     _bannersPageController.removeListener(_syncBannerIndex);
     _stopAutoScroll();
     _resumeScrollTimer?.cancel();
-    neonBloc.close();
     super.dispose();
   }
 
@@ -150,39 +146,6 @@ class _ServicesViewState extends State<ServicesView> with SingleTickerProviderSt
     if (!_pageController.hasClients) return;
 
     _pageController.animateToPage(index, duration: const Duration(milliseconds: 350), curve: Curves.easeOutQuint);
-  }
-
-  void _showNeonAccountOffer() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      neonBloc.add(const VieweRegisterOffer());
-      BottomModalSheet.show(
-        context,
-        child: Center(
-          child: Column(
-            children: [
-              Icon(Icons.cloud, size: 64, color: Theme.of(context).extension<AppColors>()!.active),
-              const SizedBox(height: AppSpacing.md),
-              Text(
-                'На cloud.mirea.ninja вы можете хранить до 10 ГБ бесплатно (квоту можно расширить в телеграм боте), а также делиться файлами и онлайн редактировать документы вместе с одногруппниками.',
-                style: AppTextStyle.bodyL.copyWith(color: Theme.of(context).extension<AppColors>()!.active),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: AppSpacing.lg),
-              PrimaryButton(
-                onPressed: () {
-                  launchUrlString('https://t.me/cloud_mirea_ninja_bot', mode: LaunchMode.externalApplication);
-                },
-                text: 'Создать аккаунт',
-              ),
-            ],
-          ),
-        ),
-        title: 'Создайте аккаунт',
-        description:
-            'Мы предлагаем вам бесплатно создать аккаунт в нашем облачном хранилище, чтобы вы могли хранить свои файлы и документы!',
-        backgroundColor: Theme.of(context).extension<AppColors>()!.background03,
-      );
-    });
   }
 
   void _syncBannerIndex() {
@@ -240,33 +203,6 @@ class _ServicesViewState extends State<ServicesView> with SingleTickerProviderSt
             itemCount: _importantServices.length,
             itemBuilder: (context, index) {
               final service = _importantServices[index];
-
-              if (service.title == 'Cloud Mirea Ninja') {
-                return BlocBuilder<NeonBloc, NeonState>(
-                  bloc: neonBloc,
-                  builder: (context, state) {
-                    return ServiceCard(
-                      title: service.title,
-                      description: service.description,
-                      onTap: () {
-                        if (state.isRegisterOfferViewed == false) {
-                          _showNeonAccountOffer();
-                        } else {
-                          ServiceUtils.navigateToService(context, service);
-                        }
-                      },
-                      onLongPress: () {
-                        _showNeonAccountOffer();
-                      },
-                      icon: ServiceIcon(
-                        color: service.color,
-                        iconColor: Theme.of(context).extension<AppColors>()!.background01,
-                        icon: service.iconData,
-                      ),
-                    );
-                  },
-                );
-              }
 
               return ServiceCard(
                 title: service.title,
