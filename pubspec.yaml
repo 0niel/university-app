@@ -116,7 +116,7 @@ dependencies:
       ref: master
   flutter_map: ^6.1.0
   envied: ^1.1.1
-  flutter_sticky_header: ^0.6.5
+  flutter_sticky_header: ^0.8.0
   schedule_exporter_repository:
     path: packages/schedule_exporter_repository
   storyly_flutter:
