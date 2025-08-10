@@ -1,7 +1,7 @@
 # Core web framework
 fastapi==0.104.1
 uvicorn[standard]==0.24.0
-jinja2==3.1.2
+jinja2==3.1.6
 
 # Telegram client
 pyrogram==2.0.106
@@ -48,7 +48,7 @@ slowapi==0.1.9
 psutil==5.9.6
 
 # News blocks code generation
-jinja2==3.1.2  # Already included above for FastAPI
+jinja2==3.1.6  # Already included above for FastAPI
 pathlib2==2.3.7; python_version < '3.4'
 
 # Additional dependencies
