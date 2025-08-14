@@ -3,6 +3,7 @@ import 'package:university_app_server_api/api.dart';
 
 Handler middleware(Handler handler) {
   return handler
+      .use(configLoggerProvider())
       .use(corsMiddleware())
       .use(communityDataSourceProvider())
       .use(scheduleDataSourceProvider())

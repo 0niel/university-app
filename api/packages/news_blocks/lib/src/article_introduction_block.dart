@@ -5,8 +5,7 @@ import 'package:news_blocks/news_blocks.dart';
 part 'article_introduction_block.g.dart';
 
 /// {@template article_introduction_block}
-/// A block which represents an article introduction.
-/// https://www.figma.com/file/RajSN6YbRqTuqvdKYtij3b/Google-News-Template-App-v3?node-id=1394%3A51730
+/// A block which represents the introduction of an article.
 /// {@endtemplate}
 @JsonSerializable()
 class ArticleIntroductionBlock with EquatableMixin implements NewsBlock {
@@ -16,9 +15,8 @@ class ArticleIntroductionBlock with EquatableMixin implements NewsBlock {
     required this.author,
     required this.publishedAt,
     required this.title,
-    this.type = ArticleIntroductionBlock.identifier,
     this.imageUrl,
-    this.isPremium = false,
+    this.type = ArticleIntroductionBlock.identifier,
   });
 
   /// Converts a `Map<String, dynamic>`
@@ -43,11 +41,6 @@ class ArticleIntroductionBlock with EquatableMixin implements NewsBlock {
   /// The title of the associated article.
   final String title;
 
-  /// Whether the associated article requires a premium subscription to access.
-  ///
-  /// Defaults to false.
-  final bool isPremium;
-
   @override
   Map<String, dynamic> toJson() => _$ArticleIntroductionBlockToJson(this);
 
@@ -62,6 +55,5 @@ class ArticleIntroductionBlock with EquatableMixin implements NewsBlock {
         publishedAt,
         imageUrl,
         title,
-        isPremium,
       ];
 }

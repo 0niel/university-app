@@ -23,19 +23,9 @@ SlideshowIntroductionBlock _$SlideshowIntroductionBlockFromJson(Map<String, dyna
       fieldKeyMap: const {'coverImageUrl': 'cover_image_url'},
     );
 
-Map<String, dynamic> _$SlideshowIntroductionBlockToJson(SlideshowIntroductionBlock instance) {
-  final val = <String, dynamic>{
-    'title': instance.title,
-    'cover_image_url': instance.coverImageUrl,
-  };
-
-  void writeNotNull(String key, dynamic value) {
-    if (value != null) {
-      val[key] = value;
-    }
-  }
-
-  writeNotNull('action', const BlockActionConverter().toJson(instance.action));
-  val['type'] = instance.type;
-  return val;
-}
+Map<String, dynamic> _$SlideshowIntroductionBlockToJson(SlideshowIntroductionBlock instance) => <String, dynamic>{
+      'title': instance.title,
+      'cover_image_url': instance.coverImageUrl,
+      if (const BlockActionConverter().toJson(instance.action) case final value?) 'action': value,
+      'type': instance.type,
+    };

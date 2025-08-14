@@ -1,4 +1,5 @@
 export 'community_data_source_provider.dart';
+export 'config_logger_provider.dart';
 export 'cors.dart';
 export 'logger_provider.dart';
 export 'lost_and_found_data_source_provider.dart';

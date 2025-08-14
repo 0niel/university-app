@@ -17,36 +17,19 @@ ArticleIntroductionBlock _$ArticleIntroductionBlockFromJson(Map<String, dynamic>
           author: $checkedConvert('author', (v) => v as String),
           publishedAt: $checkedConvert('published_at', (v) => DateTime.parse(v as String)),
           title: $checkedConvert('title', (v) => v as String),
-          type: $checkedConvert('type', (v) => v as String? ?? ArticleIntroductionBlock.identifier),
           imageUrl: $checkedConvert('image_url', (v) => v as String?),
-          isPremium: $checkedConvert('is_premium', (v) => v as bool? ?? false),
+          type: $checkedConvert('type', (v) => v as String? ?? ArticleIntroductionBlock.identifier),
         );
         return val;
       },
-      fieldKeyMap: const {
-        'categoryId': 'category_id',
-        'publishedAt': 'published_at',
-        'imageUrl': 'image_url',
-        'isPremium': 'is_premium'
-      },
+      fieldKeyMap: const {'categoryId': 'category_id', 'publishedAt': 'published_at', 'imageUrl': 'image_url'},
     );
 
-Map<String, dynamic> _$ArticleIntroductionBlockToJson(ArticleIntroductionBlock instance) {
-  final val = <String, dynamic>{
-    'category_id': instance.categoryId,
-    'author': instance.author,
-    'published_at': instance.publishedAt.toIso8601String(),
-  };
-
-  void writeNotNull(String key, dynamic value) {
-    if (value != null) {
-      val[key] = value;
-    }
-  }
-
-  writeNotNull('image_url', instance.imageUrl);
-  val['title'] = instance.title;
-  val['is_premium'] = instance.isPremium;
-  val['type'] = instance.type;
-  return val;
-}
+Map<String, dynamic> _$ArticleIntroductionBlockToJson(ArticleIntroductionBlock instance) => <String, dynamic>{
+      'category_id': instance.categoryId,
+      'author': instance.author,
+      'published_at': instance.publishedAt.toIso8601String(),
+      if (instance.imageUrl case final value?) 'image_url': value,
+      'title': instance.title,
+      'type': instance.type,
+    };

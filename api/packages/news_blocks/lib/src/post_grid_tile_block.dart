@@ -17,13 +17,13 @@ class PostGridTileBlock extends PostBlock {
     required super.categoryId,
     required super.author,
     required super.publishedAt,
-    required String super.imageUrl,
     required super.title,
+    super.imageUrl,
     super.description,
     super.action,
     super.type = PostGridTileBlock.identifier,
-    super.isPremium,
-  }) : super(isContentOverlaid: true);
+    super.isContentOverlaid,
+  });
 
   /// Converts a `Map<String, dynamic>` into a [PostGridTileBlock] instance.
   factory PostGridTileBlock.fromJson(Map<String, dynamic> json) => _$PostGridTileBlockFromJson(json);

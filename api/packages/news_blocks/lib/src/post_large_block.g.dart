@@ -22,7 +22,6 @@ PostLargeBlock _$PostLargeBlockFromJson(Map<String, dynamic> json) => $checkedCr
           description: $checkedConvert('description', (v) => v as String?),
           action: $checkedConvert('action', (v) => const BlockActionConverter().fromJson(v as Map<String, dynamic>?)),
           type: $checkedConvert('type', (v) => v as String? ?? PostLargeBlock.identifier),
-          isPremium: $checkedConvert('is_premium', (v) => v as bool? ?? false),
           isContentOverlaid: $checkedConvert('is_content_overlaid', (v) => v as bool? ?? false),
         );
         return val;
@@ -31,31 +30,19 @@ PostLargeBlock _$PostLargeBlockFromJson(Map<String, dynamic> json) => $checkedCr
         'categoryId': 'category_id',
         'publishedAt': 'published_at',
         'imageUrl': 'image_url',
-        'isPremium': 'is_premium',
         'isContentOverlaid': 'is_content_overlaid'
       },
     );
 
-Map<String, dynamic> _$PostLargeBlockToJson(PostLargeBlock instance) {
-  final val = <String, dynamic>{
-    'id': instance.id,
-    'category_id': instance.categoryId,
-    'author': instance.author,
-    'published_at': instance.publishedAt.toIso8601String(),
-  };
-
-  void writeNotNull(String key, dynamic value) {
-    if (value != null) {
-      val[key] = value;
-    }
-  }
-
-  writeNotNull('image_url', instance.imageUrl);
-  val['title'] = instance.title;
-  writeNotNull('description', instance.description);
-  writeNotNull('action', const BlockActionConverter().toJson(instance.action));
-  val['is_premium'] = instance.isPremium;
-  val['is_content_overlaid'] = instance.isContentOverlaid;
-  val['type'] = instance.type;
-  return val;
-}
+Map<String, dynamic> _$PostLargeBlockToJson(PostLargeBlock instance) => <String, dynamic>{
+      'id': instance.id,
+      'category_id': instance.categoryId,
+      'author': instance.author,
+      'published_at': instance.publishedAt.toIso8601String(),
+      if (instance.imageUrl case final value?) 'image_url': value,
+      'title': instance.title,
+      if (instance.description case final value?) 'description': value,
+      if (const BlockActionConverter().toJson(instance.action) case final value?) 'action': value,
+      'is_content_overlaid': instance.isContentOverlaid,
+      'type': instance.type,
+    };

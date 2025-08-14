@@ -5,7 +5,7 @@ part 'post_small_block.g.dart';
 
 /// {@template post_small_block}
 /// A block which represents a small post block.
-/// https://www.figma.com/file/RajSN6YbRqTuqvdKYtij3b/Google-News-Template-App-v3?node-id=391%3A18585
+/// https://www.figma.com/file/RajSN6YbRqTuqvdKYtij3b/Google-News-Template-App-v3?node-id=391%3A18507
 /// {@endtemplate}
 @JsonSerializable()
 class PostSmallBlock extends PostBlock {
@@ -20,7 +20,7 @@ class PostSmallBlock extends PostBlock {
     super.description,
     super.action,
     super.type = PostSmallBlock.identifier,
-    super.isPremium,
+    super.isContentOverlaid,
   });
 
   /// Converts a `Map<String, dynamic>` into a [PostSmallBlock] instance.

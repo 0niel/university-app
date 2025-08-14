@@ -77,81 +77,6 @@ class ApiClient {
   final http.Client _httpClient;
   final TokenProvider _tokenProvider;
 
-  Future<NewsFeedResponse> getNews({
-    int? limit,
-    int? offset,
-    String? category,
-  }) async {
-    final uri = Uri.parse('$_baseUrl/api/v1/news/').replace(
-      queryParameters: <String, String>{
-        if (limit != null) 'limit': '$limit',
-        if (offset != null) 'offset': '$offset',
-        if (category != null) 'category': category,
-      },
-    );
-    final response = await _httpClient.get(
-      uri,
-      headers: await _getRequestHeaders(),
-    );
-
-    final body = response.json();
-
-    if (response.statusCode != HttpStatus.ok) {
-      throw ApiRequestFailure(
-        body: body,
-        statusCode: response.statusCode,
-      );
-    }
-
-    return NewsFeedResponse.fromJson(body);
-  }
-
-  Future<NewsFeedResponse> getAds({
-    int? limit,
-    int? offset,
-  }) async {
-    final uri = Uri.parse('$_baseUrl/api/v1/news/ads').replace(
-      queryParameters: <String, String>{
-        if (limit != null) 'limit': '$limit',
-        if (offset != null) 'offset': '$offset',
-      },
-    );
-    final response = await _httpClient.get(
-      uri,
-      headers: await _getRequestHeaders(),
-    );
-
-    final body = response.json();
-
-    if (response.statusCode != HttpStatus.ok) {
-      throw ApiRequestFailure(
-        body: body,
-        statusCode: response.statusCode,
-      );
-    }
-
-    return NewsFeedResponse.fromJson(body);
-  }
-
-  Future<CategoriesResponse> getCategories() async {
-    final uri = Uri.parse('$_baseUrl/api/v1/news/categories');
-    final response = await _httpClient.get(
-      uri,
-      headers: await _getRequestHeaders(),
-    );
-
-    final body = response.json();
-
-    if (response.statusCode != HttpStatus.ok) {
-      throw ApiRequestFailure(
-        body: body,
-        statusCode: response.statusCode,
-      );
-    }
-
-    return CategoriesResponse.fromJson(body);
-  }
-
   Future<ContributorsResponse> getContributors() async {
     final uri = Uri.parse('$_baseUrl/api/v1/community/contributors');
 
@@ -605,6 +530,177 @@ class ApiClient {
     }
 
     return SplashVideoResponse.fromJson(body);
+  }
+
+  /// GET /api/v1/articles/<id>
+  /// Requests article content metadata.
+  ///
+  /// Supported parameters:
+  /// * [id] - Article id for which content is requested.
+  /// * [limit] - The number of results to return.
+  /// * [offset] - The (zero-based) offset of the first item
+  /// in the collection to return.
+  /// * [preview] - Whether to return a preview of the article.
+  Future<ArticleResponse> getArticle({
+    required String id,
+    int? limit,
+    int? offset,
+    bool preview = false,
+  }) async {
+    final uri = Uri.parse('$_baseUrl/api/v1/articles/$id').replace(
+      queryParameters: <String, String>{
+        if (limit != null) 'limit': '$limit',
+        if (offset != null) 'offset': '$offset',
+        'preview': '$preview',
+      },
+    );
+    final response = await _httpClient.get(
+      uri,
+      headers: await _getRequestHeaders(),
+    );
+    final body = response.json();
+
+    if (response.statusCode != HttpStatus.ok) {
+      throw ApiRequestFailure(
+        body: body,
+        statusCode: response.statusCode,
+      );
+    }
+
+    return ArticleResponse.fromJson(body);
+  }
+
+  /// GET /api/v1/articles/<id>/related
+  /// Requests related articles.
+  ///
+  /// Supported parameters:
+  /// * [id] - Article id for which related content is requested.
+  /// * [limit] - The number of results to return.
+  /// * [offset] - The (zero-based) offset of the first item
+  /// in the collection to return.
+  Future<RelatedArticlesResponse> getRelatedArticles({
+    required String id,
+    int? limit,
+    int? offset,
+  }) async {
+    final uri = Uri.parse('$_baseUrl/api/v1/articles/$id/related').replace(
+      queryParameters: <String, String>{
+        if (limit != null) 'limit': '$limit',
+        if (offset != null) 'offset': '$offset',
+      },
+    );
+    final response = await _httpClient.get(
+      uri,
+      headers: await _getRequestHeaders(),
+    );
+    final body = response.json();
+
+    if (response.statusCode != HttpStatus.ok) {
+      throw ApiRequestFailure(
+        body: body,
+        statusCode: response.statusCode,
+      );
+    }
+
+    return RelatedArticlesResponse.fromJson(body);
+  }
+
+  /// GET /api/v1/feed
+  /// Requests news feed metadata.
+  ///
+  /// Supported parameters:
+  /// * [categoryId] - The desired id of news category.
+  /// * [limit] - The number of results to return.
+  /// * [offset] - The (zero-based) offset of the first item
+  /// in the collection to return.
+  Future<FeedResponse> getFeed({
+    String? categoryId,
+    int? limit,
+    int? offset,
+  }) async {
+    final uri = Uri.parse('$_baseUrl/api/v1/feed').replace(
+      queryParameters: <String, String>{
+        if (categoryId != null) 'category': categoryId,
+        if (limit != null) 'limit': '$limit',
+        if (offset != null) 'offset': '$offset',
+      },
+    );
+    final response = await _httpClient.get(
+      uri,
+      headers: await _getRequestHeaders(),
+    );
+    final body = response.json();
+
+    if (response.statusCode != HttpStatus.ok) {
+      throw ApiRequestFailure(
+        body: body,
+        statusCode: response.statusCode,
+      );
+    }
+
+    return FeedResponse.fromJson(body);
+  }
+
+  /// GET /api/v1/categories
+  /// Requests the available news categories.
+  Future<CategoriesResponse> getCategories() async {
+    final uri = Uri.parse('$_baseUrl/api/v1/categories');
+    final response = await _httpClient.get(
+      uri,
+      headers: await _getRequestHeaders(),
+    );
+    final body = response.json();
+
+    if (response.statusCode != HttpStatus.ok) {
+      throw ApiRequestFailure(
+        body: body,
+        statusCode: response.statusCode,
+      );
+    }
+
+    return CategoriesResponse.fromJson(body);
+  }
+
+  /// GET /api/v1/search/popular
+  /// Requests current, popular content.
+  Future<PopularSearchResponse> popularSearch() async {
+    final uri = Uri.parse('$_baseUrl/api/v1/search/popular');
+    final response = await _httpClient.get(
+      uri,
+      headers: await _getRequestHeaders(),
+    );
+    final body = response.json();
+
+    if (response.statusCode != HttpStatus.ok) {
+      throw ApiRequestFailure(
+        body: body,
+        statusCode: response.statusCode,
+      );
+    }
+
+    return PopularSearchResponse.fromJson(body);
+  }
+
+  /// GET /api/v1/search/relevant?q=term
+  /// Requests relevant content based on the provided search [term].
+  Future<RelevantSearchResponse> relevantSearch({required String term}) async {
+    final uri = Uri.parse('$_baseUrl/api/v1/search/relevant').replace(
+      queryParameters: <String, String>{'q': term},
+    );
+    final response = await _httpClient.get(
+      uri,
+      headers: await _getRequestHeaders(),
+    );
+    final body = response.json();
+
+    if (response.statusCode != HttpStatus.ok) {
+      throw ApiRequestFailure(
+        body: body,
+        statusCode: response.statusCode,
+      );
+    }
+
+    return RelevantSearchResponse.fromJson(body);
   }
 
   Future<Map<String, String>> _getRequestHeaders() async {

@@ -20,7 +20,6 @@ class PostLargeBlock extends PostBlock {
     super.description,
     super.action,
     super.type = PostLargeBlock.identifier,
-    super.isPremium,
     super.isContentOverlaid,
   });
 

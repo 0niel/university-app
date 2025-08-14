@@ -5,7 +5,7 @@ part 'post_medium_block.g.dart';
 
 /// {@template post_medium_block}
 /// A block which represents a medium post block.
-/// https://www.figma.com/file/RajSN6YbRqTuqvdKYtij3b/Google-News-Template-App-v3?node-id=391%3A18585
+/// https://www.figma.com/file/RajSN6YbRqTuqvdKYtij3b/Google-News-Template-App-v3?node-id=391%3A18542
 /// {@endtemplate}
 @JsonSerializable()
 class PostMediumBlock extends PostBlock {
@@ -20,7 +20,6 @@ class PostMediumBlock extends PostBlock {
     super.description,
     super.action,
     super.type = PostMediumBlock.identifier,
-    super.isPremium,
     super.isContentOverlaid,
   });
 

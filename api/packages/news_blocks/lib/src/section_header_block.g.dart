@@ -21,18 +21,8 @@ SectionHeaderBlock _$SectionHeaderBlockFromJson(Map<String, dynamic> json) => $c
       },
     );
 
-Map<String, dynamic> _$SectionHeaderBlockToJson(SectionHeaderBlock instance) {
-  final val = <String, dynamic>{
-    'title': instance.title,
-  };
-
-  void writeNotNull(String key, dynamic value) {
-    if (value != null) {
-      val[key] = value;
-    }
-  }
-
-  writeNotNull('action', const BlockActionConverter().toJson(instance.action));
-  val['type'] = instance.type;
-  return val;
-}
+Map<String, dynamic> _$SectionHeaderBlockToJson(SectionHeaderBlock instance) => <String, dynamic>{
+      'title': instance.title,
+      if (const BlockActionConverter().toJson(instance.action) case final value?) 'action': value,
+      'type': instance.type,
+    };

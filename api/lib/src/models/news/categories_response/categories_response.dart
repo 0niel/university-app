@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
+import 'package:university_app_server_api/api.dart';
 
 part 'categories_response.g.dart';
 
@@ -11,7 +12,7 @@ class CategoriesResponse extends Equatable {
 
   factory CategoriesResponse.fromJson(Map<String, dynamic> json) => _$CategoriesResponseFromJson(json);
 
-  final List<String> categories;
+  final List<Category> categories;
 
   Map<String, dynamic> toJson() => _$CategoriesResponseToJson(this);
 

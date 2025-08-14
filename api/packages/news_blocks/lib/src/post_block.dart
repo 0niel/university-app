@@ -16,7 +16,6 @@ abstract class PostBlock with EquatableMixin implements NewsBlock {
     this.imageUrl,
     this.description,
     this.action,
-    this.isPremium = false,
     this.isContentOverlaid = false,
   });
 
@@ -48,11 +47,6 @@ abstract class PostBlock with EquatableMixin implements NewsBlock {
   @BlockActionConverter()
   final BlockAction? action;
 
-  /// Whether this post requires a premium subscription to access.
-  ///
-  /// Defaults to false.
-  final bool isPremium;
-
   /// Whether the content of this post is overlaid on the image.
   ///
   /// Defaults to false.
@@ -71,7 +65,6 @@ abstract class PostBlock with EquatableMixin implements NewsBlock {
         title,
         description,
         action,
-        isPremium,
         isContentOverlaid,
         type,
       ];
