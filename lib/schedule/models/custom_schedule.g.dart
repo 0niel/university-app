@@ -19,7 +19,7 @@ _$CustomScheduleImpl _$$CustomScheduleImplFromJson(Map<String, dynamic> json) =>
 Map<String, dynamic> _$$CustomScheduleImplToJson(_$CustomScheduleImpl instance) => <String, dynamic>{
   'id': instance.id,
   'name': instance.name,
-  'lessons': instance.lessons,
+  'lessons': instance.lessons.map((e) => e.toJson()).toList(),
   'description': instance.description,
   'createdAt': instance.createdAt?.toIso8601String(),
   'updatedAt': instance.updatedAt?.toIso8601String(),

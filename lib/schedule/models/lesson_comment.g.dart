@@ -16,6 +16,6 @@ LessonComment _$LessonCommentFromJson(Map<String, dynamic> json) => LessonCommen
 Map<String, dynamic> _$LessonCommentToJson(LessonComment instance) => <String, dynamic>{
   'subjectName': instance.subjectName,
   'lessonDate': instance.lessonDate.toIso8601String(),
-  'lessonBells': instance.lessonBells,
+  'lessonBells': instance.lessonBells.toJson(),
   'text': instance.text,
 };

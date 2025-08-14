@@ -57,6 +57,7 @@ class ScheduleState with _$ScheduleState {
     @Default([]) List<(UID, Group, List<SchedulePart>)> groupsSchedule,
     @Default(false) bool isMiniature,
     @Default([]) List<LessonComment> comments,
+    @Default([]) List<LessonReactionSummary> reactionSummaries,
     @Default(false) bool showEmptyLessons,
     @Default(true) bool showCommentsIndicators,
     @Default(false) bool isListModeEnabled,

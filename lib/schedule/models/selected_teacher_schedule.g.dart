@@ -14,6 +14,6 @@ SelectedTeacherSchedule _$SelectedTeacherScheduleFromJson(Map<String, dynamic> j
 
 Map<String, dynamic> _$SelectedTeacherScheduleToJson(SelectedTeacherSchedule instance) => <String, dynamic>{
   'type': instance.type,
-  'schedule': instance.schedule,
-  'teacher': instance.teacher,
+  'schedule': instance.schedule.map((e) => e.toJson()).toList(),
+  'teacher': instance.teacher.toJson(),
 };

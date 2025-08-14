@@ -62,6 +62,11 @@ class ScheduleBloc extends HydratedBloc<ScheduleEvent, ScheduleState> {
     on<RemoveLessonFromCustomSchedule>(_onRemoveLessonFromCustomSchedule, transformer: sequential());
     on<SelectCustomSchedule>(_onSelectCustomSchedule, transformer: sequential());
     on<ToggleCustomScheduleMode>(_onToggleCustomScheduleMode, transformer: sequential());
+
+    // Reaction events
+    on<AddLessonReaction>(_onAddLessonReaction, transformer: sequential());
+    on<RemoveLessonReaction>(_onRemoveLessonReaction, transformer: sequential());
+    on<UpdateLessonReaction>(_onUpdateLessonReaction, transformer: sequential());
   }
 
   @override
@@ -537,6 +542,99 @@ class ScheduleBloc extends HydratedBloc<ScheduleEvent, ScheduleState> {
 
   Future<void> _onToggleCustomScheduleMode(ToggleCustomScheduleMode event, Emitter<ScheduleState> emit) async {
     emit(state.copyWith(isCustomScheduleModeEnabled: !state.isCustomScheduleModeEnabled));
+  }
+
+  Future<void> _onAddLessonReaction(AddLessonReaction event, Emitter<ScheduleState> emit) async {
+    final existingSummaryIndex = state.reactionSummaries.indexWhere(
+      (summary) =>
+          summary.subjectName == event.subjectName &&
+          summary.lessonDate.isAtSameMomentAs(event.lessonDate) &&
+          summary.lessonBells == event.lessonBells,
+    );
+
+    if (existingSummaryIndex >= 0) {
+      final existingSummary = state.reactionSummaries[existingSummaryIndex];
+      final updatedCounts = Map<ReactionType, int>.from(existingSummary.reactionCounts);
+
+      if (existingSummary.userReaction != null) {
+        updatedCounts[existingSummary.userReaction!] = (updatedCounts[existingSummary.userReaction!] ?? 1) - 1;
+        if (updatedCounts[existingSummary.userReaction!]! <= 0) {
+          updatedCounts.remove(existingSummary.userReaction!);
+        }
+      }
+
+      updatedCounts[event.reactionType] = (updatedCounts[event.reactionType] ?? 0) + 1;
+
+      final updatedSummary = existingSummary.copyWith(reactionCounts: updatedCounts, userReaction: event.reactionType);
+
+      final updatedSummaries = List<LessonReactionSummary>.from(state.reactionSummaries);
+      updatedSummaries[existingSummaryIndex] = updatedSummary;
+
+      emit(state.copyWith(reactionSummaries: updatedSummaries));
+    } else {
+      final newSummary = LessonReactionSummary(
+        subjectName: event.subjectName,
+        lessonDate: event.lessonDate,
+        lessonBells: event.lessonBells,
+        reactionCounts: {event.reactionType: 1},
+        userReaction: event.reactionType,
+      );
+
+      emit(state.copyWith(reactionSummaries: [...state.reactionSummaries, newSummary]));
+    }
+  }
+
+  Future<void> _onRemoveLessonReaction(RemoveLessonReaction event, Emitter<ScheduleState> emit) async {
+    final existingSummaryIndex = state.reactionSummaries.indexWhere(
+      (summary) =>
+          summary.subjectName == event.subjectName &&
+          summary.lessonDate.isAtSameMomentAs(event.lessonDate) &&
+          summary.lessonBells == event.lessonBells,
+    );
+
+    if (existingSummaryIndex >= 0) {
+      final existingSummary = state.reactionSummaries[existingSummaryIndex];
+
+      if (existingSummary.userReaction != null) {
+        final updatedCounts = Map<ReactionType, int>.from(existingSummary.reactionCounts);
+        updatedCounts[existingSummary.userReaction!] = (updatedCounts[existingSummary.userReaction!] ?? 1) - 1;
+
+        if (updatedCounts[existingSummary.userReaction!]! <= 0) {
+          updatedCounts.remove(existingSummary.userReaction!);
+        }
+
+        if (updatedCounts.isEmpty) {
+          final updatedSummaries = List<LessonReactionSummary>.from(state.reactionSummaries);
+          updatedSummaries.removeAt(existingSummaryIndex);
+          emit(state.copyWith(reactionSummaries: updatedSummaries));
+        } else {
+          final updatedSummary = existingSummary.copyWith(reactionCounts: updatedCounts, userReaction: null);
+
+          final updatedSummaries = List<LessonReactionSummary>.from(state.reactionSummaries);
+          updatedSummaries[existingSummaryIndex] = updatedSummary;
+          emit(state.copyWith(reactionSummaries: updatedSummaries));
+        }
+      }
+    }
+  }
+
+  Future<void> _onUpdateLessonReaction(UpdateLessonReaction event, Emitter<ScheduleState> emit) async {
+    add(
+      RemoveLessonReaction(
+        subjectName: event.subjectName,
+        lessonDate: event.lessonDate,
+        lessonBells: event.lessonBells,
+      ),
+    );
+
+    add(
+      AddLessonReaction(
+        subjectName: event.subjectName,
+        lessonDate: event.lessonDate,
+        lessonBells: event.lessonBells,
+        reactionType: event.reactionType,
+      ),
+    );
   }
 
   @override

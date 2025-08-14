@@ -184,7 +184,7 @@ class __$$FieldDiffImplCopyWithImpl<$Res> extends _$FieldDiffCopyWithImpl<$Res, 
 
 /// @nodoc
 
-class _$FieldDiffImpl implements _FieldDiff {
+class _$FieldDiffImpl with DiagnosticableTreeMixin implements _FieldDiff {
   const _$FieldDiffImpl({
     required this.fieldName,
     this.oldValue,
@@ -246,8 +246,21 @@ class _$FieldDiffImpl implements _FieldDiff {
   }
 
   @override
-  String toString() {
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
     return 'FieldDiff(fieldName: $fieldName, oldValue: $oldValue, newValue: $newValue, addedDates: $addedDates, removedDates: $removedDates, unchangedDates: $unchangedDates)';
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties
+      ..add(DiagnosticsProperty('type', 'FieldDiff'))
+      ..add(DiagnosticsProperty('fieldName', fieldName))
+      ..add(DiagnosticsProperty('oldValue', oldValue))
+      ..add(DiagnosticsProperty('newValue', newValue))
+      ..add(DiagnosticsProperty('addedDates', addedDates))
+      ..add(DiagnosticsProperty('removedDates', removedDates))
+      ..add(DiagnosticsProperty('unchangedDates', unchangedDates));
   }
 
   @override
@@ -429,7 +442,7 @@ class __$$ScheduleChangeImplCopyWithImpl<$Res> extends _$ScheduleChangeCopyWithI
 
 /// @nodoc
 
-class _$ScheduleChangeImpl implements _ScheduleChange {
+class _$ScheduleChangeImpl with DiagnosticableTreeMixin implements _ScheduleChange {
   const _$ScheduleChangeImpl({required this.type, required this.subject, required final List<FieldDiff> fieldDiffs})
     : _fieldDiffs = fieldDiffs;
 
@@ -455,8 +468,18 @@ class _$ScheduleChangeImpl implements _ScheduleChange {
   }
 
   @override
-  String toString() {
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
     return 'ScheduleChange(type: $type, subject: $subject, fieldDiffs: $fieldDiffs)';
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties
+      ..add(DiagnosticsProperty('type', 'ScheduleChange'))
+      ..add(DiagnosticsProperty('type', type))
+      ..add(DiagnosticsProperty('subject', subject))
+      ..add(DiagnosticsProperty('fieldDiffs', fieldDiffs));
   }
 
   @override
@@ -588,7 +611,7 @@ class __$$ScheduleDiffImplCopyWithImpl<$Res> extends _$ScheduleDiffCopyWithImpl<
 
 /// @nodoc
 
-class _$ScheduleDiffImpl implements _ScheduleDiff {
+class _$ScheduleDiffImpl with DiagnosticableTreeMixin implements _ScheduleDiff {
   const _$ScheduleDiffImpl({required final Set<ScheduleChange> changes}) : _changes = changes;
 
   /// Множество изменений в расписании (можно преобразовать в список для удобства отображения)
@@ -603,8 +626,16 @@ class _$ScheduleDiffImpl implements _ScheduleDiff {
   }
 
   @override
-  String toString() {
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
     return 'ScheduleDiff(changes: $changes)';
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties
+      ..add(DiagnosticsProperty('type', 'ScheduleDiff'))
+      ..add(DiagnosticsProperty('changes', changes));
   }
 
   @override
@@ -654,6 +685,7 @@ mixin _$ScheduleState {
   List<(String, Group, List<SchedulePart>)> get groupsSchedule => throw _privateConstructorUsedError;
   bool get isMiniature => throw _privateConstructorUsedError;
   List<LessonComment> get comments => throw _privateConstructorUsedError;
+  List<LessonReactionSummary> get reactionSummaries => throw _privateConstructorUsedError;
   bool get showEmptyLessons => throw _privateConstructorUsedError;
   bool get showCommentsIndicators => throw _privateConstructorUsedError;
   bool get isListModeEnabled => throw _privateConstructorUsedError;
@@ -697,6 +729,7 @@ abstract class $ScheduleStateCopyWith<$Res> {
     List<(String, Group, List<SchedulePart>)> groupsSchedule,
     bool isMiniature,
     List<LessonComment> comments,
+    List<LessonReactionSummary> reactionSummaries,
     bool showEmptyLessons,
     bool showCommentsIndicators,
     bool isListModeEnabled,
@@ -735,6 +768,7 @@ class _$ScheduleStateCopyWithImpl<$Res, $Val extends ScheduleState> implements $
     Object? groupsSchedule = null,
     Object? isMiniature = null,
     Object? comments = null,
+    Object? reactionSummaries = null,
     Object? showEmptyLessons = null,
     Object? showCommentsIndicators = null,
     Object? isListModeEnabled = null,
@@ -781,6 +815,11 @@ class _$ScheduleStateCopyWithImpl<$Res, $Val extends ScheduleState> implements $
                     ? _value.comments
                     : comments // ignore: cast_nullable_to_non_nullable
                         as List<LessonComment>,
+            reactionSummaries:
+                null == reactionSummaries
+                    ? _value.reactionSummaries
+                    : reactionSummaries // ignore: cast_nullable_to_non_nullable
+                        as List<LessonReactionSummary>,
             showEmptyLessons:
                 null == showEmptyLessons
                     ? _value.showEmptyLessons
@@ -879,6 +918,7 @@ abstract class _$$ScheduleStateImplCopyWith<$Res> implements $ScheduleStateCopyW
     List<(String, Group, List<SchedulePart>)> groupsSchedule,
     bool isMiniature,
     List<LessonComment> comments,
+    List<LessonReactionSummary> reactionSummaries,
     bool showEmptyLessons,
     bool showCommentsIndicators,
     bool isListModeEnabled,
@@ -915,6 +955,7 @@ class __$$ScheduleStateImplCopyWithImpl<$Res> extends _$ScheduleStateCopyWithImp
     Object? groupsSchedule = null,
     Object? isMiniature = null,
     Object? comments = null,
+    Object? reactionSummaries = null,
     Object? showEmptyLessons = null,
     Object? showCommentsIndicators = null,
     Object? isListModeEnabled = null,
@@ -961,6 +1002,11 @@ class __$$ScheduleStateImplCopyWithImpl<$Res> extends _$ScheduleStateCopyWithImp
                 ? _value._comments
                 : comments // ignore: cast_nullable_to_non_nullable
                     as List<LessonComment>,
+        reactionSummaries:
+            null == reactionSummaries
+                ? _value._reactionSummaries
+                : reactionSummaries // ignore: cast_nullable_to_non_nullable
+                    as List<LessonReactionSummary>,
         showEmptyLessons:
             null == showEmptyLessons
                 ? _value.showEmptyLessons
@@ -1033,7 +1079,7 @@ class __$$ScheduleStateImplCopyWithImpl<$Res> extends _$ScheduleStateCopyWithImp
 
 /// @nodoc
 @JsonSerializable()
-class _$ScheduleStateImpl extends _ScheduleState {
+class _$ScheduleStateImpl extends _ScheduleState with DiagnosticableTreeMixin {
   const _$ScheduleStateImpl({
     @JsonKey(includeFromJson: false, includeToJson: false) this.status = ScheduleStatus.initial,
     final List<(String, Classroom, List<SchedulePart>)> classroomsSchedule = const [],
@@ -1041,6 +1087,7 @@ class _$ScheduleStateImpl extends _ScheduleState {
     final List<(String, Group, List<SchedulePart>)> groupsSchedule = const [],
     this.isMiniature = false,
     final List<LessonComment> comments = const [],
+    final List<LessonReactionSummary> reactionSummaries = const [],
     this.showEmptyLessons = false,
     this.showCommentsIndicators = true,
     this.isListModeEnabled = false,
@@ -1058,6 +1105,7 @@ class _$ScheduleStateImpl extends _ScheduleState {
        _teachersSchedule = teachersSchedule,
        _groupsSchedule = groupsSchedule,
        _comments = comments,
+       _reactionSummaries = reactionSummaries,
        _scheduleComments = scheduleComments,
        _comparisonSchedules = comparisonSchedules,
        _customSchedules = customSchedules,
@@ -1105,6 +1153,15 @@ class _$ScheduleStateImpl extends _ScheduleState {
     if (_comments is EqualUnmodifiableListView) return _comments;
     // ignore: implicit_dynamic_type
     return EqualUnmodifiableListView(_comments);
+  }
+
+  final List<LessonReactionSummary> _reactionSummaries;
+  @override
+  @JsonKey()
+  List<LessonReactionSummary> get reactionSummaries {
+    if (_reactionSummaries is EqualUnmodifiableListView) return _reactionSummaries;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_reactionSummaries);
   }
 
   @override
@@ -1169,8 +1226,35 @@ class _$ScheduleStateImpl extends _ScheduleState {
   final bool isCustomScheduleModeEnabled;
 
   @override
-  String toString() {
-    return 'ScheduleState(status: $status, classroomsSchedule: $classroomsSchedule, teachersSchedule: $teachersSchedule, groupsSchedule: $groupsSchedule, isMiniature: $isMiniature, comments: $comments, showEmptyLessons: $showEmptyLessons, showCommentsIndicators: $showCommentsIndicators, isListModeEnabled: $isListModeEnabled, scheduleComments: $scheduleComments, selectedSchedule: $selectedSchedule, comparisonSchedules: $comparisonSchedules, isComparisonModeEnabled: $isComparisonModeEnabled, latestDiff: $latestDiff, showScheduleDiffDialog: $showScheduleDiffDialog, isSplitViewEnabled: $isSplitViewEnabled, showAnalytics: $showAnalytics, customSchedules: $customSchedules, isCustomScheduleModeEnabled: $isCustomScheduleModeEnabled)';
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
+    return 'ScheduleState(status: $status, classroomsSchedule: $classroomsSchedule, teachersSchedule: $teachersSchedule, groupsSchedule: $groupsSchedule, isMiniature: $isMiniature, comments: $comments, reactionSummaries: $reactionSummaries, showEmptyLessons: $showEmptyLessons, showCommentsIndicators: $showCommentsIndicators, isListModeEnabled: $isListModeEnabled, scheduleComments: $scheduleComments, selectedSchedule: $selectedSchedule, comparisonSchedules: $comparisonSchedules, isComparisonModeEnabled: $isComparisonModeEnabled, latestDiff: $latestDiff, showScheduleDiffDialog: $showScheduleDiffDialog, isSplitViewEnabled: $isSplitViewEnabled, showAnalytics: $showAnalytics, customSchedules: $customSchedules, isCustomScheduleModeEnabled: $isCustomScheduleModeEnabled)';
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties
+      ..add(DiagnosticsProperty('type', 'ScheduleState'))
+      ..add(DiagnosticsProperty('status', status))
+      ..add(DiagnosticsProperty('classroomsSchedule', classroomsSchedule))
+      ..add(DiagnosticsProperty('teachersSchedule', teachersSchedule))
+      ..add(DiagnosticsProperty('groupsSchedule', groupsSchedule))
+      ..add(DiagnosticsProperty('isMiniature', isMiniature))
+      ..add(DiagnosticsProperty('comments', comments))
+      ..add(DiagnosticsProperty('reactionSummaries', reactionSummaries))
+      ..add(DiagnosticsProperty('showEmptyLessons', showEmptyLessons))
+      ..add(DiagnosticsProperty('showCommentsIndicators', showCommentsIndicators))
+      ..add(DiagnosticsProperty('isListModeEnabled', isListModeEnabled))
+      ..add(DiagnosticsProperty('scheduleComments', scheduleComments))
+      ..add(DiagnosticsProperty('selectedSchedule', selectedSchedule))
+      ..add(DiagnosticsProperty('comparisonSchedules', comparisonSchedules))
+      ..add(DiagnosticsProperty('isComparisonModeEnabled', isComparisonModeEnabled))
+      ..add(DiagnosticsProperty('latestDiff', latestDiff))
+      ..add(DiagnosticsProperty('showScheduleDiffDialog', showScheduleDiffDialog))
+      ..add(DiagnosticsProperty('isSplitViewEnabled', isSplitViewEnabled))
+      ..add(DiagnosticsProperty('showAnalytics', showAnalytics))
+      ..add(DiagnosticsProperty('customSchedules', customSchedules))
+      ..add(DiagnosticsProperty('isCustomScheduleModeEnabled', isCustomScheduleModeEnabled));
   }
 
   @override
@@ -1184,6 +1268,7 @@ class _$ScheduleStateImpl extends _ScheduleState {
             const DeepCollectionEquality().equals(other._groupsSchedule, _groupsSchedule) &&
             (identical(other.isMiniature, isMiniature) || other.isMiniature == isMiniature) &&
             const DeepCollectionEquality().equals(other._comments, _comments) &&
+            const DeepCollectionEquality().equals(other._reactionSummaries, _reactionSummaries) &&
             (identical(other.showEmptyLessons, showEmptyLessons) || other.showEmptyLessons == showEmptyLessons) &&
             (identical(other.showCommentsIndicators, showCommentsIndicators) ||
                 other.showCommentsIndicators == showCommentsIndicators) &&
@@ -1214,6 +1299,7 @@ class _$ScheduleStateImpl extends _ScheduleState {
     const DeepCollectionEquality().hash(_groupsSchedule),
     isMiniature,
     const DeepCollectionEquality().hash(_comments),
+    const DeepCollectionEquality().hash(_reactionSummaries),
     showEmptyLessons,
     showCommentsIndicators,
     isListModeEnabled,
@@ -1251,6 +1337,7 @@ abstract class _ScheduleState extends ScheduleState {
     final List<(String, Group, List<SchedulePart>)> groupsSchedule,
     final bool isMiniature,
     final List<LessonComment> comments,
+    final List<LessonReactionSummary> reactionSummaries,
     final bool showEmptyLessons,
     final bool showCommentsIndicators,
     final bool isListModeEnabled,
@@ -1282,6 +1369,8 @@ abstract class _ScheduleState extends ScheduleState {
   bool get isMiniature;
   @override
   List<LessonComment> get comments;
+  @override
+  List<LessonReactionSummary> get reactionSummaries;
   @override
   bool get showEmptyLessons;
   @override

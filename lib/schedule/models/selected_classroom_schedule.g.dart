@@ -13,7 +13,7 @@ SelectedClassroomSchedule _$SelectedClassroomScheduleFromJson(Map<String, dynami
 );
 
 Map<String, dynamic> _$SelectedClassroomScheduleToJson(SelectedClassroomSchedule instance) => <String, dynamic>{
-  'classroom': instance.classroom,
+  'classroom': instance.classroom.toJson(),
   'type': instance.type,
-  'schedule': instance.schedule,
+  'schedule': instance.schedule.map((e) => e.toJson()).toList(),
 };

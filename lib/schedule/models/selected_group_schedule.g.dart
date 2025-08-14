@@ -13,7 +13,7 @@ SelectedGroupSchedule _$SelectedGroupScheduleFromJson(Map<String, dynamic> json)
 );
 
 Map<String, dynamic> _$SelectedGroupScheduleToJson(SelectedGroupSchedule instance) => <String, dynamic>{
-  'group': instance.group,
+  'group': instance.group.toJson(),
   'type': instance.type,
-  'schedule': instance.schedule,
+  'schedule': instance.schedule.map((e) => e.toJson()).toList(),
 };

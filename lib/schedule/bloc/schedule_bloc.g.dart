@@ -59,6 +59,11 @@ _$ScheduleStateImpl _$$ScheduleStateImplFromJson(Map<String, dynamic> json) => _
   comments:
       (json['comments'] as List<dynamic>?)?.map((e) => LessonComment.fromJson(e as Map<String, dynamic>)).toList() ??
       const [],
+  reactionSummaries:
+      (json['reactionSummaries'] as List<dynamic>?)
+          ?.map((e) => LessonReactionSummary.fromJson(e as Map<String, dynamic>))
+          .toList() ??
+      const [],
   showEmptyLessons: json['showEmptyLessons'] as bool? ?? false,
   showCommentsIndicators: json['showCommentsIndicators'] as bool? ?? true,
   isListModeEnabled: json['isListModeEnabled'] as bool? ?? false,
@@ -77,19 +82,26 @@ _$ScheduleStateImpl _$$ScheduleStateImplFromJson(Map<String, dynamic> json) => _
 
 Map<String, dynamic> _$$ScheduleStateImplToJson(_$ScheduleStateImpl instance) => <String, dynamic>{
   'classroomsSchedule':
-      instance.classroomsSchedule.map((e) => <String, dynamic>{r'$1': e.$1, r'$2': e.$2, r'$3': e.$3}).toList(),
+      instance.classroomsSchedule
+          .map((e) => <String, dynamic>{r'$1': e.$1, r'$2': e.$2.toJson(), r'$3': e.$3.map((e) => e.toJson()).toList()})
+          .toList(),
   'teachersSchedule':
-      instance.teachersSchedule.map((e) => <String, dynamic>{r'$1': e.$1, r'$2': e.$2, r'$3': e.$3}).toList(),
+      instance.teachersSchedule
+          .map((e) => <String, dynamic>{r'$1': e.$1, r'$2': e.$2.toJson(), r'$3': e.$3.map((e) => e.toJson()).toList()})
+          .toList(),
   'groupsSchedule':
-      instance.groupsSchedule.map((e) => <String, dynamic>{r'$1': e.$1, r'$2': e.$2, r'$3': e.$3}).toList(),
+      instance.groupsSchedule
+          .map((e) => <String, dynamic>{r'$1': e.$1, r'$2': e.$2.toJson(), r'$3': e.$3.map((e) => e.toJson()).toList()})
+          .toList(),
   'isMiniature': instance.isMiniature,
-  'comments': instance.comments,
+  'comments': instance.comments.map((e) => e.toJson()).toList(),
+  'reactionSummaries': instance.reactionSummaries.map((e) => e.toJson()).toList(),
   'showEmptyLessons': instance.showEmptyLessons,
   'showCommentsIndicators': instance.showCommentsIndicators,
   'isListModeEnabled': instance.isListModeEnabled,
-  'scheduleComments': instance.scheduleComments,
+  'scheduleComments': instance.scheduleComments.map((e) => e.toJson()).toList(),
   'selectedSchedule': const SelectedScheduleConverter().toJson(instance.selectedSchedule),
-  'customSchedules': instance.customSchedules,
+  'customSchedules': instance.customSchedules.map((e) => e.toJson()).toList(),
 };
 
 $Rec _$recordConvert<$Rec>(Object? value, $Rec Function(Map) convert) => convert(value as Map<String, dynamic>);

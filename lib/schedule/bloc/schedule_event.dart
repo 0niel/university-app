@@ -306,3 +306,59 @@ class ToggleCustomScheduleMode extends ScheduleEvent {
   @override
   List<Object> get props => [];
 }
+
+class AddLessonReaction extends ScheduleEvent with AnalyticsEventMixin {
+  final String subjectName;
+  final DateTime lessonDate;
+  final LessonBells lessonBells;
+  final ReactionType reactionType;
+
+  const AddLessonReaction({
+    required this.subjectName,
+    required this.lessonDate,
+    required this.lessonBells,
+    required this.reactionType,
+  });
+
+  @override
+  AnalyticsEvent get event =>
+      AnalyticsEvent('AddLessonReaction', properties: {'subject': subjectName, 'reaction': reactionType.toString()});
+
+  @override
+  List<Object> get props => [subjectName, lessonDate, lessonBells, reactionType];
+}
+
+class RemoveLessonReaction extends ScheduleEvent with AnalyticsEventMixin {
+  final String subjectName;
+  final DateTime lessonDate;
+  final LessonBells lessonBells;
+
+  const RemoveLessonReaction({required this.subjectName, required this.lessonDate, required this.lessonBells});
+
+  @override
+  AnalyticsEvent get event => AnalyticsEvent('RemoveLessonReaction', properties: {'subject': subjectName});
+
+  @override
+  List<Object> get props => [subjectName, lessonDate, lessonBells];
+}
+
+class UpdateLessonReaction extends ScheduleEvent with AnalyticsEventMixin {
+  final String subjectName;
+  final DateTime lessonDate;
+  final LessonBells lessonBells;
+  final ReactionType reactionType;
+
+  const UpdateLessonReaction({
+    required this.subjectName,
+    required this.lessonDate,
+    required this.lessonBells,
+    required this.reactionType,
+  });
+
+  @override
+  AnalyticsEvent get event =>
+      AnalyticsEvent('UpdateLessonReaction', properties: {'subject': subjectName, 'reaction': reactionType.toString()});
+
+  @override
+  List<Object> get props => [subjectName, lessonDate, lessonBells, reactionType];
+}
