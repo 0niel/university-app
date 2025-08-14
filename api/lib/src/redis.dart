@@ -4,7 +4,7 @@ import 'package:redis/redis.dart';
 import 'package:university_app_server_api/config.dart';
 import 'package:university_app_server_api/src/logger.dart';
 
-final _appConfig = Config();
+final _appConfig = Config.instance;
 final _logger = getLogger('RedisClient');
 
 /// {@template redis_client}

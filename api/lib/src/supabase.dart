@@ -20,6 +20,7 @@ class _HttpClientWrapper extends http.BaseClient {
       final value = entry.value;
 
       // Sanitize header values that contain non-ASCII characters
+      // (Windows Cyrillic fix)
       if (_containsNonAscii(value)) {
         sanitizedHeaders[key] = _sanitizeHeaderValue(value);
       } else {
@@ -77,7 +78,6 @@ class SupabaseClientManager {
     return manager;
   }
 
-  /// Creates an HTTP client with proper headers to avoid encoding issues
   static http.Client _createHttpClient() {
     final client = http.Client();
     return _HttpClientWrapper(client);
