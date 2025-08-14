@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:go_router/go_router.dart';
 import 'package:app_ui/app_ui.dart';
 import 'package:rtu_mirea_app/schedule/bloc/schedule_bloc.dart';
@@ -27,7 +28,7 @@ class SearchPage extends StatelessWidget {
         appBar: AppBar(
           backgroundColor: Theme.of(context).extension<AppColors>()!.background01,
           elevation: 0,
-          title: const Text("Поиск"),
+          title: Text(context.l10n.search),
         ),
         body: SafeArea(child: SearchView(query: query)),
       ),
@@ -67,8 +68,8 @@ class _SearchViewState extends State<SearchView> {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             ScaffoldMessengerHelper.showMessage(
               context: context,
-              title: 'Ошибка',
-              subtitle: 'Не удалось выполнить поиск',
+              title: context.l10n.error,
+              subtitle: context.l10n.searchFailed,
               isSuccess: false,
             );
           });
@@ -93,10 +94,13 @@ class _SearchViewState extends State<SearchView> {
                         ..._controller.text.isNotEmpty || state.searchHisoty.isEmpty
                             ? []
                             : [
-                              const Row(
+                              Row(
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [SearchHeadlineText(headerText: "История"), ClearSearchHistoryButton()],
+                                children: [
+                                  SearchHeadlineText(headerText: context.l10n.searchHistory),
+                                  const ClearSearchHistoryButton(),
+                                ],
                               ),
                               ...state.searchHisoty.map(
                                 (e) => SearchHistoryItem(
@@ -113,7 +117,7 @@ class _SearchViewState extends State<SearchView> {
                         ...state.groups.results.isEmpty
                             ? []
                             : [
-                              const SearchHeadlineText(headerText: "Группы"),
+                              SearchHeadlineText(headerText: context.l10n.groups),
                               ...state.groups.results.map<Widget>(
                                 (group) => SearchResultItem(
                                   name: group.name,
@@ -130,7 +134,7 @@ class _SearchViewState extends State<SearchView> {
                         ...state.teachers.results.isEmpty
                             ? []
                             : [
-                              const SearchHeadlineText(headerText: "Преподаватели"),
+                              SearchHeadlineText(headerText: context.l10n.teachers),
                               ...state.teachers.results.map<Widget>(
                                 (teacher) => SearchResultItem(
                                   name: teacher.name,
@@ -147,7 +151,7 @@ class _SearchViewState extends State<SearchView> {
                         ...state.classrooms.results.isEmpty
                             ? []
                             : [
-                              const SearchHeadlineText(headerText: "Аудитории"),
+                              SearchHeadlineText(headerText: context.l10n.classrooms),
                               ...state.classrooms.results.map<Widget>(
                                 (classroom) => SearchResultItem(
                                   name:
@@ -186,7 +190,7 @@ class _SearchViewState extends State<SearchView> {
                           const SizedBox(height: 16),
                           Padding(
                             padding: const EdgeInsets.all(16.0),
-                            child: Text("Введите запрос для поиска", style: AppTextStyle.body),
+                            child: Text(context.l10n.enterSearchQuery, style: AppTextStyle.body),
                           ),
                         ],
                       ),
