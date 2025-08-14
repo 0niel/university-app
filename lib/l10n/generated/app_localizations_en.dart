@@ -106,13 +106,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String classesCount(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'classes',
-      few: 'classes',
-      one: 'class',
-    );
+    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: 'classes', few: 'classes', one: 'class');
     return '$_temp0';
   }
 
@@ -608,7 +602,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get addToSchedule => 'Add to schedule';
 
   @override
-  String get enterLessonComment => 'Enter lesson comment...';
+  String get enterLessonComment => 'Enter a comment for the class...';
 
   @override
   String get noOwnSchedules => 'You don\'t have your own schedules yet';
@@ -754,6 +748,42 @@ class AppLocalizationsEn extends AppLocalizations {
   String get errorLoadingContributors => 'Error loading contributors';
 
   @override
+  String get relatedArticles => 'Related articles';
+
+  @override
+  String get failedToLoadArticle => 'Failed to load article';
+
+  @override
+  String get shareFailed => 'Failed to share';
+
+  @override
+  String get trending => 'Trending';
+
+  @override
+  String get slideshow => 'Slideshow';
+
+  @override
+  String get enterSearchQuery => 'Enter a search query';
+
+  @override
+  String get failedToLoadMoreContent => 'Failed to load more content';
+
+  @override
+  String get searchHistory => 'History';
+
+  @override
+  String get enterScheduleName => 'Enter name';
+
+  @override
+  String get nameTooLong => 'Name is too long';
+
+  @override
+  String get createAndAddClass => 'Create and add class';
+
+  @override
+  String get addToSelectedSchedule => 'Add to selected schedule';
+
+  @override
   String get mireaMap => 'MIREA Map';
 
   @override
@@ -790,7 +820,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get competitiveProgrammingMirea => 'Competitive Programming MIREA';
 
   @override
-  String get competitiveProgrammingDescription => 'Various news and updates on competitive programming at MIREA are published here';
+  String get competitiveProgrammingDescription =>
+      'Various news and updates on competitive programming at MIREA are published here';
 
   @override
   String get personalAccount => 'Personal Account';
@@ -889,10 +920,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get createAccountTitle => 'Create an account';
 
   @override
-  String get createAccountDescription => 'We offer you to create a free account in our cloud storage so you can store your files and documents!';
+  String get createAccountDescription =>
+      'We offer you to create a free account in our cloud storage so you can store your files and documents!';
 
   @override
-  String get cloudStorageDescription => 'On cloud.mirea.ninja you can store up to 10 GB for free (quota can be expanded in the telegram bot), as well as share files and edit documents online together with classmates.';
+  String get cloudStorageDescription =>
+      'On cloud.mirea.ninja you can store up to 10 GB for free (quota can be expanded in the telegram bot), as well as share files and edit documents online together with classmates.';
 
   @override
   String get searchPlaceholder => 'Search';
@@ -1048,4 +1081,164 @@ class AppLocalizationsEn extends AppLocalizations {
   String phoneContact(String phoneNumber) {
     return 'Phone: $phoneNumber';
   }
+
+  @override
+  String lessonsOnDay(String day) {
+    return 'Lessons on $day';
+  }
+
+  @override
+  String get todayLower => 'today';
+
+  @override
+  String get tomorrowLower => 'tomorrow';
+
+  @override
+  String get showEmptyLessonsTooltip => 'Show empty classes';
+
+  @override
+  String get emptyLessons => 'Empty classes';
+
+  @override
+  String get analyticsShort => 'Analytics';
+
+  @override
+  String get dayOff => 'Day off';
+
+  @override
+  String get noLessonsThatDay => 'No classes on this day';
+
+  @override
+  String get noLessonsThatDayShort => 'No classes this day!';
+
+  @override
+  String get restSuggestion => 'You can rest or do self-study';
+
+  @override
+  String windowGap(int count) {
+    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: '$count classes', one: '$count class');
+    return 'Gap: $_temp0';
+  }
+
+  @override
+  String get noScheduleSelected => 'No schedule selected';
+
+  @override
+  String get selectEntityToSeeSchedule => 'Select a group, teacher or classroom to view schedule';
+
+  @override
+  String get errorLoadingSchedule => 'Error loading schedule';
+
+  @override
+  String get manageComparisons => 'Manage comparisons';
+
+  @override
+  String get selectUpTo4Schedules => 'Select up to 4 schedules to compare by days';
+
+  @override
+  String get noUpcomingLessons => 'No upcoming classes';
+
+  @override
+  String get noUpcomingLessonsDescription =>
+      'No classes are scheduled in the near future. Switch to the calendar to view other days.';
+
+  @override
+  String get switchToCalendar => 'Switch to calendar';
+
+  @override
+  String get lecturesShort => 'Lect.';
+
+  @override
+  String get practiceShort => 'Pract.';
+
+  @override
+  String get labsShort => 'Lab.';
+
+  @override
+  String get legend => 'Legend';
+
+  @override
+  String get laboratoryWork => 'Laboratory';
+
+  @override
+  String get scheduleLoadError => 'An error occurred while fetching the schedule. Please try again.';
+
+  @override
+  String get selectSchedulesForComparison => 'Select schedules for comparison (up to 3)';
+
+  @override
+  String deleteScheduleConfirm(String name) {
+    return 'Are you sure you want to delete \"$name\"?';
+  }
+
+  @override
+  String deleteClassConfirm(String subject) {
+    return 'Are you sure you want to delete \"$subject\" from the schedule?';
+  }
+
+  @override
+  String get commentTooLong => 'Comment is too long';
+
+  @override
+  String get addOneClassroomOrOnline => 'Add at least one classroom or make the class online';
+
+  @override
+  String get createClass => 'Create class';
+
+  @override
+  String get editClass => 'Edit class';
+
+  @override
+  String get startTime => 'Start';
+
+  @override
+  String get endTime => 'End';
+
+  @override
+  String get lessonNumber => 'Lesson number';
+
+  @override
+  String get teacherFullNameHint => 'e.g. Ivanov Ivan Ivanovich';
+
+  @override
+  String get enterTeacherFullName => 'Enter teacher full name';
+
+  @override
+  String get onlineLessonUrl => 'Online lesson URL';
+
+  @override
+  String get enterUrl => 'Enter URL';
+
+  @override
+  String get classroomNumberHint => 'e.g. A-123';
+
+  @override
+  String get enterClassroomNumber => 'Enter classroom number';
+
+  @override
+  String get enterGroupName => 'Enter group name';
+
+  @override
+  String get basic => 'Basic';
+
+  @override
+  String get dates => 'Dates';
+
+  @override
+  String get place => 'Place';
+
+  @override
+  String get create => 'Create';
+
+  @override
+  String get addDate => 'Add date';
+
+  @override
+  String get lessonDeliveryType => 'Lesson delivery type';
+
+  @override
+  String get noClassroomsSelected => 'No classrooms selected';
+
+  @override
+  String get back => 'Back';
 }

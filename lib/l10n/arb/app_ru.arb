@@ -1,1425 +1,1593 @@
 {
-    "@@locale": "ru",
-    "scheduleAppBarTitle": "Расписание",
-    "@scheduleAppBarTitle": {
-        "description": "Название страницы расписания"
-    },
-    "loadingError": "Ошибка загрузки",
-    "@loadingError": {
-        "description": "Сообщение об ошибке при загрузке"
-    },
-    "imageViewer": "Просмотр изображений",
-    "@imageViewer": {
-        "description": "Заголовок для просмотра изображений"
-    },
-    "selectDate": "Выберите дату",
-    "@selectDate": {
-        "description": "Текст кнопки для выбора даты"
-    },
-    "selectDates": "Выберите даты",
-    "@selectDates": {
-        "description": "Текст кнопки для выбора диапазона дат"
-    },
-    "enableComparisonMode": "Включить режим сравнения",
-    "@enableComparisonMode": {
-        "description": "Подсказка для включения режима сравнения"
-    },
-    "disableComparisonMode": "Выключить режим сравнения",
-    "@disableComparisonMode": {
-        "description": "Подсказка для выключения режима сравнения"
-    },
-    "compareSchedules": "Сравнить расписания",
-    "@compareSchedules": {
-        "description": "Текст кнопки для сравнения расписаний"
-    },
-    "noClassesToday": "Нет пар в этот день",
-    "@noClassesToday": {
-        "description": "Сообщение когда нет занятий"
-    },
-    "selectTime": "Выберите время",
-    "@selectTime": {
-        "description": "Заполнитель для выбора времени"
-    },
-    "clear": "Очистить",
-    "@clear": {
-        "description": "Текст кнопки для очистки выбора"
-    },
-    "month": "Месяц",
-    "@month": {
-        "description": "Формат календаря - вид по месяцам"
-    },
-    "week": "Неделя",
-    "@week": {
-        "description": "Формат календаря - вид по неделям"
-    },
-    "apply": "Применить",
-    "@apply": {
-        "description": "Текст кнопки для применения изменений"
-    },
-    "previousDay": "Предыдущий день",
-    "@previousDay": {
-        "description": "Подсказка для кнопки предыдущего дня"
-    },
-    "nextDay": "Следующий день",
-    "@nextDay": {
-        "description": "Подсказка для кнопки следующего дня"
-    },
-    "today": "Сегодня",
-    "@today": {
-        "description": "Текст кнопки для сегодняшнего дня"
-    },
-    "refreshData": "Обновить данные",
-    "@refreshData": {
-        "description": "Подсказка для кнопки обновления"
-    },
-    "scheduleComparison": "Сравнение расписаний",
-    "@scheduleComparison": {
-        "description": "Подсказка для сравнения расписаний"
-    },
-    "scheduleAnalytics": "Аналитика расписания",
-    "@scheduleAnalytics": {
-        "description": "Подсказка для аналитики расписания"
-    },
-    "allClassesList": "Список всех пар",
-    "@allClassesList": {
-        "description": "Подсказка для списка всех пар"
-    },
-    "scheduleNotSelected": "Расписание не выбрано",
-    "@scheduleNotSelected": {
-        "description": "Сообщение когда расписание не выбрано"
-    },
-    "findSchedule": "Найти расписание",
-    "@findSchedule": {
-        "description": "Текст кнопки для поиска расписания"
-    },
-    "scheduleForSelectedDay": "Расписание занятий на выбранный день",
-    "@scheduleForSelectedDay": {
-        "description": "Заголовок для содержимого расписания"
-    },
-    "tomorrow": "завтра",
-    "@tomorrow": {
-        "description": "Текст для завтрашнего дня"
-    },
-    "showEmptyClasses": "Показывать пустые пары",
-    "@showEmptyClasses": {
-        "description": "Подпись чекбокса для показа пустых пар"
-    },
-    "emptyClasses": "Пустые пары",
-    "@emptyClasses": {
-        "description": "Подпись для секции пустых пар"
-    },
-    "analytics": "Аналитика",
-    "@analytics": {
-        "description": "Подпись для секции аналитики"
-    },
-    "weekend": "Выходной",
-    "@weekend": {
-        "description": "Заголовок для страницы выходного дня"
-    },
-    "noClassesThisDay": "Нет занятий в этот день",
-    "@noClassesThisDay": {
-        "description": "Сообщение когда нет занятий в конкретный день"
-    },
-    "canRestOrStudy": "Можно отдохнуть или заняться самостоятельной работой",
-    "@canRestOrStudy": {
-        "description": "Предложение для свободного времени"
-    },
-    "goToAnotherDay": "Перейти к другому дню",
-    "@goToAnotherDay": {
-        "description": "Текст кнопки для перехода к другому дню"
-    },
-    "classesCount": "{count, plural, =1{пара} few{пары} other{пар}}",
-    "@classesCount": {
-        "description": "Множественная форма для количества пар",
-        "placeholders": {
-            "count": {
-                "type": "int"
-            }
-        }
-    },
-    "noClass": "Нет занятия",
-    "@noClass": {
-        "description": "Текст когда нет занятия"
-    },
-    "displaySettings": "Настройки отображения",
-    "@displaySettings": {
-        "description": "Заголовок для настроек отображения"
-    },
-    "showCommentIndicators": "Показывать индикаторы комментариев",
-    "@showCommentIndicators": {
-        "description": "Подпись чекбокса для показа индикаторов комментариев"
-    },
-    "compactCardMode": "Компактный режим карточек",
-    "@compactCardMode": {
-        "description": "Подпись чекбокса для компактного режима карточек"
-    },
-    "lecture": "Лекция",
-    "@lecture": {
-        "description": "Тип занятия - лекция"
-    },
-    "laboratory": "Лабораторная",
-    "@laboratory": {
-        "description": "Тип занятия - лабораторная работа"
-    },
-    "practice": "Практика",
-    "@practice": {
-        "description": "Тип занятия - практика"
-    },
-    "exam": "Экзамен",
-    "@exam": {
-        "description": "Тип занятия - экзамен"
-    },
-    "consultation": "Консультация",
-    "@consultation": {
-        "description": "Тип занятия - консультация"
-    },
-    "credit": "Зачет",
-    "@credit": {
-        "description": "Тип занятия - зачет"
-    },
-    "unknown": "Неизвестно",
-    "@unknown": {
-        "description": "Неизвестный тип занятия"
-    },
-    "lessonType": "Тип занятия",
-    "@lessonType": {
-        "description": "Подпись для селектора типа занятия"
-    },
-    "individual": "Индивидуальная",
-    "@individual": {
-        "description": "Тип занятия - индивидуальная работа"
-    },
-    "physicalEducation": "Физкультура",
-    "@physicalEducation": {
-        "description": "Тип занятия - физическая культура"
-    },
-    "courseWork": "Курсовая работа",
-    "@courseWork": {
-        "description": "Тип занятия - курсовая работа"
-    },
-    "courseProject": "Курсовой проект",
-    "@courseProject": {
-        "description": "Тип занятия - курсовой проект"
-    },
-    "mapsOnlyOnMobile": "Карты доступны только на мобильных устройствах",
-    "@mapsOnlyOnMobile": {
-        "description": "Сообщение для пользователей десктопа о картах"
-    },
-    "scheduleAnalyticsTitle": "Аналитика расписания",
-    "@scheduleAnalyticsTitle": {
-        "description": "Заголовок для страницы аналитики расписания"
-    },
-    "scheduleAnalyticsDescription": "Статистика и анализ вашего учебного расписания",
-    "@scheduleAnalyticsDescription": {
-        "description": "Описание для аналитики расписания"
-    },
-    "loadByDays": "Загрузка по дням",
-    "@loadByDays": {
-        "description": "Заголовок графика ежедневной нагрузки"
-    },
-    "lessonTypes": "Типы занятий",
-    "@lessonTypes": {
-        "description": "Заголовок графика типов занятий"
-    },
-    "teachers": "Преподаватели",
-    "@teachers": {
-        "description": "Заголовок графика преподавателей"
-    },
-    "classrooms": "Аудитории",
-    "@classrooms": {
-        "description": "Заголовок графика аудиторий"
-    },
-    "noDataForAnalytics": "Нет данных для аналитики",
-    "@noDataForAnalytics": {
-        "description": "Сообщение когда нет данных для аналитики"
-    },
-    "selectAnotherSchedule": "Выберите другое расписание или проверьте наличие занятий",
-    "@selectAnotherSchedule": {
-        "description": "Предложение когда нет данных для аналитики"
-    },
-    "exportData": "Экспорт данных",
-    "@exportData": {
-        "description": "Текст кнопки для экспорта данных"
-    },
-    "fullReportWithCharts": "Полный отчет со всеми графиками",
-    "@fullReportWithCharts": {
-        "description": "Описание опции экспорта"
-    },
-    "dataInTableFormat": "Данные в табличном формате",
-    "@dataInTableFormat": {
-        "description": "Описание опции экспорта"
-    },
-    "shareImage": "Поделиться изображением",
-    "@shareImage": {
-        "description": "Заголовок опции экспорта"
-    },
-    "currentOrAllCharts": "Текущим графиком или всеми",
-    "@currentOrAllCharts": {
-        "description": "Описание опции экспорта"
-    },
-    "export": "Экспорт",
-    "@export": {
-        "description": "Текст кнопки экспорта"
-    },
-    "monday": "Понедельник",
-    "@monday": {
-        "description": "День недели - понедельник"
-    },
-    "tuesday": "Вторник",
-    "@tuesday": {
-        "description": "День недели - вторник"
-    },
-    "wednesday": "Среда",
-    "@wednesday": {
-        "description": "День недели - среда"
-    },
-    "thursday": "Четверг",
-    "@thursday": {
-        "description": "День недели - четверг"
-    },
-    "friday": "Пятница",
-    "@friday": {
-        "description": "День недели - пятница"
-    },
-    "scheduleChanges": "Изменения в расписании",
-    "@scheduleChanges": {
-        "description": "Заголовок для диалога изменений расписания"
-    },
-    "calendar": "Календарь",
-    "@calendar": {
-        "description": "Заголовок для страницы календаря"
-    },
-    "scheduleLoadingError": "Ошибка при загрузке расписания",
-    "@scheduleLoadingError": {
-        "description": "Сообщение об ошибке загрузки расписания"
-    },
-    "addSchedulesForComparison": "Добавьте расписания для сравнения",
-    "@addSchedulesForComparison": {
-        "description": "Сообщение когда нет расписаний для сравнения"
-    },
-    "buildRoute": "Построить маршрут",
-    "@buildRoute": {
-        "description": "Текст кнопки для построения маршрута"
-    },
-    "mySchedules": "Мои расписания",
-    "@mySchedules": {
-        "description": "Заголовок для страницы пользовательских расписаний"
-    },
-    "createSchedule": "Создать расписание",
-    "@createSchedule": {
-        "description": "Текст кнопки для создания расписания"
-    },
-    "addClass": "Добавить пару",
-    "@addClass": {
-        "description": "Текст кнопки для добавления пары"
-    },
-    "classesList": "Список пар",
-    "@classesList": {
-        "description": "Текст кнопки для списка пар"
-    },
-    "classLabel": "Пара",
-    "@classLabel": {
-        "description": "Подпись для одной пары"
-    },
-    "open": "Открыть",
-    "@open": {
-        "description": "Текст кнопки для открытия"
-    },
-    "edit": "Редактировать",
-    "@edit": {
-        "description": "Пункт меню для редактирования"
-    },
-    "delete": "Удалить",
-    "@delete": {
-        "description": "Пункт меню для удаления"
-    },
-    "editSchedule": "Редактирование расписания",
-    "@editSchedule": {
-        "description": "Заголовок диалога для редактирования расписания"
-    },
-    "cancel": "Отмена",
-    "@cancel": {
-        "description": "Текст кнопки для отмены"
-    },
-    "save": "Сохранить",
-    "@save": {
-        "description": "Текст кнопки для сохранения"
-    },
-    "deleteSchedule": "Удаление расписания",
-    "@deleteSchedule": {
-        "description": "Заголовок диалога для удаления расписания"
-    },
-    "deleteScheduleConfirmation": "Вы уверены, что хотите удалить расписание \"{scheduleName}\"?",
-    "@deleteScheduleConfirmation": {
-        "description": "Сообщение подтверждения удаления расписания",
-        "placeholders": {
-            "scheduleName": {
-                "type": "String"
-            }
-        }
-    },
-    "createNewClass": "Создать новую пару",
-    "@createNewClass": {
-        "description": "Текст кнопки для создания новой пары"
-    },
-    "noAddedClasses": "Нет добавленных пар",
-    "@noAddedClasses": {
-        "description": "Сообщение когда нет добавленных пар"
-    },
-    "deleteClass": "Удаление пары",
-    "@deleteClass": {
-        "description": "Заголовок диалога для удаления пары"
-    },
-    "deleteClassConfirmation": "Вы уверены, что хотите удалить пару \"{subject}\" из расписания?",
-    "@deleteClassConfirmation": {
-        "description": "Сообщение подтверждения удаления пары",
-        "placeholders": {
-            "subject": {
-                "type": "String"
-            }
-        }
-    },
-    "start": "Начало",
-    "@start": {
-        "description": "Подпись для времени начала"
-    },
-    "end": "Конец",
-    "@end": {
-        "description": "Подпись для времени окончания"
-    },
-    "endTimeMustBeAfterStart": "Время окончания должно быть позже времени начала",
-    "@endTimeMustBeAfterStart": {
-        "description": "Сообщение об ошибке для неверного диапазона времени"
-    },
-    "classNumber": "Номер пары",
-    "@classNumber": {
-        "description": "Подпись для номера пары"
-    },
-    "none": "Нет",
-    "@none": {
-        "description": "Опция для отсутствия номера пары"
-    },
-    "groups": "Группы",
-    "@groups": {
-        "description": "Подпись для секции групп"
-    },
-    "noTeachersSelected": "Преподаватели не выбраны",
-    "@noTeachersSelected": {
-        "description": "Сообщение когда преподаватели не выбраны"
-    },
-    "addTeacher": "Добавить преподавателя",
-    "@addTeacher": {
-        "description": "Заголовок диалога для добавления преподавателя"
-    },
-    "add": "Добавить",
-    "@add": {
-        "description": "Текст кнопки для добавления"
-    },
-    "selectAtLeastOneDate": "Выберите хотя бы одну дату проведения",
-    "@selectAtLeastOneDate": {
-        "description": "Сообщение об ошибке для выбора даты"
-    },
-    "addAtLeastOneClassroom": "Добавьте хотя бы одну аудиторию или сделайте занятие онлайн",
-    "@addAtLeastOneClassroom": {
-        "description": "Сообщение об ошибке для выбора аудитории"
-    },
-    "noSelectedDates": "Нет выбранных дат",
-    "@noSelectedDates": {
-        "description": "Сообщение когда даты не выбраны"
-    },
-    "selectDatesButton": "Выбрать даты",
-    "@selectDatesButton": {
-        "description": "Текст кнопки для выбора дат"
-    },
-    "noSelectedClassrooms": "Нет выбранных аудиторий",
-    "@noSelectedClassrooms": {
-        "description": "Сообщение когда аудитории не выбраны"
-    },
-    "addClassroom": "Добавить аудиторию",
-    "@addClassroom": {
-        "description": "Текст кнопки для добавления аудитории"
-    },
-    "noGroupsSelected": "Группы не выбраны",
-    "@noGroupsSelected": {
-        "description": "Сообщение когда группы не выбраны"
-    },
-    "addGroup": "Добавить группу",
-    "@addGroup": {
-        "description": "Заголовок диалога для добавления группы"
-    },
-    "exampleClassNames": "Пример названий пар:",
-    "@exampleClassNames": {
-        "description": "Подпись для примеров названий пар"
-    },
-    "textCopied": "Текст скопирован!",
-    "@textCopied": {
-        "description": "Сообщение когда текст скопирован"
-    },
-    "failedToOpenImage": "Не удалось открыть изображение: {error}",
-    "@failedToOpenImage": {
-        "description": "Сообщение об ошибке при открытии изображения",
-        "placeholders": {
-            "error": {
-                "type": "String"
-            }
-        }
-    },
-    "loginFailed": "Ошибка входа",
-    "@loginFailed": {
-        "description": "Сообщение об ошибке входа"
-    },
-    "next": "Далее",
-    "@next": {
-        "description": "Текст кнопки для продолжения"
-    },
-    "errorLoadingSponsors": "Ошибка при загрузке спонсоров",
-    "@errorLoadingSponsors": {
-        "description": "Сообщение об ошибке загрузки спонсоров"
-    },
-    "login": "Войти",
-    "@login": {
-        "description": "Текст кнопки для входа"
-    },
-    "loginToContinue": "Войдите для продолжения",
-    "@loginToContinue": {
-        "description": "Сообщение для входа в систему"
-    },
-    "deleteScheduleTitle": "Удаление расписания",
-    "@deleteScheduleTitle": {
-        "description": "Заголовок для диалога удаления расписания"
-    },
-    "deleteScheduleMessage": "Вы уверены, что хотите удалить это расписание?",
-    "@deleteScheduleMessage": {
-        "description": "Сообщение для подтверждения удаления расписания"
-    },
-    "makeActive": "Сделать активным",
-    "@makeActive": {
-        "description": "Пункт меню для активации расписания"
-    },
-    "comment": "Комментарий",
-    "@comment": {
-        "description": "Подпись для поля комментария"
-    },
-    "schedules": "Расписания",
-    "@schedules": {
-        "description": "Заголовок для страницы расписаний"
-    },
-    "loadingSchedules": "Загрузка расписаний...",
-    "@loadingSchedules": {
-        "description": "Сообщение во время загрузки расписаний"
-    },
-    "addedClass": "Добавляемая пара:",
-    "@addedClass": {
-        "description": "Подпись для добавляемой пары"
-    },
-    "createNewSchedule": "Создать новое расписание",
-    "@createNewSchedule": {
-        "description": "Текст кнопки для создания нового расписания"
-    },
-    "selectSchedule": "Выберите расписание:",
-    "@selectSchedule": {
-        "description": "Подпись для выбора расписания"
-    },
-    "classAddedToSchedule": "Пара добавлена в расписание \"{scheduleName}\"",
-    "@classAddedToSchedule": {
-        "description": "Сообщение об успешном добавлении пары",
-        "placeholders": {
-            "scheduleName": {
-                "type": "String"
-            }
-        }
-    },
-    "legends": "Обозначения",
-    "@legends": {
-        "description": "Подпись для обозначений календаря"
-    },
-    "maxThreeSchedules": "Максимум 3 расписания для сравнения",
-    "@maxThreeSchedules": {
-        "description": "Сообщение об ошибке для лимита сравнения расписаний"
-    },
-    "university": "Университет",
-    "@university": {
-        "description": "Подпись для университета"
-    },
-    "search": "Поиск",
-    "@search": {
-        "description": "Текст заполнителя поиска"
-    },
-    "error": "Ошибка",
-    "@error": {
-        "description": "Заголовок ошибки"
-    },
-    "searchFailed": "Не удалось выполнить поиск",
-    "@searchFailed": {
-        "description": "Сообщение об ошибке поиска"
-    },
-    "enterCommentText": "Введите текст комментария...",
-    "@enterCommentText": {
-        "description": "Заполнитель ввода комментария"
-    },
-    "remove": "Удалить",
-    "@remove": {
-        "description": "Текст кнопки удаления"
-    },
-    "noAvailableSchedules": "Нет доступных расписаний",
-    "@noAvailableSchedules": {
-        "description": "Сообщение когда нет доступных расписаний"
-    },
-    "scheduleDeleted": "Расписание удалено",
-    "@scheduleDeleted": {
-        "description": "Сообщение об успешном удалении расписания"
-    },
-    "deleteScheduleConfirmationDialog": "Вы уверены, что хотите удалить это расписание?",
-    "@deleteScheduleConfirmationDialog": {
-        "description": "Сообщение подтверждения удаления расписания"
-    },
-    "active": "Активно",
-    "@active": {
-        "description": "Подпись активного статуса"
-    },
-    "comments": "Комментарии",
-    "@comments": {
-        "description": "Подпись комментариев во множественном числе"
-    },
-    "activate": "Активировать",
-    "@activate": {
-        "description": "Текст кнопки активации"
-    },
-    "group": "Группа",
-    "@group": {
-        "description": "Подпись группы"
-    },
-    "teacher": "Преподаватель",
-    "@teacher": {
-        "description": "Подпись преподавателя"
-    },
-    "classroom": "Аудитория",
-    "@classroom": {
-        "description": "Подпись аудитории"
-    },
-    "schedule": "Расписание",
-    "@schedule": {
-        "description": "Подпись расписания"
-    },
-    "commentDeleted": "Комментарий удален",
-    "@commentDeleted": {
-        "description": "Сообщение об успешном удалении комментария"
-    },
-    "commentSaved": "Комментарий сохранен",
-    "@commentSaved": {
-        "description": "Сообщение об успешном сохранении комментария"
-    },
-    "scheduleComment": "Комментарий к расписанию",
-    "@scheduleComment": {
-        "description": "Заголовок комментария к расписанию"
-    },
-    "addOrEditNote": "Добавьте или отредактируйте заметку к расписанию",
-    "@addOrEditNote": {
-        "description": "Описание комментария к расписанию"
-    },
-    "editComment": "Редактировать комментарий",
-    "@editComment": {
-        "description": "Пункт меню редактирования комментария"
-    },
-    "addComment": "Добавить комментарий",
-    "@addComment": {
-        "description": "Пункт меню добавления комментария"
-    },
-    "groups": "Группы",
-    "@groups": {
-        "description": "Заголовок секции групп"
-    },
-    "teachers": "Преподаватели",
-    "@teachers": {
-        "description": "Заголовок секции преподавателей"
-    },
-    "classrooms": "Аудитории",
-    "@classrooms": {
-        "description": "Заголовок секции аудиторий"
-    },
-    "addSchedule": "Добавить расписание",
-    "@addSchedule": {
-        "description": "Подсказка добавления расписания"
-    },
-    "activeSchedule": "Активное расписание",
-    "@activeSchedule": {
-        "description": "Подпись активного расписания"
-    },
-    "goToView": "Перейти к просмотру",
-    "@goToView": {
-        "description": "Подсказка перехода к просмотру"
-    },
-    "noAddedGroups": "Нет добавленных групп",
-    "@noAddedGroups": {
-        "description": "Сообщение когда нет добавленных групп"
-    },
-    "addGroupToSeeSchedule": "Добавьте группу, чтобы видеть её расписание",
-    "@addGroupToSeeSchedule": {
-        "description": "Инструкция по добавлению группы"
-    },
-    "noAddedTeachers": "Нет добавленных преподавателей",
-    "@noAddedTeachers": {
-        "description": "Сообщение когда нет добавленных преподавателей"
-    },
-    "addTeacherToSeeSchedule": "Добавьте преподавателя, чтобы видеть его расписание",
-    "@addTeacherToSeeSchedule": {
-        "description": "Инструкция по добавлению преподавателя"
-    },
-    "noAddedClassrooms": "Нет добавленных аудиторий",
-    "@noAddedClassrooms": {
-        "description": "Сообщение когда нет добавленных аудиторий"
-    },
-    "addClassroomToSeeSchedule": "Добавьте аудиторию, чтобы видеть её расписание",
-    "@addClassroomToSeeSchedule": {
-        "description": "Инструкция по добавлению аудитории"
-    },
-    "failedToLoadSchedules": "Не удалось загрузить расписания",
-    "@failedToLoadSchedules": {
-        "description": "Сообщение об ошибке загрузки расписаний"
-    },
-    "checkInternetConnection": "Проверьте подключение к интернету",
-    "@checkInternetConnection": {
-        "description": "Описание ошибки подключения к интернету"
-    },
-    "enterJsonString": "Пожалуйста, введите JSON строку",
-    "@enterJsonString": {
-        "description": "Сообщение валидации JSON ввода"
-    },
-    "enterJsonStringPlaceholder": "Введите JSON строку...",
-    "@enterJsonStringPlaceholder": {
-        "description": "Заполнитель JSON ввода"
-    },
-    "tabs": "Вкладки",
-    "@tabs": {
-        "description": "Подпись вкладок"
-    },
-    "scheduleChangesTitle": "Изменения в расписании",
-    "@scheduleChangesTitle": {
-        "description": "Заголовок диалога изменений расписания"
-    },
-    "loadByDaysChart": "Загрузка по дням",
-    "@loadByDaysChart": {
-        "description": "Заголовок графика ежедневной нагрузки"
-    },
-    "lessonTypesChart": "Типы занятий",
-    "@lessonTypesChart": {
-        "description": "Заголовок графика типов занятий"
-    },
-    "teachersChart": "Преподаватели",
-    "@teachersChart": {
-        "description": "Заголовок графика преподавателей"
-    },
-    "classroomsChart": "Аудитории",
-    "@classroomsChart": {
-        "description": "Заголовок графика аудиторий"
-    },
-    "fullReportWithAllCharts": "Полный отчет со всеми графиками",
-    "@fullReportWithAllCharts": {
-        "description": "Описание опции экспорта"
-    },
-    "dataInTableFormatExport": "Данные в табличном формате",
-    "@dataInTableFormatExport": {
-        "description": "Описание опции экспорта"
-    },
-    "shareImageExport": "Поделиться изображением",
-    "@shareImageExport": {
-        "description": "Заголовок опции экспорта"
-    },
-    "currentOrAllChartsExport": "Текущим графиком или всеми",
-    "@currentOrAllChartsExport": {
-        "description": "Описание опции экспорта"
-    },
-    "totalClasses": "Общее количество пар",
-    "@totalClasses": {
-        "description": "Подпись статистики общего количества пар"
-    },
-    "forEntirePeriod": "За весь период",
-    "@forEntirePeriod": {
-        "description": "Описание периода статистики"
-    },
-    "averagePerDay": "Среднее в день",
-    "@averagePerDay": {
-        "description": "Подпись статистики среднего в день"
-    },
-    "academicLoad": "Учебная нагрузка",
-    "@academicLoad": {
-        "description": "Описание учебной нагрузки"
-    },
-    "maximumPerDay": "Максимум в день",
-    "@maximumPerDay": {
-        "description": "Подпись статистики максимума в день"
-    },
-    "busiestDay": "Самый загруженный день",
-    "@busiestDay": {
-        "description": "Описание самого загруженного дня"
-    },
-    "showEmptyClassesSettings": "Показывать пустые пары",
-    "@showEmptyClassesSettings": {
-        "description": "Настройка показа пустых пар"
-    },
-    "showCommentIndicatorsSettings": "Показывать индикаторы комментариев",
-    "@showCommentIndicatorsSettings": {
-        "description": "Настройка показа индикаторов комментариев"
-    },
-    "compactCardModeSettings": "Компактный режим карточек",
-    "@compactCardModeSettings": {
-        "description": "Настройка компактного режима карточек"
-    },
-    "holiday": "Выходной",
-    "@holiday": {
-        "description": "Заголовок страницы выходного дня"
-    },
-    "selectExisting": "Выбрать существующее",
-    "@selectExisting": {
-        "description": "Опция выбора существующего"
-    },
-    "createNew": "Создать новое",
-    "@createNew": {
-        "description": "Опция создания нового"
-    },
-    "scheduleName": "Название расписания",
-    "@scheduleName": {
-        "description": "Подпись поля названия расписания"
-    },
-    "scheduleNamePlaceholder": "Например: Моё основное расписание",
-    "@scheduleNamePlaceholder": {
-        "description": "Заполнитель названия расписания"
-    },
-    "descriptionOptional": "Описание (необязательно)",
-    "@descriptionOptional": {
-        "description": "Подпись поля описания"
-    },
-    "addScheduleDescription": "Добавьте описание расписания",
-    "@addScheduleDescription": {
-        "description": "Заполнитель поля описания"
-    },
-    "openSchedule": "Открыть",
-    "@openSchedule": {
-        "description": "Кнопка открытия расписания"
-    },
-    "selectWeek": "Выберите неделю",
-    "@selectWeek": {
-        "description": "Заголовок выбора недели"
-    },
-    "quickWayToWeek": "Быстрый способ перейти к определённой неделе",
-    "@quickWayToWeek": {
-        "description": "Описание выбора недели"
-    },
-    "selectUpToFourSchedules": "Выберите до 4-х расписаний, чтобы сравнить их по дням",
-    "@selectUpToFourSchedules": {
-        "description": "Описание сравнения расписаний"
-    },
-    "addToSchedule": "Добавить в расписание",
-    "@addToSchedule": {
-        "description": "Заголовок добавления в расписание"
-    },
-    "enterLessonComment": "Введите комментарий к занятию...",
-    "@enterLessonComment": {
-        "description": "Заполнитель комментария к занятию"
-    },
-    "noOwnSchedules": "У вас пока нет своих расписаний",
-    "@noOwnSchedules": {
-        "description": "Сообщение об отсутствии пользовательских расписаний"
-    },
-    "createCustomSchedule": "Создайте собственное расписание, добавляя в него пары из разных доступных расписаний",
-    "@createCustomSchedule": {
-        "description": "Описание создания пользовательского расписания"
-    },
-    "scheduleCreation": "Создание расписания",
-    "@scheduleCreation": {
-        "description": "Заголовок создания расписания"
-    },
-    "enterNameAndDescription": "Введите название и описание для нового расписания",
-    "@enterNameAndDescription": {
-        "description": "Описание создания расписания"
-    },
-    "scheduleNameLabel": "Название расписания",
-    "@scheduleNameLabel": {
-        "description": "Подпись названия расписания"
-    },
-    "scheduleNameExample": "Например: Моё расписание",
-    "@scheduleNameExample": {
-        "description": "Пример названия расписания"
-    },
-    "descriptionOptionalLabel": "Описание (необязательно)",
-    "@descriptionOptionalLabel": {
-        "description": "Подпись необязательного описания"
-    },
-    "addScheduleDescriptionPlaceholder": "Добавьте описание расписания",
-    "@addScheduleDescriptionPlaceholder": {
-        "description": "Заполнитель описания"
-    },
-    "editScheduleTitle": "Редактирование расписания",
-    "@editScheduleTitle": {
-        "description": "Заголовок редактирования расписания"
-    },
-    "classesListTitle": "Список пар",
-    "@classesListTitle": {
-        "description": "Заголовок списка пар"
-    },
-    "addNewClassToSchedule": "Вы можете добавить новую пару в расписание {scheduleName}",
-    "@addNewClassToSchedule": {
-        "description": "Описание добавления новой пары",
-        "placeholders": {
-            "scheduleName": {
-                "type": "String"
-            }
-        }
-    },
-    "offline": "Оффлайн",
-    "@offline": {
-        "description": "Подпись оффлайн режима"
-    },
-    "online": "Онлайн",
-    "@online": {
-        "description": "Подпись онлайн режима"
-    },
-    "subjectName": "Название предмета",
-    "@subjectName": {
-        "description": "Подпись поля названия предмета"
-    },
-    "enterSubjectName": "Введите название предмета",
-    "@enterSubjectName": {
-        "description": "Заполнитель названия предмета"
-    },
-    "teacherFullName": "ФИО преподавателя",
-    "@teacherFullName": {
-        "description": "Подпись поля имени преподавателя"
-    },
-    "teacherNameExample": "Например: Иванов Иван Иванович",
-    "@teacherNameExample": {
-        "description": "Пример имени преподавателя"
-    },
-    "endTimeMustBeAfterStartTime": "Время окончания должно быть позже времени начала",
-    "@endTimeMustBeAfterStartTime": {
-        "description": "Ошибка валидации времени"
-    },
-    "selectAtLeastOneDateError": "Выберите хотя бы одну дату проведения",
-    "@selectAtLeastOneDateError": {
-        "description": "Ошибка выбора даты"
-    },
-    "addAtLeastOneClassroomError": "Добавьте хотя бы одну аудиторию или сделайте занятие онлайн",
-    "@addAtLeastOneClassroomError": {
-        "description": "Ошибка выбора аудитории"
-    },
-    "selectDatesButtonText": "Выбрать даты",
-    "@selectDatesButtonText": {
-        "description": "Текст кнопки выбора дат"
-    },
-    "onlineClassLink": "Ссылка на онлайн занятие",
-    "@onlineClassLink": {
-        "description": "Подпись поля ссылки на онлайн занятие"
-    },
-    "enterConnectionUrl": "Введите URL для подключения",
-    "@enterConnectionUrl": {
-        "description": "Заполнитель URL подключения"
-    },
-    "classroomNumber": "Аудитория {name}",
-    "@classroomNumber": {
-        "description": "Заголовок номера аудитории",
-        "placeholders": {
-            "name": {
-                "type": "String"
-            }
-        }
-    },
-    "classroomExample": "Например: А-123",
-    "@classroomExample": {
-        "description": "Пример номера аудитории"
-    },
-    "campusNameOptional": "Название кампуса (опционально)",
-    "@campusNameOptional": {
-        "description": "Подпись поля названия кампуса"
-    },
-    "campusExample": "Например: В-78",
-    "@campusExample": {
-        "description": "Пример названия кампуса"
-    },
-    "addClassroomDialog": "Добавить аудиторию",
-    "@addClassroomDialog": {
-        "description": "Заголовок диалога добавления аудитории"
-    },
-    "groupName": "Название группы",
-    "@groupName": {
-        "description": "Подпись поля названия группы"
-    },
-    "groupNameExample": "Например: ИКБО-01-21",
-    "@groupNameExample": {
-        "description": "Пример названия группы"
-    },
-    "addGroupDialog": "Добавить группу",
-    "@addGroupDialog": {
-        "description": "Заголовок диалога добавления группы"
-    },
-    "retry": "Повторить",
-    "@retry": {
-        "description": "Текст кнопки повтора"
-    },
-    "resetFilter": "Сбросить фильтр",
-    "@resetFilter": {
-        "description": "Текст кнопки сброса фильтра"
-    },
-    "supportOurService": "Поддержите наш сервис",
-    "@supportOurService": {
-        "description": "Заголовок поддержки сервиса"
-    },
-    "leaveAd": "Оставить рекламу",
-    "@leaveAd": {
-        "description": "Текст кнопки оставления рекламы"
-    },
-    "disable": "Отключить",
-    "@disable": {
-        "description": "Текст кнопки отключения"
-    },
-    "errorWithMessage": "Ошибка: {message}",
-    "@errorWithMessage": {
-        "description": "Сообщение об ошибке с деталями",
-        "placeholders": {
-            "message": {
-                "type": "String"
-            }
-        }
-    },
-    "map": "Карта",
-    "@map": {
-        "description": "Заголовок страницы карты"
-    },
-    "tryAgain": "Попробовать снова",
-    "@tryAgain": {
-        "description": "Текст кнопки повтора"
-    },
-    "announcement": "Объявление",
-    "@announcement": {
-        "description": "Подпись объявления"
-    },
-    "contact": "Связаться",
-    "@contact": {
-        "description": "Текст кнопки связи"
-    },
-    "copiedToClipboard": "{title} скопирован в буфер обмена",
-    "@copiedToClipboard": {
-        "description": "Сообщение о копировании в буфер обмена",
-        "placeholders": {
-            "title": {
-                "type": "String"
-            }
-        }
-    },
-    "post": "Пост",
-    "@post": {
-        "description": "Заголовок страницы поста"
-    },
-    "errorLoadingPost": "Ошибка при загрузке поста",
-    "@errorLoadingPost": {
-        "description": "Сообщение об ошибке загрузки поста"
-    },
-    "errorLoadingContributors": "Ошибка при загрузке контрибьюторов",
-    "@errorLoadingContributors": {
-        "description": "Сообщение об ошибке загрузки контрибьюторов"
-    },
-    "mireaMap": "Карта МИРЭА",
-    "@mireaMap": {
-        "description": "Заголовок сервиса карты МИРЭА"
-    },
-    "findNeededClassroom": "Найди нужный кабинет",
-    "@findNeededClassroom": {
-        "description": "Описание сервиса карты МИРЭА"
-    },
-    "nfcPass": "NFC-пропуск",
-    "@nfcPass": {
-        "description": "Заголовок сервиса NFC-пропуска"
-    },
-    "passForUniversityEntry": "Пропуск для входа в университет",
-    "@passForUniversityEntry": {
-        "description": "Описание сервиса NFC-пропуска"
-    },
-    "cloudMireaNinja": "Cloud Mirea Ninja",
-    "@cloudMireaNinja": {
-        "description": "Заголовок облачного сервиса"
-    },
-    "mireaNinja": "Mirea Ninja",
-    "@mireaNinja": {
-        "description": "Заголовок сообщества Mirea Ninja"
-    },
-    "mostPopularUnofficialChat": "Самый популярный неофициальный чат",
-    "@mostPopularUnofficialChat": {
-        "description": "Описание сообщества Mirea Ninja"
-    },
-    "kisDepartment": "Кафедра КИС",
-    "@kisDepartment": {
-        "description": "Заголовок кафедры КИС"
-    },
-    "corporateInformationSystems": "Кафедра Корпоративных информационных систем",
-    "@corporateInformationSystems": {
-        "description": "Описание кафедры КИС"
-    },
-    "ippoDepartment": "Кафедра ИППО",
-    "@ippoDepartment": {
-        "description": "Заголовок кафедры ИППО"
-    },
-    "instrumentalAndAppliedSoftware": "Кафедра Инструментального и прикладного программного обеспечения",
-    "@instrumentalAndAppliedSoftware": {
-        "description": "Описание кафедры ИППО"
-    },
-    "competitiveProgrammingMirea": "Спортивное программирование МИРЭА",
-    "@competitiveProgrammingMirea": {
-        "description": "Заголовок спортивного программирования"
-    },
-    "competitiveProgrammingDescription": "Здесь публикуются различные новости и апдейты по олимпиадному программированию в МИРЭА",
-    "@competitiveProgrammingDescription": {
-        "description": "Описание спортивного программирования"
-    },
-    "personalAccount": "Личный кабинет",
-    "@personalAccount": {
-        "description": "Заголовок сервиса личного кабинета"
-    },
-    "accessToGradesAndServices": "Доступ к оценкам, заявлениям и другим сервисам",
-    "@accessToGradesAndServices": {
-        "description": "Описание личного кабинета"
-    },
-    "openAction": "Открыть",
-    "@openAction": {
-        "description": "Кнопка действия открытия"
-    },
-    "educationalPortal": "Учебный портал",
-    "@educationalPortal": {
-        "description": "Заголовок учебного портала"
-    },
-    "accessToCoursesAndMaterials": "Доступ к курсам и материалам",
-    "@accessToCoursesAndMaterials": {
-        "description": "Описание учебного портала"
-    },
-    "goToAction": "Перейти",
-    "@goToAction": {
-        "description": "Кнопка действия перехода"
-    },
-    "electronicJournal": "Электронный журнал",
-    "@electronicJournal": {
-        "description": "Заголовок электронного журнала"
-    },
-    "attendanceCheckSchedule": "Проверка посещаемости, расписание",
-    "@attendanceCheckSchedule": {
-        "description": "Описание электронного журнала"
-    },
-    "library": "Библиотека",
-    "@library": {
-        "description": "Заголовок сервиса библиотеки"
-    },
-    "freeSoftware": "Бесплатное ПО",
-    "@freeSoftware": {
-        "description": "Заголовок сервиса бесплатного ПО"
-    },
-    "cyberzone": "Киберзона",
-    "@cyberzone": {
-        "description": "Заголовок сервиса киберзоны"
-    },
-    "handbook": "Справочник",
-    "@handbook": {
-        "description": "Заголовок сервиса справочника"
-    },
-    "scholarships": "Стипендии",
-    "@scholarships": {
-        "description": "Заголовок сервиса стипендий"
-    },
-    "militaryRegistration": "Воинский учет",
-    "@militaryRegistration": {
-        "description": "Заголовок сервиса воинского учета"
-    },
-    "dormitories": "Общежития",
-    "@dormitories": {
-        "description": "Заголовок сервиса общежитий"
-    },
-    "studentOffice": "Студенческий офис",
-    "@studentOffice": {
-        "description": "Заголовок студенческого офиса"
-    },
-    "certificatesDocumentsQuestions": "Справки, документы, вопросы",
-    "@certificatesDocumentsQuestions": {
-        "description": "Описание студенческого офиса"
-    },
-    "careerCenter": "Центр карьеры",
-    "@careerCenter": {
-        "description": "Заголовок центра карьеры"
-    },
-    "vacanciesAndInternships": "Вакансии и стажировки",
-    "@vacanciesAndInternships": {
-        "description": "Описание центра карьеры"
-    },
-    "initiativeService": "Сервис инициатив",
-    "@initiativeService": {
-        "description": "Заголовок сервиса инициатив"
-    },
-    "ideasAndSuggestions": "Идеи и предложения",
-    "@ideasAndSuggestions": {
-        "description": "Описание сервиса инициатив"
-    },
-    "virtualTour": "Виртуальный тур",
-    "@virtualTour": {
-        "description": "Заголовок сервиса виртуального тура"
-    },
-    "interactiveUniversityTour": "Интерактивная экскурсия по корпусам университета",
-    "@interactiveUniversityTour": {
-        "description": "Описание виртуального тура"
-    },
-    "startupAccelerator": "Стартап-акселератор",
-    "@startupAccelerator": {
-        "description": "Заголовок сервиса стартап-акселератора"
-    },
-    "startupSupport": "Поддержка стартапов и предпринимательских идей",
-    "@startupSupport": {
-        "description": "Описание стартап-акселератора"
-    },
-    "corporatePortal": "Корпоративный портал",
-    "@corporatePortal": {
-        "description": "Заголовок корпоративного портала"
-    },
-    "accessForTeachersAndStaff": "Доступ для преподавателей и сотрудников",
-    "@accessForTeachersAndStaff": {
-        "description": "Описание корпоративного портала"
-    },
-    "mainServices": "Основные сервисы",
-    "@mainServices": {
-        "description": "Заголовок секции основных сервисов"
-    },
-    "studentLife": "Студенческая жизнь",
-    "@studentLife": {
-        "description": "Заголовок секции студенческой жизни"
-    },
-    "useful": "Полезное",
-    "@useful": {
-        "description": "Заголовок секции полезного"
-    },
-    "createAccount": "Создать аккаунт",
-    "@createAccount": {
-        "description": "Текст кнопки создания аккаунта"
-    },
-    "createAccountTitle": "Создайте аккаунт",
-    "@createAccountTitle": {
-        "description": "Заголовок диалога создания аккаунта"
-    },
-    "createAccountDescription": "Мы предлагаем вам бесплатно создать аккаунт в нашем облачном хранилище, чтобы вы могли хранить свои файлы и документы!",
-    "@createAccountDescription": {
-        "description": "Описание диалога создания аккаунта"
-    },
-    "cloudStorageDescription": "На cloud.mirea.ninja вы можете хранить до 10 ГБ бесплатно (квоту можно расширить в телеграм боте), а также делиться файлами и онлайн редактировать документы вместе с одногруппниками.",
-    "@cloudStorageDescription": {
-        "description": "Описание облачного хранилища"
-    },
-    "searchPlaceholder": "Поиск",
-    "@searchPlaceholder": {
-        "description": "Заполнитель поля поиска"
-    },
-    "searchInAnnouncements": "Поиск по объявлениям...",
-    "@searchInAnnouncements": {
-        "description": "Заполнитель поиска по объявлениям"
-    },
-    "itemName": "Название",
-    "@itemName": {
-        "description": "Подпись поля названия предмета"
-    },
-    "itemNameExample": "Например: Ключи с брелоком",
-    "@itemNameExample": {
-        "description": "Пример названия предмета"
-    },
-    "description": "Описание",
-    "@description": {
-        "description": "Подпись поля описания"
-    },
-    "itemDescription": "Подробности о предмете, где и когда был найден/утерян...",
-    "@itemDescription": {
-        "description": "Заполнитель описания предмета"
-    },
-    "telegram": "Телеграм",
-    "@telegram": {
-        "description": "Подпись поля телеграм"
-    },
-    "phone": "Телефон",
-    "@phone": {
-        "description": "Подпись поля телефона"
-    },
-    "leaveFeedback": "Оставить отзыв",
-    "@leaveFeedback": {
-        "description": "Заголовок оставления отзыва"
-    },
-    "yourEmail": "Ваш email",
-    "@yourEmail": {
-        "description": "Подпись поля email"
-    },
-    "enterEmail": "Введите email",
-    "@enterEmail": {
-        "description": "Заполнитель поля email"
-    },
-    "whatHappened": "Что случилось?",
-    "@whatHappened": {
-        "description": "Подпись вопроса обратной связи"
-    },
-    "feedbackPlaceholder": "Когда я нажимаю \"Х\" происходит \"У\"",
-    "@feedbackPlaceholder": {
-        "description": "Заполнитель текста обратной связи"
-    },
-    "exportToCalendar": "Экспорт в календарь",
-    "@exportToCalendar": {
-        "description": "Заголовок экспорта в календарь"
-    },
-    "scheduleExported": "Расписание экспортировано",
-    "@scheduleExported": {
-        "description": "Сообщение об успешном экспорте расписания"
-    },
-    "failedToExportSchedule": "Не удалось экспортировать расписание",
-    "@failedToExportSchedule": {
-        "description": "Сообщение об ошибке экспорта расписания"
-    },
-    "exportSettings": "Настройки экспорта",
-    "@exportSettings": {
-        "description": "Заголовок настроек экспорта"
-    },
-    "emojiInLessonTypes": "Эмодзи в типах пар",
-    "@emojiInLessonTypes": {
-        "description": "Заголовок настройки эмодзи"
-    },
-    "emojiExample": "Пример: \"📚 Лекция\" вместо \"Лекция\"",
-    "@emojiExample": {
-        "description": "Описание настройки эмодзи"
-    },
-    "shortLessonTypeNames": "Короткие названия типов",
-    "@shortLessonTypeNames": {
-        "description": "Заголовок настройки коротких названий"
-    },
-    "shortNamesExample": "Пример: \"Лек.\" вместо \"Лекция\"",
-    "@shortNamesExample": {
-        "description": "Описание настройки коротких названий"
-    },
-    "preview": "Предпросмотр",
-    "@preview": {
-        "description": "Заголовок секции предпросмотра"
-    },
-    "fullTypeName": "Полное название типа",
-    "@fullTypeName": {
-        "description": "Подзаголовок полного названия типа"
-    },
-    "shortTypeName": "Сокращенное название типа",
-    "@shortTypeName": {
-        "description": "Подзаголовок сокращенного названия типа"
-    },
-    "subjectSelection": "Выбор предметов",
-    "@subjectSelection": {
-        "description": "Заголовок выбора предметов"
-    },
-    "standardReminders": "Стандартные напоминания",
-    "@standardReminders": {
-        "description": "Заголовок стандартных напоминаний"
-    },
-    "cardSettings": "Настройки карточки",
-    "@cardSettings": {
-        "description": "Заголовок настроек карточки"
-    },
-    "codeFromEmail": "Код из письма",
-    "@codeFromEmail": {
-        "description": "Заголовок кода из письма"
-    },
-    "news": "Новости",
-    "@news": {
-        "description": "Пункт навигации новостей"
-    },
-    "services": "Сервисы",
-    "@services": {
-        "description": "Пункт навигации сервисов"
-    },
-    "profile": "Профиль",
-    "@profile": {
-        "description": "Пункт навигации профиля"
-    },
-    "aboutApp": "О приложении",
-    "@aboutApp": {
-        "description": "Пункт навигации о приложении"
-    },
-    "settings": "Настройки",
-    "@settings": {
-        "description": "Пункт навигации настроек"
-    },
-    "findScheduleForClassroom": "Вы можете быстро найти расписание для этой аудитории, используя поиск по расписанию.",
-    "@findScheduleForClassroom": {
-        "description": "Описание поиска расписания для аудитории"
-    },
-    "rtuMireaApp": "Приложение РТУ МИРЭА",
-    "@rtuMireaApp": {
-        "description": "Название приложения"
-    },
-    "newYearHolidays": "Новогодние праздники",
-    "@newYearHolidays": {
-        "description": "Заголовок новогодних праздников"
-    },
-    "winterVacation": "Зимние каникулы",
-    "@winterVacation": {
-        "description": "Заголовок зимних каникул"
-    },
-    "defenderOfFatherlandDay": "День защитника Отечества",
-    "@defenderOfFatherlandDay": {
-        "description": "Заголовок Дня защитника Отечества"
-    },
-    "internationalWomensDay": "Международный женский день",
-    "@internationalWomensDay": {
-        "description": "Заголовок Международного женского дня"
-    },
-    "springAndLaborDay": "Праздник Весны и Труда",
-    "@springAndLaborDay": {
-        "description": "Заголовок Праздника Весны и Труда"
-    },
-    "victoryDay": "День Победы",
-    "@victoryDay": {
-        "description": "Заголовок Дня Победы"
-    },
-    "russiaDay": "День России",
-    "@russiaDay": {
-        "description": "Заголовок Дня России"
-    },
-    "nationalUnityDay": "День народного единства",
-    "@nationalUnityDay": {
-        "description": "Заголовок Дня народного единства"
-    },
-    "newYear": "Новый год",
-    "@newYear": {
-        "description": "Заголовок Нового года"
-    },
-    "total": "Всего",
-    "@total": {
-        "description": "Подпись всего"
-    },
-    "lectures": "Лекции",
-    "@lectures": {
-        "description": "Подпись лекций"
-    },
-    "practicals": "Практ.",
-    "@practicals": {
-        "description": "Подпись практических"
-    },
-    "labs": "Лаб.",
-    "@labs": {
-        "description": "Подпись лабораторных"
-    },
-    "justNow": "только что",
-    "@justNow": {
-        "description": "Подпись времени только что"
-    },
-    "unknown": "Неизвестно",
-    "@unknown": {
-        "description": "Подпись неизвестного автора"
-    },
-    "status": "Статус",
-    "@status": {
-        "description": "Подпись статуса"
-    },
-    "active": "Активен",
-    "@active": {
-        "description": "Активный статус"
-    },
-    "phoneContact": "Телефон: {phoneNumber}",
-    "@phoneContact": {
-        "description": "Подпись контакта телефона",
-        "placeholders": {
-            "phoneNumber": {
-                "type": "String"
-            }
-        }
+  "@@locale": "ru",
+  "scheduleAppBarTitle": "Расписание",
+  "@scheduleAppBarTitle": {
+    "description": "Название страницы расписания"
+  },
+  "loadingError": "Ошибка загрузки",
+  "@loadingError": {
+    "description": "Сообщение об ошибке при загрузке"
+  },
+  "imageViewer": "Просмотр изображений",
+  "@imageViewer": {
+    "description": "Заголовок для просмотра изображений"
+  },
+  "selectDate": "Выберите дату",
+  "@selectDate": {
+    "description": "Текст кнопки для выбора даты"
+  },
+  "selectDates": "Выберите даты",
+  "@selectDates": {
+    "description": "Текст кнопки для выбора диапазона дат"
+  },
+  "enableComparisonMode": "Включить режим сравнения",
+  "@enableComparisonMode": {
+    "description": "Подсказка для включения режима сравнения"
+  },
+  "disableComparisonMode": "Выключить режим сравнения",
+  "@disableComparisonMode": {
+    "description": "Подсказка для выключения режима сравнения"
+  },
+  "compareSchedules": "Сравнить расписания",
+  "@compareSchedules": {
+    "description": "Текст кнопки для сравнения расписаний"
+  },
+  "noClassesToday": "Нет пар в этот день",
+  "@noClassesToday": {
+    "description": "Сообщение когда нет занятий"
+  },
+  "selectTime": "Выберите время",
+  "@selectTime": {
+    "description": "Заполнитель для выбора времени"
+  },
+  "clear": "Очистить",
+  "@clear": {
+    "description": "Текст кнопки для очистки выбора"
+  },
+  "month": "Месяц",
+  "@month": {
+    "description": "Формат календаря - вид по месяцам"
+  },
+  "week": "Неделя",
+  "@week": {
+    "description": "Формат календаря - вид по неделям"
+  },
+  "apply": "Применить",
+  "@apply": {
+    "description": "Текст кнопки для применения изменений"
+  },
+  "previousDay": "Предыдущий день",
+  "@previousDay": {
+    "description": "Подсказка для кнопки предыдущего дня"
+  },
+  "nextDay": "Следующий день",
+  "@nextDay": {
+    "description": "Подсказка для кнопки следующего дня"
+  },
+  "today": "Сегодня",
+  "@today": {
+    "description": "Текст кнопки для сегодняшнего дня"
+  },
+  "refreshData": "Обновить данные",
+  "@refreshData": {
+    "description": "Подсказка для кнопки обновления"
+  },
+  "scheduleComparison": "Сравнение расписаний",
+  "@scheduleComparison": {
+    "description": "Подсказка для сравнения расписаний"
+  },
+  "scheduleAnalytics": "Аналитика расписания",
+  "@scheduleAnalytics": {
+    "description": "Подсказка для аналитики расписания"
+  },
+  "allClassesList": "Список всех пар",
+  "@allClassesList": {
+    "description": "Подсказка для списка всех пар"
+  },
+  "scheduleNotSelected": "Расписание не выбрано",
+  "@scheduleNotSelected": {
+    "description": "Сообщение когда расписание не выбрано"
+  },
+  "findSchedule": "Найти расписание",
+  "@findSchedule": {
+    "description": "Текст кнопки для поиска расписания"
+  },
+  "scheduleForSelectedDay": "Расписание занятий на выбранный день",
+  "@scheduleForSelectedDay": {
+    "description": "Заголовок для содержимого расписания"
+  },
+  "tomorrow": "завтра",
+  "@tomorrow": {
+    "description": "Текст для завтрашнего дня"
+  },
+  "showEmptyClasses": "Показывать пустые пары",
+  "@showEmptyClasses": {
+    "description": "Подпись чекбокса для показа пустых пар"
+  },
+  "emptyClasses": "Пустые пары",
+  "@emptyClasses": {
+    "description": "Подпись для секции пустых пар"
+  },
+  "analytics": "Аналитика",
+  "@analytics": {
+    "description": "Подпись для секции аналитики"
+  },
+  "weekend": "Выходной",
+  "@weekend": {
+    "description": "Заголовок для страницы выходного дня"
+  },
+  "noClassesThisDay": "Нет занятий в этот день",
+  "@noClassesThisDay": {
+    "description": "Сообщение когда нет занятий в конкретный день"
+  },
+  "canRestOrStudy": "Можно отдохнуть или заняться самостоятельной работой",
+  "@canRestOrStudy": {
+    "description": "Предложение для свободного времени"
+  },
+  "goToAnotherDay": "Перейти к другому дню",
+  "@goToAnotherDay": {
+    "description": "Текст кнопки для перехода к другому дню"
+  },
+  "classesCount": "{count, plural, =1{пара} few{пары} other{пар}}",
+  "@classesCount": {
+    "description": "Множественная форма для количества пар",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
     }
+  },
+  "noClass": "Нет занятия",
+  "@noClass": {
+    "description": "Текст когда нет занятия"
+  },
+  "displaySettings": "Настройки отображения",
+  "@displaySettings": {
+    "description": "Заголовок для настроек отображения"
+  },
+  "showCommentIndicators": "Показывать индикаторы комментариев",
+  "@showCommentIndicators": {
+    "description": "Подпись чекбокса для показа индикаторов комментариев"
+  },
+  "compactCardMode": "Компактный режим карточек",
+  "@compactCardMode": {
+    "description": "Подпись чекбокса для компактного режима карточек"
+  },
+  "lecture": "Лекция",
+  "@lecture": {
+    "description": "Тип занятия - лекция"
+  },
+  "laboratory": "Лабораторная",
+  "@laboratory": {
+    "description": "Тип занятия - лабораторная работа"
+  },
+  "practice": "Практика",
+  "@practice": {
+    "description": "Тип занятия - практика"
+  },
+  "exam": "Экзамен",
+  "@exam": {
+    "description": "Тип занятия - экзамен"
+  },
+  "consultation": "Консультация",
+  "@consultation": {
+    "description": "Тип занятия - консультация"
+  },
+  "credit": "Зачет",
+  "@credit": {
+    "description": "Тип занятия - зачет"
+  },
+  "unknown": "Неизвестно",
+  "@unknown": {
+    "description": "Подпись неизвестного автора"
+  },
+  "lessonType": "Тип занятия",
+  "@lessonType": {
+    "description": "Подпись для селектора типа занятия"
+  },
+  "individual": "Индивидуальная",
+  "@individual": {
+    "description": "Тип занятия - индивидуальная работа"
+  },
+  "physicalEducation": "Физкультура",
+  "@physicalEducation": {
+    "description": "Тип занятия - физическая культура"
+  },
+  "courseWork": "Курсовая работа",
+  "@courseWork": {
+    "description": "Тип занятия - курсовая работа"
+  },
+  "courseProject": "Курсовой проект",
+  "@courseProject": {
+    "description": "Тип занятия - курсовой проект"
+  },
+  "mapsOnlyOnMobile": "Карты доступны только на мобильных устройствах",
+  "@mapsOnlyOnMobile": {
+    "description": "Сообщение для пользователей десктопа о картах"
+  },
+  "scheduleAnalyticsTitle": "Аналитика расписания",
+  "@scheduleAnalyticsTitle": {
+    "description": "Заголовок для страницы аналитики расписания"
+  },
+  "scheduleAnalyticsDescription": "Статистика и анализ вашего учебного расписания",
+  "@scheduleAnalyticsDescription": {
+    "description": "Описание для аналитики расписания"
+  },
+  "loadByDays": "Загрузка по дням",
+  "@loadByDays": {
+    "description": "Заголовок графика ежедневной нагрузки"
+  },
+  "lessonTypes": "Типы занятий",
+  "@lessonTypes": {
+    "description": "Заголовок графика типов занятий"
+  },
+  "teachers": "Преподаватели",
+  "@teachers": {
+    "description": "Заголовок секции преподавателей"
+  },
+  "classrooms": "Аудитории",
+  "@classrooms": {
+    "description": "Заголовок секции аудиторий"
+  },
+  "noDataForAnalytics": "Нет данных для аналитики",
+  "@noDataForAnalytics": {
+    "description": "Сообщение когда нет данных для аналитики"
+  },
+  "selectAnotherSchedule": "Выберите другое расписание или проверьте наличие занятий",
+  "@selectAnotherSchedule": {
+    "description": "Предложение когда нет данных для аналитики"
+  },
+  "exportData": "Экспорт данных",
+  "@exportData": {
+    "description": "Текст кнопки для экспорта данных"
+  },
+  "fullReportWithCharts": "Полный отчет со всеми графиками",
+  "@fullReportWithCharts": {
+    "description": "Описание опции экспорта"
+  },
+  "dataInTableFormat": "Данные в табличном формате",
+  "@dataInTableFormat": {
+    "description": "Описание опции экспорта"
+  },
+  "shareImage": "Поделиться изображением",
+  "@shareImage": {
+    "description": "Заголовок опции экспорта"
+  },
+  "currentOrAllCharts": "Текущим графиком или всеми",
+  "@currentOrAllCharts": {
+    "description": "Описание опции экспорта"
+  },
+  "export": "Экспорт",
+  "@export": {
+    "description": "Текст кнопки экспорта"
+  },
+  "monday": "Понедельник",
+  "@monday": {
+    "description": "День недели - понедельник"
+  },
+  "tuesday": "Вторник",
+  "@tuesday": {
+    "description": "День недели - вторник"
+  },
+  "wednesday": "Среда",
+  "@wednesday": {
+    "description": "День недели - среда"
+  },
+  "thursday": "Четверг",
+  "@thursday": {
+    "description": "День недели - четверг"
+  },
+  "friday": "Пятница",
+  "@friday": {
+    "description": "День недели - пятница"
+  },
+  "scheduleChanges": "Изменения в расписании",
+  "@scheduleChanges": {
+    "description": "Заголовок для диалога изменений расписания"
+  },
+  "calendar": "Календарь",
+  "@calendar": {
+    "description": "Заголовок для страницы календаря"
+  },
+  "scheduleLoadingError": "Ошибка при загрузке расписания",
+  "@scheduleLoadingError": {
+    "description": "Сообщение об ошибке загрузки расписания"
+  },
+  "addSchedulesForComparison": "Добавьте расписания для сравнения",
+  "@addSchedulesForComparison": {
+    "description": "Сообщение когда нет расписаний для сравнения"
+  },
+  "buildRoute": "Построить маршрут",
+  "@buildRoute": {
+    "description": "Текст кнопки для построения маршрута"
+  },
+  "mySchedules": "Мои расписания",
+  "@mySchedules": {
+    "description": "Заголовок для страницы пользовательских расписаний"
+  },
+  "createSchedule": "Создать расписание",
+  "@createSchedule": {
+    "description": "Текст кнопки для создания расписания"
+  },
+  "addClass": "Добавить пару",
+  "@addClass": {
+    "description": "Текст кнопки для добавления пары"
+  },
+  "classesList": "Список пар",
+  "@classesList": {
+    "description": "Текст кнопки для списка пар"
+  },
+  "classLabel": "Пара",
+  "@classLabel": {
+    "description": "Подпись для одной пары"
+  },
+  "open": "Открыть",
+  "@open": {
+    "description": "Текст кнопки для открытия"
+  },
+  "edit": "Редактировать",
+  "@edit": {
+    "description": "Пункт меню для редактирования"
+  },
+  "delete": "Удалить",
+  "@delete": {
+    "description": "Пункт меню для удаления"
+  },
+  "editSchedule": "Редактирование расписания",
+  "@editSchedule": {
+    "description": "Заголовок диалога для редактирования расписания"
+  },
+  "cancel": "Отмена",
+  "@cancel": {
+    "description": "Текст кнопки для отмены"
+  },
+  "save": "Сохранить",
+  "@save": {
+    "description": "Текст кнопки для сохранения"
+  },
+  "deleteSchedule": "Удаление расписания",
+  "@deleteSchedule": {
+    "description": "Заголовок диалога для удаления расписания"
+  },
+  "deleteScheduleConfirmation": "Вы уверены, что хотите удалить расписание \"{scheduleName}\"?",
+  "@deleteScheduleConfirmation": {
+    "description": "Сообщение подтверждения удаления расписания",
+    "placeholders": {
+      "scheduleName": {
+        "type": "String"
+      }
+    }
+  },
+  "createNewClass": "Создать новую пару",
+  "@createNewClass": {
+    "description": "Текст кнопки для создания новой пары"
+  },
+  "noAddedClasses": "Нет добавленных пар",
+  "@noAddedClasses": {
+    "description": "Сообщение когда нет добавленных пар"
+  },
+  "deleteClass": "Удаление пары",
+  "@deleteClass": {
+    "description": "Заголовок диалога для удаления пары"
+  },
+  "deleteClassConfirmation": "Вы уверены, что хотите удалить пару \"{subject}\" из расписания?",
+  "@deleteClassConfirmation": {
+    "description": "Сообщение подтверждения удаления пары",
+    "placeholders": {
+      "subject": {
+        "type": "String"
+      }
+    }
+  },
+  "start": "Начало",
+  "@start": {
+    "description": "Подпись для времени начала"
+  },
+  "end": "Конец",
+  "@end": {
+    "description": "Подпись для времени окончания"
+  },
+  "endTimeMustBeAfterStart": "Время окончания должно быть позже времени начала",
+  "@endTimeMustBeAfterStart": {
+    "description": "Сообщение об ошибке для неверного диапазона времени"
+  },
+  "classNumber": "Номер пары",
+  "@classNumber": {
+    "description": "Подпись для номера пары"
+  },
+  "none": "Нет",
+  "@none": {
+    "description": "Опция для отсутствия номера пары"
+  },
+  "groups": "Группы",
+  "@groups": {
+    "description": "Заголовок секции групп"
+  },
+  "noTeachersSelected": "Преподаватели не выбраны",
+  "@noTeachersSelected": {
+    "description": "Сообщение когда преподаватели не выбраны"
+  },
+  "addTeacher": "Добавить преподавателя",
+  "@addTeacher": {
+    "description": "Заголовок диалога для добавления преподавателя"
+  },
+  "add": "Добавить",
+  "@add": {
+    "description": "Текст кнопки для добавления"
+  },
+  "selectAtLeastOneDate": "Выберите хотя бы одну дату проведения",
+  "@selectAtLeastOneDate": {
+    "description": "Валидация — дата"
+  },
+  "addAtLeastOneClassroom": "Добавьте хотя бы одну аудиторию или сделайте занятие онлайн",
+  "@addAtLeastOneClassroom": {
+    "description": "Сообщение об ошибке для выбора аудитории"
+  },
+  "noSelectedDates": "Нет выбранных дат",
+  "@noSelectedDates": {
+    "description": "Сообщение когда даты не выбраны"
+  },
+  "selectDatesButton": "Выбрать даты",
+  "@selectDatesButton": {
+    "description": "Текст кнопки для выбора дат"
+  },
+  "noSelectedClassrooms": "Нет выбранных аудиторий",
+  "@noSelectedClassrooms": {
+    "description": "Сообщение когда аудитории не выбраны"
+  },
+  "addClassroom": "Добавить аудиторию",
+  "@addClassroom": {
+    "description": "Текст кнопки для добавления аудитории"
+  },
+  "noGroupsSelected": "Группы не выбраны",
+  "@noGroupsSelected": {
+    "description": "Сообщение когда группы не выбраны"
+  },
+  "addGroup": "Добавить группу",
+  "@addGroup": {
+    "description": "Заголовок диалога для добавления группы"
+  },
+  "exampleClassNames": "Пример названий пар:",
+  "@exampleClassNames": {
+    "description": "Подпись для примеров названий пар"
+  },
+  "textCopied": "Текст скопирован!",
+  "@textCopied": {
+    "description": "Сообщение когда текст скопирован"
+  },
+  "failedToOpenImage": "Не удалось открыть изображение: {error}",
+  "@failedToOpenImage": {
+    "description": "Сообщение об ошибке при открытии изображения",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "loginFailed": "Ошибка входа",
+  "@loginFailed": {
+    "description": "Сообщение об ошибке входа"
+  },
+  "next": "Далее",
+  "@next": {
+    "description": "Текст кнопки для продолжения"
+  },
+  "errorLoadingSponsors": "Ошибка при загрузке спонсоров",
+  "@errorLoadingSponsors": {
+    "description": "Сообщение об ошибке загрузки спонсоров"
+  },
+  "login": "Войти",
+  "@login": {
+    "description": "Текст кнопки для входа"
+  },
+  "loginToContinue": "Войдите для продолжения",
+  "@loginToContinue": {
+    "description": "Сообщение для входа в систему"
+  },
+  "deleteScheduleTitle": "Удаление расписания",
+  "@deleteScheduleTitle": {
+    "description": "Заголовок для диалога удаления расписания"
+  },
+  "deleteScheduleMessage": "Вы уверены, что хотите удалить это расписание?",
+  "@deleteScheduleMessage": {
+    "description": "Сообщение для подтверждения удаления расписания"
+  },
+  "makeActive": "Сделать активным",
+  "@makeActive": {
+    "description": "Пункт меню для активации расписания"
+  },
+  "comment": "Комментарий",
+  "@comment": {
+    "description": "Метка комментария"
+  },
+  "schedules": "Расписания",
+  "@schedules": {
+    "description": "Заголовок для страницы расписаний"
+  },
+  "loadingSchedules": "Загрузка расписаний...",
+  "@loadingSchedules": {
+    "description": "Сообщение во время загрузки расписаний"
+  },
+  "addedClass": "Добавляемая пара:",
+  "@addedClass": {
+    "description": "Подпись для добавляемой пары"
+  },
+  "createNewSchedule": "Создать новое расписание",
+  "@createNewSchedule": {
+    "description": "Текст кнопки для создания нового расписания"
+  },
+  "selectSchedule": "Выберите расписание:",
+  "@selectSchedule": {
+    "description": "Подпись для выбора расписания"
+  },
+  "classAddedToSchedule": "Пара добавлена в расписание \"{scheduleName}\"",
+  "@classAddedToSchedule": {
+    "description": "Сообщение об успешном добавлении пары",
+    "placeholders": {
+      "scheduleName": {
+        "type": "String"
+      }
+    }
+  },
+  "legends": "Обозначения",
+  "@legends": {
+    "description": "Подпись для обозначений календаря"
+  },
+  "maxThreeSchedules": "Максимум 3 расписания для сравнения",
+  "@maxThreeSchedules": {
+    "description": "Сообщение об ошибке для лимита сравнения расписаний"
+  },
+  "university": "Университет",
+  "@university": {
+    "description": "Подпись для университета"
+  },
+  "search": "Поиск",
+  "@search": {
+    "description": "Текст заполнителя поиска"
+  },
+  "error": "Ошибка",
+  "@error": {
+    "description": "Заголовок ошибки"
+  },
+  "searchFailed": "Не удалось выполнить поиск",
+  "@searchFailed": {
+    "description": "Сообщение об ошибке поиска"
+  },
+  "enterCommentText": "Введите текст комментария...",
+  "@enterCommentText": {
+    "description": "Заполнитель ввода комментария"
+  },
+  "remove": "Удалить",
+  "@remove": {
+    "description": "Текст кнопки удаления"
+  },
+  "noAvailableSchedules": "Нет доступных расписаний",
+  "@noAvailableSchedules": {
+    "description": "Сообщение когда нет доступных расписаний"
+  },
+  "scheduleDeleted": "Расписание удалено",
+  "@scheduleDeleted": {
+    "description": "Сообщение об успешном удалении расписания"
+  },
+  "deleteScheduleConfirmationDialog": "Вы уверены, что хотите удалить это расписание?",
+  "@deleteScheduleConfirmationDialog": {
+    "description": "Сообщение подтверждения удаления расписания"
+  },
+  "active": "Активен",
+  "@active": {
+    "description": "Активный статус"
+  },
+  "comments": "Комментарии",
+  "@comments": {
+    "description": "Подпись комментариев во множественном числе"
+  },
+  "activate": "Активировать",
+  "@activate": {
+    "description": "Текст кнопки активации"
+  },
+  "group": "Группа",
+  "@group": {
+    "description": "Подпись группы"
+  },
+  "teacher": "Преподаватель",
+  "@teacher": {
+    "description": "Подпись преподавателя"
+  },
+  "classroom": "Аудитория",
+  "@classroom": {
+    "description": "Подпись аудитории"
+  },
+  "schedule": "Расписание",
+  "@schedule": {
+    "description": "Подпись расписания"
+  },
+  "commentDeleted": "Комментарий удален",
+  "@commentDeleted": {
+    "description": "Сообщение об успешном удалении комментария"
+  },
+  "commentSaved": "Комментарий сохранен",
+  "@commentSaved": {
+    "description": "Сообщение об успешном сохранении комментария"
+  },
+  "scheduleComment": "Комментарий к расписанию",
+  "@scheduleComment": {
+    "description": "Заголовок комментария к расписанию"
+  },
+  "addOrEditNote": "Добавьте или отредактируйте заметку к расписанию",
+  "@addOrEditNote": {
+    "description": "Описание комментария к расписанию"
+  },
+  "editComment": "Редактировать комментарий",
+  "@editComment": {
+    "description": "Пункт меню редактирования комментария"
+  },
+  "addComment": "Добавить комментарий",
+  "@addComment": {
+    "description": "Пункт меню добавления комментария"
+  },
+  "addSchedule": "Добавить расписание",
+  "@addSchedule": {
+    "description": "Подсказка добавления расписания"
+  },
+  "activeSchedule": "Активное расписание",
+  "@activeSchedule": {
+    "description": "Подпись активного расписания"
+  },
+  "goToView": "Перейти к просмотру",
+  "@goToView": {
+    "description": "Подсказка перехода к просмотру"
+  },
+  "noAddedGroups": "Нет добавленных групп",
+  "@noAddedGroups": {
+    "description": "Сообщение когда нет добавленных групп"
+  },
+  "addGroupToSeeSchedule": "Добавьте группу, чтобы видеть её расписание",
+  "@addGroupToSeeSchedule": {
+    "description": "Инструкция по добавлению группы"
+  },
+  "noAddedTeachers": "Нет добавленных преподавателей",
+  "@noAddedTeachers": {
+    "description": "Сообщение когда нет добавленных преподавателей"
+  },
+  "addTeacherToSeeSchedule": "Добавьте преподавателя, чтобы видеть его расписание",
+  "@addTeacherToSeeSchedule": {
+    "description": "Инструкция по добавлению преподавателя"
+  },
+  "noAddedClassrooms": "Нет добавленных аудиторий",
+  "@noAddedClassrooms": {
+    "description": "Сообщение когда нет добавленных аудиторий"
+  },
+  "addClassroomToSeeSchedule": "Добавьте аудиторию, чтобы видеть её расписание",
+  "@addClassroomToSeeSchedule": {
+    "description": "Инструкция по добавлению аудитории"
+  },
+  "failedToLoadSchedules": "Не удалось загрузить расписания",
+  "@failedToLoadSchedules": {
+    "description": "Сообщение об ошибке загрузки расписаний"
+  },
+  "checkInternetConnection": "Проверьте подключение к интернету",
+  "@checkInternetConnection": {
+    "description": "Описание ошибки подключения к интернету"
+  },
+  "enterJsonString": "Пожалуйста, введите JSON строку",
+  "@enterJsonString": {
+    "description": "Сообщение валидации JSON ввода"
+  },
+  "enterJsonStringPlaceholder": "Введите JSON строку...",
+  "@enterJsonStringPlaceholder": {
+    "description": "Заполнитель JSON ввода"
+  },
+  "tabs": "Вкладки",
+  "@tabs": {
+    "description": "Подпись вкладок"
+  },
+  "scheduleChangesTitle": "Изменения в расписании",
+  "@scheduleChangesTitle": {
+    "description": "Заголовок диалога изменений расписания"
+  },
+  "loadByDaysChart": "Загрузка по дням",
+  "@loadByDaysChart": {
+    "description": "Заголовок графика ежедневной нагрузки"
+  },
+  "lessonTypesChart": "Типы занятий",
+  "@lessonTypesChart": {
+    "description": "Заголовок графика типов занятий"
+  },
+  "teachersChart": "Преподаватели",
+  "@teachersChart": {
+    "description": "Заголовок графика преподавателей"
+  },
+  "classroomsChart": "Аудитории",
+  "@classroomsChart": {
+    "description": "Заголовок графика аудиторий"
+  },
+  "fullReportWithAllCharts": "Полный отчет со всеми графиками",
+  "@fullReportWithAllCharts": {
+    "description": "Описание опции экспорта"
+  },
+  "dataInTableFormatExport": "Данные в табличном формате",
+  "@dataInTableFormatExport": {
+    "description": "Описание опции экспорта"
+  },
+  "shareImageExport": "Поделиться изображением",
+  "@shareImageExport": {
+    "description": "Заголовок опции экспорта"
+  },
+  "currentOrAllChartsExport": "Текущим графиком или всеми",
+  "@currentOrAllChartsExport": {
+    "description": "Описание опции экспорта"
+  },
+  "totalClasses": "Общее количество пар",
+  "@totalClasses": {
+    "description": "Подпись статистики общего количества пар"
+  },
+  "forEntirePeriod": "За весь период",
+  "@forEntirePeriod": {
+    "description": "Описание периода статистики"
+  },
+  "averagePerDay": "Среднее в день",
+  "@averagePerDay": {
+    "description": "Подпись статистики среднего в день"
+  },
+  "academicLoad": "Учебная нагрузка",
+  "@academicLoad": {
+    "description": "Описание учебной нагрузки"
+  },
+  "maximumPerDay": "Максимум в день",
+  "@maximumPerDay": {
+    "description": "Подпись статистики максимума в день"
+  },
+  "busiestDay": "Самый загруженный день",
+  "@busiestDay": {
+    "description": "Описание самого загруженного дня"
+  },
+  "showEmptyClassesSettings": "Показывать пустые пары",
+  "@showEmptyClassesSettings": {
+    "description": "Настройка показа пустых пар"
+  },
+  "showCommentIndicatorsSettings": "Показывать индикаторы комментариев",
+  "@showCommentIndicatorsSettings": {
+    "description": "Настройка показа индикаторов комментариев"
+  },
+  "compactCardModeSettings": "Компактный режим карточек",
+  "@compactCardModeSettings": {
+    "description": "Настройка компактного режима карточек"
+  },
+  "holiday": "Выходной",
+  "@holiday": {
+    "description": "Заголовок страницы выходного дня"
+  },
+  "selectExisting": "Выбрать существующее",
+  "@selectExisting": {
+    "description": "Опция выбора существующего"
+  },
+  "createNew": "Создать новое",
+  "@createNew": {
+    "description": "Опция создания нового"
+  },
+  "scheduleName": "Название расписания",
+  "@scheduleName": {
+    "description": "Подпись поля названия расписания"
+  },
+  "scheduleNamePlaceholder": "Например: Моё основное расписание",
+  "@scheduleNamePlaceholder": {
+    "description": "Заполнитель названия расписания"
+  },
+  "descriptionOptional": "Описание (необязательно)",
+  "@descriptionOptional": {
+    "description": "Подпись поля описания"
+  },
+  "addScheduleDescription": "Добавьте описание расписания",
+  "@addScheduleDescription": {
+    "description": "Заполнитель поля описания"
+  },
+  "openSchedule": "Открыть",
+  "@openSchedule": {
+    "description": "Кнопка открытия расписания"
+  },
+  "selectWeek": "Выберите неделю",
+  "@selectWeek": {
+    "description": "Заголовок выбора недели"
+  },
+  "quickWayToWeek": "Быстрый способ перейти к определённой неделе",
+  "@quickWayToWeek": {
+    "description": "Описание выбора недели"
+  },
+  "selectUpToFourSchedules": "Выберите до 4-х расписаний, чтобы сравнить их по дням",
+  "@selectUpToFourSchedules": {
+    "description": "Описание сравнения расписаний"
+  },
+  "addToSchedule": "Добавить в расписание",
+  "@addToSchedule": {
+    "description": "Заголовок добавить в расписание"
+  },
+  "enterLessonComment": "Введите комментарий к занятию...",
+  "@enterLessonComment": {
+    "description": "Подсказка комментария"
+  },
+  "noOwnSchedules": "У вас пока нет своих расписаний",
+  "@noOwnSchedules": {
+    "description": "Сообщение об отсутствии пользовательских расписаний"
+  },
+  "createCustomSchedule": "Создайте собственное расписание, добавляя в него пары из разных доступных расписаний",
+  "@createCustomSchedule": {
+    "description": "Описание создания пользовательского расписания"
+  },
+  "scheduleCreation": "Создание расписания",
+  "@scheduleCreation": {
+    "description": "Заголовок создания расписания"
+  },
+  "enterNameAndDescription": "Введите название и описание для нового расписания",
+  "@enterNameAndDescription": {
+    "description": "Описание создания расписания"
+  },
+  "scheduleNameLabel": "Название расписания",
+  "@scheduleNameLabel": {
+    "description": "Подпись названия расписания"
+  },
+  "scheduleNameExample": "Например: Моё расписание",
+  "@scheduleNameExample": {
+    "description": "Пример названия расписания"
+  },
+  "descriptionOptionalLabel": "Описание (необязательно)",
+  "@descriptionOptionalLabel": {
+    "description": "Подпись необязательного описания"
+  },
+  "addScheduleDescriptionPlaceholder": "Добавьте описание расписания",
+  "@addScheduleDescriptionPlaceholder": {
+    "description": "Заполнитель описания"
+  },
+  "editScheduleTitle": "Редактирование расписания",
+  "@editScheduleTitle": {
+    "description": "Заголовок редактирования расписания"
+  },
+  "classesListTitle": "Список пар",
+  "@classesListTitle": {
+    "description": "Заголовок списка пар"
+  },
+  "addNewClassToSchedule": "Вы можете добавить новую пару в расписание {scheduleName}",
+  "@addNewClassToSchedule": {
+    "description": "Описание добавления новой пары",
+    "placeholders": {
+      "scheduleName": {
+        "type": "String"
+      }
+    }
+  },
+  "offline": "Оффлайн",
+  "@offline": {
+    "description": "Подпись оффлайн режима"
+  },
+  "online": "Онлайн",
+  "@online": {
+    "description": "Подпись онлайн режима"
+  },
+  "subjectName": "Название предмета",
+  "@subjectName": {
+    "description": "Подпись поля названия предмета"
+  },
+  "enterSubjectName": "Введите название предмета",
+  "@enterSubjectName": {
+    "description": "Заполнитель названия предмета"
+  },
+  "teacherFullName": "ФИО преподавателя",
+  "@teacherFullName": {
+    "description": "Подпись поля имени преподавателя"
+  },
+  "teacherNameExample": "Например: Иванов Иван Иванович",
+  "@teacherNameExample": {
+    "description": "Пример имени преподавателя"
+  },
+  "endTimeMustBeAfterStartTime": "Время окончания должно быть позже времени начала",
+  "@endTimeMustBeAfterStartTime": {
+    "description": "Ошибка валидации времени"
+  },
+  "selectAtLeastOneDateError": "Выберите хотя бы одну дату проведения",
+  "@selectAtLeastOneDateError": {
+    "description": "Ошибка выбора даты"
+  },
+  "addAtLeastOneClassroomError": "Добавьте хотя бы одну аудиторию или сделайте занятие онлайн",
+  "@addAtLeastOneClassroomError": {
+    "description": "Ошибка выбора аудитории"
+  },
+  "selectDatesButtonText": "Выбрать даты",
+  "@selectDatesButtonText": {
+    "description": "Текст кнопки выбора дат"
+  },
+  "onlineClassLink": "Ссылка на онлайн занятие",
+  "@onlineClassLink": {
+    "description": "Подпись поля ссылки на онлайн занятие"
+  },
+  "enterConnectionUrl": "Введите URL для подключения",
+  "@enterConnectionUrl": {
+    "description": "Заполнитель URL подключения"
+  },
+  "classroomNumber": "Аудитория {name}",
+  "@classroomNumber": {
+    "description": "Заголовок номера аудитории",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "classroomExample": "Например: А-123",
+  "@classroomExample": {
+    "description": "Пример номера аудитории"
+  },
+  "campusNameOptional": "Название кампуса (опционально)",
+  "@campusNameOptional": {
+    "description": "Подпись поля названия кампуса"
+  },
+  "campusExample": "Например: В-78",
+  "@campusExample": {
+    "description": "Пример названия кампуса"
+  },
+  "addClassroomDialog": "Добавить аудиторию",
+  "@addClassroomDialog": {
+    "description": "Заголовок диалога добавления аудитории"
+  },
+  "groupName": "Название группы",
+  "@groupName": {
+    "description": "Подпись поля названия группы"
+  },
+  "groupNameExample": "Например: ИКБО-01-21",
+  "@groupNameExample": {
+    "description": "Пример названия группы"
+  },
+  "addGroupDialog": "Добавить группу",
+  "@addGroupDialog": {
+    "description": "Заголовок диалога добавления группы"
+  },
+  "retry": "Повторить",
+  "@retry": {
+    "description": "Текст кнопки повтора"
+  },
+  "resetFilter": "Сбросить фильтр",
+  "@resetFilter": {
+    "description": "Текст кнопки сброса фильтра"
+  },
+  "supportOurService": "Поддержите наш сервис",
+  "@supportOurService": {
+    "description": "Заголовок поддержки сервиса"
+  },
+  "leaveAd": "Оставить рекламу",
+  "@leaveAd": {
+    "description": "Текст кнопки оставления рекламы"
+  },
+  "disable": "Отключить",
+  "@disable": {
+    "description": "Текст кнопки отключения"
+  },
+  "errorWithMessage": "Ошибка: {message}",
+  "@errorWithMessage": {
+    "description": "Сообщение об ошибке с деталями",
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "map": "Карта",
+  "@map": {
+    "description": "Заголовок страницы карты"
+  },
+  "tryAgain": "Попробовать снова",
+  "@tryAgain": {
+    "description": "Текст кнопки повтора"
+  },
+  "announcement": "Объявление",
+  "@announcement": {
+    "description": "Подпись объявления"
+  },
+  "contact": "Связаться",
+  "@contact": {
+    "description": "Текст кнопки связи"
+  },
+  "copiedToClipboard": "{title} скопирован в буфер обмена",
+  "@copiedToClipboard": {
+    "description": "Сообщение о копировании в буфер обмена",
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "post": "Пост",
+  "@post": {
+    "description": "Заголовок страницы поста"
+  },
+  "errorLoadingPost": "Ошибка при загрузке поста",
+  "@errorLoadingPost": {
+    "description": "Сообщение об ошибке загрузки поста"
+  },
+  "errorLoadingContributors": "Ошибка при загрузке контрибьюторов",
+  "@errorLoadingContributors": {
+    "description": "Сообщение об ошибке загрузки контрибьюторов"
+  },
+  "relatedArticles": "Похожие статьи",
+  "@relatedArticles": {
+    "description": "Заголовок секции похожих статей"
+  },
+  "failedToLoadArticle": "Не удалось загрузить статью",
+  "@failedToLoadArticle": {
+    "description": "Описание ошибки при загрузке статьи"
+  },
+  "shareFailed": "Ошибка при попытке поделиться",
+  "@shareFailed": {
+    "description": "Сообщение об ошибке при попытке поделиться"
+  },
+  "trending": "Популярное",
+  "@trending": {
+    "description": "Заголовок секции популярного"
+  },
+  "slideshow": "Слайд-шоу",
+  "@slideshow": {
+    "description": "Метка слайд-шоу"
+  },
+  "enterSearchQuery": "Введите запрос для поиска",
+  "@enterSearchQuery": {
+    "description": "Подсказка когда поиск пустой"
+  },
+  "failedToLoadMoreContent": "Не удалось загрузить больше контента",
+  "@failedToLoadMoreContent": {
+    "description": "Описание ошибки при загрузке дополнительного контента"
+  },
+  "searchHistory": "История",
+  "@searchHistory": {
+    "description": "Заголовок истории поиска"
+  },
+  "enterScheduleName": "Введите название",
+  "@enterScheduleName": {
+    "description": "Валидация пустого названия расписания"
+  },
+  "nameTooLong": "Слишком длинное название",
+  "@nameTooLong": {
+    "description": "Валидация слишком длинного названия"
+  },
+  "createAndAddClass": "Создать и добавить пару",
+  "@createAndAddClass": {
+    "description": "Кнопка создать и добавить пару"
+  },
+  "addToSelectedSchedule": "Добавить в выбранное расписание",
+  "@addToSelectedSchedule": {
+    "description": "Кнопка добавить в выбранное расписание"
+  },
+  "mireaMap": "Карта МИРЭА",
+  "@mireaMap": {
+    "description": "Заголовок сервиса карты МИРЭА"
+  },
+  "findNeededClassroom": "Найди нужный кабинет",
+  "@findNeededClassroom": {
+    "description": "Описание сервиса карты МИРЭА"
+  },
+  "nfcPass": "NFC-пропуск",
+  "@nfcPass": {
+    "description": "Заголовок сервиса NFC-пропуска"
+  },
+  "passForUniversityEntry": "Пропуск для входа в университет",
+  "@passForUniversityEntry": {
+    "description": "Описание сервиса NFC-пропуска"
+  },
+  "cloudMireaNinja": "Cloud Mirea Ninja",
+  "@cloudMireaNinja": {
+    "description": "Заголовок облачного сервиса"
+  },
+  "mireaNinja": "Mirea Ninja",
+  "@mireaNinja": {
+    "description": "Заголовок сообщества Mirea Ninja"
+  },
+  "mostPopularUnofficialChat": "Самый популярный неофициальный чат",
+  "@mostPopularUnofficialChat": {
+    "description": "Описание сообщества Mirea Ninja"
+  },
+  "kisDepartment": "Кафедра КИС",
+  "@kisDepartment": {
+    "description": "Заголовок кафедры КИС"
+  },
+  "corporateInformationSystems": "Кафедра Корпоративных информационных систем",
+  "@corporateInformationSystems": {
+    "description": "Описание кафедры КИС"
+  },
+  "ippoDepartment": "Кафедра ИППО",
+  "@ippoDepartment": {
+    "description": "Заголовок кафедры ИППО"
+  },
+  "instrumentalAndAppliedSoftware": "Кафедра Инструментального и прикладного программного обеспечения",
+  "@instrumentalAndAppliedSoftware": {
+    "description": "Описание кафедры ИППО"
+  },
+  "competitiveProgrammingMirea": "Спортивное программирование МИРЭА",
+  "@competitiveProgrammingMirea": {
+    "description": "Заголовок спортивного программирования"
+  },
+  "competitiveProgrammingDescription": "Здесь публикуются различные новости и апдейты по олимпиадному программированию в МИРЭА",
+  "@competitiveProgrammingDescription": {
+    "description": "Описание спортивного программирования"
+  },
+  "personalAccount": "Личный кабинет",
+  "@personalAccount": {
+    "description": "Заголовок сервиса личного кабинета"
+  },
+  "accessToGradesAndServices": "Доступ к оценкам, заявлениям и другим сервисам",
+  "@accessToGradesAndServices": {
+    "description": "Описание личного кабинета"
+  },
+  "openAction": "Открыть",
+  "@openAction": {
+    "description": "Кнопка действия открытия"
+  },
+  "educationalPortal": "Учебный портал",
+  "@educationalPortal": {
+    "description": "Заголовок учебного портала"
+  },
+  "accessToCoursesAndMaterials": "Доступ к курсам и материалам",
+  "@accessToCoursesAndMaterials": {
+    "description": "Описание учебного портала"
+  },
+  "goToAction": "Перейти",
+  "@goToAction": {
+    "description": "Кнопка действия перехода"
+  },
+  "electronicJournal": "Электронный журнал",
+  "@electronicJournal": {
+    "description": "Заголовок электронного журнала"
+  },
+  "attendanceCheckSchedule": "Проверка посещаемости, расписание",
+  "@attendanceCheckSchedule": {
+    "description": "Описание электронного журнала"
+  },
+  "library": "Библиотека",
+  "@library": {
+    "description": "Заголовок сервиса библиотеки"
+  },
+  "freeSoftware": "Бесплатное ПО",
+  "@freeSoftware": {
+    "description": "Заголовок сервиса бесплатного ПО"
+  },
+  "cyberzone": "Киберзона",
+  "@cyberzone": {
+    "description": "Заголовок сервиса киберзоны"
+  },
+  "handbook": "Справочник",
+  "@handbook": {
+    "description": "Заголовок сервиса справочника"
+  },
+  "scholarships": "Стипендии",
+  "@scholarships": {
+    "description": "Заголовок сервиса стипендий"
+  },
+  "militaryRegistration": "Воинский учет",
+  "@militaryRegistration": {
+    "description": "Заголовок сервиса воинского учета"
+  },
+  "dormitories": "Общежития",
+  "@dormitories": {
+    "description": "Заголовок сервиса общежитий"
+  },
+  "studentOffice": "Студенческий офис",
+  "@studentOffice": {
+    "description": "Заголовок студенческого офиса"
+  },
+  "certificatesDocumentsQuestions": "Справки, документы, вопросы",
+  "@certificatesDocumentsQuestions": {
+    "description": "Описание студенческого офиса"
+  },
+  "careerCenter": "Центр карьеры",
+  "@careerCenter": {
+    "description": "Заголовок центра карьеры"
+  },
+  "vacanciesAndInternships": "Вакансии и стажировки",
+  "@vacanciesAndInternships": {
+    "description": "Описание центра карьеры"
+  },
+  "initiativeService": "Сервис инициатив",
+  "@initiativeService": {
+    "description": "Заголовок сервиса инициатив"
+  },
+  "ideasAndSuggestions": "Идеи и предложения",
+  "@ideasAndSuggestions": {
+    "description": "Описание сервиса инициатив"
+  },
+  "virtualTour": "Виртуальный тур",
+  "@virtualTour": {
+    "description": "Заголовок сервиса виртуального тура"
+  },
+  "interactiveUniversityTour": "Интерактивная экскурсия по корпусам университета",
+  "@interactiveUniversityTour": {
+    "description": "Описание виртуального тура"
+  },
+  "startupAccelerator": "Стартап-акселератор",
+  "@startupAccelerator": {
+    "description": "Заголовок сервиса стартап-акселератора"
+  },
+  "startupSupport": "Поддержка стартапов и предпринимательских идей",
+  "@startupSupport": {
+    "description": "Описание стартап-акселератора"
+  },
+  "corporatePortal": "Корпоративный портал",
+  "@corporatePortal": {
+    "description": "Заголовок корпоративного портала"
+  },
+  "accessForTeachersAndStaff": "Доступ для преподавателей и сотрудников",
+  "@accessForTeachersAndStaff": {
+    "description": "Описание корпоративного портала"
+  },
+  "mainServices": "Основные сервисы",
+  "@mainServices": {
+    "description": "Заголовок секции основных сервисов"
+  },
+  "studentLife": "Студенческая жизнь",
+  "@studentLife": {
+    "description": "Заголовок секции студенческой жизни"
+  },
+  "useful": "Полезное",
+  "@useful": {
+    "description": "Заголовок секции полезного"
+  },
+  "createAccount": "Создать аккаунт",
+  "@createAccount": {
+    "description": "Текст кнопки создания аккаунта"
+  },
+  "createAccountTitle": "Создайте аккаунт",
+  "@createAccountTitle": {
+    "description": "Заголовок диалога создания аккаунта"
+  },
+  "createAccountDescription": "Мы предлагаем вам бесплатно создать аккаунт в нашем облачном хранилище, чтобы вы могли хранить свои файлы и документы!",
+  "@createAccountDescription": {
+    "description": "Описание диалога создания аккаунта"
+  },
+  "cloudStorageDescription": "На cloud.mirea.ninja вы можете хранить до 10 ГБ бесплатно (квоту можно расширить в телеграм боте), а также делиться файлами и онлайн редактировать документы вместе с одногруппниками.",
+  "@cloudStorageDescription": {
+    "description": "Описание облачного хранилища"
+  },
+  "searchPlaceholder": "Поиск",
+  "@searchPlaceholder": {
+    "description": "Заполнитель поля поиска"
+  },
+  "searchInAnnouncements": "Поиск по объявлениям...",
+  "@searchInAnnouncements": {
+    "description": "Заполнитель поиска по объявлениям"
+  },
+  "itemName": "Название",
+  "@itemName": {
+    "description": "Подпись поля названия предмета"
+  },
+  "itemNameExample": "Например: Ключи с брелоком",
+  "@itemNameExample": {
+    "description": "Пример названия предмета"
+  },
+  "description": "Описание",
+  "@description": {
+    "description": "Подпись поля описания"
+  },
+  "itemDescription": "Подробности о предмете, где и когда был найден/утерян...",
+  "@itemDescription": {
+    "description": "Заполнитель описания предмета"
+  },
+  "telegram": "Телеграм",
+  "@telegram": {
+    "description": "Подпись поля телеграм"
+  },
+  "phone": "Телефон",
+  "@phone": {
+    "description": "Подпись поля телефона"
+  },
+  "leaveFeedback": "Оставить отзыв",
+  "@leaveFeedback": {
+    "description": "Заголовок оставления отзыва"
+  },
+  "yourEmail": "Ваш email",
+  "@yourEmail": {
+    "description": "Подпись поля email"
+  },
+  "enterEmail": "Введите email",
+  "@enterEmail": {
+    "description": "Заполнитель поля email"
+  },
+  "whatHappened": "Что случилось?",
+  "@whatHappened": {
+    "description": "Подпись вопроса обратной связи"
+  },
+  "feedbackPlaceholder": "Когда я нажимаю \"Х\" происходит \"У\"",
+  "@feedbackPlaceholder": {
+    "description": "Заполнитель текста обратной связи"
+  },
+  "exportToCalendar": "Экспорт в календарь",
+  "@exportToCalendar": {
+    "description": "Заголовок экспорта в календарь"
+  },
+  "scheduleExported": "Расписание экспортировано",
+  "@scheduleExported": {
+    "description": "Сообщение об успешном экспорте расписания"
+  },
+  "failedToExportSchedule": "Не удалось экспортировать расписание",
+  "@failedToExportSchedule": {
+    "description": "Сообщение об ошибке экспорта расписания"
+  },
+  "exportSettings": "Настройки экспорта",
+  "@exportSettings": {
+    "description": "Заголовок настроек экспорта"
+  },
+  "emojiInLessonTypes": "Эмодзи в типах пар",
+  "@emojiInLessonTypes": {
+    "description": "Заголовок настройки эмодзи"
+  },
+  "emojiExample": "Пример: \"📚 Лекция\" вместо \"Лекция\"",
+  "@emojiExample": {
+    "description": "Описание настройки эмодзи"
+  },
+  "shortLessonTypeNames": "Короткие названия типов",
+  "@shortLessonTypeNames": {
+    "description": "Заголовок настройки коротких названий"
+  },
+  "shortNamesExample": "Пример: \"Лек.\" вместо \"Лекция\"",
+  "@shortNamesExample": {
+    "description": "Описание настройки коротких названий"
+  },
+  "preview": "Предпросмотр",
+  "@preview": {
+    "description": "Заголовок секции предпросмотра"
+  },
+  "fullTypeName": "Полное название типа",
+  "@fullTypeName": {
+    "description": "Подзаголовок полного названия типа"
+  },
+  "shortTypeName": "Сокращенное название типа",
+  "@shortTypeName": {
+    "description": "Подзаголовок сокращенного названия типа"
+  },
+  "subjectSelection": "Выбор предметов",
+  "@subjectSelection": {
+    "description": "Заголовок выбора предметов"
+  },
+  "standardReminders": "Стандартные напоминания",
+  "@standardReminders": {
+    "description": "Заголовок стандартных напоминаний"
+  },
+  "cardSettings": "Настройки карточки",
+  "@cardSettings": {
+    "description": "Заголовок настроек карточки"
+  },
+  "codeFromEmail": "Код из письма",
+  "@codeFromEmail": {
+    "description": "Заголовок кода из письма"
+  },
+  "news": "Новости",
+  "@news": {
+    "description": "Пункт навигации новостей"
+  },
+  "services": "Сервисы",
+  "@services": {
+    "description": "Пункт навигации сервисов"
+  },
+  "profile": "Профиль",
+  "@profile": {
+    "description": "Пункт навигации профиля"
+  },
+  "aboutApp": "О приложении",
+  "@aboutApp": {
+    "description": "Пункт навигации о приложении"
+  },
+  "settings": "Настройки",
+  "@settings": {
+    "description": "Пункт навигации настроек"
+  },
+  "findScheduleForClassroom": "Вы можете быстро найти расписание для этой аудитории, используя поиск по расписанию.",
+  "@findScheduleForClassroom": {
+    "description": "Описание поиска расписания для аудитории"
+  },
+  "rtuMireaApp": "Приложение РТУ МИРЭА",
+  "@rtuMireaApp": {
+    "description": "Название приложения"
+  },
+  "newYearHolidays": "Новогодние праздники",
+  "@newYearHolidays": {
+    "description": "Заголовок новогодних праздников"
+  },
+  "winterVacation": "Зимние каникулы",
+  "@winterVacation": {
+    "description": "Заголовок зимних каникул"
+  },
+  "defenderOfFatherlandDay": "День защитника Отечества",
+  "@defenderOfFatherlandDay": {
+    "description": "Заголовок Дня защитника Отечества"
+  },
+  "internationalWomensDay": "Международный женский день",
+  "@internationalWomensDay": {
+    "description": "Заголовок Международного женского дня"
+  },
+  "springAndLaborDay": "Праздник Весны и Труда",
+  "@springAndLaborDay": {
+    "description": "Заголовок Праздника Весны и Труда"
+  },
+  "victoryDay": "День Победы",
+  "@victoryDay": {
+    "description": "Заголовок Дня Победы"
+  },
+  "russiaDay": "День России",
+  "@russiaDay": {
+    "description": "Заголовок Дня России"
+  },
+  "nationalUnityDay": "День народного единства",
+  "@nationalUnityDay": {
+    "description": "Заголовок Дня народного единства"
+  },
+  "newYear": "Новый год",
+  "@newYear": {
+    "description": "Заголовок Нового года"
+  },
+  "total": "Всего",
+  "@total": {
+    "description": "Подпись всего"
+  },
+  "lectures": "Лекции",
+  "@lectures": {
+    "description": "Подпись лекций"
+  },
+  "practicals": "Практ.",
+  "@practicals": {
+    "description": "Подпись практических"
+  },
+  "labs": "Лаб.",
+  "@labs": {
+    "description": "Подпись лабораторных"
+  },
+  "justNow": "только что",
+  "@justNow": {
+    "description": "Подпись времени только что"
+  },
+  "status": "Статус",
+  "@status": {
+    "description": "Подпись статуса"
+  },
+  "phoneContact": "Телефон: {phoneNumber}",
+  "@phoneContact": {
+    "description": "Подпись контакта телефона",
+    "placeholders": {
+      "phoneNumber": {
+        "type": "String"
+      }
+    }
+  },
+  "lessonsOnDay": "Занятия на {day}",
+  "@lessonsOnDay": {
+    "description": "Заголовок занятий на день",
+    "placeholders": {
+      "day": {
+        "type": "String"
+      }
+    }
+  },
+  "todayLower": "сегодня",
+  "@todayLower": {
+    "description": "сегодня, строчные"
+  },
+  "tomorrowLower": "завтра",
+  "@tomorrowLower": {
+    "description": "завтра, строчные"
+  },
+  "showEmptyLessonsTooltip": "Показывать пустые пары",
+  "@showEmptyLessonsTooltip": {
+    "description": "Тултип для переключателя пустых пар"
+  },
+  "emptyLessons": "Пустые пары",
+  "@emptyLessons": {
+    "description": "Подпись пустых пар"
+  },
+  "analyticsShort": "Аналитика",
+  "@analyticsShort": {
+    "description": "Короткий ярлык аналитики"
+  },
+  "dayOff": "Выходной",
+  "@dayOff": {
+    "description": "Заголовок выходного"
+  },
+  "noLessonsThatDay": "Нет занятий в этот день",
+  "@noLessonsThatDay": {
+    "description": "Заголовок пустого дня"
+  },
+  "noLessonsThatDayShort": "Пар в этот день нет!",
+  "@noLessonsThatDayShort": {
+    "description": "Короткая строка пустого дня"
+  },
+  "restSuggestion": "Можно отдохнуть или заняться самостоятельной работой",
+  "@restSuggestion": {
+    "description": "Подсказка при пустом дне"
+  },
+  "windowGap": "Окно: {count, plural, one{{count} пара} few{{count} пары} many{{count} пар} other{{count} пар}}",
+  "@windowGap": {
+    "description": "Окно между парами",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "noScheduleSelected": "Расписание не выбрано",
+  "@noScheduleSelected": {
+    "description": "Заголовок отсутствия расписания"
+  },
+  "selectEntityToSeeSchedule": "Выберите группу, преподавателя или аудиторию, чтобы увидеть расписание",
+  "@selectEntityToSeeSchedule": {
+    "description": "Подзаголовок отсутствия расписания"
+  },
+  "errorLoadingSchedule": "Ошибка при загрузке расписания",
+  "@errorLoadingSchedule": {
+    "description": "Ошибка загрузки расписания"
+  },
+  "manageComparisons": "Управление сравнениями",
+  "@manageComparisons": {
+    "description": "Тултип управления сравнениями"
+  },
+  "selectUpTo4Schedules": "Выберите до 4-х расписаний, чтобы сравнить их по дням",
+  "@selectUpTo4Schedules": {
+    "description": "Описание модалки сравнения"
+  },
+  "noUpcomingLessons": "Нет предстоящих занятий",
+  "@noUpcomingLessons": {
+    "description": "Заголовок отсутствия ближайших занятий"
+  },
+  "noUpcomingLessonsDescription": "В ближайшее время занятия не запланированы. Переключитесь на календарь, чтобы посмотреть расписание за другие дни.",
+  "@noUpcomingLessonsDescription": {
+    "description": "Описание отсутствия ближайших занятий"
+  },
+  "switchToCalendar": "Переключиться на календарь",
+  "@switchToCalendar": {
+    "description": "Кнопка переключения на календарь"
+  },
+  "lecturesShort": "Лек.",
+  "@lecturesShort": {
+    "description": "Короткое — Лекции"
+  },
+  "practiceShort": "Практ.",
+  "@practiceShort": {
+    "description": "Короткое — Практики"
+  },
+  "labsShort": "Лаб.",
+  "@labsShort": {
+    "description": "Короткое — Лабы"
+  },
+  "legend": "Обозначения",
+  "@legend": {
+    "description": "Заголовок легенды"
+  },
+  "laboratoryWork": "Лабораторная",
+  "@laboratoryWork": {
+    "description": "Лабораторная работа"
+  },
+  "scheduleLoadError": "Во время получения расписания произошла ошибка. Попробуйте повторить попытку.",
+  "@scheduleLoadError": {
+    "description": "Описание ошибки загрузки расписания"
+  },
+  "selectSchedulesForComparison": "Выберите расписания для сравнения (до 3)",
+  "@selectSchedulesForComparison": {
+    "description": "Заголовок менеджера сравнения"
+  },
+  "deleteScheduleConfirm": "Вы уверены, что хотите удалить расписание \"{name}\"?",
+  "@deleteScheduleConfirm": {
+    "description": "Подтверждение удаления расписания",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "deleteClassConfirm": "Вы уверены, что хотите удалить пару \"{subject}\" из расписания?",
+  "@deleteClassConfirm": {
+    "description": "Подтверждение удаления пары",
+    "placeholders": {
+      "subject": {
+        "type": "String"
+      }
+    }
+  },
+  "commentTooLong": "Слишком длинный комментарий",
+  "@commentTooLong": {
+    "description": "Валидация длины комментария"
+  },
+  "addOneClassroomOrOnline": "Добавьте хотя бы одну аудиторию или сделайте занятие онлайн",
+  "@addOneClassroomOrOnline": {
+    "description": "Валидация — аудитория"
+  }
 }

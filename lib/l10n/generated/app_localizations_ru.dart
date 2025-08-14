@@ -106,13 +106,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String classesCount(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'пар',
-      few: 'пары',
-      one: 'пара',
-    );
+    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: 'пар', few: 'пары', one: 'пара');
     return '$_temp0';
   }
 
@@ -614,7 +608,8 @@ class AppLocalizationsRu extends AppLocalizations {
   String get noOwnSchedules => 'У вас пока нет своих расписаний';
 
   @override
-  String get createCustomSchedule => 'Создайте собственное расписание, добавляя в него пары из разных доступных расписаний';
+  String get createCustomSchedule =>
+      'Создайте собственное расписание, добавляя в него пары из разных доступных расписаний';
 
   @override
   String get scheduleCreation => 'Создание расписания';
@@ -754,6 +749,42 @@ class AppLocalizationsRu extends AppLocalizations {
   String get errorLoadingContributors => 'Ошибка при загрузке контрибьюторов';
 
   @override
+  String get relatedArticles => 'Похожие статьи';
+
+  @override
+  String get failedToLoadArticle => 'Не удалось загрузить статью';
+
+  @override
+  String get shareFailed => 'Ошибка при попытке поделиться';
+
+  @override
+  String get trending => 'Популярное';
+
+  @override
+  String get slideshow => 'Слайд-шоу';
+
+  @override
+  String get enterSearchQuery => 'Введите запрос для поиска';
+
+  @override
+  String get failedToLoadMoreContent => 'Не удалось загрузить больше контента';
+
+  @override
+  String get searchHistory => 'История';
+
+  @override
+  String get enterScheduleName => 'Введите название';
+
+  @override
+  String get nameTooLong => 'Слишком длинное название';
+
+  @override
+  String get createAndAddClass => 'Создать и добавить пару';
+
+  @override
+  String get addToSelectedSchedule => 'Добавить в выбранное расписание';
+
+  @override
   String get mireaMap => 'Карта МИРЭА';
 
   @override
@@ -790,7 +821,8 @@ class AppLocalizationsRu extends AppLocalizations {
   String get competitiveProgrammingMirea => 'Спортивное программирование МИРЭА';
 
   @override
-  String get competitiveProgrammingDescription => 'Здесь публикуются различные новости и апдейты по олимпиадному программированию в МИРЭА';
+  String get competitiveProgrammingDescription =>
+      'Здесь публикуются различные новости и апдейты по олимпиадному программированию в МИРЭА';
 
   @override
   String get personalAccount => 'Личный кабинет';
@@ -889,10 +921,12 @@ class AppLocalizationsRu extends AppLocalizations {
   String get createAccountTitle => 'Создайте аккаунт';
 
   @override
-  String get createAccountDescription => 'Мы предлагаем вам бесплатно создать аккаунт в нашем облачном хранилище, чтобы вы могли хранить свои файлы и документы!';
+  String get createAccountDescription =>
+      'Мы предлагаем вам бесплатно создать аккаунт в нашем облачном хранилище, чтобы вы могли хранить свои файлы и документы!';
 
   @override
-  String get cloudStorageDescription => 'На cloud.mirea.ninja вы можете хранить до 10 ГБ бесплатно (квоту можно расширить в телеграм боте), а также делиться файлами и онлайн редактировать документы вместе с одногруппниками.';
+  String get cloudStorageDescription =>
+      'На cloud.mirea.ninja вы можете хранить до 10 ГБ бесплатно (квоту можно расширить в телеграм боте), а также делиться файлами и онлайн редактировать документы вместе с одногруппниками.';
 
   @override
   String get searchPlaceholder => 'Поиск';
@@ -994,7 +1028,8 @@ class AppLocalizationsRu extends AppLocalizations {
   String get settings => 'Настройки';
 
   @override
-  String get findScheduleForClassroom => 'Вы можете быстро найти расписание для этой аудитории, используя поиск по расписанию.';
+  String get findScheduleForClassroom =>
+      'Вы можете быстро найти расписание для этой аудитории, используя поиск по расписанию.';
 
   @override
   String get rtuMireaApp => 'Приложение РТУ МИРЭА';
@@ -1048,4 +1083,171 @@ class AppLocalizationsRu extends AppLocalizations {
   String phoneContact(String phoneNumber) {
     return 'Телефон: $phoneNumber';
   }
+
+  @override
+  String lessonsOnDay(String day) {
+    return 'Занятия на $day';
+  }
+
+  @override
+  String get todayLower => 'сегодня';
+
+  @override
+  String get tomorrowLower => 'завтра';
+
+  @override
+  String get showEmptyLessonsTooltip => 'Показывать пустые пары';
+
+  @override
+  String get emptyLessons => 'Пустые пары';
+
+  @override
+  String get analyticsShort => 'Аналитика';
+
+  @override
+  String get dayOff => 'Выходной';
+
+  @override
+  String get noLessonsThatDay => 'Нет занятий в этот день';
+
+  @override
+  String get noLessonsThatDayShort => 'Пар в этот день нет!';
+
+  @override
+  String get restSuggestion => 'Можно отдохнуть или заняться самостоятельной работой';
+
+  @override
+  String windowGap(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count пар',
+      many: '$count пар',
+      few: '$count пары',
+      one: '$count пара',
+    );
+    return 'Окно: $_temp0';
+  }
+
+  @override
+  String get noScheduleSelected => 'Расписание не выбрано';
+
+  @override
+  String get selectEntityToSeeSchedule => 'Выберите группу, преподавателя или аудиторию, чтобы увидеть расписание';
+
+  @override
+  String get errorLoadingSchedule => 'Ошибка при загрузке расписания';
+
+  @override
+  String get manageComparisons => 'Управление сравнениями';
+
+  @override
+  String get selectUpTo4Schedules => 'Выберите до 4-х расписаний, чтобы сравнить их по дням';
+
+  @override
+  String get noUpcomingLessons => 'Нет предстоящих занятий';
+
+  @override
+  String get noUpcomingLessonsDescription =>
+      'В ближайшее время занятия не запланированы. Переключитесь на календарь, чтобы посмотреть расписание за другие дни.';
+
+  @override
+  String get switchToCalendar => 'Переключиться на календарь';
+
+  @override
+  String get lecturesShort => 'Лек.';
+
+  @override
+  String get practiceShort => 'Практ.';
+
+  @override
+  String get labsShort => 'Лаб.';
+
+  @override
+  String get legend => 'Обозначения';
+
+  @override
+  String get laboratoryWork => 'Лабораторная';
+
+  @override
+  String get scheduleLoadError => 'Во время получения расписания произошла ошибка. Попробуйте повторить попытку.';
+
+  @override
+  String get selectSchedulesForComparison => 'Выберите расписания для сравнения (до 3)';
+
+  @override
+  String deleteScheduleConfirm(String name) {
+    return 'Вы уверены, что хотите удалить расписание \"$name\"?';
+  }
+
+  @override
+  String deleteClassConfirm(String subject) {
+    return 'Вы уверены, что хотите удалить пару \"$subject\" из расписания?';
+  }
+
+  @override
+  String get commentTooLong => 'Слишком длинный комментарий';
+
+  @override
+  String get addOneClassroomOrOnline => 'Добавьте хотя бы одну аудиторию или сделайте занятие онлайн';
+
+  @override
+  String get createClass => 'Create class';
+
+  @override
+  String get editClass => 'Edit class';
+
+  @override
+  String get startTime => 'Start';
+
+  @override
+  String get endTime => 'End';
+
+  @override
+  String get lessonNumber => 'Lesson number';
+
+  @override
+  String get teacherFullNameHint => 'e.g. Ivanov Ivan Ivanovich';
+
+  @override
+  String get enterTeacherFullName => 'Enter teacher full name';
+
+  @override
+  String get onlineLessonUrl => 'Online lesson URL';
+
+  @override
+  String get enterUrl => 'Enter URL';
+
+  @override
+  String get classroomNumberHint => 'e.g. A-123';
+
+  @override
+  String get enterClassroomNumber => 'Enter classroom number';
+
+  @override
+  String get enterGroupName => 'Enter group name';
+
+  @override
+  String get basic => 'Basic';
+
+  @override
+  String get dates => 'Dates';
+
+  @override
+  String get place => 'Place';
+
+  @override
+  String get create => 'Create';
+
+  @override
+  String get addDate => 'Add date';
+
+  @override
+  String get lessonDeliveryType => 'Lesson delivery type';
+
+  @override
+  String get noClassroomsSelected => 'No classrooms selected';
+
+  @override
+  String get back => 'Back';
 }

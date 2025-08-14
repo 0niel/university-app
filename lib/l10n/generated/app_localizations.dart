@@ -90,10 +90,7 @@ abstract class AppLocalizations {
   ];
 
   /// A list of this localizations delegate's supported locales.
-  static const List<Locale> supportedLocales = <Locale>[
-    Locale('en'),
-    Locale('ru')
-  ];
+  static const List<Locale> supportedLocales = <Locale>[Locale('en'), Locale('ru')];
 
   /// Title for the schedule page
   ///
@@ -695,7 +692,7 @@ abstract class AppLocalizations {
   /// **'Add'**
   String get add;
 
-  /// Error message for date selection
+  /// Validation missing dates
   ///
   /// In en, this message translates to:
   /// **'Select at least one date'**
@@ -809,7 +806,7 @@ abstract class AppLocalizations {
   /// **'Make active'**
   String get makeActive;
 
-  /// Label for comment field
+  /// Comment label
   ///
   /// In en, this message translates to:
   /// **'Comment'**
@@ -1259,10 +1256,10 @@ abstract class AppLocalizations {
   /// **'Add to schedule'**
   String get addToSchedule;
 
-  /// Lesson comment placeholder
+  /// Comment hint
   ///
   /// In en, this message translates to:
-  /// **'Enter lesson comment...'**
+  /// **'Enter a comment for the class...'**
   String get enterLessonComment;
 
   /// No custom schedules message
@@ -1534,6 +1531,78 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Error loading contributors'**
   String get errorLoadingContributors;
+
+  /// Section title for related articles
+  ///
+  /// In en, this message translates to:
+  /// **'Related articles'**
+  String get relatedArticles;
+
+  /// Error description when an article fails to load
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load article'**
+  String get failedToLoadArticle;
+
+  /// Error message when share action fails
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to share'**
+  String get shareFailed;
+
+  /// Trending section title
+  ///
+  /// In en, this message translates to:
+  /// **'Trending'**
+  String get trending;
+
+  /// Slideshow label
+  ///
+  /// In en, this message translates to:
+  /// **'Slideshow'**
+  String get slideshow;
+
+  /// Search prompt when no query entered
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a search query'**
+  String get enterSearchQuery;
+
+  /// Error description when loading more content fails
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load more content'**
+  String get failedToLoadMoreContent;
+
+  /// Search history header
+  ///
+  /// In en, this message translates to:
+  /// **'History'**
+  String get searchHistory;
+
+  /// Validation message for empty schedule name
+  ///
+  /// In en, this message translates to:
+  /// **'Enter name'**
+  String get enterScheduleName;
+
+  /// Validation message when schedule name is too long
+  ///
+  /// In en, this message translates to:
+  /// **'Name is too long'**
+  String get nameTooLong;
+
+  /// Button text to create a schedule and add class
+  ///
+  /// In en, this message translates to:
+  /// **'Create and add class'**
+  String get createAndAddClass;
+
+  /// Button text to add class to selected schedule
+  ///
+  /// In en, this message translates to:
+  /// **'Add to selected schedule'**
+  String get addToSelectedSchedule;
 
   /// MIREA Map service title
   ///
@@ -2122,6 +2191,306 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Phone: {phoneNumber}'**
   String phoneContact(String phoneNumber);
+
+  /// Header for lessons on a specific day
+  ///
+  /// In en, this message translates to:
+  /// **'Lessons on {day}'**
+  String lessonsOnDay(String day);
+
+  /// today, lowercase
+  ///
+  /// In en, this message translates to:
+  /// **'today'**
+  String get todayLower;
+
+  /// tomorrow, lowercase
+  ///
+  /// In en, this message translates to:
+  /// **'tomorrow'**
+  String get tomorrowLower;
+
+  /// Tooltip for empty lessons toggle
+  ///
+  /// In en, this message translates to:
+  /// **'Show empty classes'**
+  String get showEmptyLessonsTooltip;
+
+  /// Label for empty lessons toggle
+  ///
+  /// In en, this message translates to:
+  /// **'Empty classes'**
+  String get emptyLessons;
+
+  /// Short label for analytics
+  ///
+  /// In en, this message translates to:
+  /// **'Analytics'**
+  String get analyticsShort;
+
+  /// Holiday title for Sunday
+  ///
+  /// In en, this message translates to:
+  /// **'Day off'**
+  String get dayOff;
+
+  /// Empty day title
+  ///
+  /// In en, this message translates to:
+  /// **'No classes on this day'**
+  String get noLessonsThatDay;
+
+  /// Short empty day line
+  ///
+  /// In en, this message translates to:
+  /// **'No classes this day!'**
+  String get noLessonsThatDayShort;
+
+  /// Suggestion on empty day
+  ///
+  /// In en, this message translates to:
+  /// **'You can rest or do self-study'**
+  String get restSuggestion;
+
+  /// Window gap between lessons with pluralization
+  ///
+  /// In en, this message translates to:
+  /// **'Gap: {count, plural, one{{count} class} other{{count} classes}}'**
+  String windowGap(int count);
+
+  /// Desktop empty schedule title
+  ///
+  /// In en, this message translates to:
+  /// **'No schedule selected'**
+  String get noScheduleSelected;
+
+  /// Desktop empty schedule subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Select a group, teacher or classroom to view schedule'**
+  String get selectEntityToSeeSchedule;
+
+  /// Snack error loading schedule
+  ///
+  /// In en, this message translates to:
+  /// **'Error loading schedule'**
+  String get errorLoadingSchedule;
+
+  /// Tooltip for manage comparisons
+  ///
+  /// In en, this message translates to:
+  /// **'Manage comparisons'**
+  String get manageComparisons;
+
+  /// Description for compare modal
+  ///
+  /// In en, this message translates to:
+  /// **'Select up to 4 schedules to compare by days'**
+  String get selectUpTo4Schedules;
+
+  /// Title for no upcoming lessons state
+  ///
+  /// In en, this message translates to:
+  /// **'No upcoming classes'**
+  String get noUpcomingLessons;
+
+  /// Description for no upcoming lessons state
+  ///
+  /// In en, this message translates to:
+  /// **'No classes are scheduled in the near future. Switch to the calendar to view other days.'**
+  String get noUpcomingLessonsDescription;
+
+  /// Button to switch to calendar
+  ///
+  /// In en, this message translates to:
+  /// **'Switch to calendar'**
+  String get switchToCalendar;
+
+  /// Lectures short label
+  ///
+  /// In en, this message translates to:
+  /// **'Lect.'**
+  String get lecturesShort;
+
+  /// Practice short label
+  ///
+  /// In en, this message translates to:
+  /// **'Pract.'**
+  String get practiceShort;
+
+  /// Labs short label
+  ///
+  /// In en, this message translates to:
+  /// **'Lab.'**
+  String get labsShort;
+
+  /// Legend title
+  ///
+  /// In en, this message translates to:
+  /// **'Legend'**
+  String get legend;
+
+  /// Laboratory work label
+  ///
+  /// In en, this message translates to:
+  /// **'Laboratory'**
+  String get laboratoryWork;
+
+  /// Schedule load error description
+  ///
+  /// In en, this message translates to:
+  /// **'An error occurred while fetching the schedule. Please try again.'**
+  String get scheduleLoadError;
+
+  /// Comparison manager title
+  ///
+  /// In en, this message translates to:
+  /// **'Select schedules for comparison (up to 3)'**
+  String get selectSchedulesForComparison;
+
+  /// Confirm delete schedule
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete \"{name}\"?'**
+  String deleteScheduleConfirm(String name);
+
+  /// Confirm delete class
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete \"{subject}\" from the schedule?'**
+  String deleteClassConfirm(String subject);
+
+  /// Comment length validation
+  ///
+  /// In en, this message translates to:
+  /// **'Comment is too long'**
+  String get commentTooLong;
+
+  /// Validation missing classroom
+  ///
+  /// In en, this message translates to:
+  /// **'Add at least one classroom or make the class online'**
+  String get addOneClassroomOrOnline;
+
+  /// Create class title
+  ///
+  /// In en, this message translates to:
+  /// **'Create class'**
+  String get createClass;
+
+  /// Edit class title
+  ///
+  /// In en, this message translates to:
+  /// **'Edit class'**
+  String get editClass;
+
+  /// Start time label
+  ///
+  /// In en, this message translates to:
+  /// **'Start'**
+  String get startTime;
+
+  /// End time label
+  ///
+  /// In en, this message translates to:
+  /// **'End'**
+  String get endTime;
+
+  /// Lesson number label
+  ///
+  /// In en, this message translates to:
+  /// **'Lesson number'**
+  String get lessonNumber;
+
+  /// Teacher full name hint
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Ivanov Ivan Ivanovich'**
+  String get teacherFullNameHint;
+
+  /// Teacher full name validation
+  ///
+  /// In en, this message translates to:
+  /// **'Enter teacher full name'**
+  String get enterTeacherFullName;
+
+  /// Online URL label
+  ///
+  /// In en, this message translates to:
+  /// **'Online lesson URL'**
+  String get onlineLessonUrl;
+
+  /// URL hint
+  ///
+  /// In en, this message translates to:
+  /// **'Enter URL'**
+  String get enterUrl;
+
+  /// Classroom number hint
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. A-123'**
+  String get classroomNumberHint;
+
+  /// Classroom number validation
+  ///
+  /// In en, this message translates to:
+  /// **'Enter classroom number'**
+  String get enterClassroomNumber;
+
+  /// Group name validation
+  ///
+  /// In en, this message translates to:
+  /// **'Enter group name'**
+  String get enterGroupName;
+
+  /// Basic tab
+  ///
+  /// In en, this message translates to:
+  /// **'Basic'**
+  String get basic;
+
+  /// Dates tab
+  ///
+  /// In en, this message translates to:
+  /// **'Dates'**
+  String get dates;
+
+  /// Place tab
+  ///
+  /// In en, this message translates to:
+  /// **'Place'**
+  String get place;
+
+  /// Create button
+  ///
+  /// In en, this message translates to:
+  /// **'Create'**
+  String get create;
+
+  /// Tooltip to add date
+  ///
+  /// In en, this message translates to:
+  /// **'Add date'**
+  String get addDate;
+
+  /// Header for lesson delivery type
+  ///
+  /// In en, this message translates to:
+  /// **'Lesson delivery type'**
+  String get lessonDeliveryType;
+
+  /// Empty state for classrooms
+  ///
+  /// In en, this message translates to:
+  /// **'No classrooms selected'**
+  String get noClassroomsSelected;
+
+  /// Back button
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get back;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
@@ -2140,18 +2509,18 @@ class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> 
 }
 
 AppLocalizations lookupAppLocalizations(Locale locale) {
-
-
   // Lookup logic when only language code is specified.
   switch (locale.languageCode) {
-    case 'en': return AppLocalizationsEn();
-    case 'ru': return AppLocalizationsRu();
+    case 'en':
+      return AppLocalizationsEn();
+    case 'ru':
+      return AppLocalizationsRu();
   }
 
   throw FlutterError(
     'AppLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
     'an issue with the localizations generation tool. Please file an issue '
     'on GitHub with a reproducible sample app and the gen-l10n configuration '
-    'that was used.'
+    'that was used.',
   );
 }
