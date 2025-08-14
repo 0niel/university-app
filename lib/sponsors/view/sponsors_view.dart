@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:rtu_mirea_app/sponsors/sponsors.dart';
+import 'package:rtu_mirea_app/l10n/l10n.dart';
 
 class SponsorsView extends StatelessWidget {
   const SponsorsView({super.key});
@@ -28,7 +29,7 @@ class _SponsorsView extends StatelessWidget {
         if (state.status == SponsorsStatus.failure) {
           ScaffoldMessenger.of(context)
             ..hideCurrentSnackBar()
-            ..showSnackBar(const SnackBar(content: Text('Ошибка при загрузке спонсоров')));
+            ..showSnackBar(SnackBar(content: Text(context.l10n.errorLoadingSponsors)));
         }
       },
       builder: (context, state) {
