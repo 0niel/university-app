@@ -1,6 +1,7 @@
 import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:rtu_mirea_app/search/bloc/search_bloc.dart';
 
 class ClearSearchHistoryButton extends StatelessWidget {
@@ -14,7 +15,7 @@ class ClearSearchHistoryButton extends StatelessWidget {
         onPressed: () {
           context.read<SearchBloc>().add(const ClearSearchHistory());
         },
-        child: const Text("Очистить"),
+        child: Text(context.l10n.clear),
       ),
     );
   }

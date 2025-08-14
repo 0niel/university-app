@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:rtu_mirea_app/presentation/constants.dart';
 import 'package:app_ui/app_ui.dart';
+import 'package:rtu_mirea_app/l10n/l10n.dart';
 
 class LoadingErrorMessage extends StatelessWidget {
   const LoadingErrorMessage({super.key, required this.onTap});
@@ -20,16 +21,13 @@ class LoadingErrorMessage extends StatelessWidget {
           children: [
             Center(child: Assets.images.saly2.image(height: 200)),
             const SizedBox(height: 8),
-            Text("Произошла ошибка", style: AppTextStyle.h5),
+            Text(context.l10n.error, style: AppTextStyle.h5),
             const SizedBox(height: 8),
-            Text(
-              "Во время получения расписания произошла ошибка. Попробуйте повторить попытку.",
-              style: AppTextStyle.captionL.copyWith(color: AppColors.dark.deactive),
-            ),
+            Text(context.l10n.scheduleLoadError, style: AppTextStyle.captionL.copyWith(color: AppColors.dark.deactive)),
             const SizedBox(height: 24),
             SizedBox(
               width: isTable ? 420 : double.infinity,
-              child: ColorfulButton(text: "Повторить", onClick: onTap, backgroundColor: AppColors.dark.primary),
+              child: ColorfulButton(text: context.l10n.retry, onClick: onTap, backgroundColor: AppColors.dark.primary),
             ),
           ],
         ),
