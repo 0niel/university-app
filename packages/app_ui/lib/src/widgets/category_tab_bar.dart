@@ -11,6 +11,7 @@ class CategoryTabBar extends StatelessWidget {
     required this.tabs,
     required this.selectedIndex,
     required this.onTap,
+    this.icons,
     this.height = 40,
     this.scrollable = true,
     this.physics = const BouncingScrollPhysics(),
@@ -21,6 +22,9 @@ class CategoryTabBar extends StatelessWidget {
 
   /// The list of tab labels to display.
   final List<String> tabs;
+
+  /// Optional list of icons to display with tabs. Must be same length as tabs if provided.
+  final List<Widget?>? icons;
 
   /// The currently selected tab index.
   final int selectedIndex;
@@ -56,7 +60,8 @@ class CategoryTabBar extends StatelessWidget {
                 scrollDirection: scrollDirection,
                 physics: physics,
                 itemCount: tabs.length,
-                itemBuilder: (context, index) => _buildTab(context, index, notifier),
+                itemBuilder: (context, index) =>
+                    _buildTab(context, index, notifier),
               )
             : Row(
                 children: List.generate(
@@ -68,11 +73,13 @@ class CategoryTabBar extends StatelessWidget {
     );
   }
 
-  Widget _buildTab(BuildContext context, int index, ValueNotifier<int> notifier) {
+  Widget _buildTab(
+      BuildContext context, int index, ValueNotifier<int> notifier) {
     return PrimaryTabButton(
       text: tabs[index],
       itemIndex: index,
       notifier: notifier,
+      icon: icons?[index],
       onClick: () {
         onTap(index);
       },
@@ -89,6 +96,7 @@ class CategoryAnimatedTabBar extends StatefulWidget {
     required this.tabs,
     required this.selectedIndex,
     required this.onTap,
+    this.icons,
     this.height = 40,
     this.scrollable = true,
     this.physics = const BouncingScrollPhysics(),
@@ -99,6 +107,9 @@ class CategoryAnimatedTabBar extends StatefulWidget {
 
   /// The list of tab labels to display.
   final List<String> tabs;
+
+  /// Optional list of icons to display with tabs. Must be same length as tabs if provided.
+  final List<Widget?>? icons;
 
   /// The currently selected tab index.
   final int selectedIndex;
@@ -137,7 +148,7 @@ class _CategoryAnimatedTabBarState extends State<CategoryAnimatedTabBar> {
   @override
   void didUpdateWidget(CategoryAnimatedTabBar oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // Обновляем текущий индекс, если он изменился извне
+
     if (widget.selectedIndex != oldWidget.selectedIndex) {
       _currentIndex = widget.selectedIndex;
     }
@@ -186,13 +197,24 @@ class _CategoryAnimatedTabBarState extends State<CategoryAnimatedTabBar> {
           borderRadius: BorderRadius.circular(20),
         ),
         child: Center(
-          child: Text(
-            widget.tabs[index],
-            style: TextStyle(
-              color: isSelected ? Colors.white : colors.deactive,
-              fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-              fontSize: 14,
-            ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (widget.icons != null &&
+                  widget.icons!.length > index &&
+                  widget.icons![index] != null) ...[
+                widget.icons![index]!,
+                const SizedBox(width: 8),
+              ],
+              Text(
+                widget.tabs[index],
+                style: TextStyle(
+                  color: isSelected ? Colors.white : colors.deactive,
+                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                  fontSize: 14,
+                ),
+              ),
+            ],
           ),
         ),
       ),
