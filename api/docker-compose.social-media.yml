@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  social-media-fetcher:
+    build:
+      context: ./social_media_fetcher
+      dockerfile: Dockerfile
+    container_name: university-app-social-media-fetcher
+    env_file:
+      - .env
+    ports:
+      - "8001:8000"
+    volumes:
+      - sessions_data:/app/sessions
+      - app_data:/app/data
+      - logs_data:/app/logs
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    depends_on:
+      - redis
+
+  redis:
+    image: redis:7-alpine
+    container_name: university-app-redis-social
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  redis_data:
+  sessions_data:
+  app_data:
+  logs_data:
