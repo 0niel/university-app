@@ -15,9 +15,6 @@ ide:
     enabled: false
 command:
   bootstrap:
-    dependency_overrides:
-      intl: ^0.18.0
-      web: ^1.0.0
     hooks:
       post: melos run format
   version:
@@ -26,8 +23,8 @@ command:
         melos bootstrap
         git add packages/app/pubspec.lock
 scripts:
-  format: dart format --line-length 120 . && dart fix --apply
-  format:check: dart format --output=none --set-exit-if-changed --line-length 120 .
+  format: dart format --line-length 80 . && dart fix --apply
+  format:check: dart format --output=none --set-exit-if-changed --line-length 80 .
   analyze: dart run custom_lint --fatal-infos .
   fix: dart fix --apply
   test: >
