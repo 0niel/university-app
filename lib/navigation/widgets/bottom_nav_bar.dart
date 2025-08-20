@@ -7,29 +7,37 @@ import 'package:rtu_mirea_app/navigation/view/scaffold_navigation_shell.dart';
 
 /// Animates the bottom navigation bar to slide up/down based on scroll direction
 class AnimatedBottomNavigationBar extends StatefulWidget {
-  const AnimatedBottomNavigationBar({super.key, required this.index, required this.onClick});
+  const AnimatedBottomNavigationBar({
+    super.key,
+    required this.index,
+    required this.onClick,
+  });
 
   final Function(int) onClick;
   final int index;
 
   @override
-  State<AnimatedBottomNavigationBar> createState() => _AnimatedBottomNavigationBarState();
+  State<AnimatedBottomNavigationBar> createState() =>
+      _AnimatedBottomNavigationBarState();
 }
 
-class _AnimatedBottomNavigationBarState extends State<AnimatedBottomNavigationBar> {
+class _AnimatedBottomNavigationBarState
+    extends State<AnimatedBottomNavigationBar> {
   final _controller = BottomNavigationBarVisibilityController.instance;
+  late final VoidCallback _visibilityListener;
 
   @override
   void initState() {
     super.initState();
-    _controller.addListener(() {
-      setState(() {});
-    });
+    _visibilityListener = () {
+      if (mounted) setState(() {});
+    };
+    _controller.addListener(_visibilityListener);
   }
 
   @override
   void dispose() {
-    _controller.removeListener(() {});
+    _controller.removeListener(_visibilityListener);
     super.dispose();
   }
 
@@ -39,13 +47,21 @@ class _AnimatedBottomNavigationBarState extends State<AnimatedBottomNavigationBa
       duration: const Duration(milliseconds: 200),
       curve: Curves.easeInOut,
       offset: Offset(0, _controller.isVisible ? 0 : 1),
-      child: AppBottomNavigationBar(index: widget.index, onClick: widget.onClick),
+      child: AppBottomNavigationBar(
+        key: ValueKey<int>(widget.index),
+        index: widget.index,
+        onClick: widget.onClick,
+      ),
     );
   }
 }
 
 class AppBottomNavigationBar extends StatefulWidget {
-  const AppBottomNavigationBar({super.key, required this.index, required this.onClick});
+  const AppBottomNavigationBar({
+    super.key,
+    required this.index,
+    required this.onClick,
+  });
 
   final Function(int) onClick;
   final int index;
@@ -55,20 +71,20 @@ class AppBottomNavigationBar extends StatefulWidget {
 }
 
 class _AppBottomNavigationBarState extends State<AppBottomNavigationBar> {
-  int selectedIndex = 0;
-
   @override
   Widget build(BuildContext context) {
     return DotNavigationBar(
       boxShadow: [
-        BoxShadow(color: Colors.black.withOpacity(0.1), spreadRadius: 1, blurRadius: 12, offset: const Offset(0, 4)),
+        BoxShadow(
+          color: Colors.black.withOpacity(0.1),
+          spreadRadius: 1,
+          blurRadius: 12,
+          offset: const Offset(0, 4),
+        ),
       ],
       currentIndex: widget.index,
       onTap: (index) {
         HapticFeedback.lightImpact();
-        setState(() {
-          selectedIndex = index;
-        });
         widget.onClick(index);
       },
       dotIndicatorColor: AppColors.dark.primary,
@@ -79,25 +95,36 @@ class _AppBottomNavigationBarState extends State<AppBottomNavigationBar> {
       paddingR: const EdgeInsets.only(bottom: 5, top: 7),
       splashBorderRadius: 50,
       items: [
-        _buildNavBarItem(0, Assets.icons.hugeicons.news.svg(color: Theme.of(context).extension<AppColors>()!.active)),
+        _buildNavBarItem(
+          0,
+          Assets.icons.hugeicons.news.svg(
+            color: Theme.of(context).extension<AppColors>()!.active,
+          ),
+        ),
         _buildNavBarItem(
           1,
-          Assets.icons.hugeicons.calendar03.svg(color: Theme.of(context).extension<AppColors>()!.active),
+          Assets.icons.hugeicons.calendar03.svg(
+            color: Theme.of(context).extension<AppColors>()!.active,
+          ),
         ),
         _buildNavBarItem(
           2,
-          Assets.icons.hugeicons.dashboardSquare01.svg(color: Theme.of(context).extension<AppColors>()!.active),
+          Assets.icons.hugeicons.dashboardSquare01.svg(
+            color: Theme.of(context).extension<AppColors>()!.active,
+          ),
         ),
         _buildNavBarItem(
           3,
-          Assets.icons.hugeicons.userAccount.svg(color: Theme.of(context).extension<AppColors>()!.active),
+          Assets.icons.hugeicons.userAccount.svg(
+            color: Theme.of(context).extension<AppColors>()!.active,
+          ),
         ),
       ],
     );
   }
 
   DotNavigationBarItem _buildNavBarItem(int index, Widget icon) {
-    bool isSelected = index == selectedIndex;
+    bool isSelected = index == widget.index;
 
     return DotNavigationBarItem(
       icon:
@@ -110,7 +137,12 @@ class _AppBottomNavigationBarState extends State<AppBottomNavigationBar> {
                     duration: const Duration(milliseconds: 150),
                     curve: Curves.easeInOut,
                   )
-                  .moveY(begin: 0, end: -2, duration: const Duration(milliseconds: 150), curve: Curves.easeInOut)
+                  .moveY(
+                    begin: 0,
+                    end: -2,
+                    duration: const Duration(milliseconds: 150),
+                    curve: Curves.easeInOut,
+                  )
                   .then()
                   .scale(
                     begin: const Offset(1.03, 1.03),
@@ -118,7 +150,12 @@ class _AppBottomNavigationBarState extends State<AppBottomNavigationBar> {
                     duration: const Duration(milliseconds: 150),
                     curve: Curves.easeInOut,
                   )
-                  .moveY(begin: -2, end: 0, duration: const Duration(milliseconds: 150), curve: Curves.easeInOut)
+                  .moveY(
+                    begin: -2,
+                    end: 0,
+                    duration: const Duration(milliseconds: 150),
+                    curve: Curves.easeInOut,
+                  )
               : icon,
       selectedColor: AppColors.dark.primary,
     );

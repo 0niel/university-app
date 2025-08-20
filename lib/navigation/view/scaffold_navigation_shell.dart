@@ -34,10 +34,12 @@ class ScaffoldNavigationShell extends StatefulWidget {
   final StatefulNavigationShell navigationShell;
 
   static final isDesktop =
-      !(defaultTargetPlatform == TargetPlatform.android || defaultTargetPlatform == TargetPlatform.iOS);
+      !(defaultTargetPlatform == TargetPlatform.android ||
+          defaultTargetPlatform == TargetPlatform.iOS);
 
   @override
-  State<ScaffoldNavigationShell> createState() => _ScaffoldNavigationShellState();
+  State<ScaffoldNavigationShell> createState() =>
+      _ScaffoldNavigationShellState();
 }
 
 class _ScaffoldNavigationShellState extends State<ScaffoldNavigationShell> {
@@ -63,34 +65,29 @@ class _ScaffoldNavigationShellState extends State<ScaffoldNavigationShell> {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        if (constraints.maxWidth > tabletBreakpoint) {
-          return Scaffold(
-            body: Row(
-              children: [
-                // Sidebar(
-                //   currentIndex: navigationShell.currentIndex,
-                //   onClick: (index) => _setActiveIndex(index),
-                // ),
-                Expanded(child: widget.navigationShell),
-              ],
-            ),
-          );
-        } else {
-          return Scaffold(
-            backgroundColor: Theme.of(context).extension<AppColors>()!.background03,
-            body: widget.navigationShell,
-            extendBody: true,
-            bottomNavigationBar: AnimatedBottomNavigationBar(
-              index: widget.navigationShell.currentIndex,
-              onClick: (index) => _setActiveIndex(index),
-            ),
-          );
-        }
+        final bool isWide = constraints.maxWidth > tabletBreakpoint;
+
+        return Scaffold(
+          backgroundColor:
+              Theme.of(context).extension<AppColors>()!.background03,
+          extendBody: !isWide,
+          body: widget.navigationShell,
+          bottomNavigationBar:
+              isWide
+                  ? null
+                  : AnimatedBottomNavigationBar(
+                    index: widget.navigationShell.currentIndex,
+                    onClick: (index) => _setActiveIndex(index),
+                  ),
+        );
       },
     );
   }
 
   void _setActiveIndex(int index) {
-    widget.navigationShell.goBranch(index, initialLocation: index == widget.navigationShell.currentIndex);
+    widget.navigationShell.goBranch(
+      index,
+      initialLocation: index == widget.navigationShell.currentIndex,
+    );
   }
 }
