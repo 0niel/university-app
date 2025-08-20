@@ -22,13 +22,18 @@ from .models import TelegramChannelInfo, TelegramMedia, TelegramMessage
 
 # Import news blocks models
 try:
-    from ...news_blocks.models import NewsBlock
+    from ...news_blocks.models import NewsBlock as NewsBlockType
     from ...news_blocks.adapters.telegram_adapter import TelegramToNewsBlocksAdapter
     BLOCKS_AVAILABLE = True
 except Exception:
-    BLOCKS_AVAILABLE = False
-    NewsBlock = None
+    from typing import Any as _Any
+    NewsBlockType = _Any
     TelegramToNewsBlocksAdapter = None
+    BLOCKS_AVAILABLE = False
+
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from ...media_storage import MediaStorage
 
 
 class TelegramFetcher(SocialMediaClient):
@@ -128,7 +133,7 @@ class TelegramFetcher(SocialMediaClient):
 
     async def fetch_news_blocks(
         self, source_id: str, limit: int = 20, **kwargs
-    ) -> List[NewsBlock]:
+    ) -> List[Any]:
         """Fetch posts from a Telegram channel and return as news blocks."""
         if not BLOCKS_AVAILABLE or not self.adapter:
             logger.warning("News blocks not available for Telegram")
@@ -160,20 +165,45 @@ class TelegramFetcher(SocialMediaClient):
                 logger.warning(f"Could not get info for channel: {source_id}")
                 return []
 
-            messages = await self.get_channel_messages_with_groups(
-                source_id, limit, kwargs.get("offset_id", 0)
-            )
+            requested_limit = max(1, int(limit))
+            raw_data_list: List[Dict[str, Any]] = []
+            offset_id = int(kwargs.get("offset_id", 0))
+            attempts = 0
+            max_attempts = 5
 
-            raw_data_list = []
-            for message_group in messages:
+            while len(raw_data_list) < requested_limit and attempts < max_attempts:
+                batch_needed = requested_limit - len(raw_data_list)
+                messages = await self.get_channel_messages_with_groups(
+                    source_id, batch_needed, offset_id
+                )
+
+                if not messages:
+                    break
+
+                # Compute next offset (fetch older messages next)
                 try:
-                    raw_data = await self._convert_message_group_to_raw_data(message_group, channel_info)
-                    if raw_data:
-                        raw_data_list.append(raw_data)
-                except Exception as e:
-                    logger.warning(f"Error converting message group: {e}")
+                    min_id_in_batch = min(
+                        (msg.id for group in messages for msg in group),
+                        default=None,
+                    )
+                    if min_id_in_batch:
+                        offset_id = int(min_id_in_batch) - 1
+                except Exception:
+                    pass
 
-            return raw_data_list
+                for message_group in messages:
+                    try:
+                        raw_data = await self._convert_message_group_to_raw_data(
+                            message_group, channel_info
+                        )
+                        if raw_data:
+                            raw_data_list.append(raw_data)
+                    except Exception as e:
+                        logger.warning(f"Error converting message group: {e}")
+
+                attempts += 1
+
+            return raw_data_list[:requested_limit]
 
         except Exception as e:
             logger.error(f"Error fetching raw data from {source_id}: {e}")
@@ -189,10 +219,7 @@ class TelegramFetcher(SocialMediaClient):
         storage: "MediaStorage",
         source_info: Dict[str, Any],
     ) -> Optional[str]:
-        """Download Telegram media by file_id and upload to storage.
-
-        media_identifier is a Telegram file_id we earlier embedded in blocks.
-        """
+        """Download Telegram media by file_id and upload to storage (client-specific)."""
         try:
             if not self._initialized or not self.client:
                 return None
@@ -202,25 +229,212 @@ class TelegramFetcher(SocialMediaClient):
             if not message or not message.media:
                 return None
 
-            # Map file id to actual media object from message
-            # Handle photo
-            if hasattr(message.media, "photo") and message.media.photo:
-                if str(message.media.photo.id) == media_identifier:
-                    return await storage.download_and_store_file(
-                        message.media, media_type, source_info, telegram_client=self
+            # Collect candidate media objects: include album messages if present
+            candidates = []
+            try:
+                if getattr(message, "media", None):
+                    candidates.append(message.media)
+                grouped_id = getattr(message, "grouped_id", None)
+                if grouped_id:
+                    album_messages = await self.client.get_messages(
+                        source_id,
+                        limit=None,
+                        min_id=message.id - 100,
+                        max_id=message.id + 100,
                     )
+                    for m in album_messages or []:
+                        if getattr(m, "grouped_id", None) == grouped_id and getattr(m, "media", None):
+                            candidates.append(m.media)
+            except Exception:
+                # Fallback: only current message
+                pass
 
-            # Handle document (video/gif)
-            if hasattr(message.media, "document") and message.media.document:
-                if str(message.media.document.id) == media_identifier:
-                    return await storage.download_and_store_file(
-                        message.media, media_type, source_info, telegram_client=self
-                    )
+            # Find matching media by id among candidates, include webpage.photo
+            media_object = None
+            for m in candidates:
+                if hasattr(m, "photo") and getattr(m, "photo", None):
+                    if str(m.photo.id) == media_identifier:
+                        media_object = m
+                        break
+                if hasattr(m, "document") and getattr(m, "document", None):
+                    if str(m.document.id) == media_identifier:
+                        media_object = m
+                        break
+                if hasattr(m, "webpage") and getattr(m, "webpage", None) and getattr(m.webpage, "photo", None):
+                    if str(m.webpage.photo.id) == media_identifier:
+                        media_object = m.webpage.photo
+                        break
+
+            if not media_object:
+                return None
+
+            # Download the media to bytes
+            temp_path = await self.client.download_media(media_object)
+            if not temp_path:
+                return None
+
+            import mimetypes, os
+            with open(temp_path, "rb") as f:
+                data = f.read()
+            try:
+                os.unlink(temp_path)
+            except Exception:
+                pass
+
+            content_type, _ = mimetypes.guess_type(temp_path)
+            if not content_type:
+                # Fallback to media object hints
+                if hasattr(media_object, "photo") and getattr(media_object, "photo", None):
+                    content_type = "image/jpeg"
+                elif hasattr(media_object, "document") and getattr(media_object, "document", None):
+                    guessed = getattr(media_object.document, "mime_type", None)
+                    content_type = guessed or "application/octet-stream"
+                else:
+                    content_type = "application/octet-stream"
+
+            file_type = "document"
+            # Prefer structural hints over guessed mimetype
+            if hasattr(media_object, "photo") and getattr(media_object, "photo", None):
+                file_type = "image"
+            elif hasattr(media_object, "document") and getattr(media_object, "document", None):
+                mt = getattr(media_object.document, "mime_type", "") or ""
+                if mt.startswith("image/"):
+                    file_type = "image"
+                elif mt.startswith("video/"):
+                    file_type = "video"
+                elif "gif" in mt.lower():
+                    file_type = "image"
+            else:
+                if content_type.startswith("image/"):
+                    file_type = "image"
+                elif content_type.startswith("video/"):
+                    file_type = "video"
+
+            if file_type == "document":
+                return None
+
+            return await storage.upload_data(
+                data=data,
+                content_type=content_type,
+                file_type=file_type,
+                source_info=source_info,
+                name_hint=str(media_identifier),
+            )
 
             return None
         except Exception as e:
             logger.warning(f"Failed Telegram media upload for {source_id}/{external_id}: {e}")
             return None
+
+    async def finalize_block_media_fields(
+        self,
+        *,
+        blocks: List[Dict[str, Any]],
+        source_type: str,
+        source_id: str,
+        external_id: str,
+        storage: "MediaStorage",
+    ) -> List[Dict[str, Any]]:
+        """Resolve Telegram-specific media identifiers in block fields into URLs."""
+        try:
+            if not self._initialized:
+                return blocks
+
+            async def resolve(value: Any, kind: str) -> Optional[str]:
+                if value is None:
+                    return None
+                v = str(value)
+                # If already an HTTP(S) link
+                if v.startswith("http://") or v.startswith("https://") or v.startswith("//"):
+                    if kind == "video":
+                        # Avoid rehosting our own Supabase public URLs
+                        if "/storage/v1/object/" in v:
+                            return v
+                        try:
+                            url = await storage.download_and_store_file(
+                                v,
+                                "video",
+                                {"source_type": source_type, "source_id": source_id},
+                            )
+                            if url:
+                                return url
+                        except Exception:
+                            pass
+                    # For images/non-video, keep as-is (generic rehost handles images)
+                    return v
+                # Telegram file_id or non-URL identifier: fetch via API and store
+                return await self.upload_platform_media(
+                    source_id=source_id,
+                    external_id=external_id,
+                    media_identifier=v,
+                    media_type=kind,
+                    storage=storage,
+                    source_info={"source_type": source_type, "source_id": source_id},
+                )
+
+            new_blocks: List[Dict[str, Any]] = []
+            for b in blocks:
+                data = dict(b)
+                for field_name, media_kind in (
+                    ("image_url", "image"),
+                    ("imageUrl", "image"),
+                    ("video_url", "video"),
+                    ("videoUrl", "video"),
+                    ("cover_image_url", "image"),
+                    ("coverImageUrl", "image"),
+                ):
+                    if field_name in data and data.get(field_name):
+                        # Avoid rehosting our own Supabase public URLs
+                        existing = str(data.get(field_name))
+                        if "/storage/v1/object/" in existing:
+                            continue
+                        url = await resolve(existing, media_kind)
+                        if url:
+                            data[field_name] = url
+
+                slides = data.get("slides")
+                if isinstance(slides, list):
+                    new_slides = []
+                    for slide in slides:
+                        if isinstance(slide, dict):
+                            if slide.get("image_url"):
+                                url = await resolve(slide.get("image_url"), "image")
+                                if url:
+                                    slide["image_url"] = url
+                            if slide.get("video_url"):
+                                url = await resolve(slide.get("video_url"), "video")
+                                if url:
+                                    slide["video_url"] = url
+                        new_slides.append(slide)
+                    data["slides"] = new_slides
+
+                # Rehost media inside NavigateToSlideshowAction payload if present
+                action = data.get("action")
+                if isinstance(action, dict) and action.get("type") == "__navigate_to_slideshow__":
+                    # Ensure article_id is present (fallback to url message id if missing)
+                    if not action.get("article_id"):
+                        action["article_id"] = str(external_id)
+                    ss = action.get("slideshow")
+                    if isinstance(ss, dict):
+                        ss_slides = ss.get("slides")
+                        if isinstance(ss_slides, list):
+                            fixed_slides = []
+                            for s in ss_slides:
+                                if isinstance(s, dict):
+                                    if s.get("image_url"):
+                                        url = await resolve(s.get("image_url"), "image")
+                                        if url:
+                                            s["image_url"] = url
+                                fixed_slides.append(s)
+                            ss["slides"] = fixed_slides
+                        # Also fix cover if present via intro; handled by page image rehost above
+                        action["slideshow"] = ss
+                    data["action"] = action
+
+                new_blocks.append(data)
+            return new_blocks
+        except Exception:
+            return blocks
 
     async def get_channel_messages_with_groups(
         self, username: str, limit: int = 20, offset_id: int = 0
@@ -237,8 +451,10 @@ class TelegramFetcher(SocialMediaClient):
             all_messages = []
             grouped_messages = {}  # grouped_id -> list of messages
             
+            # Fetch more raw messages per requested group to account for albums
+            fetch_count = max(50, limit * 6)
             async for message in self.client.iter_messages(
-                entity, limit=limit * 2, offset_id=offset_id  # Fetch more to account for grouping
+                entity, limit=fetch_count, offset_id=offset_id
             ):
                 if isinstance(message, Message):
                     telegram_message = await self._convert_message(message)
@@ -432,9 +648,31 @@ class TelegramFetcher(SocialMediaClient):
                     if media:
                         media_list.append(media)
 
+            # Combine message text with webpage title/description if present to preserve content
+            combined_text_parts: List[str] = []
+            base_text = message.message or ""
+            if base_text.strip():
+                combined_text_parts.append(base_text.strip())
+            try:
+                if hasattr(message, "media") and hasattr(message.media, "webpage") and message.media.webpage:
+                    wp = message.media.webpage
+                    wp_title = getattr(wp, "title", None)
+                    wp_descr = getattr(wp, "description", None)
+                    if isinstance(wp_title, str) and wp_title.strip():
+                        combined_text_parts.append(wp_title.strip())
+                    if isinstance(wp_descr, str) and wp_descr.strip():
+                        combined_text_parts.append(wp_descr.strip())
+                # Also include caption if present (for media messages)
+                if hasattr(message, "message") and isinstance(message.message, str):
+                    caption_text = message.message.strip()
+                    if caption_text and caption_text not in combined_text_parts:
+                        combined_text_parts.append(caption_text)
+            except Exception:
+                pass
+
             return TelegramMessage(
                 id=message.id,
-                text=message.message or "",
+                text="\n\n".join(combined_text_parts).strip(),
                 date=message.date.replace(tzinfo=timezone.utc),
                 views=getattr(message, "views", 0),
                 forwards=getattr(message, "forwards", 0),
@@ -556,7 +794,7 @@ class TelegramFetcher(SocialMediaClient):
             url = None
             thumbnail_url = None
 
-            if hasattr(message.media, "photo"):
+            if hasattr(message.media, "photo") and getattr(message.media, "photo", None):
                 media_type = "photo"
                 photo = message.media.photo
                 if photo:
@@ -567,7 +805,7 @@ class TelegramFetcher(SocialMediaClient):
                         width = getattr(largest_size, 'w', None)
                         height = getattr(largest_size, 'h', None)
 
-            elif hasattr(message.media, "document"):
+            elif hasattr(message.media, "document") and getattr(message.media, "document", None):
                 document = message.media.document
                 if document:
                     file_id = str(document.id)
@@ -593,8 +831,25 @@ class TelegramFetcher(SocialMediaClient):
                         elif hasattr(attr, "duration"):
                             duration = attr.duration
 
-            if not file_id or not file_unique_id:
-                logger.debug(f"Skipping media conversion - missing file identifiers. file_id: {file_id}, file_unique_id: {file_unique_id}")
+            elif hasattr(message.media, "webpage") and getattr(message.media, "webpage", None):
+                # Handle webpage previews with photos
+                wp = message.media.webpage
+                if hasattr(wp, "photo") and getattr(wp, "photo", None):
+                    photo = wp.photo
+                    media_type = "photo"
+                    try:
+                        file_id = str(getattr(photo, "id", None))
+                        file_unique_id = str(getattr(photo, "access_hash", None)) if getattr(photo, "access_hash", None) is not None else None
+                        if getattr(photo, "sizes", None):
+                            largest_size = max(photo.sizes, key=lambda s: getattr(s, 'w', 0) * getattr(s, 'h', 0))
+                            width = getattr(largest_size, 'w', None)
+                            height = getattr(largest_size, 'h', None)
+                    except Exception:
+                        pass
+
+            # Allow cases when file_unique_id is not available (e.g., webpage photo)
+            if not file_id:
+                logger.debug(f"Skipping media conversion - missing file_id. file_unique_id: {file_unique_id}")
                 return None
 
             # For Telegram, we store the file_id as URL for later processing

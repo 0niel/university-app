@@ -78,14 +78,18 @@ class ServiceContainer:
         self.client_registry = ClientRegistry()
 
     async def initialize_all(self) -> None:
-        """Initialize all services."""
+        """Initialize all services in correct dependency order."""
         if self.database:
             await self.database.initialize()
 
+        if not self.media_storage and isinstance(self.database, SupabaseNewsClient) and self.database.client:
+            self.media_storage = MediaStorage(self.database.settings, self.database.client)
+
         if self.media_storage:
             await self.media_storage.initialize()
+            if isinstance(self.database, SupabaseNewsClient):
+                self.database.attach_media_storage(self.media_storage)
 
-        # Initialize all clients
         for client in self.client_registry.get_all_clients().values():
             if client.is_configured and not client._initialized:
                 try:
@@ -102,7 +106,6 @@ class ServiceContainer:
         if self.media_storage:
             await self.media_storage.close()
 
-        # Close all clients
         for client in self.client_registry.get_all_clients().values():
             if client._initialized:
                 await client.close() 

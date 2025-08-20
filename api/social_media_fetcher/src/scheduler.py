@@ -112,7 +112,6 @@ class BackgroundScheduler:
                 logger.info("No active sources found")
                 return {"total_items": 0, "errors": []}
 
-            # Get only clients that have auto sync enabled
             auto_sync_clients = self.client_registry.get_auto_sync_clients()
             
             if not auto_sync_clients:
@@ -128,7 +127,6 @@ class BackgroundScheduler:
                     source_id = source["source_id"]
                     source_name = source["source_name"]
 
-                    # Check if we have a client for this source type
                     client = auto_sync_clients.get(source_type)
                     if not client:
                         logger.debug(f"No auto-sync client available for {source_type}")
@@ -137,7 +135,7 @@ class BackgroundScheduler:
                     logger.info(f"Syncing {source_type} source: {source_id}")
 
                     items_count = await self._sync_source_with_client(
-                        client, source_id, source_name
+                        client, source
                     )
                     total_items += items_count
 
@@ -157,26 +155,19 @@ class BackgroundScheduler:
             return {"total_items": 0, "errors": [str(e)]}
 
     async def _sync_source_with_client(
-        self, client, source_id: str, source_name: str
+        self, client, source: Dict
     ) -> int:
         """Universal method to sync a source with any client."""
         try:
-            # Get source info
-            source_info = await client.get_source_info(source_id)
-            
-            # Fetch raw data using the correct method
-            raw_data_list = await client.fetch_raw_data(source_id, limit=50)
+            source_type = source["source_type"]
+            source_id = source["source_id"]
+            source_name = source["source_name"]
+
+            raw_data_list = await client.fetch_raw_data(source_id, limit=30)
 
             stored_count = 0
             for raw_data in raw_data_list:
                 try:
-                    # Process media URLs if any
-                    source_info_for_media = {
-                        "source_type": client.client_type,
-                        "source_id": source_id,
-                    }
-
-                    # Save raw data as news blocks using the enhanced Supabase client
                     if await self.database.save_raw_data_as_news_blocks(
                         raw_data=raw_data,
                         source_type=client.client_type,
@@ -189,12 +180,21 @@ class BackgroundScheduler:
                 except Exception as e:
                     logger.warning(f"Error processing raw data: {e}")
 
-            # Save source info
+            # Prefer existing stored URL; if absent, try to get it from the client
+            source_url: str = str(source.get("source_url") or "")
+            if not source_url:
+                try:
+                    info = await client.get_source_info(source_id)
+                    if isinstance(info, dict):
+                        source_url = str(info.get("url") or "")
+                except Exception:
+                    source_url = ""
+
             await self.database.save_source_info(
-                client.client_type,
-                source_id,
-                source_name,
-                f"https://{'t.me' if client.client_type == 'telegram' else 'vk.com'}/{source_id}",
+                source_type=client.client_type,
+                source_id=source_id,
+                source_name=source_name,
+                source_url=source_url,
             )
 
             logger.info(

@@ -1,7 +1,10 @@
 """Abstract base classes and protocols for social media clients."""
 
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from ...media_storage import MediaStorage
 
 # Import news blocks models
 try:
@@ -102,7 +105,7 @@ class SocialMediaClient(ABC):
 
     async def fetch_news_blocks(
         self, source_id: str, limit: int = 20, **kwargs
-    ) -> List["NewsBlock"]:
+    ) -> List[Any]:
         """
         Fetch data from a social media source and return as news blocks.
 
@@ -166,6 +169,23 @@ class SocialMediaClient(ABC):
         resolution (e.g., Telegram) should override this.
         """
         return None
+
+    async def finalize_block_media_fields(
+        self,
+        *,
+        blocks: List[Dict[str, Any]],
+        source_type: str,
+        source_id: str,
+        external_id: str,
+        storage: "MediaStorage",
+    ) -> List[Dict[str, Any]]:
+        """Client-specific hook to resolve media fields in news blocks.
+
+        The default implementation is a no-op. Clients can override to transform
+        platform-specific media identifiers into final public URLs by using
+        `upload_platform_media` or their own logic.
+        """
+        return blocks
 
     def __str__(self) -> str:
         """String representation of the client."""

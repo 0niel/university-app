@@ -137,3 +137,24 @@ class Configuration(ABC):
     def get_scheduler_config(self) -> Dict[str, Any]:
         """Get scheduler configuration."""
         pass
+
+
+class MediaProcessor(ABC):
+    """Interface for media processing in news blocks."""
+    
+    @abstractmethod
+    async def process_blocks(
+        self,
+        blocks: List[Dict[str, Any]],
+        context: Dict[str, Any]
+    ) -> List[Dict[str, Any]]:
+        """Process media fields in news blocks.
+        
+        Args:
+            blocks: List of news block dictionaries
+            context: Processing context with source info
+            
+        Returns:
+            Processed blocks with updated media URLs
+        """
+        pass

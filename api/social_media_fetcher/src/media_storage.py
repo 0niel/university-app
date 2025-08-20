@@ -5,7 +5,7 @@ import hashlib
 import io
 import os
 from datetime import datetime, timezone
-from typing import Any, Dict, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 from urllib.parse import urlparse
 
 import aiohttp
@@ -27,39 +27,62 @@ class MediaStorage:
 
         self.images_bucket_name = settings.SUPABASE_BUCKET_IMAGES
         self.videos_bucket_name = settings.SUPABASE_BUCKET_VIDEOS
-        self.documents_bucket_name = settings.SUPABASE_BUCKET_DOCUMENTS
         self._bucket_id_cache: Dict[str, str] = {}
 
-    async def initialize(self):
-        """Initialize the storage and HTTP session."""
-        timeout = aiohttp.ClientTimeout(total=self.settings.CLIENT_TIMEOUT)
-        self.session = aiohttp.ClientSession(timeout=timeout)
+    async def initialize(self) -> None:
+        """Initialize the storage and HTTP session.
+        
+        Raises:
+            RuntimeError: If initialization fails
+        """
+        try:
+            timeout = aiohttp.ClientTimeout(total=self.settings.CLIENT_TIMEOUT)
+            self.session = aiohttp.ClientSession(timeout=timeout)
 
-        await self._populate_bucket_cache()
-        logger.info("Media storage initialized")
+            await self._populate_bucket_cache()
+            logger.info("Media storage initialized")
+        except Exception as e:
+            logger.error(f"Failed to initialize media storage: {e}")
+            if self.session:
+                await self.session.close()
+                self.session = None
+            raise RuntimeError(f"Media storage initialization failed: {e}") from e
 
-    async def close(self):
-        """Close the HTTP session."""
+    async def close(self) -> None:
+        """Close the HTTP session and cleanup resources."""
         if self.session:
-            await self.session.close()
-            logger.info("Media storage closed")
+            try:
+                await self.session.close()
+                logger.info("Media storage closed")
+            except Exception as e:
+                logger.warning(f"Error closing media storage session: {e}")
+            finally:
+                self.session = None
 
-    async def _populate_bucket_cache(self):
-        """Fetch all buckets and cache their names and IDs."""
+    async def _populate_bucket_cache(self) -> None:
+        """Fetch all buckets and cache their names and IDs.
+        
+        Raises:
+            RuntimeError: If bucket population fails critically
+        """
         if not (hasattr(self.supabase, 'storage') and self.supabase.storage):
             logger.warning("Supabase storage not available, skipping bucket cache.")
             return
         
         try:
             buckets = self.supabase.storage.list_buckets()
+            if not buckets:
+                logger.warning("No buckets found in Supabase storage")
+                return
 
             self._bucket_id_cache = {b.name: b.name for b in buckets}
-            logger.info(f"Successfully cached buckets: {list(self._bucket_id_cache.keys())}")
+            logger.info(f"Successfully cached {len(self._bucket_id_cache)} buckets: {list(self._bucket_id_cache.keys())}")
             
-            required_buckets = [self.images_bucket_name, self.videos_bucket_name, self.documents_bucket_name]
-            for bucket_name in required_buckets:
-                if bucket_name not in self._bucket_id_cache:
-                    logger.warning(f"Required bucket '{bucket_name}' not found in accessible buckets.")
+            required_buckets = [self.images_bucket_name, self.videos_bucket_name]
+            missing_buckets = [bucket for bucket in required_buckets if bucket not in self._bucket_id_cache]
+            
+            if missing_buckets:
+                logger.warning(f"Required buckets not found: {missing_buckets}. Available buckets: {list(self._bucket_id_cache.keys())}")
                     
         except Exception as e:
             logger.error(
@@ -67,91 +90,105 @@ class MediaStorage:
                 f"Please ensure the service key has 'storage.buckets.list' permissions."
             )
 
-    def _get_bucket_id(self, bucket_name: str) -> Optional[str]:
-        """Get bucket identifier. We use bucket names directly with Supabase SDK."""
+    def _get_bucket_id(self, bucket_name: str) -> str:
+        """Get bucket identifier. We use bucket names directly with Supabase SDK.
+        
+        Args:
+            bucket_name: Name of the bucket
+            
+        Returns:
+            The bucket identifier (same as name for Supabase)
+        """
         return bucket_name
 
-    def _get_bucket_name_for_type(self, file_type: str) -> str:
-        """Get the appropriate bucket name for file type."""
+    def _get_bucket_name_for_type(self, file_type: str) -> Optional[str]:
+        """Get the appropriate bucket name for file type.
+        
+        Returns None if the file type is not supported or bucket is not available.
+        """
         if file_type == "image":
-            return self.images_bucket_name
+            bucket_name = self.images_bucket_name
         elif file_type == "video":
-            return self.videos_bucket_name
+            bucket_name = self.videos_bucket_name
         else:
-            return self.documents_bucket_name
+            return None
+            
+        if bucket_name not in self._bucket_id_cache:
+            logger.warning(f"Bucket '{bucket_name}' not available for file type '{file_type}'")
+            return None
+            
+        return bucket_name
 
-    def _get_allowed_mime_types(self, bucket_name: str) -> list:
+    def _get_allowed_mime_types(self, bucket_name: str) -> List[str]:
         """Get allowed MIME types for a bucket."""
         if bucket_name == self.images_bucket_name:
             return ["image/*"]
         elif bucket_name == self.videos_bucket_name:
             return ["video/*"]
-        elif bucket_name == self.documents_bucket_name:
-            return ["application/*", "text/*"]
         return ["*/*"]
 
-    async def download_telegram_file(
+    async def upload_data(
         self,
-        media_object: Any,
-        telegram_client,
+        *,
+        data: bytes,
+        content_type: str,
+        file_type: str,
         source_info: Optional[Dict[str, Any]] = None,
+        name_hint: Optional[str] = None,
     ) -> Optional[str]:
-        """
-        Download a Telegram file using its media object and store it in Supabase Storage.
-
+        """Upload raw data to storage and return public URL.
+        
         Args:
-            media_object: Telegram media object (e.g., message.media)
-            telegram_client: Telegram client instance
-            source_info: Additional info about the source
-
+            data: Raw file data
+            content_type: MIME content type
+            file_type: Type of file (image, video)
+            source_info: Optional source information for organization
+            name_hint: Optional name hint for path generation
+            
         Returns:
-            Public URL of the stored file, or None if failed
+            Public URL of uploaded file or None if failed
         """
-        file_path = None
         try:
-            if not telegram_client or not telegram_client._initialized:
-                logger.warning("Telegram client not initialized")
+            if not data:
+                logger.debug("Empty data provided for upload")
+                return None
+                
+            if not content_type or not file_type:
+                logger.debug("Missing content_type or file_type")
                 return None
 
-            file_id = getattr(media_object, 'id', 'unknown_id')
-            logger.debug(f"Starting download for Telegram file: {file_id}")
-            
-            file_path = await telegram_client.client.download_media(media_object)
-            if not file_path:
-                logger.warning(f"Could not download Telegram file from media object: {file_id}")
+            if file_type not in ("image", "video"):
+                logger.debug(f"Skipping upload for unsupported file type: {file_type}")
                 return None
-            
-            logger.debug(f"Downloaded Telegram file to: {os.path.basename(file_path)}")
 
-            with open(file_path, "rb") as f:
-                file_data = f.read()
-
-            import mimetypes
-
-            content_type, _ = mimetypes.guess_type(file_path)
-            if not content_type:
-                content_type = "application/octet-stream"
-
-            if content_type.startswith("image/"):
-                file_type = "image"
-            elif content_type.startswith("video/"):
-                file_type = "video"
-            else:
-                file_type = "document"
+            content_type_clean = content_type.split(';')[0].strip().lower()
+            if not (content_type_clean.startswith("image/") or content_type_clean.startswith("video/")):
+                logger.debug(f"Skipping upload due to unsupported content-type: {content_type_clean}")
+                return None
+                
+            max_file_size = self.settings.MAX_FILE_SIZE_MB * 1024 * 1024
+            if len(data) > max_file_size:
+                logger.warning(f"Data too large: {len(data)} bytes (max: {max_file_size})")
+                return None
 
             bucket_name = self._get_bucket_name_for_type(file_type)
+            if bucket_name is None:
+                logger.debug(f"No bucket available for file type: {file_type}")
+                return None
+                
             bucket_id = self._get_bucket_id(bucket_name)
-
+                
+            seed = name_hint or content_type
+            hash_input = (seed or "") + str(len(data))
+            url_like = f"{hashlib.md5(hash_input.encode()).hexdigest()}"
             file_path_storage = self._generate_file_path(
-                file_path, file_type, content_type, source_info
+                url_like, file_type, content_type, source_info
             )
 
             processed_data = await self._process_file(
-                file_data, content_type, file_type
+                data, content_type, file_type
             )
-            
-            logger.info(f"Bucket ID: {bucket_id}")
-            
+
             result = self.supabase.storage.from_(bucket_id).upload(
                 file_path_storage,
                 processed_data,
@@ -161,80 +198,62 @@ class MediaStorage:
                     "upsert": "true",
                 },
             )
-            
-            logger.info(f"Upload result: {result}")
 
             if isinstance(result, Exception):
                 logger.error(
-                    f"Failed to upload Telegram file {file_path_storage}: {result}"
+                    f"Failed to upload data {file_path_storage}: {result}"
                 )
                 return None
 
             public_url = self.supabase.storage.from_(bucket_id).get_public_url(
                 file_path_storage
             )
-            
-            logger.info(f"Successfully stored Telegram file: {file_path_storage}")
+            logger.info(f"Successfully stored file: {file_path_storage} ({len(data)} bytes)")
             return public_url
 
         except Exception as e:
-            file_id = getattr(media_object, 'id', 'unknown_id')
-            logger.error(f"Error downloading/storing Telegram file {file_id}: {e}")
+            logger.error(f"Error uploading data: {e}")
             return None
-        finally:
-
-            if file_path:
-                try:
-                    if os.path.exists(file_path):
-                        file_size = os.path.getsize(file_path)
-                        os.unlink(file_path)
-                        logger.debug(f"Cleaned up temporary file: {os.path.basename(file_path)} ({file_size} bytes)")
-                    else:
-                        logger.debug(f"Temporary file already removed: {os.path.basename(file_path)}")
-                except Exception as e:
-                    logger.warning(f"Could not clean up temporary file {os.path.basename(file_path)}: {e}")
-              
-                    try:
-                        await asyncio.sleep(0.1)
-                        if os.path.exists(file_path):
-                            os.unlink(file_path)
-                            logger.debug(f"Cleaned up temporary file on retry: {os.path.basename(file_path)}")
-                    except Exception as e2:
-                        logger.error(f"Failed to clean up temporary file even on retry: {e2}")
 
     async def download_and_store_file(
         self,
-        url_or_media_object: Any,
+        url: str,
         file_type: str = "image",
         source_info: Optional[Dict[str, Any]] = None,
-        telegram_client=None,
     ) -> Optional[str]:
         """
-        Download a file from URL or Telegram media object and store it.
+        Download a file from a URL and store it in Supabase Storage.
+
         Args:
-            url_or_media_object: URL of the file or a Telegram media object
-            file_type: Type of file (image, video, document)
-            source_info: Additional info about the source (for organizing files)
-            telegram_client: Telegram client for downloading Telegram files
+            url: Direct HTTP(S) URL of the file
+            file_type: Type of file ("image" or "video")
+            source_info: Optional source metadata used to organize storage paths
 
         Returns:
             Public URL of the stored file, or None if failed
         """
-        if telegram_client and not isinstance(url_or_media_object, str):
-            return await self.download_telegram_file(url_or_media_object, telegram_client, source_info)
-
         if not self.session:
             logger.error("Media storage not initialized")
             return None
-
-        url = str(url_or_media_object)
 
         try:
             file_data, content_type, file_size = await self._download_file(url)
             if not file_data:
                 return None
 
+            if file_type not in ("image", "video"):
+                logger.debug(f"Skipping download/store for unsupported file type: {file_type}")
+                return None
+
+            if not (content_type and (content_type.startswith("image/") or content_type.startswith("video/"))):
+                logger.debug(f"Skipping download/store due to unsupported content-type: {content_type}")
+                return None
+
             bucket_name = self._get_bucket_name_for_type(file_type)
+            if bucket_name is None:
+                logger.debug(f"No bucket available for file type: {file_type}")
+                return None
+                
             bucket_id = self._get_bucket_id(bucket_name)
 
             file_path = self._generate_file_path(
@@ -273,23 +292,41 @@ class MediaStorage:
     async def _download_file(
         self, url: str
     ) -> Tuple[Optional[bytes], Optional[str], int]:
-        """Download file from URL and return data, content type, and size."""
+        """Download file from URL and return data, content type, and size.
+        
+        Args:
+            url: URL to download from
+            
+        Returns:
+            Tuple of (file_data, content_type, file_size)
+        """
         try:
-            async with self.session.get(url) as response:
+            if not url or not url.strip():
+                logger.warning("Empty or invalid URL provided")
+                return None, None, 0
+                
+            async with self.session.get(url, allow_redirects=True) as response:
                 if response.status != 200:
                     logger.warning(f"Failed to download {url}: HTTP {response.status}")
                     return None, None, 0
 
                 content_type = response.headers.get(
                     "content-type", "application/octet-stream"
-                )
+                ).split(';')[0].strip()  # Remove charset info
+                
                 content_length = int(response.headers.get("content-length", 0))
 
-                if content_length > 50 * 1024 * 1024:
-                    logger.warning(f"File too large: {content_length} bytes")
+                max_file_size = self.settings.MAX_FILE_SIZE_MB * 1024 * 1024
+                if content_length > 0 and content_length > max_file_size:
+                    logger.warning(f"File too large: {content_length} bytes (max: {max_file_size})")
                     return None, None, 0
 
                 data = await response.read()
+                
+                if len(data) > max_file_size:
+                    logger.warning(f"Downloaded file too large: {len(data)} bytes (max: {max_file_size})")
+                    return None, None, 0
+                    
                 return data, content_type, len(data)
 
         except Exception as e:
@@ -303,8 +340,18 @@ class MediaStorage:
         content_type: str,
         source_info: Optional[Dict[str, Any]] = None,
     ) -> str:
-        """Generate a unique file path for storage."""
-        url_hash = hashlib.md5(url.encode()).hexdigest()
+        """Generate a unique file path for storage.
+        
+        Args:
+            url: Source URL or identifier
+            file_type: Type of file (image, video)
+            content_type: MIME content type
+            source_info: Optional source information for organization
+            
+        Returns:
+            Unique storage path
+        """
+        url_hash = hashlib.md5(url.encode('utf-8')).hexdigest()[:12]  # Shorter hash
 
         ext = self._get_file_extension(url, content_type)
 
@@ -313,46 +360,48 @@ class MediaStorage:
 
         source_folder = ""
         if source_info:
-            source_type = source_info.get("source_type", "unknown")
-            source_id = source_info.get("source_id", "unknown")
+            source_type = str(source_info.get("source_type", "unknown")).replace("/", "-")
+            source_id = str(source_info.get("source_id", "unknown")).replace("/", "-")
             source_folder = f"{source_type}/{source_id}/"
 
-        return f"{source_folder}{date_folder}/{url_hash}{ext}"
+        return f"{source_folder}{date_folder}/{file_type}_{url_hash}{ext}"
 
     def _get_file_extension(self, url: str, content_type: str) -> str:
-        """Get file extension from URL or content type."""
-        parsed = urlparse(url)
-        path = parsed.path
-        if "." in path:
-            ext = os.path.splitext(path)[1].lower()
-            if ext in [
-                ".jpg",
-                ".jpeg",
-                ".png",
-                ".gif",
-                ".webp",
-                ".mp4",
-                ".avi",
-                ".mov",
-                ".pdf",
-                ".doc",
-                ".txt",
-            ]:
-                return ext
+        """Get file extension from URL or content type.
+        
+        Args:
+            url: Source URL
+            content_type: MIME content type
+            
+        Returns:
+            File extension including the dot (e.g., '.jpg')
+        """
+        try:
+            parsed = urlparse(url)
+            path = parsed.path
+            if "." in path:
+                ext = os.path.splitext(path)[1].lower()
+                if ext in {
+                    ".jpg", ".jpeg", ".png", ".gif", ".webp",
+                    ".mp4", ".avi", ".mov", ".webm",
+                }:
+                    return ext
+        except Exception as e:
+            logger.debug(f"Failed to parse URL extension from {url}: {e}")
 
         content_type_map = {
             "image/jpeg": ".jpg",
+            "image/jpg": ".jpg",  # Non-standard but sometimes used
             "image/png": ".png",
             "image/gif": ".gif",
             "image/webp": ".webp",
             "video/mp4": ".mp4",
             "video/avi": ".avi",
             "video/quicktime": ".mov",
-            "application/pdf": ".pdf",
-            "text/plain": ".txt",
+            "video/webm": ".webm",
         }
 
-        return content_type_map.get(content_type, ".bin")
+        return content_type_map.get(content_type.lower() if content_type else "", ".bin")
 
     async def _process_file(
         self, data: bytes, content_type: str, file_type: str
@@ -364,7 +413,18 @@ class MediaStorage:
         return data
 
     async def _process_image(self, data: bytes) -> bytes:
-        """Process image data (resize if too large)."""
+        """Process image data (resize if too large).
+        
+        Args:
+            data: Raw image data
+            
+        Returns:
+            Processed image data
+        """
+        if not data:
+            logger.warning("Empty image data provided")
+            return data
+            
         try:
             return await asyncio.get_event_loop().run_in_executor(
                 None, self._resize_image, data
@@ -374,26 +434,42 @@ class MediaStorage:
             return data
 
     def _resize_image(self, data: bytes) -> bytes:
-        """Resize image if it's too large."""
+        """Resize image if it's too large.
+        
+        Args:
+            data: Raw image data
+            
+        Returns:
+            Resized image data or original data if resize fails
+        """
         try:
-            image = Image.open(io.BytesIO(data))
+            with Image.open(io.BytesIO(data)) as image:
+                MAX_WIDTH = 1920
+                MAX_HEIGHT = 1080
+                QUALITY = 85
 
-            max_width = 1920
-            max_height = 1080
+                if image.width <= MAX_WIDTH and image.height <= MAX_HEIGHT:
+                    return data
 
-            if image.width <= max_width and image.height <= max_height:
-                return data
+                ratio = min(MAX_WIDTH / image.width, MAX_HEIGHT / image.height)
+                new_size = (int(image.width * ratio), int(image.height * ratio))
 
-            ratio = min(max_width / image.width, max_height / image.height)
-            new_size = (int(image.width * ratio), int(image.height * ratio))
+                resized_image = image.resize(new_size, Image.Resampling.LANCZOS)
 
-            resized_image = image.resize(new_size, Image.Resampling.LANCZOS)
+                if resized_image.mode in ('RGBA', 'LA', 'P'):
+                    rgb_image = Image.new('RGB', resized_image.size, (255, 255, 255))
+                    if resized_image.mode == 'P':
+                        resized_image = resized_image.convert('RGBA')
+                    rgb_image.paste(resized_image, mask=resized_image.split()[-1] if resized_image.mode == 'RGBA' else None)
+                    resized_image = rgb_image
 
-            output = io.BytesIO()
-            format_name = image.format or "JPEG"
-            resized_image.save(output, format=format_name, quality=85, optimize=True)
+                output = io.BytesIO()
+                format_name = image.format if image.format in ('JPEG', 'PNG', 'WEBP') else 'JPEG'
+                resized_image.save(output, format=format_name, quality=QUALITY, optimize=True)
 
-            return output.getvalue()
+                result_data = output.getvalue()
+                logger.debug(f"Image resized from {len(data)} to {len(result_data)} bytes ({image.width}x{image.height} -> {new_size[0]}x{new_size[1]})")
+                return result_data
 
         except Exception as e:
             logger.warning(f"Image resize failed: {e}")
@@ -401,43 +477,55 @@ class MediaStorage:
 
     async def process_media_urls(
         self,
-        media_urls: list,
+        media_urls: List[str],
         file_type: str,
         source_info: Optional[Dict[str, Any]] = None,
-        telegram_client=None,
-    ) -> list:
+    ) -> List[str]:
         """
         Process a list of media URLs and return storage URLs.
 
         Args:
-            media_urls: List of original URLs or Telegram file_ids
-            file_type: Type of media (image, video, document)
+            media_urls: List of original URLs or media identifiers
+            file_type: Type of media (image, video)
             source_info: Source information for organization
-            telegram_client: Telegram client for downloading Telegram files
 
         Returns:
-            List of processed storage URLs
+            List of successfully processed storage URLs
         """
         if not media_urls:
             return []
+            
+        if file_type not in ("image", "video"):
+            logger.debug(f"Unsupported file type for batch processing: {file_type}")
+            return []
 
-        processed_urls = []
-
-        semaphore = asyncio.Semaphore(5)
+        processed_urls: List[str] = []
+        
+        semaphore = asyncio.Semaphore(3)  # Reduced from 5 for better stability
 
         async def process_url(url: str) -> Optional[str]:
+            """Process a single URL with semaphore protection."""
+            if not url or not url.strip():
+                return None
+                
             async with semaphore:
-                return await self.download_and_store_file(
-                    url, file_type, source_info, telegram_client
-                )
-
-        tasks = [process_url(url) for url in media_urls]
+                try:
+                    return await self.download_and_store_file(url, file_type, source_info)
+                except Exception as e:
+                    logger.warning(f"Failed to process URL {url}: {e}")
+                    return None
+            
+        tasks = [process_url(url) for url in media_urls if url]
+        if not tasks:
+            return []
+            
         results = await asyncio.gather(*tasks, return_exceptions=True)
 
-        for result in results:
+        for i, result in enumerate(results):
             if isinstance(result, str):
                 processed_urls.append(result)
             elif isinstance(result, Exception):
-                logger.warning(f"Failed to process media URL: {result}")
+                logger.warning(f"Failed to process media URL {media_urls[i] if i < len(media_urls) else 'unknown'}: {result}")
 
+        logger.info(f"Processed {len(processed_urls)}/{len(media_urls)} media URLs successfully")
         return processed_urls

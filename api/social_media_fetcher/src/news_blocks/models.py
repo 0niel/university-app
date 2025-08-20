@@ -11,6 +11,7 @@ from typing import List
 
 
 from .base import *
+from .base import NavigateToSlideshowAction
 
 
 class ArticleIntroductionBlock(NewsBlock):
@@ -21,7 +22,7 @@ class ArticleIntroductionBlock(NewsBlock):
     categoryId: str = Field(..., alias="category_id", description="Categoryid - String")
     author: str = Field(..., alias="author", description="Author - String")
     publishedAt: datetime = Field(..., alias="published_at", description="Publishedat - DateTime")
-    imageUrl: str = Field(None, alias="image_url", description="Imageurl - String")
+    imageUrl: Optional[str] = Field(None, alias="image_url", description="Imageurl - String")
     title: str = Field(..., alias="title", description="Title - String")
     
     
@@ -95,7 +96,7 @@ class ImageBlock(NewsBlock):
     
     IDENTIFIER: ClassVar[str] = "__image__"
     
-    imageUrl: str = Field(..., alias="image_url", description="Imageurl - String")
+    imageUrl: Optional[str] = Field(None, alias="image_url", description="Imageurl - String")
     
     
     @classmethod
@@ -238,8 +239,8 @@ class SlideshowIntroductionBlock(NewsBlock):
     IDENTIFIER: ClassVar[str] = "__slideshow_introduction__"
     
     title: str = Field(..., alias="title", description="Title - String")
-    coverImageUrl: str = Field(..., alias="cover_image_url", description="Coverimageurl - String")
-    action: BlockAction = Field(None, alias="action", description="Action - BlockAction")
+    coverImageUrl: Optional[str] = Field(None, alias="cover_image_url", description="Coverimageurl - String")
+    action: BlockAction | NavigateToSlideshowAction = Field(None, alias="action", description="Action - BlockAction")
     
     
     @classmethod
@@ -258,7 +259,7 @@ class SlideBlock(NewsBlock):
     caption: str = Field(..., alias="caption", description="Caption - String")
     description: str = Field(..., alias="description", description="Description - String")
     photoCredit: str = Field(..., alias="photo_credit", description="Photocredit - String")
-    imageUrl: str = Field(..., alias="image_url", description="Imageurl - String")
+    imageUrl: Optional[str] = Field(None, alias="image_url", description="Imageurl - String")
     
     
     @classmethod

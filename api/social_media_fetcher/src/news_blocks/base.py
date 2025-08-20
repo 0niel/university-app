@@ -80,6 +80,17 @@ class BlockAction(BaseModel, ABC):
     action_type: BlockActionType = Field(..., description="Action type enum")
 
 
+class NavigateToSlideshowAction(BlockAction):
+    """Action payload for navigating to slideshow."""
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    type: str = Field(default="__navigate_to_slideshow__", description="Action type")
+    action_type: BlockActionType = Field(default=BlockActionType.NAVIGATION, description="Action type enum")
+    article_id: str = Field(..., alias="article_id", description="Article id - String")
+    slideshow: dict = Field(..., alias="slideshow", description="Embedded slideshow payload")
+
+
 class UnknownBlock(NewsBlock):
     """Unknown block type."""
     

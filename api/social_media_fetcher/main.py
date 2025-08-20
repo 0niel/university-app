@@ -89,11 +89,6 @@ async def setup_services():
         db_client = SupabaseNewsClient(settings)
         services.database = db_client
         logger.info("Database client registered")
-
-        # Setup media storage
-        media_storage = MediaStorage(settings, db_client.client)
-        services.media_storage = media_storage
-        logger.info("Media storage registered")
     else:
         logger.warning(
             "Supabase not configured - database and media storage features disabled"
@@ -312,6 +307,7 @@ async def add_source(
             source_type=request.source_type,
             source_id=request.source_id,
             source_name=request.source_name,
+            source_url=request.source_url,
             category=request.category,
             description=request.description,
             is_active=request.is_active,

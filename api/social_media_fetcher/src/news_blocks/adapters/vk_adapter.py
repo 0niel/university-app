@@ -6,12 +6,10 @@ from .base import SocialMediaToNewsBlocksAdapter
 
 from ..models import (
     NewsBlock,
-    PostLargeBlock,
-    PostMediumBlock,
-    PostSmallBlock,
     ArticleIntroductionBlock,
     ImageBlock,
     VideoBlock,
+    TextLeadParagraphBlock,
     SlideshowBlock,
     SlideBlock,
     SlideshowIntroductionBlock,
@@ -50,7 +48,7 @@ class VKToNewsBlocksAdapter(SocialMediaToNewsBlocksAdapter):
 
         title = text[:100] + "..." if len(text) > 100 else text
         if not title.strip():
-            title = f"Post from {group_name}"
+            title = group_name
 
         total_media_count = len(image_urls) + len(video_urls)
         should_create_slideshow = total_media_count > 1
@@ -77,7 +75,7 @@ class VKToNewsBlocksAdapter(SocialMediaToNewsBlocksAdapter):
                     caption=f"Image {media_index + 1}",
                     description=text if media_index == 0 else "",
                     photo_credit=group_name,
-                    image_url=image_url or "",
+                    image_url=image_url,
                 )
                 slides.append(slide)
                 media_index += 1
@@ -88,7 +86,7 @@ class VKToNewsBlocksAdapter(SocialMediaToNewsBlocksAdapter):
                     caption=f"Video {media_index + 1}",
                     description=text if media_index == 0 and not image_urls else "",
                     photo_credit=group_name,
-                    image_url=video_url or "",
+                    image_url=video_url,
                 )
                 slides.append(slide)
                 media_index += 1
@@ -96,70 +94,29 @@ class VKToNewsBlocksAdapter(SocialMediaToNewsBlocksAdapter):
             slideshow = SlideshowBlock(type=SlideshowBlock.get_identifier(), title=title, slides=slides)
             blocks.append(slideshow)
         else:
+            cover = image_urls[0] if image_urls else (video_urls[0] if video_urls else None)
             intro_block = ArticleIntroductionBlock(
                 type=ArticleIntroductionBlock.get_identifier(),
                 category_id=self.get_source_type(),
                 author=group_name,
                 published_at=published_at,
                 title=title,
-                image_url=image_urls[0] if image_urls else "",
+                image_url=cover,
             )
             blocks.append(intro_block)
 
-            full_post_id = f"vk_{owner_id}_{post_id}"
-            if len(text) > 500 or image_urls or video_urls:
-                content_block = PostLargeBlock(
-                    type=PostLargeBlock.get_identifier(),
-                    id=full_post_id,
-                    category_id=self.get_source_type(),
-                    author=group_name,
-                    published_at=published_at,
-                    title=title,
-                    image_url=image_urls[0] if image_urls else "",
-                    description=text[:300] + "..." if len(text) > 300 else text,
-                    action={
-                        "type": "__navigate_to_article__",
-                        "action_type": "navigation",
-                        "article_id": full_post_id,
-                    },
+            if text.strip():
+                blocks.append(
+                    TextLeadParagraphBlock(
+                        type=TextLeadParagraphBlock.get_identifier(), text=text
+                    )
                 )
-            elif len(text) > 200:
-                content_block = PostMediumBlock(
-                    type=PostMediumBlock.get_identifier(),
-                    id=full_post_id,
-                    category_id=self.get_source_type(),
-                    author=group_name,
-                    published_at=published_at,
-                    title=title,
-                    image_url=image_urls[0] if image_urls else "",
-                    description=text[:200] + "..." if len(text) > 200 else text,
-                    action={
-                        "type": "__navigate_to_article__",
-                        "action_type": "navigation",
-                        "article_id": full_post_id,
-                    },
-                )
-            else:
-                content_block = PostSmallBlock(
-                    type=PostSmallBlock.get_identifier(),
-                    id=full_post_id,
-                    category_id=self.get_source_type(),
-                    author=group_name,
-                    published_at=published_at,
-                    title=title,
-                    image_url=image_urls[0] if image_urls else "",
-                    description=text,
-                    action={
-                        "type": "__navigate_to_article__",
-                        "action_type": "navigation",
-                        "article_id": full_post_id,
-                    },
-                )
-            blocks.append(content_block)
 
             for image_url in image_urls[1:]:
-                blocks.append(ImageBlock(type=ImageBlock.get_identifier(), image_url=image_url or ""))
+                if image_url:
+                    blocks.append(ImageBlock(type=ImageBlock.get_identifier(), image_url=image_url))
             for video_url in video_urls:
-                blocks.append(VideoBlock(type=VideoBlock.get_identifier(), video_url=video_url or ""))
+                if video_url:
+                    blocks.append(VideoBlock(type=VideoBlock.get_identifier(), video_url=video_url))
 
         return blocks

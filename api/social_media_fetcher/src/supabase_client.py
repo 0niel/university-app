@@ -2,13 +2,14 @@
 
 import os
 from datetime import datetime, timezone
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, TYPE_CHECKING
 
 from loguru import logger
 from supabase import create_client, Client
 
 from .config import Settings
 from .media_storage import MediaStorage
+from .media_processor import NewsBlocksMediaProcessor
 
 
 try:
@@ -33,9 +34,22 @@ def serialize_for_json(obj):
 
 
 def fix_block_strings(block_data):
-    for k, v in block_data.items():
+    """Normalize block dict before JSON storage.
+
+    - Keep media URL fields (image/video/cover) as null when missing, or drop
+      them entirely so that clients don't render empty placeholders.
+    - For textual fields, replace None with empty string to avoid `null`
+      rendering quirks in some clients.
+    """
+    # Fields which should remain absent/null if not provided
+    media_url_keys = {"image_url", "cover_image_url", "video_url"}
+
+    for k, v in list(block_data.items()):
         if v is None:
-            if any(
+            if k in media_url_keys:
+                # Remove absent media fields to avoid empty strings downstream
+                block_data.pop(k)
+            elif any(
                 s in k
                 for s in [
                     "url",
@@ -46,9 +60,6 @@ def fix_block_strings(block_data):
                     "author",
                     "content",
                     "photo_credit",
-                    "cover_image_url",
-                    "image_url",
-                    "video_url",
                     "category_id",
                     "type",
                 ]
@@ -65,6 +76,7 @@ class SupabaseNewsClient:
         self.settings = settings
         self.client: Optional[Client] = None
         self.media_storage: Optional[MediaStorage] = None
+        self.media_processor: Optional[NewsBlocksMediaProcessor] = None
 
         # Prefer settings (loaded from .env via pydantic-settings),
         # fall back to OS env vars if not set there
@@ -85,12 +97,15 @@ class SupabaseNewsClient:
 
         try:
             self.client = create_client(self.supabase_url, self.supabase_key)
-            self.media_storage = MediaStorage(self.settings, self.client)
-            await self.media_storage.initialize()
-            logger.info("Supabase client and Media Storage initialized")
+            logger.info("Supabase client initialized")
         except Exception as e:
             logger.error(f"Failed to initialize Supabase client: {e}")
             raise
+
+    def attach_media_storage(self, media_storage: MediaStorage) -> None:
+        """Attach an already-initialized media storage instance."""
+        self.media_storage = media_storage
+        self.media_processor = NewsBlocksMediaProcessor(media_storage)
 
     async def close(self):
         """Close the Supabase client."""
@@ -103,7 +118,7 @@ class SupabaseNewsClient:
 
     async def save_news_blocks(
         self,
-        news_blocks: List[NewsBlock],
+        news_blocks: List[Any],
         source_type: str,
         source_id: str,
         source_name: str,
@@ -113,23 +128,6 @@ class SupabaseNewsClient:
         raw_data: Optional[Dict[str, Any]] = None,
         social_media_client: Optional[Any] = None,
     ) -> bool:
-        """
-        Save news blocks directly to the database.
-
-        Args:
-            news_blocks: List of news blocks to save
-            source_type: Type of source (telegram, vk)
-            source_id: Source identifier
-            source_name: Source display name
-            external_id: External post ID
-            original_url: Original post URL
-            published_at: Publication date
-            raw_data: Raw data from the source
-            social_media_client: The client instance for handling media downloads.
-
-        Returns:
-            True if saved successfully, False otherwise
-        """
         if not self.client:
             logger.error("Supabase client not initialized")
             return False
@@ -139,95 +137,27 @@ class SupabaseNewsClient:
             return False
 
         try:
-            media_map = {}
-            if social_media_client and source_type == "telegram":
-                try:
-                    message = await social_media_client.client.get_messages(
-                        source_id, ids=int(external_id)
-                    )
-                    messages_to_process = [message]
-                    if (
-                        message
-                        and hasattr(message, "grouped_id")
-                        and message.grouped_id
-                    ):
-                        album_messages = await social_media_client.client.get_messages(
-                            source_id,
-                            limit=None,
-                            min_id=message.id - 100,
-                            max_id=message.id + 100,
-                        )  # Heuristic
-                        messages_to_process = [
-                            m
-                            for m in album_messages
-                            if m and m.grouped_id == message.grouped_id
-                        ]
-
-                    # Create a map from photo/doc ID to the media object
-                    for msg in messages_to_process:
-                        if msg and msg.media:
-                            if hasattr(msg.media, "photo"):
-                                media_map[str(msg.media.photo.id)] = msg.media
-                            elif hasattr(msg.media, "document"):
-                                media_map[str(msg.media.document.id)] = msg.media
-                except Exception as e:
-                    logger.warning(
-                        f"Could not pre-fetch telegram media for {source_id}/{external_id}: {e}"
-                    )
-
-            # Convert news blocks to JSON, ensuring all values are JSON serialisable
-            news_blocks_json: List[Dict[str, Any]] = []
-
-            for block in news_blocks:
-                if hasattr(block, "model_dump"):
-                    block_data = block.model_dump(by_alias=True, mode="json")
-                else:
-                    block_data = block.dict(by_alias=True)
-                    for k, v in list(block_data.items()):
-                        if isinstance(v, datetime):
-                            block_data[k] = v.isoformat()
-                block_data = fix_block_strings(block_data)
-
-                # Upload Telegram media by file_id and also upload external HTTP media into Supabase
-                for media_field, media_type in [
-                    ("image_url", "image"),
-                    ("imageUrl", "image"),
-                    ("video_url", "video"),
-                    ("videoUrl", "video"),
-                ]:
-                    url_val = block_data.get(media_field)
-                    if not url_val:
-                        continue
-
-                    url_str = str(url_val)
-                    is_http = url_str.startswith("http://") or url_str.startswith("https://") or url_str.startswith("//")
-
-                    if not is_http and social_media_client:
-                        # Delegate platform media resolution to the platform client
-                        uploaded = await social_media_client.upload_platform_media(
-                            source_id=source_id,
-                            external_id=external_id,
-                            media_identifier=url_str,
-                            media_type=media_type,
-                            storage=self.media_storage,
-                            source_info={"source_type": source_type, "source_id": source_id},
-                        )
-                        if uploaded:
-                            block_data[media_field] = uploaded
+            # Convert blocks to JSON format if they aren't already processed
+            if news_blocks and not isinstance(news_blocks[0], dict):
+                news_blocks_json: List[Dict[str, Any]] = []
+                for block in news_blocks:
+                    if hasattr(block, "model_dump"):
+                        block_data = block.model_dump(by_alias=True, mode="json")
                     else:
-                        # External HTTP(S) URL -> download and re-host in Supabase
-                        stored = await self.media_storage.download_and_store_file(
-                            url_str,
-                            media_type,
-                            {"source_type": source_type, "source_id": source_id},
-                        )
-                        if stored:
-                            block_data[media_field] = stored
+                        block_data = block.dict(by_alias=True)
+                        for k, v in list(block_data.items()):
+                            if isinstance(v, datetime):
+                                block_data[k] = v.isoformat()
+                    block_data = fix_block_strings(block_data)
+                    news_blocks_json.append(block_data)
+            else:
+                # Blocks are already processed (dict format)
+                news_blocks_json = news_blocks
 
-                news_blocks_json.append(block_data)
+            first_block = news_blocks_json[0] if news_blocks_json else {}
 
-            first_block = news_blocks[0] if news_blocks else None
-            title = getattr(first_block, "title", f"Post from {source_name}")
+            title = first_block.get("title") if isinstance(first_block, dict) else getattr(first_block, "title", None)
+            title = title or (source_name or "")
 
             news_item = {
                 "external_id": external_id,
@@ -245,7 +175,7 @@ class SupabaseNewsClient:
 
             news_item_serialized = serialize_for_json(news_item)
 
-            result = (
+            (
                 self.client.table("social_news_items")
                 .upsert(
                     news_item_serialized,
@@ -254,22 +184,19 @@ class SupabaseNewsClient:
                 .execute()
             )
 
-            if result.data:
-                logger.debug(
-                    f"Saved news blocks for: {source_type}:{source_id}:{external_id}"
-                )
-                return True
-            else:
-                logger.error(
-                    f"Failed to save news blocks: {source_type}:{source_id}:{external_id}"
-                )
-                return False
+            logger.debug(
+                f"Saved news blocks for: {source_type}:{source_id}:{external_id}"
+            )
+            return True
 
         except Exception as e:
             logger.error(
                 f"Error saving news blocks {source_type}:{source_id}:{external_id}: {e}"
             )
             return False
+
+    # Removed platform-specific media processing from here. This must be handled
+    # by client/adapters via `finalize_block_media_fields` hook if needed.
 
     async def save_raw_data_as_news_blocks(
         self,
@@ -311,6 +238,38 @@ class SupabaseNewsClient:
                     f"No news blocks generated from raw data: {source_type}:{source_id}"
                 )
                 return False
+
+            # Process media fields early, before saving
+            if self.media_processor:
+                try:
+                    # Convert blocks to dict format for processing
+                    blocks_data = []
+                    for block in news_blocks:
+                        if hasattr(block, "model_dump"):
+                            block_data = block.model_dump(by_alias=True, mode="json")
+                        else:
+                            block_data = block.dict(by_alias=True)
+                            for k, v in list(block_data.items()):
+                                if isinstance(v, datetime):
+                                    block_data[k] = v.isoformat()
+                        block_data = fix_block_strings(block_data)
+                        blocks_data.append(block_data)
+                    
+                    # Process media through the processor chain
+                    processed_blocks = await self.media_processor.process_news_blocks(
+                        blocks_data,
+                        source_type,
+                        source_id,
+                        external_id,
+                        social_media_client
+                    )
+                    
+                    # Convert back to block objects (simplified - keep as dicts)
+                    news_blocks = processed_blocks
+                    
+                except Exception as e:
+                    logger.warning(f"Media processing failed, using original blocks: {e}")
+                    # Continue with original blocks if processing fails
 
             original_url = raw_data.get(
                 "url", f"https://example.com/{source_id}/{external_id}"
@@ -729,6 +688,7 @@ class SupabaseNewsClient:
         category: Optional[str] = None,
         description: Optional[str] = None,
         is_active: bool = True,
+        source_url: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Add a new social media source."""
         if not self.client:
@@ -740,7 +700,7 @@ class SupabaseNewsClient:
                 "source_type": source_type,
                 "source_id": source_id,
                 "source_name": source_name,
-                "source_url": f"https://{'t.me' if source_type == 'telegram' else 'vk.com'}/{source_id}",
+                "source_url": source_url,
                 "category": category or "",
                 "description": description or "",
                 "is_active": is_active,
@@ -766,6 +726,8 @@ class SupabaseNewsClient:
         source_type: Optional[str] = None,
         category: Optional[str] = None,
         active_only: bool = True,
+        limit: Optional[int] = None,
+        offset: int = 0,
     ) -> List[Dict[str, Any]]:
         """Get sources with optional filtering."""
         if not self.client:
@@ -773,7 +735,7 @@ class SupabaseNewsClient:
             return []
 
         try:
-            query = self.client.table("social_news_sources").select("*")
+            query = self.client.table("social_news_sources").select("*", count="exact")
 
             if source_type:
                 query = query.eq("source_type", source_type)
@@ -784,7 +746,12 @@ class SupabaseNewsClient:
             if active_only:
                 query = query.eq("is_active", True)
 
-            result = query.order("created_at", desc=True).execute()
+            query = query.order("created_at", desc=True)
+
+            if isinstance(limit, int) and limit > 0:
+                query = query.range(offset, offset + limit - 1)
+
+            result = query.execute()
 
             return result.data if result.data else []
 

@@ -112,13 +112,11 @@ class MireaOfficialFetcher(SocialMediaClient):
         try:
             async with self.session.get(self.MIREA_API_URL, params=params) as response:
                 response.raise_for_status()
-                # The API returns HTML with json inside, need to handle that
                 body = await response.text()
-                # The actual json is returned, but content-type is text/html
                 data = await response.json(content_type=None)
 
                 if data and "result" in data and isinstance(data["result"], list):
-                    return data["result"]
+                    return data["result"][: max(0, int(limit))]
                 else:
                     logger.warning(f"Unexpected data format from MIREA API: {data}")
                     return []

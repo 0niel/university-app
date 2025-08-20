@@ -1,14 +1,20 @@
 """Configuration settings for the social media fetcher."""
 
 import os
+from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 from pydantic import Field, field_validator
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    """Application settings loaded from environment variables."""
+
+    model_config = SettingsConfigDict(
+        env_file=str((Path(__file__).resolve().parents[1] / ".env").resolve()),
+        env_file_encoding="utf-8",
+        extra="ignore",
+    )
 
     HOST: str = Field(default="0.0.0.0", env="HOST")
     PORT: int = Field(default=8000, env="PORT")
@@ -37,15 +43,12 @@ class Settings(BaseSettings):
     SUPABASE_BUCKET_VIDEOS: str = Field(
         default="social-media-videos", env="SUPABASE_BUCKET_VIDEOS"
     )
-    SUPABASE_BUCKET_DOCUMENTS: str = Field(
-        default="social-media-documents", env="SUPABASE_BUCKET_DOCUMENTS"
-    )
 
     RATE_LIMIT_REQUESTS: int = Field(default=100, env="RATE_LIMIT_REQUESTS")
     RATE_LIMIT_WINDOW: int = Field(default=3600, env="RATE_LIMIT_WINDOW")
 
-    MAX_MESSAGES_PER_REQUEST: int = Field(default=50, env="MAX_MESSAGES_PER_REQUEST")
-    MAX_POSTS_PER_REQUEST: int = Field(default=50, env="MAX_POSTS_PER_REQUEST")
+    MAX_MESSAGES_PER_REQUEST: int = Field(default=30, env="MAX_MESSAGES_PER_REQUEST")
+    MAX_POSTS_PER_REQUEST: int = Field(default=30, env="MAX_POSTS_PER_REQUEST")
 
     ENABLE_BACKGROUND_SYNC: bool = Field(default=True, env="ENABLE_BACKGROUND_SYNC")
     SYNC_INTERVAL_MINUTES: int = Field(default=30, env="SYNC_INTERVAL_MINUTES")
@@ -60,17 +63,9 @@ class Settings(BaseSettings):
 
     CLIENT_TIMEOUT: int = Field(default=30, env="CLIENT_TIMEOUT")
 
-    class Config:
-        """Pydantic configuration."""
-
-        env_file = ".env"
-        env_file_encoding = "utf-8"
-        extra = "ignore"
-
     @field_validator("TELEGRAM_API_ID", mode="before")
     @classmethod
     def validate_telegram_api_id(cls, v):
-        """Validate Telegram API ID."""
         if v is not None and v != "":
             try:
                 return int(v)
@@ -79,7 +74,6 @@ class Settings(BaseSettings):
         return None
 
     def get_client_config(self, client_type: str) -> Dict[str, Any]:
-        """Get configuration for a specific client type."""
         if client_type == "telegram":
             return {
                 "api_id": self.TELEGRAM_API_ID,
@@ -100,7 +94,6 @@ class Settings(BaseSettings):
             return {}
 
     def is_client_enabled(self, client_type: str) -> bool:
-        """Check if a client type is enabled."""
         if client_type == "telegram":
             return self.telegram_configured
         elif client_type == "vk":
@@ -111,7 +104,6 @@ class Settings(BaseSettings):
             return False
 
     def get_database_config(self) -> Dict[str, Any]:
-        """Get database configuration."""
         return {
             "url": self.SUPABASE_URL,
             "service_key": self.SUPABASE_SERVICE_KEY,
@@ -120,14 +112,12 @@ class Settings(BaseSettings):
         }
 
     def get_scheduler_config(self) -> Dict[str, Any]:
-        """Get scheduler configuration."""
         return {
             "enabled": self.ENABLE_BACKGROUND_SYNC,
             "interval_minutes": self.SYNC_INTERVAL_MINUTES,
         }
 
     def get_media_config(self) -> Dict[str, Any]:
-        """Get media processing configuration."""
         return {
             "max_file_size_mb": self.MAX_FILE_SIZE_MB,
             "supported_image_formats": self.SUPPORTED_IMAGE_FORMATS,
@@ -135,7 +125,6 @@ class Settings(BaseSettings):
         }
 
     def get_server_config(self) -> Dict[str, Any]:
-        """Get server configuration."""
         return {
             "host": self.HOST,
             "port": self.PORT,
@@ -146,26 +135,21 @@ class Settings(BaseSettings):
 
     @property
     def telegram_configured(self) -> bool:
-        """Check if Telegram is properly configured."""
         return bool(self.TELEGRAM_API_ID and self.TELEGRAM_API_HASH)
 
     @property
     def vk_configured(self) -> bool:
-        """Check if VK is properly configured."""
         return bool(self.VK_ACCESS_TOKEN)
 
     @property
     def supabase_configured(self) -> bool:
-        """Check if Supabase is properly configured."""
         return bool(self.SUPABASE_URL and self.SUPABASE_SERVICE_KEY)
 
     @property
     def proxy_configured(self) -> bool:
-        """Check if proxy is configured."""
         return bool(self.PROXY_URL)
 
     def get_proxy_dict(self) -> Optional[dict]:
-        """Get proxy configuration as dictionary."""
         if not self.proxy_configured:
             return None
 
@@ -182,7 +166,6 @@ class Settings(BaseSettings):
         return proxy_dict
 
     def get_available_clients(self) -> List[str]:
-        """Get list of available client types based on configuration."""
         clients = []
         if self.telegram_configured:
             clients.append("telegram")

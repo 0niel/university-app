@@ -12,7 +12,9 @@ from ..models import (
     ArticleIntroductionBlock,
     ImageBlock,
     VideoBlock,
+    VideoIntroductionBlock,
     TextParagraphBlock,
+    TextLeadParagraphBlock,
     SlideshowBlock,
     SlideBlock,
     SlideshowIntroductionBlock,
@@ -65,6 +67,37 @@ class TelegramToNewsBlocksAdapter(SocialMediaToNewsBlocksAdapter):
         should_create_slideshow = total_media_count > 1 or media_group_count > 1
 
         if should_create_slideshow:
+            # Order: Article intro -> TextLead -> Slideshow intro (with action)
+            cover = (
+                photo_file_ids[0]
+                if photo_file_ids
+                else (video_file_ids[0] if video_file_ids else None)
+            ) or None
+            blocks.append(
+                ArticleIntroductionBlock(
+                    type=ArticleIntroductionBlock.get_identifier(),
+                    category_id=self.get_source_type(),
+                    author=channel_title or channel_username,
+                    published_at=published_at,
+                    title=title,
+                    # Do not pass empty string to image_url
+                    image_url=cover if cover else None,
+                )
+            )
+
+            # Avoid duplicating title and first paragraph: if the body starts
+            # with the derived title, trim it before adding TextLeadParagraph
+            body = text.strip()
+            if body and title and body.startswith(title):
+                body = body[len(title):].lstrip("\n :")
+
+            if body:
+                blocks.append(
+                    TextLeadParagraphBlock(
+                        type=TextLeadParagraphBlock.get_identifier(), text=body
+                    )
+                )
+
             slideshow_blocks = self._create_slideshow_blocks(
                 title=title,
                 photo_file_ids=photo_file_ids,
@@ -77,45 +110,57 @@ class TelegramToNewsBlocksAdapter(SocialMediaToNewsBlocksAdapter):
             )
             blocks.extend(slideshow_blocks)
         else:
-            intro_block = ArticleIntroductionBlock(
-                type=ArticleIntroductionBlock.get_identifier(),
-                category_id=self.get_source_type(),
-                author=channel_title or channel_username,
-                published_at=published_at,
-                title=title,
-                image_url=photo_file_ids[0] if photo_file_ids else "",
-            )
-            blocks.append(intro_block)
-
-            post_id = f"telegram_{channel_username}_{message_id}"
-            content_block = self._create_content_block(
-                post_id=post_id,
-                text=text,
-                title=title,
-                photo_file_ids=photo_file_ids,
-                video_file_ids=video_file_ids,
-                channel_title=channel_title,
-                channel_username=channel_username,
-                published_at=published_at,
-            )
-            blocks.append(content_block)
-
-            if len(text) > 300:
-                text_block = TextParagraphBlock(
-                    type=TextParagraphBlock.get_identifier(), text=text
+            if not text.strip() and video_file_ids:
+                # Video-only post: use a video introduction block
+                intro_block = VideoIntroductionBlock(
+                    type=VideoIntroductionBlock.get_identifier(),
+                    category_id=self.get_source_type(),
+                    title=title,
+                    video_url=video_file_ids[0] if video_file_ids else None,
                 )
-                blocks.append(text_block)
+                blocks.append(intro_block)
 
-            blocks.extend(self._create_media_blocks(photo_file_ids, video_file_ids))
+                # Append remaining media without duplicating the first video
+                remaining_videos = video_file_ids[1:] if len(video_file_ids) > 1 else []
+                blocks.extend(self._create_media_blocks(photo_file_ids, remaining_videos))
+            else:
+                cover = (
+                    photo_file_ids[0]
+                    if photo_file_ids
+                    else (video_file_ids[0] if video_file_ids else None)
+                ) or None
+                # Force small->large behavior by ensuring we have an image for PostLargeBlock
+                intro_block = ArticleIntroductionBlock(
+                    type=ArticleIntroductionBlock.get_identifier(),
+                    category_id=self.get_source_type(),
+                    author=channel_title or channel_username,
+                    published_at=published_at,
+                    title=title,
+                    image_url=cover if cover else None,
+                )
+                blocks.append(intro_block)
+
+                body = text.strip()
+                if body and title and body.startswith(title):
+                    body = body[len(title):].lstrip("\n :")
+
+                if body:
+                    blocks.append(
+                        TextLeadParagraphBlock(
+                            type=TextLeadParagraphBlock.get_identifier(), text=body
+                        )
+                    )
+
+                blocks.extend(self._create_media_blocks(photo_file_ids, video_file_ids))
 
         return blocks
 
     def _extract_title(self, text: str, channel_title: str) -> str:
         if not text.strip():
-            return f"Пост от {channel_title}"
+            return channel_title or ""
         lines = [line.strip() for line in text.split("\n") if line.strip()]
         if not lines:
-            return f"Пост от {channel_title}"
+            return channel_title or ""
         first_line = lines[0]
         if len(first_line) < 20 and len(lines) > 1:
             combined = f"{first_line} {lines[1]}"
@@ -138,50 +183,57 @@ class TelegramToNewsBlocksAdapter(SocialMediaToNewsBlocksAdapter):
         is_circles: bool = False,
     ) -> List[NewsBlock]:
         blocks: List[NewsBlock] = []
-        slideshow_type = "circles" if is_circles else "story"
         cover_url = (
             photo_file_ids[0] if photo_file_ids else (video_file_ids[0] if video_file_ids else "")
         )
+
+        # Build slides payload
+        slides: List[SlideBlock] = []
+        media_index = 0
+
+        for image_url in photo_file_ids:
+            slides.append(
+                SlideBlock(
+                    type=SlideBlock.get_identifier(),
+                    caption=self._generate_slide_caption(media_index, "Фото", is_circles),
+                    description="",
+                    photo_credit=channel_title,
+                    image_url=image_url,
+                )
+            )
+            media_index += 1
+
+        for video_url in video_file_ids:
+            slides.append(
+                SlideBlock(
+                    type=SlideBlock.get_identifier(),
+                    caption=self._generate_slide_caption(media_index, "Видео", is_circles),
+                    description="",
+                    photo_credit=channel_title,
+                    image_url=video_url,
+                )
+            )
+            media_index += 1
+
+        slideshow = SlideshowBlock(
+            type=SlideshowBlock.get_identifier(), title=title, slides=slides
+        )
+
+        # Proper NavigateToSlideshowAction payload
+        action = {
+            "type": "__navigate_to_slideshow__",
+            "article_id": str(message_id),
+            "slideshow": slideshow.model_dump(by_alias=True),
+        }
 
         slideshow_intro = SlideshowIntroductionBlock(
             type=SlideshowIntroductionBlock.get_identifier(),
             title=title,
             cover_image_url=cover_url,
-            action={
-                "type": "__navigate_to_slideshow__",
-                "action_type": "navigation",
-                "slideshow_id": f"telegram_{slideshow_type}_{channel_username}_{message_id}",
-            },
+            action=action,
         )
         blocks.append(slideshow_intro)
-
-        slides: List[SlideBlock] = []
-        media_index = 0
-
-        for image_url in photo_file_ids:
-            slide = SlideBlock(
-                type=SlideBlock.get_identifier(),
-                caption=self._generate_slide_caption(media_index, "Фото", is_circles),
-                description=text if media_index == 0 else "",
-                photo_credit=channel_title,
-                image_url=image_url or "",
-            )
-            slides.append(slide)
-            media_index += 1
-
-        for video_url in video_file_ids:
-            slide = SlideBlock(
-                type=SlideBlock.get_identifier(),
-                caption=self._generate_slide_caption(media_index, "Видео", is_circles),
-                description=text if media_index == 0 and not photo_file_ids else "",
-                photo_credit=channel_title,
-                image_url=video_url or "",
-            )
-            slides.append(slide)
-            media_index += 1
-
-        slideshow = SlideshowBlock(type=SlideshowBlock.get_identifier(), title=title, slides=slides)
-        blocks.append(slideshow)
+        # Do NOT append the full slideshow block to content; intro carries it in action
         return blocks
 
     def _generate_slide_caption(self, index: int, media_type: str, is_circles: bool) -> str:
@@ -238,7 +290,9 @@ class TelegramToNewsBlocksAdapter(SocialMediaToNewsBlocksAdapter):
     def _create_media_blocks(self, photo_file_ids: List[str], video_file_ids: List[str]) -> List[NewsBlock]:
         blocks: List[NewsBlock] = []
         for image_url in photo_file_ids[1:]:
-            blocks.append(ImageBlock(type=ImageBlock.get_identifier(), image_url=image_url or ""))
+            if image_url:
+                blocks.append(ImageBlock(type=ImageBlock.get_identifier(), image_url=image_url))
         for video_url in video_file_ids:
-            blocks.append(VideoBlock(type=VideoBlock.get_identifier(), video_url=video_url or ""))
+            if video_url:
+                blocks.append(VideoBlock(type=VideoBlock.get_identifier(), video_url=video_url))
         return blocks
