@@ -6,25 +6,35 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:logger/logger.dart';
+import 'package:package_info_client/package_info_client.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:rtu_mirea_app/common/hydrated_storage.dart';
+import 'package:rtu_mirea_app/env/env.dart';
 import 'package:rtu_mirea_app/firebase_options.dart';
 import 'package:rtu_mirea_app/main/bootstrap/app_bloc_observer.dart';
+import 'package:rtu_mirea_app/scopes/app_scope.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
-typedef AppBuilder =
-    Future<Widget> Function(
-      SharedPreferences sharedPreferences,
-      AnalyticsRepository analyticsRepository,
-    );
+typedef AppBuilder = Future<Widget> Function(AppScopeHolder appScopeHolder);
 
 Future<void> bootstrap(AppBuilder builder) async {
   await runZonedGuarded<Future<void>>(
     () async {
       WidgetsFlutterBinding.ensureInitialized();
 
+      // Initialize Firebase
       await Firebase.initializeApp(
         options: DefaultFirebaseOptions.currentPlatform,
+      );
+
+      // Initialize shared preferences
+      final sharedPreferences = await SharedPreferences.getInstance();
+
+      // Setup HydratedBloc storage
+      HydratedBloc.storage = CustomHydratedStorage(
+        sharedPreferences: sharedPreferences,
       );
 
       // Initialize analytics repository
@@ -42,11 +52,30 @@ Future<void> bootstrap(AppBuilder builder) async {
       // Setup Bloc observer
       Bloc.observer = AppBlocObserver(analyticsRepository: analyticsRepository);
 
-      // Setup HydratedBloc storage
-      final sharedPreferences = await SharedPreferences.getInstance();
-      HydratedBloc.storage = CustomHydratedStorage(
-        sharedPreferences: sharedPreferences,
+      // Initialize PackageInfo
+      final packageInfo = await PackageInfo.fromPlatform();
+      final packageInfoClient = PackageInfoClient(
+        appName: packageInfo.appName,
+        packageName: packageInfo.packageName,
+        packageVersion: '${packageInfo.version}+${packageInfo.buildNumber}',
       );
+
+      // Initialize Supabase
+      final supabase = await Supabase.initialize(
+        url: Env.supabaseUrl,
+        anonKey: Env.supabaseAnonKey,
+      );
+
+      // Create the app scope holder
+      final appScopeHolder = AppScopeHolder(
+        sharedPreferences: sharedPreferences,
+        analyticsRepository: analyticsRepository,
+        packageInfoClient: packageInfoClient,
+        supabaseClient: supabase.client,
+      );
+
+      // Initialize the app scope
+      await appScopeHolder.create();
 
       // Define a wrapper for SentryScreenshotWidget
       Widget wrapWithSentry(Widget child) {
@@ -56,7 +85,7 @@ Future<void> bootstrap(AppBuilder builder) async {
       }
 
       // Run the app inside the sentry wrapper
-      final app = await builder(sharedPreferences, analyticsRepository);
+      final app = await builder(appScopeHolder);
 
       runApp(wrapWithSentry(app));
     },
