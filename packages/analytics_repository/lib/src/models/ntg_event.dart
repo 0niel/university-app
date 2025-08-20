@@ -57,3 +57,18 @@ class ViewStory extends NTGEvent {
           nonInteraction: false,
         );
 }
+
+/// {@template social_share_event}
+/// An analytics event for tracking social sharing.
+/// {@endtemplate}
+class SocialShareEvent extends NTGEvent {
+  /// {@macro social_share_event}
+  SocialShareEvent()
+      : super(
+          name: 'social_share',
+          category: 'NTG social',
+          action: 'social share',
+          label: 'OS share menu',
+          nonInteraction: false,
+        );
+}
