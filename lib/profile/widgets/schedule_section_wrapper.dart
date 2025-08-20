@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:app_ui/app_ui.dart';
-import 'package:rtu_mirea_app/profile/widgets/widgets.dart';
+import 'package:rtu_mirea_app/profile/profile.dart';
 
 class ScheduleSectionWrapper extends StatelessWidget {
   final String title;

@@ -4,12 +4,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:rtu_mirea_app/ads/ads.dart';
-import 'package:rtu_mirea_app/presentation/bloc/user_bloc/user_bloc.dart';
 import 'package:app_ui/app_ui.dart';
 import 'package:rtu_mirea_app/app/theme/theme_mode.dart';
 
 import 'package:rtu_mirea_app/profile/widgets/widgets.dart';
-import 'package:rtu_mirea_app/schedule/schedule.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 enum ThemeOption { light, dark, system }
 
@@ -90,26 +89,7 @@ class _InitialProfileStatePageState extends State<_InitialProfileStatePage> {
   }
 
   void _onFeedbackTap(BuildContext context) {
-    var defaultText = 'Возникла проблема с расписанием';
-    final state = context.read<ScheduleBloc>().state;
-
-    if (state.status == ScheduleStatus.loaded && state.selectedSchedule != null) {
-      if (state.selectedSchedule is SelectedGroupSchedule) {
-        defaultText += ' группы ${(state.selectedSchedule as SelectedGroupSchedule).group.name}';
-      } else if (state.selectedSchedule is SelectedTeacherSchedule) {
-        defaultText += ' преподавателя ${(state.selectedSchedule as SelectedTeacherSchedule).teacher.name}';
-      } else if (state.selectedSchedule is SelectedClassroomSchedule) {
-        defaultText += ' аудитории ${(state.selectedSchedule as SelectedClassroomSchedule).classroom.name}';
-      }
-    }
-
-    final userBloc = context.read<UserBloc>();
-
-    if (userBloc.state.status == UserStatus.authorized) {
-      FeedbackBottomModalSheet.show(context, defaultText: defaultText, defaultEmail: userBloc.state.user!.email);
-    } else {
-      FeedbackBottomModalSheet.show(context, defaultText: defaultText);
-    }
+    launchUrlString('https://t.me/mirea_ninja_chat/473603', mode: LaunchMode.externalApplication);
   }
 
   void _onAdsSettingTap(BuildContext context) {

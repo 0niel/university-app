@@ -4,7 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:app_ui/app_ui.dart';
-import 'package:rtu_mirea_app/profile/widgets/widgets.dart';
+import 'package:rtu_mirea_app/profile/widgets/widgets.dart' hide ProfileButton;
 import 'package:rtu_mirea_app/schedule/schedule.dart';
 import 'package:rtu_mirea_app/schedule_management/bloc/schedule_exporter_cubit.dart';
 import 'package:university_app_server_api/client.dart';
@@ -27,7 +27,10 @@ class ScheduleManagementSection extends StatelessWidget {
     return BlocListener<ScheduleExporterCubit, ScheduleExporterState>(
       listener: (context, state) {
         if (state.isSuccess) {
-          ScaffoldMessengerHelper.showMessage(context: context, title: 'Расписание экспортировано');
+          ScaffoldMessengerHelper.showMessage(
+            context: context,
+            title: 'Расписание экспортировано',
+          );
         } else if (state.errorMessage.isNotEmpty) {
           ScaffoldMessengerHelper.showMessage(
             context: context,
@@ -41,7 +44,9 @@ class ScheduleManagementSection extends StatelessWidget {
         builder: (context, state) {
           return Card(
             margin: EdgeInsets.zero,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
             elevation: 0,
             color: Theme.of(context).extension<AppColors>()!.background02,
             child: Padding(
@@ -58,15 +63,21 @@ class ScheduleManagementSection extends StatelessWidget {
                     ),
                     onPressed: () => context.go('/profile/schedule-management'),
                     trailing: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
                       decoration: BoxDecoration(
-                        color: Theme.of(context).extension<AppColors>()!.primary.withOpacity(0.15),
+                        color: Theme.of(
+                          context,
+                        ).extension<AppColors>()!.primary.withOpacity(0.15),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
                         _getTotalSavedSchedules(context).toString(),
                         style: AppTextStyle.bodyL.copyWith(
-                          color: Theme.of(context).extension<AppColors>()!.primary,
+                          color:
+                              Theme.of(context).extension<AppColors>()!.primary,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -81,7 +92,9 @@ class ScheduleManagementSection extends StatelessWidget {
                     ),
                     value: state.isMiniature,
                     onChanged: (value) {
-                      context.read<ScheduleBloc>().add(ScheduleSetDisplayMode(isMiniature: value));
+                      context.read<ScheduleBloc>().add(
+                        ScheduleSetDisplayMode(isMiniature: value),
+                      );
                     },
                   ),
                   const SizedBox(height: 16),
@@ -94,7 +107,11 @@ class ScheduleManagementSection extends StatelessWidget {
                     ),
                     value: state.showEmptyLessons,
                     onChanged: (value) {
-                      context.read<ScheduleBloc>().add(ScheduleSetEmptyLessonsDisplaying(showEmptyLessons: value));
+                      context.read<ScheduleBloc>().add(
+                        ScheduleSetEmptyLessonsDisplaying(
+                          showEmptyLessons: value,
+                        ),
+                      );
                     },
                   ),
                   const SizedBox(height: 16),
@@ -103,14 +120,25 @@ class ScheduleManagementSection extends StatelessWidget {
                     icon: Container(
                       padding: const EdgeInsets.all(3),
                       decoration: BoxDecoration(
-                        border: Border.all(color: Theme.of(context).extension<AppColors>()!.primary, width: 2),
+                        border: Border.all(
+                          color:
+                              Theme.of(context).extension<AppColors>()!.primary,
+                          width: 2,
+                        ),
                         shape: BoxShape.circle,
                       ),
-                      child: Icon(Icons.circle, color: Theme.of(context).extension<AppColors>()!.primary, size: 14),
+                      child: Icon(
+                        Icons.circle,
+                        color:
+                            Theme.of(context).extension<AppColors>()!.primary,
+                        size: 14,
+                      ),
                     ),
                     value: state.showCommentsIndicators,
                     onChanged: (value) {
-                      context.read<ScheduleBloc>().add(SetShowCommentsIndicator(showCommentsIndicators: value));
+                      context.read<ScheduleBloc>().add(
+                        SetShowCommentsIndicator(showCommentsIndicators: value),
+                      );
                     },
                   ),
                   if (state.selectedSchedule != null) ...[
@@ -118,12 +146,18 @@ class ScheduleManagementSection extends StatelessWidget {
                     ProfileButton(
                       text: "Экспорт в календарь",
                       icon: Assets.icons.hugeicons.calendarCheckOut01.svg(
-                        color: Theme.of(context).extension<AppColors>()!.primary,
+                        color:
+                            Theme.of(context).extension<AppColors>()!.primary,
                         height: 24,
                       ),
                       onPressed: () async {
-                        final calendarName = _getCalendarName(state.selectedSchedule!);
-                        final lessons = state.selectedSchedule!.schedule.whereType<LessonSchedulePart>().toList();
+                        final calendarName = _getCalendarName(
+                          state.selectedSchedule!,
+                        );
+                        final lessons =
+                            state.selectedSchedule!.schedule
+                                .whereType<LessonSchedulePart>()
+                                .toList();
 
                         BottomModalSheet.show(
                           context,
@@ -131,8 +165,16 @@ class ScheduleManagementSection extends StatelessWidget {
                           isExpandable: true,
                           isDismissible: true,
                           showFullScreen: true,
-                          minFraction: 0.33,
-                          child: ExportScheduleModalContent(calendarName: calendarName, lessons: lessons),
+                          // Start almost full screen for better fit on small screens
+                          initialFraction: 0.9,
+                          minFraction: 0.5,
+                          defaultFraction: 0.9,
+                          maxFraction: 1.0,
+                          scrollable: false,
+                          child: ExportScheduleModalContent(
+                            calendarName: calendarName,
+                            lessons: lessons,
+                          ),
                         );
                       },
                     ),
@@ -141,7 +183,8 @@ class ScheduleManagementSection extends StatelessWidget {
                   ProfileButton(
                     text: "Проблемы с расписанием",
                     icon: Assets.icons.hugeicons.share01.svg(
-                      color: Theme.of(context).extension<AppColors>()!.colorful07,
+                      color:
+                          Theme.of(context).extension<AppColors>()!.colorful07,
                       height: 24,
                     ),
                     onPressed: () => onFeedbackTap(context),
@@ -161,7 +204,9 @@ class ScheduleManagementSection extends StatelessWidget {
       case SelectedGroupSchedule:
         return (selectedSchedule as SelectedGroupSchedule).group.name;
       case SelectedTeacherSchedule:
-        return _formatTeacherName((selectedSchedule as SelectedTeacherSchedule).teacher.name);
+        return _formatTeacherName(
+          (selectedSchedule as SelectedTeacherSchedule).teacher.name,
+        );
       case SelectedClassroomSchedule:
         return (selectedSchedule as SelectedClassroomSchedule).classroom.name;
       default:
@@ -183,7 +228,12 @@ class _SettingToggleRow extends StatelessWidget {
   final bool value;
   final ValueChanged<bool> onChanged;
 
-  const _SettingToggleRow({required this.title, required this.icon, required this.value, required this.onChanged});
+  const _SettingToggleRow({
+    required this.title,
+    required this.icon,
+    required this.value,
+    required this.onChanged,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -203,7 +253,12 @@ class _SettingToggleRow extends StatelessWidget {
               child: icon,
             ),
             const SizedBox(width: 16),
-            Expanded(child: Text(title, style: AppTextStyle.bodyL.copyWith(fontWeight: FontWeight.w500))),
+            Expanded(
+              child: Text(
+                title,
+                style: AppTextStyle.bodyL.copyWith(fontWeight: FontWeight.w500),
+              ),
+            ),
             PlatformSwitch(
               value: value,
               onChanged: onChanged,

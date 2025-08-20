@@ -9,24 +9,35 @@ class ExportScheduleModalContent extends StatefulWidget {
   final String calendarName;
   final List<LessonSchedulePart> lessons;
 
-  const ExportScheduleModalContent({super.key, required this.calendarName, required this.lessons});
+  const ExportScheduleModalContent({
+    super.key,
+    required this.calendarName,
+    required this.lessons,
+  });
 
   @override
   State createState() => _ExportScheduleModalContentState();
 }
 
-class _ExportScheduleModalContentState extends State<ExportScheduleModalContent> with SingleTickerProviderStateMixin {
+class _ExportScheduleModalContentState extends State<ExportScheduleModalContent>
+    with SingleTickerProviderStateMixin {
   bool _includeEmojis = true;
   bool _includeShortTypeNames = true;
   bool _selectAllSubjects = true;
   late TabController _tabController;
 
-  final Map<String, int> _presetReminders = {'10 минут до': 10, '30 минут до': 30, '1 час до': 60, '12 часов до': 720};
+  final Map<String, int> _presetReminders = {
+    '10 минут до': 10,
+    '30 минут до': 30,
+    '1 час до': 60,
+    '12 часов до': 720,
+  };
 
   late Map<String, bool> _selectedPresetReminders;
   late Map<String, bool> _selectedSubjects;
 
-  final TextEditingController _customReminderController = TextEditingController();
+  final TextEditingController _customReminderController =
+      TextEditingController();
   final FocusNode _reminderFocusNode = FocusNode();
   final List<int> _customReminders = [];
 
@@ -35,9 +46,13 @@ class _ExportScheduleModalContentState extends State<ExportScheduleModalContent>
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
 
-    _selectedPresetReminders = {for (var key in _presetReminders.keys) key: true};
+    _selectedPresetReminders = {
+      for (var key in _presetReminders.keys) key: true,
+    };
 
-    final subjects = widget.lessons.map((lesson) => lesson.subject).toSet().toList()..sort((a, b) => a.compareTo(b));
+    final subjects =
+        widget.lessons.map((lesson) => lesson.subject).toSet().toList()
+          ..sort((a, b) => a.compareTo(b));
 
     _selectedSubjects = {for (var subject in subjects) subject: true};
 
@@ -58,7 +73,9 @@ class _ExportScheduleModalContentState extends State<ExportScheduleModalContent>
   }
 
   List<LessonSchedulePart> getFilteredLessons() {
-    return widget.lessons.where((lesson) => _selectedSubjects[lesson.subject] == true).toList();
+    return widget.lessons
+        .where((lesson) => _selectedSubjects[lesson.subject] == true)
+        .toList();
   }
 
   void _toggleSelectAllSubjects() {
@@ -83,7 +100,8 @@ class _ExportScheduleModalContentState extends State<ExportScheduleModalContent>
       return false;
     }
 
-    if (_customReminders.contains(minutes) || _presetReminders.values.contains(minutes)) {
+    if (_customReminders.contains(minutes) ||
+        _presetReminders.values.contains(minutes)) {
       return false;
     }
 
@@ -130,14 +148,22 @@ class _ExportScheduleModalContentState extends State<ExportScheduleModalContent>
           indicatorColor: colors.primary,
           indicatorSize: TabBarIndicatorSize.label,
           labelStyle: AppTextStyle.bodyL.copyWith(fontWeight: FontWeight.w600),
-          tabs: const [Tab(text: "Настройки"), Tab(text: "Предметы"), Tab(text: "Напоминания")],
+          tabs: const [
+            Tab(text: "Настройки"),
+            Tab(text: "Предметы"),
+            Tab(text: "Напоминания"),
+          ],
         ),
         const SizedBox(height: 16),
         // Tab content
         Expanded(
           child: TabBarView(
             controller: _tabController,
-            children: [_buildSettingsTab(), _buildSubjectsTab(), _buildRemindersTab()],
+            children: [
+              _buildSettingsTab(),
+              _buildSubjectsTab(),
+              _buildRemindersTab(),
+            ],
           ),
         ),
 
@@ -145,7 +171,13 @@ class _ExportScheduleModalContentState extends State<ExportScheduleModalContent>
           padding: const EdgeInsets.all(16.0),
           decoration: BoxDecoration(
             color: Theme.of(context).scaffoldBackgroundColor,
-            boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 5, offset: const Offset(0, -3))],
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 5,
+                offset: const Offset(0, -3),
+              ),
+            ],
           ),
           child: Row(
             children: [
@@ -174,7 +206,10 @@ class _ExportScheduleModalContentState extends State<ExportScheduleModalContent>
                 child: PrimaryButton(
                   onPressed: () {
                     final selectedReminders = getSelectedReminderMinutes();
-                    final reminders = selectedReminders.isNotEmpty ? selectedReminders : [10, 30, 720];
+                    final reminders =
+                        selectedReminders.isNotEmpty
+                            ? selectedReminders
+                            : [10, 30, 720];
 
                     context.read<ScheduleExporterCubit>().exportSchedule(
                       calendarName: widget.calendarName,
@@ -187,7 +222,11 @@ class _ExportScheduleModalContentState extends State<ExportScheduleModalContent>
                     Navigator.of(context).pop();
                   },
                   text: 'Экспортировать',
-                  icon: Icon(Icons.calendar_today, size: 20, color: colors.white),
+                  icon: Icon(
+                    Icons.calendar_today,
+                    size: 20,
+                    color: colors.white,
+                  ),
                 ),
               ),
             ],
@@ -233,7 +272,10 @@ class _ExportScheduleModalContentState extends State<ExportScheduleModalContent>
           children: [
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 8.0),
-              child: Text('Пример названий пар:', style: AppTextStyle.body.copyWith(color: colors.deactive)),
+              child: Text(
+                'Пример названий пар:',
+                style: AppTextStyle.body.copyWith(color: colors.deactive),
+              ),
             ),
             _PreviewItem(
               title: _includeEmojis ? '📚 Лекция' : 'Лекция',
@@ -265,19 +307,33 @@ class _ExportScheduleModalContentState extends State<ExportScheduleModalContent>
           icon: Icons.subject_outlined,
           trailing: Text(
             '$selectedCount/${subjects.length}',
-            style: AppTextStyle.bodyL.copyWith(color: colors.primary, fontWeight: FontWeight.w600),
+            style: AppTextStyle.bodyL.copyWith(
+              color: colors.primary,
+              fontWeight: FontWeight.w600,
+            ),
           ),
           children: [
             // Select all checkbox
             InkWell(
               onTap: _toggleSelectAllSubjects,
               child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 8.0),
+                padding: const EdgeInsets.symmetric(
+                  vertical: 12.0,
+                  horizontal: 8.0,
+                ),
                 child: Row(
                   children: [
-                    PlatformCheckbox(value: _selectAllSubjects, onChanged: (_) => _toggleSelectAllSubjects()),
+                    PlatformCheckbox(
+                      value: _selectAllSubjects,
+                      onChanged: (_) => _toggleSelectAllSubjects(),
+                    ),
                     const SizedBox(width: 8),
-                    Text('Выбрать все', style: AppTextStyle.bodyL.copyWith(fontWeight: FontWeight.w600)),
+                    Text(
+                      'Выбрать все',
+                      style: AppTextStyle.bodyL.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -291,7 +347,9 @@ class _ExportScheduleModalContentState extends State<ExportScheduleModalContent>
                 onToggle: (value) {
                   setState(() {
                     _selectedSubjects[subject] = value;
-                    _selectAllSubjects = _selectedSubjects.values.every((v) => v);
+                    _selectAllSubjects = _selectedSubjects.values.every(
+                      (v) => v,
+                    );
                   });
                 },
               );
@@ -303,6 +361,8 @@ class _ExportScheduleModalContentState extends State<ExportScheduleModalContent>
   }
 
   Widget _buildRemindersTab() {
+    final colors = Theme.of(context).extension<AppColors>()!;
+
     return ListView(
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
       children: [
@@ -310,17 +370,100 @@ class _ExportScheduleModalContentState extends State<ExportScheduleModalContent>
           title: 'Стандартные напоминания',
           icon: Icons.access_time,
           children:
-              _presetReminders.keys.map((key) {
-                return _ReminderToggleItem(
-                  title: key,
-                  value: _selectedPresetReminders[key] ?? false,
-                  onChanged: (value) {
-                    setState(() {
-                      _selectedPresetReminders[key] = value;
-                    });
-                  },
-                );
-              }).toList(),
+              _presetReminders.keys
+                  .map(
+                    (key) => _ReminderToggleItem(
+                      title: key,
+                      value: _selectedPresetReminders[key] ?? false,
+                      onChanged: (value) {
+                        setState(() {
+                          _selectedPresetReminders[key] = value;
+                        });
+                      },
+                    ),
+                  )
+                  .toList(),
+        ),
+        const SizedBox(height: 16),
+        _SectionCard(
+          title: 'Свои напоминания (в минутах)',
+          icon: Icons.add_alert_outlined,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: LabelledInput(
+                    label: 'Минуты',
+                    placeholder: 'Например, 5',
+                    controller: _customReminderController,
+                    keyboardType: TextInputType.number,
+                    onChanged: (_) => setState(() {}),
+                    errorText:
+                        _validateCustomReminder(_customReminderController.text)
+                            ? null
+                            : 'Введите уникальное число > 0',
+                  ),
+                ),
+                const SizedBox(width: 12),
+                SizedBox(
+                  width: 120,
+                  child: TextOutlinedButton(
+                    content: 'Добавить',
+                    onPressed: _addCustomReminder,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            if (_customReminders.isEmpty)
+              Text(
+                'Пока нет пользовательских напоминаний',
+                style: AppTextStyle.body.copyWith(color: colors.deactive),
+              )
+            else
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children:
+                    _customReminders
+                        .map(
+                          (m) => Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 6,
+                            ),
+                            decoration: BoxDecoration(
+                              color: colors.background03,
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(
+                                color: colors.primary.withOpacity(0.25),
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  '$m мин',
+                                  style: AppTextStyle.body.copyWith(
+                                    color: colors.active,
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                GestureDetector(
+                                  onTap: () => _removeCustomReminder(m),
+                                  child: Icon(
+                                    Icons.close,
+                                    size: 16,
+                                    color: colors.deactive,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        )
+                        .toList(),
+              ),
+          ],
         ),
       ],
     );
@@ -333,7 +476,12 @@ class _SectionCard extends StatelessWidget {
   final List<Widget> children;
   final Widget? trailing;
 
-  const _SectionCard({required this.title, required this.icon, required this.children, this.trailing});
+  const _SectionCard({
+    required this.title,
+    required this.icon,
+    required this.children,
+    this.trailing,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -353,7 +501,14 @@ class _SectionCard extends StatelessWidget {
               children: [
                 Icon(icon, color: colors.primary),
                 const SizedBox(width: 12),
-                Expanded(child: Text(title, style: AppTextStyle.titleM.copyWith(fontWeight: FontWeight.w600))),
+                Expanded(
+                  child: Text(
+                    title,
+                    style: AppTextStyle.titleM.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
                 if (trailing != null) trailing!,
               ],
             ),
@@ -371,7 +526,11 @@ class _PreviewItem extends StatelessWidget {
   final String subtitle;
   final bool enabled;
 
-  const _PreviewItem({required this.title, required this.subtitle, this.enabled = true});
+  const _PreviewItem({
+    required this.title,
+    required this.subtitle,
+    this.enabled = true,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -380,9 +539,15 @@ class _PreviewItem extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: enabled ? colors.background03 : colors.background03.withOpacity(0.5),
+        color:
+            enabled
+                ? colors.background03
+                : colors.background03.withOpacity(0.5),
         borderRadius: BorderRadius.circular(12),
-        border: enabled ? Border.all(color: colors.primary.withOpacity(0.3), width: 1.5) : null,
+        border:
+            enabled
+                ? Border.all(color: colors.primary.withOpacity(0.3), width: 1.5)
+                : null,
       ),
       child: Row(
         children: [
@@ -398,14 +563,20 @@ class _PreviewItem extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 4),
-                Text(subtitle, style: AppTextStyle.body.copyWith(color: colors.deactive)),
+                Text(
+                  subtitle,
+                  style: AppTextStyle.body.copyWith(color: colors.deactive),
+                ),
               ],
             ),
           ),
           if (enabled)
             Container(
               padding: const EdgeInsets.all(4),
-              decoration: BoxDecoration(color: colors.primary.withOpacity(0.15), shape: BoxShape.circle),
+              decoration: BoxDecoration(
+                color: colors.primary.withOpacity(0.15),
+                shape: BoxShape.circle,
+              ),
               child: Icon(Icons.check, color: colors.primary, size: 16),
             ),
         ],
@@ -420,7 +591,12 @@ class _SettingToggleItem extends StatelessWidget {
   final bool value;
   final ValueChanged<bool> onChanged;
 
-  const _SettingToggleItem({required this.title, this.subtitle, required this.value, required this.onChanged});
+  const _SettingToggleItem({
+    required this.title,
+    this.subtitle,
+    required this.value,
+    required this.onChanged,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -437,12 +613,25 @@ class _SettingToggleItem extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(title, style: AppTextStyle.bodyL.copyWith(fontWeight: FontWeight.w500)),
-                  if (subtitle != null) Text(subtitle!, style: AppTextStyle.body.copyWith(color: colors.deactive)),
+                  Text(
+                    title,
+                    style: AppTextStyle.bodyL.copyWith(
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  if (subtitle != null)
+                    Text(
+                      subtitle!,
+                      style: AppTextStyle.body.copyWith(color: colors.deactive),
+                    ),
                 ],
               ),
             ),
-            Switch(value: value, onChanged: onChanged, activeColor: colors.primary),
+            PlatformSwitch(
+              value: value,
+              onChanged: onChanged,
+              activeColor: colors.primary,
+            ),
           ],
         ),
       ),
@@ -455,7 +644,11 @@ class _SubjectItem extends StatelessWidget {
   final bool isSelected;
   final ValueChanged<bool> onToggle;
 
-  const _SubjectItem({required this.subject, required this.isSelected, required this.onToggle});
+  const _SubjectItem({
+    required this.subject,
+    required this.isSelected,
+    required this.onToggle,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -467,7 +660,10 @@ class _SubjectItem extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 8.0),
         child: Row(
           children: [
-            PlatformCheckbox(value: isSelected, onChanged: (value) => onToggle(value ?? false)),
+            PlatformCheckbox(
+              value: isSelected,
+              onChanged: (value) => onToggle(value ?? false),
+            ),
             const SizedBox(width: 8),
             Expanded(
               child: Text(
@@ -490,7 +686,11 @@ class _ReminderToggleItem extends StatelessWidget {
   final bool value;
   final ValueChanged<bool> onChanged;
 
-  const _ReminderToggleItem({required this.title, required this.value, required this.onChanged});
+  const _ReminderToggleItem({
+    required this.title,
+    required this.value,
+    required this.onChanged,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -503,7 +703,11 @@ class _ReminderToggleItem extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 8.0),
         child: Row(
           children: [
-            Icon(Icons.notifications_outlined, color: value ? colors.primary : colors.deactive, size: 20),
+            Icon(
+              Icons.notifications_outlined,
+              color: value ? colors.primary : colors.deactive,
+              size: 20,
+            ),
             const SizedBox(width: 16),
             Expanded(
               child: Text(
@@ -514,7 +718,10 @@ class _ReminderToggleItem extends StatelessWidget {
                 ),
               ),
             ),
-            PlatformCheckbox(value: value, onChanged: (value) => onChanged(value ?? false)),
+            PlatformCheckbox(
+              value: value,
+              onChanged: (value) => onChanged(value ?? false),
+            ),
           ],
         ),
       ),
