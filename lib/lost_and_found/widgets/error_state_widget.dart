@@ -1,5 +1,6 @@
 import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
+import 'package:rtu_mirea_app/l10n/l10n.dart';
 
 class ErrorStateWidget extends StatelessWidget {
   final String message;
@@ -20,7 +21,7 @@ class ErrorStateWidget extends StatelessWidget {
             _buildErrorIllustration(context),
             const SizedBox(height: 24),
             Text(
-              'Что-то пошло не так',
+              context.l10n.loadingError,
               style: AppTextStyle.titleM.copyWith(fontWeight: FontWeight.w600, color: appColors.active),
               textAlign: TextAlign.center,
             ),
@@ -32,7 +33,7 @@ class ErrorStateWidget extends StatelessWidget {
               child: ElevatedButton.icon(
                 onPressed: onRetry,
                 icon: const Icon(Icons.refresh),
-                label: const Text('Попробовать снова'),
+                label: Text(context.l10n.tryAgain),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: appColors.primary,
                   foregroundColor: Colors.white,
