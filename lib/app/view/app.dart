@@ -30,21 +30,17 @@ import 'package:flutter/services.dart';
 import 'package:rtu_mirea_app/analytics/bloc/analytics_bloc.dart';
 
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:rtu_mirea_app/data/repositories/stories_repository_impl.dart';
 import 'package:rtu_mirea_app/home/cubit/home_cubit.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:rtu_mirea_app/app/theme/cubit/theme_cubit.dart';
 import 'package:rtu_mirea_app/app/theme/cubit/theme_state.dart';
 
 import 'package:rtu_mirea_app/schedule/bloc/schedule_bloc.dart';
-import 'package:rtu_mirea_app/stories/bloc/stories_bloc.dart';
 
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:user_repository/user_repository.dart';
 import 'package:yandex_mobileads/mobile_ads.dart';
 import 'package:syncfusion_localizations/syncfusion_localizations.dart';
-import 'package:rtu_mirea_app/splash_video/splash_video.dart';
-import 'package:splash_video_repository/splash_video_repository.dart';
 
 Future<void> yandexInterstitialAdLoader({
   required String adUnitId,
@@ -88,7 +84,6 @@ class App extends StatelessWidget {
     required NfcPassRepository nfcPassRepository,
     required LostFoundRepository lostFoundRepository,
     required UserRepository userRepository,
-    required SplashVideoRepository splashVideoRepository,
     required User user,
   }) : _analyticsRepository = analyticsRepository,
        _scheduleRepository = scheduleRepository,
@@ -100,8 +95,7 @@ class App extends StatelessWidget {
        _nfcPassRepository = nfcPassRepository,
        _userRepository = userRepository,
        _lostFoundRepository = lostFoundRepository,
-       _user = user,
-       _splashVideoRepository = splashVideoRepository;
+       _user = user;
 
   final AnalyticsRepository _analyticsRepository;
   final ScheduleRepository _scheduleRepository;
@@ -113,7 +107,6 @@ class App extends StatelessWidget {
   final NfcPassRepository _nfcPassRepository;
   final LostFoundRepository _lostFoundRepository;
   final UserRepository _userRepository;
-  final SplashVideoRepository _splashVideoRepository;
   final User _user;
 
   @override
@@ -130,7 +123,6 @@ class App extends StatelessWidget {
         RepositoryProvider.value(value: _nfcPassRepository),
         RepositoryProvider.value(value: _lostFoundRepository),
         RepositoryProvider.value(value: _userRepository),
-        RepositoryProvider.value(value: _splashVideoRepository),
       ],
       child: MultiBlocProvider(
         providers: [
@@ -157,10 +149,6 @@ class App extends StatelessWidget {
                     ScheduleBloc(scheduleRepository: context.read<ScheduleRepository>())
                       ..add(const RefreshSelectedScheduleData()),
           ),
-          BlocProvider<StoriesBloc>(
-            create:
-                (context) => StoriesBloc(storiesRepository: context.read<StoriesRepositoryImpl>())..add(LoadStories()),
-          ),
           BlocProvider<NfcPassCubit>(create: (_) => NfcPassCubit(repository: _nfcPassRepository)),
           BlocProvider(
             create:
@@ -177,15 +165,6 @@ class App extends StatelessWidget {
           ),
           BlocProvider(
             create: (context) => LostFoundBloc(repository: _lostFoundRepository, userRepository: _userRepository),
-          ),
-          BlocProvider(
-            create:
-                (context) => SplashVideoBloc(splashVideoRepository: _splashVideoRepository)..add(
-                  const CheckSplashVideoStatus(
-                    videoUrl: 'YOUR_VIDEO_URL_HERE', // Replace with your actual video URL
-                    endDate: '2023-12-31', // Replace with your desired end date in ISO format
-                  ),
-                ),
           ),
         ],
         child: _AppView(),
