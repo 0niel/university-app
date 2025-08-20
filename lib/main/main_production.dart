@@ -13,7 +13,6 @@ import 'package:persistent_storage/persistent_storage.dart';
 import 'package:rtu_mirea_app/app/app.dart';
 import 'package:rtu_mirea_app/env/env.dart';
 import 'package:rtu_mirea_app/main/bootstrap/bootstrap.dart';
-import 'package:rtu_mirea_app/splash_video/api_client_adapter.dart';
 import 'package:schedule_exporter_repository/schedule_exporter_repository.dart';
 import 'package:schedule_repository/schedule_repository.dart' as schedule_repository;
 import 'package:secure_storage/secure_storage.dart';
@@ -23,7 +22,6 @@ import 'package:token_storage/token_storage.dart';
 import 'package:university_app_server_api/client.dart';
 import 'package:url_strategy/url_strategy.dart';
 import 'package:user_repository/user_repository.dart';
-import 'package:splash_video_repository/splash_video_repository.dart';
 
 void main() async {
   await bootstrap((sharedPreferences, analyticsRepository) async {
@@ -61,11 +59,6 @@ void main() async {
     );
     final secureStorage = SecureStorage(flutterSecureStorage);
 
-    // Initialize splash video repository
-    final splashVideoStorage = StorageBasedSplashVideoStorage(storage: persistentStorage);
-    final apiClientAdapter = ApiClientAdapter(apiClient);
-    final splashVideoRepository = ApiSplashVideoRepository(apiClient: apiClientAdapter, storage: splashVideoStorage);
-
     // Initialize repositories
     final userStorage = UserStorage(storage: persistentStorage);
     final authenticationClient = SupabaseAuthenticationClient(tokenStorage: tokenStorage, supabaseAuth: authClient);
@@ -96,7 +89,6 @@ void main() async {
       nfcPassRepository: nfcPassRepository,
       lostFoundRepository: lostFoundRepository,
       userRepository: userRepository,
-      splashVideoRepository: splashVideoRepository,
       user: await userRepository.user.first,
     );
   });

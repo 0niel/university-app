@@ -17,7 +17,8 @@ import 'package:rtu_mirea_app/common/utils/logger.dart';
 import 'package:rtu_mirea_app/env/env.dart';
 import 'package:rtu_mirea_app/main/bootstrap/bootstrap.dart';
 import 'package:schedule_exporter_repository/schedule_exporter_repository.dart';
-import 'package:schedule_repository/schedule_repository.dart' as schedule_repository;
+import 'package:schedule_repository/schedule_repository.dart'
+    as schedule_repository;
 import 'package:secure_storage/secure_storage.dart';
 import 'package:supabase_authentication_client/supabase_authentication_client.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -25,7 +26,6 @@ import 'package:token_storage/token_storage.dart';
 import 'package:university_app_server_api/client.dart';
 import 'package:url_strategy/url_strategy.dart';
 import 'package:user_repository/user_repository.dart';
-import 'package:splash_video_repository/splash_video_repository.dart';
 
 void main() async {
   await bootstrap((sharedPreferences, analyticsRepository) async {
@@ -43,7 +43,10 @@ void main() async {
     final deepLinkService = DeepLinkService(deepLinkClient: DeepLinkClient());
 
     // Initialize Supabase
-    final supabase = await Supabase.initialize(url: Env.supabaseUrl, anonKey: Env.supabaseAnonKey);
+    final supabase = await Supabase.initialize(
+      url: Env.supabaseUrl,
+      anonKey: Env.supabaseAnonKey,
+    );
     final authClient = supabase.client.auth;
 
     // Initialize API clients
@@ -53,44 +56,49 @@ void main() async {
         return session?.accessToken;
       },
     );
-    logger.d('We set localhost API client. Ensure that you are running the server locally.');
+    logger.d(
+      'We set localhost API client. Ensure that you are running the server locally.',
+    );
 
-    final discourseApiClient = DiscourseApiClient(baseUrl: 'https://mirea.ninja');
+    final discourseApiClient = DiscourseApiClient(
+      baseUrl: 'https://mirea.ninja',
+    );
 
     // Initialize storages
-    final persistentStorage = PersistentStorage(sharedPreferences: sharedPreferences);
+    final persistentStorage = PersistentStorage(
+      sharedPreferences: sharedPreferences,
+    );
     final FlutterSecureStorage flutterSecureStorage = FlutterSecureStorage(
       aOptions: AndroidOptions(encryptedSharedPreferences: true),
     );
     final secureStorage = SecureStorage(flutterSecureStorage);
 
-    // Initialize splash video repository
-    final splashVideoStorage = StorageBasedSplashVideoStorage(storage: persistentStorage);
-    final splashVideoRepository = SplashVideoRepositoryImpl(storage: splashVideoStorage);
-
-    // For API-based implementation (uncomment if you want to use API):
-    // final apiClientAdapter = ApiClientAdapter(apiClient);
-    // final splashVideoRepository = ApiSplashVideoRepository(
-    //   apiClient: apiClientAdapter,
-    //   storage: splashVideoStorage,
-    // );
-
     // Initialize repositories
     final userStorage = UserStorage(storage: persistentStorage);
-    final authenticationClient = SupabaseAuthenticationClient(tokenStorage: tokenStorage, supabaseAuth: authClient);
+    final authenticationClient = SupabaseAuthenticationClient(
+      tokenStorage: tokenStorage,
+      supabaseAuth: authClient,
+    );
     final userRepository = UserRepository(
       authenticationClient: authenticationClient,
       packageInfoClient: packageInfoClient,
       deepLinkService: deepLinkService,
       storage: userStorage,
     );
-    final scheduleRepository = schedule_repository.ScheduleRepository(apiClient: apiClient);
+    final scheduleRepository = schedule_repository.ScheduleRepository(
+      apiClient: apiClient,
+    );
     final scheduleExporterRepository = ScheduleExporterRepository();
     final communityRepository = CommunityRepository(apiClient: apiClient);
-    final discourseRepository = DiscourseRepository(apiClient: discourseApiClient);
+    final discourseRepository = DiscourseRepository(
+      apiClient: discourseApiClient,
+    );
     final newsRepository = NewsRepository(apiClient: apiClient);
     final articleStorage = ArticleStorage(storage: secureStorage);
-    final articleRepository = ArticleRepository(apiClient: apiClient, storage: articleStorage);
+    final articleRepository = ArticleRepository(
+      apiClient: apiClient,
+      storage: articleStorage,
+    );
     final nfcPassRepository = NfcPassRepository(storage: secureStorage);
     final lostFoundRepository = LostFoundRepository(apiClient: apiClient);
 
@@ -109,7 +117,6 @@ void main() async {
       nfcPassRepository: nfcPassRepository,
       lostFoundRepository: lostFoundRepository,
       userRepository: userRepository,
-      splashVideoRepository: splashVideoRepository,
       user: await userRepository.user.first,
     );
   });
