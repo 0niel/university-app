@@ -3,8 +3,7 @@ name: Shorebird Master Push Workflow
 env:
   SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
   MAPKIT_API_KEY: ${{ secrets.MAPKIT_API_KEY }}
-  STORYLY_ID: ${{ secrets.STORYLY_ID }}
-  SENTRY_DSN: ${{ secrets.STORYLY_ID }}
+  SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
 
 jobs:
   build_and_release:
