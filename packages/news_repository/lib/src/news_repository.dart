@@ -2,7 +2,7 @@ import 'package:equatable/equatable.dart';
 import 'package:university_app_server_api/client.dart';
 
 /// {@template news_failure}
-/// Base failure class for the news feature.
+/// Base failure class for the news repository failures.
 /// {@endtemplate}
 abstract class NewsFailure with EquatableMixin implements Exception {
   /// {@macro news_failure}
@@ -15,42 +15,96 @@ abstract class NewsFailure with EquatableMixin implements Exception {
   List<Object?> get props => [error];
 }
 
-class GetNewsFailure extends NewsFailure {
-  const GetNewsFailure(super.error);
+/// {@template get_feed_failure}
+/// Thrown when fetching feed fails.
+/// {@endtemplate}
+class GetFeedFailure extends NewsFailure {
+  /// {@macro get_feed_failure}
+  const GetFeedFailure(super.error);
 }
 
-class GetAdsFailure extends NewsFailure {
-  const GetAdsFailure(super.error);
+/// {@template get_categories_failure}
+/// Thrown when fetching categories fails.
+/// {@endtemplate}
+class GetCategoriesFailure extends NewsFailure {
+  /// {@macro get_categories_failure}
+  const GetCategoriesFailure(super.error);
 }
 
-/// {@template community_repository}
+/// {@template popular_search_failure}
+/// Thrown when fetching popular searches fails.
+/// {@endtemplate}
+class PopularSearchFailure extends NewsFailure {
+  /// {@macro popular_search_failure}
+  const PopularSearchFailure(super.error);
+}
+
+/// {@template relevant_search_failure}
+/// Thrown when fetching relevant searches fails.
+/// {@endtemplate}
+class RelevantSearchFailure extends NewsFailure {
+  /// {@macro relevant_search_failure}
+  const RelevantSearchFailure(super.error);
+}
+
+/// {@template news_repository}
 /// A repository that manages news data.
 /// {@endtemplate}
 class NewsRepository {
-  /// {@macro community_repository}
+  /// {@macro news_repository}
   const NewsRepository({
     required ApiClient apiClient,
   }) : _apiClient = apiClient;
 
   final ApiClient _apiClient;
 
-  Future<NewsFeedResponse> getNews({
+  /// Requests news feed metadata.
+  ///
+  /// Supported parameters:
+  /// * [categoryId] - the desired news category.
+  /// * [limit] - The number of results to return.
+  /// * [offset] - The (zero-based) offset of the first item
+  /// in the collection to return.
+  Future<FeedResponse> getFeed({
+    String? categoryId,
     int? limit,
     int? offset,
-    String? category,
   }) async {
     try {
-      return await _apiClient.getNews(limit: limit, offset: offset, category: category);
+      return await _apiClient.getFeed(
+        categoryId: categoryId,
+        limit: limit,
+        offset: offset,
+      );
     } catch (error, stackTrace) {
-      Error.throwWithStackTrace(GetNewsFailure(error), stackTrace);
+      Error.throwWithStackTrace(GetFeedFailure(error), stackTrace);
     }
   }
 
-  Future<NewsFeedResponse> getAds({int? limit, int? offset}) async {
+  /// Requests the available news categories.
+  Future<CategoriesResponse> getCategories() async {
     try {
-      return await _apiClient.getAds(limit: limit, offset: offset);
+      return await _apiClient.getCategories();
     } catch (error, stackTrace) {
-      Error.throwWithStackTrace(GetAdsFailure(error), stackTrace);
+      Error.throwWithStackTrace(GetCategoriesFailure(error), stackTrace);
+    }
+  }
+
+  /// Requests the popular searches.
+  Future<PopularSearchResponse> popularSearch() async {
+    try {
+      return await _apiClient.popularSearch();
+    } catch (error, stackTrace) {
+      Error.throwWithStackTrace(PopularSearchFailure(error), stackTrace);
+    }
+  }
+
+  /// Requests the searches relevant to [term].
+  Future<RelevantSearchResponse> relevantSearch({required String term}) async {
+    try {
+      return await _apiClient.relevantSearch(term: term);
+    } catch (error, stackTrace) {
+      Error.throwWithStackTrace(RelevantSearchFailure(error), stackTrace);
     }
   }
 }
