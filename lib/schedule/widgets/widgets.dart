@@ -1,5 +1,8 @@
 export 'calendar/table_calendar.dart';
 export 'lesson_card.dart';
+export 'lesson_reaction_picker.dart';
+export 'lesson_reaction_display.dart';
+export 'reaction_celebration.dart';
 export 'no_selected_schedule_message.dart';
 export 'events_page_view.dart';
 export 'schedule_drawer_button.dart';
@@ -26,3 +29,4 @@ export 'desktop_calendar_panel.dart';
 export 'datetime_field.dart';
 export 'lesson_type_selector.dart';
 export 'date_range_picker.dart';
+export 'custom_lesson_editor_widgets.dart';

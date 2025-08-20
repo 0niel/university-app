@@ -21,6 +21,7 @@ import 'package:table_calendar/table_calendar.dart';
 import 'package:university_app_server_api/client.dart';
 import 'package:expandable_page_view/expandable_page_view.dart';
 import 'package:rtu_mirea_app/navigation/view/scaffold_navigation_shell.dart';
+import 'package:rtu_mirea_app/l10n/l10n.dart';
 
 class SchedulePage extends StatefulWidget {
   const SchedulePage({super.key});
@@ -114,7 +115,7 @@ class _SchedulePageState extends State<SchedulePage> {
     } else if (scheduleState is SelectedClassroomSchedule) {
       return scheduleState.classroom.name;
     } else {
-      return 'Расписание';
+      return context.l10n.schedule;
     }
   }
 
@@ -144,9 +145,7 @@ class _SchedulePageState extends State<SchedulePage> {
         return BlocConsumer<ScheduleBloc, ScheduleState>(
           listener: (context, state) {
             if (state.status == ScheduleStatus.failure) {
-              ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(const SnackBar(content: Text('Ошибка при загрузке расписания')));
+              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(context.l10n.errorLoadingSchedule)));
             }
           },
           buildWhen:
@@ -182,7 +181,7 @@ class _SchedulePageState extends State<SchedulePage> {
                   // Add custom schedules button
                   IconButton(
                     icon: const Icon(Icons.add),
-                    tooltip: 'Мои расписания',
+                    tooltip: context.l10n.mySchedules,
                     onPressed: () => context.go('/schedule/custom'),
                   ),
                   ComparisonModeButton(onPressed: () => _bloc.add(const ToggleComparisonMode())),
@@ -227,7 +226,7 @@ class _SchedulePageState extends State<SchedulePage> {
                         padding: const EdgeInsets.only(bottom: bottomNavigationBarHeight + AppSpacing.lg),
                         child: FloatingActionButton(
                           onPressed: _openComparisonManager,
-                          tooltip: 'Управление сравнениями',
+                          tooltip: context.l10n.manageComparisons,
                           child: const Icon(Icons.compare),
                         ),
                       )
@@ -351,7 +350,7 @@ class _SchedulePageState extends State<SchedulePage> {
           state.isComparisonModeEnabled
               ? FloatingActionButton(
                 onPressed: _openComparisonManager,
-                tooltip: 'Управление сравнениями',
+                tooltip: context.l10n.manageComparisons,
                 child: const Icon(Icons.compare),
               )
               : null,
@@ -385,11 +384,11 @@ class _SchedulePageState extends State<SchedulePage> {
 
   String _getScheduleTypeLabel(SelectedSchedule schedule) {
     if (schedule is SelectedGroupSchedule) {
-      return 'Группа';
+      return context.l10n.group;
     } else if (schedule is SelectedTeacherSchedule) {
-      return 'Преподаватель';
+      return context.l10n.teacher;
     } else if (schedule is SelectedClassroomSchedule) {
-      return 'Аудитория';
+      return context.l10n.classroom;
     }
     return '';
   }
@@ -398,8 +397,8 @@ class _SchedulePageState extends State<SchedulePage> {
     BottomModalSheet.show(
       context,
       child: const ComparisonManager(),
-      title: 'Сравнение расписаний',
-      description: 'Выберите до 4-х расписаний, чтобы сравнить их по дням',
+      title: context.l10n.compareSchedules,
+      description: context.l10n.selectUpTo4Schedules,
     );
   }
 
@@ -436,11 +435,10 @@ class _ListModeView extends StatelessWidget {
 
     if (!hasUpcomingLessons) {
       return FailureScreen(
-        title: 'Нет предстоящих занятий',
-        description:
-            'В ближайшее время занятий не запланировано. Переключитесь на календарь, чтобы посмотреть расписание за другие дни.',
+        title: context.l10n.noUpcomingLessons,
+        description: context.l10n.noUpcomingLessonsDescription,
         icon: Icons.event_busy,
-        buttonText: 'Переключиться на календарь',
+        buttonText: context.l10n.switchToCalendar,
         buttonIcon: Icons.calendar_month,
         onButtonPressed: () {
           context.read<ScheduleBloc>().add(const ToggleListMode());

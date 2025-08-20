@@ -4,10 +4,15 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:app_ui/app_ui.dart';
 import 'package:university_app_server_api/client.dart';
+import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:rtu_mirea_app/schedule/widgets/widgets.dart';
 
 class ScheduleAnalytics extends StatefulWidget {
-  const ScheduleAnalytics({super.key, required this.schedule, required this.selectedDay});
+  const ScheduleAnalytics({
+    super.key,
+    required this.schedule,
+    required this.selectedDay,
+  });
 
   final List<SchedulePart> schedule;
   final DateTime selectedDay;
@@ -16,7 +21,8 @@ class ScheduleAnalytics extends StatefulWidget {
   State<ScheduleAnalytics> createState() => _ScheduleAnalyticsState();
 }
 
-class _ScheduleAnalyticsState extends State<ScheduleAnalytics> with SingleTickerProviderStateMixin {
+class _ScheduleAnalyticsState extends State<ScheduleAnalytics>
+    with SingleTickerProviderStateMixin {
   int _selectedTab = 0;
   late TabController _tabController;
 
@@ -42,7 +48,8 @@ class _ScheduleAnalyticsState extends State<ScheduleAnalytics> with SingleTicker
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).extension<AppColors>()!;
-    final lessonParts = widget.schedule.whereType<LessonSchedulePart>().toList();
+    final lessonParts =
+        widget.schedule.whereType<LessonSchedulePart>().toList();
 
     if (lessonParts.isEmpty) {
       return _buildEmptyAnalytics(context);
@@ -53,11 +60,18 @@ class _ScheduleAnalyticsState extends State<ScheduleAnalytics> with SingleTicker
       children: [
         Row(
           children: [
-            Icon(HugeIcons.strokeRoundedChartBarLine, size: 24, color: colors.colorful04),
+            Icon(
+              HugeIcons.strokeRoundedChartBarLine,
+              size: 24,
+              color: colors.colorful04,
+            ),
             const SizedBox(width: 12),
             Text(
-              'Аналитика расписания',
-              style: AppTextStyle.title.copyWith(fontWeight: FontWeight.bold, color: colors.active),
+              context.l10n.scheduleAnalyticsTitle,
+              style: AppTextStyle.title.copyWith(
+                fontWeight: FontWeight.bold,
+                color: colors.active,
+              ),
             ),
             const Spacer(),
             _buildExportButton(context),
@@ -65,7 +79,7 @@ class _ScheduleAnalyticsState extends State<ScheduleAnalytics> with SingleTicker
         ),
         const SizedBox(height: 6),
         Text(
-          'Статистика и анализ вашего учебного расписания',
+          context.l10n.scheduleAnalyticsDescription,
           style: AppTextStyle.body.copyWith(color: colors.deactive),
         ),
         const SizedBox(height: 24),
@@ -79,7 +93,10 @@ class _ScheduleAnalyticsState extends State<ScheduleAnalytics> with SingleTicker
             labelColor: Colors.white,
             unselectedLabelColor: colors.deactive,
             dividerColor: Colors.transparent,
-            indicator: BoxDecoration(color: colors.primary, borderRadius: BorderRadius.circular(10)),
+            indicator: BoxDecoration(
+              color: colors.primary,
+              borderRadius: BorderRadius.circular(10),
+            ),
             indicatorSize: TabBarIndicatorSize.tab,
             labelStyle: AppTextStyle.body.copyWith(fontWeight: FontWeight.w600),
             unselectedLabelStyle: AppTextStyle.body,
@@ -92,7 +109,7 @@ class _ScheduleAnalyticsState extends State<ScheduleAnalytics> with SingleTicker
                   children: [
                     Icon(HugeIcons.strokeRoundedChartColumn, size: 16),
                     const SizedBox(width: 6),
-                    const Text('Загрузка по дням'),
+                    Text(context.l10n.loadByDaysChart),
                   ],
                 ),
               ),
@@ -103,7 +120,7 @@ class _ScheduleAnalyticsState extends State<ScheduleAnalytics> with SingleTicker
                   children: [
                     Icon(HugeIcons.strokeRoundedChartAverage, size: 16),
                     const SizedBox(width: 6),
-                    const Text('Типы занятий'),
+                    Text(context.l10n.lessonTypesChart),
                   ],
                 ),
               ),
@@ -114,7 +131,7 @@ class _ScheduleAnalyticsState extends State<ScheduleAnalytics> with SingleTicker
                   children: [
                     Icon(HugeIcons.strokeRoundedTeacher, size: 16),
                     const SizedBox(width: 6),
-                    const Text('Преподаватели'),
+                    Text(context.l10n.teachersChart),
                   ],
                 ),
               ),
@@ -125,7 +142,7 @@ class _ScheduleAnalyticsState extends State<ScheduleAnalytics> with SingleTicker
                   children: [
                     Icon(HugeIcons.strokeRoundedUniversity, size: 16),
                     const SizedBox(width: 6),
-                    const Text('Аудитории'),
+                    Text(context.l10n.classroomsChart),
                   ],
                 ),
               ),
@@ -161,19 +178,31 @@ class _ScheduleAnalyticsState extends State<ScheduleAnalytics> with SingleTicker
           Container(
             width: 80,
             height: 80,
-            decoration: BoxDecoration(color: colors.background03.withOpacity(0.2), shape: BoxShape.circle),
-            child: Center(child: Icon(HugeIcons.strokeRoundedChart, size: 36, color: colors.deactive)),
+            decoration: BoxDecoration(
+              color: colors.background03.withOpacity(0.2),
+              shape: BoxShape.circle,
+            ),
+            child: Center(
+              child: Icon(
+                HugeIcons.strokeRoundedChart,
+                size: 36,
+                color: colors.deactive,
+              ),
+            ),
           ),
           const SizedBox(height: 20),
           Text(
-            'Нет данных для аналитики',
-            style: AppTextStyle.titleM.copyWith(fontWeight: FontWeight.w600, color: colors.active),
+            context.l10n.noDataForAnalytics,
+            style: AppTextStyle.titleM.copyWith(
+              fontWeight: FontWeight.w600,
+              color: colors.active,
+            ),
           ),
           const SizedBox(height: 12),
           SizedBox(
             width: 300,
             child: Text(
-              'Выберите другое расписание или проверьте наличие занятий',
+              context.l10n.selectAnotherSchedule,
               style: AppTextStyle.body.copyWith(color: colors.deactive),
               textAlign: TextAlign.center,
             ),
@@ -187,52 +216,51 @@ class _ScheduleAnalyticsState extends State<ScheduleAnalytics> with SingleTicker
     final colors = Theme.of(context).extension<AppColors>()!;
 
     return Tooltip(
-      message: 'Экспорт данных',
+      message: context.l10n.exportData,
       child: Material(
         color: Colors.transparent,
         borderRadius: BorderRadius.circular(8),
         child: InkWell(
           borderRadius: BorderRadius.circular(8),
           onTap: () {
-            showModalBottomSheet(
-              context: context,
-              builder:
-                  (context) => Container(
-                    padding: const EdgeInsets.all(24),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          'Экспорт данных',
-                          style: AppTextStyle.titleM.copyWith(fontWeight: FontWeight.bold, color: colors.active),
-                        ),
-                        const SizedBox(height: 24),
-                        _buildExportOption(
-                          context,
-                          title: 'PDF документ',
-                          subtitle: 'Полный отчет со всеми графиками',
-                          icon: HugeIcons.strokeRoundedDocumentAttachment,
-                          onTap: () => Navigator.pop(context),
-                        ),
-                        const SizedBox(height: 12),
-                        _buildExportOption(
-                          context,
-                          title: 'Excel таблица',
-                          subtitle: 'Данные в табличном формате',
-                          icon: HugeIcons.strokeRoundedTable,
-                          onTap: () => Navigator.pop(context),
-                        ),
-                        const SizedBox(height: 12),
-                        _buildExportOption(
-                          context,
-                          title: 'Поделиться изображением',
-                          subtitle: 'Текущим графиком или всеми',
-                          icon: HugeIcons.strokeRoundedShare01,
-                          onTap: () => Navigator.pop(context),
-                        ),
-                      ],
+            BottomModalSheet.show(
+              context,
+              title: context.l10n.exportData,
+              isExpandable: true,
+              scrollable: true,
+              initialFraction: 0.5,
+              child: Container(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const SizedBox(height: 8),
+                    _buildExportOption(
+                      context,
+                      title: 'PDF',
+                      subtitle: context.l10n.fullReportWithAllCharts,
+                      icon: HugeIcons.strokeRoundedDocumentAttachment,
+                      onTap: () => Navigator.pop(context),
                     ),
-                  ),
+                    const SizedBox(height: 12),
+                    _buildExportOption(
+                      context,
+                      title: 'Excel',
+                      subtitle: context.l10n.dataInTableFormatExport,
+                      icon: HugeIcons.strokeRoundedTable,
+                      onTap: () => Navigator.pop(context),
+                    ),
+                    const SizedBox(height: 12),
+                    _buildExportOption(
+                      context,
+                      title: context.l10n.shareImageExport,
+                      subtitle: context.l10n.currentOrAllChartsExport,
+                      icon: HugeIcons.strokeRoundedShare01,
+                      onTap: () => Navigator.pop(context),
+                    ),
+                  ],
+                ),
+              ),
             );
           },
           child: Container(
@@ -243,11 +271,18 @@ class _ScheduleAnalyticsState extends State<ScheduleAnalytics> with SingleTicker
             ),
             child: Row(
               children: [
-                Icon(HugeIcons.strokeRoundedDownload01, size: 16, color: colors.deactive),
+                Icon(
+                  HugeIcons.strokeRoundedDownload01,
+                  size: 16,
+                  color: colors.deactive,
+                ),
                 const SizedBox(width: 6),
                 Text(
-                  'Экспорт',
-                  style: AppTextStyle.captionL.copyWith(color: colors.deactive, fontWeight: FontWeight.w500),
+                  context.l10n.export,
+                  style: AppTextStyle.captionL.copyWith(
+                    color: colors.deactive,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
               ],
             ),
@@ -282,20 +317,40 @@ class _ScheduleAnalyticsState extends State<ScheduleAnalytics> with SingleTicker
               Container(
                 width: 40,
                 height: 40,
-                decoration: BoxDecoration(color: colors.background03.withOpacity(0.3), shape: BoxShape.circle),
-                child: Center(child: Icon(icon, size: 20, color: colors.active)),
+                decoration: BoxDecoration(
+                  color: colors.background03.withOpacity(0.3),
+                  shape: BoxShape.circle,
+                ),
+                child: Center(
+                  child: Icon(icon, size: 20, color: colors.active),
+                ),
               ),
               const SizedBox(width: 16),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(title, style: AppTextStyle.body.copyWith(color: colors.active, fontWeight: FontWeight.w600)),
-                    Text(subtitle, style: AppTextStyle.captionL.copyWith(color: colors.deactive)),
+                    Text(
+                      title,
+                      style: AppTextStyle.body.copyWith(
+                        color: colors.active,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    Text(
+                      subtitle,
+                      style: AppTextStyle.captionL.copyWith(
+                        color: colors.deactive,
+                      ),
+                    ),
                   ],
                 ),
               ),
-              Icon(Icons.arrow_forward_ios_rounded, size: 16, color: colors.deactive),
+              Icon(
+                Icons.arrow_forward_ios_rounded,
+                size: 16,
+                color: colors.deactive,
+              ),
             ],
           ),
         ),
@@ -303,7 +358,10 @@ class _ScheduleAnalyticsState extends State<ScheduleAnalytics> with SingleTicker
     );
   }
 
-  Widget _buildWeeklyLoadChart(List<LessonSchedulePart> lessons, AppColors colors) {
+  Widget _buildWeeklyLoadChart(
+    List<LessonSchedulePart> lessons,
+    AppColors colors,
+  ) {
     final Map<int, int> lessonsByDay = {};
     for (var lesson in lessons) {
       final uniqueWeekdays = lesson.dates.map((d) => d.weekday).toSet();
@@ -315,7 +373,10 @@ class _ScheduleAnalyticsState extends State<ScheduleAnalytics> with SingleTicker
     // Use fixed denominator for the full week (7 days)
     final int daysCount = 7;
 
-    final int totalLessons = lessonsByDay.values.fold(0, (sum, count) => sum + count);
+    final int totalLessons = lessonsByDay.values.fold(
+      0,
+      (sum, count) => sum + count,
+    );
 
     final weekdayNames = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
     final barGroups = List.generate(7, (index) {
@@ -336,7 +397,10 @@ class _ScheduleAnalyticsState extends State<ScheduleAnalytics> with SingleTicker
                     ? colors.colorful04.withOpacity(0.7)
                     : colors.colorful01.withOpacity(0.7),
             width: 20,
-            borderRadius: const BorderRadius.only(topLeft: Radius.circular(6), topRight: Radius.circular(6)),
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(6),
+              topRight: Radius.circular(6),
+            ),
           ),
         ],
       );
@@ -369,8 +433,11 @@ class _ScheduleAnalyticsState extends State<ScheduleAnalytics> with SingleTicker
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Распределение пар по дням недели',
-          style: AppTextStyle.titleS.copyWith(color: colors.active, fontWeight: FontWeight.w600),
+          context.l10n.loadByDays,
+          style: AppTextStyle.titleS.copyWith(
+            color: colors.active,
+            fontWeight: FontWeight.w600,
+          ),
         ),
 
         Padding(
@@ -379,10 +446,13 @@ class _ScheduleAnalyticsState extends State<ScheduleAnalytics> with SingleTicker
             text: TextSpan(
               style: AppTextStyle.captionL.copyWith(color: colors.deactive),
               children: [
-                const TextSpan(text: 'День с наибольшей нагрузкой: '),
+                TextSpan(text: '${context.l10n.busiestDay}: '),
                 TextSpan(
                   text: weekdayFullNames[maxDay],
-                  style: TextStyle(fontWeight: FontWeight.bold, color: colors.primary),
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: colors.primary,
+                  ),
                 ),
               ],
             ),
@@ -397,8 +467,12 @@ class _ScheduleAnalyticsState extends State<ScheduleAnalytics> with SingleTicker
             BarChartData(
               gridData: FlGridData(show: false),
               titlesData: FlTitlesData(
-                topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                topTitles: AxisTitles(
+                  sideTitles: SideTitles(showTitles: false),
+                ),
+                rightTitles: AxisTitles(
+                  sideTitles: SideTitles(showTitles: false),
+                ),
                 bottomTitles: AxisTitles(
                   sideTitles: SideTitles(
                     showTitles: true,
@@ -407,7 +481,10 @@ class _ScheduleAnalyticsState extends State<ScheduleAnalytics> with SingleTicker
                         padding: const EdgeInsets.only(top: 10),
                         child: Text(
                           weekdayNames[value.toInt()],
-                          style: AppTextStyle.captionL.copyWith(color: colors.deactive, fontWeight: FontWeight.w600),
+                          style: AppTextStyle.captionL.copyWith(
+                            color: colors.deactive,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       );
                     },
@@ -427,39 +504,47 @@ class _ScheduleAnalyticsState extends State<ScheduleAnalytics> with SingleTicker
           builder: (context, constraints) {
             // Determine number of columns based on available width
             final isWideScreen = constraints.maxWidth > 700;
-            final crossAxisCount = isWideScreen ? 4 : 2;
 
             return Wrap(
               spacing: 16,
               runSpacing: 16,
               children: [
                 SizedBox(
-                  width: isWideScreen ? (constraints.maxWidth - 48) / 4 : (constraints.maxWidth - 16) / 2,
+                  width:
+                      isWideScreen
+                          ? (constraints.maxWidth - 48) / 4
+                          : (constraints.maxWidth - 16) / 2,
                   child: _buildEnhancedStatCard(
                     context,
-                    title: 'Общее количество пар',
+                    title: context.l10n.totalClasses,
                     value: '${lessons.length}',
                     icon: HugeIcons.strokeRoundedClock01,
                     color: colors.colorful01,
-                    subtitle: 'За весь период',
+                    subtitle: context.l10n.forEntirePeriod,
                   ),
                 ),
                 SizedBox(
-                  width: isWideScreen ? (constraints.maxWidth - 48) / 4 : (constraints.maxWidth - 16) / 2,
+                  width:
+                      isWideScreen
+                          ? (constraints.maxWidth - 48) / 4
+                          : (constraints.maxWidth - 16) / 2,
                   child: _buildEnhancedStatCard(
                     context,
-                    title: 'Среднее в день',
+                    title: context.l10n.averagePerDay,
                     value: (totalLessons / daysCount).toStringAsFixed(1),
                     icon: HugeIcons.strokeRoundedChart,
                     color: colors.colorful02,
-                    subtitle: 'Учебная нагрузка',
+                    subtitle: context.l10n.academicLoad,
                   ),
                 ),
                 SizedBox(
-                  width: isWideScreen ? (constraints.maxWidth - 48) / 4 : (constraints.maxWidth - 16) / 2,
+                  width:
+                      isWideScreen
+                          ? (constraints.maxWidth - 48) / 4
+                          : (constraints.maxWidth - 16) / 2,
                   child: _buildEnhancedStatCard(
                     context,
-                    title: 'Максимум в день',
+                    title: context.l10n.maximumPerDay,
                     value: '${lessonsByDay.values.maxOrNull ?? 0}',
                     icon: HugeIcons.strokeRoundedChartBubble01,
                     color: colors.colorful03,
@@ -474,11 +559,15 @@ class _ScheduleAnalyticsState extends State<ScheduleAnalytics> with SingleTicker
     );
   }
 
-  Widget _buildLessonTypeDistribution(List<LessonSchedulePart> lessons, AppColors colors) {
+  Widget _buildLessonTypeDistribution(
+    List<LessonSchedulePart> lessons,
+    AppColors colors,
+  ) {
     // Count lessons by type
     final Map<LessonType, int> countByType = {};
     for (var lesson in lessons) {
-      countByType[lesson.lessonType] = (countByType[lesson.lessonType] ?? 0) + 1;
+      countByType[lesson.lessonType] =
+          (countByType[lesson.lessonType] ?? 0) + 1;
     }
 
     // Prepare data for pie chart
@@ -490,7 +579,10 @@ class _ScheduleAnalyticsState extends State<ScheduleAnalytics> with SingleTicker
           title: '${(count / lessons.length * 100).round()}%',
           radius: 100,
           color: LessonCard.getColorByType(type),
-          titleStyle: AppTextStyle.body.copyWith(fontWeight: FontWeight.bold, color: Colors.white),
+          titleStyle: AppTextStyle.body.copyWith(
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
           badgeWidget: sections.length < 3 ? null : const Text(''),
         ),
       );
@@ -500,15 +592,23 @@ class _ScheduleAnalyticsState extends State<ScheduleAnalytics> with SingleTicker
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Распределение занятий по типам',
-          style: AppTextStyle.titleS.copyWith(color: colors.active, fontWeight: FontWeight.w600),
+          context.l10n.lessonTypes,
+          style: AppTextStyle.titleS.copyWith(
+            color: colors.active,
+            fontWeight: FontWeight.w600,
+          ),
         ),
         const SizedBox(height: 24),
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
-              child: SizedBox(height: 250, child: PieChart(PieChartData(sections: sections, centerSpaceRadius: 40))),
+              child: SizedBox(
+                height: 250,
+                child: PieChart(
+                  PieChartData(sections: sections, centerSpaceRadius: 40),
+                ),
+              ),
             ),
             Expanded(
               child: Padding(
@@ -535,7 +635,10 @@ class _ScheduleAnalyticsState extends State<ScheduleAnalytics> with SingleTicker
     );
   }
 
-  Widget _buildTeacherDistribution(List<LessonSchedulePart> lessons, AppColors colors) {
+  Widget _buildTeacherDistribution(
+    List<LessonSchedulePart> lessons,
+    AppColors colors,
+  ) {
     // Count lessons by teacher
     final Map<String, int> countByTeacher = {};
     for (var lesson in lessons) {
@@ -545,7 +648,9 @@ class _ScheduleAnalyticsState extends State<ScheduleAnalytics> with SingleTicker
     }
 
     // Sort by count
-    final sortedTeachers = countByTeacher.entries.toList()..sort((a, b) => b.value.compareTo(a.value));
+    final sortedTeachers =
+        countByTeacher.entries.toList()
+          ..sort((a, b) => b.value.compareTo(a.value));
 
     // Take top 10
     final topTeachers = sortedTeachers.take(10).toList();
@@ -554,8 +659,11 @@ class _ScheduleAnalyticsState extends State<ScheduleAnalytics> with SingleTicker
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Распределение занятий по преподавателям',
-          style: AppTextStyle.titleS.copyWith(color: colors.active, fontWeight: FontWeight.w600),
+          context.l10n.teachers,
+          style: AppTextStyle.titleS.copyWith(
+            color: colors.active,
+            fontWeight: FontWeight.w600,
+          ),
         ),
         const SizedBox(height: 16),
         ...topTeachers.map((entry) {
@@ -571,18 +679,27 @@ class _ScheduleAnalyticsState extends State<ScheduleAnalytics> with SingleTicker
     );
   }
 
-  Widget _buildClassroomDistribution(List<LessonSchedulePart> lessons, AppColors colors) {
+  Widget _buildClassroomDistribution(
+    List<LessonSchedulePart> lessons,
+    AppColors colors,
+  ) {
     // Count lessons by classroom
     final Map<String, int> countByClassroom = {};
     for (var lesson in lessons) {
       for (var classroom in lesson.classrooms) {
-        final key = classroom.name + (classroom.campus != null ? ' (${classroom.campus?.shortName ?? ""})' : '');
+        final key =
+            classroom.name +
+            (classroom.campus != null
+                ? ' (${classroom.campus?.shortName ?? ""})'
+                : '');
         countByClassroom[key] = (countByClassroom[key] ?? 0) + 1;
       }
     }
 
     // Sort by count
-    final sortedClassrooms = countByClassroom.entries.toList()..sort((a, b) => b.value.compareTo(a.value));
+    final sortedClassrooms =
+        countByClassroom.entries.toList()
+          ..sort((a, b) => b.value.compareTo(a.value));
 
     // Take top 10
     final topClassrooms = sortedClassrooms.take(10).toList();
@@ -591,8 +708,11 @@ class _ScheduleAnalyticsState extends State<ScheduleAnalytics> with SingleTicker
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Распределение занятий по аудиториям',
-          style: AppTextStyle.titleS.copyWith(color: colors.active, fontWeight: FontWeight.w600),
+          context.l10n.classrooms,
+          style: AppTextStyle.titleS.copyWith(
+            color: colors.active,
+            fontWeight: FontWeight.w600,
+          ),
         ),
         const SizedBox(height: 16),
         ...topClassrooms.map((entry) {
@@ -622,14 +742,27 @@ class _ScheduleAnalyticsState extends State<ScheduleAnalytics> with SingleTicker
       padding: const EdgeInsets.only(bottom: 12.0),
       child: Row(
         children: [
-          Container(width: 16, height: 16, decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
+          Container(
+            width: 16,
+            height: 16,
+            decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+          ),
           const SizedBox(width: 8),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: AppTextStyle.body.copyWith(color: colors.active, fontWeight: FontWeight.w500)),
-                Text('$count (${percent.round()}%)', style: AppTextStyle.captionL.copyWith(color: colors.deactive)),
+                Text(
+                  title,
+                  style: AppTextStyle.body.copyWith(
+                    color: colors.active,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                Text(
+                  '$count (${percent.round()}%)',
+                  style: AppTextStyle.captionL.copyWith(color: colors.deactive),
+                ),
               ],
             ),
           ),
@@ -655,13 +788,22 @@ class _ScheduleAnalyticsState extends State<ScheduleAnalytics> with SingleTicker
           Container(
             width: 36,
             height: 36,
-            decoration: BoxDecoration(color: color.withOpacity(0.1), shape: BoxShape.circle),
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
             child: Center(child: Icon(icon, size: 18, color: color)),
           ),
           const SizedBox(width: 12),
           Expanded(
             flex: 3,
-            child: Text(name, style: AppTextStyle.body.copyWith(color: colors.active, fontWeight: FontWeight.w500)),
+            child: Text(
+              name,
+              style: AppTextStyle.body.copyWith(
+                color: colors.active,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
           ),
           Expanded(
             flex: 2,
@@ -675,7 +817,10 @@ class _ScheduleAnalyticsState extends State<ScheduleAnalytics> with SingleTicker
           const SizedBox(width: 12),
           Text(
             '$count (${percent.round()}%)',
-            style: AppTextStyle.captionL.copyWith(color: colors.deactive, fontWeight: FontWeight.w600),
+            style: AppTextStyle.captionL.copyWith(
+              color: colors.deactive,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ],
       ),
@@ -697,7 +842,13 @@ class _ScheduleAnalyticsState extends State<ScheduleAnalytics> with SingleTicker
         color: colors.background02,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: colors.background03.withOpacity(0.5)),
-        boxShadow: [BoxShadow(color: colors.background03.withOpacity(0.3), blurRadius: 6, offset: const Offset(0, 2))],
+        boxShadow: [
+          BoxShadow(
+            color: colors.background03.withOpacity(0.3),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -709,24 +860,42 @@ class _ScheduleAnalyticsState extends State<ScheduleAnalytics> with SingleTicker
               Container(
                 width: 40,
                 height: 40,
-                decoration: BoxDecoration(color: color.withOpacity(0.1), shape: BoxShape.circle),
+                decoration: BoxDecoration(
+                  color: color.withOpacity(0.1),
+                  shape: BoxShape.circle,
+                ),
                 child: Icon(icon, color: color, size: 20),
               ),
               const Spacer(),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(color: color.withOpacity(0.1), borderRadius: BorderRadius.circular(16)),
+                decoration: BoxDecoration(
+                  color: color.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(16),
+                ),
                 child: Text(
                   subtitle ?? '',
-                  style: AppTextStyle.captionS.copyWith(color: color, fontWeight: FontWeight.w500),
+                  style: AppTextStyle.captionS.copyWith(
+                    color: color,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
               ),
             ],
           ),
           const SizedBox(height: 16),
-          Text(value, style: AppTextStyle.title.copyWith(fontWeight: FontWeight.bold, color: colors.active)),
+          Text(
+            value,
+            style: AppTextStyle.title.copyWith(
+              fontWeight: FontWeight.bold,
+              color: colors.active,
+            ),
+          ),
           const SizedBox(height: 4),
-          Text(title, style: AppTextStyle.captionL.copyWith(color: colors.deactive)),
+          Text(
+            title,
+            style: AppTextStyle.captionL.copyWith(color: colors.deactive),
+          ),
         ],
       ),
     );

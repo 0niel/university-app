@@ -75,6 +75,7 @@ class LessonCard extends StatefulWidget {
 class _LessonCardState extends State<LessonCard> {
   Timer? _timer;
   double? _progress;
+  final GlobalKey _cardKey = GlobalKey();
 
   double? _computeProgress() {
     final now = DateTime.now();
@@ -125,6 +126,89 @@ class _LessonCardState extends State<LessonCard> {
   void dispose() {
     _timer?.cancel();
     super.dispose();
+  }
+
+  void _showReactionPicker(BuildContext context, LessonReactionSummary? currentSummary) {
+    // Capture the valid context from the LessonCard.
+    final cardContext = context;
+    final overlayState = Overlay.of(cardContext);
+    late OverlayEntry overlayEntry;
+
+    overlayEntry = OverlayEntry(
+      // The context from this builder is temporary and will be deactivated.
+      builder:
+          (overlayBuilderContext) => LessonReactionPicker(
+            currentReaction: currentSummary?.userReaction,
+            onReactionSelected: (reactionType) {
+              final lessonDate = widget.lesson.dates.isNotEmpty ? widget.lesson.dates.first : DateTime.now();
+
+              if (currentSummary?.userReaction == reactionType) {
+                // Use the captured cardContext to safely access the BLoC.
+                cardContext.read<ScheduleBloc>().add(
+                  RemoveLessonReaction(
+                    subjectName: widget.lesson.subject,
+                    lessonDate: lessonDate,
+                    lessonBells: widget.lesson.lessonBells,
+                  ),
+                );
+                // Use the captured cardContext to show the toast.
+                ReactionToast.show(cardContext, message: 'Реакция удалена', reactionType: reactionType);
+              } else {
+                // Add or update reaction
+                cardContext.read<ScheduleBloc>().add(
+                  AddLessonReaction(
+                    subjectName: widget.lesson.subject,
+                    lessonDate: lessonDate,
+                    lessonBells: widget.lesson.lessonBells,
+                    reactionType: reactionType,
+                  ),
+                );
+
+                // Show celebration animation
+                // Используем задержку для корректного получения позиции
+                Future.delayed(const Duration(milliseconds: 100), () {
+                  if (!mounted) return;
+
+                  final RenderBox? renderBox = _cardKey.currentContext?.findRenderObject() as RenderBox?;
+                  if (renderBox != null && renderBox.hasSize) {
+                    final position = renderBox.localToGlobal(Offset.zero);
+                    final centerPosition = Offset(
+                      position.dx + renderBox.size.width / 2,
+                      position.dy + renderBox.size.height / 2,
+                    );
+
+                    ReactionCelebrationOverlay.show(cardContext, reactionType: reactionType, position: centerPosition);
+                  } else {
+                    // Если не можем получить позицию карточки, показываем по центру экрана
+                    final screenSize = MediaQuery.of(cardContext).size;
+                    ReactionCelebrationOverlay.show(
+                      cardContext,
+                      reactionType: reactionType,
+                      position: Offset(screenSize.width / 2, screenSize.height / 2),
+                    );
+                  }
+                });
+
+                // Show success toast
+                ReactionToast.show(cardContext, message: 'Реакция добавлена!', reactionType: reactionType);
+              }
+
+              overlayEntry.remove();
+            },
+            onDismiss: () {
+              overlayEntry.remove();
+            },
+          ),
+    );
+
+    overlayState.insert(overlayEntry);
+
+    // Auto-dismiss after 10 seconds
+    Future.delayed(const Duration(seconds: 10), () {
+      if (overlayEntry.mounted) {
+        overlayEntry.remove();
+      }
+    });
   }
 
   String _getClassroomNames(List<Classroom> classrooms) {
@@ -179,8 +263,17 @@ class _LessonCardState extends State<LessonCard> {
     final lessonColor = LessonCard.getColorByType(widget.lesson.lessonType);
     final isActive = _progress != null;
 
+    // Find reaction summary for this lesson
+    final reactionSummary = state.reactionSummaries.firstWhereOrNull(
+      (summary) =>
+          summary.subjectName == widget.lesson.subject &&
+          summary.lessonBells == widget.lesson.lessonBells &&
+          widget.lesson.dates.any((date) => summary.lessonDate.isAtSameMomentAs(date)),
+    );
+
     return RepaintBoundary(
       child: Card(
+        key: _cardKey,
         margin: const EdgeInsets.all(0),
         color: Theme.of(context).extension<AppColors>()!.surface,
         surfaceTintColor: Colors.transparent,
@@ -195,6 +288,7 @@ class _LessonCardState extends State<LessonCard> {
               child: PlatformInkWell(
                 borderRadius: BorderRadius.circular(14),
                 onTap: () => widget.onTap?.call(widget.lesson),
+                onLongPress: () => _showReactionPicker(context, reactionSummary),
                 child: Stack(
                   children: [
                     if (_progress != null)
@@ -215,6 +309,9 @@ class _LessonCardState extends State<LessonCard> {
                           },
                         ),
                       ),
+                    // Display reactions in the top-right corner
+                    if (reactionSummary != null && reactionSummary.totalReactions > 0)
+                      LessonReactionFloatingDisplay(reactionSummary: reactionSummary),
                     Container(
                       constraints: const BoxConstraints(minHeight: 75),
                       padding: EdgeInsets.only(

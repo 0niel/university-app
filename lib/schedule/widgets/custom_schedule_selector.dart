@@ -6,6 +6,7 @@ import 'package:rtu_mirea_app/schedule/bloc/schedule_bloc.dart';
 import 'package:rtu_mirea_app/schedule/models/custom_schedule.dart';
 import 'package:rtu_mirea_app/schedule/widgets/lesson_card.dart';
 import 'package:university_app_server_api/client.dart';
+import 'package:rtu_mirea_app/l10n/l10n.dart';
 
 class CustomScheduleSelector extends StatefulWidget {
   final LessonSchedulePart lesson;
@@ -52,7 +53,7 @@ class _CustomScheduleSelectorState extends State<CustomScheduleSelector> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Добавляемая пара:', style: AppTextStyle.captionL.copyWith(color: colors.deactive)),
+                Text(context.l10n.addedClass, style: AppTextStyle.captionL.copyWith(color: colors.deactive)),
                 const SizedBox(height: 12),
                 Text(widget.lesson.subject, style: AppTextStyle.titleS.copyWith(fontWeight: FontWeight.bold)),
                 const SizedBox(height: 8),
@@ -82,7 +83,7 @@ class _CustomScheduleSelectorState extends State<CustomScheduleSelector> {
               Expanded(
                 child: _buildOptionButton(
                   context,
-                  title: 'Выбрать существующее',
+                  title: context.l10n.selectExisting,
                   icon: HugeIcons.strokeRoundedListView,
                   isSelected: !_isCreatingNew,
                   onTap: () => setState(() => _isCreatingNew = false),
@@ -92,7 +93,7 @@ class _CustomScheduleSelectorState extends State<CustomScheduleSelector> {
               Expanded(
                 child: _buildOptionButton(
                   context,
-                  title: 'Создать новое',
+                  title: context.l10n.createNew,
                   icon: HugeIcons.strokeRoundedAdd01,
                   isSelected: _isCreatingNew,
                   onTap: () => setState(() => _isCreatingNew = true),
@@ -161,25 +162,23 @@ class _CustomScheduleSelectorState extends State<CustomScheduleSelector> {
   }
 
   Widget _buildCreateForm() {
-    final colors = Theme.of(context).extension<AppColors>()!;
-
     return Form(
       key: _formKey,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Создать новое расписание', style: AppTextStyle.titleS.copyWith(fontWeight: FontWeight.bold)),
+          Text(context.l10n.createNewSchedule, style: AppTextStyle.titleS.copyWith(fontWeight: FontWeight.bold)),
           const SizedBox(height: 16),
           TextInput(
             controller: _nameController,
-            labelText: 'Название расписания',
-            hintText: 'Например: Моё основное расписание',
+            labelText: context.l10n.scheduleNameLabel,
+            hintText: context.l10n.scheduleNamePlaceholder,
             validator: (value) {
               if (value == null || value.isEmpty) {
-                return 'Введите название';
+                return context.l10n.enterScheduleName;
               }
               if (value.length > 50) {
-                return 'Слишком длинное название';
+                return context.l10n.nameTooLong;
               }
               return null;
             },
@@ -187,8 +186,8 @@ class _CustomScheduleSelectorState extends State<CustomScheduleSelector> {
           const SizedBox(height: 16),
           TextInput(
             controller: _descriptionController,
-            labelText: 'Описание (необязательно)',
-            hintText: 'Добавьте описание расписания',
+            labelText: context.l10n.descriptionOptionalLabel,
+            hintText: context.l10n.addScheduleDescriptionPlaceholder,
             maxLines: 3,
           ),
           const SizedBox(height: 24),
@@ -196,7 +195,7 @@ class _CustomScheduleSelectorState extends State<CustomScheduleSelector> {
             width: double.infinity,
             child: PrimaryButton(
               onPressed: _isSubmitting ? null : _createAndAddToSchedule,
-              text: 'Создать и добавить пару',
+              text: context.l10n.createAndAddClass,
             ),
           ),
         ],
@@ -214,7 +213,7 @@ class _CustomScheduleSelectorState extends State<CustomScheduleSelector> {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Выберите расписание:', style: AppTextStyle.titleS.copyWith(fontWeight: FontWeight.bold)),
+            Text(context.l10n.selectSchedule, style: AppTextStyle.titleS.copyWith(fontWeight: FontWeight.bold)),
             const SizedBox(height: 16),
             ListView.builder(
               shrinkWrap: true,
@@ -231,7 +230,7 @@ class _CustomScheduleSelectorState extends State<CustomScheduleSelector> {
                 width: double.infinity,
                 child: PrimaryButton(
                   onPressed: _isSubmitting ? null : _addToSelectedSchedule,
-                  text: 'Добавить в выбранное расписание',
+                  text: context.l10n.addToSelectedSchedule,
                   enabled: _isSubmitting,
                 ),
               ),
@@ -296,7 +295,7 @@ class _CustomScheduleSelectorState extends State<CustomScheduleSelector> {
                           overflow: TextOverflow.ellipsis,
                         ),
                       Text(
-                        '${schedule.lessons.length} пар',
+                        '${schedule.lessons.length} ${context.l10n.classesCount(schedule.lessons.length)}',
                         style: AppTextStyle.captionL.copyWith(color: colors.deactive),
                       ),
                     ],
@@ -321,14 +320,12 @@ class _CustomScheduleSelectorState extends State<CustomScheduleSelector> {
   }
 
   Widget _buildNoSchedulesMessage() {
-    final colors = Theme.of(context).extension<AppColors>()!;
-
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: colors.background03.withOpacity(0.1),
+        color: Theme.of(context).extension<AppColors>()!.background03.withOpacity(0.1),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: colors.background03),
+        border: Border.all(color: Theme.of(context).extension<AppColors>()!.background03),
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -336,25 +333,34 @@ class _CustomScheduleSelectorState extends State<CustomScheduleSelector> {
           Container(
             width: 80,
             height: 80,
-            decoration: BoxDecoration(color: colors.background01.withOpacity(0.2), shape: BoxShape.circle),
-            child: Center(child: Icon(HugeIcons.strokeRoundedCalendar01, size: 40, color: colors.deactive)),
+            decoration: BoxDecoration(
+              color: Theme.of(context).extension<AppColors>()!.background01.withOpacity(0.2),
+              shape: BoxShape.circle,
+            ),
+            child: Center(
+              child: Icon(
+                HugeIcons.strokeRoundedCalendar01,
+                size: 40,
+                color: Theme.of(context).extension<AppColors>()!.deactive,
+              ),
+            ),
           ),
           const SizedBox(height: 16),
           Text(
-            'У вас пока нет своих расписаний',
+            context.l10n.noOwnSchedules,
             style: AppTextStyle.titleS.copyWith(fontWeight: FontWeight.w600),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 8),
           Text(
-            'Создайте новое расписание, чтобы добавить в него эту пару',
-            style: AppTextStyle.body.copyWith(color: colors.deactive),
+            context.l10n.createCustomSchedule,
+            style: AppTextStyle.body.copyWith(color: Theme.of(context).extension<AppColors>()!.deactive),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 16),
           OutlinedButton.icon(
             icon: Icon(HugeIcons.strokeRoundedAdd01, size: 16),
-            label: const Text('Создать расписание'),
+            label: Text(context.l10n.createSchedule),
             onPressed: () => setState(() => _isCreatingNew = true),
           ),
         ],
@@ -363,8 +369,6 @@ class _CustomScheduleSelectorState extends State<CustomScheduleSelector> {
   }
 
   Widget _buildLessonInfo(BuildContext context, String text, Color color, {IconData? icon}) {
-    final colors = Theme.of(context).extension<AppColors>()!;
-
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(color: color.withOpacity(0.1), borderRadius: BorderRadius.circular(8)),
@@ -410,10 +414,10 @@ class _CustomScheduleSelectorState extends State<CustomScheduleSelector> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Пара добавлена в расписание "${newSchedule.name}"'),
+            content: Text(context.l10n.classAddedToSchedule(newSchedule.name)),
             behavior: SnackBarBehavior.floating,
             action: SnackBarAction(
-              label: 'Открыть',
+              label: context.l10n.open,
               onPressed: () {
                 bloc.add(SelectCustomSchedule(scheduleId: newSchedule.id));
                 Navigator.pop(context);
@@ -441,17 +445,17 @@ class _CustomScheduleSelectorState extends State<CustomScheduleSelector> {
     // Get the selected schedule name for the success message
     final schedule = bloc.state.customSchedules.firstWhere(
       (s) => s.id == _selectedScheduleId,
-      orElse: () => CustomSchedule(id: '', name: 'Расписание', lessons: []),
+      orElse: () => CustomSchedule(id: '', name: context.l10n.schedule, lessons: []),
     );
 
     // Show success message and close the modal
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Пара добавлена в расписание "${schedule.name}"'),
+          content: Text(context.l10n.classAddedToSchedule(schedule.name)),
           behavior: SnackBarBehavior.floating,
           action: SnackBarAction(
-            label: 'Открыть',
+            label: context.l10n.open,
             onPressed: () {
               bloc.add(SelectCustomSchedule(scheduleId: _selectedScheduleId!));
               Navigator.pop(context);

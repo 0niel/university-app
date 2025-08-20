@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:rtu_mirea_app/schedule/bloc/schedule_bloc.dart';
+import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'syncfusion_calendar_view.dart';
 
 class SyncfusionCalendarScreen extends StatelessWidget {
@@ -11,6 +12,6 @@ class SyncfusionCalendarScreen extends StatelessWidget {
     final state = context.read<ScheduleBloc>().state;
     final lessons = state.selectedSchedule?.schedule.toList() ?? [];
 
-    return Scaffold(appBar: AppBar(title: const Text('Календарь')), body: SyncfusionCalendarView(lessons: lessons));
+    return Scaffold(appBar: AppBar(title: Text(context.l10n.calendar)), body: SyncfusionCalendarView(lessons: lessons));
   }
 }

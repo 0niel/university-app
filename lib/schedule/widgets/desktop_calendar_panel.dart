@@ -7,6 +7,7 @@ import 'package:rtu_mirea_app/schedule/widgets/calendar/format_toggle.dart';
 import 'package:rtu_mirea_app/schedule/widgets/widgets.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:university_app_server_api/client.dart';
+import 'package:rtu_mirea_app/l10n/l10n.dart';
 
 class DesktopCalendarPanel extends StatelessWidget {
   final PageController pageController;
@@ -83,7 +84,7 @@ class DesktopCalendarPanel extends StatelessWidget {
 
   Widget _buildMonthHeader(BuildContext context, DateTime day) {
     final colors = Theme.of(context).extension<AppColors>()!;
-    final month = DateFormat.MMMM('ru_RU').format(day);
+    final month = DateFormat.MMMM(Localizations.localeOf(context).toString()).format(day);
     final year = day.year.toString();
 
     return Container(
@@ -175,7 +176,7 @@ class DesktopCalendarPanel extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 4),
           child: Text(
-            'Сегодня',
+            context.l10n.today,
             style: AppTextStyle.titleS.copyWith(fontWeight: FontWeight.w600, color: colors.active),
           ),
         ),
@@ -193,7 +194,7 @@ class DesktopCalendarPanel extends StatelessWidget {
                   _buildStatItem(
                     context,
                     count: todayLessons.length,
-                    label: 'Всего',
+                    label: context.l10n.total,
                     icon: HugeIcons.strokeRoundedClock01,
                     color: colors.colorful04,
                   ),
@@ -201,7 +202,7 @@ class DesktopCalendarPanel extends StatelessWidget {
                   _buildStatItem(
                     context,
                     count: lectureCount,
-                    label: 'Лекции',
+                    label: context.l10n.lecturesShort,
                     icon: HugeIcons.strokeRoundedPresentation01,
                     color: colors.colorful01,
                   ),
@@ -213,7 +214,7 @@ class DesktopCalendarPanel extends StatelessWidget {
                   _buildStatItem(
                     context,
                     count: practiceCount,
-                    label: 'Практ.',
+                    label: context.l10n.practiceShort,
                     icon: HugeIcons.strokeRoundedBook03,
                     color: colors.colorful03,
                   ),
@@ -221,7 +222,7 @@ class DesktopCalendarPanel extends StatelessWidget {
                   _buildStatItem(
                     context,
                     count: labCount,
-                    label: 'Лаб.',
+                    label: context.l10n.labsShort,
                     icon: HugeIcons.strokeRoundedGivePill,
                     color: colors.colorful02,
                   ),
@@ -282,7 +283,10 @@ class DesktopCalendarPanel extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Обозначения', style: AppTextStyle.body.copyWith(color: colors.active, fontWeight: FontWeight.w600)),
+          Text(
+            context.l10n.legend,
+            style: AppTextStyle.body.copyWith(color: colors.active, fontWeight: FontWeight.w600),
+          ),
           const SizedBox(height: 12),
           Container(
             decoration: BoxDecoration(
@@ -292,13 +296,13 @@ class DesktopCalendarPanel extends StatelessWidget {
             padding: const EdgeInsets.all(12),
             child: Column(
               children: [
-                _buildLegendItem(context, 'Лекция', colors.colorful01),
+                _buildLegendItem(context, context.l10n.lecture, colors.colorful01),
                 const SizedBox(height: 8),
-                _buildLegendItem(context, 'Практика', colors.colorful03),
+                _buildLegendItem(context, context.l10n.practice, colors.colorful03),
                 const SizedBox(height: 8),
-                _buildLegendItem(context, 'Лабораторная', colors.colorful02),
+                _buildLegendItem(context, context.l10n.laboratoryWork, colors.colorful02),
                 const SizedBox(height: 8),
-                _buildLegendItem(context, 'Экзамен', colors.colorful06),
+                _buildLegendItem(context, context.l10n.exam, colors.colorful06),
               ],
             ),
           ),

@@ -19,13 +19,21 @@ class NoSelectedScheduleMessage extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 24),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: isTable ? CrossAxisAlignment.center : CrossAxisAlignment.start,
+            crossAxisAlignment:
+                isTable ? CrossAxisAlignment.center : CrossAxisAlignment.start,
             children: [
               Center(
                 child: Assets.images.saly2
                     .image(height: 200)
-                    .animate(onPlay: (controller) => controller.repeat(reverse: true))
-                    .rotate(duration: 3000.ms, begin: -0.03, end: 0.03, curve: Curves.easeInOut)
+                    .animate(
+                      onPlay: (controller) => controller.repeat(reverse: true),
+                    )
+                    .rotate(
+                      duration: 3000.ms,
+                      begin: -0.03,
+                      end: 0.03,
+                      curve: Curves.easeInOut,
+                    )
                     .move(
                       duration: 3000.ms,
                       begin: const Offset(0, -10),
@@ -38,18 +46,24 @@ class NoSelectedScheduleMessage extends StatelessWidget {
               const SizedBox(height: 8),
               Text(
                 "Скачайте расписание по крайней мере для одной группы, чтобы отобразить календарь.",
-                style: AppTextStyle.captionL.copyWith(color: Theme.of(context).extension<AppColors>()!.deactive),
+                style: AppTextStyle.body.copyWith(
+                  color: Theme.of(context).extension<AppColors>()!.deactive,
+                ),
               ),
               const SizedBox(height: 24),
               SizedBox(
                 width: isTable ? 420 : double.infinity,
                 child: Column(
-                  crossAxisAlignment: isTable ? CrossAxisAlignment.center : CrossAxisAlignment.stretch,
+                  crossAxisAlignment:
+                      isTable
+                          ? CrossAxisAlignment.center
+                          : CrossAxisAlignment.stretch,
                   children: [
                     ColorfulButton(
                       text: "Настроить",
                       onClick: onTap,
-                      backgroundColor: Theme.of(context).extension<AppColors>()!.primary,
+                      backgroundColor:
+                          Theme.of(context).extension<AppColors>()!.primary,
                     ),
                   ],
                 ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart'; // Импортируем flutter_animate
 import 'package:app_ui/app_ui.dart';
+import 'package:rtu_mirea_app/l10n/l10n.dart';
 
 class HolidayPage extends StatelessWidget {
   const HolidayPage({super.key, required this.title});
@@ -17,7 +18,6 @@ class HolidayPage extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          // Добавляем анимацию к изображению
           Assets.images.saly18
               .image(height: 225.0)
               .animate(onPlay: (controller) => controller.repeat(reverse: true))
@@ -30,12 +30,10 @@ class HolidayPage extends StatelessWidget {
               )
               .rotate(begin: 0.0349, end: -0.0349, duration: 5000.ms, curve: Curves.easeInOut),
 
-          const SizedBox(
-            height: 16, // Увеличиваем отступ для лучшей визуализации
-          ),
+          const SizedBox(height: 16),
           Text(title, style: AppTextStyle.title),
           const SizedBox(height: 8),
-          Text("Пар в этот день нет!", style: AppTextStyle.bodyL),
+          Text(context.l10n.noLessonsThatDayShort, style: AppTextStyle.bodyL),
         ],
       ),
     );

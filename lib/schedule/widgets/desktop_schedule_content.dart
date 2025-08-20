@@ -9,6 +9,7 @@ import 'package:rtu_mirea_app/schedule/widgets/widgets.dart';
 import 'package:rtu_mirea_app/schedule/widgets/schedule_analytics.dart';
 import 'package:go_router/go_router.dart';
 import 'package:university_app_server_api/client.dart';
+import 'package:rtu_mirea_app/l10n/l10n.dart';
 
 class DesktopScheduleContent extends StatelessWidget {
   const DesktopScheduleContent({
@@ -58,11 +59,11 @@ class DesktopScheduleContent extends StatelessWidget {
                     children: [
                       Text(
                         // Dynamic day text based on selected day
-                        'Занятия на ${_formatDayText(selectedDay)}',
+                        context.l10n.lessonsOnDay(_formatDayText(context, selectedDay)),
                         style: AppTextStyle.titleS.copyWith(color: colors.active, fontWeight: FontWeight.w600),
                       ),
                       Text(
-                        'Расписание занятий на выбранный день',
+                        context.l10n.scheduleForSelectedDay,
                         style: AppTextStyle.captionL.copyWith(color: colors.deactive),
                       ),
                     ],
@@ -106,16 +107,17 @@ class DesktopScheduleContent extends StatelessWidget {
     );
   }
 
-  String _formatDayText(DateTime day) {
+  String _formatDayText(BuildContext context, DateTime day) {
     final now = DateTime.now();
     final tomorrow = DateTime(now.year, now.month, now.day + 1);
 
     if (day.year == now.year && day.month == now.month && day.day == now.day) {
-      return 'сегодня';
+      return context.l10n.todayLower;
     } else if (day.year == tomorrow.year && day.month == tomorrow.month && day.day == tomorrow.day) {
-      return 'завтра';
+      return context.l10n.tomorrowLower;
     } else {
-      return DateFormat('d MMMM', 'ru_RU').format(day);
+      final locale = Localizations.localeOf(context).toString();
+      return DateFormat('d MMMM', locale).format(day);
     }
   }
 
@@ -130,7 +132,7 @@ class DesktopScheduleContent extends StatelessWidget {
         children: [
           // Empty lessons toggle
           Tooltip(
-            message: 'Показывать пустые пары',
+            message: context.l10n.showEmptyLessonsTooltip,
             child: InkWell(
               borderRadius: BorderRadius.circular(4),
               onTap: () {
@@ -151,7 +153,7 @@ class DesktopScheduleContent extends StatelessWidget {
                     ),
                     const SizedBox(width: 4),
                     Text(
-                      'Пустые пары',
+                      context.l10n.emptyLessons,
                       style: AppTextStyle.captionL.copyWith(
                         color: showEmptyLessons ? colors.primary : colors.deactive,
                         fontWeight: showEmptyLessons ? FontWeight.w500 : null,
@@ -166,7 +168,7 @@ class DesktopScheduleContent extends StatelessWidget {
           // Analytics toggle button
           const SizedBox(width: 8),
           Tooltip(
-            message: 'Аналитика расписания',
+            message: context.l10n.scheduleAnalyticsTitle,
             child: InkWell(
               borderRadius: BorderRadius.circular(4),
               onTap: () {
@@ -187,7 +189,7 @@ class DesktopScheduleContent extends StatelessWidget {
                     ),
                     const SizedBox(width: 4),
                     Text(
-                      'Аналитика',
+                      context.l10n.analyticsShort,
                       style: AppTextStyle.captionL.copyWith(
                         color: showAnalytics ? colors.colorful04 : colors.deactive,
                         fontWeight: showAnalytics ? FontWeight.w500 : null,
@@ -225,7 +227,7 @@ class _EventsPageView extends StatelessWidget {
 
         final holiday = lessonsForDay.firstWhereOrNull((element) => element is HolidaySchedulePart);
         if (holiday != null) return HolidayPage(title: (holiday as HolidaySchedulePart).title);
-        if (day.weekday == DateTime.sunday) return const HolidayPage(title: 'Выходной');
+        if (day.weekday == DateTime.sunday) return HolidayPage(title: context.l10n.dayOff);
 
         final allLessons = lessonsForDay.whereType<LessonSchedulePart>().toList();
 
@@ -299,14 +301,14 @@ class _EventsPageView extends StatelessWidget {
           ),
           const SizedBox(height: 20),
           Text(
-            'Нет занятий в этот день',
+            context.l10n.noLessonsThatDay,
             style: AppTextStyle.titleM.copyWith(fontWeight: FontWeight.w600, color: colors.active),
           ),
           const SizedBox(height: 12),
           SizedBox(
             width: 300,
             child: Text(
-              'Можно отдохнуть или заняться самостоятельной работой',
+              context.l10n.restSuggestion,
               style: AppTextStyle.body.copyWith(color: colors.deactive),
               textAlign: TextAlign.center,
             ),
@@ -314,7 +316,7 @@ class _EventsPageView extends StatelessWidget {
           const SizedBox(height: 24),
           _buildActionButton(
             context,
-            text: 'Перейти к другому дню',
+            text: context.l10n.goToAnotherDay,
             icon: HugeIcons.strokeRoundedCalendar01,
             color: colors.primary,
           ),
@@ -457,7 +459,7 @@ class _EventsPageView extends StatelessWidget {
                     Icon(HugeIcons.strokeRoundedHourglass, size: 16, color: colors.deactive),
                     const SizedBox(width: 8),
                     Text(
-                      'Окно: $windowCount ${_pluralizeLesson(windowCount)}',
+                      context.l10n.windowGap(windowCount),
                       style: AppTextStyle.captionL.copyWith(color: colors.deactive, fontStyle: FontStyle.italic),
                     ),
                   ],
@@ -470,12 +472,6 @@ class _EventsPageView extends StatelessWidget {
 
       return ListView(physics: const BouncingScrollPhysics(), children: widgets);
     }
-  }
-
-  String _pluralizeLesson(int count) {
-    if (count == 1) return 'пара';
-    if (count >= 2 && count <= 4) return 'пары';
-    return 'пар';
   }
 
   Widget _buildEmptyLesson(BuildContext context, int lessonNumber) {
@@ -493,7 +489,10 @@ class _EventsPageView extends StatelessWidget {
         children: [
           Icon(HugeIcons.strokeRoundedBorderNone01, size: 18, color: colors.deactive),
           const SizedBox(width: 8),
-          Text('Нет занятия', style: AppTextStyle.body.copyWith(color: colors.deactive, fontStyle: FontStyle.italic)),
+          Text(
+            context.l10n.noClass,
+            style: AppTextStyle.body.copyWith(color: colors.deactive, fontStyle: FontStyle.italic),
+          ),
         ],
       ),
     );

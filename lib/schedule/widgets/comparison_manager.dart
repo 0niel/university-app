@@ -6,22 +6,23 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:rtu_mirea_app/schedule/bloc/schedule_bloc.dart';
 import 'package:rtu_mirea_app/schedule/models/models.dart';
 import 'package:app_ui/app_ui.dart';
+import 'package:rtu_mirea_app/l10n/l10n.dart';
 
 class ComparisonManager extends StatelessWidget {
   const ComparisonManager({super.key});
 
-  String _getScheduleTitle(SelectedSchedule schedule) {
-    if (schedule is SelectedGroupSchedule) {
-      return schedule.group.name;
-    } else if (schedule is SelectedTeacherSchedule) {
-      return schedule.teacher.name;
-    } else if (schedule is SelectedClassroomSchedule) {
-      return schedule.classroom.name;
-    } else if (schedule is SelectedCustomSchedule) {
-      return schedule.name;
-    }
-    return 'Неизвестно';
-  }
+  // String _getScheduleTitle(SelectedSchedule schedule) {
+  //   if (schedule is SelectedGroupSchedule) {
+  //     return schedule.group.name;
+  //   } else if (schedule is SelectedTeacherSchedule) {
+  //     return schedule.teacher.name;
+  //   } else if (schedule is SelectedClassroomSchedule) {
+  //     return schedule.classroom.name;
+  //   } else if (schedule is SelectedCustomSchedule) {
+  //     return schedule.name;
+  //   }
+  //   return context.l10n.unknown;
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -49,7 +50,7 @@ class ComparisonManager extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Text(
-              'Выберите расписания для сравнения (до 3)',
+              context.l10n.selectSchedulesForComparison,
               style: AppTextStyle.titleS,
               textAlign: TextAlign.center,
             ),
@@ -73,12 +74,7 @@ class ComparisonManager extends StatelessWidget {
           const SizedBox(height: 8),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: PrimaryButton(
-              text: 'Применить',
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
+            child: PrimaryButton(text: context.l10n.apply, onPressed: () => Navigator.of(context).pop()),
           ),
           const SizedBox(height: 16),
         ],

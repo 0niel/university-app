@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:app_ui/app_ui.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:go_router/go_router.dart';
+import 'package:rtu_mirea_app/l10n/l10n.dart';
 
 class DesktopNoScheduleView extends StatelessWidget {
   const DesktopNoScheduleView({super.key});
@@ -23,14 +24,14 @@ class DesktopNoScheduleView extends StatelessWidget {
             ),
             const SizedBox(height: 32),
             Text(
-              'Расписание не выбрано',
+              context.l10n.noScheduleSelected,
               style: AppTextStyle.h6.copyWith(fontWeight: FontWeight.bold, color: colors.active),
             ),
             const SizedBox(height: 16),
             SizedBox(
               width: 400,
               child: Text(
-                'Выберите группу, преподавателя или аудиторию, чтобы увидеть расписание',
+                context.l10n.selectEntityToSeeSchedule,
                 style: AppTextStyle.bodyL.copyWith(color: colors.deactive, height: 1.5),
                 textAlign: TextAlign.center,
               ),
@@ -47,7 +48,7 @@ class DesktopNoScheduleView extends StatelessWidget {
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               ),
               icon: const Icon(Icons.search, color: Colors.white),
-              label: const Text('Найти расписание'),
+              label: Text(context.l10n.findSchedule),
             ),
           ],
         ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:rtu_mirea_app/services/services.dart';
 import 'package:rtu_mirea_app/top_discussions/view/view.dart';
 import 'package:app_ui/app_ui.dart';
@@ -11,7 +12,10 @@ class ServicesPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(appBar: AppBar(elevation: 0, title: const Text("Сервисы")), body: const ServicesView());
+    return Scaffold(
+      appBar: AppBar(elevation: 0, title: Text(context.l10n.services)),
+      body: const ServicesView(),
+    );
   }
 }
 
@@ -22,7 +26,8 @@ class ServicesView extends StatefulWidget {
   State<ServicesView> createState() => _ServicesViewState();
 }
 
-class _ServicesViewState extends State<ServicesView> with SingleTickerProviderStateMixin, WidgetsBindingObserver {
+class _ServicesViewState extends State<ServicesView>
+    with SingleTickerProviderStateMixin, WidgetsBindingObserver {
   late final PageController _pageController;
   late final PageController _bannersPageController;
   Timer? _autoScrollTimer;
@@ -34,12 +39,12 @@ class _ServicesViewState extends State<ServicesView> with SingleTickerProviderSt
   int _selectedIndex = 0;
   int _currentBannerIndex = 0;
 
-  late final List<ImportantServiceModel> _importantServices;
-  late final List<CommunityModel> _communities;
-  late final List<BannerModel> _banners;
-  late final List<ServiceTileModel> _mainServices;
-  late final List<HorizontalServiceModel> _studentLifeServices;
-  late final List<WideServiceModel> _usefulServices;
+  late List<ImportantServiceModel> _importantServices;
+  late List<CommunityModel> _communities;
+  late List<BannerModel> _banners;
+  late List<ServiceTileModel> _mainServices;
+  late List<HorizontalServiceModel> _studentLifeServices;
+  late List<WideServiceModel> _usefulServices;
 
   @override
   void initState() {
@@ -57,12 +62,21 @@ class _ServicesViewState extends State<ServicesView> with SingleTickerProviderSt
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _importantServices = ServicesConfig.getImportantServices(context);
-    _communities = ServicesConfig.getCommunities(context);
-    _banners = ServicesConfig.getBanners(context);
-    _mainServices = ServicesConfig.getMainServices(context);
-    _studentLifeServices = ServicesConfig.getStudentLifeServices(context);
-    _usefulServices = ServicesConfig.getUsefulServices(context);
+    // Always re-fetch from config when dependencies change
+    final important = ServicesConfig.getImportantServices(context);
+    final communities = ServicesConfig.getCommunities(context);
+    final banners = ServicesConfig.getBanners(context);
+    final mainServices = ServicesConfig.getMainServices(context);
+    final studentLife = ServicesConfig.getStudentLifeServices(context);
+    final useful = ServicesConfig.getUsefulServices(context);
+
+    // Assign without using final to avoid LateInitializationError on rebuilds
+    _importantServices = important;
+    _communities = communities;
+    _banners = banners;
+    _mainServices = mainServices;
+    _studentLifeServices = studentLife;
+    _usefulServices = useful;
   }
 
   @override
@@ -129,9 +143,9 @@ class _ServicesViewState extends State<ServicesView> with SingleTickerProviderSt
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    _pageController.dispose();
-    _bannersPageController.dispose();
     _bannersPageController.removeListener(_syncBannerIndex);
+    _bannersPageController.dispose();
+    _pageController.dispose();
     _stopAutoScroll();
     _resumeScrollTimer?.cancel();
     super.dispose();
@@ -145,13 +159,19 @@ class _ServicesViewState extends State<ServicesView> with SingleTickerProviderSt
     // Check if controller is attached to a view before animating
     if (!_pageController.hasClients) return;
 
-    _pageController.animateToPage(index, duration: const Duration(milliseconds: 350), curve: Curves.easeOutQuint);
+    _pageController.animateToPage(
+      index,
+      duration: const Duration(milliseconds: 350),
+      curve: Curves.easeOutQuint,
+    );
   }
 
   void _syncBannerIndex() {
-    if (_bannersPageController.hasClients && _bannersPageController.page != null) {
+    if (_bannersPageController.hasClients &&
+        _bannersPageController.page != null) {
       if (_banners.isNotEmpty) {
-        final currentPage = _bannersPageController.page!.round() % _banners.length;
+        final currentPage =
+            _bannersPageController.page!.round() % _banners.length;
         if (_currentBannerIndex != currentPage) {
           setState(() {
             _currentBannerIndex = currentPage;
@@ -166,8 +186,17 @@ class _ServicesViewState extends State<ServicesView> with SingleTickerProviderSt
     return Column(
       children: [
         Padding(
-          padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, AppSpacing.sm),
-          child: CategoryAnimatedTabBar(tabs: _categories, selectedIndex: _selectedIndex, onTap: _onCategorySelected),
+          padding: const EdgeInsets.fromLTRB(
+            AppSpacing.lg,
+            AppSpacing.lg,
+            AppSpacing.lg,
+            AppSpacing.sm,
+          ),
+          child: CategoryAnimatedTabBar(
+            tabs: _categories,
+            selectedIndex: _selectedIndex,
+            onTap: _onCategorySelected,
+          ),
         ),
         Expanded(
           child: PageView(
@@ -223,7 +252,11 @@ class _ServicesViewState extends State<ServicesView> with SingleTickerProviderSt
           child: SectionHeaderWithButton(
             title: "Обсуждаемое",
             buttonText: "Все",
-            onPressed: () => launchUrlString('https://mirea.ninja/top', mode: LaunchMode.externalApplication),
+            onPressed:
+                () => launchUrlString(
+                  'https://mirea.ninja/top',
+                  mode: LaunchMode.externalApplication,
+                ),
           ),
         ),
         const SizedBox(height: AppSpacing.md),
@@ -231,7 +264,11 @@ class _ServicesViewState extends State<ServicesView> with SingleTickerProviderSt
         const SizedBox(height: AppSpacing.xlg),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xlg),
-          child: const SectionHeaderWithButton(title: "Сообщества", buttonText: "Все", onPressed: _dummy),
+          child: const SectionHeaderWithButton(
+            title: "Сообщества",
+            buttonText: "Все",
+            onPressed: _dummy,
+          ),
         ),
         const SizedBox(height: AppSpacing.md),
         Padding(
@@ -247,11 +284,14 @@ class _ServicesViewState extends State<ServicesView> with SingleTickerProviderSt
                   CommunityCard(
                     title: community.title,
                     url: community.url,
-                    logo: CircleAvatar(foregroundImage: NetworkImage(community.logoUrl)),
+                    logo: CircleAvatar(
+                      foregroundImage: NetworkImage(community.logoUrl),
+                    ),
                     launchMode: LaunchMode.externalApplication,
                     description: community.description,
                   ),
-                  if (index < _communities.length - 1) const SizedBox(height: AppSpacing.sm),
+                  if (index < _communities.length - 1)
+                    const SizedBox(height: AppSpacing.sm),
                 ],
               );
             },
@@ -267,7 +307,10 @@ class _ServicesViewState extends State<ServicesView> with SingleTickerProviderSt
   Widget _buildDigitalUniversityTab() {
     return ListView(
       physics: const BouncingScrollPhysics(),
-      padding: EdgeInsets.only(top: AppSpacing.md, bottom: MediaQuery.of(context).padding.bottom + AppSpacing.xlg),
+      padding: EdgeInsets.only(
+        top: AppSpacing.md,
+        bottom: MediaQuery.of(context).padding.bottom + AppSpacing.xlg,
+      ),
       children: [
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -284,14 +327,18 @@ class _ServicesViewState extends State<ServicesView> with SingleTickerProviderSt
                   itemBuilder: (context, index) {
                     final banner = _banners[index];
                     return Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.md,
+                      ),
                       child: VerticalBanner(
                         title: banner.title,
                         description: banner.description ?? '',
                         iconData: banner.iconData,
                         color: banner.color,
                         action: banner.action,
-                        onTap: () => ServiceUtils.navigateToService(context, banner),
+                        onTap:
+                            () =>
+                                ServiceUtils.navigateToService(context, banner),
                       ),
                     );
                   },
@@ -312,7 +359,9 @@ class _ServicesViewState extends State<ServicesView> with SingleTickerProviderSt
                     color:
                         index == _currentBannerIndex
                             ? Theme.of(context).extension<AppColors>()!.primary
-                            : Theme.of(context).extension<AppColors>()!.deactive.withOpacity(0.3),
+                            : Theme.of(
+                              context,
+                            ).extension<AppColors>()!.deactive.withOpacity(0.3),
                   ),
                 ),
               ),
@@ -330,7 +379,10 @@ class _ServicesViewState extends State<ServicesView> with SingleTickerProviderSt
           child: LayoutGrid(
             autoPlacement: AutoPlacement.rowDense,
             columnSizes: List.filled(4, 1.fr),
-            rowSizes: List.generate((_mainServices.length / 4).ceil(), (_) => auto),
+            rowSizes: List.generate(
+              (_mainServices.length / 4).ceil(),
+              (_) => auto,
+            ),
             columnGap: AppSpacing.md,
             rowGap: AppSpacing.sm,
             children:
@@ -340,7 +392,11 @@ class _ServicesViewState extends State<ServicesView> with SingleTickerProviderSt
                         title: service.title,
                         iconData: service.iconData,
                         color: service.color,
-                        onTap: () => ServiceUtils.navigateToService(context, service),
+                        onTap:
+                            () => ServiceUtils.navigateToService(
+                              context,
+                              service,
+                            ),
                       ),
                     )
                     .toList(),
@@ -412,7 +468,8 @@ class _ServicesViewState extends State<ServicesView> with SingleTickerProviderSt
                   color: service.color,
                   onTap: () => ServiceUtils.navigateToService(context, service),
                 ),
-                if (index < _usefulServices.length - 1) const SizedBox(height: AppSpacing.sm),
+                if (index < _usefulServices.length - 1)
+                  const SizedBox(height: AppSpacing.sm),
               ],
             );
           }).toList(),

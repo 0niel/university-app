@@ -40,7 +40,7 @@ class SearchModeSelect extends StatelessWidget {
 
         return Padding(
           padding: const EdgeInsets.symmetric(vertical: 16),
-          child: CategoryTabBar(
+          child: CategoryAnimatedTabBar(
             tabs: tabs,
             icons: icons,
             selectedIndex: selectedIndex,
