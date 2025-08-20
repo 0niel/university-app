@@ -17,22 +17,16 @@ class InMemoryNewsDataSource implements NewsDataSource {
   @override
   Future<Article?> getArticle({
     required String id,
-    int limit = 20,
-    int offset = 0,
-    bool preview = false,
   }) async {
     final result = _newsItems.where((item) => item.post.id == id);
     if (result.isEmpty) return null;
     final articleNewsItem = result.first;
-    final article = (preview ? articleNewsItem.contentPreview : articleNewsItem.content)
+    final article = articleNewsItem.content
         .toArticle(title: articleNewsItem.post.title, url: articleNewsItem.url);
-    final totalBlocks = article.totalBlocks;
-    final normalizedOffset = math.min(offset, totalBlocks);
-    final blocks = article.blocks.sublist(normalizedOffset).take(limit).toList();
     return Article(
       title: article.title,
-      blocks: blocks,
-      totalBlocks: totalBlocks,
+      blocks: article.blocks,
+      totalBlocks: article.totalBlocks,
       url: article.url,
     );
   }
@@ -76,7 +70,8 @@ class InMemoryNewsDataSource implements NewsDataSource {
     int limit = 20,
     int offset = 0,
   }) async {
-    final feed = _newsFeedData[categoryId] ?? const Feed(blocks: [], totalBlocks: 0);
+    final feed =
+        _newsFeedData[categoryId] ?? const Feed(blocks: [], totalBlocks: 0);
     final totalBlocks = feed.totalBlocks;
     final normalizedOffset = math.min(offset, totalBlocks);
     final blocks = feed.blocks.sublist(normalizedOffset).take(limit).toList();

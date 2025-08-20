@@ -15,9 +15,6 @@ Middleware configLoggerProvider() {
           logLevel: config.logLevel,
           enableDebugLogging: config.enableDebugLogging,
         );
-
-        // Log the configuration
-        config.logConfiguration();
       } catch (e) {
         final logger = getLogger('ConfigLogger');
         logger.e('Failed to log configuration', error: e);

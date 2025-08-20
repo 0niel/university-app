@@ -10,20 +10,9 @@ abstract class NewsDataSource {
 
   /// Returns a news [Article] for the provided article [id].
   ///
-  /// In addition, the contents can be paginated by supplying
-  /// [limit] and [offset].
-  ///
-  /// * [limit] - The number of content blocks to return.
-  /// * [offset] - The (zero-based) offset of the first item
-  /// in the collection to return.
-  /// * [preview] - Whether to return a preview of the article.
-  ///
   /// Returns `null` if there is no article with the provided [id].
   Future<Article?> getArticle({
     required String id,
-    int limit = 20,
-    int offset = 0,
-    bool preview = false,
   });
 
   /// Returns a list of current popular topics.

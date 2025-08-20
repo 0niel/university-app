@@ -12,7 +12,7 @@ Handler middleware(Handler handler) {
       .use(splashVideoDataSourceProvider())
       .use(userProvider())
       .use(requestLogger())
-      .use(loggerProvider())
       .use(redisProvider())
+      .use(loggerProvider())
       .use(supabaseProvider());
 }

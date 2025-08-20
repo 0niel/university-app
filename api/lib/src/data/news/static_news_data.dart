@@ -18,7 +18,8 @@ final mireaNewsItems = <NewsItem>[
       categoryId: _mireaNewsCategory.id,
       author: 'RTU МИРЭА',
       publishedAt: DateTime(2025, 6, 10),
-      imageUrl: 'https://www.mirea.ru/upload/news/2025/06/10/iri_top100.png', // при наличии изображения
+      imageUrl:
+          'https://www.mirea.ru/upload/news/2025/06/10/iri_top100.png', // при наличии изображения
       title:
           'Проект Института радиоэлектроники и информатики вошёл в топ-100 лучших проектов участников шестого потока «Академии инноваторов»',
       description:
@@ -46,7 +47,8 @@ final mireaNewsItems = <NewsItem>[
       author: 'RTU МИРЭА',
       publishedAt: DateTime(2025, 6, 6),
       imageUrl: 'https://www.mirea.ru/upload/news/2025/06/06/metal2025.png',
-      title: 'РТУ МИРЭА вошёл в число участников выставки «Металлообработка-2025»',
+      title:
+          'РТУ МИРЭА вошёл в число участников выставки «Металлообработка-2025»',
       description:
           'РТУ МИРЭА в очередной раз принял участие в 25-й юбилейной международной выставке «Металлообработка-2025».',
     ),
@@ -55,7 +57,8 @@ final mireaNewsItems = <NewsItem>[
         categoryId: _mireaNewsCategory.id,
         author: 'RTU МИРЭА',
         publishedAt: DateTime(2025, 6, 6),
-        title: 'РТУ МИРЭА вошёл в число участников выставки «Металлообработка-2025»',
+        title:
+            'РТУ МИРЭА вошёл в число участников выставки «Металлообработка-2025»',
         imageUrl: 'https://www.mirea.ru/upload/news/2025/06/06/metal2025.png',
       ),
     ],
@@ -71,15 +74,18 @@ final mireaNewsItems = <NewsItem>[
       author: 'RTU МИРЭА',
       publishedAt: DateTime(2025, 6, 4),
       imageUrl: 'https://www.mirea.ru/upload/news/2025/06/04/itex2025.png',
-      title: 'Делегация РТУ МИРЭА приняла участие в международной выставке ITEX-2025',
-      description: 'С 29 по 31 мая 2025 года в Куала-Лумпуре прошла международная выставка ITEX-2025.',
+      title:
+          'Делегация РТУ МИРЭА приняла участие в международной выставке ITEX-2025',
+      description:
+          'С 29 по 31 мая 2025 года в Куала-Лумпуре прошла международная выставка ITEX-2025.',
     ),
     content: [
       ArticleIntroductionBlock(
         categoryId: _mireaNewsCategory.id,
         author: 'RTU МИРЭА',
         publishedAt: DateTime(2025, 6, 4),
-        title: 'Делегация РТУ МИРЭА приняла участие в международной выставке ITEX-2025',
+        title:
+            'Делегация РТУ МИРЭА приняла участие в международной выставке ITEX-2025',
         imageUrl: 'https://www.mirea.ru/upload/news/2025/06/04/itex2025.png',
       ),
     ],
@@ -99,8 +105,10 @@ final rtuMireaTelegramItems = <NewsItem>[
       author: 'RTU MIREA Official',
       publishedAt: DateTime(2025, 6, 7),
       imageUrl: 'https://static.t.me/rtumirea_official/10031/tax-a-land.png',
-      title: 'ТеДо (компания «Технологии Доверия») запускает новый поток Tax-a-Land',
-      description: 'Это уникальная образовательная программа по налогообложению и праву.\n'
+      title:
+          'ТеДо (компания «Технологии Доверия») запускает новый поток Tax-a-Land',
+      description:
+          'Это уникальная образовательная программа по налогообложению и праву.\n'
           'Как будут проходить занятия:\n'
           '— 30 июня – 24 июля\n'
           '— понедельник, среда, четверг, 13:00–15:00 (мск)\n'
@@ -111,7 +119,8 @@ final rtuMireaTelegramItems = <NewsItem>[
         categoryId: _rtuMireaTelegramCategory.id,
         author: 'RTU MIREA Official',
         publishedAt: DateTime(2025, 6, 7),
-        title: 'ТеДо (компания «Технологии Доверия») запускает новый поток Tax-a-Land',
+        title:
+            'ТеДо (компания «Технологии Доверия») запускает новый поток Tax-a-Land',
         imageUrl: 'https://static.t.me/rtumirea_official/10031/tax-a-land.png',
       ),
     ],
@@ -168,9 +177,12 @@ const relevantTopics = <String>[
 ];
 
 final _newsFeedData = <String, Feed>{
-  _mireaNewsCategory.id: Feed(blocks: mireaNewsItems.map((n) => n.post).toList(), totalBlocks: mireaNewsItems.length),
-  _rtuMireaTelegramCategory.id:
-      Feed(blocks: rtuMireaTelegramItems.map((n) => n.post).toList(), totalBlocks: rtuMireaTelegramItems.length),
+  _mireaNewsCategory.id: Feed(
+      blocks: mireaNewsItems.map((n) => n.post).toList(),
+      totalBlocks: mireaNewsItems.length),
+  _rtuMireaTelegramCategory.id: Feed(
+      blocks: rtuMireaTelegramItems.map((n) => n.post).toList(),
+      totalBlocks: rtuMireaTelegramItems.length),
 };
 
 extension on List<NewsBlock> {

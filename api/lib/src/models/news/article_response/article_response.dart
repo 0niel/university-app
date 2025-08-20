@@ -13,13 +13,12 @@ class ArticleResponse extends Equatable {
   const ArticleResponse({
     required this.title,
     required this.content,
-    required this.totalCount,
     required this.url,
-    required this.isPreview,
   });
 
   /// Converts a `Map<String, dynamic>` into a [ArticleResponse] instance.
-  factory ArticleResponse.fromJson(Map<String, dynamic> json) => _$ArticleResponseFromJson(json);
+  factory ArticleResponse.fromJson(Map<String, dynamic> json) =>
+      _$ArticleResponseFromJson(json);
 
   /// The title of the associated article.
   final String title;
@@ -28,14 +27,8 @@ class ArticleResponse extends Equatable {
   @NewsBlocksConverter()
   final List<NewsBlock> content;
 
-  /// The total number of available content blocks.
-  final int totalCount;
-
   /// The url for the associated article.
   final Uri url;
-
-  /// Whether the [content] of this article is a preview of the full article.
-  final bool isPreview;
 
   /// Converts the current instance to a `Map<String, dynamic>`.
   Map<String, dynamic> toJson() => _$ArticleResponseToJson(this);
@@ -44,8 +37,6 @@ class ArticleResponse extends Equatable {
   List<Object> get props => [
         title,
         content,
-        totalCount,
         url,
-        isPreview,
       ];
 }
