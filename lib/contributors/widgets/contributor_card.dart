@@ -25,7 +25,8 @@ class ContributorCard extends StatelessWidget {
             children: [
               CircleAvatar(
                 radius: 37,
-                backgroundColor: Theme.of(context).extension<AppColors>()!.deactive,
+                backgroundColor:
+                    Theme.of(context).extension<AppColors>()!.background03,
                 backgroundImage: NetworkImage(contributor.avatarUrl),
               ),
               const SizedBox(height: 16),
@@ -38,7 +39,10 @@ class ContributorCard extends StatelessWidget {
           ),
         ),
         onTap: () {
-          launchUrl(Uri.parse(contributor.htmlUrl), mode: LaunchMode.externalApplication);
+          launchUrl(
+            Uri.parse(contributor.htmlUrl),
+            mode: LaunchMode.externalApplication,
+          );
         },
       ),
     );
