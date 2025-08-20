@@ -1,6 +1,49 @@
+import 'dart:async';
+
 import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:smooth_sheets/smooth_sheets.dart';
+
+/// Lightweight controller to manage BottomModalSheet outside of the widget tree.
+///
+/// Note: This controller focuses on high-level actions like closing the sheet.
+/// Low-level snap/expand control depends on Smooth Sheets internals, which
+/// might not expose a public controller yet. Once available, we can wire it here.
+class BottomModalSheetController {
+  BottomModalSheetController();
+
+  BuildContext? _routeContext;
+  Completer<void>? _closedCompleter;
+
+  /// Attach a route [BuildContext] so the controller can operate.
+  void _attach(BuildContext context) => _routeContext = context;
+
+  /// Bind the controller to the closing future of the route.
+  void _bindCloseFuture(Future<dynamic> future) {
+    _closedCompleter = Completer<void>();
+    future.whenComplete(() {
+      if (!(_closedCompleter?.isCompleted ?? true)) {
+        _closedCompleter?.complete();
+      }
+      _routeContext = null;
+    });
+  }
+
+  /// Dismiss the sheet if possible.
+  void close() {
+    final context = _routeContext;
+    if (context == null) return;
+    if (Navigator.of(context).canPop()) {
+      Navigator.of(context).pop();
+    }
+  }
+
+  /// Future that completes when the sheet is closed.
+  Future<void> get closed async => _closedCompleter?.future ?? Future.value();
+
+  /// Whether the sheet is currently open.
+  bool get isOpen => _routeContext != null;
+}
 
 /// Default values for the modal sheet
 const _defaultSheetHeight = 500.0;
@@ -15,6 +58,7 @@ class BottomModalSheet extends StatelessWidget {
     required this.title,
     required this.child,
     super.key,
+    this.controller,
     this.onConfirm,
     this.description,
     this.isExpandable = true,
@@ -49,6 +93,9 @@ class BottomModalSheet extends StatelessWidget {
 
   /// Sheet content
   final Widget child;
+
+  /// Optional external controller
+  final BottomModalSheetController? controller;
 
   /// Allow resize
   final bool isExpandable;
@@ -132,40 +179,43 @@ class BottomModalSheet extends StatelessWidget {
     SheetScrollConfiguration? scrollConfiguration,
     SheetDecoration? decoration,
     double elevation = 4,
+    BottomModalSheetController? controller,
   }) {
-    return Navigator.push(
-      context,
-      ModalSheetRoute(
-        swipeDismissible: isDismissible,
-        barrierDismissible: isDismissible,
-        swipeDismissSensitivity: const SwipeDismissSensitivity(minDragDistance: 100),
-        barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
-        barrierColor: barrierColor ?? Colors.black54,
-        builder: (context) => BottomModalSheet(
-          title: title,
-          description: description,
-          isExpandable: isExpandable,
-          showFullScreen: showFullScreen,
-          isDismissible: isDismissible,
-          backgroundColor: backgroundColor,
-          initialFraction: initialFraction,
-          minFraction: minFraction,
-          defaultFraction: defaultFraction,
-          maxFraction: maxFraction,
-          sheetHeight: sheetHeight,
-          borderRadius: borderRadius,
-          padding: padding,
-          margin: margin,
-          physics: physics,
-          showDragHandle: showDragHandle,
-          scrollable: scrollable,
-          scrollConfiguration: scrollConfiguration,
-          decoration: decoration,
-          elevation: elevation,
-          child: child,
-        ),
+    final route = ModalSheetRoute<void>(
+      swipeDismissible: isDismissible,
+      barrierDismissible: isDismissible,
+      swipeDismissSensitivity:
+          const SwipeDismissSensitivity(minDragDistance: 100),
+      barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
+      barrierColor: barrierColor ?? Colors.black54,
+      builder: (context) => BottomModalSheet(
+        title: title,
+        description: description,
+        isExpandable: isExpandable,
+        showFullScreen: showFullScreen,
+        isDismissible: isDismissible,
+        backgroundColor: backgroundColor,
+        initialFraction: initialFraction,
+        minFraction: minFraction,
+        defaultFraction: defaultFraction,
+        maxFraction: maxFraction,
+        sheetHeight: sheetHeight,
+        borderRadius: borderRadius,
+        padding: padding,
+        margin: margin,
+        physics: physics,
+        showDragHandle: showDragHandle,
+        scrollable: scrollable,
+        scrollConfiguration: scrollConfiguration,
+        decoration: decoration,
+        elevation: elevation,
+        controller: controller,
+        child: child,
       ),
     );
+    final future = Navigator.push(context, route);
+    controller?._bindCloseFuture(future);
+    return future;
   }
 
   @override
@@ -173,21 +223,34 @@ class BottomModalSheet extends StatelessWidget {
     final theme = Theme.of(context);
     final colors = theme.extension<AppColors>();
 
-    // Create snap points based on settings
-    final snapPoints = <SheetOffset>[SheetOffset(defaultFraction)];
+    // Bind controller to current route context so it can close the sheet.
+    controller?._attach(context);
+
+    // Create snap points based on settings (min -> default -> max -> fullscreen)
+    final fractions = <double>[];
+    void addFrac(double f) {
+      if (f > 0 && f <= 1.0 && !fractions.contains(f)) fractions.add(f);
+    }
+
+    addFrac(minFraction);
+    addFrac(defaultFraction);
 
     // If expandable, add maximum snap point
     if (isExpandable) {
-      snapPoints.add(SheetOffset(maxFraction));
+      addFrac(maxFraction);
     }
 
     // If fullscreen is enabled, add it
     if (showFullScreen) {
-      snapPoints.add(const SheetOffset(_fullScreenFraction));
+      addFrac(_fullScreenFraction);
     }
 
+    final snaps = fractions.map(SheetOffset.new).toList();
+
     // Choose snap grid type
-    final snapGrid = snapPoints.length > 1 ? MultiSnapGrid(snaps: snapPoints) : SingleSnapGrid(snap: snapPoints.first);
+    final snapGrid = snaps.length > 1
+        ? MultiSnapGrid(snaps: snaps)
+        : SingleSnapGrid(snap: snaps.first);
 
     final bgColor = backgroundColor ?? colors?.background02;
 
@@ -207,11 +270,21 @@ class BottomModalSheet extends StatelessWidget {
         isContentScrollAware: true,
       ),
       child: Sheet(
-        initialOffset: SheetOffset(initialFraction ?? defaultFraction),
+        initialOffset: SheetOffset(
+          initialFraction ??
+              (() {
+                final screenHeight = MediaQuery.of(context).size.height;
+                final heightFraction = (sheetHeight / screenHeight)
+                    .clamp(minFraction, maxFraction)
+                    ;
+                return heightFraction;
+              })(),
+        ),
         physics: physics,
         snapGrid: snapGrid,
         decoration: decoration ?? defaultDecoration,
-        scrollConfiguration: const SheetScrollConfiguration(),
+        scrollConfiguration:
+            scrollConfiguration ?? const SheetScrollConfiguration(),
         child: contentWidget,
       ),
     );
@@ -220,7 +293,10 @@ class BottomModalSheet extends StatelessWidget {
   Widget _buildContent(BuildContext context) {
     final theme = Theme.of(context);
     final colors = theme.extension<AppColors>();
-    final bottomPadding = MediaQuery.of(context).viewPadding.bottom;
+    final mediaQuery = MediaQuery.of(context);
+    final bottomPadding = mediaQuery.viewInsets.bottom > 0
+        ? mediaQuery.viewInsets.bottom
+        : mediaQuery.viewPadding.bottom;
 
     final defaultPadding = EdgeInsets.only(
       left: 16,
@@ -229,7 +305,57 @@ class BottomModalSheet extends StatelessWidget {
       bottom: bottomPadding + 16,
     );
 
+    final header = <Widget>[
+      if (showDragHandle)
+        Center(
+          child: Container(
+            width: 40,
+            height: 6,
+            margin: const EdgeInsets.symmetric(vertical: 12),
+            decoration: BoxDecoration(
+              color: colors?.deactive ?? Colors.grey,
+              borderRadius: BorderRadius.circular(3),
+            ),
+          ),
+        ),
+      Center(
+        child: Text(
+          title,
+          style: AppTextStyle.h5.copyWith(
+            color: colors?.active ?? Colors.black,
+          ),
+          textAlign: TextAlign.center,
+        ),
+      ),
+      const SizedBox(height: 8),
+      if (description != null)
+        Text(
+          description!,
+          style: AppTextStyle.captionL.copyWith(
+            color: colors?.deactive ?? Colors.grey,
+          ),
+          textAlign: TextAlign.center,
+        ),
+      const SizedBox(height: 24),
+    ];
+
+    final content = scrollable
+        ? Flexible(
+            fit: FlexFit.tight,
+            child: SingleChildScrollView(
+              physics: const BouncingScrollPhysics(
+                  parent: AlwaysScrollableScrollPhysics(),),
+              padding: EdgeInsets.zero,
+              child: child,
+            ),
+          )
+        : Flexible(
+            fit: FlexFit.tight,
+            child: child,
+          );
+
     return Container(
+      margin: margin,
       decoration: BoxDecoration(
         color: backgroundColor ?? colors?.background02,
         borderRadius: BorderRadius.vertical(
@@ -245,38 +371,8 @@ class BottomModalSheet extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              if (showDragHandle)
-                Center(
-                  child: Container(
-                    width: 40,
-                    height: 6,
-                    margin: const EdgeInsets.symmetric(vertical: 12),
-                    decoration: BoxDecoration(
-                      color: colors?.deactive ?? Colors.grey,
-                      borderRadius: BorderRadius.circular(3),
-                    ),
-                  ),
-                ),
-              Center(
-                child: Text(
-                  title,
-                  style: AppTextStyle.h5.copyWith(
-                    color: colors?.active ?? Colors.black,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-              ),
-              const SizedBox(height: 8),
-              if (description != null)
-                Text(
-                  description!,
-                  style: AppTextStyle.captionL.copyWith(
-                    color: colors?.deactive ?? Colors.grey,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-              const SizedBox(height: 32),
-              Expanded(child: child),
+              ...header,
+              content,
             ],
           ),
         ),

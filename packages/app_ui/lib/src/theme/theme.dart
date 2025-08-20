@@ -1,5 +1,6 @@
 import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 
 enum AppThemeType { light, dark }
 
@@ -11,7 +12,8 @@ class AppTheme {
   static const _buttonRadius = 12.0;
 
   // Common component builders
-  static OutlinedBorder defaultCardShape(AppColors colors) => RoundedRectangleBorder(
+  static OutlinedBorder defaultCardShape(AppColors colors) =>
+      RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(_cardRadius),
       );
 
@@ -29,7 +31,10 @@ class AppTheme {
       );
 
   static final lightTheme = ThemeData.light().copyWith(
-    extensions: <ThemeExtension<dynamic>>[AppColors.light],
+    extensions: <ThemeExtension<dynamic>>[
+      AppColors.light,
+      const SkeletonizerConfigData(),
+    ],
     textTheme: ThemeData.light().textTheme.apply(
           bodyColor: AppColors.light.active,
           displayColor: AppColors.light.active,
@@ -39,7 +44,8 @@ class AppTheme {
         textStyle: WidgetStateProperty.all(
           AppTextStyle.buttonS.copyWith(color: AppColors.light.accent),
         ),
-        overlayColor: WidgetStateProperty.all(AppColors.light.accent.withOpacity(0.08)),
+        overlayColor:
+            WidgetStateProperty.all(AppColors.light.accent.withOpacity(0.08)),
         padding: WidgetStateProperty.all(
           const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
         ),
@@ -65,9 +71,11 @@ class AppTheme {
       selectedColor: AppColors.light.accent.withOpacity(0.15),
       secondarySelectedColor: AppColors.light.surfaceHigh,
       padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 10),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(_smallRadius)),
+      shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(_smallRadius),),
       labelStyle: AppTextStyle.body.copyWith(color: AppColors.light.active),
-      secondaryLabelStyle: AppTextStyle.body.copyWith(color: AppColors.light.active),
+      secondaryLabelStyle:
+          AppTextStyle.body.copyWith(color: AppColors.light.active),
       brightness: Brightness.light,
       side: BorderSide(color: AppColors.light.borderLight, width: 0.5),
     ),
@@ -83,17 +91,21 @@ class AppTheme {
       backgroundColor: AppColors.light.surfaceHigh,
       selectedItemColor: AppColors.light.primary,
       unselectedItemColor: AppColors.light.deactive,
-      selectedLabelStyle: AppTextStyle.captionL.copyWith(fontWeight: FontWeight.w600),
+      selectedLabelStyle:
+          AppTextStyle.captionL.copyWith(fontWeight: FontWeight.w600),
       unselectedLabelStyle: AppTextStyle.captionS,
       elevation: 0,
     ),
     listTileTheme: ListTileThemeData(
       tileColor: Colors.transparent,
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      leadingAndTrailingTextStyle: AppTextStyle.chip.copyWith(color: AppColors.light.active),
+      leadingAndTrailingTextStyle:
+          AppTextStyle.chip.copyWith(color: AppColors.light.active),
       titleTextStyle: AppTextStyle.body.copyWith(color: AppColors.light.active),
-      subtitleTextStyle: AppTextStyle.captionL.copyWith(color: AppColors.light.deactive),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(_smallRadius)),
+      subtitleTextStyle:
+          AppTextStyle.captionL.copyWith(color: AppColors.light.deactive),
+      shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(_smallRadius),),
       minLeadingWidth: 24,
       visualDensity: const VisualDensity(vertical: -1),
     ),
@@ -104,8 +116,10 @@ class AppTheme {
     ),
     snackBarTheme: SnackBarThemeData(
       backgroundColor: AppColors.light.surfaceHigh,
-      contentTextStyle: AppTextStyle.bodyBold.copyWith(color: AppColors.light.active),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(_defaultRadius)),
+      contentTextStyle:
+          AppTextStyle.bodyBold.copyWith(color: AppColors.light.active),
+      shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(_defaultRadius),),
       insetPadding: const EdgeInsets.all(16),
       elevation: 0,
       behavior: SnackBarBehavior.floating,
@@ -130,7 +144,8 @@ class AppTheme {
         backgroundColor: WidgetStateProperty.all(AppColors.light.primary),
         elevation: WidgetStateProperty.all(0),
         shape: WidgetStateProperty.all<RoundedRectangleBorder>(
-          RoundedRectangleBorder(borderRadius: BorderRadius.circular(_buttonRadius)),
+          RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(_buttonRadius),),
         ),
         textStyle: WidgetStateProperty.all(
           AppTextStyle.buttonS.copyWith(
@@ -141,7 +156,8 @@ class AppTheme {
         padding: WidgetStateProperty.all(
           const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
         ),
-        overlayColor: WidgetStateProperty.all(AppColors.light.white.withOpacity(0.1)),
+        overlayColor:
+            WidgetStateProperty.all(AppColors.light.white.withOpacity(0.1)),
       ),
     ),
     outlinedButtonTheme: OutlinedButtonThemeData(
@@ -195,8 +211,9 @@ class AppTheme {
     ),
     switchTheme: SwitchThemeData(
       thumbColor: WidgetStateProperty.resolveWith<Color>(
-        (states) =>
-            states.contains(WidgetState.selected) ? AppColors.light.primary : AppColors.light.deactive.withOpacity(0.5),
+        (states) => states.contains(WidgetState.selected)
+            ? AppColors.light.primary
+            : AppColors.light.deactive.withOpacity(0.5),
       ),
       trackColor: WidgetStateProperty.resolveWith<Color>(
         (states) => states.contains(WidgetState.selected)
@@ -204,23 +221,31 @@ class AppTheme {
             : AppColors.light.surfaceHigh,
       ),
       trackOutlineColor: WidgetStateProperty.resolveWith<Color>(
-        (states) => states.contains(WidgetState.selected) ? Colors.transparent : AppColors.light.borderLight,
+        (states) => states.contains(WidgetState.selected)
+            ? Colors.transparent
+            : AppColors.light.borderLight,
       ),
       trackOutlineWidth: WidgetStateProperty.all(1),
     ),
     checkboxTheme: CheckboxThemeData(
       fillColor: WidgetStateProperty.resolveWith<Color>(
-        (states) => states.contains(WidgetState.selected) ? AppColors.light.primary : Colors.transparent,
+        (states) => states.contains(WidgetState.selected)
+            ? AppColors.light.primary
+            : Colors.transparent,
       ),
       checkColor: WidgetStateProperty.resolveWith<Color>(
-        (states) => states.contains(WidgetState.selected) ? AppColors.light.white : Colors.transparent,
+        (states) => states.contains(WidgetState.selected)
+            ? AppColors.light.white
+            : Colors.transparent,
       ),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
       side: BorderSide(color: AppColors.light.borderMedium, width: 1.5),
     ),
     radioTheme: RadioThemeData(
       fillColor: WidgetStateProperty.resolveWith<Color>(
-        (states) => states.contains(WidgetState.selected) ? AppColors.light.primary : AppColors.light.deactive,
+        (states) => states.contains(WidgetState.selected)
+            ? AppColors.light.primary
+            : AppColors.light.deactive,
       ),
     ),
     tabBarTheme: TabBarThemeData(
@@ -234,7 +259,8 @@ class AppTheme {
       ),
       labelStyle: AppTextStyle.bodyBold,
       unselectedLabelStyle: AppTextStyle.body,
-      overlayColor: WidgetStateProperty.all(AppColors.light.primary.withOpacity(0.08)),
+      overlayColor:
+          WidgetStateProperty.all(AppColors.light.primary.withOpacity(0.08)),
       dividerColor: AppColors.light.divider,
     ),
     dialogTheme: DialogThemeData(
@@ -248,7 +274,8 @@ class AppTheme {
         color: AppColors.light.active,
         fontWeight: FontWeight.w600,
       ),
-      contentTextStyle: AppTextStyle.body.copyWith(color: AppColors.light.active),
+      contentTextStyle:
+          AppTextStyle.body.copyWith(color: AppColors.light.active),
     ),
     tooltipTheme: TooltipThemeData(
       decoration: BoxDecoration(
@@ -260,7 +287,8 @@ class AppTheme {
     ),
     bannerTheme: MaterialBannerThemeData(
       backgroundColor: AppColors.light.surfaceHigh,
-      contentTextStyle: AppTextStyle.body.copyWith(color: AppColors.light.active),
+      contentTextStyle:
+          AppTextStyle.body.copyWith(color: AppColors.light.active),
       elevation: 0,
       padding: const EdgeInsets.all(16),
     ),
@@ -272,7 +300,8 @@ class AppTheme {
         color: AppColors.light.primary,
         fontWeight: FontWeight.w600,
       ),
-      unselectedLabelTextStyle: AppTextStyle.captionL.copyWith(color: AppColors.light.deactive),
+      unselectedLabelTextStyle:
+          AppTextStyle.captionL.copyWith(color: AppColors.light.deactive),
     ),
     navigationBarTheme: NavigationBarThemeData(
       backgroundColor: AppColors.light.surfaceHigh,
@@ -308,19 +337,26 @@ class AppTheme {
     segmentedButtonTheme: SegmentedButtonThemeData(
       style: ButtonStyle(
         backgroundColor: WidgetStateProperty.resolveWith<Color>(
-          (states) =>
-              states.contains(WidgetState.selected) ? AppColors.light.primary.withOpacity(0.2) : Colors.transparent,
+          (states) => states.contains(WidgetState.selected)
+              ? AppColors.light.primary.withOpacity(0.2)
+              : Colors.transparent,
         ),
         foregroundColor: WidgetStateProperty.resolveWith<Color>(
-          (states) => states.contains(WidgetState.selected) ? AppColors.light.primary : AppColors.light.deactive,
+          (states) => states.contains(WidgetState.selected)
+              ? AppColors.light.primary
+              : AppColors.light.deactive,
         ),
-        side: WidgetStateProperty.all(BorderSide(color: AppColors.light.borderLight)),
+        side: WidgetStateProperty.all(
+            BorderSide(color: AppColors.light.borderLight),),
       ),
     ),
   );
 
   static final darkTheme = ThemeData.dark().copyWith(
-    extensions: <ThemeExtension<dynamic>>[AppColors.dark],
+    extensions: <ThemeExtension<dynamic>>[
+      AppColors.dark,
+      const SkeletonizerConfigData(),
+    ],
     textTheme: ThemeData.dark().textTheme.apply(
           bodyColor: AppColors.dark.active,
           displayColor: AppColors.dark.active,
@@ -330,7 +366,8 @@ class AppTheme {
         textStyle: WidgetStateProperty.all(
           AppTextStyle.buttonS.copyWith(color: AppColors.dark.accent),
         ),
-        overlayColor: WidgetStateProperty.all(AppColors.dark.accent.withOpacity(0.08)),
+        overlayColor:
+            WidgetStateProperty.all(AppColors.dark.accent.withOpacity(0.08)),
         padding: WidgetStateProperty.all(
           const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
         ),
@@ -355,9 +392,11 @@ class AppTheme {
       selectedColor: AppColors.dark.accent.withOpacity(0.15),
       secondarySelectedColor: AppColors.dark.surfaceHigh,
       padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 10),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(_smallRadius)),
+      shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(_smallRadius),),
       labelStyle: AppTextStyle.body.copyWith(color: AppColors.dark.active),
-      secondaryLabelStyle: AppTextStyle.body.copyWith(color: AppColors.dark.active),
+      secondaryLabelStyle:
+          AppTextStyle.body.copyWith(color: AppColors.dark.active),
       brightness: Brightness.dark,
       side: BorderSide(color: AppColors.dark.borderLight, width: 0.5),
     ),
@@ -373,17 +412,21 @@ class AppTheme {
       backgroundColor: AppColors.dark.surfaceHigh,
       selectedItemColor: AppColors.dark.primary,
       unselectedItemColor: AppColors.dark.deactive,
-      selectedLabelStyle: AppTextStyle.captionL.copyWith(fontWeight: FontWeight.w600),
+      selectedLabelStyle:
+          AppTextStyle.captionL.copyWith(fontWeight: FontWeight.w600),
       unselectedLabelStyle: AppTextStyle.captionS,
       elevation: 0,
     ),
     listTileTheme: ListTileThemeData(
       tileColor: Colors.transparent,
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      leadingAndTrailingTextStyle: AppTextStyle.chip.copyWith(color: AppColors.dark.active),
+      leadingAndTrailingTextStyle:
+          AppTextStyle.chip.copyWith(color: AppColors.dark.active),
       titleTextStyle: AppTextStyle.body.copyWith(color: AppColors.dark.active),
-      subtitleTextStyle: AppTextStyle.captionL.copyWith(color: AppColors.dark.deactive),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(_smallRadius)),
+      subtitleTextStyle:
+          AppTextStyle.captionL.copyWith(color: AppColors.dark.deactive),
+      shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(_smallRadius),),
       minLeadingWidth: 24,
       visualDensity: const VisualDensity(vertical: -1),
     ),
@@ -394,8 +437,10 @@ class AppTheme {
     ),
     snackBarTheme: SnackBarThemeData(
       backgroundColor: AppColors.dark.surfaceHigh,
-      contentTextStyle: AppTextStyle.bodyBold.copyWith(color: AppColors.dark.active),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(_defaultRadius)),
+      contentTextStyle:
+          AppTextStyle.bodyBold.copyWith(color: AppColors.dark.active),
+      shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(_defaultRadius),),
       insetPadding: const EdgeInsets.all(16),
       elevation: 0,
       behavior: SnackBarBehavior.floating,
@@ -420,7 +465,8 @@ class AppTheme {
         backgroundColor: WidgetStateProperty.all(AppColors.dark.primary),
         elevation: WidgetStateProperty.all(0),
         shape: WidgetStateProperty.all<RoundedRectangleBorder>(
-          RoundedRectangleBorder(borderRadius: BorderRadius.circular(_buttonRadius)),
+          RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(_buttonRadius),),
         ),
         textStyle: WidgetStateProperty.all(
           AppTextStyle.buttonS.copyWith(
@@ -431,7 +477,8 @@ class AppTheme {
         padding: WidgetStateProperty.all(
           const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
         ),
-        overlayColor: WidgetStateProperty.all(AppColors.dark.white.withOpacity(0.1)),
+        overlayColor:
+            WidgetStateProperty.all(AppColors.dark.white.withOpacity(0.1)),
       ),
     ),
     outlinedButtonTheme: OutlinedButtonThemeData(
@@ -485,8 +532,9 @@ class AppTheme {
     ),
     switchTheme: SwitchThemeData(
       thumbColor: WidgetStateProperty.resolveWith<Color>(
-        (states) =>
-            states.contains(WidgetState.selected) ? AppColors.dark.primary : AppColors.dark.deactive.withOpacity(0.5),
+        (states) => states.contains(WidgetState.selected)
+            ? AppColors.dark.primary
+            : AppColors.dark.deactive.withOpacity(0.5),
       ),
       trackColor: WidgetStateProperty.resolveWith<Color>(
         (states) => states.contains(WidgetState.selected)
@@ -494,23 +542,31 @@ class AppTheme {
             : AppColors.dark.surfaceHigh,
       ),
       trackOutlineColor: WidgetStateProperty.resolveWith<Color>(
-        (states) => states.contains(WidgetState.selected) ? Colors.transparent : AppColors.dark.borderLight,
+        (states) => states.contains(WidgetState.selected)
+            ? Colors.transparent
+            : AppColors.dark.borderLight,
       ),
       trackOutlineWidth: WidgetStateProperty.all(1),
     ),
     checkboxTheme: CheckboxThemeData(
       fillColor: WidgetStateProperty.resolveWith<Color>(
-        (states) => states.contains(WidgetState.selected) ? AppColors.dark.primary : Colors.transparent,
+        (states) => states.contains(WidgetState.selected)
+            ? AppColors.dark.primary
+            : Colors.transparent,
       ),
       checkColor: WidgetStateProperty.resolveWith<Color>(
-        (states) => states.contains(WidgetState.selected) ? AppColors.dark.white : Colors.transparent,
+        (states) => states.contains(WidgetState.selected)
+            ? AppColors.dark.white
+            : Colors.transparent,
       ),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
       side: BorderSide(color: AppColors.dark.borderMedium, width: 1.5),
     ),
     radioTheme: RadioThemeData(
       fillColor: WidgetStateProperty.resolveWith<Color>(
-        (states) => states.contains(WidgetState.selected) ? AppColors.dark.primary : AppColors.dark.deactive,
+        (states) => states.contains(WidgetState.selected)
+            ? AppColors.dark.primary
+            : AppColors.dark.deactive,
       ),
     ),
     tabBarTheme: TabBarThemeData(
@@ -524,7 +580,8 @@ class AppTheme {
       ),
       labelStyle: AppTextStyle.bodyBold,
       unselectedLabelStyle: AppTextStyle.body,
-      overlayColor: WidgetStateProperty.all(AppColors.dark.primary.withOpacity(0.08)),
+      overlayColor:
+          WidgetStateProperty.all(AppColors.dark.primary.withOpacity(0.08)),
       dividerColor: AppColors.dark.divider,
     ),
     dialogTheme: DialogThemeData(
@@ -538,7 +595,8 @@ class AppTheme {
         color: AppColors.dark.active,
         fontWeight: FontWeight.w600,
       ),
-      contentTextStyle: AppTextStyle.body.copyWith(color: AppColors.dark.active),
+      contentTextStyle:
+          AppTextStyle.body.copyWith(color: AppColors.dark.active),
     ),
     tooltipTheme: TooltipThemeData(
       decoration: BoxDecoration(
@@ -550,7 +608,8 @@ class AppTheme {
     ),
     bannerTheme: MaterialBannerThemeData(
       backgroundColor: AppColors.dark.surfaceHigh,
-      contentTextStyle: AppTextStyle.body.copyWith(color: AppColors.dark.active),
+      contentTextStyle:
+          AppTextStyle.body.copyWith(color: AppColors.dark.active),
       elevation: 0,
       padding: const EdgeInsets.all(16),
     ),
@@ -562,7 +621,8 @@ class AppTheme {
         color: AppColors.dark.primary,
         fontWeight: FontWeight.w600,
       ),
-      unselectedLabelTextStyle: AppTextStyle.captionL.copyWith(color: AppColors.dark.deactive),
+      unselectedLabelTextStyle:
+          AppTextStyle.captionL.copyWith(color: AppColors.dark.deactive),
     ),
     navigationBarTheme: NavigationBarThemeData(
       backgroundColor: AppColors.dark.surfaceHigh,
@@ -598,13 +658,17 @@ class AppTheme {
     segmentedButtonTheme: SegmentedButtonThemeData(
       style: ButtonStyle(
         backgroundColor: WidgetStateProperty.resolveWith<Color>(
-          (states) =>
-              states.contains(WidgetState.selected) ? AppColors.dark.primary.withOpacity(0.2) : Colors.transparent,
+          (states) => states.contains(WidgetState.selected)
+              ? AppColors.dark.primary.withOpacity(0.2)
+              : Colors.transparent,
         ),
         foregroundColor: WidgetStateProperty.resolveWith<Color>(
-          (states) => states.contains(WidgetState.selected) ? AppColors.dark.primary : AppColors.dark.deactive,
+          (states) => states.contains(WidgetState.selected)
+              ? AppColors.dark.primary
+              : AppColors.dark.deactive,
         ),
-        side: WidgetStateProperty.all(BorderSide(color: AppColors.dark.borderLight)),
+        side: WidgetStateProperty.all(
+            BorderSide(color: AppColors.dark.borderLight),),
       ),
     ),
     progressIndicatorTheme: ProgressIndicatorThemeData(
@@ -645,7 +709,8 @@ class AppTheme {
           textStyle: WidgetStateProperty.all(
             AppTextStyle.buttonS.copyWith(color: colors.accent),
           ),
-          overlayColor: WidgetStateProperty.all(colors.accent.withOpacity(0.08)),
+          overlayColor:
+              WidgetStateProperty.all(colors.accent.withOpacity(0.08)),
           padding: WidgetStateProperty.all(
             const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
           ),
@@ -670,7 +735,8 @@ class AppTheme {
         backgroundColor: colors.surfaceHigh,
         selectedItemColor: colors.primary,
         unselectedItemColor: colors.deactive,
-        selectedLabelStyle: AppTextStyle.captionL.copyWith(fontWeight: FontWeight.w600),
+        selectedLabelStyle:
+            AppTextStyle.captionL.copyWith(fontWeight: FontWeight.w600),
         unselectedLabelStyle: AppTextStyle.captionS,
         elevation: 0,
       ),
@@ -693,7 +759,8 @@ class AppTheme {
           backgroundColor: WidgetStateProperty.all(colors.primary),
           elevation: WidgetStateProperty.all(0),
           shape: WidgetStateProperty.all<RoundedRectangleBorder>(
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(_buttonRadius)),
+            RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(_buttonRadius),),
           ),
           textStyle: WidgetStateProperty.all(
             AppTextStyle.buttonS.copyWith(
@@ -709,13 +776,19 @@ class AppTheme {
       ),
       switchTheme: SwitchThemeData(
         thumbColor: WidgetStateProperty.resolveWith<Color>(
-          (states) => states.contains(WidgetState.selected) ? colors.primary : colors.deactive.withOpacity(0.5),
+          (states) => states.contains(WidgetState.selected)
+              ? colors.primary
+              : colors.deactive.withOpacity(0.5),
         ),
         trackColor: WidgetStateProperty.resolveWith<Color>(
-          (states) => states.contains(WidgetState.selected) ? colors.primary.withOpacity(0.3) : colors.surfaceHigh,
+          (states) => states.contains(WidgetState.selected)
+              ? colors.primary.withOpacity(0.3)
+              : colors.surfaceHigh,
         ),
         trackOutlineColor: WidgetStateProperty.resolveWith<Color>(
-          (states) => states.contains(WidgetState.selected) ? Colors.transparent : colors.borderLight,
+          (states) => states.contains(WidgetState.selected)
+              ? Colors.transparent
+              : colors.borderLight,
         ),
         trackOutlineWidth: WidgetStateProperty.all(1),
       ),
@@ -737,7 +810,8 @@ class AppTheme {
   }
 
   // Utility functions for common UI elements
-  static BoxDecoration cardDecoration(BuildContext context, {bool isActive = false, Color? highlightColor}) {
+  static BoxDecoration cardDecoration(BuildContext context,
+      {bool isActive = false, Color? highlightColor,}) {
     final colors = Theme.of(context).extension<AppColors>()!;
     final accentColor = highlightColor ?? colors.accent;
 
@@ -747,7 +821,8 @@ class AppTheme {
     );
   }
 
-  static BoxDecoration chipDecoration(BuildContext context, {bool isSelected = false, Color? color}) {
+  static BoxDecoration chipDecoration(BuildContext context,
+      {bool isSelected = false, Color? color,}) {
     final colors = Theme.of(context).extension<AppColors>()!;
     final chipColor = color ?? colors.primary;
 

@@ -8,17 +8,19 @@ class PrimaryTabButton extends StatelessWidget {
     required this.notifier,
     required this.text,
     required this.itemIndex,
+    this.icon,
     super.key,
   });
   final String text;
   final int itemIndex;
   final ValueNotifier<int> notifier;
   final VoidCallback onClick;
+  final Widget? icon;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 32,
+      height: 40,
       padding: const EdgeInsets.symmetric(horizontal: 5),
       child: ValueListenableBuilder(
         valueListenable: notifier,
@@ -37,22 +39,37 @@ class PrimaryTabButton extends StatelessWidget {
                 backgroundColor: notifier.value == itemIndex
                     ? Theme.of(context).extension<AppColors>()!.primary
                     : Theme.of(context).extension<AppColors>()!.background01,
+                minimumSize: const Size(60, 32),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
               ),
             ),
             color: notifier.value == itemIndex
                 ? Theme.of(context).extension<AppColors>()!.primary
                 : Theme.of(context).extension<AppColors>()!.background01,
             cupertino: (_, __) => CupertinoElevatedButtonData(
-              padding: EdgeInsets.zero,
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
               borderRadius: BorderRadius.circular(50),
             ),
-            child: Text(
-              text,
-              style: AppTextStyle.tab.copyWith(
-                color: notifier.value == itemIndex
-                    ? Theme.of(context).extension<AppColors>()!.active
-                    : Theme.of(context).extension<AppColors>()!.deactive.withAlpha(200),
-              ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (icon != null) ...[
+                  icon!,
+                  const SizedBox(width: 8),
+                ],
+                Text(
+                  text,
+                  style: AppTextStyle.tab.copyWith(
+                    color: notifier.value == itemIndex
+                        ? Theme.of(context).extension<AppColors>()!.active
+                        : Theme.of(context)
+                            .extension<AppColors>()!
+                            .deactive
+                            .withAlpha(200),
+                  ),
+                ),
+              ],
             ),
           );
         },

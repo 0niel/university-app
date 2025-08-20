@@ -74,7 +74,10 @@ class CategoryTabBar extends StatelessWidget {
   }
 
   Widget _buildTab(
-      BuildContext context, int index, ValueNotifier<int> notifier) {
+    BuildContext context,
+    int index,
+    ValueNotifier<int> notifier,
+  ) {
     return PrimaryTabButton(
       text: tabs[index],
       itemIndex: index,
@@ -102,6 +105,7 @@ class CategoryAnimatedTabBar extends StatefulWidget {
     this.physics = const BouncingScrollPhysics(),
     this.scrollDirection = Axis.horizontal,
     this.padding = EdgeInsets.zero,
+    this.onDoubleTap,
     super.key,
   });
 
@@ -116,6 +120,9 @@ class CategoryAnimatedTabBar extends StatefulWidget {
 
   /// Called when a tab is tapped.
   final void Function(int index) onTap;
+
+  /// Called when a tab is double tapped.
+  final void Function(int index)? onDoubleTap;
 
   /// The height of the tab bar. Defaults to 40.
   final double height;
@@ -188,14 +195,23 @@ class _CategoryAnimatedTabBarState extends State<CategoryAnimatedTabBar> {
         });
         widget.onTap(index);
       },
+      onDoubleTap:
+          widget.onDoubleTap != null ? () => widget.onDoubleTap!(index) : null,
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 300),
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeOutCubic,
         margin: const EdgeInsets.only(right: AppSpacing.sm),
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-        decoration: BoxDecoration(
-          color: isSelected ? colors.primary : colors.background02,
-          borderRadius: BorderRadius.circular(20),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.lg,
+          vertical: AppSpacing.sm,
         ),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? colors.primary.withOpacity(0.08)
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        constraints: const BoxConstraints(minWidth: 56),
         child: Center(
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -208,11 +224,17 @@ class _CategoryAnimatedTabBarState extends State<CategoryAnimatedTabBar> {
               ],
               Text(
                 widget.tabs[index],
-                style: TextStyle(
-                  color: isSelected ? Colors.white : colors.deactive,
-                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                  fontSize: 14,
-                ),
+                style: isSelected
+                    ? AppTextStyle.tab.copyWith(
+                        color: colors.primary,
+                        fontWeight: FontWeight.w700,
+                      )
+                    : AppTextStyle.tab.copyWith(
+                        color: colors.deactive,
+                        fontWeight: FontWeight.w600,
+                      ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
             ],
           ),

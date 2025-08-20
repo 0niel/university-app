@@ -50,7 +50,6 @@ class _GalleryImageItemState extends State<GalleryImageItem> {
         _isLoading = true;
       });
 
-      // Use the DefaultCacheManager to get the file
       final file = await DefaultCacheManager().getSingleFile(widget.imageUrl);
       await OpenFilex.open(file.path, type: 'image/jpeg');
     } catch (e) {
@@ -90,9 +89,8 @@ class _GalleryImageItemState extends State<GalleryImageItem> {
                 fit: BoxFit.cover,
                 width: double.infinity,
                 height: double.infinity,
-                memCacheWidth: 320, // Optimize memory usage
-                maxWidthDiskCache: 640, // Optimize disk usage
-                // Set cache lifetime to 1 day (implicitly handled by CacheManager)
+                memCacheWidth: 320,
+                maxWidthDiskCache: 640,
                 cacheManager: DefaultCacheManager(),
                 placeholder: (context, url) => ColoredBox(
                   color: colors.background03,
@@ -115,12 +113,13 @@ class _GalleryImageItemState extends State<GalleryImageItem> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           SizedBox(
-                              height: 32,
-                              width: 32,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 3,
-                                color: colors.white,
-                              ),),
+                            height: 32,
+                            width: 32,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 3,
+                              color: colors.white,
+                            ),
+                          ),
                           const SizedBox(height: 8),
                           Text(
                             'Открытие...',
