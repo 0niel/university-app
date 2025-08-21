@@ -75,6 +75,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "6.11.0"
+  analyzer_plugin:
+    dependency: transitive
+    description:
+      name: analyzer_plugin
+      sha256: "9661b30b13a685efaee9f02e5d01ed9f2b423bd889d28a304d02d704aee69161"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.11.3"
   ansi_styles:
     dependency: transitive
     description:
@@ -352,6 +360,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.10.0"
+  ci:
+    dependency: transitive
+    description:
+      name: ci
+      sha256: "145d095ce05cddac4d797a158bc4cf3b6016d1fe63d8c3d2fbd7212590adca13"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.1.0"
   cli_launcher:
     dependency: transitive
     description:
@@ -479,6 +495,30 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.2.1"
+  custom_lint:
+    dependency: "direct dev"
+    description:
+      name: custom_lint
+      sha256: "4500e88854e7581ee43586abeaf4443cb22375d6d289241a87b1aadf678d5545"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.6.10"
+  custom_lint_builder:
+    dependency: transitive
+    description:
+      name: custom_lint_builder
+      sha256: "5a95eff100da256fbf086b329c17c8b49058c261cdf56d3a4157d3c31c511d78"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.6.10"
+  custom_lint_core:
+    dependency: transitive
+    description:
+      name: custom_lint_core
+      sha256: "76a4046cc71d976222a078a8fd4a65e198b70545a8d690a75196dd14f08510f6"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.6.10"
   dart_frog:
     dependency: transitive
     description:
@@ -3223,6 +3263,30 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.0"
+  yx_scope:
+    dependency: "direct main"
+    description:
+      name: yx_scope
+      sha256: "9ba98b442261596311363bf7361622e5ccc67189705b8d042ca23c9de366f8bf"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.1.2"
+  yx_scope_flutter:
+    dependency: "direct main"
+    description:
+      name: yx_scope_flutter
+      sha256: aff9d99986cf0a2779f4d6fb3692c73b87c94a9239c84c27c2544fafe6068213
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.1.2"
+  yx_scope_linter:
+    dependency: "direct dev"
+    description:
+      name: yx_scope_linter
+      sha256: aeeaa6902ecbd3cb43a6ccea6af0f6687a033ffa79f436168fa4f7f0b8000954
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.1.4"
 sdks:
   dart: ">=3.8.0 <4.0.0"
   flutter: ">=3.32.0"
