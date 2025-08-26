@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   social-media-fetcher:
     build:
@@ -8,21 +6,43 @@ services:
     container_name: university-app-social-media-fetcher
     env_file:
       - .env
-    ports:
-      - "8001:8000"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.constraint-label-stack=social"
+      - "traefik.http.routers.social-media-fetcher.rule=PathPrefix(`/`)"
+      - "traefik.http.routers.social-media-fetcher.entrypoints=web"
+      - "traefik.http.services.social-media-fetcher.loadbalancer.server.port=8000"
+      - "traefik.http.routers.social-media-fetcher.middlewares=social-media-fetcher-auth"
+      - "traefik.http.middlewares.social-media-fetcher-auth.basicauth.users=${TRAEFIK_BASIC_AUTH_USERS?Please set TRAEFIK_BASIC_AUTH_USERS in api/.env (htpasswd format)}"
     volumes:
       - sessions_data:/app/sessions
       - app_data:/app/data
       - logs_data:/app/logs
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 40s
     depends_on:
       - redis
+
+  traefik:
+    image: traefik:2.10
+    container_name: university-app-traefik-social
+    command:
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--providers.docker.constraints=Label(`traefik.constraint-label-stack`,`social`)"
+      - "--entrypoints.web.address=:8002"
+      - "--entrypoints.traefik.address=:8080"
+      - "--ping=true"
+    ports:
+      - "8002:8002"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    restart: unless-stopped
 
   redis:
     image: redis:7-alpine

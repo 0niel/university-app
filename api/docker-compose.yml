@@ -1,5 +1,3 @@
-version: "3.9"
-
 services:
   traefik:
     image: traefik:v3.3
@@ -19,7 +17,7 @@ services:
       - --certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json
     restart: unless-stopped
     ports:
-      - 80:80
+      - 8000:80
       - 443:443
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
@@ -31,7 +29,9 @@ services:
       - application
 
   backend:
-    build: /build
+    build:
+      context: .
+      dockerfile: Dockerfile
     networks:
       - application
       - default
@@ -41,8 +41,8 @@ services:
       - traefik.enable=true
       - traefik.constraint-label-stack=api
       - traefik.docker.network=application
-      - traefik.http.services.api.loadbalancer.server.port=8080
-      #http
+      - traefik.http.services.api.loadbalancer.server.port=8000
+      # http
       - traefik.http.routers.api_http.entrypoints=api_web
       - traefik.http.routers.api_http.rule=(Host(`${API_HOST}`) && PathPrefix(`/api`))
       - traefik.http.routers.api_http.service=api
