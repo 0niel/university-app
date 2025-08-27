@@ -545,6 +545,10 @@
   "@search": {
     "description": "Search placeholder text"
   },
+  "all": "All",
+  "@all": {
+    "description": "Search mode - all results"
+  },
   "error": "Error",
   "@error": {
     "description": "Error title"
@@ -1376,10 +1380,6 @@
   "findScheduleForClassroom": "You can quickly find a schedule for this classroom using schedule search.",
   "@findScheduleForClassroom": {
     "description": "Classroom schedule search description"
-  },
-  "rtuMireaApp": "RTU MIREA App",
-  "@rtuMireaApp": {
-    "description": "App title"
   },
   "newYearHolidays": "New Year holidays",
   "@newYearHolidays": {

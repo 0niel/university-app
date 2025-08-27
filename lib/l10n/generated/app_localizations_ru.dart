@@ -99,14 +99,21 @@ class AppLocalizationsRu extends AppLocalizations {
   String get noClassesThisDay => 'Нет занятий в этот день';
 
   @override
-  String get canRestOrStudy => 'Можно отдохнуть или заняться самостоятельной работой';
+  String get canRestOrStudy =>
+      'Можно отдохнуть или заняться самостоятельной работой';
 
   @override
   String get goToAnotherDay => 'Перейти к другому дню';
 
   @override
   String classesCount(int count) {
-    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: 'пар', few: 'пары', one: 'пара');
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'пар',
+      few: 'пары',
+      one: 'пара',
+    );
     return '$_temp0';
   }
 
@@ -159,13 +166,15 @@ class AppLocalizationsRu extends AppLocalizations {
   String get courseProject => 'Курсовой проект';
 
   @override
-  String get mapsOnlyOnMobile => 'Карты доступны только на мобильных устройствах';
+  String get mapsOnlyOnMobile =>
+      'Карты доступны только на мобильных устройствах';
 
   @override
   String get scheduleAnalyticsTitle => 'Аналитика расписания';
 
   @override
-  String get scheduleAnalyticsDescription => 'Статистика и анализ вашего учебного расписания';
+  String get scheduleAnalyticsDescription =>
+      'Статистика и анализ вашего учебного расписания';
 
   @override
   String get loadByDays => 'Загрузка по дням';
@@ -183,7 +192,8 @@ class AppLocalizationsRu extends AppLocalizations {
   String get noDataForAnalytics => 'Нет данных для аналитики';
 
   @override
-  String get selectAnotherSchedule => 'Выберите другое расписание или проверьте наличие занятий';
+  String get selectAnotherSchedule =>
+      'Выберите другое расписание или проверьте наличие занятий';
 
   @override
   String get exportData => 'Экспорт данных';
@@ -295,7 +305,8 @@ class AppLocalizationsRu extends AppLocalizations {
   String get end => 'Конец';
 
   @override
-  String get endTimeMustBeAfterStart => 'Время окончания должно быть позже времени начала';
+  String get endTimeMustBeAfterStart =>
+      'Время окончания должно быть позже времени начала';
 
   @override
   String get classNumber => 'Номер пары';
@@ -319,7 +330,8 @@ class AppLocalizationsRu extends AppLocalizations {
   String get selectAtLeastOneDate => 'Выберите хотя бы одну дату проведения';
 
   @override
-  String get addAtLeastOneClassroom => 'Добавьте хотя бы одну аудиторию или сделайте занятие онлайн';
+  String get addAtLeastOneClassroom =>
+      'Добавьте хотя бы одну аудиторию или сделайте занятие онлайн';
 
   @override
   String get noSelectedDates => 'Нет выбранных дат';
@@ -369,7 +381,8 @@ class AppLocalizationsRu extends AppLocalizations {
   String get deleteScheduleTitle => 'Удаление расписания';
 
   @override
-  String get deleteScheduleMessage => 'Вы уверены, что хотите удалить это расписание?';
+  String get deleteScheduleMessage =>
+      'Вы уверены, что хотите удалить это расписание?';
 
   @override
   String get makeActive => 'Сделать активным';
@@ -410,6 +423,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get search => 'Поиск';
 
   @override
+  String get all => 'Все';
+
+  @override
   String get error => 'Ошибка';
 
   @override
@@ -428,7 +444,8 @@ class AppLocalizationsRu extends AppLocalizations {
   String get scheduleDeleted => 'Расписание удалено';
 
   @override
-  String get deleteScheduleConfirmationDialog => 'Вы уверены, что хотите удалить это расписание?';
+  String get deleteScheduleConfirmationDialog =>
+      'Вы уверены, что хотите удалить это расписание?';
 
   @override
   String get active => 'Активен';
@@ -461,7 +478,8 @@ class AppLocalizationsRu extends AppLocalizations {
   String get scheduleComment => 'Комментарий к расписанию';
 
   @override
-  String get addOrEditNote => 'Добавьте или отредактируйте заметку к расписанию';
+  String get addOrEditNote =>
+      'Добавьте или отредактируйте заметку к расписанию';
 
   @override
   String get editComment => 'Редактировать комментарий';
@@ -482,19 +500,22 @@ class AppLocalizationsRu extends AppLocalizations {
   String get noAddedGroups => 'Нет добавленных групп';
 
   @override
-  String get addGroupToSeeSchedule => 'Добавьте группу, чтобы видеть её расписание';
+  String get addGroupToSeeSchedule =>
+      'Добавьте группу, чтобы видеть её расписание';
 
   @override
   String get noAddedTeachers => 'Нет добавленных преподавателей';
 
   @override
-  String get addTeacherToSeeSchedule => 'Добавьте преподавателя, чтобы видеть его расписание';
+  String get addTeacherToSeeSchedule =>
+      'Добавьте преподавателя, чтобы видеть его расписание';
 
   @override
   String get noAddedClassrooms => 'Нет добавленных аудиторий';
 
   @override
-  String get addClassroomToSeeSchedule => 'Добавьте аудиторию, чтобы видеть её расписание';
+  String get addClassroomToSeeSchedule =>
+      'Добавьте аудиторию, чтобы видеть её расписание';
 
   @override
   String get failedToLoadSchedules => 'Не удалось загрузить расписания';
@@ -560,7 +581,8 @@ class AppLocalizationsRu extends AppLocalizations {
   String get showEmptyClassesSettings => 'Показывать пустые пары';
 
   @override
-  String get showCommentIndicatorsSettings => 'Показывать индикаторы комментариев';
+  String get showCommentIndicatorsSettings =>
+      'Показывать индикаторы комментариев';
 
   @override
   String get compactCardModeSettings => 'Компактный режим карточек';
@@ -569,10 +591,10 @@ class AppLocalizationsRu extends AppLocalizations {
   String get holiday => 'Выходной';
 
   @override
-  String get selectExisting => 'Выбрать существующее';
+  String get selectExisting => 'В существующее';
 
   @override
-  String get createNew => 'Создать новое';
+  String get createNew => 'Новое';
 
   @override
   String get scheduleName => 'Название расписания';
@@ -596,7 +618,8 @@ class AppLocalizationsRu extends AppLocalizations {
   String get quickWayToWeek => 'Быстрый способ перейти к определённой неделе';
 
   @override
-  String get selectUpToFourSchedules => 'Выберите до 4-х расписаний, чтобы сравнить их по дням';
+  String get selectUpToFourSchedules =>
+      'Выберите до 4-х расписаний, чтобы сравнить их по дням';
 
   @override
   String get addToSchedule => 'Добавить в расписание';
@@ -615,7 +638,8 @@ class AppLocalizationsRu extends AppLocalizations {
   String get scheduleCreation => 'Создание расписания';
 
   @override
-  String get enterNameAndDescription => 'Введите название и описание для нового расписания';
+  String get enterNameAndDescription =>
+      'Введите название и описание для нового расписания';
 
   @override
   String get scheduleNameLabel => 'Название расписания';
@@ -627,7 +651,8 @@ class AppLocalizationsRu extends AppLocalizations {
   String get descriptionOptionalLabel => 'Описание (необязательно)';
 
   @override
-  String get addScheduleDescriptionPlaceholder => 'Добавьте описание расписания';
+  String get addScheduleDescriptionPlaceholder =>
+      'Добавьте описание расписания';
 
   @override
   String get editScheduleTitle => 'Редактирование расписания';
@@ -659,13 +684,16 @@ class AppLocalizationsRu extends AppLocalizations {
   String get teacherNameExample => 'Например: Иванов Иван Иванович';
 
   @override
-  String get endTimeMustBeAfterStartTime => 'Время окончания должно быть позже времени начала';
+  String get endTimeMustBeAfterStartTime =>
+      'Время окончания должно быть позже времени начала';
 
   @override
-  String get selectAtLeastOneDateError => 'Выберите хотя бы одну дату проведения';
+  String get selectAtLeastOneDateError =>
+      'Выберите хотя бы одну дату проведения';
 
   @override
-  String get addAtLeastOneClassroomError => 'Добавьте хотя бы одну аудиторию или сделайте занятие онлайн';
+  String get addAtLeastOneClassroomError =>
+      'Добавьте хотя бы одну аудиторию или сделайте занятие онлайн';
 
   @override
   String get selectDatesButtonText => 'Выбрать даты';
@@ -712,7 +740,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get supportOurService => 'Поддержите наш сервис';
 
   @override
-  String get leaveAd => 'Оставить рекламу';
+  String get leaveAd => 'Оставить';
 
   @override
   String get disable => 'Отключить';
@@ -809,13 +837,15 @@ class AppLocalizationsRu extends AppLocalizations {
   String get kisDepartment => 'Кафедра КИС';
 
   @override
-  String get corporateInformationSystems => 'Кафедра Корпоративных информационных систем';
+  String get corporateInformationSystems =>
+      'Кафедра Корпоративных информационных систем';
 
   @override
   String get ippoDepartment => 'Кафедра ИППО';
 
   @override
-  String get instrumentalAndAppliedSoftware => 'Кафедра Инструментального и прикладного программного обеспечения';
+  String get instrumentalAndAppliedSoftware =>
+      'Кафедра Инструментального и прикладного программного обеспечения';
 
   @override
   String get competitiveProgrammingMirea => 'Спортивное программирование МИРЭА';
@@ -828,7 +858,8 @@ class AppLocalizationsRu extends AppLocalizations {
   String get personalAccount => 'Личный кабинет';
 
   @override
-  String get accessToGradesAndServices => 'Доступ к оценкам, заявлениям и другим сервисам';
+  String get accessToGradesAndServices =>
+      'Доступ к оценкам, заявлениям и другим сервисам';
 
   @override
   String get openAction => 'Открыть';
@@ -891,7 +922,8 @@ class AppLocalizationsRu extends AppLocalizations {
   String get virtualTour => 'Виртуальный тур';
 
   @override
-  String get interactiveUniversityTour => 'Интерактивная экскурсия по корпусам университета';
+  String get interactiveUniversityTour =>
+      'Интерактивная экскурсия по корпусам университета';
 
   @override
   String get startupAccelerator => 'Стартап-акселератор';
@@ -903,7 +935,8 @@ class AppLocalizationsRu extends AppLocalizations {
   String get corporatePortal => 'Корпоративный портал';
 
   @override
-  String get accessForTeachersAndStaff => 'Доступ для преподавателей и сотрудников';
+  String get accessForTeachersAndStaff =>
+      'Доступ для преподавателей и сотрудников';
 
   @override
   String get mainServices => 'Основные сервисы';
@@ -944,7 +977,8 @@ class AppLocalizationsRu extends AppLocalizations {
   String get description => 'Описание';
 
   @override
-  String get itemDescription => 'Подробности о предмете, где и когда был найден/утерян...';
+  String get itemDescription =>
+      'Подробности о предмете, где и когда был найден/утерян...';
 
   @override
   String get telegram => 'Телеграм';
@@ -1032,9 +1066,6 @@ class AppLocalizationsRu extends AppLocalizations {
       'Вы можете быстро найти расписание для этой аудитории, используя поиск по расписанию.';
 
   @override
-  String get rtuMireaApp => 'Приложение РТУ МИРЭА';
-
-  @override
   String get newYearHolidays => 'Новогодние праздники';
 
   @override
@@ -1114,7 +1145,8 @@ class AppLocalizationsRu extends AppLocalizations {
   String get noLessonsThatDayShort => 'Пар в этот день нет!';
 
   @override
-  String get restSuggestion => 'Можно отдохнуть или заняться самостоятельной работой';
+  String get restSuggestion =>
+      'Можно отдохнуть или заняться самостоятельной работой';
 
   @override
   String windowGap(int count) {
@@ -1133,7 +1165,8 @@ class AppLocalizationsRu extends AppLocalizations {
   String get noScheduleSelected => 'Расписание не выбрано';
 
   @override
-  String get selectEntityToSeeSchedule => 'Выберите группу, преподавателя или аудиторию, чтобы увидеть расписание';
+  String get selectEntityToSeeSchedule =>
+      'Выберите группу, преподавателя или аудиторию, чтобы увидеть расписание';
 
   @override
   String get errorLoadingSchedule => 'Ошибка при загрузке расписания';
@@ -1142,7 +1175,8 @@ class AppLocalizationsRu extends AppLocalizations {
   String get manageComparisons => 'Управление сравнениями';
 
   @override
-  String get selectUpTo4Schedules => 'Выберите до 4-х расписаний, чтобы сравнить их по дням';
+  String get selectUpTo4Schedules =>
+      'Выберите до 4-х расписаний, чтобы сравнить их по дням';
 
   @override
   String get noUpcomingLessons => 'Нет предстоящих занятий';
@@ -1170,10 +1204,12 @@ class AppLocalizationsRu extends AppLocalizations {
   String get laboratoryWork => 'Лабораторная';
 
   @override
-  String get scheduleLoadError => 'Во время получения расписания произошла ошибка. Попробуйте повторить попытку.';
+  String get scheduleLoadError =>
+      'Во время получения расписания произошла ошибка. Попробуйте повторить попытку.';
 
   @override
-  String get selectSchedulesForComparison => 'Выберите расписания для сравнения (до 3)';
+  String get selectSchedulesForComparison =>
+      'Выберите расписания для сравнения (до 3)';
 
   @override
   String deleteScheduleConfirm(String name) {
@@ -1189,7 +1225,8 @@ class AppLocalizationsRu extends AppLocalizations {
   String get commentTooLong => 'Слишком длинный комментарий';
 
   @override
-  String get addOneClassroomOrOnline => 'Добавьте хотя бы одну аудиторию или сделайте занятие онлайн';
+  String get addOneClassroomOrOnline =>
+      'Добавьте хотя бы одну аудиторию или сделайте занятие онлайн';
 
   @override
   String get createClass => 'Create class';

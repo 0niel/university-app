@@ -545,6 +545,10 @@
   "@search": {
     "description": "Текст заполнителя поиска"
   },
+  "all": "Все",
+  "@all": {
+    "description": "Режим поиска - все результаты"
+  },
   "error": "Ошибка",
   "@error": {
     "description": "Заголовок ошибки"
@@ -757,11 +761,11 @@
   "@holiday": {
     "description": "Заголовок страницы выходного дня"
   },
-  "selectExisting": "Выбрать существующее",
+  "selectExisting": "В существующее",
   "@selectExisting": {
     "description": "Опция выбора существующего"
   },
-  "createNew": "Создать новое",
+  "createNew": "Новое",
   "@createNew": {
     "description": "Опция создания нового"
   },
@@ -951,7 +955,7 @@
   "@supportOurService": {
     "description": "Заголовок поддержки сервиса"
   },
-  "leaveAd": "Оставить рекламу",
+  "leaveAd": "Оставить",
   "@leaveAd": {
     "description": "Текст кнопки оставления рекламы"
   },
@@ -1376,10 +1380,6 @@
   "findScheduleForClassroom": "Вы можете быстро найти расписание для этой аудитории, используя поиск по расписанию.",
   "@findScheduleForClassroom": {
     "description": "Описание поиска расписания для аудитории"
-  },
-  "rtuMireaApp": "Приложение РТУ МИРЭА",
-  "@rtuMireaApp": {
-    "description": "Название приложения"
   },
   "newYearHolidays": "Новогодние праздники",
   "@newYearHolidays": {

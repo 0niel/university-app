@@ -106,7 +106,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String classesCount(int count) {
-    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: 'classes', few: 'classes', one: 'class');
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'classes',
+      few: 'classes',
+      one: 'class',
+    );
     return '$_temp0';
   }
 
@@ -165,7 +171,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get scheduleAnalyticsTitle => 'Schedule Analytics';
 
   @override
-  String get scheduleAnalyticsDescription => 'Statistics and analysis of your academic schedule';
+  String get scheduleAnalyticsDescription =>
+      'Statistics and analysis of your academic schedule';
 
   @override
   String get loadByDays => 'Load by days';
@@ -183,7 +190,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noDataForAnalytics => 'No data for analytics';
 
   @override
-  String get selectAnotherSchedule => 'Select another schedule or check for classes';
+  String get selectAnotherSchedule =>
+      'Select another schedule or check for classes';
 
   @override
   String get exportData => 'Export data';
@@ -319,7 +327,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get selectAtLeastOneDate => 'Select at least one date';
 
   @override
-  String get addAtLeastOneClassroom => 'Add at least one classroom or make the class online';
+  String get addAtLeastOneClassroom =>
+      'Add at least one classroom or make the class online';
 
   @override
   String get noSelectedDates => 'No selected dates';
@@ -369,7 +378,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get deleteScheduleTitle => 'Delete schedule';
 
   @override
-  String get deleteScheduleMessage => 'Are you sure you want to delete this schedule?';
+  String get deleteScheduleMessage =>
+      'Are you sure you want to delete this schedule?';
 
   @override
   String get makeActive => 'Make active';
@@ -410,6 +420,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get search => 'Search';
 
   @override
+  String get all => 'All';
+
+  @override
   String get error => 'Error';
 
   @override
@@ -428,7 +441,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get scheduleDeleted => 'Schedule deleted';
 
   @override
-  String get deleteScheduleConfirmationDialog => 'Are you sure you want to delete this schedule?';
+  String get deleteScheduleConfirmationDialog =>
+      'Are you sure you want to delete this schedule?';
 
   @override
   String get active => 'Active';
@@ -596,7 +610,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get quickWayToWeek => 'Quick way to go to a specific week';
 
   @override
-  String get selectUpToFourSchedules => 'Select up to 4 schedules to compare them by days';
+  String get selectUpToFourSchedules =>
+      'Select up to 4 schedules to compare them by days';
 
   @override
   String get addToSchedule => 'Add to schedule';
@@ -608,13 +623,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noOwnSchedules => 'You don\'t have your own schedules yet';
 
   @override
-  String get createCustomSchedule => 'Create a custom schedule by adding classes from different available schedules';
+  String get createCustomSchedule =>
+      'Create a custom schedule by adding classes from different available schedules';
 
   @override
   String get scheduleCreation => 'Schedule creation';
 
   @override
-  String get enterNameAndDescription => 'Enter name and description for the new schedule';
+  String get enterNameAndDescription =>
+      'Enter name and description for the new schedule';
 
   @override
   String get scheduleNameLabel => 'Schedule name';
@@ -664,7 +681,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get selectAtLeastOneDateError => 'Select at least one date';
 
   @override
-  String get addAtLeastOneClassroomError => 'Add at least one classroom or make the class online';
+  String get addAtLeastOneClassroomError =>
+      'Add at least one classroom or make the class online';
 
   @override
   String get selectDatesButtonText => 'Select dates';
@@ -808,13 +826,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get kisDepartment => 'KIS Department';
 
   @override
-  String get corporateInformationSystems => 'Corporate Information Systems Department';
+  String get corporateInformationSystems =>
+      'Corporate Information Systems Department';
 
   @override
   String get ippoDepartment => 'IPPO Department';
 
   @override
-  String get instrumentalAndAppliedSoftware => 'Instrumental and Applied Software Department';
+  String get instrumentalAndAppliedSoftware =>
+      'Instrumental and Applied Software Department';
 
   @override
   String get competitiveProgrammingMirea => 'Competitive Programming MIREA';
@@ -827,7 +847,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get personalAccount => 'Personal Account';
 
   @override
-  String get accessToGradesAndServices => 'Access to grades, applications and other services';
+  String get accessToGradesAndServices =>
+      'Access to grades, applications and other services';
 
   @override
   String get openAction => 'Open';
@@ -872,7 +893,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get studentOffice => 'Student Office';
 
   @override
-  String get certificatesDocumentsQuestions => 'Certificates, documents, questions';
+  String get certificatesDocumentsQuestions =>
+      'Certificates, documents, questions';
 
   @override
   String get careerCenter => 'Career Center';
@@ -890,7 +912,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get virtualTour => 'Virtual Tour';
 
   @override
-  String get interactiveUniversityTour => 'Interactive tour of university buildings';
+  String get interactiveUniversityTour =>
+      'Interactive tour of university buildings';
 
   @override
   String get startupAccelerator => 'Startup Accelerator';
@@ -943,7 +966,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get description => 'Description';
 
   @override
-  String get itemDescription => 'Details about the item, where and when it was found/lost...';
+  String get itemDescription =>
+      'Details about the item, where and when it was found/lost...';
 
   @override
   String get telegram => 'Telegram';
@@ -1027,10 +1051,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settings => 'Settings';
 
   @override
-  String get findScheduleForClassroom => 'You can quickly find a schedule for this classroom using schedule search.';
-
-  @override
-  String get rtuMireaApp => 'RTU MIREA App';
+  String get findScheduleForClassroom =>
+      'You can quickly find a schedule for this classroom using schedule search.';
 
   @override
   String get newYearHolidays => 'New Year holidays';
@@ -1116,7 +1138,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String windowGap(int count) {
-    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: '$count classes', one: '$count class');
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count classes',
+      one: '$count class',
+    );
     return 'Gap: $_temp0';
   }
 
@@ -1124,7 +1151,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noScheduleSelected => 'No schedule selected';
 
   @override
-  String get selectEntityToSeeSchedule => 'Select a group, teacher or classroom to view schedule';
+  String get selectEntityToSeeSchedule =>
+      'Select a group, teacher or classroom to view schedule';
 
   @override
   String get errorLoadingSchedule => 'Error loading schedule';
@@ -1133,7 +1161,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get manageComparisons => 'Manage comparisons';
 
   @override
-  String get selectUpTo4Schedules => 'Select up to 4 schedules to compare by days';
+  String get selectUpTo4Schedules =>
+      'Select up to 4 schedules to compare by days';
 
   @override
   String get noUpcomingLessons => 'No upcoming classes';
@@ -1161,10 +1190,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get laboratoryWork => 'Laboratory';
 
   @override
-  String get scheduleLoadError => 'An error occurred while fetching the schedule. Please try again.';
+  String get scheduleLoadError =>
+      'An error occurred while fetching the schedule. Please try again.';
 
   @override
-  String get selectSchedulesForComparison => 'Select schedules for comparison (up to 3)';
+  String get selectSchedulesForComparison =>
+      'Select schedules for comparison (up to 3)';
 
   @override
   String deleteScheduleConfirm(String name) {
@@ -1180,7 +1211,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get commentTooLong => 'Comment is too long';
 
   @override
-  String get addOneClassroomOrOnline => 'Add at least one classroom or make the class online';
+  String get addOneClassroomOrOnline =>
+      'Add at least one classroom or make the class online';
 
   @override
   String get createClass => 'Create class';
