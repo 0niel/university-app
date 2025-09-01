@@ -22,7 +22,7 @@ pydantic-settings>=2.0.0
 python-multipart==0.0.6
 
 # Image processing
-Pillow==10.1.0
+Pillow==10.3.0
 
 # Database and caching
 redis==5.0.1
