@@ -18,6 +18,7 @@ class CombinedNewsDataSource implements api.NewsDataSource {
   final SupabaseClient _supabaseClient;
 
   final Map<String, api.Article> _articleCache = {};
+  static const int _maxCacheEntries = 200;
 
   Future<List<Map<String, dynamic>>> _getNewsItems({
     int limit = 20,
@@ -85,6 +86,10 @@ class CombinedNewsDataSource implements api.NewsDataSource {
 
         fullArticle = _convertToFullArticle(response);
         _articleCache[id] = fullArticle;
+        if (_articleCache.length > _maxCacheEntries) {
+          final firstKey = _articleCache.keys.first;
+          _articleCache.remove(firstKey);
+        }
       }
 
       return fullArticle;
@@ -202,7 +207,7 @@ class CombinedNewsDataSource implements api.NewsDataSource {
       }).toList();
 
       final blocks = <NewsBlock>[];
-      for (var i = 0; i < relevantItems.take(20).length; i++) {
+      for (var i = 0; i < relevantItems.take(5).length; i++) {
         final item = relevantItems.elementAt(i);
         final size = _determinePostSize(item, i);
         final block = _createPostBlock(item, size: size);
@@ -301,8 +306,9 @@ class CombinedNewsDataSource implements api.NewsDataSource {
 
   @override
   Future<List<api.Category>> getCategories() async {
-    final categories = <api.Category>[]
-      ..add(const api.Category(id: 'all', name: 'Все'));
+    final categories = <api.Category>[
+      const api.Category(id: 'all', name: 'Все')
+    ];
 
     try {
       final sourcesRaw = await _supabaseClient
