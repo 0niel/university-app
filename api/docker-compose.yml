@@ -32,6 +32,13 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    restart: always
+    deploy:
+      resources:
+        limits:
+          memory: 512m
+        reservations:
+          memory: 128m
     networks:
       - application
       - default
@@ -58,6 +65,7 @@ services:
 
   redis:
     image: bitnami/redis:latest
+    restart: unless-stopped
     networks:
       - application
       - default
