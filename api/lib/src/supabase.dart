@@ -61,26 +61,46 @@ class SupabaseClientManager {
   SupabaseClientManager();
 
   SupabaseClient? _client;
+  static SupabaseClientManager? _instance;
 
-  /// Creates and returns a new [SupabaseClientManager] instance.
-  static SupabaseClientManager create() {
-    final manager = SupabaseClientManager();
-    try {
-      manager._client = SupabaseClient(
-        _appConfig.supabaseUrl,
-        _appConfig.supabaseAnonKey,
-        httpClient: _createHttpClient(),
-      );
-    } catch (e) {
-      _logger.e('Failed to connect to create Supabase client', error: e);
-      rethrow;
+  /// Returns a singleton instance of [SupabaseClientManager].
+  static SupabaseClientManager get instance {
+    if (_instance == null) {
+      final manager = SupabaseClientManager();
+      try {
+        manager._client = SupabaseClient(
+          _appConfig.supabaseUrl,
+          _appConfig.supabaseAnonKey,
+          httpClient: _sharedHttpClient,
+        );
+      } catch (e) {
+        _logger.e('Failed to create Supabase client', error: e);
+        rethrow;
+      }
+      _instance = manager;
     }
-    return manager;
+    return _instance!;
   }
 
-  static http.Client _createHttpClient() {
-    final client = http.Client();
-    return _HttpClientWrapper(client);
+  // Reuse a single HTTP client across requests.
+  // The wrapper sanitizes headers and the underlying client keeps a keep-alive
+  // connection pool which is safe to share for the lifetime of the process.
+  static final http.Client _sharedHttpClient =
+      _HttpClientWrapper(http.Client());
+
+  /// Creates a per-request [SupabaseClient] that reuses the shared HTTP
+  /// connection pool. Optionally sets an access token for auth-scoped calls.
+  SupabaseClient createScopedClient({String? accessToken}) {
+    final client = SupabaseClient(
+      _appConfig.supabaseUrl,
+      _appConfig.supabaseAnonKey,
+      httpClient: _sharedHttpClient,
+    );
+    if (accessToken != null && accessToken.isNotEmpty) {
+      // ignore: discarded_futures
+      client.auth.setSession(accessToken);
+    }
+    return client;
   }
 
   /// Returns the [SupabaseClient] for operations.

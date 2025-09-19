@@ -6,14 +6,14 @@ import 'package:university_app_server_api/src/supabase.dart';
 Middleware supabaseProvider() {
   return (handler) {
     return (context) async {
-      final supabaseManager = SupabaseClientManager.create();
+      final supabaseManager = SupabaseClientManager.instance;
 
       final token = context.request.headers['Authorization']?.split(' ').last;
-      if (token != null) {
-        await supabaseManager.client.auth.setSession(token);
-      }
+      final scoped = (token != null && token.isNotEmpty)
+          ? supabaseManager.createScopedClient(accessToken: token)
+          : supabaseManager.client;
 
-      final updatedContext = context.provide<SupabaseClient>(() => supabaseManager.client);
+      final updatedContext = context.provide<SupabaseClient>(() => scoped);
       return handler(updatedContext);
     };
   };
