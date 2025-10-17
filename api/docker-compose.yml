@@ -1,6 +1,9 @@
+version: "3.9"
+
 services:
   traefik:
     image: traefik:v3.3
+    restart: unless-stopped
     command:
       - --accesslog=true
       - --log.level=INFO
@@ -15,12 +18,11 @@ services:
       - --certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=api_web
       - --certificatesresolvers.letsencrypt.acme.email=${EMAIL}
       - --certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json
-    restart: unless-stopped
     ports:
-      - 8000:80
-      - 443:443
+      - "80:80"
+      - "443:443"
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/run/docker.sock:/var/run/docker.sock:ro
       - ./data/letsencrypt:/letsencrypt
     depends_on:
       - backend
@@ -41,7 +43,6 @@ services:
           memory: 128m
     networks:
       - application
-      - default
     env_file:
       - .env
     labels:
@@ -68,7 +69,6 @@ services:
     restart: unless-stopped
     networks:
       - application
-      - default
     labels:
       - traefik.enable=false
     environment:
@@ -77,3 +77,4 @@ services:
 networks:
   gateway:
   application:
+    name: application
