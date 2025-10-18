@@ -192,6 +192,8 @@ dependencies:
   skeletonizer: ^2.1.0+1
   news_blocks_ui:
     path: packages/news_blocks_ui
+  yx_scope: ^1.1.2
+  yx_scope_flutter: ^1.1.2
 
 dependency_overrides:
   web: ^0.5.1
@@ -210,6 +212,8 @@ dev_dependencies:
   envied_generator: ^1.1.1
   go_router_builder: ^2.9.0
   build_verify: ^3.1.0
+  yx_scope_linter: ^0.1.4
+  custom_lint: ^0.6.10
 
 flutter_icons:
   android: false

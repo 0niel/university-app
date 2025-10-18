@@ -10,10 +10,17 @@ part 'app_event.dart';
 part 'app_state.dart';
 
 class AppBloc extends HydratedBloc<AppEvent, AppState> {
-  AppBloc({required FirebaseMessaging firebaseMessaging, required UserRepository userRepository, required User user})
-    : _firebaseMessaging = firebaseMessaging,
-      _userRepository = userRepository,
-      super(user == User.anonymous ? const AppState.unauthenticated() : AppState.authenticated(user)) {
+  AppBloc({
+    required FirebaseMessaging firebaseMessaging,
+    required UserRepository userRepository,
+    required User user,
+  }) : _firebaseMessaging = firebaseMessaging,
+       _userRepository = userRepository,
+       super(
+         user == User.anonymous
+             ? const AppState.unauthenticated()
+             : AppState.authenticated(user),
+       ) {
     on<AppOpened>(_onAppOpened);
     on<RecieveInteractedMessage>(_onRecieveInteractedMessage);
     on<ThemeChanged>(_onThemeChanged);
@@ -55,7 +62,8 @@ class AppBloc extends HydratedBloc<AppEvent, AppState> {
   }
 
   Future<void> setupInteractedMessage(Emitter<AppState> emit) async {
-    RemoteMessage? initialMessage = await _firebaseMessaging.getInitialMessage();
+    RemoteMessage? initialMessage =
+        await _firebaseMessaging.getInitialMessage();
     if (initialMessage != null) {
       _handleMessage(emit, initialMessage);
     }
@@ -68,18 +76,28 @@ class AppBloc extends HydratedBloc<AppEvent, AppState> {
     add(RecieveInteractedMessage(message));
   }
 
-  Future<void> _onRecieveInteractedMessage(RecieveInteractedMessage event, Emitter<AppState> emit) async {
+  Future<void> _onRecieveInteractedMessage(
+    RecieveInteractedMessage event,
+    Emitter<AppState> emit,
+  ) async {
     final data = event.message.data;
     Logger().i('Handling message: $data');
     final discoursePostId = data['discourse_post_id'] as String?;
-    emit(state.copyWith(discoursePostIdToOpen: int.tryParse(discoursePostId ?? '')));
+    emit(
+      state.copyWith(
+        discoursePostIdToOpen: int.tryParse(discoursePostId ?? ''),
+      ),
+    );
   }
 
   Future<void> _onAppOpened(AppOpened event, Emitter<AppState> emit) async {
     await setupInteractedMessage(emit);
   }
 
-  Future<void> _onThemeChanged(ThemeChanged event, Emitter<AppState> emit) async {
+  Future<void> _onThemeChanged(
+    ThemeChanged event,
+    Emitter<AppState> emit,
+  ) async {
     CustomThemeMode.setAmoled(event.isAmoled);
     emit(state.copyWith(isAmoled: event.isAmoled));
   }
