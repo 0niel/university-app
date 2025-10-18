@@ -1,30 +1,15 @@
 import 'dart:async';
 
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:logger/logger.dart';
-import 'package:rtu_mirea_app/common/hydrated_storage.dart';
-import 'package:rtu_mirea_app/firebase_options.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
-typedef AppBuilder =
-    Future<Widget> Function(SharedPreferences sharedPreferences);
+typedef AppBuilder = Future<Widget> Function(void _);
 
 Future<void> bootstrap(AppBuilder builder) async {
   await runZonedGuarded<Future<void>>(
     () async {
       WidgetsFlutterBinding.ensureInitialized();
-
-      await Firebase.initializeApp(
-        options: DefaultFirebaseOptions.currentPlatform,
-      );
-
-      final sharedPreferences = await SharedPreferences.getInstance();
-      HydratedBloc.storage = CustomHydratedStorage(
-        sharedPreferences: sharedPreferences,
-      );
 
       Widget wrapWithSentry(Widget child) {
         return SentryScreenshotWidget(
@@ -32,7 +17,7 @@ Future<void> bootstrap(AppBuilder builder) async {
         );
       }
 
-      final app = await builder(sharedPreferences);
+      final app = await builder(null);
 
       runApp(wrapWithSentry(app));
     },

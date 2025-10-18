@@ -6,7 +6,6 @@ import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
-import 'package:news_repository/news_repository.dart';
 import 'package:platform/platform.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:rtu_mirea_app/ads/bloc/ads_bloc.dart';
@@ -18,7 +17,6 @@ import 'package:rtu_mirea_app/lost_and_found/lost_and_found.dart';
 import 'package:rtu_mirea_app/navigation/navigation.dart';
 import 'package:rtu_mirea_app/nfc_pass/bloc/nfc_pass_cubit.dart';
 import 'package:rtu_mirea_app/schedule_management/bloc/schedule_exporter_cubit.dart';
-import 'package:schedule_repository/schedule_repository.dart';
 import 'package:flutter/services.dart';
 import 'package:rtu_mirea_app/analytics/bloc/analytics_bloc.dart';
 
@@ -79,9 +77,8 @@ class App extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ScopeBuilder<AppScopeContainer>(
-      builder: (context, scope) {
-        final AppScope appScope = scope!;
+    return ScopeBuilder<AppScopeContainer>.withPlaceholder(
+      builder: (context, appScope) {
         return MultiRepositoryProvider(
           providers: [
             RepositoryProvider.value(value: appScope.analyticsRepository),
@@ -103,15 +100,13 @@ class App extends StatelessWidget {
               BlocProvider(create: (_) => ThemeCubit()),
               BlocProvider(
                 create:
-                    (context) => CategoriesBloc(
-                      newsRepository: context.read<NewsRepository>(),
-                    )..add(const CategoriesRequested()),
+                    (_) =>
+                        CategoriesBloc(newsRepository: appScope.newsRepository)
+                          ..add(const CategoriesRequested()),
               ),
               BlocProvider(
                 create:
-                    (context) => FeedBloc(
-                      newsRepository: context.read<NewsRepository>(),
-                    ),
+                    (_) => FeedBloc(newsRepository: appScope.newsRepository),
               ),
               BlocProvider(create: (_) => AdsBloc()),
               BlocProvider(
@@ -130,15 +125,15 @@ class App extends StatelessWidget {
               ),
               BlocProvider(
                 create:
-                    (context) => AnalyticsBloc(
+                    (_) => AnalyticsBloc(
                       analyticsRepository: appScope.analyticsRepository,
                     ),
                 lazy: false,
               ),
               BlocProvider<ScheduleBloc>(
                 create:
-                    (context) => ScheduleBloc(
-                      scheduleRepository: context.read<ScheduleRepository>(),
+                    (_) => ScheduleBloc(
+                      scheduleRepository: appScope.scheduleRepository,
                     )..add(const RefreshSelectedScheduleData()),
               ),
               BlocProvider<NfcPassCubit>(
@@ -147,7 +142,7 @@ class App extends StatelessWidget {
               ),
               BlocProvider(
                 create:
-                    (context) =>
+                    (_) =>
                         FullScreenAdsBloc(
                             interstitialAdLoader: yandexInterstitialAdLoader,
                             rewardedAdLoader: yandexRewardedAdLoader,
@@ -160,7 +155,7 @@ class App extends StatelessWidget {
               ),
               BlocProvider(
                 create:
-                    (context) => LostFoundBloc(
+                    (_) => LostFoundBloc(
                       repository: appScope.lostFoundRepository,
                       userRepository: appScope.userRepository,
                     ),
@@ -170,6 +165,7 @@ class App extends StatelessWidget {
           ),
         );
       },
+      placeholder: const Center(child: CircularProgressIndicator()),
     );
   }
 }

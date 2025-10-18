@@ -10,20 +10,22 @@ import 'package:lost_and_found_repository/lost_and_found_repository.dart';
 import 'package:news_repository/news_repository.dart';
 import 'package:nfc_pass_repository/nfc_pass_repository.dart';
 import 'package:package_info_client/package_info_client.dart';
-import 'package:package_info_plus/package_info_plus.dart';
 import 'package:persistent_storage/persistent_storage.dart';
 import 'package:rtu_mirea_app/common/utils/logger.dart';
-import 'package:rtu_mirea_app/main/bootstrap/app_bloc_observer.dart';
+import 'package:rtu_mirea_app/main/bootstrap/bloc_observer_initializer.dart';
+import 'package:rtu_mirea_app/main/bootstrap/firebase_initializer.dart';
+import 'package:rtu_mirea_app/main/bootstrap/supabase_initializer.dart';
+import 'package:rtu_mirea_app/main/bootstrap/hydrated_storage_initializer.dart';
+import 'package:rtu_mirea_app/main/bootstrap/shared_preferences_initializer.dart';
+import 'package:rtu_mirea_app/main/bootstrap/package_info_initializer.dart';
 import 'package:schedule_exporter_repository/schedule_exporter_repository.dart';
 import 'package:schedule_repository/schedule_repository.dart';
 import 'package:secure_storage/secure_storage.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_authentication_client/supabase_authentication_client.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:token_storage/token_storage.dart';
 import 'package:university_app_server_api/client.dart';
 import 'package:user_repository/user_repository.dart';
-import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:yx_scope/yx_scope.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:sentry_flutter/sentry_flutter.dart' hide Scope;
@@ -46,20 +48,34 @@ abstract class AppScope implements Scope {
 
 /// Root scope container. Holds all long-living dependencies.
 class AppScopeContainer extends ScopeContainer implements AppScope {
-  AppScopeContainer({
-    required SharedPreferences sharedPreferences,
-    required PackageInfo packageInfo,
-    required bool dev,
-  }) : _sharedPreferences = sharedPreferences,
-       _packageInfo = packageInfo,
-       _dev = dev;
+  AppScopeContainer({required bool dev}) : _dev = dev;
 
-  final SharedPreferences _sharedPreferences;
-  final PackageInfo _packageInfo;
   final bool _dev;
 
+  // Async initializers - first wave
+  late final _sharedPreferencesInitializerDep = asyncDep(
+    () => SharedPreferencesInitializer(),
+  );
+  late final _packageInfoInitializerDep = asyncDep(
+    () => PackageInfoInitializer(),
+  );
+  late final _firebaseInitializerDep = asyncDep(() => FirebaseInitializer());
+  late final _supabaseInitializerDep = asyncDep(() => SupabaseInitializer());
+
+  // Async initializers - second wave
+  late final _hydratedStorageInitializerDep = asyncDep(
+    () => HydratedStorageInitializer(
+      sharedPreferences: _sharedPreferencesInitializerDep.get.instance,
+    ),
+  );
+
   // Primitive deps / platform services
-  late final _sharedPreferencesDep = dep(() => _sharedPreferences);
+  late final _sharedPreferencesDep = dep(
+    () => _sharedPreferencesInitializerDep.get.instance,
+  );
+  late final _packageInfoDep = dep(
+    () => _packageInfoInitializerDep.get.instance,
+  );
   late final _supabaseClientDep = dep(() => Supabase.instance.client);
 
   // Networking/API
@@ -98,14 +114,15 @@ class AppScopeContainer extends ScopeContainer implements AppScope {
   late final _deepLinkServiceDep = dep(
     () => DeepLinkService(deepLinkClient: DeepLinkClient()),
   );
-  late final _packageInfoClientDep = dep(
-    () => PackageInfoClient(
+  late final _packageInfoClientDep = dep(() {
+    final packageInfo = _packageInfoDep.get;
+    return PackageInfoClient(
       appName:
-          kDebugMode ? '${_packageInfo.appName} [DEV]' : _packageInfo.appName,
-      packageName: _packageInfo.packageName,
-      packageVersion: '${_packageInfo.version}+${_packageInfo.buildNumber}',
-    ),
-  );
+          kDebugMode ? '${packageInfo.appName} [DEV]' : packageInfo.appName,
+      packageName: packageInfo.packageName,
+      packageVersion: '${packageInfo.version}+${packageInfo.buildNumber}',
+    );
+  });
 
   // Auth
   late final _authenticationClientDep = dep(
@@ -167,6 +184,24 @@ class AppScopeContainer extends ScopeContainer implements AppScope {
     }
   });
 
+  late final _blocObserverInitializerDep = asyncDep(
+    () => BlocObserverInitializer(
+      analyticsRepository: _analyticsRepositoryDep.get,
+    ),
+  );
+
+  @override
+  List<Set<AsyncDep>> get initializeQueue => [
+    {_sharedPreferencesInitializerDep},
+    {
+      _packageInfoInitializerDep,
+      _firebaseInitializerDep,
+      _supabaseInitializerDep,
+    },
+    {_hydratedStorageInitializerDep},
+    {_blocObserverInitializerDep},
+  ];
+
   @override
   AnalyticsRepository get analyticsRepository => _analyticsRepositoryDep.get;
   @override
@@ -196,31 +231,10 @@ class AppScopeContainer extends ScopeContainer implements AppScope {
 
 /// Holder for the [AppScopeContainer].
 class AppScopeHolder extends ScopeHolder<AppScopeContainer> {
-  AppScopeHolder({
-    required this.sharedPreferences,
-    required this.packageInfo,
-    this.dev = false,
-  });
+  AppScopeHolder({this.dev = false});
 
-  final SharedPreferences sharedPreferences;
-  final PackageInfo packageInfo;
   final bool dev;
 
   @override
-  AppScopeContainer createContainer() => AppScopeContainer(
-    sharedPreferences: sharedPreferences,
-    packageInfo: packageInfo,
-    dev: dev,
-  );
-
-  @override
-  Future<void> create() async {
-    await super.create();
-    final scope = this.scope;
-    if (scope != null) {
-      Bloc.observer = AppBlocObserver(
-        analyticsRepository: scope.analyticsRepository,
-      );
-    }
-  }
+  AppScopeContainer createContainer() => AppScopeContainer(dev: dev);
 }
