@@ -133,7 +133,7 @@ dependencies {
     implementation "androidx.constraintlayout:constraintlayout:2.2.1"
 
     // ==== WORKMANAGER ====
-    implementation "androidx.work:work-runtime-ktx:2.10.0"
+    implementation "androidx.work:work-runtime-ktx:2.11.0"
     implementation "androidx.work:work-runtime:2.10.0"
 
     // ==== JETPACK COMPOSE & TESTING ====
