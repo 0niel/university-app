@@ -30,7 +30,10 @@ class Calendar extends StatefulWidget {
 
   static const startingDayOfWeek = StartingDayOfWeek.monday;
 
-  static List<SchedulePart> getSchedulePartsByDay({required List<SchedulePart> schedule, required DateTime day}) {
+  static List<SchedulePart> getSchedulePartsByDay({
+    required List<SchedulePart> schedule,
+    required DateTime day,
+  }) {
     return schedule.where((element) {
       return element.dates.firstWhereOrNull((d) => isSameDay(d, day)) != null;
     }).toList();
@@ -48,10 +51,14 @@ class Calendar extends StatefulWidget {
   }
 
   /// First day of calendar. Used to set up [TableCalendar.firstDay].
-  static final DateTime firstCalendarDay = getNowWithoutTime().subtract(const Duration(days: 365));
+  static final DateTime firstCalendarDay = getNowWithoutTime().subtract(
+    const Duration(days: 365),
+  );
 
   /// Last day of calendar. Used to set up [TableCalendar.lastDay].
-  static final DateTime lastCalendarDay = getNowWithoutTime().add(const Duration(days: 365));
+  static final DateTime lastCalendarDay = getNowWithoutTime().add(
+    const Duration(days: 365),
+  );
 
   /// Check if the day is in range from [Calendar.firstCalendarDay] to
   /// [Calendar.lastCalendarDay]. If not, return first or last day in range.
@@ -66,7 +73,11 @@ class Calendar extends StatefulWidget {
   }
 
   /// Shows week selector modal dialog
-  static Future<void> showWeekSelector(BuildContext context, int currentWeek, Function(int) onWeekSelected) async {
+  static Future<void> showWeekSelector(
+    BuildContext context,
+    int currentWeek,
+    Function(int) onWeekSelected,
+  ) async {
     final colors = Theme.of(context).extension<AppColors>()!;
     return BottomModalSheet.show(
       context,
@@ -94,7 +105,13 @@ class Calendar extends StatefulWidget {
                 borderRadius: BorderRadius.circular(10),
                 boxShadow:
                     isCurrentWeek
-                        ? [BoxShadow(color: colors.primary.withOpacity(0.3), blurRadius: 8, offset: const Offset(0, 3))]
+                        ? [
+                          BoxShadow(
+                            color: colors.primary.withOpacity(0.3),
+                            blurRadius: 8,
+                            offset: const Offset(0, 3),
+                          ),
+                        ]
                         : null,
               ),
               child: Material(
@@ -110,7 +127,8 @@ class Calendar extends StatefulWidget {
                       '$week',
                       style: AppTextStyle.titleM.copyWith(
                         color: isCurrentWeek ? Colors.white : colors.active,
-                        fontWeight: isCurrentWeek ? FontWeight.w600 : FontWeight.w500,
+                        fontWeight:
+                            isCurrentWeek ? FontWeight.w600 : FontWeight.w500,
                       ),
                     ),
                   ),
@@ -127,7 +145,8 @@ class Calendar extends StatefulWidget {
   State<Calendar> createState() => _CalendarState();
 }
 
-class _CalendarState extends State<Calendar> with SingleTickerProviderStateMixin {
+class _CalendarState extends State<Calendar>
+    with SingleTickerProviderStateMixin {
   late CalendarFormat _calendarFormat;
   late DateTime _focusedDay;
   late DateTime _selectedDay;
@@ -143,7 +162,10 @@ class _CalendarState extends State<Calendar> with SingleTickerProviderStateMixin
     _calendarFormat = widget.calendarFormat;
     _focusedDay = Calendar.getDayInAvailableRange(Calendar.getNowWithoutTime());
     _selectedPage = Calendar.getPageIndex(_focusedDay);
-    _animationController = AnimationController(vsync: this, duration: const Duration(milliseconds: 300));
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 300),
+    );
 
     widget.pageViewController.addListener(() {
       if (mounted) {
@@ -153,14 +175,18 @@ class _CalendarState extends State<Calendar> with SingleTickerProviderStateMixin
           }
 
           _selectedPage = widget.pageViewController.page!.round();
-          _selectedDay = Calendar.firstCalendarDay.add(Duration(days: _selectedPage));
+          _selectedDay = Calendar.firstCalendarDay.add(
+            Duration(days: _selectedPage),
+          );
           _selectedWeek = getWeek(_selectedDay);
           _focusedDay = Calendar.getDayInAvailableRange(_selectedDay);
         });
       }
     });
 
-    _selectedDay = Calendar.getDayInAvailableRange(Calendar.getNowWithoutTime());
+    _selectedDay = Calendar.getDayInAvailableRange(
+      Calendar.getNowWithoutTime(),
+    );
     _selectedWeek = getWeek();
   }
 
@@ -188,17 +214,16 @@ class _CalendarState extends State<Calendar> with SingleTickerProviderStateMixin
     super.dispose();
   }
 
-  int _calculateFocusedPage(CalendarFormat format, DateTime startDay, DateTime focusedDay) {
-    switch (format) {
-      case CalendarFormat.month:
-        return _getMonthCount(startDay, focusedDay);
-      case CalendarFormat.twoWeeks:
-        return _getTwoWeekCount(startDay, focusedDay);
-      case CalendarFormat.week:
-        return _getWeekCount(startDay, focusedDay);
-      default:
-        return _getMonthCount(startDay, focusedDay);
-    }
+  int _calculateFocusedPage(
+    CalendarFormat format,
+    DateTime startDay,
+    DateTime focusedDay,
+  ) {
+    return switch (format) {
+      CalendarFormat.month => _getMonthCount(startDay, focusedDay),
+      CalendarFormat.twoWeeks => _getTwoWeekCount(startDay, focusedDay),
+      CalendarFormat.week => _getWeekCount(startDay, focusedDay),
+    };
   }
 
   int _getMonthCount(DateTime first, DateTime last) {
@@ -217,10 +242,11 @@ class _CalendarState extends State<Calendar> with SingleTickerProviderStateMixin
   }
 
   int _getDaysBefore(DateTime firstDay) {
-    return (firstDay.weekday + 7 - getWeekdayNumber(Calendar.startingDayOfWeek)) % 7;
+    return (firstDay.weekday +
+            7 -
+            getWeekdayNumber(Calendar.startingDayOfWeek)) %
+        7;
   }
-
-  late final ValueNotifier<int> _focusedMonth = ValueNotifier<int>(_focusedDay.month);
 
   DateTime _firstDayOfWeek(DateTime week) {
     final daysBefore = _getDaysBefore(week);
@@ -252,7 +278,9 @@ class _CalendarState extends State<Calendar> with SingleTickerProviderStateMixin
                       final currentDate = Calendar.getNowWithoutTime();
                       if (mounted) {
                         setState(() {
-                          _focusedDay = Calendar.getDayInAvailableRange(currentDate);
+                          _focusedDay = Calendar.getDayInAvailableRange(
+                            currentDate,
+                          );
                           _selectedDay = currentDate;
                           _selectedWeek = getWeek(currentDate);
                           _selectedPage = Calendar.getPageIndex(_selectedDay);
@@ -295,7 +323,9 @@ class _CalendarState extends State<Calendar> with SingleTickerProviderStateMixin
                       }
                     },
                     animationController: _animationController,
-                  ).animate().fadeIn(duration: const Duration(milliseconds: 200));
+                  ).animate().fadeIn(
+                    duration: const Duration(milliseconds: 200),
+                  );
             },
             markerBuilder: (context, day, events) {
               if (events.isEmpty) return const SizedBox();
@@ -354,10 +384,13 @@ class _CalendarState extends State<Calendar> with SingleTickerProviderStateMixin
                   schedule: widget.schedule,
                   day: day,
                 ).whereType<LessonSchedulePart>().toList();
-            final eventsByTime = groupBy(events, (LessonSchedulePart e) => e.lessonBells.number);
+            final eventsByTime = groupBy(
+              events,
+              (LessonSchedulePart e) => e.lessonBells.number,
+            );
             return eventsByTime.values.map((e) => e.first).toList();
           },
-          locale: 'ru_RU',
+          locale: Localizations.localeOf(context).toString(),
           selectedDayPredicate: (day) {
             // Use `selectedDayPredicate` to determine which day is currently selected.
             // If this returns true, then `day` will be marked as selected.
@@ -412,7 +445,11 @@ class _CalendarState extends State<Calendar> with SingleTickerProviderStateMixin
     );
   }
 
-  Widget _buildDayOfWeekCell(BuildContext context, DateTime day, AppColors colors) {
+  Widget _buildDayOfWeekCell(
+    BuildContext context,
+    DateTime day,
+    AppColors colors,
+  ) {
     final weekdayNames = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
     final weekday = (day.weekday - 1) % 7;
     final isWeekend = day.weekday == DateTime.sunday;
@@ -439,13 +476,15 @@ class _CalendarState extends State<Calendar> with SingleTickerProviderStateMixin
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: List.generate(
-          events.length > 3 ? 3 : events.length,
+          events.length > 6 ? 6 : events.length,
           (index) => Container(
             width: 4.5,
             height: 4.5,
             margin: const EdgeInsets.symmetric(horizontal: 1),
             decoration: BoxDecoration(
-              color: LessonCard.getColorByType((events[index] as LessonSchedulePart).lessonType),
+              color: LessonCard.getColorByType(
+                (events[index] as LessonSchedulePart).lessonType,
+              ),
               shape: BoxShape.circle,
             ),
           ),
@@ -454,8 +493,16 @@ class _CalendarState extends State<Calendar> with SingleTickerProviderStateMixin
     );
   }
 
-  Widget _buildDayCell(BuildContext context, DateTime day, DateTime today, AppColors colors) {
-    final comments = widget.comments.where((element) => isSameDay(element.lessonDate, day)).toList();
+  Widget _buildDayCell(
+    BuildContext context,
+    DateTime day,
+    DateTime today,
+    AppColors colors,
+  ) {
+    final comments =
+        widget.comments
+            .where((element) => isSameDay(element.lessonDate, day))
+            .toList();
     final isWeekend = day.weekday == DateTime.sunday;
     final hasComments = comments.isNotEmpty && widget.showCommentsIndicators;
 
@@ -466,7 +513,10 @@ class _CalendarState extends State<Calendar> with SingleTickerProviderStateMixin
             child: Text(
               day.day.toString(),
               style: AppTextStyle.body.copyWith(
-                color: hasComments ? colors.colorful02 : (isWeekend ? colors.deactiveDarker : colors.active),
+                color:
+                    hasComments
+                        ? colors.colorful02
+                        : (isWeekend ? colors.deactiveDarker : colors.active),
                 fontSize: 13,
               ),
             ),
@@ -478,7 +528,10 @@ class _CalendarState extends State<Calendar> with SingleTickerProviderStateMixin
               child: Container(
                 width: 4,
                 height: 4,
-                decoration: BoxDecoration(color: colors.colorful02, shape: BoxShape.circle),
+                decoration: BoxDecoration(
+                  color: colors.colorful02,
+                  shape: BoxShape.circle,
+                ),
               ),
             ),
         ],
@@ -487,19 +540,14 @@ class _CalendarState extends State<Calendar> with SingleTickerProviderStateMixin
   }
 
   Widget _buildTodayCell(BuildContext context, DateTime day, AppColors colors) {
-    final comments = widget.comments.where((element) => isSameDay(element.lessonDate, day)).toList();
+    final comments =
+        widget.comments
+            .where((element) => isSameDay(element.lessonDate, day))
+            .toList();
     final hasComments = comments.isNotEmpty && widget.showCommentsIndicators;
 
     return Stack(
       children: [
-        // Light circle background for today
-        Center(
-          child: Container(
-            width: 26,
-            height: 26,
-            decoration: BoxDecoration(color: colors.primary.withOpacity(0.1), shape: BoxShape.circle),
-          ),
-        ),
         Center(
           child: Text(
             day.day.toString(),
@@ -517,17 +565,27 @@ class _CalendarState extends State<Calendar> with SingleTickerProviderStateMixin
             child: Container(
               width: 4,
               height: 4,
-              decoration: BoxDecoration(color: colors.colorful02, shape: BoxShape.circle),
+              decoration: BoxDecoration(
+                color: colors.colorful02,
+                shape: BoxShape.circle,
+              ),
             ),
           ),
       ],
     );
   }
 
-  Widget _buildSelectedCell(BuildContext context, DateTime day, DateTime today, AppColors colors) {
-    final comments = widget.comments.where((element) => isSameDay(element.lessonDate, day)).toList();
+  Widget _buildSelectedCell(
+    BuildContext context,
+    DateTime day,
+    DateTime today,
+    AppColors colors,
+  ) {
+    final comments =
+        widget.comments
+            .where((element) => isSameDay(element.lessonDate, day))
+            .toList();
     final hasComments = comments.isNotEmpty && widget.showCommentsIndicators;
-    final isToday = isSameDay(day, today);
 
     return Stack(
       children: [
@@ -536,25 +594,22 @@ class _CalendarState extends State<Calendar> with SingleTickerProviderStateMixin
           child: Container(
             width: 24,
             height: 24,
-            decoration: BoxDecoration(color: colors.primary, shape: BoxShape.circle),
+            decoration: BoxDecoration(
+              color: colors.primary,
+              shape: BoxShape.circle,
+            ),
           ),
         ),
         Center(
           child: Text(
             day.day.toString(),
-            style: AppTextStyle.body.copyWith(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 13),
-          ),
-        ),
-        if (isToday)
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: Container(
-              width: 4,
-              height: 2,
-              margin: const EdgeInsets.only(bottom: 2),
-              decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(1)),
+            style: AppTextStyle.body.copyWith(
+              color: Colors.white,
+              fontWeight: FontWeight.w600,
+              fontSize: 13,
             ),
           ),
+        ),
         if (hasComments)
           Positioned(
             top: 2,
@@ -562,23 +617,37 @@ class _CalendarState extends State<Calendar> with SingleTickerProviderStateMixin
             child: Container(
               width: 4,
               height: 4,
-              decoration: BoxDecoration(color: Colors.white, shape: BoxShape.circle),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
+              ),
             ),
           ),
       ],
     );
   }
 
-  Widget _buildOutsideCell(BuildContext context, DateTime day, AppColors colors) {
+  Widget _buildOutsideCell(
+    BuildContext context,
+    DateTime day,
+    AppColors colors,
+  ) {
     return Center(
       child: Text(
         day.day.toString(),
-        style: AppTextStyle.body.copyWith(color: colors.deactive.withOpacity(0.4), fontSize: 13),
+        style: AppTextStyle.body.copyWith(
+          color: colors.deactive.withOpacity(0.4),
+          fontSize: 13,
+        ),
       ),
     );
   }
 
-  Widget _buildDisabledCell(BuildContext context, DateTime day, AppColors colors) {
+  Widget _buildDisabledCell(
+    BuildContext context,
+    DateTime day,
+    AppColors colors,
+  ) {
     return Center(
       child: Text(
         day.day.toString(),
@@ -595,14 +664,23 @@ class _CalendarState extends State<Calendar> with SingleTickerProviderStateMixin
   void _showWeekSelector(BuildContext context) async {
     Calendar.showWeekSelector(context, _selectedWeek, (week) {
       final currentDate = Calendar.getNowWithoutTime();
-      final newFocusedDay = CalendarUtils.getDaysInWeek(week, currentDate).first;
-      final newPage = _calculateFocusedPage(_calendarFormat, Calendar.firstCalendarDay, newFocusedDay);
+      final newFocusedDay =
+          CalendarUtils.getDaysInWeek(week, currentDate).first;
+      final newPage = _calculateFocusedPage(
+        _calendarFormat,
+        Calendar.firstCalendarDay,
+        newFocusedDay,
+      );
 
       if (newPage == _pageController?.page?.round()) {
         return;
       }
 
-      _pageController?.animateToPage(newPage, duration: const Duration(milliseconds: 300), curve: Curves.easeInOut);
+      _pageController?.animateToPage(
+        newPage,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
 
       setState(() {
         _focusedDay = Calendar.getDayInAvailableRange(newFocusedDay);
