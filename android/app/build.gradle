@@ -134,7 +134,7 @@ dependencies {
 
     // ==== WORKMANAGER ====
     implementation "androidx.work:work-runtime-ktx:2.10.0"
-    implementation "androidx.work:work-runtime:2.10.0"
+    implementation "androidx.work:work-runtime:2.11.0"
 
     // ==== JETPACK COMPOSE & TESTING ====
     implementation "androidx.compose.ui:ui:1.7.8"
