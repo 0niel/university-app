@@ -150,6 +150,6 @@ dependencies {
 
     // ==== PLAY SERVICES & ADS ====
     implementation "com.google.android.gms:play-services-location:21.3.0"
-    implementation "com.yandex.android:mobileads:7.12.1"
+    implementation "com.yandex.android:mobileads:7.18.1"
     implementation "com.google.android.gms:play-services-ads:24.0.0"
 }
