@@ -106,7 +106,7 @@ dependencies:
   visibility_detector: ^0.4.0+2
   platform: ^3.0.2
   json_annotation: ^4.9.0
-  hugeicons: ^0.0.7
+  hugeicons: 0.0.11
   device_calendar:
     git:
       url: https://github.com/0niel/device_calendar.git
