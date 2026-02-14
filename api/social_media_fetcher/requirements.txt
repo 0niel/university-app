@@ -14,7 +14,7 @@ vk-api==11.9.9
 httpx>=0.26,<0.29
 aiohttp>=3.8.0
 beautifulsoup4==4.12.2
-lxml==4.9.3
+lxml==4.9.4
 
 # Data processing
 pydantic>=2.0.0
