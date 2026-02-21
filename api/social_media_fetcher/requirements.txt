@@ -49,7 +49,7 @@ psutil==5.9.6
 
 # News blocks code generation
 jinja2==3.1.2  # Already included above for FastAPI
-pathlib2==2.3.7; python_version < '3.4'
+pathlib2==2.3.7.post1; python_version < '3.4'
 
 # Additional dependencies
 telethon>=1.30.0
