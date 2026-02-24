@@ -45,7 +45,7 @@ orjson==3.9.10
 slowapi==0.1.9
 
 # Health checks
-psutil==5.9.6
+psutil==5.9.8
 
 # News blocks code generation
 jinja2==3.1.2  # Already included above for FastAPI
