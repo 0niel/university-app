@@ -3,19 +3,20 @@ import 'dart:convert';
 
 import 'package:analytics_repository/analytics_repository.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
-import 'package:collection/collection.dart';
+import 'package:connectivity_client/connectivity_client.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
-import 'package:rtu_mirea_app/data/datasources/widget_data.dart';
-import 'package:rtu_mirea_app/schedule/bloc/calculate_schedule_diff.dart';
+import 'package:preferences_repository/preferences_repository.dart';
+import 'package:rtu_mirea_app/data/datasources/home_screen_widget_service.dart';
+import 'package:rtu_mirea_app/profile/cubit/sync_preferences_cubit.dart';
 import 'package:rtu_mirea_app/schedule/models/models.dart';
 import 'package:rtu_mirea_app/schedule/utils/schedule_widget_updater.dart';
 import 'package:schedule_repository/schedule_repository.dart';
-import 'package:university_app_server_api/client.dart';
 
 part 'schedule_event.dart';
+part 'schedule_status.dart';
 part 'schedule_state.dart';
 part 'schedule_bloc.g.dart';
 part 'schedule_bloc.freezed.dart';
@@ -23,623 +24,447 @@ part 'schedule_bloc.freezed.dart';
 typedef UID = String;
 
 class ScheduleBloc extends HydratedBloc<ScheduleEvent, ScheduleState> {
-  ScheduleBloc({required ScheduleRepository scheduleRepository})
-    : _scheduleRepository = scheduleRepository,
-      _widgetUpdater = ScheduleWidgetUpdater(HomeScreenWidgetService()),
-      super(const ScheduleState()) {
+  ScheduleBloc({
+    required this._scheduleRepository,
+    this._preferencesRepository,
+    ScheduleWidgetUpdater? widgetUpdater,
+    ConnectivityClient? connectivityClient,
+    SyncPolicy Function()? syncPolicy,
+    this._authRetryDelay = const Duration(milliseconds: 500),
+  }) : _widgetUpdater =
+           widgetUpdater ??
+           const ScheduleWidgetUpdater(HomeScreenWidgetService()),
+       _connectivityClient = connectivityClient ?? ConnectivityClient(),
+       _syncPolicyBuilder = syncPolicy ?? (() => SyncPolicy.always),
+       super(const ScheduleState()) {
     on<ScheduleRequested>(_onScheduleRequested, transformer: sequential());
-    on<TeacherScheduleRequested>(_onTeacherScheduleRequested, transformer: sequential());
-    on<ClassroomScheduleRequested>(_onClassroomScheduleRequested, transformer: sequential());
-    on<RefreshSelectedScheduleData>(_onScheduleResumed, transformer: droppable());
-    on<ScheduleSetDisplayMode>(_onScheduleSetDisplayMode);
-    on<SetSelectedSchedule>(_onSetSelectedSchedule);
-    on<DeleteSchedule>(_onRemoveSavedSchedule);
-    on<ScheduleSetEmptyLessonsDisplaying>(_onSetEmptyLessonsDisplaying);
-    on<SetLessonComment>(_onSetLessonComment);
-    on<SetShowCommentsIndicator>(_onSetShowCommentsIndicator);
-    on<ToggleListMode>(_onScheduleToggleListMode);
-    on<SetScheduleComment>(_onSetScheduleComment);
-    on<RemoveScheduleComment>(_onRemoveScheduleComment);
-    on<DeleteScheduleComment>(_onDeleteScheduleComment);
-    on<ImportScheduleFromJson>(_onImportScheduleFromJson);
+    on<TeacherScheduleRequested>(
+      _onTeacherScheduleRequested,
+      transformer: sequential(),
+    );
+    on<ClassroomScheduleRequested>(
+      _onClassroomScheduleRequested,
+      transformer: sequential(),
+    );
+    on<SelectedScheduleRefreshRequested>(
+      _onSelectedScheduleRefreshRequested,
+      transformer: droppable(),
+    );
+    on<ScheduleSelected>(_onScheduleSelected);
+    on<ScheduleDeleteRequested>(_onScheduleDeleteRequested);
+    on<ScheduleReordered>(_onScheduleReordered);
 
-    // Comparison events
-    on<AddScheduleToComparison>(_onAddScheduleToComparison, transformer: sequential());
-    on<RemoveScheduleFromComparison>(_onRemoveScheduleFromComparison, transformer: sequential());
-    on<ToggleComparisonMode>(_onToggleComparisonMode, transformer: sequential());
+    unawaited(restoreSelectedScheduleFromRemote());
+  }
 
-    on<HideScheduleDiffDialog>(_onHideScheduleDiffDialog);
+  static const _selectedSchedulePreferenceKey = 'selected_schedule';
 
-    // Desktop mode events
-    on<ToggleSplitView>(_onToggleSplitView);
-    on<SetAnalyticsVisibility>(_onSetAnalyticsVisibility);
+  final ScheduleRepository _scheduleRepository;
+  final PreferencesRepository? _preferencesRepository;
 
-    // Custom schedule events
-    on<CreateCustomSchedule>(_onCreateCustomSchedule, transformer: sequential());
-    on<DeleteCustomSchedule>(_onDeleteCustomSchedule, transformer: sequential());
-    on<UpdateCustomSchedule>(_onUpdateCustomSchedule, transformer: sequential());
-    on<AddLessonToCustomSchedule>(_onAddLessonToCustomSchedule, transformer: sequential());
-    on<RemoveLessonFromCustomSchedule>(_onRemoveLessonFromCustomSchedule, transformer: sequential());
-    on<SelectCustomSchedule>(_onSelectCustomSchedule, transformer: sequential());
-    on<ToggleCustomScheduleMode>(_onToggleCustomScheduleMode, transformer: sequential());
+  final Duration _authRetryDelay;
+  final ScheduleWidgetUpdater _widgetUpdater;
+  final ConnectivityClient _connectivityClient;
+  final SyncPolicy Function() _syncPolicyBuilder;
 
-    // Reaction events
-    on<AddLessonReaction>(_onAddLessonReaction, transformer: sequential());
-    on<RemoveLessonReaction>(_onRemoveLessonReaction, transformer: sequential());
-    on<UpdateLessonReaction>(_onUpdateLessonReaction, transformer: sequential());
+  Future<void> restoreSelectedScheduleFromRemote() async {
+    final preferences = _preferencesRepository;
+    if (preferences == null) return;
+    var attempts = 0;
+    while (!preferences.hasAuthenticatedUser) {
+      attempts += 1;
+      if (isClosed || attempts > 20) return;
+      await Future<void>.delayed(_authRetryDelay);
+    }
+    if (state.selectedSchedule != null) return;
+
+    try {
+      final entry = await preferences.get(_selectedSchedulePreferenceKey);
+      final value = entry?.value;
+      if (value == null || isClosed || state.selectedSchedule != null) return;
+
+      final name = value['name'] as String?;
+      if (name == null || name.isEmpty) return;
+      final uid = value['uid'] as String?;
+
+      switch (value['type']) {
+        case 'group':
+          add(
+            ScheduleRequested(
+              group: Group(name: name, uid: uid),
+            ),
+          );
+        case 'teacher':
+          add(
+            TeacherScheduleRequested(
+              teacher: Teacher(name: name, uid: uid),
+            ),
+          );
+        case 'classroom':
+          add(
+            ClassroomScheduleRequested(
+              classroom: Classroom(name: name, uid: uid),
+            ),
+          );
+      }
+    } on PreferencesFailure catch (_) {}
+  }
+
+  String? _lastPushedDescriptor;
+
+  UID _idOf(SelectedSchedule selected) => switch (selected) {
+    SelectedGroupSchedule(:final group) => group.uid ?? group.name,
+    SelectedTeacherSchedule(:final teacher) => teacher.uid ?? teacher.name,
+    SelectedClassroomSchedule(:final classroom) =>
+      classroom.uid ?? classroom.name,
+    SelectedCustomSchedule() => selected.name,
+  };
+
+  Map<String, dynamic>? _descriptorOf(SelectedSchedule? selected) {
+    return switch (selected) {
+      SelectedGroupSchedule(:final group) => {
+        'type': 'group',
+        'name': group.name,
+        'uid': group.uid,
+      },
+      SelectedTeacherSchedule(:final teacher) => {
+        'type': 'teacher',
+        'name': teacher.name,
+        'uid': teacher.uid,
+      },
+      SelectedClassroomSchedule(:final classroom) => {
+        'type': 'classroom',
+        'name': classroom.name,
+        'uid': classroom.uid,
+      },
+      SelectedCustomSchedule() || null => null,
+    };
   }
 
   @override
-  bool shouldPersistOnEvent(ScheduleEvent? event) {
-    return event is! AddScheduleToComparison &&
-        event is! RemoveScheduleFromComparison &&
-        event is! ToggleComparisonMode &&
-        event is! ToggleSplitView &&
-        event is! SetAnalyticsVisibility &&
-        event is! HideScheduleDiffDialog;
+  void onChange(Change<ScheduleState> change) {
+    super.onChange(change);
+
+    final preferences = _preferencesRepository;
+    if (preferences == null || !preferences.hasAuthenticatedUser) return;
+
+    final descriptor = _descriptorOf(change.nextState.selectedSchedule);
+    if (descriptor == null) return;
+    final encoded = jsonEncode(descriptor);
+    if (encoded == _lastPushedDescriptor) return;
+    _lastPushedDescriptor = encoded;
+
+    unawaited(
+      preferences.set(_selectedSchedulePreferenceKey, descriptor).catchError((
+        Object error,
+        StackTrace stackTrace,
+      ) {
+        addError(error, stackTrace);
+      }),
+    );
   }
 
-  final ScheduleRepository _scheduleRepository;
-  final ScheduleWidgetUpdater _widgetUpdater;
-  static const _maxComparisonSchedules = 3;
-
-  // Handle desktop-specific events
-  Future<void> _onToggleSplitView(ToggleSplitView event, Emitter<ScheduleState> emit) async {
-    emit(state.copyWith(isSplitViewEnabled: !state.isSplitViewEnabled));
+  Future<void> _onScheduleRequested(
+    ScheduleRequested event,
+    Emitter<ScheduleState> emit,
+  ) async {
+    final group = event.group;
+    final id = group.uid ?? group.name;
+    await _runLoad(emit, () async {
+      final parts = (await _scheduleRepository.getSchedule(group: id)).data;
+      return state.copyWith(
+        groupsSchedule: [
+          for (final e in state.groupsSchedule)
+            if (e.$1 != id) e,
+          (id, group, parts),
+        ],
+        scheduleSyncedAt: _touchSync(id),
+        selectedSchedule: _shouldActivate(event.makeActive)
+            ? SelectedGroupSchedule(group: group, schedule: parts)
+            : state.selectedSchedule,
+      );
+    });
   }
 
-  Future<void> _onSetAnalyticsVisibility(SetAnalyticsVisibility event, Emitter<ScheduleState> emit) async {
-    emit(state.copyWith(showAnalytics: event.showAnalytics));
+  Future<void> _onTeacherScheduleRequested(
+    TeacherScheduleRequested event,
+    Emitter<ScheduleState> emit,
+  ) async {
+    final teacher = event.teacher;
+    final id = teacher.uid ?? teacher.name;
+    await _runLoad(emit, () async {
+      final parts = (await _scheduleRepository.getTeacherSchedule(
+        teacher: id,
+      )).data;
+      return state.copyWith(
+        teachersSchedule: [
+          for (final e in state.teachersSchedule)
+            if (e.$1 != id) e,
+          (id, teacher, parts),
+        ],
+        scheduleSyncedAt: _touchSync(id),
+        selectedSchedule: _shouldActivate(event.makeActive)
+            ? SelectedTeacherSchedule(teacher: teacher, schedule: parts)
+            : state.selectedSchedule,
+      );
+    });
   }
 
-  Future<void> _onImportScheduleFromJson(ImportScheduleFromJson event, Emitter<ScheduleState> emit) async {
+  Future<void> _onClassroomScheduleRequested(
+    ClassroomScheduleRequested event,
+    Emitter<ScheduleState> emit,
+  ) async {
+    final classroom = event.classroom;
+    final id = classroom.uid ?? classroom.name;
+    await _runLoad(emit, () async {
+      final parts = (await _scheduleRepository.getClassroomSchedule(
+        classroom: id,
+      )).data;
+      return state.copyWith(
+        classroomsSchedule: [
+          for (final e in state.classroomsSchedule)
+            if (e.$1 != id) e,
+          (id, classroom, parts),
+        ],
+        scheduleSyncedAt: _touchSync(id),
+        selectedSchedule: _shouldActivate(event.makeActive)
+            ? SelectedClassroomSchedule(
+                classroom: classroom,
+                schedule: parts,
+              )
+            : state.selectedSchedule,
+      );
+    });
+  }
+
+  bool _shouldActivate(bool makeActive) =>
+      makeActive || state.selectedSchedule == null;
+
+  Map<UID, DateTime> _touchSync(UID id) => {
+    ...state.scheduleSyncedAt,
+    id: DateTime.now(),
+  };
+
+  Future<void> _runLoad(
+    Emitter<ScheduleState> emit,
+    Future<ScheduleState> Function() load,
+  ) async {
+    emit(state.copyWith(status: .loading));
     try {
-      final Map<String, dynamic> jsonData = jsonDecode(event.jsonString);
-      final importedSchedule = SelectedSchedule.fromJson(jsonData);
-
-      emit(state.copyWith(selectedSchedule: importedSchedule, status: ScheduleStatus.loaded));
-
-      // Update widgets if the imported schedule is for a group
-      if (importedSchedule is SelectedGroupSchedule) {
-        await _updateWidgets(importedSchedule.schedule, importedSchedule.group.name);
+      final next = (await load()).copyWith(
+        status: .loaded,
+        lastSyncedAt: DateTime.now(),
+        isOffline: false,
+      );
+      emit(next);
+      if (next.selectedSchedule case final selected?) {
+        await _widgetUpdater.updateWidgetsFromSelectedSchedule(selected);
       }
-    } catch (error, stackTrace) {
-      emit(state.copyWith(status: ScheduleStatus.failure));
+    } on Exception catch (error, stackTrace) {
+      emit(state.copyWith(status: .failure));
       addError(error, stackTrace);
     }
   }
 
-  Future<void> _onSetScheduleComment(SetScheduleComment event, Emitter<ScheduleState> emit) async {
-    final updatedComments =
-        List<ScheduleComment>.from(state.scheduleComments)
-          ..removeWhere((comment) => comment.scheduleName == event.comment.scheduleName)
-          ..add(event.comment);
-
-    emit(state.copyWith(scheduleComments: updatedComments));
+  void _onScheduleSelected(
+    ScheduleSelected event,
+    Emitter<ScheduleState> emit,
+  ) {
+    emit(state.copyWith(selectedSchedule: event.selectedSchedule));
+    add(const SelectedScheduleRefreshRequested(manual: true));
   }
 
-  Future<void> _onRemoveScheduleComment(RemoveScheduleComment event, Emitter<ScheduleState> emit) async {
-    final updatedComments = List<ScheduleComment>.from(state.scheduleComments)
-      ..removeWhere((comment) => comment.scheduleName == event.scheduleName);
-
-    emit(state.copyWith(scheduleComments: updatedComments));
-  }
-
-  Future<void> _onDeleteScheduleComment(DeleteScheduleComment event, Emitter<ScheduleState> emit) async {
-    final updatedComments =
-        state.scheduleComments.where((comment) => comment.scheduleName != event.scheduleName).toList();
-
-    emit(state.copyWith(scheduleComments: updatedComments));
-  }
-
-  Future<void> _onSetShowCommentsIndicator(SetShowCommentsIndicator event, Emitter<ScheduleState> emit) async {
-    if (state.showCommentsIndicators != event.showCommentsIndicators) {
-      emit(state.copyWith(showCommentsIndicators: event.showCommentsIndicators));
+  void _onScheduleDeleteRequested(
+    ScheduleDeleteRequested event,
+    Emitter<ScheduleState> emit,
+  ) {
+    final syncedAt = {
+      for (final entry in state.scheduleSyncedAt.entries)
+        if (entry.key != event.identifier) entry.key: entry.value,
+    };
+    switch (event.target) {
+      case .group:
+        emit(
+          state.copyWith(
+            groupsSchedule: [
+              for (final e in state.groupsSchedule)
+                if (e.$1 != event.identifier) e,
+            ],
+            scheduleSyncedAt: syncedAt,
+          ),
+        );
+      case .teacher:
+        emit(
+          state.copyWith(
+            teachersSchedule: [
+              for (final e in state.teachersSchedule)
+                if (e.$1 != event.identifier) e,
+            ],
+            scheduleSyncedAt: syncedAt,
+          ),
+        );
+      case .classroom:
+        emit(
+          state.copyWith(
+            classroomsSchedule: [
+              for (final e in state.classroomsSchedule)
+                if (e.$1 != event.identifier) e,
+            ],
+            scheduleSyncedAt: syncedAt,
+          ),
+        );
     }
   }
 
-  Future<void> _onSetLessonComment(SetLessonComment event, Emitter<ScheduleState> emit) async {
-    final comment = state.comments.firstWhereOrNull(
-      (comment) => event.comment.lessonDate == comment.lessonDate && event.comment.lessonBells == comment.lessonBells,
-    );
+  void _onScheduleReordered(
+    ScheduleReordered event,
+    Emitter<ScheduleState> emit,
+  ) {
+    int rank(UID id) {
+      final index = event.orderedIds.indexOf(id);
+      return index == -1 ? event.orderedIds.length : index;
+    }
 
-    if (event.comment.text.isEmpty && comment == null) {
+    switch (event.target) {
+      case .group:
+        final sorted = [...state.groupsSchedule]
+          ..sort((a, b) => rank(a.$1).compareTo(rank(b.$1)));
+        emit(state.copyWith(groupsSchedule: sorted));
+      case .teacher:
+        final sorted = [...state.teachersSchedule]
+          ..sort((a, b) => rank(a.$1).compareTo(rank(b.$1)));
+        emit(state.copyWith(teachersSchedule: sorted));
+      case .classroom:
+        final sorted = [...state.classroomsSchedule]
+          ..sort((a, b) => rank(a.$1).compareTo(rank(b.$1)));
+        emit(state.copyWith(classroomsSchedule: sorted));
+    }
+  }
+
+  Future<void> _onSelectedScheduleRefreshRequested(
+    SelectedScheduleRefreshRequested event,
+    Emitter<ScheduleState> emit,
+  ) async {
+    final selected = state.selectedSchedule;
+    if (selected == null) {
+      emit(state.copyWith(status: .loaded));
       return;
     }
 
-    List<LessonComment> updatedComments =
-        state.comments
-            .where(
-              (element) =>
-                  element.lessonDate != event.comment.lessonDate || element.lessonBells != event.comment.lessonBells,
-            )
-            .toList();
-
-    if (event.comment.text.isNotEmpty) {
-      updatedComments.add(event.comment);
+    if (!event.manual && !await _autoRefreshAllowed()) {
+      emit(state.copyWith(status: .loaded));
+      await _updateWidgets(selected);
+      return;
     }
 
-    emit(state.copyWith(comments: updatedComments));
-  }
-
-  Future<void> _onSetEmptyLessonsDisplaying(
-    ScheduleSetEmptyLessonsDisplaying event,
-    Emitter<ScheduleState> emit,
-  ) async {
-    if (state.showEmptyLessons != event.showEmptyLessons) {
-      emit(state.copyWith(showEmptyLessons: event.showEmptyLessons));
-    }
-  }
-
-  Future<void> _onRemoveSavedSchedule(DeleteSchedule event, Emitter<ScheduleState> emit) async {
-    if (event.target == ScheduleTarget.group) {
-      final updatedGroups = state.groupsSchedule.where((element) => element.$1 != event.identifier).toList();
-      emit(state.copyWith(groupsSchedule: updatedGroups));
-    } else if (event.target == ScheduleTarget.teacher) {
-      final updatedTeachers = state.teachersSchedule.where((element) => element.$1 != event.identifier).toList();
-      emit(state.copyWith(teachersSchedule: updatedTeachers));
-    } else if (event.target == ScheduleTarget.classroom) {
-      final updatedClassrooms = state.classroomsSchedule.where((element) => element.$1 != event.identifier).toList();
-      emit(state.copyWith(classroomsSchedule: updatedClassrooms));
-    }
-  }
-
-  Future<void> _onSetSelectedSchedule(SetSelectedSchedule event, Emitter<ScheduleState> emit) async {
-    emit(state.copyWith(selectedSchedule: event.selectedSchedule));
-    add(const RefreshSelectedScheduleData());
-  }
-
-  FutureOr<void> _onScheduleSetDisplayMode(ScheduleSetDisplayMode event, Emitter<ScheduleState> emit) {
-    if (state.isMiniature != event.isMiniature) {
-      emit(state.copyWith(isMiniature: event.isMiniature));
-    }
-  }
-
-  FutureOr<void> _onScheduleResumed(RefreshSelectedScheduleData event, Emitter<ScheduleState> emit) async {
-    if (state.selectedSchedule != null) {
-      try {
-        final oldScheduleParts = state.selectedSchedule?.schedule ?? [];
-
-        ScheduleDiff? diff;
-
-        if (state.selectedSchedule is SelectedGroupSchedule) {
-          final selectedSchedule = state.selectedSchedule as SelectedGroupSchedule;
-          final response = await _scheduleRepository.getSchedule(
-            group: selectedSchedule.group.uid ?? selectedSchedule.group.name,
-          );
-
-          final newScheduleParts = response.data;
-
-          // Update home screen widgets
-          final updatedSchedule = SelectedGroupSchedule(group: selectedSchedule.group, schedule: newScheduleParts);
-          await _widgetUpdater.updateWidgetsFromSelectedSchedule(updatedSchedule);
-
-          // diff = _calculateScheduleDiff(oldScheduleParts, newScheduleParts);
-
-          emit(
-            state.copyWith(
-              status: ScheduleStatus.loaded,
-              selectedSchedule: updatedSchedule,
-              // latestDiff: diff,
-              // showScheduleDiffDialog: diff != null && diff.changes.isNotEmpty,
-            ),
-          );
-        } else if (state.selectedSchedule is SelectedTeacherSchedule) {
-          final selectedSchedule = state.selectedSchedule as SelectedTeacherSchedule;
-          final response = await _scheduleRepository.getTeacherSchedule(
-            teacher: selectedSchedule.teacher.uid ?? selectedSchedule.teacher.name,
-          );
-
-          final newScheduleParts = response.data;
-          // diff = _calculateScheduleDiff(oldScheduleParts, newScheduleParts);
-
-          // Update home screen widgets for teacher schedule
-          final updatedSchedule = SelectedTeacherSchedule(
-            teacher: selectedSchedule.teacher,
-            schedule: newScheduleParts,
-          );
-          await _widgetUpdater.updateWidgetsFromSelectedSchedule(updatedSchedule);
-
-          emit(
-            state.copyWith(
-              status: ScheduleStatus.loaded,
-              selectedSchedule: updatedSchedule,
-              // latestDiff: diff,
-              // showScheduleDiffDialog: diff != null && diff.changes.isNotEmpty,
-            ),
-          );
-        } else if (state.selectedSchedule is SelectedClassroomSchedule) {
-          final selectedSchedule = state.selectedSchedule as SelectedClassroomSchedule;
-          final response = await _scheduleRepository.getClassroomSchedule(
-            classroom: selectedSchedule.classroom.uid ?? selectedSchedule.classroom.name,
-          );
-
-          final newScheduleParts = response.data;
-          // diff = _calculateScheduleDiff(oldScheduleParts, newScheduleParts);
-
-          // Update home screen widgets for classroom schedule
-          final updatedSchedule = SelectedClassroomSchedule(
-            classroom: selectedSchedule.classroom,
-            schedule: newScheduleParts,
-          );
-          await _widgetUpdater.updateWidgetsFromSelectedSchedule(updatedSchedule);
-
-          emit(
-            state.copyWith(
-              status: ScheduleStatus.loaded,
-              selectedSchedule: updatedSchedule,
-              // latestDiff: diff,
-              // showScheduleDiffDialog: diff != null && diff.changes.isNotEmpty,
-            ),
-          );
-        } else if (state.selectedSchedule is SelectedCustomSchedule) {
-          // Custom schedules can just be reused as is
-          await _widgetUpdater.updateWidgetsFromSelectedSchedule(state.selectedSchedule!);
-        }
-      } catch (error, stackTrace) {
-        emit(state.copyWith(status: ScheduleStatus.failure));
-        addError(error, stackTrace);
+    try {
+      final refreshed = await _refetchSelected(selected);
+      if (refreshed == null) {
+        await _updateWidgets(selected);
+        return;
       }
+
+      if (_shouldKeepCachedSchedule(refreshed.schedule, selected)) {
+        emit(
+          state.copyWith(
+            status: .loaded,
+            lastSyncedAt: DateTime.now(),
+            scheduleSyncedAt: _touchSync(_idOf(selected)),
+            isOffline: false,
+          ),
+        );
+        return;
+      }
+
+      await _widgetUpdater.updateWidgetsFromSelectedSchedule(refreshed);
+      emit(
+        state.copyWith(
+          status: .loaded,
+          selectedSchedule: refreshed,
+          lastSyncedAt: DateTime.now(),
+          scheduleSyncedAt: _touchSync(_idOf(refreshed)),
+          isOffline: false,
+        ),
+      );
+    } on Exception catch (error, stackTrace) {
+      _emitRefreshFailure(emit);
+      addError(error, stackTrace);
     }
   }
 
-  Future<void> _updateWidgets(List<SchedulePart> scheduleParts, String scheduleName) async {
-    // Skip widget update on web platform
+  Future<bool> _autoRefreshAllowed() async {
+    switch (_syncPolicyBuilder()) {
+      case .always:
+        return true;
+      case .manualOnly:
+        return false;
+      case .wifiOnly:
+        try {
+          return await _connectivityClient.hasWifiOrEthernet();
+        } on ConnectivityCheckFailure catch (error, stackTrace) {
+          addError(error, stackTrace);
+          return true;
+        }
+    }
+  }
+
+  Future<SelectedSchedule?> _refetchSelected(SelectedSchedule selected) async {
+    switch (selected) {
+      case SelectedGroupSchedule():
+        final response = await _scheduleRepository.getSchedule(
+          group: selected.group.uid ?? selected.group.name,
+        );
+        return SelectedGroupSchedule(
+          group: selected.group,
+          schedule: response.data,
+        );
+      case SelectedTeacherSchedule():
+        final response = await _scheduleRepository.getTeacherSchedule(
+          teacher: selected.teacher.uid ?? selected.teacher.name,
+        );
+        return SelectedTeacherSchedule(
+          teacher: selected.teacher,
+          schedule: response.data,
+        );
+      case SelectedClassroomSchedule():
+        final response = await _scheduleRepository.getClassroomSchedule(
+          classroom: selected.classroom.uid ?? selected.classroom.name,
+        );
+        return SelectedClassroomSchedule(
+          classroom: selected.classroom,
+          schedule: response.data,
+        );
+      case SelectedCustomSchedule():
+        return null;
+    }
+  }
+
+  bool _shouldKeepCachedSchedule(
+    List<SchedulePart> newScheduleParts,
+    SelectedSchedule selectedSchedule,
+  ) {
+    return newScheduleParts.isEmpty && selectedSchedule.schedule.isNotEmpty;
+  }
+
+  void _emitRefreshFailure(Emitter<ScheduleState> emit) {
+    final hasCachedSchedule =
+        state.selectedSchedule?.schedule.isNotEmpty ?? false;
+    emit(
+      state.copyWith(
+        status: hasCachedSchedule ? .loaded : .failure,
+        isOffline: hasCachedSchedule,
+      ),
+    );
+  }
+
+  Future<void> _updateWidgets(SelectedSchedule selectedSchedule) async {
     if (kIsWeb) return;
-
-    // Try to create a SelectedSchedule if possible from the current state
-    if (state.selectedSchedule != null) {
-      await _widgetUpdater.updateWidgetsFromSelectedSchedule(state.selectedSchedule!);
-    } else {
-      // Fallback to the legacy method if no selected schedule is available
-      await _widgetUpdater.updateWidgets(scheduleParts, scheduleName);
-    }
-  }
-
-  ScheduleDiff? _calculateScheduleDiff(List<SchedulePart> oldParts, List<SchedulePart> newParts) {
-    return calculateScheduleDiff(oldParts, newParts);
-  }
-
-  FutureOr<void> _onHideScheduleDiffDialog(HideScheduleDiffDialog event, Emitter<ScheduleState> emit) {
-    emit(state.copyWith(showScheduleDiffDialog: false));
-  }
-
-  Future<void> _onScheduleRequested(ScheduleRequested event, Emitter<ScheduleState> emit) async {
-    emit(state.copyWith(status: ScheduleStatus.loading));
-
-    try {
-      final response = await _scheduleRepository.getSchedule(group: event.group.uid ?? event.group.name);
-
-      final updatedGroupsSchedule =
-          state.groupsSchedule.where((element) => element.$1 != (event.group.uid ?? event.group.name)).toList();
-
-      final selectedSchedule = SelectedGroupSchedule(group: event.group, schedule: response.data);
-
-      emit(
-        state.copyWith(
-          status: ScheduleStatus.loaded,
-          selectedSchedule: selectedSchedule,
-          groupsSchedule: [...updatedGroupsSchedule, (event.group.uid ?? event.group.name, event.group, response.data)],
-        ),
-      );
-
-      // Update home screen widgets
-      await _widgetUpdater.updateWidgetsFromSelectedSchedule(selectedSchedule);
-    } catch (error, stackTrace) {
-      emit(state.copyWith(status: ScheduleStatus.failure));
-      addError(error, stackTrace);
-    }
-  }
-
-  Future<void> _onTeacherScheduleRequested(TeacherScheduleRequested event, Emitter<ScheduleState> emit) async {
-    emit(state.copyWith(status: ScheduleStatus.loading));
-    try {
-      final response = await _scheduleRepository.getTeacherSchedule(teacher: event.teacher.uid ?? event.teacher.name);
-
-      final updatedTeachersSchedule =
-          state.teachersSchedule.where((element) => element.$1 != (event.teacher.uid ?? event.teacher.name)).toList();
-
-      final selectedSchedule = SelectedTeacherSchedule(teacher: event.teacher, schedule: response.data);
-
-      emit(
-        state.copyWith(
-          status: ScheduleStatus.loaded,
-          selectedSchedule: selectedSchedule,
-          teachersSchedule: [
-            ...updatedTeachersSchedule,
-            (event.teacher.uid ?? event.teacher.name, event.teacher, response.data),
-          ],
-        ),
-      );
-
-      // Update home screen widgets for teacher schedule
-      await _widgetUpdater.updateWidgetsFromSelectedSchedule(selectedSchedule);
-    } catch (error, stackTrace) {
-      emit(state.copyWith(status: ScheduleStatus.failure));
-      addError(error, stackTrace);
-    }
-  }
-
-  Future<void> _onClassroomScheduleRequested(ClassroomScheduleRequested event, Emitter<ScheduleState> emit) async {
-    emit(state.copyWith(status: ScheduleStatus.loading));
-    try {
-      final response = await _scheduleRepository.getClassroomSchedule(
-        classroom: event.classroom.uid ?? event.classroom.name,
-      );
-
-      final updatedClassroomsSchedule =
-          state.classroomsSchedule
-              .where((element) => element.$1 != (event.classroom.uid ?? event.classroom.name))
-              .toList();
-
-      final selectedSchedule = SelectedClassroomSchedule(classroom: event.classroom, schedule: response.data);
-
-      emit(
-        state.copyWith(
-          status: ScheduleStatus.loaded,
-          selectedSchedule: selectedSchedule,
-          classroomsSchedule: [
-            ...updatedClassroomsSchedule,
-            (event.classroom.uid ?? event.classroom.name, event.classroom, response.data),
-          ],
-        ),
-      );
-
-      // Update home screen widgets for classroom schedule
-      await _widgetUpdater.updateWidgetsFromSelectedSchedule(selectedSchedule);
-    } catch (error, stackTrace) {
-      emit(state.copyWith(status: ScheduleStatus.failure));
-      addError(error, stackTrace);
-    }
-  }
-
-  Future<void> _onScheduleToggleListMode(ToggleListMode event, Emitter<ScheduleState> emit) async {
-    emit(state.copyWith(isListModeEnabled: !state.isListModeEnabled));
-  }
-
-  Future<void> _onAddScheduleToComparison(AddScheduleToComparison event, Emitter<ScheduleState> emit) async {
-    if (state.comparisonSchedules.length >= _maxComparisonSchedules) return;
-
-    // Check if the schedule is already in comparison to avoid unnecessary state updates
-    if (state.comparisonSchedules.contains(event.schedule)) return;
-
-    // Using a new set to avoid mutating the original
-    final updatedComparison = Set<SelectedSchedule>.from(state.comparisonSchedules)..add(event.schedule);
-
-    // Only emit if there's an actual change
-    if (updatedComparison.length > state.comparisonSchedules.length) {
-      emit(state.copyWith(comparisonSchedules: updatedComparison));
-    }
-  }
-
-  Future<void> _onRemoveScheduleFromComparison(RemoveScheduleFromComparison event, Emitter<ScheduleState> emit) async {
-    // Check if the schedule is actually in the comparison set before proceeding
-    if (!state.comparisonSchedules.contains(event.schedule)) return;
-
-    // Using a new set to avoid mutating the original
-    final updatedComparison = Set<SelectedSchedule>.from(state.comparisonSchedules)..remove(event.schedule);
-
-    // Only emit if there's an actual change
-    if (updatedComparison.length < state.comparisonSchedules.length) {
-      emit(state.copyWith(comparisonSchedules: updatedComparison));
-    }
-  }
-
-  FutureOr<void> _onToggleComparisonMode(ToggleComparisonMode event, Emitter<ScheduleState> emit) {
-    // Only emit if we're actually changing state
-    if (state.isComparisonModeEnabled != !state.isComparisonModeEnabled) {
-      emit(state.copyWith(isComparisonModeEnabled: !state.isComparisonModeEnabled));
-    }
-  }
-
-  // Custom schedule handlers
-  Future<void> _onCreateCustomSchedule(CreateCustomSchedule event, Emitter<ScheduleState> emit) async {
-    final customSchedule = CustomSchedule.create(event.name, description: event.description);
-    final updatedSchedules = [...state.customSchedules, customSchedule];
-
-    emit(state.copyWith(customSchedules: updatedSchedules));
-  }
-
-  Future<void> _onDeleteCustomSchedule(DeleteCustomSchedule event, Emitter<ScheduleState> emit) async {
-    final updatedSchedules = state.customSchedules.where((schedule) => schedule.id != event.scheduleId).toList();
-
-    emit(state.copyWith(customSchedules: updatedSchedules));
-  }
-
-  Future<void> _onUpdateCustomSchedule(UpdateCustomSchedule event, Emitter<ScheduleState> emit) async {
-    final updatedSchedules =
-        state.customSchedules.map((schedule) {
-          return schedule.id == event.schedule.id ? event.schedule : schedule;
-        }).toList();
-
-    emit(state.copyWith(customSchedules: updatedSchedules));
-  }
-
-  Future<void> _onAddLessonToCustomSchedule(AddLessonToCustomSchedule event, Emitter<ScheduleState> emit) async {
-    final customScheduleIndex = state.customSchedules.indexWhere((schedule) => schedule.id == event.scheduleId);
-
-    if (customScheduleIndex == -1) return;
-
-    final customSchedule = state.customSchedules[customScheduleIndex];
-
-    // Check if the lesson is already in the custom schedule
-    final lessonExists = customSchedule.lessons.any(
-      (lesson) =>
-          lesson.subject == event.lesson.subject &&
-          lesson.lessonBells.number == event.lesson.lessonBells.number &&
-          const DeepCollectionEquality().equals(
-            lesson.dates.map((e) => e.toIso8601String()).toList(),
-            event.lesson.dates.map((e) => e.toIso8601String()).toList(),
-          ),
-    );
-
-    if (lessonExists) return;
-
-    final updatedLessons = [...customSchedule.lessons, event.lesson];
-    final updatedSchedule = customSchedule.copyWith(lessons: updatedLessons, updatedAt: DateTime.now());
-
-    final updatedSchedules = [...state.customSchedules];
-    updatedSchedules[customScheduleIndex] = updatedSchedule;
-
-    emit(state.copyWith(customSchedules: updatedSchedules));
-  }
-
-  Future<void> _onRemoveLessonFromCustomSchedule(
-    RemoveLessonFromCustomSchedule event,
-    Emitter<ScheduleState> emit,
-  ) async {
-    final customScheduleIndex = state.customSchedules.indexWhere((schedule) => schedule.id == event.scheduleId);
-
-    if (customScheduleIndex == -1) return;
-
-    final customSchedule = state.customSchedules[customScheduleIndex];
-
-    // Find the lesson to remove
-    final lessonIndex = customSchedule.lessons.indexWhere(
-      (lesson) =>
-          lesson.subject == event.lesson.subject &&
-          lesson.lessonBells.number == event.lesson.lessonBells.number &&
-          const DeepCollectionEquality().equals(
-            lesson.dates.map((e) => e.toIso8601String()).toList(),
-            event.lesson.dates.map((e) => e.toIso8601String()).toList(),
-          ),
-    );
-
-    if (lessonIndex == -1) return;
-
-    final updatedLessons = [...customSchedule.lessons];
-    updatedLessons.removeAt(lessonIndex);
-
-    final updatedSchedule = customSchedule.copyWith(lessons: updatedLessons, updatedAt: DateTime.now());
-
-    final updatedSchedules = [...state.customSchedules];
-    updatedSchedules[customScheduleIndex] = updatedSchedule;
-
-    emit(state.copyWith(customSchedules: updatedSchedules));
-  }
-
-  Future<void> _onSelectCustomSchedule(SelectCustomSchedule event, Emitter<ScheduleState> emit) async {
-    final customSchedule = state.customSchedules.firstWhereOrNull((schedule) => schedule.id == event.scheduleId);
-
-    if (customSchedule == null) return;
-
-    // Convert CustomSchedule lessons to SchedulePart list
-    final scheduleParts = customSchedule.lessons.map<SchedulePart>((e) => e).toList();
-
-    // Create a special Selected Schedule for custom schedules
-    final selectedSchedule = SelectedCustomSchedule(
-      id: customSchedule.id,
-      name: customSchedule.name,
-      description: customSchedule.description,
-      schedule: scheduleParts,
-    );
-
-    emit(state.copyWith(selectedSchedule: selectedSchedule, status: ScheduleStatus.loaded));
-
-    // Update widgets for custom schedule
     await _widgetUpdater.updateWidgetsFromSelectedSchedule(selectedSchedule);
   }
 
-  Future<void> _onToggleCustomScheduleMode(ToggleCustomScheduleMode event, Emitter<ScheduleState> emit) async {
-    emit(state.copyWith(isCustomScheduleModeEnabled: !state.isCustomScheduleModeEnabled));
-  }
-
-  Future<void> _onAddLessonReaction(AddLessonReaction event, Emitter<ScheduleState> emit) async {
-    final existingSummaryIndex = state.reactionSummaries.indexWhere(
-      (summary) =>
-          summary.subjectName == event.subjectName &&
-          summary.lessonDate.isAtSameMomentAs(event.lessonDate) &&
-          summary.lessonBells == event.lessonBells,
-    );
-
-    if (existingSummaryIndex >= 0) {
-      final existingSummary = state.reactionSummaries[existingSummaryIndex];
-      final updatedCounts = Map<ReactionType, int>.from(existingSummary.reactionCounts);
-
-      if (existingSummary.userReaction != null) {
-        updatedCounts[existingSummary.userReaction!] = (updatedCounts[existingSummary.userReaction!] ?? 1) - 1;
-        if (updatedCounts[existingSummary.userReaction!]! <= 0) {
-          updatedCounts.remove(existingSummary.userReaction!);
-        }
-      }
-
-      updatedCounts[event.reactionType] = (updatedCounts[event.reactionType] ?? 0) + 1;
-
-      final updatedSummary = existingSummary.copyWith(reactionCounts: updatedCounts, userReaction: event.reactionType);
-
-      final updatedSummaries = List<LessonReactionSummary>.from(state.reactionSummaries);
-      updatedSummaries[existingSummaryIndex] = updatedSummary;
-
-      emit(state.copyWith(reactionSummaries: updatedSummaries));
-    } else {
-      final newSummary = LessonReactionSummary(
-        subjectName: event.subjectName,
-        lessonDate: event.lessonDate,
-        lessonBells: event.lessonBells,
-        reactionCounts: {event.reactionType: 1},
-        userReaction: event.reactionType,
-      );
-
-      emit(state.copyWith(reactionSummaries: [...state.reactionSummaries, newSummary]));
-    }
-  }
-
-  Future<void> _onRemoveLessonReaction(RemoveLessonReaction event, Emitter<ScheduleState> emit) async {
-    final existingSummaryIndex = state.reactionSummaries.indexWhere(
-      (summary) =>
-          summary.subjectName == event.subjectName &&
-          summary.lessonDate.isAtSameMomentAs(event.lessonDate) &&
-          summary.lessonBells == event.lessonBells,
-    );
-
-    if (existingSummaryIndex >= 0) {
-      final existingSummary = state.reactionSummaries[existingSummaryIndex];
-
-      if (existingSummary.userReaction != null) {
-        final updatedCounts = Map<ReactionType, int>.from(existingSummary.reactionCounts);
-        updatedCounts[existingSummary.userReaction!] = (updatedCounts[existingSummary.userReaction!] ?? 1) - 1;
-
-        if (updatedCounts[existingSummary.userReaction!]! <= 0) {
-          updatedCounts.remove(existingSummary.userReaction!);
-        }
-
-        if (updatedCounts.isEmpty) {
-          final updatedSummaries = List<LessonReactionSummary>.from(state.reactionSummaries);
-          updatedSummaries.removeAt(existingSummaryIndex);
-          emit(state.copyWith(reactionSummaries: updatedSummaries));
-        } else {
-          final updatedSummary = existingSummary.copyWith(reactionCounts: updatedCounts, userReaction: null);
-
-          final updatedSummaries = List<LessonReactionSummary>.from(state.reactionSummaries);
-          updatedSummaries[existingSummaryIndex] = updatedSummary;
-          emit(state.copyWith(reactionSummaries: updatedSummaries));
-        }
-      }
-    }
-  }
-
-  Future<void> _onUpdateLessonReaction(UpdateLessonReaction event, Emitter<ScheduleState> emit) async {
-    add(
-      RemoveLessonReaction(
-        subjectName: event.subjectName,
-        lessonDate: event.lessonDate,
-        lessonBells: event.lessonBells,
-      ),
-    );
-
-    add(
-      AddLessonReaction(
-        subjectName: event.subjectName,
-        lessonDate: event.lessonDate,
-        lessonBells: event.lessonBells,
-        reactionType: event.reactionType,
-      ),
-    );
-  }
+  @override
+  ScheduleState fromJson(Map<String, dynamic> json) => .fromJson(json);
 
   @override
-  ScheduleState? fromJson(Map<String, dynamic> json) => ScheduleState.fromJson(json);
-
-  @override
-  Map<String, dynamic>? toJson(ScheduleState state) => state.toJson();
+  Map<String, dynamic> toJson(ScheduleState state) => state.toJson();
 }

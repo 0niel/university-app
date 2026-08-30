@@ -41,71 +41,64 @@ void main() {
       ).thenAnswer((_) async {});
     });
 
-    test('creates FirebaseAnalytics instance internally when not injected', () {
-      expect(() => analyticsRepository, isNot(throwsException));
+    test('does not send events when no provider is injected', () async {
+      const repository = AnalyticsRepository();
+
+      await repository.track(const AnalyticsEvent('event'));
     });
 
     group('track', () {
-      test('tracks event successfully', () {
+      test('tracks event successfully', () async {
         const event = AnalyticsEvent(
           'TestEvent',
           properties: <String, String>{'test-key': 'mock-id'},
         );
 
-        analyticsRepository.track(event);
+        await analyticsRepository.track(event);
 
         verify(
           () => firebaseAnalytics.logEvent(
             name: event.name,
-            parameters: event.properties?.map((key, value) => MapEntry(key, value as Object)),
+            parameters: event.properties?.map(
+              (key, value) => MapEntry(key, value as Object),
+            ),
           ),
         ).called(1);
+      });
 
-        test(
-            'throws TrackEventFailure '
-            'when logEvent throws exception', () async {
-          when(
-            () => firebaseAnalytics.logEvent(
-              name: any(named: 'name'),
-              parameters: any(named: 'parameters'),
-            ),
-          ).thenThrow(Exception());
+      test('throws TrackEventFailure when logEvent throws', () async {
+        when(
+          () => firebaseAnalytics.logEvent(
+            name: any(named: 'name'),
+            parameters: any(named: 'parameters'),
+          ),
+        ).thenThrow(Exception());
 
-          const analyticEvent1 = AnalyticsEvent(
-            'event1',
-            properties: <String, dynamic>{
-              'property1': 'value1',
-              'property2': 'value2',
-            },
-          );
+        const event = AnalyticsEvent('event1');
 
-          expect(
-            () => analyticsRepository.track(analyticEvent1),
-            throwsA(isA<TrackEventFailure>()),
-          );
-        });
+        await expectLater(
+          analyticsRepository.track(event),
+          throwsA(isA<TrackEventFailure>()),
+        );
       });
 
       group('setUserId', () {
-        test('sets user identifier successfully', () {
+        test('sets user identifier successfully', () async {
           const userId = 'userId';
 
-          analyticsRepository.setUserId(userId);
+          await analyticsRepository.setUserId(userId);
 
-          verify(
-            () => firebaseAnalytics.setUserId(id: userId),
-          ).called(1);
+          verify(() => firebaseAnalytics.setUserId(id: userId)).called(1);
         });
 
-        test(
-            'throws SetUserIdFailure '
+        test('throws SetUserIdFailure '
             'when setUserId throws exception', () async {
           when(
             () => firebaseAnalytics.setUserId(id: any(named: 'id')),
           ).thenThrow(Exception());
 
-          expect(
-            () => analyticsRepository.setUserId('userId'),
+          await expectLater(
+            analyticsRepository.setUserId('userId'),
             throwsA(isA<SetUserIdFailure>()),
           );
         });

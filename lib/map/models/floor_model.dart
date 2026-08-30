@@ -1,12 +1,12 @@
-import 'package:equatable/equatable.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 
-class FloorModel extends Equatable {
-  final String id;
-  final int number;
-  final String svgPath;
+part 'floor_model.freezed.dart';
 
-  const FloorModel({required this.id, required this.number, required this.svgPath});
-
-  @override
-  List<Object?> get props => [id, number, svgPath];
+@freezed
+abstract class FloorModel with _$FloorModel {
+  const factory FloorModel({
+    required String id,
+    required int number,
+    required String svgPath,
+  }) = _FloorModel;
 }

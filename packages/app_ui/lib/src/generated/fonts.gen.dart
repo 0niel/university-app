@@ -15,4 +15,7 @@ class FontFamily {
 
   /// Font family: Montserrat
   static const String montserrat = 'Montserrat';
+
+  /// Font family: Onest
+  static const String onest = 'Onest';
 }

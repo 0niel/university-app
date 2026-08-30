@@ -4,8 +4,8 @@ abstract class DiscourseEvent extends Equatable {
   const DiscourseEvent();
 }
 
-class DiscourseTopTopicsLoadRequest extends DiscourseEvent {
-  const DiscourseTopTopicsLoadRequest();
+class DiscourseTopTopicsRequested extends DiscourseEvent {
+  const DiscourseTopTopicsRequested();
 
   @override
   List<Object?> get props => [];

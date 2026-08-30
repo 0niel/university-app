@@ -2,6 +2,9 @@ part of 'login_bloc.dart';
 
 abstract class LoginEvent extends Equatable {
   const LoginEvent();
+
+  @override
+  List<Object?> get props => [];
 }
 
 class LoginEmailChanged extends LoginEvent {
@@ -13,7 +16,26 @@ class LoginEmailChanged extends LoginEvent {
   List<Object> get props => [email];
 }
 
-class SendEmailLinkSubmitted extends LoginEvent with AnalyticsEventMixin {
+class LoginPasswordChanged extends LoginEvent {
+  const LoginPasswordChanged(this.password);
+
+  final String password;
+
   @override
-  AnalyticsEvent get event => const AnalyticsEvent('SendEmailLinkSubmitted');
+  List<Object> get props => [password];
+}
+
+class LoginWithPasswordSubmitted extends LoginEvent with AnalyticsEventMixin {
+  @override
+  AnalyticsEvent get event => const .new('LoginWithPasswordSubmitted');
+}
+
+class EmailLinkRequested extends LoginEvent with AnalyticsEventMixin {
+  @override
+  AnalyticsEvent get event => const .new('SendEmailLinkSubmitted');
+}
+
+class ContinueAsGuestRequested extends LoginEvent with AnalyticsEventMixin {
+  @override
+  AnalyticsEvent get event => const .new('ContinueAsGuestRequested');
 }

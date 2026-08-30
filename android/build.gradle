@@ -21,7 +21,32 @@ allprojects {
 rootProject.buildDir = '../build'
 subprojects {
     project.buildDir = "${rootProject.buildDir}/${project.name}"
+
+    // Apply Kotlin to plugins that do not apply it themselves.
+    if (project.name == 'firebase_analytics' || project.name == 'watch_connectivity') {
+        pluginManager.withPlugin('com.android.library') {
+            pluginManager.apply('org.jetbrains.kotlin.android')
+        }
+    }
+
+    // Keep home_widget on the compileSdk-compatible Glance line.
+    configurations.all {
+        resolutionStrategy {
+            force 'androidx.glance:glance:1.1.1'
+            force 'androidx.glance:glance-appwidget:1.1.1'
+        }
+    }
 }
+subprojects {
+    // Align plugin Kotlin bytecode with Java 11 dependencies.
+    tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile)
+        .configureEach {
+            compilerOptions {
+                jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11)
+            }
+        }
+}
+
 subprojects {
     project.evaluationDependsOn(':app')
 }

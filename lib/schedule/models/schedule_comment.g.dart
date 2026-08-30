@@ -6,10 +6,17 @@ part of 'schedule_comment.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-ScheduleComment _$ScheduleCommentFromJson(Map<String, dynamic> json) =>
-    ScheduleComment(scheduleName: json['scheduleName'] as String, text: json['text'] as String);
+_ScheduleComment _$ScheduleCommentFromJson(Map<String, dynamic> json) =>
+    $checkedCreate('_ScheduleComment', json, ($checkedConvert) {
+      final val = _ScheduleComment(
+        scheduleName: $checkedConvert('scheduleName', (v) => v as String),
+        text: $checkedConvert('text', (v) => v as String),
+      );
+      return val;
+    });
 
-Map<String, dynamic> _$ScheduleCommentToJson(ScheduleComment instance) => <String, dynamic>{
-  'scheduleName': instance.scheduleName,
-  'text': instance.text,
-};
+Map<String, dynamic> _$ScheduleCommentToJson(_ScheduleComment instance) =>
+    <String, dynamic>{
+      'scheduleName': instance.scheduleName,
+      'text': instance.text,
+    };

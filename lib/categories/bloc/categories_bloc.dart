@@ -1,41 +1,48 @@
 import 'dart:async';
 
 import 'package:collection/collection.dart';
-import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:news_repository/news_repository.dart';
 
 part 'categories_event.dart';
 part 'categories_state.dart';
+part 'categories_status.dart';
+part 'categories_bloc.freezed.dart';
 
 class CategoriesBloc extends Bloc<CategoriesEvent, CategoriesState> {
-  CategoriesBloc({required NewsRepository newsRepository})
-    : _newsRepository = newsRepository,
-      super(const CategoriesState.initial()) {
+  CategoriesBloc({required this.newsRepository})
+    : super(const CategoriesState()) {
     on<CategoriesRequested>(_onCategoriesRequested);
     on<CategorySelected>(_onCategorySelected);
   }
 
-  final NewsRepository _newsRepository;
+  final NewsRepository newsRepository;
 
-  FutureOr<void> _onCategoriesRequested(CategoriesRequested event, Emitter<CategoriesState> emit) async {
-    emit(state.copyWith(status: CategoriesStatus.loading));
+  FutureOr<void> _onCategoriesRequested(
+    CategoriesRequested event,
+    Emitter<CategoriesState> emit,
+  ) async {
+    emit(state.copyWith(status: .loading));
     try {
-      final response = await _newsRepository.getCategories();
+      final response = await newsRepository.getCategories();
 
       emit(
         state.copyWith(
-          status: CategoriesStatus.populated,
+          status: .populated,
           categories: response.categories,
           selectedCategory: response.categories.firstOrNull,
+          sources: response.sources,
         ),
       );
-    } catch (error, stackTrace) {
-      emit(state.copyWith(status: CategoriesStatus.failure));
+    } on Exception catch (error, stackTrace) {
+      emit(state.copyWith(status: .failure));
       addError(error, stackTrace);
     }
   }
 
-  void _onCategorySelected(CategorySelected event, Emitter<CategoriesState> emit) =>
-      emit(state.copyWith(selectedCategory: event.category));
+  void _onCategorySelected(
+    CategorySelected event,
+    Emitter<CategoriesState> emit,
+  ) => emit(state.copyWith(selectedCategory: event.category));
 }

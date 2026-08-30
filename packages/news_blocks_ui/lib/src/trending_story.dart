@@ -18,8 +18,7 @@ class TrendingStory extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context).textTheme;
-    final colors = Theme.of(context).extension<AppColors>()!;
+    final colors = Theme.of(context).colors;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -32,7 +31,7 @@ class TrendingStory extends StatelessWidget {
           ),
           child: Text(
             title,
-            style: AppTextStyle.chip.copyWith(color: colors.secondary),
+            style: AppText.chip.copyWith(color: colors.secondary),
           ),
         ),
         PostSmall(block: block.content),

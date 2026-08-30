@@ -3,12 +3,14 @@ description: An Authentication Client Interface
 publish_to: none
 
 environment:
-  sdk: ">=3.7.0 <4.0.0"
+  sdk: ^3.12.0
 
 resolution: workspace
 dependencies:
-  equatable: ^2.0.3
+  freezed_annotation: 3.1.0
 
 dev_dependencies:
+  build_runner: 2.15.1
+  freezed: 3.2.5
   test: ^1.21.4
-  very_good_analysis: ^10.1.0
+  very_good_analysis: 10.3.0

@@ -1,0 +1,46 @@
+name: Sync MIREA schedule
+
+on:
+  schedule:
+    - cron: "0 1 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: schedule-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    if: >-
+      vars.SCHEDULE_INGEST_URL != '' &&
+      vars.SCHEDULE_ORGANIZATION_ID == 'mirea'
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
+        with:
+          channel: stable
+          flutter-version-file: .fvmrc
+          cache: true
+
+      - name: Install dependencies
+        working-directory: tools/schedule_fetcher
+        run: dart pub get
+
+      - name: Sync schedule
+        working-directory: tools/schedule_fetcher
+        env:
+          SCHEDULE_INGEST_URL: ${{ vars.SCHEDULE_INGEST_URL }}
+          SCHEDULE_ORGANIZATION_ID: ${{ vars.SCHEDULE_ORGANIZATION_ID }}
+          SCHEDULE_INGEST_KEY: ${{ secrets.SCHEDULE_INGEST_KEY }}
+        run: dart run bin/sync_mirea_schedule.dart

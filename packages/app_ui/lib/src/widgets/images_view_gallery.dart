@@ -3,7 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:photo_view/photo_view_gallery.dart';
 
+/// {@template images_view_gallery}
+/// A full-screen, zoomable, swipeable photo viewer for [imageUrls] with a
+/// tap-to-toggle app bar, starting at [initialIndex].
+/// {@endtemplate}
 class ImagesViewGallery extends StatefulWidget {
+  /// {@macro images_view_gallery}
   const ImagesViewGallery({
     required this.imageUrls,
     super.key,
@@ -23,11 +28,10 @@ class _ImagesViewGalleryState extends State<ImagesViewGallery> {
 
   @override
   void initState() {
+    super.initState();
     _appBarVisible = true;
 
     _pageController = PageController();
-
-    super.initState();
   }
 
   void _toggleAppBarVisibility() {
@@ -47,9 +51,7 @@ class _ImagesViewGalleryState extends State<ImagesViewGallery> {
           ? AppBar(
               backgroundColor: Colors.transparent,
               elevation: 0,
-              title: const Text(
-                'Просмотр изображений',
-              ),
+              title: const Text('Просмотр изображений'),
             )
           : null,
       extendBodyBehindAppBar: true,
@@ -59,29 +61,36 @@ class _ImagesViewGalleryState extends State<ImagesViewGallery> {
           children: [
             PhotoViewGallery.builder(
               scrollPhysics: const BouncingScrollPhysics(),
-              builder: (BuildContext context, int index) {
+              builder: (context, index) {
                 return PhotoViewGalleryPageOptions(
                   imageProvider: NetworkImage(widget.imageUrls[index]),
                   initialScale: PhotoViewComputedScale.contained * 0.8,
                   minScale: PhotoViewComputedScale.contained * 0.6,
                   maxScale: PhotoViewComputedScale.covered * 5.9,
-                  heroAttributes: PhotoViewHeroAttributes(tag: widget.imageUrls[index]),
+                  heroAttributes: PhotoViewHeroAttributes(
+                    tag: widget.imageUrls[index],
+                  ),
                 );
               },
               itemCount: widget.imageUrls.length,
-              loadingBuilder: (context, event) => Center(
-                child: SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(
-                    value: event == null ? 0 : event.cumulativeBytesLoaded / event.expectedTotalBytes!,
+              loadingBuilder: (context, event) {
+                final total = event?.expectedTotalBytes;
+                return Center(
+                  child: SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      value: event == null
+                          ? 0
+                          : total == null
+                              ? null
+                              : event.cumulativeBytesLoaded / total,
+                    ),
                   ),
-                ),
-              ),
+                );
+              },
               backgroundDecoration: widget.imageUrls.length == 1
-                  ? BoxDecoration(
-                      color: Theme.of(context).extension<AppColors>()!.background01,
-                    )
+                  ? BoxDecoration(color: Theme.of(context).colors.background01)
                   : null,
               pageController: _pageController,
             ),

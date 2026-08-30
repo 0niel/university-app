@@ -1,13 +1,15 @@
-import 'package:envied/envied.dart';
+abstract final class Env {
+  static const supabaseUrl = String.fromEnvironment('SUPABASE_URL');
 
-part 'env.g.dart';
+  static const _publishableKey = String.fromEnvironment(
+    'SUPABASE_PUBLISHABLE_KEY',
+  );
 
-@Envied(requireEnvFile: false, environment: false)
-abstract class Env {
-  @EnviedField(varName: 'SENTRY_DSN')
-  static const String sentryDsn = _Env.sentryDsn;
-  @EnviedField(varName: 'SUPABASE_URL')
-  static const String supabaseUrl = _Env.supabaseUrl;
-  @EnviedField(varName: 'SUPABASE_ANON_KEY')
-  static const String supabaseAnonKey = _Env.supabaseAnonKey;
+  static const _anonKey = String.fromEnvironment('SUPABASE_ANON_KEY');
+
+  static String get supabasePublishableKey =>
+      _publishableKey.isNotEmpty ? _publishableKey : _anonKey;
+
+  static bool get hasSupabaseConfig =>
+      supabaseUrl.isNotEmpty && supabasePublishableKey.isNotEmpty;
 }

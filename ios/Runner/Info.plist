@@ -4,6 +4,18 @@
 	<dict>
 		<key>io.flutter.embedded_views_preview</key>
 		<true/>
+		<key>NSFaceIDUsageDescription</key>
+		<string>Face ID используется, чтобы разблокировать пропуск.</string>
+		<key>NSLocationWhenInUseUsageDescription</key>
+		<string>Геопозиция нужна, чтобы делиться местоположением с друзьями на карте и видеть их рядом.</string>
+		<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+		<string>Доступ в фоне позволяет друзьям видеть тебя на карте, даже когда приложение свёрнуто. Режим призрака отключает шеринг в один тап.</string>
+		<key>UIBackgroundModes</key>
+		<array>
+			<string>fetch</string>
+			<string>location</string>
+			<string>remote-notification</string>
+		</array>
 		<key>ITSAppUsesNonExemptEncryption</key>
 		<false/>
 		<key>CADisableMinimumFrameDurationOnPhone</key>
@@ -11,7 +23,7 @@
 		<key>CFBundleDevelopmentRegion</key>
 		<string>$(DEVELOPMENT_LANGUAGE)</string>
 		<key>CFBundleDisplayName</key>
-	<string>IT University</string>
+		<string>$(TENANT_APP_DISPLAY_NAME)</string>
 		<key>CFBundleExecutable</key>
 		<string>$(EXECUTABLE_NAME)</string>
 		<key>CFBundleIdentifier</key>
@@ -19,7 +31,7 @@
 		<key>CFBundleInfoDictionaryVersion</key>
 		<string>6.0</string>
 		<key>CFBundleName</key>
-	<string>IT University</string>
+		<string>$(TENANT_APP_DISPLAY_NAME)</string>
 		<key>CFBundlePackageType</key>
 		<string>APPL</string>
 		<key>CFBundleShortVersionString</key>
@@ -33,7 +45,7 @@
 				<string>Viewer</string>
 				<key>CFBundleURLSchemes</key>
 				<array>
-					<string>ninja.mirea.mireaapp</string>
+					<string>$(TENANT_APP_DEEP_LINK_SCHEME)</string>
 				</array>
 			</dict>
 		</array>
@@ -52,11 +64,6 @@
 		<string>Приложение запрашивает разрешение на отправку уведомлений</string>
 		<key>UIApplicationSupportsIndirectInputEvents</key>
 		<true/>
-		<key>UIBackgroundModes</key>
-		<array>
-			<string>fetch</string>
-			<string>remote-notification</string>
-		</array>
 		<key>UILaunchStoryboardName</key>
 		<string>LaunchScreen</string>
 		<key>UIMainStoryboardFile</key>

@@ -4,11 +4,7 @@ import 'package:news_blocks/news_blocks.dart';
 import 'package:news_blocks_ui/news_blocks_ui.dart';
 import 'package:news_blocks_ui/src/widgets/widgets.dart';
 
-/// {@template post_large}
-/// A reusable post large block widget.
-/// {@endtemplate}
 class PostLarge extends StatelessWidget {
-  /// {@macro post_large}
   const PostLarge({
     required this.block,
     required this.categoryName,
@@ -17,88 +13,61 @@ class PostLarge extends StatelessWidget {
     super.key,
   });
 
-  /// The associated [PostLargeBlock] instance.
   final PostLargeBlock block;
-
-  /// The name of the category of the associated article.
   final String? categoryName;
-
-  /// Whether this post is a locked post.
   final bool isLocked;
-
-  /// An optional callback which is invoked when the action is triggered.
-  /// A [Uri] from the associated [BlockAction] is provided to the callback.
   final BlockActionCallback? onPressed;
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).extension<AppColors>()!;
-    return Material(
-      color: colors.surface.withOpacity(0),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(12),
-        onTap: block.hasNavigationAction
-            ? () => onPressed?.call(block.action!)
-            : null,
-        child: PostLargeContainer(
-          isContentOverlaid: block.isContentOverlaid,
-          children: [
-            PostLargeImage(
-              isContentOverlaid: block.isContentOverlaid,
-              imageUrl: block.imageUrl!,
-              isLocked: isLocked,
-            ),
-            PostContent(
-              author: block.author,
-              categoryName: categoryName,
-              publishedAt: block.publishedAt,
-              title: block.title,
-              isContentOverlaid: block.isContentOverlaid,
-            ),
-          ],
+    final scale = Theme.of(context).scale;
+    final action = block.action;
+
+    return Card(
+      margin: EdgeInsets.symmetric(
+        horizontal: scale.space(AppSpacing.md),
+        vertical: scale.space(AppSpacing.sm),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(scale.radius(16)),
+          onTap:
+              block.hasNavigationAction && action != null
+                  ? () => onPressed?.call(action)
+                  : null,
+          child: PostLargeContainer(
+            isContentOverlaid: block.isContentOverlaid,
+            children: [
+              if (!block.isContentOverlaid)
+                Padding(
+                  padding: EdgeInsets.fromLTRB(
+                    scale.space(AppSpacing.lg),
+                    scale.space(AppSpacing.md),
+                    scale.space(AppSpacing.lg),
+                    scale.space(AppSpacing.sm),
+                  ),
+                  child: PostSourceHeader(
+                    author: block.author,
+                    fallbackTitle: categoryName ?? 'Новости',
+                  ),
+                ),
+              PostLargeImage(
+                isContentOverlaid: block.isContentOverlaid,
+                imageUrl: block.imageUrl,
+                isLocked: isLocked,
+              ),
+              PostContent(
+                author: block.author,
+                categoryName: categoryName,
+                publishedAt: block.publishedAt,
+                title: block.title,
+                isContentOverlaid: block.isContentOverlaid,
+              ),
+            ],
+          ),
         ),
       ),
     );
-  }
-}
-
-/// {@template post_large_container}
-/// A post container of large block widget which decides on build layout.
-/// {@endtemplate}
-@visibleForTesting
-class PostLargeContainer extends StatelessWidget {
-  /// {@macro post_large_container}
-  const PostLargeContainer({
-    required this.children,
-    required this.isContentOverlaid,
-    super.key,
-  });
-
-  /// List containing children to be laid out.
-  final List<Widget> children;
-
-  /// Whether the content of this post should be overlaid on the image.
-  ///
-  /// Defaults to false.
-  final bool isContentOverlaid;
-
-  @override
-  Widget build(BuildContext context) {
-    return isContentOverlaid
-        ? ClipRRect(
-            borderRadius: BorderRadius.circular(12),
-            child: Stack(
-              key: const Key('postLarge_stack'),
-              alignment: Alignment.bottomLeft,
-              children: children,
-            ),
-          )
-        : Padding(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-            child: Column(
-              key: const Key('postLarge_column'),
-              children: children,
-            ),
-          );
   }
 }

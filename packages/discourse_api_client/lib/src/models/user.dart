@@ -1,31 +1,21 @@
-import 'package:json_annotation/json_annotation.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 
+part 'user.freezed.dart';
 part 'user.g.dart';
 
-@JsonSerializable()
-class User {
-  User({
-    required this.id,
-    required this.username,
-    required this.name,
-    required this.avatarTemplate,
-    required this.trustLevel,
-    this.admin,
-    this.moderator,
-    this.customFields,
-  });
+/// A user embedded in a Discourse API response.
+@freezed
+abstract class User with _$User {
+  const factory User({
+    required int id,
+    required String username,
+    required String? name,
+    @JsonKey(name: 'avatar_template') required String avatarTemplate,
+    @JsonKey(name: 'trust_level') required int trustLevel,
+    bool? admin,
+    bool? moderator,
+    @JsonKey(name: 'custom_fields') Map<String, dynamic>? customFields,
+  }) = _User;
 
   factory User.fromJson(Map<String, dynamic> json) => _$UserFromJson(json);
-  final int id;
-  final String username;
-  final String? name;
-  @JsonKey(name: 'avatar_template')
-  final String avatarTemplate;
-  final bool? admin;
-  final bool? moderator;
-  @JsonKey(name: 'trust_level')
-  final int trustLevel;
-  @JsonKey(name: 'custom_fields')
-  final Map<String, dynamic>? customFields;
-  Map<String, dynamic> toJson() => _$UserToJson(this);
 }

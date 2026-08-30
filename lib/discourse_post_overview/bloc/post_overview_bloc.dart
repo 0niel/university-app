@@ -1,30 +1,53 @@
 import 'dart:async';
 
-import 'package:discourse_repository/discourse_repository.dart';
+import 'package:bloc_concurrency/bloc_concurrency.dart';
+import 'package:community_repository/community_repository.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 
-part 'post_overview_state.dart';
 part 'post_overview_event.dart';
+part 'post_overview_bloc.freezed.dart';
+part 'post_overview_state.dart';
+part 'post_overview_status.dart';
 
 class PostOverviewBloc extends Bloc<PostOverviewEvent, PostOverviewState> {
-  PostOverviewBloc({required DiscourseRepository discourseRepository})
-    : _discourseRepository = discourseRepository,
-      super(const PostOverviewState.initial()) {
-    on<PostRequested>(_onPostRequested);
+  PostOverviewBloc({required this._communityRepository})
+    : super(const PostOverviewState()) {
+    on<PostRequested>(_onPostRequested, transformer: droppable());
   }
 
-  final DiscourseRepository _discourseRepository;
+  final CommunityRepository _communityRepository;
 
-  FutureOr<void> _onPostRequested(PostRequested event, Emitter<PostOverviewState> emit) async {
-    emit(state.copyWith(status: PostOverviewStatus.loading));
+  FutureOr<void> _onPostRequested(
+    PostRequested event,
+    Emitter<PostOverviewState> emit,
+  ) async {
+    emit(state.copyWith(status: .loading));
     try {
-      final results = await _discourseRepository.getPost(event.postId);
+      final post = await _communityRepository.getPost(event.postId);
 
-      emit(state.copyWith(post: results, status: PostOverviewStatus.loaded));
-    } catch (error, stackTrace) {
-      emit(state.copyWith(status: PostOverviewStatus.failure));
+      final comments = await _loadComments(post.topicId);
+
+      emit(
+        state.copyWith(
+          post: post,
+          comments: comments,
+          status: .loaded,
+        ),
+      );
+    } on Exception catch (error, stackTrace) {
+      emit(state.copyWith(status: .failure));
       addError(error, stackTrace);
+    }
+  }
+
+  Future<List<DiscoursePostComment>> _loadComments(int topicId) async {
+    try {
+      return await _communityRepository.getPostComments(topicId: topicId);
+    } on Exception catch (error, stackTrace) {
+      addError(error, stackTrace);
+      return const [];
     }
   }
 }

@@ -1,0 +1,2 @@
+-- Superseded by 20260611200000_add_marketplace_mentorship_teams.sql so a
+-- fresh database creates the mentorship tables before extending them.

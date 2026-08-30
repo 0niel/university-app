@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 262" font-family="Geist, system-ui, -apple-system, sans-serif" role="img" aria-label="Как ходит трафик: приложение через защищённый прокси к твоему серверу">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0L10 5L0 10z" fill="#9aa0a6"/>
+    </marker>
+    <filter id="soft" x="-20%" y="-20%" width="140%" height="160%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#000" flood-opacity="0.12"/>
+    </filter>
+  </defs>
+
+  <line x1="184" y1="80" x2="326" y2="80" stroke="#9aa0a6" stroke-width="2" marker-end="url(#arrow)"/>
+  <line x1="546" y1="80" x2="690" y2="80" stroke="#9aa0a6" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <rect x="30" y="52" width="152" height="56" rx="12" fill="#6b7280" filter="url(#soft)"/>
+  <text x="106" y="85" text-anchor="middle" fill="#fff" font-size="15" font-weight="600">Приложение</text>
+
+  <rect x="330" y="48" width="214" height="64" rx="12" fill="#7c5cff" filter="url(#soft)"/>
+  <text x="437" y="76" text-anchor="middle" fill="#fff" font-size="15" font-weight="700">miniapp-proxy</text>
+  <text x="437" y="95" text-anchor="middle" fill="#e7e0ff" font-size="11">edge-функция</text>
+
+  <rect x="692" y="52" width="158" height="56" rx="12" fill="#6b7280" filter="url(#soft)"/>
+  <text x="771" y="85" text-anchor="middle" fill="#fff" font-size="15" font-weight="600">Твой сервер</text>
+
+  <rect x="232" y="58" width="44" height="22" rx="11" fill="#efeaff"/>
+  <text x="254" y="73" text-anchor="middle" fill="#5a3ec8" font-size="12" font-weight="600">JWT</text>
+  <rect x="590" y="58" width="52" height="22" rx="11" fill="#efeaff"/>
+  <text x="616" y="73" text-anchor="middle" fill="#5a3ec8" font-size="12" font-weight="600">https</text>
+
+  <path d="M437 112 V132" stroke="#c9b8ff" stroke-width="2" stroke-dasharray="3 3"/>
+
+  <rect x="297" y="132" width="286" height="110" rx="14" fill="#f5f3ff" stroke="#e0d9ff" stroke-width="1.5"/>
+  <text x="317" y="156" fill="#5a3ec8" font-size="12" font-weight="700">Прокси проверяет</text>
+  <text x="317" y="178" fill="#4b4b57" font-size="12.5">• авторизация и статус аппа</text>
+  <text x="317" y="198" fill="#4b4b57" font-size="12.5">• rate limit 180 req/мин</text>
+  <text x="317" y="218" fill="#4b4b57" font-size="12.5">• пиннинг хоста, без редиректов</text>
+  <text x="317" y="236" fill="#4b4b57" font-size="12.5">• ответ ≤ 512 КБ, таймаут 10 с</text>
+</svg>

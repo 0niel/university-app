@@ -33,8 +33,8 @@ class ShowRewardedAdRequested extends FullScreenAdsEvent {
   const ShowRewardedAdRequested();
 }
 
-class EarnedReward extends FullScreenAdsEvent {
-  const EarnedReward(this.reward);
+class RewardEarned extends FullScreenAdsEvent {
+  const RewardEarned(this.reward);
 
   final Reward reward;
 

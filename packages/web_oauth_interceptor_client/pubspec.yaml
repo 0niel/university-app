@@ -1,5 +1,5 @@
 name: web_oauth_interceptor_client
-description: A Very Good Project created by Very Good CLI.
+description: Secure OAuth login interception for Flutter in-app browsers.
 version: 0.1.0+1
 publish_to: none
 
@@ -8,15 +8,12 @@ environment:
 
 resolution: workspace
 dependencies:
+  collection: any
   flutter:
     sdk: flutter
-  flutter_inappwebview: ^6.0.0
-
-  logger: ^2.4.0
-  
-  collection: any
+  flutter_inappwebview: ^6.2.0-beta.3
 dev_dependencies:
   flutter_test:
     sdk: flutter
   mocktail: ^1.0.4
-  very_good_analysis: ^10.1.0
+  very_good_analysis: 10.3.0

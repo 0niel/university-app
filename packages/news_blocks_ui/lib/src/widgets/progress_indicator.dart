@@ -6,33 +6,26 @@ import 'package:flutter/material.dart';
 /// {@endtemplate}
 class ProgressIndicator extends StatelessWidget {
   /// {@macro progress_indicator}
-  const ProgressIndicator({
-    super.key,
-    this.progress,
-    this.color,
-  });
+  const ProgressIndicator({super.key, this.progress, this.color});
 
   /// The current progress of this indicator (between 0 and 1).
   final double? progress;
 
   /// The color of this indicator.
   ///
-  /// Defaults to [AppColors.gainsboro].
+  /// Defaults to the active theme's shimmer base color.
   final Color? color;
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).extension<AppColors>()!;
+    final colors = Theme.of(context).colors;
     return ColoredBox(
       color: color ?? colors.shimmerBase,
       child: Center(
         child: SizedBox(
           width: 24,
           height: 24,
-          child: CircularProgressIndicator(
-            strokeWidth: 2.5,
-            value: progress,
-          ),
+          child: CircularProgressIndicator(strokeWidth: 2.5, value: progress),
         ),
       ),
     );

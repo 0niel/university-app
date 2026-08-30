@@ -1,1 +1,1 @@
-export 'post_overview_page_view.dart';
+export 'discourse_post_overview_page_view.dart';

@@ -1,5 +1,5 @@
 name: example
-description: "A new Flutter project."
+description: OAuth interceptor client example.
 publish_to: 'none'
 
 
@@ -10,18 +10,16 @@ environment:
 
 
 dependencies:
+  cupertino_icons: ^1.0.8
   flutter:
     sdk: flutter
-
   web_oauth_interceptor_client:
     path: ../
-  cupertino_icons: ^1.0.8
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-
-  flutter_lints: ^4.0.0
+  very_good_analysis: 10.3.0
 
 flutter:
   uses-material-design: true

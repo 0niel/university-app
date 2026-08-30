@@ -1,0 +1,31 @@
+import 'dart:async';
+
+import 'package:app_ui/app_ui.dart';
+import 'package:collection/collection.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:friends_repository/friends_repository.dart';
+import 'package:go_router/go_router.dart';
+import 'package:rtu_mirea_app/common/utils/ninja_initials.dart';
+import 'package:rtu_mirea_app/l10n/l10n.dart';
+import 'package:rtu_mirea_app/people/cubit/cubit.dart';
+import 'package:rtu_mirea_app/people/widgets/people_cold_error.dart';
+import 'package:study_groups_repository/study_groups_repository.dart';
+
+part 'people/friend_request_row.dart';
+part 'people/live_avatars.dart';
+part 'people/ninja_friends_tab.dart';
+part 'people/ninja_friends_tab_skeleton.dart';
+part 'people/ninja_group_tab_skeleton.dart';
+part 'people/ninja_no_study_group_tab.dart';
+part 'people/ninja_people_body.dart';
+part 'people/ninja_people_group_member_card.dart';
+part 'people/ninja_people_loading_skeleton.dart';
+part 'people/ninja_people_section_header.dart';
+part 'people/ninja_study_group_tab.dart';
+part 'people/people_friend_row.dart';
+part 'people/people_map_banner.dart';
+part 'people/people_privacy_note.dart';
+part 'people/person_row_skeleton.dart';
+part 'people/study_group_action_card.dart';
+part 'people/study_group_invite_card.dart';

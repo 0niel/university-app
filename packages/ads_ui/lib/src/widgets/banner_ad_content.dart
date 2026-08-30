@@ -1,49 +1,27 @@
 import 'dart:async';
+import 'dart:developer';
 
 import 'package:ads_ui/src/widgets/widgets.dart';
-import 'package:app_ui/app_ui.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:news_blocks/news_blocks.dart';
 import 'package:platform/platform.dart' as platform;
 import 'package:yandex_mobileads/mobile_ads.dart';
 
-/// {@template banner_ad_failed_to_load_exception}
-/// An exception thrown when loading a banner ad fails.
-/// {@endtemplate}
-class BannerAdFailedToLoadException implements Exception {
-  /// {@macro banner_ad_failed_to_load_exception}
-  BannerAdFailedToLoadException(this.error);
+typedef BannerAdBuilder =
+    BannerAd Function({
+      required BannerAdSize size,
+      required String adUnitId,
+      required AdRequest request,
+      void Function()? onAdLoaded,
+      void Function(AdRequestError error)? onAdFailedToLoad,
+      void Function()? onAdClicked,
+      void Function()? onLeftApplication,
+      void Function()? onReturnedToApplication,
+      void Function(ImpressionData impressionData)? onImpression,
+    });
 
-  /// The error which was caught.
-  final Object error;
-}
-
-/// {@template banner_ad_failed_to_get_size_exception}
-/// An exception thrown when getting a banner ad size fails.
-/// {@endtemplate}
-class BannerAdFailedToGetSizeException implements Exception {
-  /// {@macro banner_ad_failed_to_get_size_exception}
-  BannerAdFailedToGetSizeException();
-}
-
-/// Signature for [BannerAd] builder.
-typedef BannerAdBuilder = BannerAd Function({
-  required BannerAdSize size,
-  required String adUnitId,
-  required AdRequest request,
-  void Function()? onAdLoaded,
-  void Function(AdRequestError error)? onAdFailedToLoad,
-  void Function()? onAdClicked,
-  void Function()? onLeftApplication,
-  void Function()? onReturnedToApplication,
-  void Function(ImpressionData impressionData)? onImpression,
-});
-
-/// {@template banner_ad_content}
-/// A reusable content of a banner ad.
-/// {@endtemplate}
 class BannerAdContent extends StatefulWidget {
-  /// {@macro banner_ad_content}
   const BannerAdContent({
     required this.size,
     this.adFailedToLoadTitle,
@@ -58,64 +36,27 @@ class BannerAdContent extends StatefulWidget {
     super.key,
   });
 
-  /// The size of this banner ad.
   final BannerSize size;
-
-  /// The title displayed when this ad fails to load.
   final String? adFailedToLoadTitle;
-
-  /// The retry policy for loading.
   final AdsRetryPolicy adsRetryPolicy;
-
-  /// The width of this banner ad for [BannerAdSize.anchoredAdaptive].
-  /// Defaults to the width of the device.
   final int? anchoredAdaptiveWidth;
-
-  /// The unit id of this banner ad on Android.
-  /// Defaults to [androidTestUnitId].
   final String? adUnitIdAndroid;
-
-  /// The unit id of this banner ad on iOS.
-  /// Defaults to [iosTestUnitAd].
   final String? adUnitIdIOS;
-
-  /// The builder of this banner ad.
   final BannerAdBuilder adBuilder;
-
-  /// The current platform where this banner ad is displayed.
   final platform.Platform currentPlatform;
-
-  /// Called once when this banner ad loads.
   final VoidCallback? onAdLoaded;
-
-  /// Whether the progress indicator should be shown when the ad is loading.
   final bool showProgressIndicator;
-
-  /// The Android test unit id of this banner ad.
   @visibleForTesting
-  static const androidTestUnitId = 'demo-banner-yandex';
+  static const testUnitId = 'demo-banner-yandex';
 
-  /// The iOS test unit id of this banner ad.
   @visibleForTesting
-  static const iosTestUnitAd = 'demo-banner-yandex';
-
-  /// The size values of this banner ad.
-  static final _sizeValues = <BannerSize, BannerAdSize>{
-    BannerSize.normal: BannerAdSize.sticky(
-      width: GoogleAdSizes.banner.width,
-    ),
-    BannerSize.large: BannerAdSize.sticky(
-      width: GoogleAdSizes.mediumRectangle.width,
-    ),
-    BannerSize.extraLarge: const BannerAdSize.sticky(width: 300),
-  };
+  static const String androidTestUnitId = testUnitId;
+  static const String iosTestUnitAd = testUnitId;
 
   @override
   State<BannerAdContent> createState() => _BannerAdContentState();
 }
 
-/// A default [BannerAdBuilder] that uses the Yandex Mobile Ads [BannerAd.new]
-/// constructor.
 BannerAd _defaultAdBuilder({
   required BannerAdSize size,
   required String adUnitId,
@@ -127,34 +68,37 @@ BannerAd _defaultAdBuilder({
   void Function()? onReturnedToApplication,
   void Function(ImpressionData impressionData)? onImpression,
 }) {
-  return BannerAd(
-    adUnitId: adUnitId,
-    adSize: size,
-    adRequest: request,
-    onAdLoaded: onAdLoaded,
-    onAdFailedToLoad: onAdFailedToLoad,
-    onAdClicked: onAdClicked,
-    onLeftApplication: onLeftApplication,
-    onReturnedToApplication: onReturnedToApplication,
-    onImpression: onImpression,
-  );
+  return BannerAd(adSize: size);
 }
 
-class _BannerAdContentState extends State<BannerAdContent> with AutomaticKeepAliveClientMixin {
+class _BannerAdContentState extends State<BannerAdContent>
+    with AutomaticKeepAliveClientMixin {
   BannerAd? _ad;
+  StreamSubscription<BannerAdLoadState>? _loadStateSubscription;
+  StreamSubscription<BannerAdEvent>? _eventSubscription;
   bool _adFailedToLoad = false;
   bool _isBannerAlreadyCreated = false;
-  final AdRequest _adRequest = const AdRequest();
+  bool _hasNotifiedAdLoaded = false;
+
+  bool get _isSupportedPlatform =>
+      !kIsWeb &&
+      (widget.currentPlatform.isAndroid || widget.currentPlatform.isIOS);
 
   @override
   void initState() {
-    MobileAds.initialize();
     super.initState();
+
+    if (_isSupportedPlatform) {
+      unawaited(YandexAds.initialize());
+    }
   }
 
   @override
   void dispose() {
-    _ad?.destroy();
+    unawaited(_loadStateSubscription?.cancel() ?? Future.value());
+    unawaited(_eventSubscription?.cancel() ?? Future.value());
+    final ad = _ad;
+    if (ad != null) unawaited(ad.destroy());
     super.dispose();
   }
 
@@ -163,18 +107,27 @@ class _BannerAdContentState extends State<BannerAdContent> with AutomaticKeepAli
     super.build(context);
 
     if (!_isBannerAlreadyCreated && !_adFailedToLoad) {
-      _loadAd();
+      unawaited(_loadAd());
     }
+    final ad = _ad;
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         const SizedBox(height: 16),
-        if (_isBannerAlreadyCreated)
-          AdWidget(bannerAd: _ad!)
-        else if (_adFailedToLoad && widget.adFailedToLoadTitle != null)
-          Text(widget.adFailedToLoadTitle!)
+        if (_isBannerAlreadyCreated && ad != null)
+          AdWidget(bannerAd: ad)
+        else if (_adFailedToLoad)
+          if (widget.adFailedToLoadTitle case final String title)
+            Text(title)
+          else
+            const SizedBox.shrink()
+        else if (widget.showProgressIndicator)
+          const Padding(
+            padding: EdgeInsets.all(16),
+            child: CircularProgressIndicator(),
+          )
         else
-          const SizedBox(),
+          const SizedBox.shrink(),
       ],
     );
   }
@@ -183,65 +136,127 @@ class _BannerAdContentState extends State<BannerAdContent> with AutomaticKeepAli
   bool get wantKeepAlive => true;
 
   Future<void> _loadAd() async {
-    final windowSize = MediaQuery.of(context).size;
-
-    BannerAdSize currentAdSize;
-    if (widget.size == BannerSize.anchoredAdaptive) {
-      final adWidth = widget.anchoredAdaptiveWidth ?? windowSize.width.truncate();
-      final candidateSize = BannerAdSize.sticky(
-        width: adWidth,
-      );
-      final calculated = await candidateSize.getCalculatedBannerAdSize();
-      debugPrint('calculatedBannerSize: $calculated');
-      currentAdSize = candidateSize;
-    } else {
-      currentAdSize = BannerAdContent._sizeValues[widget.size]!;
+    if (!_isSupportedPlatform) {
+      return;
     }
 
-    if (!_isBannerAlreadyCreated) {
-      final adUnitId = widget.currentPlatform.isAndroid
-          ? widget.adUnitIdAndroid ?? BannerAdContent.androidTestUnitId
-          : widget.adUnitIdIOS ?? BannerAdContent.iosTestUnitAd;
-      _ad = widget.adBuilder(
-        adUnitId: adUnitId,
-        request: _adRequest,
-        size: currentAdSize,
-        onAdLoaded: () {
-          if (!mounted) return;
-          setState(() {});
-          widget.onAdLoaded?.call();
-          debugPrint('callback: banner ad loaded');
-        },
-        onAdFailedToLoad: (error) {
-          if (!mounted) return;
-          setState(() {
-            _adFailedToLoad = true;
-          });
-          debugPrint('callback: banner ad failed to load, '
-              'code: ${error.code}, description: ${error.description}');
-        },
-        onAdClicked: () => debugPrint('callback: banner ad clicked'),
-        onLeftApplication: () => debugPrint('callback: left app'),
-        onReturnedToApplication: () => debugPrint('callback: returned to app'),
-        onImpression: (data) => debugPrint('callback: impression: ${data.getRawData()}'),
-      );
-      setState(() {
-        _isBannerAlreadyCreated = true;
-      });
-    }
+    if (_isBannerAlreadyCreated) return;
+
+    final currentAdSize = await _resolveAdSize();
+    if (!mounted || _isBannerAlreadyCreated) return;
+
+    final adUnitId = widget.currentPlatform.isAndroid
+        ? (widget.adUnitIdAndroid ?? BannerAdContent.androidTestUnitId)
+        : (widget.adUnitIdIOS ?? BannerAdContent.iosTestUnitAd);
+    final bannerAd = widget.adBuilder(
+      adUnitId: adUnitId,
+      request: AdRequest(adUnitId: adUnitId),
+      size: currentAdSize,
+      onAdLoaded: () {
+        if (!mounted) return;
+        _notifyAdLoaded();
+        log('callback: banner ad loaded', name: 'BannerAdContent');
+      },
+      onAdFailedToLoad: (error) {
+        if (!mounted) return;
+        setState(() {
+          _adFailedToLoad = true;
+        });
+        log(
+          'callback: banner ad failed to load, '
+          'code: ${error.code}, description: ${error.description}',
+          name: 'BannerAdContent',
+        );
+      },
+      onAdClicked: () =>
+          log('callback: banner ad clicked', name: 'BannerAdContent'),
+      onLeftApplication: () =>
+          log('callback: left app', name: 'BannerAdContent'),
+      onReturnedToApplication: () =>
+          log('callback: returned to app', name: 'BannerAdContent'),
+      onImpression: (data) => log(
+        'callback: impression: ${data.getRawData()}',
+        name: 'BannerAdContent',
+      ),
+    );
+    _ad = bannerAd;
+    _listenToAdEvents(bannerAd);
+    setState(() {
+      _isBannerAlreadyCreated = true;
+    });
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _ad?.loadAd(adRequest: _adRequest);
+      final ad = _ad;
+      if (ad != null) unawaited(ad.load(AdRequest(adUnitId: adUnitId)));
     });
   }
 
-  // ignore: unused_element
-  void _reportError(Object exception, StackTrace stackTrace) {
-    FlutterError.reportError(
-      FlutterErrorDetails(
-        exception: exception,
-        stack: stackTrace,
-      ),
-    );
+  void _listenToAdEvents(BannerAd ad) {
+    final previousLoadStateSubscription = _loadStateSubscription;
+    if (previousLoadStateSubscription != null) {
+      unawaited(previousLoadStateSubscription.cancel());
+    }
+    _loadStateSubscription = ad.loadStateStream.listen((state) {
+      if (!mounted) return;
+      switch (state) {
+        case BannerAdLoadStateLoaded():
+          _notifyAdLoaded();
+          log('callback: banner ad loaded', name: 'BannerAdContent');
+        case BannerAdLoadStateError(:final error):
+          setState(() {
+            _adFailedToLoad = true;
+          });
+          log(
+            'callback: banner ad failed to load, '
+            'code: ${error.code}, description: ${error.description}',
+            name: 'BannerAdContent',
+          );
+        case BannerAdLoadStateInitial():
+        case BannerAdLoadStateLoading():
+          break;
+      }
+    });
+
+    final previousEventSubscription = _eventSubscription;
+    if (previousEventSubscription != null) {
+      unawaited(previousEventSubscription.cancel());
+    }
+    _eventSubscription = ad.events.listen((event) {
+      switch (event) {
+        case BannerAdClickedEvent():
+          log('callback: banner ad clicked', name: 'BannerAdContent');
+        case BannerAdImpressionEvent(:final impressionData):
+          log(
+            'callback: impression: ${impressionData.getRawData()}',
+            name: 'BannerAdContent',
+          );
+      }
+    });
+  }
+
+  Future<BannerAdSize> _resolveAdSize() async {
+    switch (widget.size) {
+      case BannerSize.anchoredAdaptive:
+        final adWidth =
+            widget.anchoredAdaptiveWidth ??
+            MediaQuery.widthOf(context).truncate();
+        final calculated = await BannerAdSize.sticky(
+          width: adWidth,
+        ).getCalculatedBannerAdSize();
+        log('calculatedBannerSize: $calculated', name: 'BannerAdContent');
+        return BannerAdSize.sticky(width: calculated.width);
+      case BannerSize.normal:
+        return BannerAdSize.sticky(width: GoogleAdSizes.banner.width);
+      case BannerSize.large:
+        return BannerAdSize.sticky(width: GoogleAdSizes.mediumRectangle.width);
+      case BannerSize.extraLarge:
+        return const BannerAdSize.sticky(width: 300);
+    }
+  }
+
+  void _notifyAdLoaded() {
+    if (_hasNotifiedAdLoaded) return;
+    _hasNotifiedAdLoaded = true;
+    widget.onAdLoaded?.call();
   }
 }

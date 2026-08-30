@@ -1,19 +1,14 @@
 import 'package:flutter/widgets.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 
-class RoomModel {
-  final String roomId;
-  final String name;
-  final bool isSelected;
-  Path path;
+part 'room_model.freezed.dart';
 
-  RoomModel({required this.roomId, required this.path, this.name = '', this.isSelected = false});
-
-  RoomModel copyWith({String? roomId, String? name, Path? path, bool? isSelected}) {
-    return RoomModel(
-      roomId: roomId ?? this.roomId,
-      name: name ?? this.name,
-      path: path ?? this.path,
-      isSelected: isSelected ?? this.isSelected,
-    );
-  }
+@freezed
+abstract class RoomModel with _$RoomModel {
+  const factory RoomModel({
+    required String roomId,
+    required Path path,
+    @Default('') String name,
+    @Default(false) bool isSelected,
+  }) = _RoomModel;
 }

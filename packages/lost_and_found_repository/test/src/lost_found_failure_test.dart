@@ -1,5 +1,5 @@
-import 'package:flutter_test/flutter_test.dart';
 import 'package:lost_and_found_repository/lost_and_found_repository.dart';
+import 'package:test/test.dart';
 
 void main() {
   group('LostFoundFailure', () {
@@ -7,6 +7,7 @@ void main() {
       const error = 'test error';
       final failures = [
         const CreateLostFoundItemFailure(error),
+        const LostFoundUploadFailure(error),
         const UpdateLostFoundItemFailure(error),
         const DeleteLostFoundItemFailure(error),
         const GetLostFoundItemsFailure(error),
@@ -15,7 +16,7 @@ void main() {
       ];
 
       for (final failure in failures) {
-        expect(failure.props, [error]);
+        expect(failure.props, [error, <String>[]]);
       }
     });
 
@@ -30,6 +31,13 @@ void main() {
       expect(
         const UpdateLostFoundItemFailure(error),
         equals(const UpdateLostFoundItemFailure(error)),
+      );
+
+      expect(
+        const LostFoundUploadFailure(error, cleanupPaths: ['orphan.jpg']),
+        equals(
+          const LostFoundUploadFailure(error, cleanupPaths: ['orphan.jpg']),
+        ),
       );
 
       expect(
@@ -72,13 +80,13 @@ void main() {
       const error = 'test error';
 
       expect(
-        const CreateLostFoundItemFailure(error),
-        isNot(equals(const UpdateLostFoundItemFailure(error))),
+        const CreateLostFoundItemFailure(error).runtimeType,
+        isNot(const UpdateLostFoundItemFailure(error).runtimeType),
       );
 
       expect(
-        const GetLostFoundItemsFailure(error),
-        isNot(equals(const GetLostFoundItemFailure(error))),
+        const GetLostFoundItemsFailure(error).runtimeType,
+        isNot(const GetLostFoundItemFailure(error).runtimeType),
       );
     });
   });

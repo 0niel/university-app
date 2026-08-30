@@ -1,5 +1,3 @@
-// ignore_for_file: prefer_const_constructors
-
 import 'package:notifications_client/notifications_client.dart';
 import 'package:test/fake.dart';
 import 'package:test/test.dart';
@@ -12,16 +10,10 @@ void main() {
   });
 
   test('exports SubscribeToCategoryFailure', () {
-    expect(
-      () => SubscribeToCategoryFailure('oops'),
-      returnsNormally,
-    );
+    expect(() => const SubscribeToCategoryFailure('oops'), returnsNormally);
   });
 
   test('exports UnsubscribeFromCategoryFailure', () {
-    expect(
-      () => UnsubscribeFromCategoryFailure('oops'),
-      returnsNormally,
-    );
+    expect(() => const UnsubscribeFromCategoryFailure('oops'), returnsNormally);
   });
 }

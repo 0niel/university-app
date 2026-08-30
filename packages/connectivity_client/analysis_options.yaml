@@ -1,0 +1,7 @@
+include: ../../analysis_options.yaml
+
+dcm:
+  rules:
+    - prefer-match-file-name:
+        exclude:
+          - test/**

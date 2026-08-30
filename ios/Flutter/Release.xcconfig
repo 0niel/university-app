@@ -1,2 +1,5 @@
 #include? "Pods/Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"
+TENANT_APP_DISPLAY_NAME = Ninja Mirea
+TENANT_APP_DEEP_LINK_SCHEME = mireaninja
+#include? "Tenant.xcconfig"
 #include "Generated.xcconfig"

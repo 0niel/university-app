@@ -1,16 +1,18 @@
 part of 'login_bloc.dart';
 
-class LoginState extends Equatable {
-  const LoginState({this.email = const Email.pure(), this.status = FormzSubmissionStatus.initial, this.valid = false});
+@freezed
+abstract class LoginState with _$LoginState {
+  const factory LoginState({
+    @Default(Email.pure()) Email email,
+    @Default(Password.pure()) Password password,
+    @Default(FormzSubmissionStatus.initial) FormzSubmissionStatus status,
+    @Default(false) bool isValid,
+    @Default(false) bool isEmailValid,
+    String? errorMessage,
+    LoginErrorKind? errorKind,
+  }) = _LoginState;
 
-  final Email email;
-  final FormzSubmissionStatus status;
-  final bool valid;
-
-  @override
-  List<Object> get props => [email, status, valid];
-
-  LoginState copyWith({Email? email, FormzSubmissionStatus? status, bool? valid}) {
-    return LoginState(email: email ?? this.email, status: status ?? this.status, valid: valid ?? this.valid);
-  }
+  const LoginState._();
 }
+
+enum LoginErrorKind { invalidCredentials, guestUnavailable }

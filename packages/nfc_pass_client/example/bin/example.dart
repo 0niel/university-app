@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:example/src/command_runner.dart';
 
 Future<void> main(List<String> args) async {
-  await _flushThenExit(await ExampleCommandRunner().run(args));
+  await _flushThenExit(await CommandRunner().run(args));
 }
 
 /// Flushes the stdout and stderr streams, then exits the program with the given
@@ -13,5 +13,6 @@ Future<void> main(List<String> args) async {
 /// exited already. This is useful to prevent Future chains from proceeding
 /// after you've decided to exit.
 Future<void> _flushThenExit(int status) {
-  return Future.wait<void>([stdout.close(), stderr.close()]).then<void>((_) => exit(status));
+  return Future.wait([stdout.close(), stderr.close()])
+      .then((_) => exit(status));
 }

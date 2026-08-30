@@ -1,7 +1,8 @@
+import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:wear/ambient_mode/ambient_mode.dart';
+import 'package:wear/home/home.dart';
 import 'package:wear/l10n/l10n.dart';
-import 'package:wear/nfc_pass/nfc_pass.dart';
 
 class App extends StatelessWidget {
   const App({super.key});
@@ -9,24 +10,21 @@ class App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AmbientModeBuilder(
-      child: const CounterPage(),
+      child: const HomePage(),
       builder: (context, isAmbientModeActive, child) {
         return MaterialApp(
-          theme: ThemeData(
-            useMaterial3: true,
-            // This makes elements such as buttons have a fewer pixels in
-            // padding and general spacing. good for devices with limited screen
-            // real state.
+          theme: AppTheme.darkTheme.copyWith(
             visualDensity: VisualDensity.compact,
-            // When in ambient mode, change the apps color scheme
-            colorScheme: isAmbientModeActive
-                ? const ColorScheme.dark(
-                    primary: Colors.white24,
-                    onSurface: Colors.white10,
-                  )
-                : const ColorScheme.dark(
-                    primary: Color(0xFF6200EE),
-                  ),
+            extensions: [
+              if (isAmbientModeActive)
+                AppColors.dark.copyWith(
+                  active: Colors.white70,
+                  deactive: Colors.white38,
+                  primary: Colors.white24,
+                )
+              else
+                AppColors.dark,
+            ],
           ),
           debugShowCheckedModeBanner: false,
           localizationsDelegates: AppLocalizations.localizationsDelegates,

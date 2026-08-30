@@ -6,7 +6,8 @@ import 'package:storage/storage.dart';
 /// {@endtemplate}
 class PersistentStorage implements Storage {
   /// {@macro persistent_storage}
-  const PersistentStorage({required SharedPreferences sharedPreferences}) : _sharedPreferences = sharedPreferences;
+  const PersistentStorage({required SharedPreferences sharedPreferences})
+    : _sharedPreferences = sharedPreferences;
 
   final SharedPreferences _sharedPreferences;
 
@@ -22,7 +23,7 @@ class PersistentStorage implements Storage {
   @override
   Future<void> write({required String key, required String value}) async {
     try {
-      await _sharedPreferences.setString(key, value);
+      await _complete(_sharedPreferences.setString(key, value));
     } catch (error, stackTrace) {
       Error.throwWithStackTrace(StorageException(error), stackTrace);
     }
@@ -31,7 +32,7 @@ class PersistentStorage implements Storage {
   @override
   Future<void> delete({required String key}) async {
     try {
-      await _sharedPreferences.remove(key);
+      await _complete(_sharedPreferences.remove(key));
     } catch (error, stackTrace) {
       Error.throwWithStackTrace(StorageException(error), stackTrace);
     }
@@ -40,9 +41,15 @@ class PersistentStorage implements Storage {
   @override
   Future<void> clear() async {
     try {
-      await _sharedPreferences.clear();
+      await _complete(_sharedPreferences.clear());
     } catch (error, stackTrace) {
       Error.throwWithStackTrace(StorageException(error), stackTrace);
+    }
+  }
+
+  Future<void> _complete(Future<bool> operation) async {
+    if (!await operation) {
+      throw StateError('SharedPreferences rejected the operation');
     }
   }
 }

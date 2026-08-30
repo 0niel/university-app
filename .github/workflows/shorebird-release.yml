@@ -3,64 +3,137 @@ name: Shorebird Release
 on:
   workflow_dispatch:
 
-env:
-  SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
-  MAPKIT_API_KEY: ${{ secrets.MAPKIT_API_KEY }}
-  STORYLY_ID: ${{ secrets.STORYLY_ID }}
-  SENTRY_DSN: ${{ secrets.STORYLY_ID }}
+permissions:
+  contents: read
 
 jobs:
   release:
+    runs-on: macos-15
+    timeout-minutes: 60
     defaults:
       run:
         shell: bash
 
-    runs-on: macos-15
-
     steps:
-      - name: 📚 Git Checkout
-        uses: actions/checkout@v3
+      - name: Check out repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
         with:
-          submodules: 'recursive'
-          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Check out private NFC module
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+        with:
+          repository: 0niel/university-app-nfc-private
+          ref: 6226b9b4c3f2ed2c4a0727ae062f8a5239e5aba5
+          ssh-key: ${{ secrets.NFC_MODULE_DEPLOY_KEY }}
+          path: android/private/nfc-pass-android
+          persist-credentials: false
 
       - name: Set up Java
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@0f481fcb613427c0f801b606911222b5b6f3083a # v5
         with:
-          distribution: 'temurin'
-          java-version: '17'
+          distribution: temurin
+          java-version: "17"
 
-      - name: 🐦 Setup Shorebird
-        uses: shorebirdtech/setup-shorebird@v1
+      - name: Set up Flutter
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
+        with:
+          channel: stable
+          flutter-version-file: .fvmrc
+          cache: true
+
+      - name: Set up Shorebird
+        uses: shorebirdtech/setup-shorebird@4dd9d7dc2d7930bfeadb053b6e94b5110779d1e5 # v1
         with:
           cache: true
 
-      - name: ♻️ Cache Flutter Pub
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/.pub-cache
-            build/
-          key: ${{ runner.os }}-pub-cache-${{ hashFiles('pubspec.lock') }}
-
-      - name: 🚀 Setup Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          channel: stable
-
-      - name: 📦 Flutter Pub Get
+      - name: Install dependencies
         run: flutter pub get
 
+      - name: Generate code
+        run: dart run build_runner build
 
-      - name: 🛠️ Generate Build Runner (env.g.dart)
-        run: flutter pub run build_runner build --delete-conflicting-outputs
+      - name: Configure Android signing
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          python3 - <<'PY'
+          import base64
+          import os
+          from pathlib import Path
 
-      - name: 🚀 Shorebird Release (Android)
-        uses: shorebirdtech/shorebird-release@v0
+          required = (
+              "ANDROID_KEYSTORE_BASE64",
+              "ANDROID_KEYSTORE_PASSWORD",
+              "ANDROID_KEY_ALIAS",
+              "ANDROID_KEY_PASSWORD",
+          )
+          missing = [name for name in required if not os.environ.get(name)]
+          if missing:
+              raise SystemExit(f"Missing release secrets: {', '.join(missing)}")
+
+          Path("android/app/release.jks").write_bytes(
+              base64.b64decode(os.environ["ANDROID_KEYSTORE_BASE64"], validate=True)
+          )
+          Path("android/key.properties").write_text(
+              "\n".join(
+                  (
+                      f"storePassword={os.environ['ANDROID_KEYSTORE_PASSWORD']}",
+                      f"keyPassword={os.environ['ANDROID_KEY_PASSWORD']}",
+                      f"keyAlias={os.environ['ANDROID_KEY_ALIAS']}",
+                      "storeFile=release.jks",
+                  )
+              )
+              + "\n",
+              encoding="utf-8",
+          )
+          PY
+
+      - name: Configure university
+        env:
+          UNIVERSITY_CONFIG_JSON: ${{ vars.UNIVERSITY_CONFIG_JSON }}
+          FIREBASE_CONFIG_JSON: ${{ vars.FIREBASE_CONFIG_JSON }}
+        run: |
+          test -n "${UNIVERSITY_CONFIG_JSON}"
+          test -n "${FIREBASE_CONFIG_JSON}"
+          printf '%s\n' "${UNIVERSITY_CONFIG_JSON}" > "${RUNNER_TEMP}/university.json"
+          printf '%s\n' "${FIREBASE_CONFIG_JSON}" > "${RUNNER_TEMP}/firebase.json"
+          dart run tool/configure_university.dart \
+            --config "${RUNNER_TEMP}/university.json"
+
+      - name: Release Android
+        uses: shorebirdtech/shorebird-release@fb52cad53f4ed5ce39883d51a26916ead502b93d # v1
+        env:
+          ORG_GRADLE_PROJECT_requirePrivateNfcModule: "true"
+          SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
         with:
           platform: android
+          flutter-version: 3.44.2
+          args: >-
+            --flavor production
+            --
+            --dart-define-from-file=${{ runner.temp }}/university.json
+            --dart-define-from-file=${{ runner.temp }}/firebase.json
+            --dart-define=SUPABASE_URL=${{ secrets.SUPABASE_URL }}
+            --dart-define=SUPABASE_PUBLISHABLE_KEY=${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
 
-      - name: 🚀 Shorebird Release (iOS)
-        uses: shorebirdtech/shorebird-release@v0
+      - name: Release iOS
+        uses: shorebirdtech/shorebird-release@fb52cad53f4ed5ce39883d51a26916ead502b93d # v1
+        env:
+          SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
         with:
           platform: ios
+          flutter-version: 3.44.2
+          args: >-
+            --
+            --dart-define-from-file=${{ runner.temp }}/university.json
+            --dart-define-from-file=${{ runner.temp }}/firebase.json
+            --dart-define=SUPABASE_URL=${{ secrets.SUPABASE_URL }}
+            --dart-define=SUPABASE_PUBLISHABLE_KEY=${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
+
+      - name: Remove Android signing material
+        if: always()
+        run: rm -f android/key.properties android/app/release.jks

@@ -22,7 +22,8 @@ class $AssetsIconsGen {
   SvgGenImage get addGroup => const SvgGenImage('assets/icons/add_group.svg');
 
   /// File path: assets/icons/calendar-03.svg
-  SvgGenImage get calendar03 => const SvgGenImage('assets/icons/calendar-03.svg');
+  SvgGenImage get calendar03 =>
+      const SvgGenImage('assets/icons/calendar-03.svg');
 
   /// File path: assets/icons/calendar.svg
   SvgGenImage get calendar => const SvgGenImage('assets/icons/calendar.svg');
@@ -37,7 +38,8 @@ class $AssetsIconsGen {
   $AssetsIconsHugeiconsGen get hugeicons => const $AssetsIconsHugeiconsGen();
 
   /// File path: assets/icons/image_placeholder.svg
-  SvgGenImage get imagePlaceholder => const SvgGenImage('assets/icons/image_placeholder.svg');
+  SvgGenImage get imagePlaceholder =>
+      const SvgGenImage('assets/icons/image_placeholder.svg');
 
   /// File path: assets/icons/left_arrow.svg
   SvgGenImage get leftArrow => const SvgGenImage('assets/icons/left_arrow.svg');
@@ -49,7 +51,8 @@ class $AssetsIconsGen {
   SvgGenImage get menu => const SvgGenImage('assets/icons/menu.svg');
 
   /// File path: assets/icons/networking.svg
-  SvgGenImage get networking => const SvgGenImage('assets/icons/networking.svg');
+  SvgGenImage get networking =>
+      const SvgGenImage('assets/icons/networking.svg');
 
   /// File path: assets/icons/oval.svg
   SvgGenImage get oval => const SvgGenImage('assets/icons/oval.svg');
@@ -61,7 +64,8 @@ class $AssetsIconsGen {
   SvgGenImage get setting02 => const SvgGenImage('assets/icons/setting-02.svg');
 
   /// File path: assets/icons/social-sharing.svg
-  SvgGenImage get socialSharing => const SvgGenImage('assets/icons/social-sharing.svg');
+  SvgGenImage get socialSharing =>
+      const SvgGenImage('assets/icons/social-sharing.svg');
 
   /// File path: assets/icons/tag.svg
   SvgGenImage get tag => const SvgGenImage('assets/icons/tag.svg');
@@ -118,7 +122,8 @@ class $AssetsImagesGen {
   AssetGenImage get logo => const AssetGenImage('assets/images/logo.png');
 
   /// List of all assets
-  List<AssetGenImage> get values => [saly1, saly18, saly2, saly25, saly3, saly39, saly4, saly5, logo];
+  List<AssetGenImage> get values =>
+      [saly1, saly18, saly2, saly25, saly3, saly39, saly4, saly5, logo];
 }
 
 class $AssetsMapsGen {
@@ -144,146 +149,190 @@ class $AssetsIconsHugeiconsGen {
   const $AssetsIconsHugeiconsGen();
 
   /// File path: assets/icons/hugeicons/add-circle.svg
-  SvgGenImage get addCircle => const SvgGenImage('assets/icons/hugeicons/add-circle.svg');
+  SvgGenImage get addCircle =>
+      const SvgGenImage('assets/icons/hugeicons/add-circle.svg');
 
   /// File path: assets/icons/hugeicons/add-square.svg
-  SvgGenImage get addSquare => const SvgGenImage('assets/icons/hugeicons/add-square.svg');
+  SvgGenImage get addSquare =>
+      const SvgGenImage('assets/icons/hugeicons/add-square.svg');
 
   /// File path: assets/icons/hugeicons/alert-02.svg
-  SvgGenImage get alert02 => const SvgGenImage('assets/icons/hugeicons/alert-02.svg');
+  SvgGenImage get alert02 =>
+      const SvgGenImage('assets/icons/hugeicons/alert-02.svg');
 
   /// File path: assets/icons/hugeicons/api.svg
   SvgGenImage get api => const SvgGenImage('assets/icons/hugeicons/api.svg');
 
   /// File path: assets/icons/hugeicons/bug-01.svg
-  SvgGenImage get bug01 => const SvgGenImage('assets/icons/hugeicons/bug-01.svg');
+  SvgGenImage get bug01 =>
+      const SvgGenImage('assets/icons/hugeicons/bug-01.svg');
 
   /// File path: assets/icons/hugeicons/building-06.svg
-  SvgGenImage get building06 => const SvgGenImage('assets/icons/hugeicons/building-06.svg');
+  SvgGenImage get building06 =>
+      const SvgGenImage('assets/icons/hugeicons/building-06.svg');
 
   /// File path: assets/icons/hugeicons/calendar-03.svg
-  SvgGenImage get calendar03 => const SvgGenImage('assets/icons/hugeicons/calendar-03.svg');
+  SvgGenImage get calendar03 =>
+      const SvgGenImage('assets/icons/hugeicons/calendar-03.svg');
 
   /// File path: assets/icons/hugeicons/calendar-check-out-01.svg
-  SvgGenImage get calendarCheckOut01 => const SvgGenImage('assets/icons/hugeicons/calendar-check-out-01.svg');
+  SvgGenImage get calendarCheckOut01 =>
+      const SvgGenImage('assets/icons/hugeicons/calendar-check-out-01.svg');
 
   /// File path: assets/icons/hugeicons/cancel-square.svg
-  SvgGenImage get cancelSquare => const SvgGenImage('assets/icons/hugeicons/cancel-square.svg');
+  SvgGenImage get cancelSquare =>
+      const SvgGenImage('assets/icons/hugeicons/cancel-square.svg');
 
   /// File path: assets/icons/hugeicons/copy-link.png
-  AssetGenImage get copyLink => const AssetGenImage('assets/icons/hugeicons/copy-link.png');
+  AssetGenImage get copyLink =>
+      const AssetGenImage('assets/icons/hugeicons/copy-link.png');
 
   /// File path: assets/icons/hugeicons/course.png
-  AssetGenImage get course => const AssetGenImage('assets/icons/hugeicons/course.png');
+  AssetGenImage get course =>
+      const AssetGenImage('assets/icons/hugeicons/course.png');
 
   /// File path: assets/icons/hugeicons/dashboard-square-01.svg
-  SvgGenImage get dashboardSquare01 => const SvgGenImage('assets/icons/hugeicons/dashboard-square-01.svg');
+  SvgGenImage get dashboardSquare01 =>
+      const SvgGenImage('assets/icons/hugeicons/dashboard-square-01.svg');
 
   /// File path: assets/icons/hugeicons/delete-02.svg
-  SvgGenImage get delete02 => const SvgGenImage('assets/icons/hugeicons/delete-02.svg');
+  SvgGenImage get delete02 =>
+      const SvgGenImage('assets/icons/hugeicons/delete-02.svg');
 
   /// File path: assets/icons/hugeicons/delete-04.svg
-  SvgGenImage get delete04 => const SvgGenImage('assets/icons/hugeicons/delete-04.svg');
+  SvgGenImage get delete04 =>
+      const SvgGenImage('assets/icons/hugeicons/delete-04.svg');
 
   /// File path: assets/icons/hugeicons/favourite.svg
-  SvgGenImage get favourite => const SvgGenImage('assets/icons/hugeicons/favourite.svg');
+  SvgGenImage get favourite =>
+      const SvgGenImage('assets/icons/hugeicons/favourite.svg');
 
   /// File path: assets/icons/hugeicons/filter-horizontal.svg
-  SvgGenImage get filterHorizontal => const SvgGenImage('assets/icons/hugeicons/filter-horizontal.svg');
+  SvgGenImage get filterHorizontal =>
+      const SvgGenImage('assets/icons/hugeicons/filter-horizontal.svg');
 
   /// File path: assets/icons/hugeicons/github.svg
-  SvgGenImage get github => const SvgGenImage('assets/icons/hugeicons/github.svg');
+  SvgGenImage get github =>
+      const SvgGenImage('assets/icons/hugeicons/github.svg');
 
   /// File path: assets/icons/hugeicons/help-square.svg
-  SvgGenImage get helpSquare => const SvgGenImage('assets/icons/hugeicons/help-square.svg');
+  SvgGenImage get helpSquare =>
+      const SvgGenImage('assets/icons/hugeicons/help-square.svg');
 
   /// File path: assets/icons/hugeicons/list-view.svg
-  SvgGenImage get listView => const SvgGenImage('assets/icons/hugeicons/list-view.svg');
+  SvgGenImage get listView =>
+      const SvgGenImage('assets/icons/hugeicons/list-view.svg');
 
   /// File path: assets/icons/hugeicons/menu-02.svg
-  SvgGenImage get menu02 => const SvgGenImage('assets/icons/hugeicons/menu-02.svg');
+  SvgGenImage get menu02 =>
+      const SvgGenImage('assets/icons/hugeicons/menu-02.svg');
 
   /// File path: assets/icons/hugeicons/more-horizontal-square-02.svg
-  SvgGenImage get moreHorizontalSquare02 => const SvgGenImage('assets/icons/hugeicons/more-horizontal-square-02.svg');
+  SvgGenImage get moreHorizontalSquare02 =>
+      const SvgGenImage('assets/icons/hugeicons/more-horizontal-square-02.svg');
 
   /// File path: assets/icons/hugeicons/news.svg
   SvgGenImage get news => const SvgGenImage('assets/icons/hugeicons/news.svg');
 
   /// File path: assets/icons/hugeicons/note-01.svg
-  SvgGenImage get note01 => const SvgGenImage('assets/icons/hugeicons/note-01.svg');
+  SvgGenImage get note01 =>
+      const SvgGenImage('assets/icons/hugeicons/note-01.svg');
 
   /// File path: assets/icons/hugeicons/note-add.svg
-  SvgGenImage get noteAdd => const SvgGenImage('assets/icons/hugeicons/note-add.svg');
+  SvgGenImage get noteAdd =>
+      const SvgGenImage('assets/icons/hugeicons/note-add.svg');
 
   /// File path: assets/icons/hugeicons/note-edit.svg
-  SvgGenImage get noteEdit => const SvgGenImage('assets/icons/hugeicons/note-edit.svg');
+  SvgGenImage get noteEdit =>
+      const SvgGenImage('assets/icons/hugeicons/note-edit.svg');
 
   /// File path: assets/icons/hugeicons/notification-02.svg
-  SvgGenImage get notification02 => const SvgGenImage('assets/icons/hugeicons/notification-02.svg');
+  SvgGenImage get notification02 =>
+      const SvgGenImage('assets/icons/hugeicons/notification-02.svg');
 
   /// File path: assets/icons/hugeicons/qr-code.svg
-  SvgGenImage get qrCode => const SvgGenImage('assets/icons/hugeicons/qr-code.svg');
+  SvgGenImage get qrCode =>
+      const SvgGenImage('assets/icons/hugeicons/qr-code.svg');
 
   /// File path: assets/icons/hugeicons/remove-circle.svg
-  SvgGenImage get removeCircle => const SvgGenImage('assets/icons/hugeicons/remove-circle.svg');
+  SvgGenImage get removeCircle =>
+      const SvgGenImage('assets/icons/hugeicons/remove-circle.svg');
 
   /// File path: assets/icons/hugeicons/remove-square.svg
-  SvgGenImage get removeSquare => const SvgGenImage('assets/icons/hugeicons/remove-square.svg');
+  SvgGenImage get removeSquare =>
+      const SvgGenImage('assets/icons/hugeicons/remove-square.svg');
 
   /// File path: assets/icons/hugeicons/school.svg
-  SvgGenImage get school => const SvgGenImage('assets/icons/hugeicons/school.svg');
+  SvgGenImage get school =>
+      const SvgGenImage('assets/icons/hugeicons/school.svg');
 
   /// File path: assets/icons/hugeicons/search-02.svg
-  SvgGenImage get search02 => const SvgGenImage('assets/icons/hugeicons/search-02.svg');
+  SvgGenImage get search02 =>
+      const SvgGenImage('assets/icons/hugeicons/search-02.svg');
 
   /// File path: assets/icons/hugeicons/search-add.svg
-  SvgGenImage get searchAdd => const SvgGenImage('assets/icons/hugeicons/search-add.svg');
+  SvgGenImage get searchAdd =>
+      const SvgGenImage('assets/icons/hugeicons/search-add.svg');
 
   /// File path: assets/icons/hugeicons/search-square.svg
-  SvgGenImage get searchSquare => const SvgGenImage('assets/icons/hugeicons/search-square.svg');
+  SvgGenImage get searchSquare =>
+      const SvgGenImage('assets/icons/hugeicons/search-square.svg');
 
   /// File path: assets/icons/hugeicons/search.svg
-  SvgGenImage get search => const SvgGenImage('assets/icons/hugeicons/search.svg');
+  SvgGenImage get search =>
+      const SvgGenImage('assets/icons/hugeicons/search.svg');
 
   /// File path: assets/icons/hugeicons/setting-01.svg
-  SvgGenImage get setting01 => const SvgGenImage('assets/icons/hugeicons/setting-01.svg');
+  SvgGenImage get setting01 =>
+      const SvgGenImage('assets/icons/hugeicons/setting-01.svg');
 
   /// File path: assets/icons/hugeicons/setting-05.svg
-  SvgGenImage get setting05 => const SvgGenImage('assets/icons/hugeicons/setting-05.svg');
+  SvgGenImage get setting05 =>
+      const SvgGenImage('assets/icons/hugeicons/setting-05.svg');
 
   /// File path: assets/icons/hugeicons/share-01.svg
-  SvgGenImage get share01 => const SvgGenImage('assets/icons/hugeicons/share-01.svg');
+  SvgGenImage get share01 =>
+      const SvgGenImage('assets/icons/hugeicons/share-01.svg');
 
   /// File path: assets/icons/hugeicons/square-arrow-left-01-round.svg
-  SvgGenImage get squareArrowLeft01Round => const SvgGenImage('assets/icons/hugeicons/square-arrow-left-01-round.svg');
+  SvgGenImage get squareArrowLeft01Round => const SvgGenImage(
+      'assets/icons/hugeicons/square-arrow-left-01-round.svg');
 
   /// File path: assets/icons/hugeicons/square-arrow-right-01-round.svg
-  SvgGenImage get squareArrowRight01Round =>
-      const SvgGenImage('assets/icons/hugeicons/square-arrow-right-01-round.svg');
+  SvgGenImage get squareArrowRight01Round => const SvgGenImage(
+      'assets/icons/hugeicons/square-arrow-right-01-round.svg');
 
   /// File path: assets/icons/hugeicons/student-card.svg
-  SvgGenImage get studentCard => const SvgGenImage('assets/icons/hugeicons/student-card.svg');
+  SvgGenImage get studentCard =>
+      const SvgGenImage('assets/icons/hugeicons/student-card.svg');
 
   /// File path: assets/icons/hugeicons/tag-01.svg
-  SvgGenImage get tag01 => const SvgGenImage('assets/icons/hugeicons/tag-01.svg');
+  SvgGenImage get tag01 =>
+      const SvgGenImage('assets/icons/hugeicons/tag-01.svg');
 
   /// File path: assets/icons/hugeicons/teaching.svg
-  SvgGenImage get teaching => const SvgGenImage('assets/icons/hugeicons/teaching.svg');
+  SvgGenImage get teaching =>
+      const SvgGenImage('assets/icons/hugeicons/teaching.svg');
 
   /// File path: assets/icons/hugeicons/telegram.svg
-  SvgGenImage get telegram => const SvgGenImage('assets/icons/hugeicons/telegram.svg');
+  SvgGenImage get telegram =>
+      const SvgGenImage('assets/icons/hugeicons/telegram.svg');
 
   /// File path: assets/icons/hugeicons/university.svg
-  SvgGenImage get university => const SvgGenImage('assets/icons/hugeicons/university.svg');
+  SvgGenImage get university =>
+      const SvgGenImage('assets/icons/hugeicons/university.svg');
 
   /// File path: assets/icons/hugeicons/user-account.svg
-  SvgGenImage get userAccount => const SvgGenImage('assets/icons/hugeicons/user-account.svg');
+  SvgGenImage get userAccount =>
+      const SvgGenImage('assets/icons/hugeicons/user-account.svg');
 
   /// File path: assets/icons/hugeicons/user-group.svg
-  SvgGenImage get userGroup => const SvgGenImage('assets/icons/hugeicons/user-group.svg');
+  SvgGenImage get userGroup =>
+      const SvgGenImage('assets/icons/hugeicons/user-group.svg');
 
   /// File path: assets/icons/hugeicons/user-square.svg
-  SvgGenImage get userSquare => const SvgGenImage('assets/icons/hugeicons/user-square.svg');
+  SvgGenImage get userSquare =>
+      const SvgGenImage('assets/icons/hugeicons/user-square.svg');
 
   /// List of all assets
   List<dynamic> get values => [
@@ -447,7 +496,8 @@ class AssetGenImage {
     bool matchTextDirection = false,
     bool gaplessPlayback = true,
     bool isAntiAlias = false,
-    @Deprecated('Do not specify package for a generated library asset') String? package = package,
+    @Deprecated('Do not specify package for a generated library asset')
+    String? package = package,
     FilterQuality filterQuality = FilterQuality.low,
     int? cacheWidth,
     int? cacheHeight,
@@ -482,7 +532,8 @@ class AssetGenImage {
 
   ImageProvider provider({
     AssetBundle? bundle,
-    @Deprecated('Do not specify package for a generated library asset') String? package = package,
+    @Deprecated('Do not specify package for a generated library asset')
+    String? package = package,
   }) {
     return AssetImage(
       _assetName,
@@ -520,7 +571,8 @@ class SvgGenImage {
     Key? key,
     bool matchTextDirection = false,
     AssetBundle? bundle,
-    @Deprecated('Do not specify package for a generated library asset') String? package = package,
+    @Deprecated('Do not specify package for a generated library asset')
+    String? package = package,
     double? width,
     double? height,
     BoxFit fit = BoxFit.contain,
@@ -563,7 +615,8 @@ class SvgGenImage {
       placeholderBuilder: placeholderBuilder,
       semanticsLabel: semanticsLabel,
       excludeFromSemantics: excludeFromSemantics,
-      colorFilter: colorFilter ?? (color == null ? null : ColorFilter.mode(color, colorBlendMode)),
+      colorFilter: colorFilter ??
+          (color == null ? null : ColorFilter.mode(color, colorBlendMode)),
       clipBehavior: clipBehavior,
       cacheColorFilter: cacheColorFilter,
     );

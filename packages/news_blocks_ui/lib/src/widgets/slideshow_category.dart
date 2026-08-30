@@ -22,9 +22,9 @@ class SlideshowCategory extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).extension<AppColors>()!;
+    final colors = Theme.of(context).colors;
     final backgroundColor =
-        isIntroduction ? colors.secondary : colors.surface.withOpacity(0);
+        isIntroduction ? colors.secondary : colors.surface.withValues(alpha: 0);
     final textColor = isIntroduction ? colors.white : colors.accent;
     const horizontalSpacing = AppSpacing.xs;
 
@@ -43,10 +43,9 @@ class SlideshowCategory extends StatelessWidget {
               ),
               child: Text(
                 slideshowText.toUpperCase(),
-                style: Theme.of(context)
-                    .textTheme
-                    .labelSmall
-                    ?.copyWith(color: textColor),
+                style: Theme.of(
+                  context,
+                ).textTheme.labelSmall?.copyWith(color: textColor),
               ),
             ),
           ),

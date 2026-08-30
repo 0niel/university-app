@@ -7,6 +7,9 @@ class StorageException implements Exception {
 
   /// Связанная ошибка.
   final Object error;
+
+  @override
+  String toString() => 'StorageException: $error';
 }
 
 /// Интерфейс клиентского хранилища.

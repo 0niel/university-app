@@ -7,6 +7,8 @@ bin/internal/engine.version
 # Miscellaneous
 *.class
 *.lock
+!/supabase/functions/deno.lock
+!/tools/social_media_fetcher/uv.lock
 *.log
 *.pyc
 *.swp
@@ -154,7 +156,43 @@ app.*.symbols
 
 # Envied Package
 .env
-env.g.dart
+**/.env.*
+!.env.example
+*.key
+*.pem
+*.p12
+*.pfx
+
+test/gallery/failures/
+packages/news_blocks_ui/test/**/failures/
+design_bundle/
+*.code-workspace
+tools/schedule_fetcher/.logs/
+config/university.local.json
+config/firebase.local.json
+/config/firebase.local/
+
+# Generated local tenant metadata
+/android/tenant.properties
+/ios/Flutter/Tenant.xcconfig
+/web/university-config.json
+
+# Local Telegram/AyuGram credentials
+*.session
+*.session-journal
+*.session-shm
+*.session-wal
+.sofa/
+
+# Python tooling caches and local environments
+.venv/
+**/.venv/
+**/node_modules/
+.pytest_cache/
+**/.pytest_cache/
+.ruff_cache/
+**/.ruff_cache/
+/supabase/functions/node_modules/
 
 # FVM Version Cache
 .fvm/
@@ -162,3 +200,8 @@ env.g.dart
 # Firebase
 **/.firebaserc
 .firebase
+/android/app/google-services.json
+/android/app/src/**/google-services.json
+/ios/Runner/GoogleService-Info.plist
+/lib/firebase_options.dart
+/android/private/

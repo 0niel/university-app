@@ -1,55 +1,26 @@
-import 'package:flutter/material.dart';
 import 'package:app_ui/app_ui.dart';
+import 'package:flutter/material.dart';
+import 'package:rtu_mirea_app/l10n/l10n.dart';
 
 class SearchTextField extends StatelessWidget {
-  const SearchTextField({required this.controller, super.key});
+  const SearchTextField({
+    required this.controller,
+    super.key,
+    this.autofocus = false,
+  });
 
   final TextEditingController controller;
+  final bool autofocus;
 
   @override
   Widget build(BuildContext context) {
     return Hero(
       tag: 'searchHero',
-      child: Container(
-        height: 48,
-        decoration: BoxDecoration(
-          color: Theme.of(context).extension<AppColors>()!.background02,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: TextField(
-          controller: controller,
-          style: AppTextStyle.titleS.copyWith(
-            color: Theme.of(context).extension<AppColors>()!.active,
-          ),
-          decoration: InputDecoration(
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 12,
-            ),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide.none,
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide.none,
-            ),
-            hintText: 'Поиск',
-            hintStyle: AppTextStyle.titleS.copyWith(
-              color: Theme.of(context).extension<AppColors>()!.deactive,
-            ),
-            prefixIcon: Padding(
-              padding: const EdgeInsets.only(right: 8, left: 16),
-              child: Assets.icons.hugeicons.search.svg(
-                color: Theme.of(context).extension<AppColors>()!.active,
-              ),
-            ),
-            prefixIconConstraints: const BoxConstraints(
-              maxWidth: 48,
-              maxHeight: 48,
-            ),
-          ),
-        ),
+      child: NinjaInput(
+        controller: controller,
+        autofocus: autofocus,
+        leadingIcon: const AppLineIconWidget(AppLineIcon.search),
+        placeholder: context.l10n.searchGlobalHint,
       ),
     );
   }

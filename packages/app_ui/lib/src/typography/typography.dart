@@ -1,46 +1,105 @@
-import 'package:app_ui/app_ui.dart';
+import 'package:app_ui/src/generated/generated.dart';
 import 'package:flutter/material.dart';
 
-abstract class AppTextStyle {
-  static const _headline = TextStyle(
-    fontFamily: FontFamily.montserrat,
-    fontWeight: FontWeight.w600,
-    letterSpacing: 0,
-    decoration: TextDecoration.none,
-    textBaseline: TextBaseline.alphabetic,
-  );
-
-  static const _inter = TextStyle(
+abstract final class AppText {
+  static const _base = TextStyle(
     fontFamily: FontFamily.inter,
     letterSpacing: 0,
     decoration: TextDecoration.none,
     textBaseline: TextBaseline.alphabetic,
   );
 
-  // When height is non-null, the line height of the span of text will be a
-  // multiple of font Size and be exactly fontSize * height logical pixels tall.
+  static final TextStyle displayHero = _base.copyWith(
+    fontSize: 27,
+    height: 1.1,
+    fontWeight: FontWeight.w700,
+  );
 
-  // For example, if want to have height 24.0, with font-size 20.0, we should
-  // have height property 1.2
-  static final h0 = _headline.copyWith(fontSize: 60, height: 1);
-  static final h1 = _headline.copyWith(fontSize: 48, height: 1.1);
-  static final h2 = _headline.copyWith(fontSize: 40, height: 1.2);
-  static final h3 = _headline.copyWith(fontSize: 36, height: 1.1);
-  static final h4 = _headline.copyWith(fontSize: 32, height: 1.3);
-  static final h5 = _headline.copyWith(fontSize: 24, height: 1.3);
-  static final h6 = _headline.copyWith(fontSize: 20, height: 1.2);
-  static final title = _headline.copyWith(fontSize: 18, height: 1.3);
+  static final TextStyle displayLarge = _base.copyWith(
+    fontSize: 30,
+    height: 1.1,
+    fontWeight: FontWeight.w700,
+  );
 
-  static final titleM = _inter.copyWith(fontSize: 16, fontWeight: FontWeight.w600);
-  static final titleS = _inter.copyWith(fontSize: 14, fontWeight: FontWeight.w600);
-  static final buttonL = _inter.copyWith(fontSize: 16, fontWeight: FontWeight.w700);
-  static final buttonS = _inter.copyWith(fontSize: 14, fontWeight: FontWeight.w700);
-  static final tab = _inter.copyWith(fontSize: 14, fontWeight: FontWeight.w600);
-  static final bodyL = _inter.copyWith(fontSize: 14, fontWeight: FontWeight.w500);
-  static final body = _inter.copyWith(fontSize: 13, fontWeight: FontWeight.w500);
-  static final bodyBold = _inter.copyWith(fontSize: 14, fontWeight: FontWeight.w700);
-  static final bodyRegular = _inter.copyWith(fontSize: 13);
-  static final captionL = _inter.copyWith(fontSize: 12, fontWeight: FontWeight.w500);
-  static final captionS = _inter.copyWith(fontSize: 11, fontWeight: FontWeight.w500);
-  static final chip = _inter.copyWith(fontSize: 10, fontWeight: FontWeight.w700, letterSpacing: 0.50);
+  static final TextStyle display = _base.copyWith(
+    fontSize: 32,
+    height: 1.15,
+    fontWeight: FontWeight.w700,
+  );
+
+  static final TextStyle displaySmall = _base.copyWith(
+    fontSize: 24,
+    height: 1.2,
+    fontWeight: FontWeight.w700,
+  );
+
+  static final TextStyle title = _base.copyWith(
+    fontSize: 19,
+    height: 1.2,
+    fontWeight: FontWeight.w700,
+  );
+
+  static final TextStyle heading = _base.copyWith(
+    fontSize: 15.5,
+    height: 1.25,
+    fontWeight: FontWeight.w600,
+  );
+
+  static final TextStyle body = _base.copyWith(
+    fontSize: 14,
+    height: 1.35,
+    fontWeight: FontWeight.w500,
+  );
+
+  static final TextStyle bodyStrong =
+      body.copyWith(fontWeight: FontWeight.w700);
+
+  static final TextStyle bodyLarge = body.copyWith(fontSize: 15);
+
+  static final TextStyle bodyRegular =
+      body.copyWith(fontWeight: FontWeight.w400);
+
+  static final TextStyle caption = _base.copyWith(
+    fontSize: 12,
+    height: 1.3,
+    fontWeight: FontWeight.w500,
+  );
+
+  static final TextStyle captionSmall = _base.copyWith(
+    fontSize: 11,
+    height: 1.25,
+    fontWeight: FontWeight.w500,
+  );
+
+  static final TextStyle button = _base.copyWith(
+    fontSize: 13,
+    height: 1.2,
+    fontWeight: FontWeight.w600,
+  );
+
+  static final TextStyle buttonLarge = button.copyWith(
+    fontSize: 15,
+    fontWeight: FontWeight.w700,
+  );
+
+  static final TextStyle tab = button;
+
+  static final TextStyle overline = _base.copyWith(
+    fontSize: 11,
+    height: 1.2,
+    fontWeight: FontWeight.w700,
+    letterSpacing: .8,
+  );
+
+  static final TextStyle chip = _base.copyWith(
+    fontSize: 11,
+    height: 1.2,
+    fontWeight: FontWeight.w700,
+  );
+
+  static TextStyle tabular([TextStyle? base]) {
+    return (base ?? bodyStrong).copyWith(
+      fontFeatures: const [FontFeature.tabularFigures()],
+    );
+  }
 }

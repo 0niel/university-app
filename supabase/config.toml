@@ -8,7 +8,7 @@ enabled = true
 port = 54321
 # Schemas to expose in your API. Tables, views and stored procedures in this schema will get API
 # endpoints. public and storage are always included.
-schemas = ["public", "storage", "graphql_public"]
+schemas = ["public", "storage", "graphql_public", "app_api_v1", "ingest_v1"]
 # Extra schemas to add to the search_path of every request. public is always included.
 extra_search_path = ["public", "extensions"]
 # The maximum number of rows returns from a view, table, or stored procedure. Limits payload size
@@ -79,6 +79,9 @@ enable_refresh_token_rotation = true
 refresh_token_reuse_interval = 10
 # Allow/disallow new user signups to your project.
 enable_signup = true
+# Allow/disallow anonymous (guest) sign-ins. Required for the "Войти как гость"
+# button on the login screen.
+enable_anonymous_sign_ins = true
 
 [auth.email]
 # Allow/disallow new user signups via email to your project.
@@ -87,12 +90,25 @@ enable_signup = true
 # addresses. If disabled, only the new email is required to confirm.
 double_confirm_changes = true
 # If enabled, users need to confirm their email address before signing in.
-enable_confirmations = false
+# Sign-up sends a 6-digit code (confirmation template) which the app verifies
+# via verifyOTP(type: signup) on the email-confirmation screen.
+enable_confirmations = true
 
-# Uncomment to customize email template
-# [auth.email.template.invite]
-# subject = "You have been invited"
-# content_path = "./supabase/templates/invite.html"
+# Code-based (OTP) email auth. Each template renders the 6-digit {{ .Token }}.
+#  * magic_link  — login by code (signInWithOtp for existing users)
+#  * confirmation — sign-up confirmation code (new users)
+#  * recovery    — password reset code (resetPasswordForEmail)
+[auth.email.template.magic_link]
+subject = "Код для входа в приложение университета"
+content_path = "./supabase/templates/magic_link.html"
+
+[auth.email.template.confirmation]
+subject = "Подтверждение регистрации в приложении университета"
+content_path = "./supabase/templates/confirmation.html"
+
+[auth.email.template.recovery]
+subject = "Сброс пароля в приложении университета"
+content_path = "./supabase/templates/recovery.html"
 
 [auth.sms]
 # Allow/disallow new user signups via SMS to your project.
@@ -132,3 +148,15 @@ port = 54327
 vector_port = 54328
 # Configure one of the supported backends: `postgres`, `bigquery`.
 backend = "postgres"
+
+[functions.ingest]
+verify_jwt = false
+
+[functions.sync-telegram-feed]
+verify_jwt = false
+
+[functions.miniapp-deploy]
+verify_jwt = false
+
+[functions.miniapp-notify]
+verify_jwt = false

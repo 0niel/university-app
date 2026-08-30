@@ -1,40 +1,23 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:discourse_api_client/src/discourse_api_exceptions.dart';
 import 'package:discourse_api_client/src/models/models.dart';
 import 'package:http/http.dart' as http;
 
-class DiscourseApiMalformedResponse implements Exception {
-  const DiscourseApiMalformedResponse({required this.error});
-
-  final Object error;
-}
-
-class DiscourseApiRequestFailure implements Exception {
-  const DiscourseApiRequestFailure({
-    required this.statusCode,
-    required this.body,
-  });
-
-  final int statusCode;
-
-  final Map<String, dynamic> body;
-}
-
+/// {@template discourse_api_client}
+/// A thin HTTP client over a Discourse forum, fetching top topics, individual
+/// posts and a topic's full post stream as typed models.
+/// {@endtemplate}
 class DiscourseApiClient {
-  DiscourseApiClient({
-    required String baseUrl,
-    http.Client? httpClient,
-  }) : this._(
-          baseUrl: baseUrl,
-          httpClient: httpClient,
-        );
+  /// {@macro discourse_api_client}
+  DiscourseApiClient({required String baseUrl, http.Client? httpClient})
+    : this._(baseUrl: baseUrl, httpClient: httpClient);
 
   DiscourseApiClient._({
-    required String baseUrl,
+    required this._baseUrl,
     http.Client? httpClient,
-  })  : _baseUrl = baseUrl,
-        _httpClient = httpClient ?? http.Client();
+  }) : _httpClient = httpClient ?? http.Client();
 
   final String _baseUrl;
   final http.Client _httpClient;
@@ -43,7 +26,7 @@ class DiscourseApiClient {
     final uri = Uri.parse('$_baseUrl/top.json?period=monthly');
     final response = await _httpClient.get(
       uri,
-      headers: await _getRequestHeaders(),
+      headers: _requestHeaders,
     );
 
     final body = response.json();
@@ -62,7 +45,7 @@ class DiscourseApiClient {
     final uri = Uri.parse('$_baseUrl/posts/$id.json');
     final response = await _httpClient.get(
       uri,
-      headers: await _getRequestHeaders(),
+      headers: _requestHeaders,
     );
 
     final body = response.json();
@@ -77,8 +60,42 @@ class DiscourseApiClient {
     return Post.fromJson(body);
   }
 
-  Future<Map<String, String>> _getRequestHeaders() async {
-    return <String, String>{
+  /// Fetches the posts of a topic (the whole thread: first post + replies)
+  /// from `/t/{topicId}.json`, mapping `post_stream.posts[]` to [TopicPost].
+  Future<List<TopicPost>> getTopicPosts(int topicId) async {
+    final uri = Uri.parse('$_baseUrl/t/$topicId.json');
+    final response = await _httpClient.get(
+      uri,
+      headers: _requestHeaders,
+    );
+
+    final body = response.json();
+
+    if (response.statusCode != HttpStatus.ok) {
+      throw DiscourseApiRequestFailure(
+        body: body,
+        statusCode: response.statusCode,
+      );
+    }
+
+    final postStream = body['post_stream'];
+    final posts = postStream is Map<String, dynamic>
+        ? postStream['posts']
+        : null;
+    if (posts is! List) {
+      throw DiscourseApiMalformedResponse(
+        error: 'post_stream.posts missing in topic $topicId response',
+      );
+    }
+
+    return posts
+        .whereType<Map<String, dynamic>>()
+        .map(TopicPost.fromJson)
+        .toList();
+  }
+
+  Map<String, String> get _requestHeaders {
+    return {
       HttpHeaders.contentTypeHeader: ContentType.json.value,
       HttpHeaders.acceptHeader: ContentType.json.value,
     };

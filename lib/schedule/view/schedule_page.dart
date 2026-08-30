@@ -1,705 +1,810 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:academic_calendar/academic_calendar.dart';
+import 'package:app_ui/app_ui.dart';
+import 'package:collection/collection.dart';
+import 'package:flutter/foundation.dart' show ValueListenable;
 import 'package:flutter/material.dart' hide TimeOfDay;
-import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import 'package:rtu_mirea_app/ads/ads.dart';
-import 'package:rtu_mirea_app/common/utils/calendar_utils.dart';
-import 'package:rtu_mirea_app/presentation/constants.dart';
-import 'package:app_ui/app_ui.dart';
-import 'package:rtu_mirea_app/common/widgets/responsive_layout.dart';
-import 'package:rtu_mirea_app/schedule/bloc/schedule_bloc.dart';
-import 'package:rtu_mirea_app/schedule/models/models.dart';
-
-import 'package:rtu_mirea_app/schedule/widgets/widgets.dart';
-
-import 'package:table_calendar/table_calendar.dart';
-import 'package:university_app_server_api/client.dart';
-import 'package:expandable_page_view/expandable_page_view.dart';
-import 'package:rtu_mirea_app/navigation/view/scaffold_navigation_shell.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
+import 'package:rtu_mirea_app/schedule/bloc/schedule_bloc.dart';
+import 'package:rtu_mirea_app/schedule/cubit/cubit.dart';
+import 'package:rtu_mirea_app/schedule/models/models.dart';
+import 'package:rtu_mirea_app/schedule/view/schedule_page/lesson_meta.dart';
+import 'package:rtu_mirea_app/schedule/view/schedule_page/lesson_text.dart';
+import 'package:rtu_mirea_app/schedule/view/schedule_page/month_load.dart';
+import 'package:rtu_mirea_app/schedule/view/schedule_page/schedule_dates.dart';
+import 'package:rtu_mirea_app/schedule/view/schedule_page/schedule_paging.dart';
+import 'package:rtu_mirea_app/schedule/view/schedule_page/schedule_skeleton.dart';
+import 'package:rtu_mirea_app/schedule/view/schedule_page/sheets.dart';
+import 'package:rtu_mirea_app/schedule/view/session/session_page.dart';
+import 'package:rtu_mirea_app/schedule/widgets/widgets.dart';
+import 'package:rtu_mirea_app/schedule_management/view/view.dart';
+import 'package:rtu_mirea_app/search/widgets/global_search_button.dart';
+import 'package:rtu_mirea_app/tour/tour.dart';
+import 'package:schedule_repository/schedule_repository.dart';
+
+part 'schedule_page/activity_row.dart';
+part 'schedule_page/busy_day_density_bar.dart';
+part 'schedule_page/change_callout.dart';
+part 'schedule_page/empty_day_card.dart';
+part 'schedule_page/empty_filter_sliver.dart';
+part 'schedule_page/filter_chips.dart';
+part 'schedule_page/friends_on_class.dart';
+part 'schedule_page/gap_row.dart';
+part 'schedule_page/inline_reactions.dart';
+part 'schedule_page/lesson_extra_row.dart';
+part 'schedule_page/lesson_progress_bar.dart';
+part 'schedule_page/lesson_queries.dart';
+part 'schedule_page/list_schedule_sliver.dart';
+part 'schedule_page/month_cell.dart';
+part 'schedule_page/month_legend.dart';
+part 'schedule_page/month_schedule_sliver.dart';
+part 'schedule_page/month_switcher.dart';
+part 'schedule_page/note_row.dart';
+part 'schedule_page/now_chip.dart';
+part 'schedule_page/offline_banner.dart';
+part 'schedule_page/past_summary.dart';
+part 'schedule_page/schedule_agenda_slivers.dart';
+part 'schedule_page/schedule_chrome.dart';
+part 'schedule_page/schedule_clock_ticker.dart';
+part 'schedule_page/schedule_day_button.dart';
+part 'schedule_page/schedule_day_off_style.dart';
+part 'schedule_page/schedule_day_model.dart';
+part 'schedule_page/schedule_day_page.dart';
+part 'schedule_page/schedule_day_pager.dart';
+part 'schedule_page/schedule_empty_block.dart';
+part 'schedule_page/schedule_empty_sliver.dart';
+part 'schedule_page/schedule_fab.dart';
+part 'schedule_page/schedule_filter.dart';
+part 'schedule_page/schedule_floating_actions.dart';
+part 'schedule_page/schedule_header.dart';
+part 'schedule_page/schedule_month_label.dart';
+part 'schedule_page/schedule_more_actions_sheet.dart';
+part 'schedule_page/schedule_next_lesson_card.dart';
+part 'schedule_page/schedule_now_marker.dart';
+part 'schedule_page/schedule_unavailable.dart';
+part 'schedule_page/schedule_view.dart';
+part 'schedule_page/schedule_view_transition.dart';
+part 'schedule_page/timeline_children.dart';
+part 'schedule_page/timeline_lesson_card.dart';
+part 'schedule_page/view_selector.dart';
+part 'schedule_page/week_activity_chip.dart';
+part 'schedule_page/week_day_column.dart';
+part 'schedule_page/week_lesson_chip.dart';
+part 'schedule_page/week_pager_strip.dart';
+part 'schedule_page/week_parity_switcher.dart';
+part 'schedule_page/week_schedule_sliver.dart';
+part 'schedule_page/week_strip_page.dart';
+part 'schedule_page/week_today_pill.dart';
 
 class SchedulePage extends StatefulWidget {
   const SchedulePage({super.key});
-
-  static const int maxLessonsPerDay = 7;
 
   @override
   State<SchedulePage> createState() => _SchedulePageState();
 }
 
-class _SchedulePageState extends State<SchedulePage> {
-  late final PageController _pageController;
-  late final ScheduleBloc _bloc;
+class _SchedulePageState extends State<SchedulePage> with _ScheduleClockTicker {
+  _ScheduleView _view = .agenda;
+  _ScheduleFilter _filter = .all;
+  DateTime _selectedDay = dateOnly(DateTime.now());
+  DateTime _clockNow = DateTime.now();
+  bool _showPast = false;
 
-  // Track the current page index
-  late int _currentPageIndex;
+  SelectedSchedule? _previousSelectedSchedule;
+  final GlobalKey _nowMarkerKey = GlobalKey();
+  final Map<int, GlobalKey> _agendaMorphDayKeys = {};
+  final Map<int, GlobalKey> _monthMorphDayKeys = {};
+  final ValueNotifier<double> _selectorCollapse = ValueNotifier(0);
 
-  CalendarFormat _calendarFormat = CalendarFormat.week;
+  late final SchedulePaging _paging;
+  late final ScheduleMonthPaging _monthPaging;
+  late PageController _dayController;
+  late PageController _weekController;
+  late PageController _monthController;
+  late int _monthTargetPage;
+  int _pagerGuards = 0;
+  int _monthPagerGuards = 0;
 
-  Timer? _toggleTimer;
+  @override
+  bool get isClockTickNeeded =>
+      _view == .agenda && isSameDate(_selectedDay, _clockNow);
 
-  bool _isStoriesVisible = false;
-
-  // Track scroll direction
-  bool _isScrollingDown = false;
-  double _lastScrollPosition = 0;
+  @override
+  void onClockTick() => setState(() => _clockNow = DateTime.now());
 
   @override
   void initState() {
     super.initState();
-    // Initialize with the initial page
-    _currentPageIndex = Calendar.getPageIndex(Calendar.getNowWithoutTime());
-    _pageController = PageController(initialPage: _currentPageIndex);
-    _bloc = context.read<ScheduleBloc>();
-
-    // Add a listener to update current page index
-    _pageController.addListener(_updateCurrentPage);
-  }
-
-  bool _handleScrollNotification(ScrollNotification notification) {
-    if (notification is ScrollUpdateNotification) {
-      // Only respond to vertical scrolling, ignore horizontal page changes
-      if (notification.metrics.axis != Axis.vertical) return false;
-
-      final ScrollMetrics metrics = notification.metrics;
-      final double currentScrollPosition = metrics.pixels;
-
-      final isScrollingDown = currentScrollPosition > _lastScrollPosition;
-
-      if (isScrollingDown != _isScrollingDown) {
-        setState(() {
-          _isScrollingDown = isScrollingDown;
-        });
-
-        if (isScrollingDown) {
-          BottomNavigationBarVisibilityController.instance.hide();
-        } else {
-          BottomNavigationBarVisibilityController.instance.show();
-        }
-      }
-
-      _lastScrollPosition = currentScrollPosition;
-    }
-
-    return true;
-  }
-
-  void _updateCurrentPage() {
-    if (_pageController.hasClients && _pageController.page != null) {
-      setState(() {
-        _currentPageIndex = _pageController.page!.round();
-      });
-    }
-  }
-
-  @override
-  void dispose() {
-    _toggleTimer?.cancel();
-    // Remove the listener when disposing
-    _pageController.removeListener(_updateCurrentPage);
-    _pageController.dispose();
-    super.dispose();
-  }
-
-  String get _appBarTitle {
-    final scheduleState = _bloc.state.selectedSchedule;
-    if (scheduleState is SelectedGroupSchedule) {
-      return scheduleState.group.name;
-    } else if (scheduleState is SelectedTeacherSchedule) {
-      return _formatTeacherName(scheduleState.teacher.name);
-    } else if (scheduleState is SelectedClassroomSchedule) {
-      return scheduleState.classroom.name;
-    } else {
-      return context.l10n.schedule;
-    }
-  }
-
-  String _formatTeacherName(String fullName) {
-    final nameParts = fullName.split(' ');
-    if (nameParts.length == 3) {
-      return '${nameParts[0]} ${nameParts[1][0]}. ${nameParts[2][0]}.';
-    } else if (nameParts.length == 2) {
-      return '${nameParts[0]} ${nameParts[1][0]}.';
-    } else {
-      return fullName;
-    }
-  }
-
-  void _onFormatChanged(CalendarFormat format) {
-    setState(() {
-      _calendarFormat = format;
+    _previousSelectedSchedule = context
+        .read<ScheduleBloc>()
+        .state
+        .selectedSchedule;
+    _paging = SchedulePaging(today: _selectedDay);
+    _monthPaging = ScheduleMonthPaging(today: _selectedDay);
+    final page = _paging.dayPageOf(_selectedDay);
+    _dayController = PageController(initialPage: page);
+    _weekController = PageController(
+      initialPage: _paging.weekPageOfDayPage(page),
+    );
+    _monthTargetPage = _monthPaging.pageOf(_selectedDay);
+    _monthController = PageController(initialPage: _monthTargetPage);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _loadUserActivities(_selectedDay);
+      _loadScheduleChanges();
+      _loadClassmates();
     });
   }
 
   @override
+  void dispose() {
+    _dayController.dispose();
+    _weekController.dispose();
+    _monthController.dispose();
+    _selectorCollapse.dispose();
+    super.dispose();
+  }
+
+  void _loadClassmates() {
+    final selected = context.read<ScheduleBloc>().state.selectedSchedule;
+    final group = selected is SelectedGroupSchedule ? selected.group.name : '';
+    unawaited(context.read<ClassmatesCubit>().load(group));
+  }
+
+  void _loadUserActivities(DateTime around) {
+    unawaited(
+      context.read<UserActivitiesCubit>().load(
+        from: DateTime(around.year, around.month - 1),
+        to: DateTime(around.year, around.month + 2, 0),
+      ),
+    );
+  }
+
+  void _loadScheduleChanges() {
+    final selected = context.read<ScheduleBloc>().state.selectedSchedule;
+    final request = _changesRequestFor(selected);
+    if (request == null) return;
+    unawaited(
+      context.read<ScheduleChangesCubit>().load(
+        targetType: request.$1,
+        target: request.$2,
+      ),
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final isWideScreen = ResponsiveLayout.isDesktop(context);
-
-    return BlocBuilder<AdsBloc, AdsState>(
+    final colors = context.ninja;
+    return BlocConsumer<ScheduleBloc, ScheduleState>(
+      listener: _listenScheduleState,
+      buildWhen: (previous, current) {
+        return current.selectedSchedule != previous.selectedSchedule ||
+            current.status != previous.status ||
+            current.isOffline != previous.isOffline ||
+            current.lastSyncedAt != previous.lastSyncedAt;
+      },
       builder: (context, state) {
-        return BlocConsumer<ScheduleBloc, ScheduleState>(
-          listener: (context, state) {
-            if (state.status == ScheduleStatus.failure) {
-              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(context.l10n.errorLoadingSchedule)));
-            }
-          },
-          buildWhen:
-              (previous, current) => current.status != ScheduleStatus.failure && current.selectedSchedule != null,
-          builder: (context, state) {
-            if (state.status == ScheduleStatus.loading) {
-              return const Center(child: CircularProgressIndicator());
-            } else if (state.selectedSchedule == null) {
-              return isWideScreen
-                  ? const DesktopNoScheduleView()
-                  : NoSelectedScheduleMessage(
-                    onTap: () {
-                      context.go('/schedule/search');
-                    },
-                  );
-            } else if (state.status == ScheduleStatus.failure) {
-              return LoadingErrorMessage(
-                onTap: () {
-                  context.go('/schedule/search');
-                },
-              );
-            }
+        final selectedSchedule = state.selectedSchedule;
+        if (state.status == .loading && selectedSchedule == null) {
+          return Scaffold(
+            backgroundColor: colors.canvas,
+            body: const SafeArea(bottom: false, child: ScheduleSkeleton()),
+          );
+        }
 
-            // Enhanced desktop view experience
-            if (isWideScreen) {
-              return _buildDesktopLayout(state);
-            }
+        if (selectedSchedule == null) {
+          return Scaffold(
+            backgroundColor: colors.canvas,
+            body: SafeArea(
+              bottom: false,
+              child: _ScheduleUnavailable(
+                failed: state.status == .failure,
+                onRetry: () => unawaited(_refreshSchedule()),
+                onConfigure: () => openGlobalSearch(context),
+              ),
+            ),
+          );
+        }
 
-            return Scaffold(
-              appBar: AppBar(
-                title: Text(_appBarTitle),
-                actions: [
-                  // Add custom schedules button
-                  IconButton(
-                    icon: const Icon(Icons.add),
-                    tooltip: context.l10n.mySchedules,
-                    onPressed: () => context.go('/schedule/custom'),
+        final parts = selectedSchedule.schedule;
+        final preferences = context.watch<SchedulePreferencesCubit>().state;
+        final activities = context.watch<UserActivitiesCubit>().state;
+        final day = _ScheduleDayModel.resolve(
+          parts: parts,
+          day: _selectedDay,
+          preferences: preferences,
+          activities: activities,
+          filter: _filter,
+        );
+        final morphWeek = weekDaysFor(_selectedDay);
+        final morphLessonColors = <int, List<Color>>{
+          for (final date in morphWeek)
+            _dayKey(date): [
+              for (final lesson in _applyPreferences(
+                _lessonsForDay(parts, date),
+                preferences,
+              ))
+                colors.subjectColor(lesson.subject),
+            ],
+        };
+        final morphActivityTypes = <int, List<UserActivityType>>{
+          for (final date in morphWeek) _dayKey(date): activities.typesOn(date),
+        };
+
+        return Scaffold(
+          backgroundColor: colors.canvas,
+          body: SafeArea(
+            bottom: false,
+            child: _withScheduleEntrance(
+              context,
+              Column(
+                crossAxisAlignment: .stretch,
+                children: [
+                  _ScheduleChrome(
+                    scheduleName: selectedSchedule.name,
+                    onSearch: () => openGlobalSearch(context),
+                    onMore: () => unawaited(
+                      _showScheduleMoreActions(
+                        context,
+                        scheduleName: selectedSchedule.name,
+                      ),
+                    ),
                   ),
-                  ComparisonModeButton(onPressed: () => _bloc.add(const ToggleComparisonMode())),
-                  ViewToggleButton(
-                    isListModeEnabled: _bloc.state.isListModeEnabled,
-                    onPressed: () => _bloc.add(const ToggleListMode()),
+                  if (state.isOffline)
+                    _OfflineBanner(lastSyncedAt: state.lastSyncedAt),
+                  ValueListenableBuilder<double>(
+                    valueListenable: _selectorCollapse,
+                    child: AppTourAnchor(
+                      target: .scheduleViews,
+                      child: _ViewSelector(value: _view, onChanged: _setView),
+                    ),
+                    builder: (context, value, child) => _CollapsingViewSelector(
+                      progress: value,
+                      child: child!,
+                    ),
+                  ),
+                  Expanded(
+                    child: NotificationListener<ScrollNotification>(
+                      onNotification: _handleScheduleScroll,
+                      child: _ScheduleViewTransition(
+                        view: _view,
+                        selectedDay: _selectedDay,
+                        agendaDayKeys: _agendaMorphDayKeys,
+                        monthDayKeys: _monthMorphDayKeys,
+                        lessonColors: morphLessonColors,
+                        activityTypes: morphActivityTypes,
+                        child: _viewContent(
+                          colors: colors,
+                          parts: parts,
+                          activities: activities,
+                          preferences: preferences,
+                          day: day,
+                        ),
+                      ),
+                    ),
                   ),
                 ],
               ),
-              body: NotificationListener<ScrollNotification>(
-                onNotification: _handleScrollNotification,
-                child: AnimatedSwitcher(
-                  duration: 300.ms,
-                  switchInCurve: Curves.easeInOut,
-                  switchOutCurve: Curves.easeInOut,
-                  transitionBuilder: (Widget child, Animation<double> animation) {
-                    return FadeTransition(
-                      opacity: animation,
-                      child: SlideTransition(
-                        position: animation.drive(Tween<Offset>(begin: const Offset(0.0, 0.1), end: Offset.zero)),
-                        child: child,
-                      ),
-                    );
-                  },
-                  child:
-                      state.isComparisonModeEnabled
-                          ? _ComparisonModeView(onOpenComparisonManager: _openComparisonManager)
-                          : state.isListModeEnabled
-                          ? _ListModeView(isStoriesVisible: _isStoriesVisible, onStoriesLoaded: _handleStoriesLoaded)
-                          : _CalendarModeView(
-                            pageController: _pageController,
-                            calendarFormat: _calendarFormat,
-                            onFormatChanged: _onFormatChanged,
-                            isStoriesVisible: _isStoriesVisible,
-                            onStoriesLoaded: _handleStoriesLoaded,
-                          ),
-                ),
-              ),
-              floatingActionButton:
-                  state.isComparisonModeEnabled
-                      ? Padding(
-                        padding: const EdgeInsets.only(bottom: bottomNavigationBarHeight + AppSpacing.lg),
-                        child: FloatingActionButton(
-                          onPressed: _openComparisonManager,
-                          tooltip: context.l10n.manageComparisons,
-                          child: const Icon(Icons.compare),
-                        ),
-                      )
-                      : null,
-            );
-          },
+            ),
+          ),
+          floatingActionButton: _ScheduleFloatingActions(
+            showToday: !isSameDate(_selectedDay, DateTime.now()),
+            showAdd:
+                _view == .agenda &&
+                (day.lessons.isNotEmpty || day.activities.isNotEmpty),
+            onToday: _goToToday,
+            onAdd: _openAddActivity,
+          ),
         );
       },
     );
   }
 
-  Widget _buildDesktopLayout(ScheduleState state) {
-    final colors = Theme.of(context).extension<AppColors>()!;
-    // Use the tracked page index instead of directly accessing _pageController.page
-    final selectedDay = Calendar.firstCalendarDay.add(Duration(days: _currentPageIndex));
-    final currentWeek = getWeek(selectedDay);
-
-    return Scaffold(
-      body: NotificationListener<ScrollNotification>(
-        onNotification: _handleScrollNotification,
-        child: Row(
-          children: [
-            // Main content area with calendar and lessons
-            Expanded(
-              child: Column(
-                children: [
-                  // App bar with title and navigation
-                  DesktopAppBar(
-                    title: _appBarTitle,
-                    scheduleType: _getScheduleTypeLabel(state.selectedSchedule!),
-                    selectedDay: selectedDay,
-                    onTodayPressed: () {
-                      final todayIndex = Calendar.getPageIndex(Calendar.getNowWithoutTime());
-                      _pageController.animateToPage(
-                        todayIndex,
-                        duration: const Duration(milliseconds: 300),
-                        curve: Curves.easeInOut,
-                      );
-                    },
-                    onWeekSelectPressed: () {
-                      Calendar.showWeekSelector(context, currentWeek, (week) {
-                        final currentDate = Calendar.getNowWithoutTime();
-                        final newFocusedDay = CalendarUtils.getDaysInWeek(week, currentDate).first;
-                        final newPage = Calendar.getPageIndex(newFocusedDay);
-
-                        _pageController.animateToPage(
-                          newPage,
-                          duration: const Duration(milliseconds: 300),
-                          curve: Curves.easeInOut,
-                        );
-                      });
-                    },
-                    onPreviousDay: () {
-                      final currentPage = _pageController.page?.round() ?? _pageController.initialPage;
-                      _pageController.animateToPage(
-                        currentPage - 1,
-                        duration: const Duration(milliseconds: 300),
-                        curve: Curves.easeInOut,
-                      );
-                    },
-                    onNextDay: () {
-                      final currentPage = _pageController.page?.round() ?? _pageController.initialPage;
-                      _pageController.animateToPage(
-                        currentPage + 1,
-                        duration: const Duration(milliseconds: 300),
-                        curve: Curves.easeInOut,
-                      );
-                    },
-                  ),
-
-                  // Main content with calendar and lessons
-                  Expanded(
-                    child:
-                        state.isComparisonModeEnabled
-                            ? _ComparisonModeView(onOpenComparisonManager: _openComparisonManager)
-                            : Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                // Calendar panel
-                                Container(
-                                  width: 320,
-                                  decoration: BoxDecoration(
-                                    color: colors.surface,
-                                    border: Border(right: BorderSide(color: colors.background03)),
-                                  ),
-                                  child: DesktopCalendarPanel(
-                                    pageController: _pageController,
-                                    calendarFormat: _calendarFormat,
-                                    onFormatChanged: _onFormatChanged,
-                                    isStoriesVisible: _isStoriesVisible,
-                                    onStoriesLoaded: _handleStoriesLoaded,
-                                    schedule: state.selectedSchedule?.schedule ?? [],
-                                    comments: state.comments,
-                                    showCommentsIndicators: state.showCommentsIndicators,
-                                  ),
-                                ),
-
-                                // Lessons and analytics area
-                                Expanded(
-                                  child:
-                                      state.isListModeEnabled
-                                          ? _ListModeView(isStoriesVisible: false, onStoriesLoaded: (_) {})
-                                          : DesktopScheduleContent(
-                                            pageController: _pageController,
-                                            showEmptyLessons: state.showEmptyLessons,
-                                            showAnalytics: state.showAnalytics,
-                                            schedule: state.selectedSchedule?.schedule ?? [],
-                                            selectedDay: selectedDay,
-                                          ),
-                                ),
-                              ],
-                            ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-      floatingActionButton:
-          state.isComparisonModeEnabled
-              ? FloatingActionButton(
-                onPressed: _openComparisonManager,
-                tooltip: context.l10n.manageComparisons,
-                child: const Icon(Icons.compare),
-              )
-              : null,
-    );
-  }
-
-  Widget _buildDesktopHeaderButton(
-    BuildContext context, {
-    required IconData icon,
-    required String tooltip,
-    required VoidCallback onPressed,
-    bool isActive = false,
+  Widget _viewContent({
+    required NinjaColors colors,
+    required List<SchedulePart> parts,
+    required UserActivitiesState activities,
+    required SchedulePreferencesState preferences,
+    required _ScheduleDayModel day,
   }) {
-    final colors = Theme.of(context).extension<AppColors>()!;
-
-    return Tooltip(
-      message: tooltip,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
-        child: IconButton(
-          icon: Icon(icon, color: isActive ? colors.primary : colors.active),
-          style: IconButton.styleFrom(
-            backgroundColor: isActive ? colors.primary.withOpacity(0.1) : Colors.transparent,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppSpacing.sm)),
-          ),
-          onPressed: onPressed,
-        ),
-      ),
-    );
-  }
-
-  String _getScheduleTypeLabel(SelectedSchedule schedule) {
-    if (schedule is SelectedGroupSchedule) {
-      return context.l10n.group;
-    } else if (schedule is SelectedTeacherSchedule) {
-      return context.l10n.teacher;
-    } else if (schedule is SelectedClassroomSchedule) {
-      return context.l10n.classroom;
+    if (_view == .month) {
+      return _monthView(
+        colors: colors,
+        parts: parts,
+        preferences: preferences,
+      );
     }
-    return '';
-  }
-
-  void _openComparisonManager() {
-    BottomModalSheet.show(
-      context,
-      child: const ComparisonManager(),
-      title: context.l10n.compareSchedules,
-      description: context.l10n.selectUpTo4Schedules,
-    );
-  }
-
-  void _handleStoriesLoaded(bool hasStories) {
-    if (hasStories && !_isStoriesVisible) {
-      setState(() {
-        _isStoriesVisible = true;
-      });
-    }
-  }
-}
-
-class _ListModeView extends StatelessWidget {
-  const _ListModeView({required this.isStoriesVisible, required this.onStoriesLoaded});
-
-  final bool isStoriesVisible;
-  final ValueChanged<bool> onStoriesLoaded;
-
-  @override
-  Widget build(BuildContext context) {
-    final state = context.select((ScheduleBloc bloc) => bloc.state);
-    final scheduleParts = state.selectedSchedule?.schedule ?? [];
-    final lessonsByDay = _groupLessonsByDay(scheduleParts);
-    final today = Calendar.getNowWithoutTime();
-    final filteredLessonsByDay =
-        lessonsByDay.keys
-            .where((day) => day.isAfter(today) || day.isAtSameMomentAs(today))
-            .map((day) => MapEntry(day, lessonsByDay[day]))
-            .toList();
-
-    final hasUpcomingLessons = filteredLessonsByDay.any(
-      (entry) => entry.value?.whereType<LessonSchedulePart>().isNotEmpty == true,
-    );
-
-    if (!hasUpcomingLessons) {
-      return FailureScreen(
-        title: context.l10n.noUpcomingLessons,
-        description: context.l10n.noUpcomingLessonsDescription,
-        icon: Icons.event_busy,
-        buttonText: context.l10n.switchToCalendar,
-        buttonIcon: Icons.calendar_month,
-        onButtonPressed: () {
-          context.read<ScheduleBloc>().add(const ToggleListMode());
-        },
+    if (_view == .week) {
+      return _weekView(
+        colors: colors,
+        parts: parts,
+        activities: activities,
+        preferences: preferences,
       );
     }
 
-    return CustomScrollView(
-      slivers: [
-        const SliverToBoxAdapter(child: StickyAd()),
-        for (var entry in filteredLessonsByDay)
-          StickyHeader(day: entry.key, lessons: entry.value?.whereType<LessonSchedulePart>().toList() ?? []),
+    return Column(
+      crossAxisAlignment: .stretch,
+      children: [
+        _ScheduleMonthLabel(
+          day: _selectedDay,
+          onTap: () => _setView(.month),
+        ),
+        AppTourAnchor(
+          target: .scheduleWeek,
+          child: _WeekPagerStrip(
+            controller: _weekController,
+            paging: _paging,
+            selectedDay: _selectedDay,
+            schedule: parts,
+            activities: activities,
+            preferences: preferences,
+            dayLayoutKeyBuilder: _agendaMorphKeyFor,
+            onDaySelected: _selectDay,
+            onWeekPageChanged: _onWeekPageChanged,
+          ),
+        ),
+        Expanded(
+          child: Stack(
+            children: [
+              _ScheduleDayPager(
+                controller: _dayController,
+                paging: _paging,
+                parts: parts,
+                preferences: preferences,
+                activities: activities,
+                filter: _filter,
+                showPast: _showPast,
+                nowMarkerKey: _nowMarkerKey,
+                onPageChanged: _onDayPageChanged,
+                onRefresh: _refreshSchedule,
+                onTogglePast: () => setState(() => _showPast = !_showPast),
+                onAddActivity: _openAddActivity,
+                onShowWeek: () => _setView(.week),
+                onFilterChanged: (value) => setState(() => _filter = value),
+                onLessonTap: _openLesson,
+                onLessonActions: _openLessonActions,
+              ),
+              if (day.hasNow) _NowChip(onTap: _scrollToLive),
+            ],
+          ),
+        ),
       ],
     );
   }
 
-  Map<DateTime, List<SchedulePart>> _groupLessonsByDay(List<SchedulePart> scheduleParts) {
-    final Map<DateTime, List<SchedulePart>> lessonsByDay = {};
-    for (final part in scheduleParts) {
-      for (final date in part.dates) {
-        final day = DateTime(date.year, date.month, date.day);
-        lessonsByDay.update(day, (existing) => existing..add(part), ifAbsent: () => [part]);
-      }
-    }
-    return Map.fromEntries(lessonsByDay.entries.toList()..sort((a, b) => a.key.compareTo(b.key)));
-  }
-}
-
-class _CalendarModeView extends StatelessWidget {
-  const _CalendarModeView({
-    required this.pageController,
-    required this.calendarFormat,
-    required this.onFormatChanged,
-    required this.isStoriesVisible,
-    required this.onStoriesLoaded,
-  });
-
-  final PageController pageController;
-  final CalendarFormat calendarFormat;
-  final ValueChanged<CalendarFormat> onFormatChanged;
-  final bool isStoriesVisible;
-  final ValueChanged<bool> onStoriesLoaded;
-
-  @override
-  Widget build(BuildContext context) {
-    final state = context.select((ScheduleBloc bloc) => bloc.state);
-    return NestedScrollView(
-      physics: const ClampingScrollPhysics(),
-      headerSliverBuilder:
-          (_, __) => [
-            CalendarStoriesAppBar(isStoriesVisible: isStoriesVisible, onStoriesLoaded: onStoriesLoaded),
-            SliverToBoxAdapter(
-              child: Column(
-                children: [
-                  Calendar(
-                    pageViewController: pageController,
-                    schedule: state.selectedSchedule?.schedule ?? [],
-                    comments: state.comments,
-                    showCommentsIndicators: state.showCommentsIndicators,
-                    calendarFormat: calendarFormat,
-                  ),
-                ],
-              ),
-            ),
-          ],
-      body: _EventsPageView(pageController: pageController, showEmptyLessons: state.showEmptyLessons),
+  Widget _weekView({
+    required NinjaColors colors,
+    required List<SchedulePart> parts,
+    required UserActivitiesState activities,
+    required SchedulePreferencesState preferences,
+  }) {
+    final content = RefreshIndicator(
+      onRefresh: _refreshSchedule,
+      color: colors.ink,
+      backgroundColor: colors.canvas,
+      child: CustomScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        slivers: [
+          _WeekScheduleSliver(
+            days: weekDaysFor(_selectedDay),
+            schedule: parts,
+            activities: activities,
+            preferences: preferences,
+            filter: _filter,
+            onWeekShift: _shiftWeek,
+            onDaySelected: (value) => _selectDay(value, view: .agenda),
+          ),
+        ],
+      ),
+    );
+    return GestureDetector(
+      behavior: .opaque,
+      onHorizontalDragEnd: (details) {
+        final velocity = details.primaryVelocity ?? 0;
+        if (velocity.abs() < 180) return;
+        _shiftWeek(velocity < 0 ? 1 : -1);
+      },
+      child: content,
     );
   }
-}
 
-class _EventsPageView extends StatelessWidget {
-  const _EventsPageView({required this.pageController, required this.showEmptyLessons});
-
-  final PageController pageController;
-  final bool showEmptyLessons;
-
-  int _toMinutes(TimeOfDay t) => t.hour * 60 + t.minute;
-
-  String _pluralizeWindow(int count) {
-    return Intl.plural(count, one: '$count пару', few: '$count пары', many: '$count пар', other: '$count пар');
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final state = context.select((ScheduleBloc bloc) => bloc.state);
-    final schedule = state.selectedSchedule?.schedule ?? [];
-    return EventsPageView(
-      controller: pageController,
-      itemBuilder: (context, index) {
-        final day = Calendar.firstCalendarDay.add(Duration(days: index));
-        final lessonsForDay = Calendar.getSchedulePartsByDay(schedule: schedule, day: day);
-        final holiday = lessonsForDay.firstWhereOrNull((element) => element is HolidaySchedulePart);
-        if (holiday != null) return HolidayPage(title: (holiday as HolidaySchedulePart).title);
-        if (day.weekday == DateTime.sunday) return const HolidayPage(title: 'Выходной');
-        final allLessons = lessonsForDay.whereType<LessonSchedulePart>().toList();
-        final numberedLessons = allLessons.where((l) => l.lessonBells.number != null).toList();
-        final unnumberedLessons = allLessons.where((l) => l.lessonBells.number == null).toList();
-        numberedLessons.sort(
-          (a, b) => _toMinutes(a.lessonBells.startTime).compareTo(_toMinutes(b.lessonBells.startTime)),
-        );
-        unnumberedLessons.sort(
-          (a, b) => _toMinutes(a.lessonBells.startTime).compareTo(_toMinutes(b.lessonBells.startTime)),
-        );
-        final lessonsByTime = <int, List<LessonSchedulePart>>{};
-        for (final l in numberedLessons) {
-          final key = l.lessonBells.number!;
-          lessonsByTime.putIfAbsent(key, () => []).add(l);
-        }
-        for (final l in unnumberedLessons) {
-          final lessonTime = _toMinutes(l.lessonBells.startTime);
-          LessonSchedulePart? previous;
-          LessonSchedulePart? next;
-          for (final nl in numberedLessons) {
-            final t = _toMinutes(nl.lessonBells.startTime);
-            if (t <= lessonTime) previous = nl;
-            if (t > lessonTime) {
-              next = nl;
-              break;
-            }
-          }
-          final key =
-              previous != null && next != null
-                  ? (lessonTime - _toMinutes(previous.lessonBells.startTime) <=
-                          _toMinutes(next.lessonBells.startTime) - lessonTime
-                      ? previous.lessonBells.number!
-                      : next.lessonBells.number!)
-                  : previous?.lessonBells.number ?? next?.lessonBells.number ?? 0;
-          if (key != 0) {
-            lessonsByTime.putIfAbsent(key, () => []).add(l);
-          }
-        }
-        if (showEmptyLessons) {
-          final List<Widget> widgets = [];
-          final scheduledKeys = lessonsByTime.keys.where((k) => k != 0).toList()..sort();
-          for (var lessonNumber = 1; lessonNumber <= SchedulePage.maxLessonsPerDay; lessonNumber++) {
-            final lessons = lessonsByTime[lessonNumber] ?? [];
-            if (lessons.isNotEmpty) {
-              widgets.add(_buildLessonCard(context, lessons, day));
-            } else {
-              widgets.add(
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.sm),
-                  child: EmptyLessonCard(lessonNumber: lessonNumber),
+  Widget _monthView({
+    required NinjaColors colors,
+    required List<SchedulePart> parts,
+    required SchedulePreferencesState preferences,
+  }) {
+    return Column(
+      crossAxisAlignment: .stretch,
+      children: [
+        _MonthCalendarHeader(
+          month: _selectedDay,
+          onPrev: () => _shiftMonth(-1),
+          onNext: () => _shiftMonth(1),
+        ),
+        Expanded(
+          child: PageView.builder(
+            key: const ValueKey('schedule-month-pager'),
+            controller: _monthController,
+            itemCount: _monthPaging.pageCount,
+            allowImplicitScrolling: true,
+            onPageChanged: _onMonthPageChanged,
+            itemBuilder: (context, index) {
+              final month = _monthPaging.monthOfPage(index);
+              return RefreshIndicator(
+                onRefresh: _refreshSchedule,
+                color: colors.ink,
+                backgroundColor: colors.canvas,
+                child: CustomScrollView(
+                  key: PageStorageKey('schedule-month-$index'),
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  slivers: [
+                    _MonthScheduleSliver(
+                      month: month,
+                      selectedDay: _selectedDay,
+                      dayLayoutKeyBuilder: _monthMorphKeyFor,
+                      schedule: parts,
+                      preferences: preferences,
+                      onDaySelected: (value) =>
+                          _selectDay(value, view: .agenda),
+                    ),
+                  ],
                 ),
               );
-            }
-            if (scheduledKeys.contains(lessonNumber)) {
-              final indexInScheduled = scheduledKeys.indexOf(lessonNumber);
-              if (indexInScheduled < scheduledKeys.length - 1) {
-                final nextKey = scheduledKeys[indexInScheduled + 1];
-                if (nextKey - lessonNumber == 1) {
-                  widgets.add(
-                    ConsecutiveBreakWidget(
-                      currentLessons: lessonsByTime[lessonNumber]!,
-                      nextLessons: lessonsByTime[nextKey]!,
-                    ),
-                  );
-                }
-              }
-            }
-          }
-          return ListView(shrinkWrap: true, physics: const NeverScrollableScrollPhysics(), children: widgets);
-        } else {
-          final sortedKeys = lessonsByTime.keys.where((k) => k != 0).toList()..sort();
-          final List<Widget> widgets = [];
-          for (var i = 0; i < sortedKeys.length; i++) {
-            final key = sortedKeys[i];
-            final lessons = lessonsByTime[key]!;
-            widgets.add(_buildLessonCard(context, lessons, day));
-            if (i < sortedKeys.length - 1) {
-              final int currentKey = sortedKeys[i];
-              final int nextKey = sortedKeys[i + 1];
-              if (nextKey - currentKey == 1) {
-                widgets.add(
-                  ConsecutiveBreakWidget(
-                    currentLessons: lessonsByTime[currentKey]!,
-                    nextLessons: lessonsByTime[nextKey]!,
-                  ),
-                );
-              } else {
-                final windowCount = nextKey - currentKey - 1;
-                widgets.add(WindowBreakWidget(windowCount: windowCount));
-              }
-            }
-          }
-          return ListView(shrinkWrap: true, physics: const NeverScrollableScrollPhysics(), children: widgets);
-        }
-      },
-    );
-  }
-
-  Widget _buildLessonCard(BuildContext context, List<LessonSchedulePart> lessons, DateTime day) {
-    if (lessons.length == 1) {
-      final lesson = lessons.first;
-      return Padding(
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.sm),
-        child: LessonCard(
-          lesson: lesson,
-          onTap: (lesson) {
-            context.go('/schedule/details', extra: (lesson, day));
-          },
-        ),
-      );
-    }
-    return ExpandablePageView.builder(
-      itemCount: lessons.length,
-      itemBuilder: (context, index) {
-        final currentLesson = lessons[index];
-        return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.sm),
-          child: LessonCard(
-            countInGroup: lessons.length,
-            indexInGroup: index,
-            lesson: currentLesson,
-            onTap: (lesson) {
-              context.go('/schedule/details', extra: (lesson, day));
             },
           ),
-        );
-      },
-    );
-  }
-}
-
-class _ComparisonModeView extends StatelessWidget {
-  const _ComparisonModeView({required this.onOpenComparisonManager});
-
-  final VoidCallback onOpenComparisonManager;
-
-  @override
-  Widget build(BuildContext context) {
-    final state = context.select((ScheduleBloc bloc) => bloc.state);
-    final comparisonSchedules = state.comparisonSchedules;
-    if (comparisonSchedules.isEmpty) {
-      return Center(child: Text('Добавьте расписания для сравнения', style: AppTextStyle.body));
-    }
-    final allLessons =
-        comparisonSchedules.expand((schedule) => schedule.schedule.whereType<LessonSchedulePart>()).toList();
-    final lessonsByDay = _groupLessonsByDay(allLessons);
-    final today = Calendar.getNowWithoutTime();
-    final filteredLessonsByDay =
-        lessonsByDay.keys
-            .where((day) => day.isAfter(today) || day.isAtSameMomentAs(today))
-            .map((day) => MapEntry(day, lessonsByDay[day]))
-            .toList();
-    return CustomScrollView(
-      slivers: [
-        for (var entry in filteredLessonsByDay)
-          ComparisonStickyHeader(day: entry.key, lessons: entry.value ?? [], schedules: comparisonSchedules.toList()),
+        ),
       ],
     );
   }
 
-  Map<DateTime, List<SchedulePart>> _groupLessonsByDay(List<LessonSchedulePart> scheduleParts) {
-    final Map<DateTime, List<SchedulePart>> lessonsByDay = {};
-    for (final part in scheduleParts) {
-      for (final date in part.dates) {
-        final day = DateTime(date.year, date.month, date.day);
-        lessonsByDay.update(day, (existing) => existing..add(part), ifAbsent: () => [part]);
+  void _shiftWeek(int delta) {
+    _selectDay(_selectedDay.add(Duration(days: 7 * delta)));
+  }
+
+  void _shiftMonth(int delta) {
+    if (!_monthController.hasClients) {
+      _selectDay(DateTime(_selectedDay.year, _selectedDay.month + delta));
+      return;
+    }
+    final target = (_monthTargetPage + delta).clamp(
+      0,
+      _monthPaging.pageCount - 1,
+    );
+    _applySelectedDay(_monthPaging.dayInPage(target, _selectedDay.day));
+    unawaited(
+      _driveMonthPager(
+        target,
+        animate: NinjaMotion.of(context) != Duration.zero,
+      ),
+    );
+  }
+
+  void _goToToday() {
+    final today = dateOnly(DateTime.now());
+    _selectorCollapse.value = 0;
+    _selectDay(today);
+  }
+
+  bool _handleScheduleScroll(ScrollNotification notification) {
+    if (notification.metrics.axis != Axis.vertical) return false;
+    final next = (notification.metrics.pixels / 72).clamp(0.0, 1.0);
+    if ((next - _selectorCollapse.value).abs() >= .01 ||
+        next == 0 ||
+        next == 1) {
+      _selectorCollapse.value = next;
+    }
+    return false;
+  }
+
+  GlobalKey _agendaMorphKeyFor(DateTime day) => _agendaMorphDayKeys.putIfAbsent(
+    _dayKey(day),
+    GlobalKey.new,
+  );
+
+  GlobalKey _monthMorphKeyFor(DateTime day) => _monthMorphDayKeys.putIfAbsent(
+    _dayKey(day),
+    GlobalKey.new,
+  );
+
+  void _setView(_ScheduleView view) {
+    if (view == _view) return;
+    unawaited(HapticFeedback.selectionClick());
+    _selectorCollapse.value = 0;
+    setState(() {
+      if (view == .agenda && _view != .agenda && !_dayController.hasClients) {
+        _resetPagers();
+      }
+      if (view == .month && _view != .month && !_monthController.hasClients) {
+        _resetMonthPager();
+      }
+      _view = view;
+      if (view != .agenda) _filter = .all;
+    });
+  }
+
+  void _resetPagers() {
+    final previousDay = _dayController;
+    final previousWeek = _weekController;
+    final page = _paging.dayPageOf(_selectedDay);
+    _dayController = PageController(initialPage: page);
+    _weekController = PageController(
+      initialPage: _paging.weekPageOfDayPage(page),
+    );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      previousDay.dispose();
+      previousWeek.dispose();
+    });
+  }
+
+  void _resetMonthPager() {
+    final previous = _monthController;
+    _monthTargetPage = _monthPaging.pageOf(_selectedDay);
+    _monthController = PageController(initialPage: _monthTargetPage);
+    WidgetsBinding.instance.addPostFrameCallback((_) => previous.dispose());
+  }
+
+  void _selectDay(DateTime day, {_ScheduleView? view}) {
+    final next = dateOnly(day);
+    if (view == .agenda && _view != .agenda) {
+      _applySelectedDay(next, view: view);
+      if (_dayController.hasClients) {
+        _syncPagers(next);
+      } else {
+        _resetPagers();
+      }
+      return;
+    }
+    _applySelectedDay(next, view: view);
+    _syncPagers(next);
+    _syncMonthPager(next);
+  }
+
+  void _applySelectedDay(DateTime day, {_ScheduleView? view}) {
+    final monthChanged =
+        day.year != _selectedDay.year || day.month != _selectedDay.month;
+    setState(() {
+      _selectedDay = day;
+      _showPast = false;
+      if (view != null) _view = view;
+    });
+    if (monthChanged) _loadUserActivities(_selectedDay);
+    _pruneMorphKeys();
+  }
+
+  void _pruneMorphKeys() {
+    final agendaDays = weekDaysFor(_selectedDay).map(_dayKey).toSet();
+    final monthDays = <int>{};
+    for (var offset = -1; offset <= 1; offset++) {
+      final first = DateTime(
+        _selectedDay.year,
+        _selectedDay.month + offset,
+      );
+      final count = DateTime(first.year, first.month + 1, 0).day;
+      for (var day = 1; day <= count; day++) {
+        monthDays.add(_dayKey(DateTime(first.year, first.month, day)));
       }
     }
-    return Map.fromEntries(lessonsByDay.entries.toList()..sort((a, b) => a.key.compareTo(b.key)));
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _agendaMorphDayKeys.removeWhere(
+        (day, key) => !agendaDays.contains(day) && key.currentContext == null,
+      );
+      _monthMorphDayKeys.removeWhere(
+        (day, key) => !monthDays.contains(day) && key.currentContext == null,
+      );
+    });
+  }
+
+  int? _pageOf(PageController controller) {
+    if (!controller.hasClients) return null;
+    final position = controller.position;
+    if (!position.hasPixels || !position.hasContentDimensions) return null;
+    return controller.page?.round();
+  }
+
+  Future<void> _drivePager(
+    PageController controller,
+    int page, {
+    required bool animate,
+  }) async {
+    if (!controller.hasClients) return;
+    _pagerGuards++;
+    try {
+      if (animate) {
+        await controller.animateToPage(
+          page,
+          duration: NinjaMotion.of(context),
+          curve: NinjaMotion.enter,
+        );
+      } else {
+        controller.jumpToPage(page);
+      }
+    } finally {
+      _pagerGuards--;
+    }
+  }
+
+  Future<void> _driveMonthPager(int page, {required bool animate}) async {
+    if (!_monthController.hasClients) return;
+    _monthTargetPage = page;
+    _monthPagerGuards++;
+    try {
+      if (animate) {
+        await _monthController.animateToPage(
+          page,
+          duration: NinjaMotion.of(context, NinjaMotion.slow),
+          curve: NinjaMotion.enter,
+        );
+      } else {
+        _monthController.jumpToPage(page);
+      }
+    } finally {
+      _monthPagerGuards--;
+    }
+  }
+
+  void _syncPagers(DateTime day) {
+    final dayPage = _paging.dayPageOf(day);
+    final weekPage = _paging.weekPageOfDayPage(dayPage);
+    final instant = NinjaMotion.of(context) == Duration.zero;
+
+    final currentDay = _pageOf(_dayController);
+    if (currentDay != null && currentDay != dayPage) {
+      unawaited(
+        _drivePager(
+          _dayController,
+          dayPage,
+          animate: !instant && !schedulePagerShouldJump(currentDay, dayPage),
+        ),
+      );
+    }
+
+    final currentWeek = _pageOf(_weekController);
+    if (currentWeek != null && currentWeek != weekPage) {
+      unawaited(
+        _drivePager(
+          _weekController,
+          weekPage,
+          animate:
+              !instant &&
+              !schedulePagerShouldJump(currentWeek, weekPage, threshold: 2),
+        ),
+      );
+    }
+  }
+
+  void _syncMonthPager(DateTime day) {
+    final current = _pageOf(_monthController);
+    final target = _monthPaging.pageOf(day);
+    if (current == null) return;
+    if (_monthTargetPage == target &&
+        (_monthPagerGuards > 0 || current == target)) {
+      return;
+    }
+    unawaited(
+      _driveMonthPager(
+        target,
+        animate:
+            NinjaMotion.of(context) != Duration.zero &&
+            (target - current).abs() == 1,
+      ),
+    );
+  }
+
+  void _onDayPageChanged(int page) {
+    if (_pagerGuards > 0) return;
+    _selectorCollapse.value = 0;
+    unawaited(HapticFeedback.selectionClick());
+    _applySelectedDay(_paging.dayOfPage(page));
+    final weekPage = _paging.weekPageOfDayPage(page);
+    final currentWeek = _pageOf(_weekController);
+    if (currentWeek == null || currentWeek == weekPage) return;
+    unawaited(
+      _drivePager(
+        _weekController,
+        weekPage,
+        animate:
+            NinjaMotion.of(context) != Duration.zero &&
+            !schedulePagerShouldJump(currentWeek, weekPage, threshold: 2),
+      ),
+    );
+  }
+
+  void _onWeekPageChanged(int page) {
+    if (_pagerGuards > 0) return;
+    _selectorCollapse.value = 0;
+    final dayPage = _paging.dayPageInWeek(page, _selectedDay.weekday);
+    unawaited(HapticFeedback.selectionClick());
+    _applySelectedDay(_paging.dayOfPage(dayPage));
+    unawaited(_drivePager(_dayController, dayPage, animate: false));
+  }
+
+  void _onMonthPageChanged(int page) {
+    if (_monthPagerGuards > 0) return;
+    _monthTargetPage = page;
+    _selectorCollapse.value = 0;
+    unawaited(HapticFeedback.selectionClick());
+    _applySelectedDay(_monthPaging.dayInPage(page, _selectedDay.day));
+  }
+
+  Future<void> _refreshSchedule() async {
+    final bloc = context.read<ScheduleBloc>();
+    final completion = bloc.stream.firstWhere(
+      (state) => state.status == .loaded || state.status == .failure,
+    );
+    bloc.add(const SelectedScheduleRefreshRequested(manual: true));
+    try {
+      await completion.timeout(const Duration(seconds: 15));
+    } on TimeoutException catch (_) {}
+  }
+
+  void _scrollToLive() {
+    final liveContext = _nowMarkerKey.currentContext;
+    if (liveContext == null) return;
+    unawaited(
+      Scrollable.ensureVisible(
+        liveContext,
+        duration: NinjaMotion.of(context, NinjaMotion.slow),
+        curve: Curves.easeOut,
+        alignment: 0.2,
+      ),
+    );
+  }
+
+  void _listenScheduleState(BuildContext context, ScheduleState state) {
+    if (state.status == .failure) {
+      showNinjaToast(
+        context,
+        showCheck: false,
+        message: context.l10n.errorLoadingSchedule,
+      );
+      return;
+    }
+
+    if (state.status != .loaded || state.selectedSchedule == null) {
+      return;
+    }
+
+    final oldParts =
+        _previousSelectedSchedule?.schedule ?? const <SchedulePart>[];
+    final newParts = state.selectedSchedule?.schedule ?? const <SchedulePart>[];
+    final diff = computeScheduleDiff(oldParts, newParts);
+    final scheduleChanged = _previousSelectedSchedule != state.selectedSchedule;
+    _previousSelectedSchedule = state.selectedSchedule;
+
+    if (scheduleChanged) {
+      _loadScheduleChanges();
+      _loadClassmates();
+    }
+
+    if (oldParts.isNotEmpty && diff.hasChanges) {
+      final count =
+          diff.added.length + diff.modified.length + diff.removed.length;
+      showNinjaToast(
+        context,
+        showCheck: false,
+        message: context.l10n.scheduleUpdatedChanges(count),
+      );
+    }
+  }
+
+  void _openLesson(LessonSchedulePart lesson, DateTime day) {
+    context.go('/schedule/details', extra: (lesson, day));
+  }
+
+  void _openLessonActions(LessonSchedulePart lesson, DateTime day) {
+    unawaited(HapticFeedback.selectionClick());
+    unawaited(showClassActionsSheet(context, lesson: lesson, day: day));
+  }
+
+  void _openAddActivity() {
+    context.go('/schedule/custom');
   }
 }

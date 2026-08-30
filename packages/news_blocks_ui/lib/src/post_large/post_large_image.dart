@@ -29,7 +29,7 @@ class PostLargeImage extends StatelessWidget {
         if (isContentOverlaid)
           OverlaidImage(
             imageUrl: imageUrl,
-            gradientColor: const Color(0xFF000000).withOpacity(0.7),
+            gradientColor: const Color(0xFF000000).withValues(alpha: 0.7),
           )
         else
           InlineImage(imageUrl: imageUrl),

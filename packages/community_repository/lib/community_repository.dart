@@ -1,4 +1,4 @@
-export 'package:university_app_server_api/client.dart'
-    show Contributor, ContributorsResponse, Sponsor, SponsorsResponse;
+export 'package:github/github.dart' show Contributor;
 
+export 'src/community_models.dart';
 export 'src/community_repository.dart';

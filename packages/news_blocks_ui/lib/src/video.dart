@@ -17,7 +17,11 @@ class Video extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(
-          AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, AppSpacing.lg,),
+        AppSpacing.lg,
+        AppSpacing.lg,
+        AppSpacing.lg,
+        AppSpacing.lg,
+      ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(12),
         child: InlineVideo(

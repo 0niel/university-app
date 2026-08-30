@@ -4,7 +4,7 @@
 [![Powered by Mason](https://img.shields.io/endpoint?url=https%3A%2F%2Ftinyurl.com%2Fmason-badge)](https://github.com/felangel/mason)
 [![License: MIT][license_badge]][license_link]
 
-attendance-app.mirea.client for Protobuf NFC API
+Configurable gRPC-Web client for university NFC-pass providers.
 
 ## Installation 💻
 

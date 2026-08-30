@@ -16,6 +16,6 @@ class HydratedStorageInitializer implements AsyncLifecycle {
 
   @override
   Future<void> dispose() async {
-    await HydratedBloc.storage.close();
+    await _storage.close();
   }
 }

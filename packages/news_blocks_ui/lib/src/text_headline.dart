@@ -14,12 +14,12 @@ class TextHeadline extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).extension<AppColors>()!;
+    final colors = Theme.of(context).colors;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
       child: Text(
         block.text,
-        style: AppTextStyle.h4.copyWith(color: colors.active),
+        style: AppText.display.copyWith(color: colors.active),
         maxLines: 3,
         overflow: TextOverflow.ellipsis,
       ),

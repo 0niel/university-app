@@ -14,12 +14,12 @@ class TextParagraph extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).extension<AppColors>()!;
+    final colors = Theme.of(context).colors;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
       child: Text(
         block.text,
-        style: AppTextStyle.body.copyWith(color: colors.active, height: 1.5),
+        style: AppText.body.copyWith(color: colors.active, height: 1.5),
       ),
     );
   }

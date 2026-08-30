@@ -1,59 +1,32 @@
+import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
-import 'package:equatable/equatable.dart';
-import 'package:flutter/foundation.dart';
-import 'package:rtu_mirea_app/domain/entities/app_settings.dart';
+import 'package:rtu_mirea_app/home/models/app_settings.dart';
+
 part 'home_state.dart';
+part 'home_cubit.freezed.dart';
+part 'home_cubit.g.dart';
 
-class HomeCubit extends HydratedBloc<HomeEvent, HomeState> {
-  HomeCubit() : super(AppInitial()) {
-    on<CheckOnboardingEvent>(_onCheckOnboarding);
-    on<CloseOnboardingEvent>(_onCloseOnboarding);
-  }
+class HomeCubit extends HydratedCubit<HomeState> {
+  HomeCubit() : super(const HomeState());
 
-  void _onCheckOnboarding(CheckOnboardingEvent event, Emitter<HomeState> emit) {
-    final settings = state.settings;
-    final isMobileApp = defaultTargetPlatform == TargetPlatform.android || defaultTargetPlatform == TargetPlatform.iOS;
+  void closeOnboarding() =>
+      emit(HomeState(settings: state.settings.copyWith(onboardingShown: true)));
 
-    if (settings.onboardingShown == false && isMobileApp) {
-      emit(AppOnboarding(settings: settings.copyWith(onboardingShown: true)));
-    } else {
-      emit(AppClean(settings: settings));
-    }
-  }
+  void resetOnboarding() => emit(
+    HomeState(settings: state.settings.copyWith(onboardingShown: false)),
+  );
 
-  void _onCloseOnboarding(CloseOnboardingEvent event, Emitter<HomeState> emit) {
-    emit(AppClean(settings: state.settings));
-  }
-
-  void checkOnboarding() => add(CheckOnboardingEvent());
-
-  void closeOnboarding() => add(CloseOnboardingEvent());
+  void dismissSearchCoach() => emit(state.copyWith(searchCoachShown: true));
 
   @override
-  HomeState? fromJson(Map<String, dynamic> json) {
+  HomeState fromJson(Map<String, dynamic> json) {
     try {
-      final settingsJson = json['settings'] as Map<String, dynamic>?;
-      if (settingsJson == null) {
-        return AppInitial(settings: AppSettings.defaultSettings());
-      }
-
-      final settings = AppSettings.fromJson(settingsJson);
-      return AppInitial(settings: settings);
-    } catch (e) {
-      // If there's an error parsing the JSON, return default settings
-      return AppInitial(settings: AppSettings.defaultSettings());
+      return HomeState.fromJson(json);
+    } on Object catch (_) {
+      return const HomeState();
     }
   }
 
   @override
-  Map<String, dynamic>? toJson(HomeState state) {
-    return {'settings': state.settings.toJson()};
-  }
+  Map<String, dynamic> toJson(HomeState state) => state.toJson();
 }
-
-// Events
-abstract class HomeEvent {}
-
-class CheckOnboardingEvent extends HomeEvent {}
-
-class CloseOnboardingEvent extends HomeEvent {}

@@ -1,9 +1,16 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:app_ui/app_ui.dart';
+import 'package:flutter/material.dart';
+import 'package:rtu_mirea_app/l10n/l10n.dart';
+
+part 'clear_icon.dart';
 
 class SearchHistoryItem extends StatelessWidget {
-  const SearchHistoryItem({super.key, required this.query, required this.onPressed, required this.onClear});
+  const SearchHistoryItem({
+    required this.query,
+    required this.onPressed,
+    required this.onClear,
+    super.key,
+  });
 
   final String query;
   final void Function(String) onPressed;
@@ -11,18 +18,63 @@ class SearchHistoryItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return PlatformTextButton(
-      onPressed: () {
-        onPressed(query);
-      },
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 5),
-        child: Align(
-          alignment: Alignment.centerLeft,
-          child: Text(
-            query,
-            style: AppTextStyle.titleS.copyWith(color: Theme.of(context).extension<AppColors>()!.active),
-          ),
+    final colors = context.ninja;
+    return AppPressable(
+      onTap: () => onPressed(query),
+      semanticsLabel: query,
+      semanticsButton: true,
+      child: Container(
+        decoration: BoxDecoration(
+          color: colors.surface,
+          borderRadius: .circular(NinjaRadius.card),
+        ),
+        padding: const .fromLTRB(
+          AppSpacing.lg,
+          AppSpacing.sm,
+          AppSpacing.sm,
+          AppSpacing.sm,
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 40,
+              height: 40,
+              alignment: .center,
+              decoration: BoxDecoration(
+                color: colors.surfaceAlt,
+                borderRadius: .circular(AppRadius.md),
+              ),
+              child: AppLineIconWidget(
+                .clock,
+                size: 18,
+                color: colors.mutedDark,
+              ),
+            ),
+            const SizedBox(width: AppSpacing.md),
+            Expanded(
+              child: Text(
+                query,
+                maxLines: 2,
+                overflow: .ellipsis,
+                style: NinjaText.body.copyWith(color: colors.ink),
+              ),
+            ),
+            const SizedBox(width: AppSpacing.sm),
+            Tooltip(
+              message: context.l10n.delete,
+              child: AppPressable(
+                onTap: onClear,
+                semanticsLabel: context.l10n.delete,
+                semanticsButton: true,
+                child: const SizedBox.square(
+                  dimension: NinjaMetrics.minTouchTarget,
+                  child: Center(
+                    child: _ClearIcon(),
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );

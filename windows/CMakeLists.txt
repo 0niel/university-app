@@ -9,6 +9,9 @@ set(BINARY_NAME "rtu_mirea_mobile")
 # Explicitly opt in to modern CMake behaviors to avoid warnings with recent
 # versions of CMake.
 cmake_policy(VERSION 3.14...3.25)
+if(POLICY CMP0175)
+  cmake_policy(SET CMP0175 OLD)
+endif()
 
 # Define build configuration option.
 get_property(IS_MULTICONFIG GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
@@ -55,7 +58,11 @@ add_subdirectory("runner")
 
 # Generated plugin build rules, which manage building the plugins and adding
 # them to the application.
+set(_PROJECT_PREV_WARN_DEPRECATED ${CMAKE_WARN_DEPRECATED})
+set(CMAKE_WARN_DEPRECATED OFF)
 include(flutter/generated_plugins.cmake)
+set(CMAKE_WARN_DEPRECATED ${_PROJECT_PREV_WARN_DEPRECATED})
+unset(_PROJECT_PREV_WARN_DEPRECATED)
 
 
 # === Installation ===

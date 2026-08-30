@@ -18,13 +18,18 @@ class BannerAdContainer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final horizontalPadding =
-        size == BannerSize.normal ? AppSpacing.lg + AppSpacing.xs : AppSpacing.xlg + AppSpacing.xs + AppSpacing.xxs;
+        size == BannerSize.normal
+            ? AppSpacing.lg + AppSpacing.xs
+            : AppSpacing.xlg + AppSpacing.xs + AppSpacing.xxs;
 
-    final verticalPadding = size == BannerSize.normal ? AppSpacing.lg : AppSpacing.xlg + AppSpacing.sm;
+    final verticalPadding =
+        size == BannerSize.normal
+            ? AppSpacing.lg
+            : AppSpacing.xlg + AppSpacing.sm;
 
     return ColoredBox(
       key: const Key('bannerAdContainer_coloredBox'),
-      color: Theme.of(context).extension<AppColors>()!.deactiveDarker,
+      color: Theme.of(context).colors.deactiveDarker,
       child: Padding(
         padding: EdgeInsets.symmetric(
           horizontal: horizontalPadding,

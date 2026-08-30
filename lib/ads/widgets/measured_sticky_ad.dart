@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:rtu_mirea_app/ads/ads.dart';
 
 class MeasuredStickyAd extends StatefulWidget {
-  const MeasuredStickyAd({super.key, required this.onMeasured});
+  const MeasuredStickyAd({required this.onMeasured, super.key});
 
   final ValueChanged<double> onMeasured;
 

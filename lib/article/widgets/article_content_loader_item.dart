@@ -1,78 +1,36 @@
 import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
-import 'package:skeletonizer/skeletonizer.dart';
+import 'package:rtu_mirea_app/l10n/l10n.dart';
 
-/// Renders a widget containing a progress indicator that calls
-/// [onPresented] when the item becomes visible.
-class ArticleContentLoaderItem extends StatefulWidget {
-  const ArticleContentLoaderItem({super.key, this.onPresented});
-
-  /// A callback performed when the widget is presented.
-  final VoidCallback? onPresented;
-
-  @override
-  State<ArticleContentLoaderItem> createState() =>
-      _ArticleContentLoaderItemState();
-}
-
-class _ArticleContentLoaderItemState extends State<ArticleContentLoaderItem> {
-  @override
-  void initState() {
-    super.initState();
-    widget.onPresented?.call();
-  }
+class ArticleContentLoaderItem extends StatelessWidget {
+  const ArticleContentLoaderItem({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).extension<AppColors>()!;
-
-    Widget textLine({required double width, double height = 14}) {
-      return Container(
-        height: height,
-        width: width,
-        decoration: BoxDecoration(
-          color: colors.background02,
-          borderRadius: BorderRadius.circular(6),
-        ),
-      );
-    }
-
-    Widget imagePlaceholder({double height = 200}) {
-      return ClipRRect(
-        borderRadius: BorderRadius.circular(AppSpacing.md),
-        child: Container(height: height, color: colors.background02),
-      );
-    }
-
-    return Skeletonizer(
-      enabled: true,
-      effect: ShimmerEffect(
-        baseColor: colors.shimmerBase,
-        highlightColor: colors.shimmerHighlight,
-      ),
+    final textScale = MediaQuery.textScalerOf(context).scale(1);
+    final titleHeight = (28 * textScale).clamp(28.0, 48.0);
+    final lineHeight = (14 * textScale).clamp(14.0, 24.0);
+    return NinjaSkeletonGroup(
+      semanticsLabel: context.l10n.loadingContent,
       child: Padding(
         padding: const EdgeInsets.symmetric(
-          vertical: AppSpacing.lg,
-          horizontal: AppSpacing.lg,
+          horizontal: AppSpacing.xl,
+          vertical: AppSpacing.xlg,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            NinjaSkeleton(height: titleHeight, widthFactor: .82),
             const SizedBox(height: AppSpacing.md),
-            textLine(
-              width: MediaQuery.of(context).size.width * 0.8,
-              height: 24,
-            ),
+            NinjaSkeleton(height: titleHeight, widthFactor: .58),
+            const SizedBox(height: AppSpacing.xl),
+            const NinjaSkeletonMedia(height: 220, radius: NinjaRadius.card),
+            const SizedBox(height: AppSpacing.xl),
+            NinjaSkeleton.bar(height: lineHeight),
             const SizedBox(height: AppSpacing.sm),
-            textLine(width: MediaQuery.of(context).size.width * 0.6),
-            const SizedBox(height: AppSpacing.md),
-            imagePlaceholder(),
-            const SizedBox(height: AppSpacing.md),
-            textLine(width: MediaQuery.of(context).size.width * 0.9),
-            const SizedBox(height: AppSpacing.xs),
-            textLine(width: MediaQuery.of(context).size.width * 0.85),
-            const SizedBox(height: AppSpacing.xs),
-            textLine(width: MediaQuery.of(context).size.width * 0.7),
+            NinjaSkeleton.bar(height: lineHeight, widthFactor: .9),
+            const SizedBox(height: AppSpacing.sm),
+            NinjaSkeleton.bar(height: lineHeight, widthFactor: .7),
           ],
         ),
       ),

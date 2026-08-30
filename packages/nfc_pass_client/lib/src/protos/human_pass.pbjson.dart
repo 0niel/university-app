@@ -1,13 +1,15 @@
+// This is a generated file - do not edit.
 //
-//  Generated code. Do not modify.
-//  source: human_pass.proto
-//
-// @dart = 2.12
+// Generated from human_pass.proto.
+
+// @dart = 3.3
 
 // ignore_for_file: annotate_overrides, camel_case_types, comment_references
-// ignore_for_file: constant_identifier_names, library_prefixes
-// ignore_for_file: non_constant_identifier_names, prefer_final_fields
-// ignore_for_file: unnecessary_import, unnecessary_this, unused_import
+// ignore_for_file: constant_identifier_names
+// ignore_for_file: curly_braces_in_flow_control_structures
+// ignore_for_file: deprecated_member_use_from_same_package, library_prefixes
+// ignore_for_file: non_constant_identifier_names, prefer_relative_imports
+// ignore_for_file: unused_import
 
 import 'dart:convert' as $convert;
 import 'dart:core' as $core;
@@ -20,7 +22,8 @@ const GetAccessTokenForDigitalPassRequest$json = {
 
 /// Descriptor for `GetAccessTokenForDigitalPassRequest`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List getAccessTokenForDigitalPassRequestDescriptor =
-    $convert.base64Decode('CiNHZXRBY2Nlc3NUb2tlbkZvckRpZ2l0YWxQYXNzUmVxdWVzdA==');
+    $convert
+        .base64Decode('CiNHZXRBY2Nlc3NUb2tlbkZvckRpZ2l0YWxQYXNzUmVxdWVzdA==');
 
 @$core.Deprecated('Use getAccessTokenForDigitalPassResponseDescriptor instead')
 const GetAccessTokenForDigitalPassResponse$json = {
@@ -32,7 +35,8 @@ const GetAccessTokenForDigitalPassResponse$json = {
 
 /// Descriptor for `GetAccessTokenForDigitalPassResponse`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List getAccessTokenForDigitalPassResponseDescriptor =
-    $convert.base64Decode('CiRHZXRBY2Nlc3NUb2tlbkZvckRpZ2l0YWxQYXNzUmVzcG9uc2USEAoDand0GAEgASgJUgNqd3'
+    $convert.base64Decode(
+        'CiRHZXRBY2Nlc3NUb2tlbkZvckRpZ2l0YWxQYXNzUmVzcG9uc2USEAoDand0GAEgASgJUgNqd3'
         'Q=');
 
 @$core.Deprecated('Use sendVerificationCodeRequestDescriptor instead')
@@ -58,26 +62,41 @@ const GetDigitalPassRequest$json = {
   '1': 'GetDigitalPassRequest',
   '2': [
     {'1': 'code', '3': 1, '4': 1, '5': 9, '10': 'code'},
-    {'1': 'device_info', '3': 2, '4': 1, '5': 11, '6': '.rtu.humanpass.DeviceInfo', '10': 'deviceInfo'},
+    {
+      '1': 'device_info',
+      '3': 2,
+      '4': 1,
+      '5': 11,
+      '6': '.rtu.humanpass.DeviceInfo',
+      '10': 'deviceInfo'
+    },
   ],
 };
 
 /// Descriptor for `GetDigitalPassRequest`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List getDigitalPassRequestDescriptor =
-    $convert.base64Decode('ChVHZXREaWdpdGFsUGFzc1JlcXVlc3QSEgoEY29kZRgBIAEoCVIEY29kZRI6CgtkZXZpY2VfaW'
-        '5mbxgCIAEoCzIZLnJ0dS5odW1hbnBhc3MuRGV2aWNlSW5mb1IKZGV2aWNlSW5mbw==');
+final $typed_data.Uint8List getDigitalPassRequestDescriptor = $convert.base64Decode(
+    'ChVHZXREaWdpdGFsUGFzc1JlcXVlc3QSEgoEY29kZRgBIAEoCVIEY29kZRI6CgtkZXZpY2VfaW'
+    '5mbxgCIAEoCzIZLnJ0dS5odW1hbnBhc3MuRGV2aWNlSW5mb1IKZGV2aWNlSW5mbw==');
 
 @$core.Deprecated('Use getDigitalPassResponseDescriptor instead')
 const GetDigitalPassResponse$json = {
   '1': 'GetDigitalPassResponse',
   '2': [
-    {'1': 'inner', '3': 1, '4': 1, '5': 11, '6': '.rtu.humanpass.DigitalPassInner', '10': 'inner'},
+    {
+      '1': 'inner',
+      '3': 1,
+      '4': 1,
+      '5': 11,
+      '6': '.rtu.humanpass.DigitalPassInner',
+      '10': 'inner'
+    },
   ],
 };
 
 /// Descriptor for `GetDigitalPassResponse`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List getDigitalPassResponseDescriptor =
-    $convert.base64Decode('ChZHZXREaWdpdGFsUGFzc1Jlc3BvbnNlEjUKBWlubmVyGAEgASgLMh8ucnR1Lmh1bWFucGFzcy'
+    $convert.base64Decode(
+        'ChZHZXREaWdpdGFsUGFzc1Jlc3BvbnNlEjUKBWlubmVyGAEgASgLMh8ucnR1Lmh1bWFucGFzcy'
         '5EaWdpdGFsUGFzc0lubmVyUgVpbm5lcg==');
 
 @$core.Deprecated('Use digitalPassInnerDescriptor instead')
@@ -90,9 +109,9 @@ const DigitalPassInner$json = {
 };
 
 /// Descriptor for `DigitalPassInner`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List digitalPassInnerDescriptor =
-    $convert.base64Decode('ChBEaWdpdGFsUGFzc0lubmVyEhcKB3Bhc3NfaWQYASABKANSBnBhc3NJZBIbCglwYXNzX3V1aW'
-        'QYAiABKAlSCHBhc3NVdWlk');
+final $typed_data.Uint8List digitalPassInnerDescriptor = $convert.base64Decode(
+    'ChBEaWdpdGFsUGFzc0lubmVyEhcKB3Bhc3NfaWQYASABKANSBnBhc3NJZBIbCglwYXNzX3V1aW'
+    'QYAiABKAlSCHBhc3NVdWlk');
 
 @$core.Deprecated('Use deviceInfoDescriptor instead')
 const DeviceInfo$json = {
@@ -103,8 +122,8 @@ const DeviceInfo$json = {
 };
 
 /// Descriptor for `DeviceInfo`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List deviceInfoDescriptor =
-    $convert.base64Decode('CgpEZXZpY2VJbmZvEh8KC2RldmljZV9uYW1lGAEgASgJUgpkZXZpY2VOYW1l');
+final $typed_data.Uint8List deviceInfoDescriptor = $convert.base64Decode(
+    'CgpEZXZpY2VJbmZvEh8KC2RldmljZV9uYW1lGAEgASgJUgpkZXZpY2VOYW1l');
 
 @$core.Deprecated('Use getDigitalPassStatusRequestDescriptor instead')
 const GetDigitalPassStatusRequest$json = {

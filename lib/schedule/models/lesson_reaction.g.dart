@@ -6,45 +6,50 @@ part of 'lesson_reaction.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-LessonReaction _$LessonReactionFromJson(Map<String, dynamic> json) => LessonReaction(
-  subjectName: json['subjectName'] as String,
-  lessonDate: DateTime.parse(json['lessonDate'] as String),
-  lessonBells: LessonBells.fromJson(json['lessonBells'] as Map<String, dynamic>),
-  reactionType: $enumDecode(_$ReactionTypeEnumMap, json['reactionType']),
-  createdAt: DateTime.parse(json['createdAt'] as String),
-);
+_LessonReaction _$LessonReactionFromJson(Map<String, dynamic> json) =>
+    $checkedCreate('_LessonReaction', json, ($checkedConvert) {
+      final val = _LessonReaction(
+        subjectName: $checkedConvert('subjectName', (v) => v as String),
+        lessonDate: $checkedConvert(
+          'lessonDate',
+          (v) => DateTime.parse(v as String),
+        ),
+        lessonBells: $checkedConvert(
+          'lessonBells',
+          (v) => LessonBells.fromJson(v as Map<String, dynamic>),
+        ),
+        reactionType: $checkedConvert(
+          'reactionType',
+          (v) => $enumDecode(_$ReactionTypeEnumMap, v),
+        ),
+        createdAt: $checkedConvert(
+          'createdAt',
+          (v) => DateTime.parse(v as String),
+        ),
+      );
+      return val;
+    });
 
-Map<String, dynamic> _$LessonReactionToJson(LessonReaction instance) => <String, dynamic>{
-  'subjectName': instance.subjectName,
-  'lessonDate': instance.lessonDate.toIso8601String(),
-  'lessonBells': instance.lessonBells.toJson(),
-  'reactionType': _$ReactionTypeEnumMap[instance.reactionType]!,
-  'createdAt': instance.createdAt.toIso8601String(),
-};
+Map<String, dynamic> _$LessonReactionToJson(_LessonReaction instance) =>
+    <String, dynamic>{
+      'subjectName': instance.subjectName,
+      'lessonDate': instance.lessonDate.toIso8601String(),
+      'lessonBells': instance.lessonBells.toJson(),
+      'reactionType': _$ReactionTypeEnumMap[instance.reactionType]!,
+      'createdAt': instance.createdAt.toIso8601String(),
+    };
 
 const _$ReactionTypeEnumMap = {
+  ReactionType.fire: 'fire',
+  ReactionType.brain: 'brain',
   ReactionType.love: 'love',
   ReactionType.sad: 'sad',
   ReactionType.flushed: 'flushed',
   ReactionType.sick: 'sick',
   ReactionType.poo: 'poo',
+  ReactionType.thinking: 'thinking',
   ReactionType.sleepy: 'sleepy',
-};
-
-LessonReactionSummary _$LessonReactionSummaryFromJson(Map<String, dynamic> json) => LessonReactionSummary(
-  subjectName: json['subjectName'] as String,
-  lessonDate: DateTime.parse(json['lessonDate'] as String),
-  lessonBells: LessonBells.fromJson(json['lessonBells'] as Map<String, dynamic>),
-  reactionCounts: (json['reactionCounts'] as Map<String, dynamic>).map(
-    (k, e) => MapEntry($enumDecode(_$ReactionTypeEnumMap, k), (e as num).toInt()),
-  ),
-  userReaction: $enumDecodeNullable(_$ReactionTypeEnumMap, json['userReaction']),
-);
-
-Map<String, dynamic> _$LessonReactionSummaryToJson(LessonReactionSummary instance) => <String, dynamic>{
-  'subjectName': instance.subjectName,
-  'lessonDate': instance.lessonDate.toIso8601String(),
-  'lessonBells': instance.lessonBells.toJson(),
-  'reactionCounts': instance.reactionCounts.map((k, e) => MapEntry(_$ReactionTypeEnumMap[k]!, e)),
-  'userReaction': _$ReactionTypeEnumMap[instance.userReaction],
+  ReactionType.skull: 'skull',
+  ReactionType.mindblown: 'mindblown',
+  ReactionType.respect: 'respect',
 };

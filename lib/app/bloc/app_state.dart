@@ -1,36 +1,26 @@
 part of 'app_bloc.dart';
 
-enum AppStatus {
-  onboardingRequired(),
-  authenticated(),
-  unauthenticated();
+@freezed
+abstract class AppState with _$AppState {
+  const factory AppState({
+    @Default(AppStatus.unauthenticated) AppStatus status,
+    @Default(User.anonymous) User user,
+    @Default(false) bool isAmoled,
+    int? discoursePostIdToOpen,
+    String? routeToOpen,
+    @Default(0) int notificationNavigationId,
+  }) = _AppState;
 
-  bool get isLoggedIn => this == AppStatus.authenticated || this == AppStatus.onboardingRequired;
-}
+  const AppState._();
 
-class AppState extends Equatable {
-  const AppState({this.isAmoled = false, this.discoursePostIdToOpen, required this.status, this.user = User.anonymous});
-
-  const AppState.authenticated(User user) : this(status: AppStatus.authenticated, user: user);
-
-  const AppState.onboardingRequired(User user) : this(status: AppStatus.onboardingRequired, user: user);
-
-  const AppState.unauthenticated() : this(status: AppStatus.unauthenticated);
-
-  final AppStatus status;
-  final User user;
-  final bool isAmoled;
-  final int? discoursePostIdToOpen;
-
-  AppState copyWith({bool? isAmoled, int? discoursePostIdToOpen, AppStatus? status, User? user}) {
+  AppState withNotificationDestination({int? discoursePostId, String? route}) {
     return AppState(
-      isAmoled: isAmoled ?? this.isAmoled,
-      discoursePostIdToOpen: discoursePostIdToOpen ?? this.discoursePostIdToOpen,
-      status: status ?? this.status,
-      user: user ?? this.user,
+      isAmoled: isAmoled,
+      discoursePostIdToOpen: discoursePostId,
+      routeToOpen: discoursePostId == null ? route : null,
+      notificationNavigationId: notificationNavigationId + 1,
+      status: status,
+      user: user,
     );
   }
-
-  @override
-  List<Object?> get props => [isAmoled, discoursePostIdToOpen];
 }

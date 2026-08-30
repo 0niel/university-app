@@ -8,10 +8,17 @@ import 'package:news_blocks_ui/src/widgets/widgets.dart';
 /// {@endtemplate}
 class Image extends StatelessWidget {
   /// {@macro image}
-  const Image({required this.block, super.key});
+  const Image({
+    required this.block,
+    this.semanticLabel,
+    super.key,
+  });
 
   /// The associated [ImageBlock] instance.
   final ImageBlock block;
+
+  /// Text announced by assistive technologies for this image.
+  final String? semanticLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -19,8 +26,10 @@ class Image extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
       child: InlineImage(
         imageUrl: block.imageUrl,
-        progressIndicatorBuilder: (context, url, downloadProgress) =>
-            ProgressIndicator(progress: downloadProgress.progress),
+        semanticLabel: semanticLabel,
+        progressIndicatorBuilder:
+            (context, url, downloadProgress) =>
+                ProgressIndicator(progress: downloadProgress.progress),
       ),
     );
   }

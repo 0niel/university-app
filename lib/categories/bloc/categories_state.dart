@@ -1,32 +1,17 @@
 part of 'categories_bloc.dart';
 
-enum CategoriesStatus { initial, loading, populated, failure }
+@freezed
+abstract class CategoriesState with _$CategoriesState {
+  const factory CategoriesState({
+    @Default(CategoriesStatus.initial) CategoriesStatus status,
+    List<Category>? categories,
+    Category? selectedCategory,
+    @Default(<NewsSourceItem>[]) List<NewsSourceItem> sources,
+  }) = _CategoriesState;
 
-class CategoriesState extends Equatable {
-  const CategoriesState({required this.status, this.categories, this.selectedCategory});
+  const CategoriesState._();
 
-  const CategoriesState.initial() : this(status: CategoriesStatus.initial);
-
-  final CategoriesStatus status;
-  final List<Category>? categories;
-  final Category? selectedCategory;
-
-  String? getCategoryName(String categoryId) {
-    try {
-      return categories?.firstWhere((category) => category.id == categoryId).name;
-    } catch (_) {
-      return null;
-    }
-  }
-
-  @override
-  List<Object?> get props => [status, categories, selectedCategory];
-
-  CategoriesState copyWith({CategoriesStatus? status, List<Category>? categories, Category? selectedCategory}) {
-    return CategoriesState(
-      status: status ?? this.status,
-      categories: categories ?? this.categories,
-      selectedCategory: selectedCategory ?? this.selectedCategory,
-    );
-  }
+  String? getCategoryName(String categoryId) => categories
+      ?.firstWhereOrNull((category) => category.id == categoryId)
+      ?.name;
 }

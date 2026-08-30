@@ -1,0 +1,38 @@
+name: Cleanup expired story media
+
+on:
+  schedule:
+    - cron: "17 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: story-media-cleanup
+  cancel-in-progress: false
+
+jobs:
+  cleanup:
+    if: >-
+      vars.SUPABASE_URL != '' &&
+      vars.INGEST_ORGANIZATION_ID != ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Remove expired and orphaned story media
+        env:
+          SUPABASE_URL: ${{ vars.SUPABASE_URL }}
+          ORGANIZATION_ID: ${{ vars.INGEST_ORGANIZATION_ID }}
+          INGEST_KEY: ${{ secrets.INGEST_API_KEY }}
+        run: |
+          test -n "${INGEST_KEY}"
+          payload="$(jq -n \
+            --arg organization_id "${ORGANIZATION_ID}" \
+            '{entity:"story_media_cleanup", organization_id:$organization_id}')"
+          curl --fail-with-body --silent --show-error \
+            --request POST \
+            --header "content-type: application/json" \
+            --header "x-ingest-key: ${INGEST_KEY}" \
+            --data "${payload}" \
+            "${SUPABASE_URL}/functions/v1/ingest"

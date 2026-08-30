@@ -1,36 +1,42 @@
-import 'package:flutter/material.dart';
 import 'package:app_ui/app_ui.dart';
+import 'package:flutter/widgets.dart';
+import 'package:rtu_mirea_app/profile/widgets/settings_card.dart';
 
 class SettingsSection extends StatelessWidget {
-  final String title;
-  final List<Widget> children;
+  const SettingsSection({
+    required this.label,
+    required this.children,
+    super.key,
+  });
 
-  const SettingsSection({super.key, required this.title, required this.children});
+  final String label;
+  final List<Widget> children;
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.ninja;
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Padding(
-          padding: const EdgeInsets.only(left: 4, bottom: 8),
+          padding: const EdgeInsets.fromLTRB(
+            NinjaMetrics.screenPadding,
+            28,
+            NinjaMetrics.screenPadding,
+            8,
+          ),
           child: Text(
-            title,
-            style: AppTextStyle.bodyL.copyWith(
-              color: Theme.of(context).extension<AppColors>()!.deactive,
-              fontWeight: FontWeight.w500,
-            ),
+            label,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: NinjaText.title.copyWith(color: colors.ink),
           ),
         ),
-        Card(
-          margin: EdgeInsets.zero,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          elevation: 0,
-          color: Theme.of(context).extension<AppColors>()!.background02,
-          child: Padding(
-            padding: const EdgeInsets.all(12.0),
-            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: children),
+        Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: NinjaMetrics.screenPadding,
           ),
+          child: SettingsCard(children: children),
         ),
       ],
     );

@@ -46,8 +46,8 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
 
-import HomeWidgetGlanceState
-import HomeWidgetGlanceStateDefinition
+import es.antonborri.home_widget.HomeWidgetGlanceState
+import es.antonborri.home_widget.HomeWidgetGlanceStateDefinition
 
 class ScheduleGlanceAppWidget : GlanceAppWidget() {
     private val TAG = "ScheduleWidget"

@@ -1,0 +1,5 @@
+create index schedule_occurrences_discipline_idx
+on core.schedule_occurrences (discipline_id);
+
+create index schedule_occurrence_reactions_occurrence_idx
+on core.schedule_occurrence_reactions (occurrence_id);

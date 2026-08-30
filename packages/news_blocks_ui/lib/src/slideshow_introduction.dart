@@ -38,8 +38,7 @@ class SlideshowIntroduction extends StatelessWidget {
         child: InkWell(
           borderRadius: BorderRadius.circular(12),
           onTap: action != null ? () => onPressed?.call(action) : null,
-          splashColor:
-              Theme.of(context).extension<AppColors>()!.white.withOpacity(0.08),
+          splashColor: Theme.of(context).colors.white.withValues(alpha: 0.08),
           child: Stack(
             alignment: Alignment.bottomLeft,
             children: [
@@ -54,13 +53,11 @@ class SlideshowIntroduction extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     SlideshowCategory(slideshowText: slideshowText),
-                    const SizedBox(
-                      height: AppSpacing.xs,
-                    ),
+                    const SizedBox(height: AppSpacing.xs),
                     Text(
                       block.title,
-                      style: AppTextStyle.h5.copyWith(
-                        color: Theme.of(context).extension<AppColors>()!.active,
+                      style: AppText.title.copyWith(
+                        color: Theme.of(context).colors.active,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,

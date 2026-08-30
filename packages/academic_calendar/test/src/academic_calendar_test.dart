@@ -47,16 +47,36 @@ void main() {
       expect(week10, 14);
     });
 
-    test('getSemesterStartWithPeriod returns correct start date for given date', () {
-      // For semester 1 date
-      final period1 = getPeriod(DateTime(2022, 9));
-      final startDate1 = getSemesterStartWithPeriod(period1);
-      expect(startDate1, DateTime(2022, 9));
+    test(
+      'getSemesterStartWithPeriod returns correct start date for given date',
+      () {
+        final period1 = getPeriod(DateTime(2022, 9));
+        final startDate1 = getSemesterStartWithPeriod(period1);
+        expect(startDate1, DateTime(2022, 9));
 
-      // For semester 2 date
-      final period2 = getPeriod(DateTime(2022, 2));
-      final startDate2 = getSemesterStartWithPeriod(period2);
-      expect(startDate2, DateTime(2022, 2, 9));
+        final period2 = getPeriod(DateTime(2022, 2));
+        final startDate2 = getSemesterStartWithPeriod(period2);
+        expect(startDate2, DateTime(2022, 2, 9));
+      },
+    );
+
+    test('getDayByWeek validates its one-based arguments', () {
+      final period = getPeriod(DateTime(2022, 9));
+
+      expect(
+        () => getDayByWeek(period, 0, 1),
+        throwsRangeError,
+      );
+      expect(
+        () => getDayByWeek(period, DateTime.monday, 19),
+        throwsRangeError,
+      );
+    });
+
+    test('weekOfYear follows ISO-8601 at year boundaries', () {
+      expect(DateTime(2021).weekOfYear, 53);
+      expect(DateTime(2021, 1, 4).weekOfYear, 1);
+      expect(DateTime(2020, 12, 31).weekOfYear, 53);
     });
   });
 }

@@ -1,4 +1,2 @@
-/// A library with a set of functions to work with academic calendars.
-library academic_calendar;
-
 export 'src/academic_calendar.dart';
+export 'src/russian_work_calendar.dart';

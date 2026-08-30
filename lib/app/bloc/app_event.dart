@@ -11,19 +11,19 @@ class AppOpened extends AppEvent {
   const AppOpened();
 }
 
-class RecieveInteractedMessage extends AppEvent {
-  final RemoteMessage message;
+class InteractedMessageReceived extends AppEvent {
+  const InteractedMessageReceived(this.message);
 
-  const RecieveInteractedMessage(this.message);
+  final RemoteMessage message;
 
   @override
   List<Object?> get props => [message];
 }
 
 class ThemeChanged extends AppEvent {
-  final bool isAmoled;
+  const ThemeChanged({required this.isAmoled});
 
-  const ThemeChanged(this.isAmoled);
+  final bool isAmoled;
 
   @override
   List<Object?> get props => [isAmoled];

@@ -14,38 +14,63 @@ void main() {
     setUp(() {
       storage = MockStorage();
 
-      when(() => storage.write(key: any(named: 'key'), value: any(named: 'value'))).thenAnswer((_) async {});
+      when(
+        () => storage.write(key: any(named: 'key'), value: any(named: 'value')),
+      ).thenAnswer((_) async {});
     });
 
     group('setNotificationsEnabled', () {
       test('saves the value in Storage', () async {
         const enabled = true;
 
-        await NotificationsStorage(storage: storage).setNotificationsEnabled(enabled: enabled);
+        await NotificationsStorage(
+          storage: storage,
+        ).setNotificationsEnabled(enabled: enabled);
 
         verify(
-          () => storage.write(key: NotificationsStorageKeys.notificationsEnabled, value: enabled.toString()),
+          () => storage.write(
+            key: NotificationsStorageKeys.notificationsEnabled,
+            value: enabled.toString(),
+          ),
         ).called(1);
       });
     });
 
     group('fetchNotificationsEnabled', () {
       test('returns the value from Storage', () async {
-        when(() => storage.read(key: NotificationsStorageKeys.notificationsEnabled)).thenAnswer((_) async => 'true');
+        when(
+          () =>
+              storage.read(key: NotificationsStorageKeys.notificationsEnabled),
+        ).thenAnswer((_) async => 'true');
 
-        final result = await NotificationsStorage(storage: storage).fetchNotificationsEnabled();
+        final result =
+            await NotificationsStorage(
+              storage: storage,
+            ).fetchNotificationsEnabled();
 
-        verify(() => storage.read(key: NotificationsStorageKeys.notificationsEnabled)).called(1);
+        verify(
+          () =>
+              storage.read(key: NotificationsStorageKeys.notificationsEnabled),
+        ).called(1);
 
         expect(result, isTrue);
       });
 
       test('returns false when no value exists in Storage', () async {
-        when(() => storage.read(key: NotificationsStorageKeys.notificationsEnabled)).thenAnswer((_) async => null);
+        when(
+          () =>
+              storage.read(key: NotificationsStorageKeys.notificationsEnabled),
+        ).thenAnswer((_) async => null);
 
-        final result = await NotificationsStorage(storage: storage).fetchNotificationsEnabled();
+        final result =
+            await NotificationsStorage(
+              storage: storage,
+            ).fetchNotificationsEnabled();
 
-        verify(() => storage.read(key: NotificationsStorageKeys.notificationsEnabled)).called(1);
+        verify(
+          () =>
+              storage.read(key: NotificationsStorageKeys.notificationsEnabled),
+        ).called(1);
 
         expect(result, isFalse);
       });
@@ -55,10 +80,15 @@ void main() {
       test('saves the value in Storage', () async {
         const preferences = {'Информация', 'Объявления'};
 
-        await NotificationsStorage(storage: storage).setCategoriesPreferences(categories: preferences);
+        await NotificationsStorage(
+          storage: storage,
+        ).setCategoriesPreferences(categories: preferences);
 
         verify(
-          () => storage.write(key: NotificationsStorageKeys.categoriesPreferences, value: json.encode(preferences)),
+          () => storage.write(
+            key: NotificationsStorageKeys.categoriesPreferences,
+            value: jsonEncode(preferences.toList()),
+          ),
         ).called(1);
       });
     });
@@ -68,25 +98,57 @@ void main() {
         const preferences = {'Информация', 'Объявления'};
 
         when(
-          () => storage.read(key: NotificationsStorageKeys.categoriesPreferences),
-        ).thenAnswer((_) async => json.encode(preferences));
+          () =>
+              storage.read(key: NotificationsStorageKeys.categoriesPreferences),
+        ).thenAnswer((_) async => jsonEncode(preferences.toList()));
 
-        final result = await NotificationsStorage(storage: storage).fetchCategoriesPreferences();
+        final result =
+            await NotificationsStorage(
+              storage: storage,
+            ).fetchCategoriesPreferences();
 
-        verify(() => storage.read(key: NotificationsStorageKeys.categoriesPreferences)).called(1);
+        verify(
+          () =>
+              storage.read(key: NotificationsStorageKeys.categoriesPreferences),
+        ).called(1);
 
         expect(result, equals(preferences));
       });
 
       test('returns null when no value exists in Storage', () async {
-        when(() => storage.read(key: NotificationsStorageKeys.categoriesPreferences)).thenAnswer((_) async => null);
+        when(
+          () =>
+              storage.read(key: NotificationsStorageKeys.categoriesPreferences),
+        ).thenAnswer((_) async => null);
 
-        final result = await NotificationsStorage(storage: storage).fetchCategoriesPreferences();
+        final result =
+            await NotificationsStorage(
+              storage: storage,
+            ).fetchCategoriesPreferences();
 
-        verify(() => storage.read(key: NotificationsStorageKeys.categoriesPreferences)).called(1);
+        verify(
+          () =>
+              storage.read(key: NotificationsStorageKeys.categoriesPreferences),
+        ).called(1);
 
         expect(result, isNull);
       });
+
+      test(
+        'throws FormatException when the stored value is not a JSON array',
+        () async {
+          when(
+            () => storage.read(
+              key: NotificationsStorageKeys.categoriesPreferences,
+            ),
+          ).thenAnswer((_) async => '{"topic":"Информация"}');
+
+          expect(
+            NotificationsStorage(storage: storage).fetchCategoriesPreferences(),
+            throwsFormatException,
+          );
+        },
+      );
     });
   });
 }

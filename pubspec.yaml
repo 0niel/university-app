@@ -2,17 +2,18 @@ name: rtu_mirea_app
 description: Mobile application for students of RTU MIREA
 publish_to: 'none'
 
-version: 1.6.0+145
+version: 5.1.0+152
 
 environment:
-  sdk: ">=3.7.0"
+  sdk: ^3.12.0
+  flutter: ^3.44.0
 
 workspace:
-  - api
-  - api/packages/github
-  - api/packages/news_blocks
-  - api/packages/rtu_mirea_schedule_api_client
-  - api/packages/schedule
+  - packages/discourse_api_client
+  - packages/github
+  - packages/news_blocks
+  - packages/rtu_mirea_schedule_api_client
+  - packages/schedule
   - packages/academic_calendar
   - packages/ads_ui
   - packages/analytics_repository
@@ -22,11 +23,15 @@ workspace:
   - packages/auth_client/supabase_authentication_client
   - packages/auth_client/token_storage
   - packages/community_repository
+  - packages/community_catalog_repository
+  - packages/service_catalog_repository
+  - packages/connectivity_client
   - packages/deep_link_client
-  - packages/discourse_api_client
-  - packages/discourse_repository
+  - packages/local_auth_client
+  - packages/local_notifications_client
+  - packages/local_notifications_repository
   - packages/lost_and_found_repository
-  - packages/mini_app
+  - packages/mini_apps_repository
   - packages/news_blocks_ui
   - packages/news_repository
   - packages/nfc_pass_client
@@ -36,230 +41,266 @@ workspace:
   - packages/notifications_repository
   - packages/package_info_client
   - packages/permission_client
+  - packages/preferences_repository
   - packages/schedule_exporter_repository
   - packages/schedule_repository
   - packages/share_launcher
+  - packages/stac_bridge
   - packages/storage/persistent_storage
   - packages/storage/secure_storage
   - packages/storage/storage
   - packages/user_repository
+  - packages/gamification_repository
+  - packages/friends_repository
+  - packages/campus_repository
+  - packages/study_groups_repository
+  - packages/network_location_client
   - packages/web_oauth_interceptor_client
 
 dependencies:
-  flutter:
-    sdk: flutter
-  path_provider: ^2.1.1
-  university_app_server_api:
-    path: api
-  schedule_repository:
-    path: packages/schedule_repository
-  community_repository:
-    path: packages/community_repository
   academic_calendar:
     path: packages/academic_calendar
+  activity_calendar: ^1.0.1
+  adaptive_theme: ^3.5.0
+  ads_ui:
+    path: packages/ads_ui
+  after_layout: ^1.1.0
+  # Pinned to 0.9.1: 0.9.2+ is built against a newer androidx.glance than the
+  # app's pinned glance 1.1.1, which makes its Glance types unresolvable in the
+  # native widget (ScheduleGlanceAppWidget/Receiver). Bump together with the
+  # androidx.glance deps in android/app/build.gradle.
   analytics_repository:
     path: packages/analytics_repository
-  flutter_animate: ^4.5.0
-  latlong2: ^0.9.0
-  adaptive_theme: ^3.5.0
-  very_good_infinite_list: ^0.9.0
-  hydrated_bloc: ^10.1.1
-  bloc_concurrency: ^0.3.0
-  provider: ^6.0.5
-  intl: ^0.20.2
-  dio: ^5.1.2
-  shared_preferences: ^2.0.11
-  bloc: ^9.2.0
-  flutter_bloc: ^9.1.1
-  flutter_svg: ^2.0.5
-  equatable: ^2.0.5
-  photo_view: ^0.15.0
-  material_floating_search_bar_2: ^0.5.0
-  dartz: ^0.10.0-nullsafety.2
-  flutter_typeahead: ^5.2.0
-  calendar_date_picker2: ^2.0.1
-  flutter_html: ^3.0.0-beta.2
-  flutter_html_iframe: ^3.0.0-beta.2
-  flutter_html_video: ^3.0.0-beta.2
-  flutter_html_svg: ^3.0.0-beta.2
-  flutter_html_table: ^3.0.0-beta.2
-  table_calendar: ^3.0.3
-  dismissible_page: ^1.0.2
-  story: ^1.1.0
-  extended_image: ^10.0.1
-  cached_network_image: ^3.2.0
-  url_launcher: ^6.1.12
-  carousel_slider: ^5.0.0
-  salomon_bottom_bar: ^3.3.2
-  url_strategy: ^0.3.0
-  cupertino_icons: ^1.0.2
-  after_layout: ^1.1.0
-  get:
-  get_storage:
-  home_widget: ^0.9.0
-  freezed_annotation: any
-  firebase_core: ^4.4.0
-  firebase_analytics: ^12.1.2
-  firebase_core_web: ^3.4.0
-  firebase_messaging: ^16.1.1
-  flutter_secure_storage: ^10.0.0
-  flutter_nfc_kit: ^3.3.1
   app_settings: ^7.0.0
-  sentry_flutter: ^9.12.0
-  sentry_dio: ^9.12.0
-  sentry_logging: ^9.12.0
-  logging: ^1.1.1
-  sliver_tools: ^0.2.12
-  unicons: any
-  go_router: ^17.1.0
-  notifications_repository:
-    path: packages/notifications_repository
-  permission_client:
-    path: packages/permission_client
-  firebase_notifications_client:
-    path: packages/notifications_client/firebase_notifications_client
-  persistent_storage:
-    path: packages/storage/persistent_storage
-  secure_storage:
-    path: packages/storage/secure_storage
-  collection: ^1.18.0
-  expandable_page_view: ^1.0.17
-  activity_calendar: ^1.0.1
-  discourse_repository:
-    path: packages/discourse_repository
-  discourse_api_client:
-    path: packages/discourse_api_client
-  logger: ^2.0.2+1
-  flutter_markdown: ^0.7.6+2
-  open_filex: ^4.4.0
-  flutter_cache_manager: ^3.3.1
-  bot_toast: ^4.1.3
-  package_info_plus: ^9.0.0
-  news_repository:
-    path: packages/news_repository
+  # Pinned to 9.20.0: sentry_flutter 9.21+ reworked the Android Session Replay
+  # recorder (SentryFlutterReplayRecorder), which fails to compile against the
+  # project's Kotlin 2.3.x toolchain. Bump once getsentry/sentry-dart ships a
+  # Kotlin-2.3-compatible replay module.
+  app_ui:
+    path: packages/app_ui
+  # mini_app:
+  #   path: packages/mini_app
   article_repository:
     path: packages/article_repository
-  share_launcher:
-    path: packages/share_launcher
-  visibility_detector: ^0.4.0+2
-  platform: ^3.0.2
-  json_annotation: ^4.9.0
-  hugeicons: ^1.1.5
+  bloc: ^9.2.0
+  bloc_concurrency: ^0.3.0
+  bot_toast: ^4.1.3
+  built_collection: ^5.1.1
+
+  cached_network_image: ^3.2.0
+  calendar_date_picker2: ^3.0.0
+  campus_repository:
+    path: packages/campus_repository
+  carousel_slider: ^5.0.0
+  clock: ^1.1.2
+  collection: ^1.18.0
+  community_catalog_repository:
+    path: packages/community_catalog_repository
+  community_repository:
+    path: packages/community_repository
+  connectivity_client:
+    path: packages/connectivity_client
+  cupertino_icons: ^1.0.2
+  deep_link_client:
+    path: packages/deep_link_client
   device_calendar:
     git:
       url: https://github.com/0niel/device_calendar.git
       ref: develop
-  timezone: ^0.10.0
+  device_info_plus: ^13.1.0
+  dio: ^5.1.2
+  dismissible_page: ^1.0.2
   dot_navigation_bar:
     git:
       url: https://github.com/0niel/dot_navigation_bar.git
       ref: master
-  flutter_map: ^8.2.2
-  envied: ^1.1.1
-  flutter_sticky_header: ^0.8.0
-  schedule_exporter_repository:
-    path: packages/schedule_exporter_repository
-  storyly_flutter:
-    git:
-      url: https://github.com/0niel/storyly-sdk.git
-      ref: master
-      path: flutter/storyly_flutter/
-  flutter_platform_widgets: ^9.0.0
+  dynamite_runtime: ^0.6.0
+  
   enough_platform_widgets: ^1.1.1
-  built_collection: ^5.1.1
-  
-  file_picker: ^10.1.9
+  equatable: ^2.0.5
+  extended_image: ^10.0.1
+  file_picker: ^12.0.0-beta.4
   filesize: ^2.0.0
-  flutter_material_design_icons: ^1.1.7296
-  meta: ^1.0.0
-  path: ^1.0.0
-  queue: ^3.0.0
-  rxdart: ^0.28.0
-  universal_io: ^2.0.0
-  dynamite_runtime: ^0.5.0+1
-  
-  http: ^1.2.2
+  firebase_analytics: ^12.1.2
+  firebase_core: ^4.4.0
+  firebase_messaging: ^16.1.1
+  fl_chart: ^1.1.1
+  flutter:
+    sdk: flutter
+  flutter_animate: ^4.5.0
+  flutter_bloc: ^9.1.1
+  flutter_cache_manager: ^3.3.1
+  flutter_html: ^3.0.0-beta.2
+  flutter_html_iframe: ^3.0.0-beta.2
+  flutter_html_svg: ^3.0.0-beta.2
+  flutter_html_table: ^3.0.0-beta.2
+  flutter_html_video: ^3.0.0-beta.2
+  flutter_layout_grid: ^2.0.8
   flutter_localizations:
     sdk: flutter
-  path_drawing: ^1.0.1
-  xml: ^6.5.0
-  device_info_plus: ^12.3.0
+  flutter_map: ^8.2.2
+  flutter_material_design_icons: ^3.1.0+7447
+  flutter_native_splash: ^2.4.3
+  flutter_nfc_kit: ^3.3.1
+  flutter_screenutil: ^5.9.3
+  flutter_secure_storage: ^10.0.0
+  flutter_staggered_animations: ^1.1.0
+  flutter_staggered_grid_view: ^0.7.0
+  flutter_sticky_header: ^0.8.0
+  flutter_svg: ^2.0.5
+  flutter_typeahead: ^6.0.0
+  flutter_web_plugins:
+    sdk: flutter
+  formz: ^0.8.0
+  freezed_annotation: 3.1.0
+  friends_repository:
+    path: packages/friends_repository
+  gamification_repository:
+    path: packages/gamification_repository
+  geolocator: ^14.0.2
+  go_router: ^17.1.0
+  home_widget: 0.9.1
+  http: ^1.2.2
+  hugeicons: ^1.1.5
+  hydrated_bloc: ^11.0.0
   image_picker: ^1.1.2
-  video_player: ^2.9.2
-  fluttertoast: ^9.0.0
+  intl: ^0.20.2
+  json_annotation: 4.12.0
+  latlong2: ^0.9.1
+  local_auth_client:
+    path: packages/local_auth_client
+  local_notifications_client:
+    path: packages/local_notifications_client
+  local_notifications_repository:
+    path: packages/local_notifications_repository
+  logger: ^2.0.2+1
+  logging: ^1.1.1
+  lost_and_found_repository:
+    path: packages/lost_and_found_repository
+  material_floating_search_bar_2: ^0.5.0
+  meta: ^1.15.0
+  mime: ^2.0.0
+  mini_apps_repository:
+    path: packages/mini_apps_repository
+  mobile_scanner: ^7.2.0
+  network_location_client:
+    path: packages/network_location_client
+  news_blocks:
+    path: packages/news_blocks
+  news_blocks_ui:
+    path: packages/news_blocks_ui
+  news_repository:
+    path: packages/news_repository
   nfc_pass_client:
     path: packages/nfc_pass_client
   nfc_pass_repository:
     path: packages/nfc_pass_repository
-  watch_connectivity: ^0.2.1
-  app_ui:
-    path: packages/app_ui
-  font_awesome_flutter: ^10.8.0
-  # mini_app:
-  #   path: packages/mini_app
-  yandex_mobileads: ^7.9.0
-  news_blocks:
-    path: api/packages/news_blocks
-  ads_ui:
-    path: packages/ads_ui
-  syncfusion_flutter_calendar: ^32.1.23
-  syncfusion_localizations: ^32.2.3
-  flutter_native_splash: ^2.4.3
-  supabase_flutter: ^2.8.3
-  lost_and_found_repository:
-    path: packages/lost_and_found_repository
-  supabase_authentication_client:
-    path: packages/auth_client/supabase_authentication_client
-  deep_link_client:
-    path: packages/deep_link_client
-  user_repository:
-    path: packages/user_repository
+  # Pinned to 0.2.9: the first Built-in-Kotlin build (no self-applied KGP). Under
+  # AGP 9 with android.builtInKotlin=false, Kotlin is applied to this module by
+  # the kotlin-android hook in android/build.gradle (same as firebase_analytics).
+  # Older 0.2.x self-apply Kotlin 1.7.20, which Gradle 9 rejects.
+  open_filex: ^4.4.0
   package_info_client:
     path: packages/package_info_client
+  package_info_plus: ^10.1.0
+  path: ^1.0.0
+  path_drawing: ^1.0.1
+  path_provider: ^2.1.1
+  permission_client:
+    path: packages/permission_client
+  persistent_storage:
+    path: packages/storage/persistent_storage
+  photo_view: ^0.15.0
+  platform: ^3.0.2
+  preferences_repository:
+    path: packages/preferences_repository
+  qr_flutter: ^4.1.0
+  queue: ^3.0.0
+  responsive_framework: ^1.5.1
+  rxdart: ^0.28.0
+  salomon_bottom_bar: ^3.3.2
+  schedule:
+    path: packages/schedule
+  schedule_exporter_repository:
+    path: packages/schedule_exporter_repository
+  schedule_repository:
+    path: packages/schedule_repository
+  secure_storage:
+    path: packages/storage/secure_storage
+  sentry_dio: 9.20.0
+  sentry_flutter: 9.20.0
+  sentry_logging: 9.20.0
+  service_catalog_repository:
+    path: packages/service_catalog_repository
+  share_launcher:
+    path: packages/share_launcher
+  share_plus: ^13.1.0
+  shared_preferences: ^2.0.11
+  sliver_tools: ^0.2.12
+  smooth_sheets: ^1.0.2
+  stac_bridge:
+    path: packages/stac_bridge
+  story: ^1.1.0
+  stream_transform: ^2.1.1
+  study_groups_repository:
+    path: packages/study_groups_repository
+  supabase_authentication_client:
+    path: packages/auth_client/supabase_authentication_client
+  supabase_flutter: ^2.8.3
+  syncfusion_flutter_calendar: ^32.1.23
+  syncfusion_localizations: ^32.2.3
+  table_calendar: ^3.0.3
+  timezone: ^0.10.0
   token_storage:
     path: packages/auth_client/token_storage
-  formz: ^0.8.0
-  flutter_screenutil: ^5.9.3
-  flutter_staggered_grid_view: ^0.7.0
-  flutter_staggered_animations: ^1.1.0
-  share_plus: ^12.0.1
-  shimmer: ^3.0.0
-  fl_chart: ^1.1.1
-  responsive_framework: ^1.5.1
-  smooth_sheets: ^0.16.0
-  flutter_layout_grid: ^2.0.8
-  skeletonizer: ^2.1.0+1
-  news_blocks_ui:
-    path: packages/news_blocks_ui
+  tutorial_coach_mark: ^1.3.3
+  unicons: any
+  universal_io: ^2.0.0
+  url_launcher: ^6.1.12
+  user_repository:
+    path: packages/user_repository
+  uuid: ^4.5.3
+  very_good_infinite_list: ^0.9.0
+  video_player: ^2.9.2
+  visibility_detector: ^0.4.0+2
+  watch_connectivity: 0.2.9
+  xml: ^6.6.1
+  yandex_mobileads: ^8.0.0
   yx_scope: ^1.1.2
   yx_scope_flutter: ^1.1.2
-  tutorial_coach_mark: ^1.3.3
-
 dependency_overrides:
-  web: ^0.5.1
-  share_plus_platform_interface: ^5.0.0
+  code_assets: 1.2.1
 
+  enough_platform_widgets:
+    git:
+      url: https://github.com/Enough-Software/enough_platform_widgets.git
+      ref: 38f080f758da42dd9e66d49adbba02aa28d9ff7c
+  hooks: 2.0.2
+  web: ^0.5.1
 dev_dependencies:
-  flutter_lints: ^6.0.0
+  bloc_test: ^10.0.0
+  build_runner: 2.15.1
+  build_verify: any
+  flutter_gen_runner: ^5.3.2
+  flutter_launcher_icons: ^0.14.1
   flutter_test:
     sdk: flutter
-  flutter_launcher_icons: ^0.14.1
-  flutter_gen_runner: ^5.3.2
-  freezed: any
-  json_serializable: ^6.7.1
-
-  envied_generator: ^1.1.1
+  freezed: 3.2.5
   go_router_builder: ^4.1.1
-  build_runner: any
-  build_verify: any
-  yx_scope_linter: ^0.2.0
-  custom_lint: ^0.7.3
+  json_serializable: 6.14.0
+  mocktail: ^1.0.5
+  very_good_analysis: 10.3.0
 
-flutter_icons:
-  android: false
+flutter_launcher_icons:
+  android: true
   ios: true
   image_path: "assets/icon.png"
-
+  adaptive_icon_background: "assets/icon_background.png"
+  adaptive_icon_foreground: "assets/icon_foreground.png"
+  adaptive_icon_monochrome: "assets/icon_monochrome.png"
+  min_sdk_android: 21
+  # Adaptive icon: gradient face + white shuriken (the canonical AppNinjaMark).
+  remove_alpha_ios: true
 
 flutter:
   uses-material-design: true

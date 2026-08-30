@@ -8,11 +8,13 @@ resolution: workspace
 dependencies:
   app_ui: any
   cached_network_image: ^3.3.1
+  collection: ^1.19.1
   flutter:
     sdk: flutter
   flutter_html: ^3.0.0
   news_blocks: any
   path_provider_platform_interface: ^2.0.5
+  photo_view: ^0.15.0
   platform: ^3.1.0
   plugin_platform_interface: ^2.1.3
   url_launcher: ^6.1.7
@@ -29,7 +31,7 @@ dev_dependencies:
   mocktail: ^1.0.2
   mocktail_image_network: ^1.0.0
   sqflite_common_ffi: ^2.3.3
-  very_good_analysis: ^10.1.0
+  very_good_analysis: 10.3.0
 flutter:
   uses-material-design: true
   assets:

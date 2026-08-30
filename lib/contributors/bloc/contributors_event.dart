@@ -4,8 +4,8 @@ abstract class ContributorsEvent extends Equatable {
   const ContributorsEvent();
 }
 
-class ContributorsLoadRequest extends ContributorsEvent {
-  const ContributorsLoadRequest();
+class ContributorsRequested extends ContributorsEvent {
+  const ContributorsRequested();
 
   @override
   List<Object?> get props => [];

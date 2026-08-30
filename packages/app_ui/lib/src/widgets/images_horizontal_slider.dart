@@ -1,7 +1,9 @@
 import 'dart:async';
+import 'dart:developer';
 
 import 'package:app_ui/app_ui.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:open_filex/open_filex.dart';
@@ -24,7 +26,9 @@ class ImagesHorizontalSlider extends StatelessWidget {
         physics: const BouncingScrollPhysics(),
         padding: const EdgeInsets.symmetric(horizontal: 24),
         itemBuilder: (context, index) {
-          return GalleryImageItem(imageUrl: images[index + 1]);
+          final imageUrl = images.elementAtOrNull(index + 1);
+          if (imageUrl == null) return const SizedBox.shrink();
+          return GalleryImageItem(imageUrl: imageUrl);
         },
       ),
     );
@@ -52,10 +56,19 @@ class _GalleryImageItemState extends State<GalleryImageItem> {
 
       final file = await DefaultCacheManager().getSingleFile(widget.imageUrl);
       await OpenFilex.open(file.path, type: 'image/jpeg');
-    } catch (e) {
-      if (mounted) {
+    } on Exception catch (e, st) {
+      log(
+        'Failed to open image in system gallery',
+        error: e,
+        stackTrace: st,
+        name: 'GalleryImageItem',
+      );
+      if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Не удалось открыть изображение: $e'), backgroundColor: Colors.red),
+          SnackBar(
+            content: Text('Не удалось открыть изображение: $e'),
+            backgroundColor: Colors.red,
+          ),
         );
       }
     } finally {
@@ -69,16 +82,22 @@ class _GalleryImageItemState extends State<GalleryImageItem> {
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).extension<AppColors>()!;
+    final colors = Theme.of(context).colors;
 
-    return GestureDetector(
+    return AppPressable(
       onTap: () => _openImageInSystemGallery(context),
       child: Container(
         width: 160,
         margin: const EdgeInsets.only(right: 12),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
-          boxShadow: [BoxShadow(color: colors.primary.withOpacity(0.05), blurRadius: 8, offset: const Offset(0, 2))],
+          boxShadow: [
+            BoxShadow(
+              color: colors.primary.withValues(alpha: 0.05),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
         child: Stack(
           children: [
@@ -98,7 +117,12 @@ class _GalleryImageItemState extends State<GalleryImageItem> {
                 ),
                 errorWidget: (context, url, error) => ColoredBox(
                   color: colors.background03,
-                  child: Center(child: Icon(Icons.broken_image_rounded, color: colors.deactive)),
+                  child: Center(
+                    child: Icon(
+                      Icons.broken_image_rounded,
+                      color: colors.deactive,
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -107,7 +131,7 @@ class _GalleryImageItemState extends State<GalleryImageItem> {
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(16),
                   child: ColoredBox(
-                    color: colors.background03.withOpacity(0.7),
+                    color: colors.background03.withValues(alpha: 0.7),
                     child: Center(
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
@@ -123,7 +147,7 @@ class _GalleryImageItemState extends State<GalleryImageItem> {
                           const SizedBox(height: 8),
                           Text(
                             'Открытие...',
-                            style: AppTextStyle.body.copyWith(
+                            style: AppText.body.copyWith(
                               color: colors.white,
                               fontWeight: FontWeight.bold,
                             ),

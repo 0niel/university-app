@@ -1,0 +1,28 @@
+#!/usr/bin/env sh
+set -eu
+
+if command -v fvm >/dev/null 2>&1; then
+  fvm dart tool/verify_private_native_boundary.dart
+else
+  dart tool/verify_private_native_boundary.dart
+fi
+
+zero=0000000000000000000000000000000000000000
+
+while read -r local_ref local_sha remote_ref remote_sha; do
+  [ "$local_sha" = "$zero" ] && continue
+  if [ "$remote_sha" = "$zero" ]; then
+    range="$local_sha"
+  else
+    range="$remote_sha..$local_sha"
+  fi
+  if git log --format= --name-only "$range" -- \
+    android/app/src/main/kotlin/ninja/mirea/mireaapp/DigitalPassHostApduService.kt \
+    android/app/src/main/kotlin/ninja/mirea/mireaapp/DigitalPassStore.kt \
+    android/app/src/main/kotlin/ninja/mirea/mireaapp/Utils.kt \
+    android/app/src/main/res/xml/apduservice.xml \
+    android/private | grep -q .; then
+    echo "Push blocked: private NFC sources are present in commit history." >&2
+    exit 1
+  fi
+done

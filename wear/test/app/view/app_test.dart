@@ -1,3 +1,4 @@
+import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:wear/ambient_mode/ambient_mode.dart';
@@ -12,46 +13,45 @@ void main() {
       AmbientModeListener.instance.value = false;
     });
 
-    testWidgets('renders CounterPage', (tester) async {
+    testWidgets('navigates to NfcPassPage', (tester) async {
       await tester.pumpWidget(const App());
-      expect(find.byType(CounterPage), findsOneWidget);
+
+      await tester.drag(find.byType(PageView), const Offset(-500, 0));
+      await tester.pump(const Duration(milliseconds: 500));
+
+      expect(find.byType(NfcPassPage), findsOneWidget);
     });
 
-    group('renders the correct color scheme', () {
+    group('updates ambient colors', () {
       testWidgets('on ambient mode updates', (tester) async {
         await tester.pumpWidget(const App());
 
-        MaterialApp getMaterialApp() {
-          return find.byType(MaterialApp).evaluate().first.widget as MaterialApp;
+        ThemeData getTheme() {
+          final [materialAppElement] = find
+              .byType(MaterialApp)
+              .evaluate()
+              .toList();
+          final materialApp = materialAppElement.widget as MaterialApp;
+          return materialApp.theme!;
         }
 
-        expect(
-          getMaterialApp().theme?.colorScheme,
-          const ColorScheme.dark(
-            primary: Color(0xFF00B5FF),
-          ),
-        );
+        AppColors getColors() {
+          return getTheme().extension<AppColors>()!;
+        }
+
+        expect(getColors().primary, AppColors.dark.primary);
 
         await simulatePlatformCall('ambient_mode', 'onUpdateAmbient');
         await tester.pumpAndSettle();
 
-        expect(
-          getMaterialApp().theme?.colorScheme,
-          const ColorScheme.dark(
-            primary: Colors.white24,
-            onSurface: Colors.white10,
-          ),
-        );
+        expect(getColors().primary, Colors.white24);
+        expect(getColors().active, Colors.white70);
+        expect(getColors().deactive, Colors.white38);
 
         await simulatePlatformCall('ambient_mode', 'onExitAmbient');
         await tester.pumpAndSettle();
 
-        expect(
-          getMaterialApp().theme?.colorScheme,
-          const ColorScheme.dark(
-            primary: Color(0xFF00B5FF),
-          ),
-        );
+        expect(getColors(), AppColors.dark);
       });
     });
   });

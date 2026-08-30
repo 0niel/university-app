@@ -1,0 +1,2 @@
+-- Deferred to 20260611200001_add_team_kind_applications_and_app_push.sql so
+-- the base mentorship and team tables exist on a fresh database.
