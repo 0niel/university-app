@@ -31,6 +31,24 @@ void main() {
     expect(capturedContext.ninja, isA<NinjaColors>());
     expect(capturedContext.ninja.ninjaOnScarlet, isA<Color>());
     expect(NinjaText.title.fontFamily, NinjaText.family);
+    expect(
+      [
+        NinjaText.display,
+        NinjaText.title,
+        NinjaText.appBarTitle,
+        NinjaText.headline,
+        NinjaText.dialogTitle,
+        NinjaText.body,
+        NinjaText.subtext,
+        NinjaText.microLabel,
+        NinjaText.badge,
+        NinjaText.button,
+        NinjaText.buttonLarge,
+        NinjaText.buttonSmall,
+        NinjaText.helper,
+      ].map((style) => style.decoration),
+      everyElement(TextDecoration.none),
+    );
     expect(NinjaRadius.card, 24);
     expect(NinjaRadius.button, NinjaRadius.pill);
     expect(NinjaMetrics.minTouchTarget, 44);

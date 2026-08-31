@@ -1,14 +1,11 @@
 import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart' show debugPaintBaselinesEnabled;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   final colors = NinjaColors.light();
   const duration = Duration(seconds: 1);
   const settle = Duration(milliseconds: 300);
-
-  tearDown(() => debugPaintBaselinesEnabled = false);
 
   Widget host(void Function(BuildContext context) onReady) => MaterialApp(
         theme: NinjaTheme.light(),
@@ -100,18 +97,37 @@ void main() {
     expect(find.text('Второй'), findsNothing);
   });
 
-  testWidgets('host disables baseline debug paint before showing a toast', (
+  testWidgets('hosted toast clears the outer fallback text decoration', (
     tester,
   ) async {
+    late BuildContext toastContext;
     await tester.pumpWidget(
-      host((context) => showNinjaToast(context, message: 'Готово')),
+      MaterialApp(
+        theme: NinjaTheme.light(),
+        builder: (context, child) => DefaultTextStyle(
+          style: const TextStyle(
+            decoration: TextDecoration.underline,
+            decorationColor: Colors.yellow,
+            decorationStyle: TextDecorationStyle.double,
+          ),
+          child: NinjaToastHost(child: child!),
+        ),
+        home: Builder(
+          builder: (context) {
+            toastContext = context;
+            return const Scaffold(body: SizedBox());
+          },
+        ),
+      ),
     );
-    debugPaintBaselinesEnabled = true;
 
-    await tester.tap(find.text('запустить'));
+    showNinjaToast(toastContext, message: 'Готово');
     await tester.pump();
 
-    expect(debugPaintBaselinesEnabled, isFalse);
+    final finder = find.text('Готово');
+    final text = tester.widget<Text>(finder);
+    final inherited = DefaultTextStyle.of(tester.element(finder)).style;
+    expect(inherited.merge(text.style).decoration, TextDecoration.none);
   });
 
   testWidgets('action dismisses the toast and fires the callback', (

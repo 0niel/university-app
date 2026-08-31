@@ -28,16 +28,16 @@ class _LoginPageViewState extends State<_LoginPageView> {
         listenWhen: (previous, current) => previous.status != current.status,
         listener: (context, state) {
           if (state.status.isFailure) {
-            final fallback = switch (state.errorKind) {
+            final message = switch (state.errorKind) {
               LoginErrorKind.invalidCredentials =>
                 context.l10n.authInvalidCredentials,
               LoginErrorKind.guestUnavailable =>
                 context.l10n.authGuestUnavailable,
-              null => context.l10n.loginGenericError,
+              LoginErrorKind.generic || null => context.l10n.loginGenericError,
             };
             showNinjaToast(
               context,
-              message: state.errorMessage ?? fallback,
+              message: message,
               showCheck: false,
             );
           }

@@ -21,7 +21,15 @@ class MyLocationMarker extends StatelessWidget {
               alignment: Alignment.center,
               clipBehavior: .none,
               children: [
-                if (!isGhost) _PulseRing(color: colors.brand),
+                if (!isGhost)
+                  Container(
+                    width: 54,
+                    height: 54,
+                    decoration: BoxDecoration(
+                      color: colors.brand.withValues(alpha: 0.18),
+                      shape: .circle,
+                    ),
+                  ),
                 Container(
                   width: 44,
                   height: 44,

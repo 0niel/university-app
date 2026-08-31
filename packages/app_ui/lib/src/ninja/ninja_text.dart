@@ -10,6 +10,7 @@ abstract final class NinjaText {
     height: 1.12,
     fontWeight: FontWeight.w700,
     letterSpacing: -0.5,
+    decoration: TextDecoration.none,
   );
 
   static const title = TextStyle(
@@ -18,6 +19,7 @@ abstract final class NinjaText {
     height: 1.2,
     fontWeight: FontWeight.w700,
     letterSpacing: -0.3,
+    decoration: TextDecoration.none,
   );
 
   static const appBarTitle = TextStyle(
@@ -26,6 +28,7 @@ abstract final class NinjaText {
     height: 1.15,
     fontWeight: FontWeight.w700,
     letterSpacing: -0.3,
+    decoration: TextDecoration.none,
   );
 
   static const headline = TextStyle(
@@ -33,6 +36,7 @@ abstract final class NinjaText {
     fontSize: 15,
     height: 1.25,
     fontWeight: FontWeight.w600,
+    decoration: TextDecoration.none,
   );
 
   static const dialogTitle = TextStyle(
@@ -40,6 +44,7 @@ abstract final class NinjaText {
     fontSize: 17,
     height: 1.2,
     fontWeight: FontWeight.w700,
+    decoration: TextDecoration.none,
   );
 
   static const body = TextStyle(
@@ -47,6 +52,7 @@ abstract final class NinjaText {
     fontSize: 13.5,
     height: 1.4,
     fontWeight: FontWeight.w500,
+    decoration: TextDecoration.none,
   );
 
   static const subtext = TextStyle(
@@ -54,6 +60,7 @@ abstract final class NinjaText {
     fontSize: 12.5,
     height: 1.35,
     fontWeight: FontWeight.w500,
+    decoration: TextDecoration.none,
   );
 
   static const microLabel = TextStyle(
@@ -61,6 +68,7 @@ abstract final class NinjaText {
     fontSize: 11.5,
     height: 1.25,
     fontWeight: FontWeight.w600,
+    decoration: TextDecoration.none,
   );
 
   static const badge = TextStyle(
@@ -68,6 +76,7 @@ abstract final class NinjaText {
     fontSize: 10.5,
     height: 1.2,
     fontWeight: FontWeight.w600,
+    decoration: TextDecoration.none,
   );
 
   static const button = TextStyle(
@@ -75,6 +84,7 @@ abstract final class NinjaText {
     fontSize: 13.5,
     height: 1.2,
     fontWeight: FontWeight.w600,
+    decoration: TextDecoration.none,
   );
 
   static const buttonLarge = TextStyle(
@@ -82,6 +92,7 @@ abstract final class NinjaText {
     fontSize: 15,
     height: 1.2,
     fontWeight: FontWeight.w600,
+    decoration: TextDecoration.none,
   );
 
   static const buttonSmall = TextStyle(
@@ -89,6 +100,7 @@ abstract final class NinjaText {
     fontSize: 12,
     height: 1.2,
     fontWeight: FontWeight.w600,
+    decoration: TextDecoration.none,
   );
 
   static const helper = TextStyle(
@@ -96,6 +108,7 @@ abstract final class NinjaText {
     fontSize: 11.5,
     height: 1.3,
     fontWeight: FontWeight.w500,
+    decoration: TextDecoration.none,
   );
 
   static TextStyle tabular(TextStyle base) => base.copyWith(

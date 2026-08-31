@@ -4,19 +4,11 @@ import 'dart:ui' show clampDouble;
 
 import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart' show debugPaintBaselinesEnabled;
 import 'package:go_router/go_router.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:rtu_mirea_app/tour/app_tour_anchors.dart';
 import 'package:rtu_mirea_app/tour/app_tour_controller.dart';
 import 'package:rtu_mirea_app/tour/model/app_tour_step.dart';
-
-void _disableTextDebugPaint() {
-  assert(() {
-    debugPaintBaselinesEnabled = false;
-    return true;
-  }(), 'Text baseline debug paint must be disabled.');
-}
 
 class AppTourOverlay extends StatefulWidget {
   const AppTourOverlay({
@@ -49,7 +41,6 @@ class _AppTourOverlayState extends State<AppTourOverlay>
   @override
   void initState() {
     super.initState();
-    _disableTextDebugPaint();
     _isTourActive = _controller.isActive;
     _pulse = AnimationController(vsync: this, duration: _pulseDuration);
     _controller
@@ -90,7 +81,6 @@ class _AppTourOverlayState extends State<AppTourOverlay>
 
   void _onTourChanged() {
     if (!mounted) return;
-    _disableTextDebugPaint();
     _syncPulse();
     setState(() => _isTourActive = _controller.isActive);
   }

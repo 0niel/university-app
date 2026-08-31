@@ -173,7 +173,6 @@ class _MonthCalendarHeader extends StatelessWidget {
               ],
             ),
           ),
-          Container(height: 1, color: colors.lineSoft),
         ],
       ),
     );

@@ -15,4 +15,4 @@ abstract class LoginState with _$LoginState {
   const LoginState._();
 }
 
-enum LoginErrorKind { invalidCredentials, guestUnavailable }
+enum LoginErrorKind { invalidCredentials, guestUnavailable, generic }

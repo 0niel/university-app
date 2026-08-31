@@ -27,6 +27,7 @@ class _FriendsMapViewState extends State<FriendsMapView>
   final _mapController = MapController();
   final _panelController = DraggableScrollableController();
   final ValueNotifier<double> _panelExtent = ValueNotifier(0.28);
+  late final TileProvider _tileProvider = AppMapTiles.createTileProvider();
   late final FriendsMapCamera _camera = FriendsMapCamera(
     _mapController,
     vsync: this,
@@ -99,7 +100,10 @@ class _FriendsMapViewState extends State<FriendsMapView>
               ),
             ),
             children: [
-              AppMapTiles.tileLayer(context),
+              AppMapTiles.tileLayer(
+                context,
+                tileProvider: _tileProvider,
+              ),
               FriendsMarkerLayer(
                 friends: friendsWithLocation,
                 myLatitude: state.hasMyLocation ? state.myLatitude : null,
@@ -149,7 +153,6 @@ class _FriendsMapViewState extends State<FriendsMapView>
             friends: state.friends,
             myLatitude: state.myLatitude,
             myLongitude: state.myLongitude,
-            attribution: AppMapTiles.attribution,
             loading: loading,
             failed: failed,
             onRetry: () => unawaited(context.read<FriendsMapCubit>().load()),
@@ -162,6 +165,7 @@ class _FriendsMapViewState extends State<FriendsMapView>
             },
             onAddFriend: () => _showAddFriend(context),
           ),
+          FriendsMapAttribution(panelExtent: _panelExtent),
         ],
       ),
     );

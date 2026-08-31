@@ -7,6 +7,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:friends_repository/friends_repository.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:rtu_mirea_app/friends/widgets/friend_marker.dart';
+import 'package:rtu_mirea_app/l10n/l10n.dart';
 
 LatLng? friendPoint(Friend friend) {
   final lat = friend.latitude;
@@ -41,10 +42,7 @@ class _FriendsMarkerLayerState extends State<FriendsMarkerLayer>
     with SingleTickerProviderStateMixin {
   static const _glide = Duration(milliseconds: 650);
 
-  late final AnimationController _controller = AnimationController(
-    vsync: this,
-    duration: _glide,
-  )..addListener(_onTick);
+  late final AnimationController _controller;
 
   final _displayed = <String, LatLng>{};
   final _from = <String, LatLng>{};
@@ -53,6 +51,8 @@ class _FriendsMarkerLayerState extends State<FriendsMarkerLayer>
   @override
   void initState() {
     super.initState();
+    _controller = AnimationController(vsync: this, duration: _glide)
+      ..addListener(_onTick);
     for (final friend in widget.friends) {
       final point = _pointOf(friend);
       if (point != null) _displayed[friend.userId] = point;
@@ -135,7 +135,9 @@ class _FriendsMarkerLayerState extends State<FriendsMarkerLayer>
             width: 96,
             height: 96,
             alignment: .center,
-            child: MyLocationMarker(isGhost: widget.isGhost),
+            child: RepaintBoundary(
+              child: MyLocationMarker(isGhost: widget.isGhost),
+            ),
           ),
         for (final friend in widget.friends)
           if (_displayed[friend.userId] case final point?)
@@ -148,8 +150,11 @@ class _FriendsMarkerLayerState extends State<FriendsMarkerLayer>
                 key: ValueKey(friend.userId),
                 behavior: HitTestBehavior.deferToChild,
                 onTap: () => widget.onFriendTap(friend),
-                semanticsLabel: friend.fullName,
-                child: FriendMarker(friend: friend),
+                semanticsLabel: friendMarkerSemanticsLabel(
+                  friend,
+                  context.l10n,
+                ),
+                child: RepaintBoundary(child: FriendMarker(friend: friend)),
               ),
             ),
       ],

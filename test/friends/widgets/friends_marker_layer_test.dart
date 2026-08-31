@@ -1,5 +1,6 @@
 import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:friends_repository/friends_repository.dart';
 import 'package:latlong2/latlong.dart';
@@ -7,15 +8,20 @@ import 'package:rtu_mirea_app/friends/widgets/friend_marker.dart';
 import 'package:rtu_mirea_app/friends/widgets/friends_marker_layer.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 
-Friend _friendAt({double? latitude, double? longitude}) => Friend(
+Friend _friendAt({
+  double? latitude,
+  double? longitude,
+  DateTime? locationUpdatedAt,
+}) => Friend(
   friendshipId: 'f1',
   userId: 'u1',
   fullName: 'Наруто Узумаки',
   latitude: latitude,
   longitude: longitude,
+  locationUpdatedAt: locationUpdatedAt,
 );
 
-Widget _wrap(Widget child) {
+Widget _wrap(Widget child, {bool disableAnimations = true}) {
   return MaterialApp(
     theme: AppTheme.darkTheme,
     locale: const Locale('ru'),
@@ -23,7 +29,9 @@ Widget _wrap(Widget child) {
     supportedLocales: AppLocalizations.supportedLocales,
     home: Builder(
       builder: (context) => MediaQuery(
-        data: MediaQuery.of(context).copyWith(disableAnimations: true),
+        data: MediaQuery.of(
+          context,
+        ).copyWith(disableAnimations: disableAnimations),
         child: Scaffold(body: Center(child: child)),
       ),
     ),
@@ -99,6 +107,63 @@ void main() {
 
       expect(find.text('Ты'), findsOneWidget);
       expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('live markers do not run perpetual animations', (tester) async {
+      await tester.pumpWidget(
+        _wrap(
+          FriendMarker(
+            friend: _friendAt(
+              latitude: 55.67,
+              longitude: 37.48,
+              locationUpdatedAt: DateTime.now(),
+            ),
+          ),
+          disableAnimations: false,
+        ),
+      );
+      await tester.pump(const Duration(milliseconds: 500));
+
+      expect(
+        find.descendant(
+          of: find.byType(FriendMarker),
+          matching: find.byType(AnimatedBuilder),
+        ),
+        findsNothing,
+      );
+    });
+
+    testWidgets('marker semantics include localized freshness', (tester) async {
+      final friend = _friendAt(
+        latitude: 55.67,
+        longitude: 37.48,
+        locationUpdatedAt: DateTime.now(),
+      );
+      await tester.pumpWidget(
+        _wrap(
+          FlutterMap(
+            options: const MapOptions(
+              initialCenter: LatLng(55.67, 37.48),
+              initialZoom: 15,
+            ),
+            children: [
+              FriendsMarkerLayer(
+                friends: [friend],
+                onFriendTap: (_) {},
+              ),
+            ],
+          ),
+        ),
+      );
+      await tester.pump();
+
+      expect(
+        find.bySemanticsLabel('Наруто Узумаки, сейчас'),
+        findsOneWidget,
+      );
+      await tester.pump(const Duration(milliseconds: 300));
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pump();
     });
   });
 }

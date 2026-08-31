@@ -1,5 +1,6 @@
 export 'friend_marker.dart';
 export 'friends_circle_button.dart';
+export 'friends_map_attribution.dart';
 export 'friends_map_controls.dart';
 export 'friends_map_status_pill.dart';
 export 'friends_map_top_bar.dart';
