@@ -2,7 +2,7 @@ name: rtu_mirea_app
 description: Mobile application for students of RTU MIREA
 publish_to: 'none'
 
-version: 5.1.0+152
+version: 5.2.0+153
 
 environment:
   sdk: ^3.12.0
@@ -300,7 +300,6 @@ flutter_launcher_icons:
   adaptive_icon_foreground: "assets/icon_foreground.png"
   adaptive_icon_monochrome: "assets/icon_monochrome.png"
   min_sdk_android: 21
-  # Adaptive icon: gradient face + white shuriken (the canonical AppNinjaMark).
   remove_alpha_ios: true
 
 flutter:

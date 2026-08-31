@@ -14,7 +14,7 @@ void main() {
     expect(workflow, contains("workflow_run.conclusion == 'success'"));
     expect(workflow, contains("workflow_run.event == 'push'"));
     expect(workflow, contains('cancel-in-progress: false'));
-    expect(workflow, contains('shorebirdtech/shorebird-release@'));
+    expect(workflow, contains('shorebird release android'));
     expect(workflow, contains('--artifact apk'));
     expectProductionTargetBeforeSeparator(
       workflow,
@@ -27,6 +27,13 @@ void main() {
     expect(workflow, contains(r'gh release create "$TAG"'));
     expect(workflow, contains('--prerelease'));
     expect(workflow, contains('if-no-files-found: error'));
+    expect(
+      workflow,
+      contains('5ac7f9a9a5c4a5e66a958e608da0f73e34a3d6bb'),
+    );
+    expect(workflow, contains(r'git -C "$shorebird_dir" rev-parse HEAD'));
+    expect(workflow, isNot(contains('shorebirdtech/setup-shorebird@')));
+    expect(workflow, isNot(contains('shorebirdtech/shorebird-release@')));
   });
 
   test('manual iOS Shorebird releases use the production entrypoint', () {
@@ -110,11 +117,20 @@ void expectProductionTargetBeforeSeparator(
     stepEnd == -1 ? workflow.length : stepEnd,
   );
   const argsMarker = '          args: >-\n';
+  const runMarker = '        run: |\n';
   final argsStart = step.indexOf(argsMarker);
-  expect(argsStart, isNonNegative, reason: 'Missing args for $stepName');
+  final runStart = step.indexOf(runMarker);
+  expect(
+    argsStart >= 0 || runStart >= 0,
+    isTrue,
+    reason: 'Missing command for $stepName',
+  );
+  final commandStart = argsStart >= 0
+      ? argsStart + argsMarker.length
+      : runStart + runMarker.length;
 
   final tokens = step
-      .substring(argsStart + argsMarker.length)
+      .substring(commandStart)
       .split(RegExp(r'\s+'))
       .where((token) => token.isNotEmpty)
       .toList();
