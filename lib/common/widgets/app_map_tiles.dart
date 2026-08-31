@@ -62,7 +62,7 @@ class AppMapTiles {
     MapCachingProvider? cachingProvider,
   }) {
     return NetworkTileProvider(
-      headers: const {'User-Agent': _userAgent},
+      headers: {'User-Agent': _userAgent},
       silenceExceptions: true,
       attemptDecodeOfHttpErrorResponses: false,
       cachingProvider:

@@ -26,7 +26,7 @@ void main() {
 
     group('getContributors', () {
       test('returns list of contributors', () async {
-        const path = '/repos/Oniel/university-app/contributors';
+        const path = '/repos/0niel/university-app/contributors';
 
         final response = http.Response(
           jsonEncode([
@@ -54,7 +54,14 @@ void main() {
 
         verify(
           () => httpClient.get(
-            any(that: hasPath(path)),
+            any(
+              that: allOf(
+                hasPath(path),
+                predicate<Uri>(
+                  (uri) => uri.queryParameters['per_page'] == '100',
+                ),
+              ),
+            ),
             headers: any(named: 'headers'),
           ),
         ).called(1);

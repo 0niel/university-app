@@ -16,6 +16,10 @@ abstract class StudyMaterial with _$StudyMaterial {
     @Default(0) int price,
     @Default(0) int pages,
     @Default('') String authorName,
+    @Default('') String fileName,
+    @Default('') String mimeType,
+    @Default(0) int fileSize,
+    @Default(false) bool hasFile,
     @Default(false) bool isMine,
     @JsonKey(fromJson: dateTimeFromJson, toJson: dateTimeToJson)
     DateTime? createdAt,

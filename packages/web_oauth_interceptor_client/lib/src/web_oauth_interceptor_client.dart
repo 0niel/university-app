@@ -125,6 +125,7 @@ class WebOAuthInterceptorClient extends InAppBrowser {
   @override
   void onReceivedError(WebResourceRequest request, WebResourceError error) {
     super.onReceivedError(request, error);
+    if (request.isForMainFrame == false) return;
     _reportError('Load error (${error.type}).');
   }
 
@@ -134,6 +135,7 @@ class WebOAuthInterceptorClient extends InAppBrowser {
     WebResourceResponse errorResponse,
   ) {
     super.onReceivedHttpError(request, errorResponse);
+    if (request.isForMainFrame == false) return;
     final statusCode = errorResponse.statusCode;
     _reportError(
       statusCode == null ? 'HTTP error.' : 'HTTP error (status $statusCode).',

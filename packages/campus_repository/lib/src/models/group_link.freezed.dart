@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$GroupLink {
 
-@JsonKey(defaultValue: '') String get id;@JsonKey(defaultValue: '') String get title;@JsonKey(defaultValue: '') String get url; String get emoji; String get kind; String get addedBy; bool get isMine;
+ String get id; String get title; String get url; String get emoji; String get kind; String get addedBy; bool get isMine;
 /// Create a copy of GroupLink
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -48,7 +48,7 @@ abstract mixin class $GroupLinkCopyWith<$Res>  {
   factory $GroupLinkCopyWith(GroupLink value, $Res Function(GroupLink) _then) = _$GroupLinkCopyWithImpl;
 @useResult
 $Res call({
-@JsonKey(defaultValue: '') String id,@JsonKey(defaultValue: '') String title,@JsonKey(defaultValue: '') String url, String emoji, String kind, String addedBy, bool isMine
+ String id, String title, String url, String emoji, String kind, String addedBy, bool isMine
 });
 
 
@@ -159,7 +159,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(defaultValue: '')  String id, @JsonKey(defaultValue: '')  String title, @JsonKey(defaultValue: '')  String url,  String emoji,  String kind,  String addedBy,  bool isMine)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String title,  String url,  String emoji,  String kind,  String addedBy,  bool isMine)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _GroupLink() when $default != null:
 return $default(_that.id,_that.title,_that.url,_that.emoji,_that.kind,_that.addedBy,_that.isMine);case _:
@@ -180,7 +180,7 @@ return $default(_that.id,_that.title,_that.url,_that.emoji,_that.kind,_that.adde
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(defaultValue: '')  String id, @JsonKey(defaultValue: '')  String title, @JsonKey(defaultValue: '')  String url,  String emoji,  String kind,  String addedBy,  bool isMine)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String title,  String url,  String emoji,  String kind,  String addedBy,  bool isMine)  $default,) {final _that = this;
 switch (_that) {
 case _GroupLink():
 return $default(_that.id,_that.title,_that.url,_that.emoji,_that.kind,_that.addedBy,_that.isMine);case _:
@@ -200,7 +200,7 @@ return $default(_that.id,_that.title,_that.url,_that.emoji,_that.kind,_that.adde
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(defaultValue: '')  String id, @JsonKey(defaultValue: '')  String title, @JsonKey(defaultValue: '')  String url,  String emoji,  String kind,  String addedBy,  bool isMine)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String title,  String url,  String emoji,  String kind,  String addedBy,  bool isMine)?  $default,) {final _that = this;
 switch (_that) {
 case _GroupLink() when $default != null:
 return $default(_that.id,_that.title,_that.url,_that.emoji,_that.kind,_that.addedBy,_that.isMine);case _:
@@ -215,12 +215,12 @@ return $default(_that.id,_that.title,_that.url,_that.emoji,_that.kind,_that.adde
 @JsonSerializable()
 
 class _GroupLink extends GroupLink {
-  const _GroupLink({@JsonKey(defaultValue: '') required this.id, @JsonKey(defaultValue: '') required this.title, @JsonKey(defaultValue: '') required this.url, this.emoji = '🔗', this.kind = 'link', this.addedBy = '', this.isMine = false}): super._();
+  const _GroupLink({required this.id, required this.title, required this.url, this.emoji = '🔗', this.kind = 'link', this.addedBy = '', this.isMine = false}): super._();
   factory _GroupLink.fromJson(Map<String, dynamic> json) => _$GroupLinkFromJson(json);
 
-@override@JsonKey(defaultValue: '') final  String id;
-@override@JsonKey(defaultValue: '') final  String title;
-@override@JsonKey(defaultValue: '') final  String url;
+@override final  String id;
+@override final  String title;
+@override final  String url;
 @override@JsonKey() final  String emoji;
 @override@JsonKey() final  String kind;
 @override@JsonKey() final  String addedBy;
@@ -259,7 +259,7 @@ abstract mixin class _$GroupLinkCopyWith<$Res> implements $GroupLinkCopyWith<$Re
   factory _$GroupLinkCopyWith(_GroupLink value, $Res Function(_GroupLink) _then) = __$GroupLinkCopyWithImpl;
 @override @useResult
 $Res call({
-@JsonKey(defaultValue: '') String id,@JsonKey(defaultValue: '') String title,@JsonKey(defaultValue: '') String url, String emoji, String kind, String addedBy, bool isMine
+ String id, String title, String url, String emoji, String kind, String addedBy, bool isMine
 });
 
 

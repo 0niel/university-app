@@ -38,36 +38,58 @@ class _AllCommunitiesViewState extends State<AllCommunitiesView> {
     return Scaffold(
       backgroundColor: colors.canvas,
       body: SafeArea(
-        child: Column(
-          crossAxisAlignment: .start,
+        child: Stack(
           children: [
-            NinjaCommunityCatalogHeader(
-              searchController: _searchController,
-              onChanged: context.read<CommunityCatalogCubit>().queryChanged,
-            ),
-            const NinjaCommunitySectionFilters(),
-            Expanded(
-              child: BlocBuilder<CommunityCatalogCubit, CommunityCatalogState>(
-                builder: (context, state) => NinjaStateSwitcher(
-                  child: switch (state.status) {
-                    .initial || .loading => const NinjaCommunityCatalogSkeleton(
-                      key: ValueKey('catalog-loading'),
-                    ),
-                    .failure => NinjaCommunityCatalogError(
-                      key: const ValueKey('catalog-failure'),
-                      onRetry: () => unawaited(_refresh()),
-                    ),
-                    .success => NinjaCommunityCatalogContent(
-                      key: ValueKey(
-                        'catalog-${state.selectedSectionKey ?? 'all'}',
+            RefreshIndicator(
+              color: colors.ink,
+              backgroundColor: colors.canvas,
+              onRefresh: _refresh,
+              child: CustomScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                slivers: [
+                  const NinjaCommunityCatalogHeader(),
+                  NinjaCommunityCatalogSearchHeader(
+                    searchController: _searchController,
+                    onChanged: context
+                        .read<CommunityCatalogCubit>()
+                        .queryChanged,
+                  ),
+                  BlocBuilder<CommunityCatalogCubit, CommunityCatalogState>(
+                    builder: (context, state) => switch (state.status) {
+                      .initial || .loading => const SliverFillRemaining(
+                        child: NinjaCommunityCatalogSkeleton(
+                          key: ValueKey('catalog-loading'),
+                        ),
                       ),
-                      state: state,
-                      onRefresh: _refresh,
-                      onReset: _resetFilters,
-                    ),
-                  },
-                ),
+                      .failure => SliverFillRemaining(
+                        hasScrollBody: false,
+                        child: NinjaCommunityCatalogError(
+                          key: const ValueKey('catalog-failure'),
+                          onRetry: () => unawaited(_refresh()),
+                        ),
+                      ),
+                      .success => NinjaCommunityCatalogContent(
+                        key: ValueKey(
+                          'catalog-${state.selectedSectionKey ?? 'all'}',
+                        ),
+                        state: state,
+                        onReset: _resetFilters,
+                      ),
+                    },
+                  ),
+                ],
               ),
+            ),
+            BlocSelector<CommunityCatalogCubit, CommunityCatalogState, bool>(
+              selector: (state) => state.isRefreshing,
+              builder: (context, isRefreshing) => isRefreshing
+                  ? const Positioned(
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      child: NinjaProgressBar(value: 1, tone: .ink, height: 2),
+                    )
+                  : const SizedBox.shrink(),
             ),
           ],
         ),

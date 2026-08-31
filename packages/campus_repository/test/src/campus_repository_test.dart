@@ -88,12 +88,14 @@ void main() {
   test('removes an uploaded file when material creation fails', () async {
     var uploaded = false;
     var removed = false;
+    var uploadPath = '';
     final client = MockClient((request) async {
       final path = request.url.path;
       if (request.method == 'POST' && path.contains('/storage/v1/object/')) {
         uploaded = true;
+        uploadPath = path;
         return http.Response(
-          jsonEncode({'Key': 'lesson-materials/user/bank/note.pdf'}),
+          jsonEncode({'Key': path}),
           200,
           request: request,
         );
@@ -137,6 +139,76 @@ void main() {
 
     expect(uploaded, isTrue);
     expect(removed, isTrue);
+    expect(uploadPath, startsWith('/storage/v1/object/lesson-materials/bank/'));
+    expect(uploadPath, isNot(contains('user-')));
+  });
+
+  test('rejects fileless material creation before a network request', () async {
+    var called = false;
+    final repository = _repository(
+      MockClient((request) async {
+        called = true;
+        return http.Response('not called', 500, request: request);
+      }),
+    );
+
+    await expectLater(
+      repository.createPublicMaterial(title: 'Notes', subjectName: 'Math'),
+      throwsArgumentError,
+    );
+    expect(called, isFalse);
+  });
+
+  test('creates a signed URL for an attached public material', () async {
+    final client = MockClient((request) async {
+      if (request.url.path.endsWith('/rest/v1/rpc/access_public_material')) {
+        expect(jsonDecode(request.body), {'p_id': 'material-1'});
+        return http.Response(
+          jsonEncode({'filePath': 'bank/material.pdf'}),
+          200,
+          request: request,
+          headers: {'content-type': 'application/json'},
+        );
+      }
+      expect(
+        request.url.path,
+        '/storage/v1/object/sign/lesson-materials/bank/material.pdf',
+      );
+      return http.Response(
+        jsonEncode({'signedURL': '/object/sign/lesson-materials/note?token=x'}),
+        200,
+        request: request,
+      );
+    });
+    final repository = _repository(client);
+
+    final url = await repository.createPublicMaterialUrl(
+      const StudyMaterial(
+        id: 'material-1',
+        title: 'Notes',
+        fileName: 'note.pdf',
+        hasFile: true,
+      ),
+    );
+
+    expect(
+      url,
+      'https://project.supabase.co/storage/v1/object/sign/'
+      'lesson-materials/note?token=x',
+    );
+  });
+
+  test('rejects a public material without an attached file', () async {
+    final repository = _repository(
+      MockClient((request) async => http.Response('not called', 500)),
+    );
+
+    expect(
+      () => repository.createPublicMaterialUrl(
+        const StudyMaterial(id: 'material-1', title: 'Notes'),
+      ),
+      throwsFormatException,
+    );
   });
 
   group('saveGroupNote', () {

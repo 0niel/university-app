@@ -13,6 +13,7 @@ class KnowledgeBankList extends StatelessWidget {
     required this.isFiltered,
     required this.materials,
     required this.authors,
+    required this.openingMaterialIds,
     required this.onDownload,
     required this.onRetry,
     required this.onUpload,
@@ -25,6 +26,7 @@ class KnowledgeBankList extends StatelessWidget {
   final bool isFiltered;
   final List<StudyMaterial> materials;
   final List<MaterialAuthor> authors;
+  final Set<String> openingMaterialIds;
   final ValueChanged<StudyMaterial> onDownload;
   final VoidCallback onRetry;
   final VoidCallback onUpload;
@@ -102,6 +104,7 @@ class KnowledgeBankList extends StatelessWidget {
           return MaterialRow(
             key: ValueKey(material.id),
             material: material,
+            loading: openingMaterialIds.contains(material.id),
             onDownload: () => onDownload(material),
           ).animateListItem(index: index);
         }

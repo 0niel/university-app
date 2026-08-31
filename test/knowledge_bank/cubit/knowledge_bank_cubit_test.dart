@@ -11,6 +11,12 @@ class MockGamificationRepository extends Mock
     implements GamificationRepository {}
 
 void main() {
+  setUpAll(
+    () => registerFallbackValue(
+      const StudyMaterial(id: 'fallback', title: 'Fallback'),
+    ),
+  );
+
   group('KnowledgeBankCubit', () {
     late CampusRepository campusRepository;
     late GamificationRepository gamificationRepository;
@@ -26,6 +32,8 @@ void main() {
       id: 'm-1',
       title: 'Конспект по матану',
       downloads: 3,
+      fileName: 'math.pdf',
+      hasFile: true,
     );
     const cheatsheet = StudyMaterial(
       id: 'm-2',
@@ -50,6 +58,11 @@ void main() {
       when(
         () => campusRepository.incrementMaterialDownloads(any()),
       ).thenAnswer((_) async {});
+      when(
+        () => campusRepository.createPublicMaterialUrl(any()),
+      ).thenAnswer(
+        (_) async => 'https://project.supabase.co/storage/material.pdf',
+      );
     });
 
     KnowledgeBankCubit buildCubit() => KnowledgeBankCubit(
@@ -156,13 +169,40 @@ void main() {
       );
     });
 
-    group('download', () {
+    group('materialUrl', () {
+      test('returns a valid signed material URL', () async {
+        final cubit = buildCubit();
+
+        await expectLater(
+          cubit.materialUrl(note),
+          completion(
+            Uri.parse('https://project.supabase.co/storage/material.pdf'),
+          ),
+        );
+
+        verify(() => campusRepository.createPublicMaterialUrl(note)).called(1);
+        await cubit.close();
+      });
+
+      test('returns null and reports the error when signing fails', () async {
+        when(
+          () => campusRepository.createPublicMaterialUrl(any()),
+        ).thenThrow(Exception('storage down'));
+        final cubit = buildCubit();
+
+        await expectLater(cubit.materialUrl(note), completion(isNull));
+
+        verify(() => campusRepository.createPublicMaterialUrl(note)).called(1);
+        await cubit.close();
+      });
+    });
+
+    group('materialOpened', () {
       blocTest<KnowledgeBankCubit, KnowledgeBankState>(
-        'optimistically increments the matched material download counter '
-        'and returns true on success',
+        'increments the matched material only after the remote call succeeds',
         build: buildCubit,
         seed: () => const KnowledgeBankState(materials: [note, cheatsheet]),
-        act: (cubit) async => expect(await cubit.download(note), isTrue),
+        act: (cubit) => cubit.materialOpened(note),
         expect: () => const <KnowledgeBankState>[
           KnowledgeBankState(
             materials: [
@@ -170,6 +210,8 @@ void main() {
                 id: 'm-1',
                 title: 'Конспект по матану',
                 downloads: 4,
+                fileName: 'math.pdf',
+                hasFile: true,
               ),
               cheatsheet,
             ],
@@ -183,26 +225,14 @@ void main() {
       );
 
       blocTest<KnowledgeBankCubit, KnowledgeBankState>(
-        'reverts the optimistic increment and returns false when the '
-        'remote call throws',
+        'does not increment locally when the remote call throws',
         setUp: () => when(
           () => campusRepository.incrementMaterialDownloads(any()),
         ).thenThrow(Exception('remote down')),
         build: buildCubit,
         seed: () => const KnowledgeBankState(materials: [note]),
-        act: (cubit) async => expect(await cubit.download(note), isFalse),
-        expect: () => const <KnowledgeBankState>[
-          KnowledgeBankState(
-            materials: [
-              StudyMaterial(
-                id: 'm-1',
-                title: 'Конспект по матану',
-                downloads: 4,
-              ),
-            ],
-          ),
-          KnowledgeBankState(materials: [note]),
-        ],
+        act: (cubit) => cubit.materialOpened(note),
+        expect: () => const <KnowledgeBankState>[],
         errors: () => [isA<Exception>()],
       );
     });

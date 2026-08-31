@@ -49,6 +49,7 @@ class _FriendsMapViewState extends State<FriendsMapView>
   @override
   void dispose() {
     _camera.dispose();
+    _tileProvider.dispose();
     _mapController.dispose();
     _panelController
       ..removeListener(_syncPanelExtent)

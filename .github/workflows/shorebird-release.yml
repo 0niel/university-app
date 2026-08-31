@@ -1,4 +1,4 @@
-name: Shorebird Release
+name: Shorebird iOS Release
 
 on:
   workflow_dispatch:
@@ -10,42 +10,75 @@ jobs:
   release:
     runs-on: macos-15
     timeout-minutes: 60
+    environment: beta
     defaults:
       run:
         shell: bash
+    env:
+      APPLE_TEAM_ID: J935XAGDUL
+      IOS_APP_BUNDLE_ID: com.ituniversity.app
+      IOS_WIDGET_BUNDLE_ID: com.ituniversity.app.HomeWidget
 
     steps:
+      - name: Verify release configuration
+        env:
+          SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
+          BUILD_CERTIFICATE_BASE64: ${{ secrets.BUILD_CERTIFICATE_BASE64 }}
+          BUILD_PROVISION_PROFILE_BASE64: ${{ secrets.BUILD_PROVISION_PROFILE_BASE64 }}
+          BUILD_WIDGET_PROVISION_PROFILE_BASE64: ${{ secrets.BUILD_WIDGET_PROVISION_PROFILE_BASE64 }}
+          P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
+          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+          UNIVERSITY_CONFIG_JSON: ${{ vars.UNIVERSITY_CONFIG_JSON }}
+          FIREBASE_CONFIG_JSON: ${{ vars.FIREBASE_CONFIG_JSON }}
+          SUPABASE_URL: ${{ vars.SUPABASE_URL }}
+          SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
+        run: |
+          required=(
+            SHOREBIRD_TOKEN
+            BUILD_CERTIFICATE_BASE64
+            BUILD_PROVISION_PROFILE_BASE64
+            BUILD_WIDGET_PROVISION_PROFILE_BASE64
+            P12_PASSWORD
+            KEYCHAIN_PASSWORD
+            UNIVERSITY_CONFIG_JSON
+            FIREBASE_CONFIG_JSON
+            SUPABASE_URL
+            SUPABASE_PUBLISHABLE_KEY
+          )
+          missing=()
+          for name in "${required[@]}"; do
+            if [[ -z "${!name:-}" ]]; then
+              missing+=("$name")
+            fi
+          done
+          if (( ${#missing[@]} > 0 )); then
+            printf 'Missing iOS release configuration: %s\n' "${missing[*]}" >&2
+            exit 1
+          fi
+
       - name: Check out repository
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
         with:
           persist-credentials: false
 
-      - name: Check out private NFC module
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
-        with:
-          repository: 0niel/university-app-nfc-private
-          ref: 6226b9b4c3f2ed2c4a0727ae062f8a5239e5aba5
-          ssh-key: ${{ secrets.NFC_MODULE_DEPLOY_KEY }}
-          path: android/private/nfc-pass-android
-          persist-credentials: false
-
-      - name: Set up Java
-        uses: actions/setup-java@0f481fcb613427c0f801b606911222b5b6f3083a # v5
-        with:
-          distribution: temurin
-          java-version: "17"
-
       - name: Set up Flutter
-        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
         with:
           channel: stable
           flutter-version-file: .fvmrc
           cache: true
 
-      - name: Set up Shorebird
-        uses: shorebirdtech/setup-shorebird@4dd9d7dc2d7930bfeadb053b6e94b5110779d1e5 # v1
-        with:
-          cache: true
+      - name: Install pinned Shorebird
+        run: |
+          shorebird_dir="$RUNNER_TEMP/shorebird-sdk"
+          shorebird_revision="5ac7f9a9a5c4a5e66a958e608da0f73e34a3d6bb"
+          mkdir "$shorebird_dir"
+          git -C "$shorebird_dir" init
+          git -C "$shorebird_dir" remote add origin https://github.com/shorebirdtech/shorebird.git
+          git -C "$shorebird_dir" fetch --depth 1 origin "$shorebird_revision"
+          git -C "$shorebird_dir" checkout --detach FETCH_HEAD
+          test "$(git -C "$shorebird_dir" rev-parse HEAD)" = "$shorebird_revision"
+          printf '%s\n' "$shorebird_dir/bin" >> "$GITHUB_PATH"
 
       - name: Install dependencies
         run: flutter pub get
@@ -53,89 +86,227 @@ jobs:
       - name: Generate code
         run: dart run build_runner build
 
-      - name: Configure Android signing
-        env:
-          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
-          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
-          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
-          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+      - name: Verify source
         run: |
+          flutter analyze
+          flutter test
+
+      - name: Configure iOS signing
+        env:
+          BUILD_CERTIFICATE_BASE64: ${{ secrets.BUILD_CERTIFICATE_BASE64 }}
+          BUILD_PROVISION_PROFILE_BASE64: ${{ secrets.BUILD_PROVISION_PROFILE_BASE64 }}
+          BUILD_WIDGET_PROVISION_PROFILE_BASE64: ${{ secrets.BUILD_WIDGET_PROVISION_PROFILE_BASE64 }}
+          P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
+          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+        run: |
+          certificate_path="$RUNNER_TEMP/build_certificate.p12"
+          app_profile_path="$RUNNER_TEMP/app.mobileprovision"
+          widget_profile_path="$RUNNER_TEMP/widget.mobileprovision"
+          keychain_path="$RUNNER_TEMP/app-signing.keychain-db"
+          profiles_directory="$HOME/Library/MobileDevice/Provisioning Profiles"
+          export_options_path="$RUNNER_TEMP/ExportOptions.plist"
+          mkdir -p "$profiles_directory"
           python3 - <<'PY'
           import base64
           import os
           from pathlib import Path
 
-          required = (
-              "ANDROID_KEYSTORE_BASE64",
-              "ANDROID_KEYSTORE_PASSWORD",
-              "ANDROID_KEY_ALIAS",
-              "ANDROID_KEY_PASSWORD",
-          )
-          missing = [name for name in required if not os.environ.get(name)]
-          if missing:
-              raise SystemExit(f"Missing release secrets: {', '.join(missing)}")
-
-          Path("android/app/release.jks").write_bytes(
-              base64.b64decode(os.environ["ANDROID_KEYSTORE_BASE64"], validate=True)
-          )
-          Path("android/key.properties").write_text(
-              "\n".join(
-                  (
-                      f"storePassword={os.environ['ANDROID_KEYSTORE_PASSWORD']}",
-                      f"keyPassword={os.environ['ANDROID_KEY_PASSWORD']}",
-                      f"keyAlias={os.environ['ANDROID_KEY_ALIAS']}",
-                      "storeFile=release.jks",
-                  )
+          def decode_base64(name: str, path: str) -> None:
+              Path(path).write_bytes(
+                  base64.b64decode(os.environ[name].strip(), validate=True)
               )
-              + "\n",
-              encoding="utf-8",
-          )
+
+          runner_temp = os.environ["RUNNER_TEMP"]
+          decode_base64("BUILD_CERTIFICATE_BASE64", runner_temp + "/build_certificate.p12")
+          decode_base64("BUILD_PROVISION_PROFILE_BASE64", runner_temp + "/app.mobileprovision")
+          decode_base64("BUILD_WIDGET_PROVISION_PROFILE_BASE64", runner_temp + "/widget.mobileprovision")
           PY
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$keychain_path"
+          security set-keychain-settings -lut 21600 "$keychain_path"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$keychain_path"
+          security import "$certificate_path" \
+            -P "$P12_PASSWORD" \
+            -A \
+            -t cert \
+            -f pkcs12 \
+            -k "$keychain_path"
+          security set-key-partition-list \
+            -S apple-tool:,apple: \
+            -k "$KEYCHAIN_PASSWORD" \
+            "$keychain_path"
+          security list-keychain -d user -s "$keychain_path"
+          if ! security find-identity -v -p codesigning "$keychain_path" | grep -q 'Apple Distribution'; then
+            printf 'Apple Distribution identity is unavailable\n' >&2
+            exit 1
+          fi
+          security cms -D -i "$app_profile_path" > "$RUNNER_TEMP/app-profile.plist"
+          security cms -D -i "$widget_profile_path" > "$RUNNER_TEMP/widget-profile.plist"
+          python3 - <<'PY'
+          import datetime
+          import os
+          import plistlib
+
+          def profile(path: str, bundle_id: str) -> str:
+              with open(path, "rb") as source:
+                  data = plistlib.load(source)
+              expiration = data["ExpirationDate"]
+              now = datetime.datetime.now(datetime.timezone.utc)
+              if expiration.tzinfo is None:
+                  expiration = expiration.replace(tzinfo=datetime.timezone.utc)
+              if expiration <= now:
+                  raise SystemExit(f"Provisioning profile expired for {bundle_id}")
+              application_identifier = data["Entitlements"]["application-identifier"]
+              if not application_identifier.endswith("." + bundle_id):
+                  raise SystemExit(f"Provisioning profile bundle mismatch for {bundle_id}")
+              if os.environ["APPLE_TEAM_ID"] not in data.get("TeamIdentifier", []):
+                  raise SystemExit(f"Provisioning profile team mismatch for {bundle_id}")
+              return data["Name"]
+
+          runner_temp = os.environ["RUNNER_TEMP"]
+          app_bundle = os.environ["IOS_APP_BUNDLE_ID"]
+          widget_bundle = os.environ["IOS_WIDGET_BUNDLE_ID"]
+          export_options = {
+              "manageAppVersionAndBuildNumber": False,
+              "method": "app-store",
+              "provisioningProfiles": {
+                  app_bundle: profile(runner_temp + "/app-profile.plist", app_bundle),
+                  widget_bundle: profile(runner_temp + "/widget-profile.plist", widget_bundle),
+              },
+              "signingCertificate": "Apple Distribution",
+              "signingStyle": "manual",
+              "teamID": os.environ["APPLE_TEAM_ID"],
+          }
+          with open(runner_temp + "/ExportOptions.plist", "wb") as target:
+              plistlib.dump(export_options, target)
+          PY
+          cp "$app_profile_path" "$profiles_directory/app.mobileprovision"
+          cp "$widget_profile_path" "$profiles_directory/widget.mobileprovision"
+          test -s "$export_options_path"
 
       - name: Configure university
         env:
           UNIVERSITY_CONFIG_JSON: ${{ vars.UNIVERSITY_CONFIG_JSON }}
           FIREBASE_CONFIG_JSON: ${{ vars.FIREBASE_CONFIG_JSON }}
         run: |
-          test -n "${UNIVERSITY_CONFIG_JSON}"
-          test -n "${FIREBASE_CONFIG_JSON}"
-          printf '%s\n' "${UNIVERSITY_CONFIG_JSON}" > "${RUNNER_TEMP}/university.json"
-          printf '%s\n' "${FIREBASE_CONFIG_JSON}" > "${RUNNER_TEMP}/firebase.json"
+          printf '%s\n' "$UNIVERSITY_CONFIG_JSON" > "$RUNNER_TEMP/university.json"
+          printf '%s\n' "$FIREBASE_CONFIG_JSON" > "$RUNNER_TEMP/firebase.json"
           dart run tool/configure_university.dart \
-            --config "${RUNNER_TEMP}/university.json"
-
-      - name: Release Android
-        uses: shorebirdtech/shorebird-release@fb52cad53f4ed5ce39883d51a26916ead502b93d # v1
-        env:
-          ORG_GRADLE_PROJECT_requirePrivateNfcModule: "true"
-          SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
-        with:
-          platform: android
-          flutter-version: 3.44.2
-          args: >-
-            --flavor production
-            --target lib/main/main_production.dart
-            --
-            --dart-define-from-file=${{ runner.temp }}/university.json
-            --dart-define-from-file=${{ runner.temp }}/firebase.json
-            --dart-define=SUPABASE_URL=${{ secrets.SUPABASE_URL }}
-            --dart-define=SUPABASE_PUBLISHABLE_KEY=${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
+            --config "$RUNNER_TEMP/university.json"
 
       - name: Release iOS
-        uses: shorebirdtech/shorebird-release@fb52cad53f4ed5ce39883d51a26916ead502b93d # v1
+        uses: shorebirdtech/shorebird-release@fb52cad53f4ed5ce39883d51a26916ead502b93d
         env:
           SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
         with:
           platform: ios
           flutter-version: 3.44.2
           args: >-
+            --export-options-plist=${{ runner.temp }}/ExportOptions.plist
             --target lib/main/main_production.dart
             --
             --dart-define-from-file=${{ runner.temp }}/university.json
             --dart-define-from-file=${{ runner.temp }}/firebase.json
-            --dart-define=SUPABASE_URL=${{ secrets.SUPABASE_URL }}
+            --dart-define=SUPABASE_URL=${{ vars.SUPABASE_URL }}
             --dart-define=SUPABASE_PUBLISHABLE_KEY=${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
 
-      - name: Remove Android signing material
+      - name: Upload iOS artifact
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: ios-shorebird-release
+          path: build/ios/ipa/*.ipa
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Remove signing and configuration material
         if: always()
-        run: rm -f android/key.properties android/app/release.jks
+        run: |
+          security delete-keychain "$RUNNER_TEMP/app-signing.keychain-db" 2>/dev/null || true
+          rm -f "$HOME/Library/MobileDevice/Provisioning Profiles/app.mobileprovision"
+          rm -f "$HOME/Library/MobileDevice/Provisioning Profiles/widget.mobileprovision"
+          rm -f "$RUNNER_TEMP/build_certificate.p12"
+          rm -f "$RUNNER_TEMP/app.mobileprovision"
+          rm -f "$RUNNER_TEMP/widget.mobileprovision"
+          rm -f "$RUNNER_TEMP/app-profile.plist"
+          rm -f "$RUNNER_TEMP/widget-profile.plist"
+          rm -f "$RUNNER_TEMP/ExportOptions.plist"
+          rm -f "$RUNNER_TEMP/university.json"
+          rm -f "$RUNNER_TEMP/firebase.json"
+
+  publish:
+    needs: release
+    runs-on: macos-15
+    timeout-minutes: 20
+    environment: beta
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Verify publishing configuration
+        env:
+          APPSTORE_API_KEY_ID: ${{ secrets.APPSTORE_API_KEY_ID }}
+          APPSTORE_API_ISSUER_ID: ${{ secrets.APPSTORE_API_ISSUER_ID }}
+          APPSTORE_API_PRIVATE_KEY: ${{ secrets.APPSTORE_API_PRIVATE_KEY }}
+        run: |
+          required=(
+            APPSTORE_API_KEY_ID
+            APPSTORE_API_ISSUER_ID
+            APPSTORE_API_PRIVATE_KEY
+          )
+          for name in "${required[@]}"; do
+            if [[ -z "${!name:-}" ]]; then
+              printf 'Missing TestFlight configuration: %s\n' "$name" >&2
+              exit 1
+            fi
+          done
+
+      - name: Download iOS artifact
+        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0
+        with:
+          name: ios-shorebird-release
+          path: ${{ runner.temp }}/ios
+
+      - name: Configure App Store Connect key
+        env:
+          APPSTORE_API_KEY_ID: ${{ secrets.APPSTORE_API_KEY_ID }}
+          APPSTORE_API_PRIVATE_KEY: ${{ secrets.APPSTORE_API_PRIVATE_KEY }}
+        run: |
+          mkdir -p "$HOME/.appstoreconnect/private_keys"
+          python3 - <<'PY'
+          import base64
+          import os
+          from pathlib import Path
+
+          private_key = os.environ["APPSTORE_API_PRIVATE_KEY"].strip()
+          if "BEGIN PRIVATE KEY" not in private_key:
+              private_key = base64.b64decode(private_key, validate=True).decode("utf-8")
+          private_key = private_key.replace("\\n", "\n")
+          if "BEGIN PRIVATE KEY" not in private_key:
+              raise SystemExit("Invalid App Store Connect private key")
+          key_path = Path.home() / ".appstoreconnect" / "private_keys" / f"AuthKey_{os.environ['APPSTORE_API_KEY_ID']}.p8"
+          key_path.write_text(private_key.rstrip() + "\n", encoding="utf-8")
+          key_path.chmod(0o600)
+          PY
+
+      - name: Upload iOS beta to TestFlight
+        env:
+          APPSTORE_API_KEY_ID: ${{ secrets.APPSTORE_API_KEY_ID }}
+          APPSTORE_API_ISSUER_ID: ${{ secrets.APPSTORE_API_ISSUER_ID }}
+        run: |
+          ipa="$(find "$RUNNER_TEMP/ios" -type f -name '*.ipa' -print -quit)"
+          if [[ -z "$ipa" ]]; then
+            printf 'Signed iOS artifact is unavailable\n' >&2
+            exit 1
+          fi
+          xcrun altool \
+            --upload-app \
+            --type ios \
+            --file "$ipa" \
+            --apiKey "$APPSTORE_API_KEY_ID" \
+            --apiIssuer "$APPSTORE_API_ISSUER_ID"
+
+      - name: Remove App Store Connect key
+        if: always()
+        env:
+          APPSTORE_API_KEY_ID: ${{ secrets.APPSTORE_API_KEY_ID }}
+        run: |
+          rm -f "$HOME/.appstoreconnect/private_keys/AuthKey_$APPSTORE_API_KEY_ID.p8"

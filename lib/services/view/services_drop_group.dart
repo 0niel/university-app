@@ -1,4 +1,5 @@
 import 'package:app_ui/app_ui.dart';
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_layout_grid/flutter_layout_grid.dart';
 import 'package:rtu_mirea_app/services/services.dart';
@@ -80,13 +81,14 @@ class ServicesDropGroup extends StatelessWidget {
   }
 
   Widget _serviceTile(int index) {
-    final service = services[index];
+    final service = services.elementAtOrNull(index);
+    if (service == null) return const SizedBox.shrink();
     final id = FavoriteServicesRepository.idOf(
       routePath: service.routePath,
       url: service.url,
     );
-    final previous = index == 0 ? null : services[index - 1];
-    final afterNext = index + 2 >= services.length ? null : services[index + 2];
+    final previous = index == 0 ? null : services.elementAtOrNull(index - 1);
+    final afterNext = services.elementAtOrNull(index + 2);
     return ServicesDraggableTile(
       service: service,
       groupKey: groupKey,

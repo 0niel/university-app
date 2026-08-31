@@ -22,10 +22,12 @@ class ContributorsCard extends StatelessWidget {
 
     return BlocBuilder<ContributorsBloc, ContributorsState>(
       builder: (context, state) {
-        final isLoading = state.status == .loading || state.status == .initial;
         final contributors = state.contributors.contributors;
+        final isLoading =
+            state.status == .initial ||
+            (state.status == .loading && contributors.isEmpty);
         final Widget child;
-        if (state.status == .failure) {
+        if (state.status == .failure && contributors.isEmpty) {
           child = KeyedSubtree(
             key: const ValueKey('contributors-error'),
             child: NinjaErrorCard(

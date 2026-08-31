@@ -1,0 +1,202 @@
+definitions:
+  environment:
+    ios_environment: &ios_environment
+      flutter: 3.44.2
+      xcode: 26.4
+      cocoapods: default
+      groups:
+        - shorebird
+        - app_store
+        - university
+      vars:
+        FLUTTER_VERSION: 3.44.2
+        BUNDLE_ID: com.ituniversity.app
+        WIDGET_BUNDLE_ID: com.ituniversity.app.HomeWidget
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: $BUNDLE_ID
+  scripts:
+    - &verify_environment
+      name: Verify release environment
+      script: |
+        required=(
+          SHOREBIRD_TOKEN
+          APP_STORE_CONNECT_PRIVATE_KEY
+          APP_STORE_CONNECT_KEY_IDENTIFIER
+          APP_STORE_CONNECT_ISSUER_ID
+          CERTIFICATE_PRIVATE_KEY
+          UNIVERSITY_CONFIG_JSON
+          FIREBASE_CONFIG_JSON
+          SUPABASE_URL
+          SUPABASE_PUBLISHABLE_KEY
+        )
+        missing=()
+        for name in "${required[@]}"; do
+          if [[ -z "${!name:-}" ]]; then
+            missing+=("$name")
+          fi
+        done
+        if (( ${#missing[@]} > 0 )); then
+          printf 'Missing Codemagic configuration: %s\n' "${missing[*]}" >&2
+          exit 1
+        fi
+        configured_flutter="$(python3 -c 'import json; print(json.load(open(".fvmrc", encoding="utf-8"))["flutter"])')"
+        if [[ "$configured_flutter" != "$FLUTTER_VERSION" ]]; then
+          printf 'Flutter version mismatch: .fvmrc=%s workflow=%s\n' "$configured_flutter" "$FLUTTER_VERSION" >&2
+          exit 1
+        fi
+    - &install_shorebird
+      name: Install pinned Shorebird
+      script: |
+        shorebird_dir="$CM_BUILD_DIR/.shorebird-sdk"
+        shorebird_revision="5ac7f9a9a5c4a5e66a958e608da0f73e34a3d6bb"
+        mkdir "$shorebird_dir"
+        git -C "$shorebird_dir" init
+        git -C "$shorebird_dir" remote add origin https://github.com/shorebirdtech/shorebird.git
+        git -C "$shorebird_dir" fetch --depth 1 origin "$shorebird_revision"
+        git -C "$shorebird_dir" checkout --detach FETCH_HEAD
+        test "$(git -C "$shorebird_dir" rev-parse HEAD)" = "$shorebird_revision"
+        echo "PATH=$shorebird_dir/bin:$PATH" >> "$CM_ENV"
+    - &install_dependencies
+      name: Install dependencies
+      script: flutter pub get
+    - &generate_code
+      name: Generate code
+      script: dart run build_runner build
+    - &verify_source
+      name: Verify source
+      script: |
+        flutter analyze
+        flutter test
+    - &configure_university
+      name: Configure university
+      script: |
+        printf '%s\n' "$UNIVERSITY_CONFIG_JSON" > "$CM_BUILD_DIR/.ci-university.json"
+        printf '%s\n' "$FIREBASE_CONFIG_JSON" > "$CM_BUILD_DIR/.ci-firebase.json"
+        dart run tool/configure_university.dart --config "$CM_BUILD_DIR/.ci-university.json"
+    - &fetch_signing_files
+      name: Fetch signing files
+      script: |
+        signing_args=(
+          --type IOS_APP_STORE
+          --create
+          --platform IOS
+          --issuer-id "$APP_STORE_CONNECT_ISSUER_ID"
+          --key-id "$APP_STORE_CONNECT_KEY_IDENTIFIER"
+          --private-key "$APP_STORE_CONNECT_PRIVATE_KEY"
+        )
+        app-store-connect fetch-signing-files "$BUNDLE_ID" "${signing_args[@]}"
+        app-store-connect fetch-signing-files "$WIDGET_BUNDLE_ID" "${signing_args[@]}"
+    - &configure_signing
+      name: Configure code signing
+      script: |
+        keychain initialize
+        keychain add-certificates
+        xcode-project use-profiles --custom-export-options='{"manageAppVersionAndBuildNumber":false}'
+    - &cleanup_configuration
+      name: Remove generated configuration
+      script: |
+        rm -f "$CM_BUILD_DIR/.ci-university.json"
+        rm -f "$CM_BUILD_DIR/.ci-firebase.json"
+
+workflows:
+  ios-beta-release:
+    name: iOS beta release
+    instance_type: mac_mini_m2
+    max_build_duration: 60
+    environment:
+      <<: *ios_environment
+    cache:
+      cache_paths:
+        - $HOME/.pub-cache
+        - $HOME/Library/Caches/CocoaPods
+    triggering:
+      events:
+        - push
+      branch_patterns:
+        - pattern: master
+          include: true
+          source: true
+      cancel_previous_builds: false
+    scripts:
+      - *verify_environment
+      - *install_shorebird
+      - *install_dependencies
+      - *generate_code
+      - *verify_source
+      - *configure_university
+      - *fetch_signing_files
+      - *configure_signing
+      - name: Prepare release version
+        script: |
+          source_version="$(sed -n 's/^version:[[:space:]]*//p' pubspec.yaml)"
+          build_name="${source_version%%+*}"
+          if [[ -z "$build_name" ]]; then
+            printf 'Missing version in pubspec.yaml\n' >&2
+            exit 1
+          fi
+          echo "BUILD_NAME=$build_name" >> "$CM_ENV"
+      - name: Release iOS beta
+        script: |
+          shorebird release ios \
+            --flutter-version="$FLUTTER_VERSION" \
+            --export-options-plist="$HOME/export_options.plist" \
+            --target=lib/main/main_production.dart \
+            --build-name="$BUILD_NAME" \
+            --build-number="$BUILD_NUMBER" \
+            --no-confirm \
+            -- \
+            --dart-define-from-file="$CM_BUILD_DIR/.ci-university.json" \
+            --dart-define-from-file="$CM_BUILD_DIR/.ci-firebase.json" \
+            --dart-define=SUPABASE_URL="$SUPABASE_URL" \
+            --dart-define=SUPABASE_PUBLISHABLE_KEY="$SUPABASE_PUBLISHABLE_KEY"
+      - *cleanup_configuration
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - build/ios/archive/Runner.xcarchive/dSYMs/*.dSYM
+      - build/**/*.symbols
+    publishing:
+      app_store_connect:
+        api_key: $APP_STORE_CONNECT_PRIVATE_KEY
+        key_id: $APP_STORE_CONNECT_KEY_IDENTIFIER
+        issuer_id: $APP_STORE_CONNECT_ISSUER_ID
+        submit_to_testflight: true
+
+  ios-patch:
+    name: iOS patch
+    instance_type: mac_mini_m2
+    max_build_duration: 60
+    inputs:
+      release_version:
+        description: Shorebird release version
+    environment:
+      <<: *ios_environment
+    cache:
+      cache_paths:
+        - $HOME/.pub-cache
+        - $HOME/Library/Caches/CocoaPods
+    scripts:
+      - *verify_environment
+      - *install_shorebird
+      - *install_dependencies
+      - *generate_code
+      - *verify_source
+      - *configure_university
+      - *fetch_signing_files
+      - *configure_signing
+      - name: Patch iOS
+        script: |
+          shorebird patch ios \
+            --release-version=${{ inputs.release_version }} \
+            --export-options-plist="$HOME/export_options.plist" \
+            --target=lib/main/main_production.dart \
+            --no-confirm \
+            -- \
+            --dart-define-from-file="$CM_BUILD_DIR/.ci-university.json" \
+            --dart-define-from-file="$CM_BUILD_DIR/.ci-firebase.json" \
+            --dart-define=SUPABASE_URL="$SUPABASE_URL" \
+            --dart-define=SUPABASE_PUBLISHABLE_KEY="$SUPABASE_PUBLISHABLE_KEY"
+      - *cleanup_configuration
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - build/**/*.symbols

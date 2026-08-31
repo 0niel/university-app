@@ -40,6 +40,7 @@ class _MaterialUploadSheetState extends State<MaterialUploadSheet> {
   int _price = 0;
   bool _anonymous = false;
   bool _saving = false;
+  bool _hasTitle = false;
 
   String? _fileName;
   Uint8List? _fileBytes;
@@ -68,6 +69,7 @@ class _MaterialUploadSheetState extends State<MaterialUploadSheet> {
               ? file.name.substring(0, extensionIndex)
               : file.name;
         }
+        _hasTitle = _title.text.trim().isNotEmpty;
       });
     } on Exception catch (error, stackTrace) {
       log(
@@ -80,7 +82,11 @@ class _MaterialUploadSheetState extends State<MaterialUploadSheet> {
 
   Future<void> _save() async {
     final title = _title.text.trim();
-    if (title.isEmpty || _saving) return;
+    final fileName = _fileName;
+    final fileBytes = _fileBytes;
+    if (title.isEmpty || fileName == null || fileBytes == null || _saving) {
+      return;
+    }
     setState(() => _saving = true);
     try {
       await widget.repository.createPublicMaterial(
@@ -89,8 +95,8 @@ class _MaterialUploadSheetState extends State<MaterialUploadSheet> {
         materialType: _type,
         price: _price,
         isAnonymous: _anonymous,
-        fileName: _fileName,
-        fileBytes: _fileBytes,
+        fileName: fileName,
+        fileBytes: fileBytes,
         mimeType: _mimeType,
       );
       if (mounted) Navigator.of(context).pop(true);
@@ -109,6 +115,7 @@ class _MaterialUploadSheetState extends State<MaterialUploadSheet> {
     final colors = context.ninja;
     final l10n = context.l10n;
     final bytes = _fileBytes;
+    final canSave = !_saving && bytes != null && _fileName != null && _hasTitle;
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -174,6 +181,9 @@ class _MaterialUploadSheetState extends State<MaterialUploadSheet> {
         NinjaInput(
           controller: _title,
           placeholder: l10n.knowledgeUploadTitleHint,
+          onChanged: (value) => setState(
+            () => _hasTitle = value.trim().isNotEmpty,
+          ),
         ),
         const SizedBox(height: 10),
         NinjaInput(
@@ -266,7 +276,7 @@ class _MaterialUploadSheetState extends State<MaterialUploadSheet> {
           size: NinjaButtonSize.large,
           expanded: true,
           loading: _saving,
-          onPressed: _saving ? null : () => unawaited(_save()),
+          onPressed: canSave ? () => unawaited(_save()) : null,
         ),
       ],
     );

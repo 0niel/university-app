@@ -98,6 +98,32 @@ void main() {
     expect(_tileLayerFrom(darkTiles).urlTemplate, AppMapTiles.urlTemplate);
   });
 
+  testWidgets('builds with the configured network provider', (tester) async {
+    final provider = AppMapTiles.createTileProvider(
+      cachingProvider: const DisabledMapCachingProvider(),
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Builder(
+          builder: (context) => FlutterMap(
+            options: const MapOptions(
+              initialCenter: LatLng(55.67, 37.48),
+              initialZoom: 15,
+            ),
+            children: [
+              AppMapTiles.tileLayer(context, tileProvider: provider),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byType(TileLayer), findsOneWidget);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
   testWidgets('keeps the tile provider alive when the theme changes', (
     tester,
   ) async {

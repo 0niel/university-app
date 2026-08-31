@@ -1,7 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:github/github.dart';
 
-part 'community_models.freezed.dart';
+part 'contributors_response.freezed.dart';
 
 @freezed
 /// Contributors returned by the configured source repository.

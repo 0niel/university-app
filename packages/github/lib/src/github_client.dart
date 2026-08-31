@@ -18,11 +18,14 @@ class GithubClient {
   final http.Client _httpClient;
 
   Future<List<Contributor>> getContributors({
-    String owner = 'Oniel',
+    String owner = '0niel',
     String repo = 'university-app',
   }) async {
+    final uri = Uri.parse('$_baseUrl/repos/$owner/$repo/contributors').replace(
+      queryParameters: const {'per_page': '100'},
+    );
     final response = await _httpClient.get(
-      Uri.parse('$_baseUrl/repos/$owner/$repo/contributors'),
+      uri,
       headers: _requestHeaders,
     );
     if (response.statusCode != HttpStatus.ok) {

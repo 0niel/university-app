@@ -9,11 +9,13 @@ class MaterialRow extends StatelessWidget {
   const MaterialRow({
     required this.material,
     required this.onDownload,
+    this.loading = false,
     super.key,
   });
 
   final StudyMaterial material;
   final VoidCallback onDownload;
+  final bool loading;
 
   @override
   Widget build(BuildContext context) {
@@ -33,13 +35,24 @@ class MaterialRow extends StatelessWidget {
     final price = material.isFree
         ? const PricePill(free: true)
         : PricePill(shurikens: material.price);
+    final action = loading
+        ? SizedBox.square(
+            dimension: 24,
+            child: CircularProgressIndicator(
+              strokeWidth: 2.4,
+              color: accent,
+            ),
+          )
+        : price;
+    final enabled = material.hasFile && !loading;
 
     return Semantics(
       container: true,
       button: true,
+      enabled: enabled,
       label: '${material.title}, $meta',
       child: AppPressable(
-        onTap: onDownload,
+        onTap: enabled ? onDownload : null,
         child: Container(
           decoration: BoxDecoration(
             color: colors.surface,
@@ -96,14 +109,14 @@ class MaterialRow extends StatelessWidget {
                     ),
                     if (compact) ...[
                       const SizedBox(height: 10),
-                      Align(alignment: Alignment.centerLeft, child: price),
+                      Align(alignment: Alignment.centerLeft, child: action),
                     ],
                   ],
                 ),
               ),
               if (!compact) ...[
                 const SizedBox(width: 12),
-                price,
+                action,
               ],
             ],
           ),

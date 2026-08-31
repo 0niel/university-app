@@ -29,13 +29,71 @@ void main() {
     expect(workflow, contains('if-no-files-found: error'));
   });
 
-  test('manual Shorebird releases use the production entrypoint', () {
+  test('manual iOS Shorebird releases use the production entrypoint', () {
     final workflow = File(
       '.github/workflows/shorebird-release.yml',
     ).readAsStringSync();
 
-    expectProductionTargetBeforeSeparator(workflow, stepName: 'Release Android');
     expectProductionTargetBeforeSeparator(workflow, stepName: 'Release iOS');
+    expect(
+      RegExp(
+        r'--dart-define=SUPABASE_URL=\$\{\{ vars\.SUPABASE_URL \}\}',
+      ).allMatches(workflow),
+      hasLength(1),
+    );
+    expect(workflow, isNot(contains('secrets.SUPABASE_URL')));
+  });
+
+  test('manual iOS release validates, verifies, signs, and publishes', () {
+    final workflow = File(
+      '.github/workflows/shorebird-release.yml',
+    ).readAsStringSync();
+    final verifyIndex = workflow.indexOf(
+      '      - name: Verify release configuration',
+    );
+    final configureIosIndex = workflow.indexOf(
+      '      - name: Configure iOS signing',
+    );
+    final releaseIosIndex = workflow.indexOf('      - name: Release iOS');
+    final testFlightIndex = workflow.indexOf(
+      '      - name: Upload iOS beta to TestFlight',
+    );
+    final verifySourceIndex = workflow.indexOf('      - name: Verify source');
+
+    expect(verifyIndex, isNonNegative);
+    expect(verifySourceIndex, greaterThan(verifyIndex));
+    expect(configureIosIndex, greaterThan(verifyIndex));
+    expect(configureIosIndex, greaterThan(verifySourceIndex));
+    expect(releaseIosIndex, greaterThan(configureIosIndex));
+    expect(testFlightIndex, greaterThan(releaseIosIndex));
+    expect(workflow, contains('BUILD_PROVISION_PROFILE_BASE64'));
+    expect(workflow, contains('BUILD_WIDGET_PROVISION_PROFILE_BASE64'));
+    expect(workflow, contains('APPSTORE_API_ISSUER_ID'));
+    expect(
+      workflow,
+      contains(
+        r'--export-options-plist=${{ runner.temp }}/ExportOptions.plist',
+      ),
+    );
+    expect(workflow, contains('com.ituniversity.app.HomeWidget'));
+    expect(workflow, contains('if: always()'));
+    expect(workflow, contains('publish:\n    needs: release'));
+    expect(workflow, contains('actions/upload-artifact@'));
+    expect(workflow, contains('actions/download-artifact@'));
+  });
+
+  test('manual iOS release pins and verifies Shorebird source', () {
+    final workflow = File(
+      '.github/workflows/shorebird-release.yml',
+    ).readAsStringSync();
+
+    expect(
+      workflow,
+      contains('5ac7f9a9a5c4a5e66a958e608da0f73e34a3d6bb'),
+    );
+    expect(workflow, contains(r'git -C "$shorebird_dir" fetch --depth 1'));
+    expect(workflow, contains(r'git -C "$shorebird_dir" rev-parse HEAD'));
+    expect(workflow, isNot(contains('shorebirdtech/install')));
   });
 }
 
@@ -51,7 +109,7 @@ void expectProductionTargetBeforeSeparator(
     stepStart,
     stepEnd == -1 ? workflow.length : stepEnd,
   );
-  final argsMarker = '          args: >-\n';
+  const argsMarker = '          args: >-\n';
   final argsStart = step.indexOf(argsMarker);
   expect(argsStart, isNonNegative, reason: 'Missing args for $stepName');
 
