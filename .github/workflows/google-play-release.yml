@@ -1,0 +1,134 @@
+name: Google Play Internal Release
+
+on:
+  workflow_run:
+    workflows:
+      - Beta Release
+    types:
+      - completed
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: GitHub release tag
+        required: true
+
+permissions:
+  attestations: read
+  contents: read
+
+concurrency:
+  group: google-play-internal-${{ github.event.workflow_run.head_sha || inputs.release_tag }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'push')
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: beta
+    env:
+      GOOGLE_PLAY_SERVICE_ACCOUNT_JSON: >-
+        ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON || secrets.FIREBASE_SERVICE_ACCOUNT_RTU_MIREA_APP }}
+      PACKAGE_NAME: ninja.mirea.mireaapp
+
+    steps:
+      - name: Verify publishing configuration
+        shell: bash
+        run: |
+          if [[ -z "$GOOGLE_PLAY_SERVICE_ACCOUNT_JSON" ]]; then
+            printf 'Missing Google Play service account configuration\n' >&2
+            exit 1
+          fi
+
+      - name: Resolve beta release
+        id: release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_SHA: ${{ github.event.workflow_run.head_sha }}
+          REQUESTED_TAG: ${{ inputs.release_tag }}
+        shell: bash
+        run: |
+          if [[ -n "$REQUESTED_TAG" ]]; then
+            tag="$REQUESTED_TAG"
+          else
+            tag="$(
+              gh api "repos/$GITHUB_REPOSITORY/releases?per_page=100" \
+                --jq "[.[] | select(.prerelease and .target_commitish == \"$RELEASE_SHA\")][0].tag_name // empty"
+            )"
+          fi
+          if [[ -z "$tag" ]]; then
+            printf 'Matching beta release is unavailable\n' >&2
+            exit 1
+          fi
+          printf 'tag=%s\n' "$tag" >> "$GITHUB_OUTPUT"
+
+      - name: Download signed Android bundle
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ steps.release.outputs.tag }}
+        shell: bash
+        run: |
+          mkdir "$RUNNER_TEMP/play-release"
+          gh release download "$RELEASE_TAG" \
+            --repo "$GITHUB_REPOSITORY" \
+            --pattern '*.aab' \
+            --dir "$RUNNER_TEMP/play-release"
+          gh release download "$RELEASE_TAG" \
+            --repo "$GITHUB_REPOSITORY" \
+            --pattern 'SHA256SUMS' \
+            --dir "$RUNNER_TEMP/play-release"
+          mapfile -t bundles < <(
+            find "$RUNNER_TEMP/play-release" -maxdepth 1 -type f -name '*.aab' -print
+          )
+          if (( ${#bundles[@]} != 1 )); then
+            printf 'Expected one signed Android bundle, found %s\n' "${#bundles[@]}" >&2
+            exit 1
+          fi
+          bundle="${bundles[0]}"
+          unzip -t "$bundle" >/dev/null
+          (
+            cd "$RUNNER_TEMP/play-release"
+            sha256sum --check --ignore-missing SHA256SUMS
+          )
+          gh attestation verify "$bundle" --repo "$GITHUB_REPOSITORY"
+          printf 'ANDROID_BUNDLE=%s\n' "$bundle" >> "$GITHUB_ENV"
+
+      - name: Prepare Google Play credentials
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import base64
+          import json
+          import os
+          from pathlib import Path
+
+          raw = os.environ["GOOGLE_PLAY_SERVICE_ACCOUNT_JSON"].strip()
+          try:
+              credentials = json.loads(raw)
+          except json.JSONDecodeError:
+              credentials = json.loads(base64.b64decode(raw, validate=True))
+          required = {"client_email", "private_key", "project_id"}
+          if not required.issubset(credentials):
+              raise SystemExit("Invalid Google Play service account configuration")
+          destination = Path(os.environ["RUNNER_TEMP"]) / "google-play-service-account.json"
+          destination.write_text(json.dumps(credentials), encoding="utf-8")
+          destination.chmod(0o600)
+          PY
+
+      - name: Upload beta to Google Play
+        uses: r0adkll/upload-google-play@e738b9dd8f2476ea806d921b64aacd24f34515a5
+        with:
+          serviceAccountJson: ${{ runner.temp }}/google-play-service-account.json
+          packageName: ${{ env.PACKAGE_NAME }}
+          releaseFiles: ${{ env.ANDROID_BUNDLE }}
+          releaseName: ${{ steps.release.outputs.tag }}
+          track: internal
+          status: completed
+
+      - name: Remove Google Play credentials
+        if: always()
+        shell: bash
+        run: rm -f "$RUNNER_TEMP/google-play-service-account.json"
