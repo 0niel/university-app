@@ -65,7 +65,7 @@ android {
     defaultConfig {
         applicationId "ninja.mirea.mireaapp"
         minSdk 26
-        targetSdk 34
+        targetSdk 36
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
         multiDexEnabled true
@@ -175,4 +175,5 @@ dependencies {
 
     implementation "com.google.android.gms:play-services-location:21.3.0"
     implementation "com.google.android.gms:play-services-ads:24.0.0"
+    implementation "com.android.billingclient:billing:8.3.0"
 }
