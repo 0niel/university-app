@@ -159,6 +159,40 @@ void main() {
     expect(called, isFalse);
   });
 
+  test('loads materials through the tenant-scoped v1 RPC', () async {
+    final repository = _repository(
+      MockClient((request) async {
+        expect(
+          request.url.path,
+          '/rest/v1/rpc/list_public_materials_v1',
+        );
+        expect(jsonDecode(request.body), {
+          'p_organization_id': 'university',
+          'p_limit': 25,
+        });
+        return http.Response(
+          jsonEncode([
+            {
+              'id': 'material-1',
+              'title': 'Legacy anonymous notes',
+              'hasFile': false,
+              'requiresRepublish': true,
+            },
+          ]),
+          200,
+          request: request,
+          headers: {'content-type': 'application/json'},
+        );
+      }),
+    );
+
+    final materials = await repository.getPublicMaterials(limit: 25);
+    final material = materials.singleOrNull;
+
+    expect(material?.requiresRepublish, isTrue);
+    expect(material?.hasFile, isFalse);
+  });
+
   test('creates a signed URL for an attached public material', () async {
     final client = MockClient((request) async {
       if (request.url.path.endsWith('/rest/v1/rpc/access_public_material')) {

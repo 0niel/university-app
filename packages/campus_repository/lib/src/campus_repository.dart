@@ -456,7 +456,7 @@ class CampusRepository {
 
   Future<List<StudyMaterial>> getPublicMaterials({int limit = 50}) async {
     final res = await _supabase.rpc<Object?>(
-      'get_public_materials',
+      'list_public_materials_v1',
       params: {'p_organization_id': _organizationId, 'p_limit': limit},
     );
     return _mapRows(res, StudyMaterial.fromJson);

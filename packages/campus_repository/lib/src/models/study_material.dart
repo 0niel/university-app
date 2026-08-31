@@ -20,6 +20,7 @@ abstract class StudyMaterial with _$StudyMaterial {
     @Default('') String mimeType,
     @Default(0) int fileSize,
     @Default(false) bool hasFile,
+    @Default(false) bool requiresRepublish,
     @Default(false) bool isMine,
     @JsonKey(fromJson: dateTimeFromJson, toJson: dateTimeToJson)
     DateTime? createdAt,

@@ -32,9 +32,18 @@ class MaterialRow extends StatelessWidget {
     ].join(' · ');
     final accent = colors.brand;
     final compact = MediaQuery.textScalerOf(context).scale(1) > 1.5;
-    final price = material.isFree
-        ? const PricePill(free: true)
-        : PricePill(shurikens: material.price);
+    final price = switch ((material.hasFile, material.requiresRepublish)) {
+      (false, true) => PricePill(
+        text: l10n.knowledgeMaterialRepublishRequired,
+        locked: true,
+      ),
+      (false, false) => PricePill(
+        text: l10n.knowledgeMaterialNoAttachment,
+        locked: true,
+      ),
+      (true, _) when material.isFree => const PricePill(free: true),
+      _ => PricePill(shurikens: material.price),
+    };
     final action = loading
         ? SizedBox.square(
             dimension: 24,
@@ -50,7 +59,14 @@ class MaterialRow extends StatelessWidget {
       container: true,
       button: true,
       enabled: enabled,
-      label: '${material.title}, $meta',
+      label: [
+        material.title,
+        meta,
+        if (!material.hasFile)
+          material.requiresRepublish
+              ? l10n.knowledgeMaterialRepublishRequired
+              : l10n.knowledgeMaterialNoAttachment,
+      ].join(', '),
       child: AppPressable(
         onTap: enabled ? onDownload : null,
         child: Container(

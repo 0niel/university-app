@@ -53,6 +53,61 @@ begin
     raise exception 'Material upload verification is incomplete';
   end if;
 
+  v_definition := pg_get_functiondef(
+    'app_api_v1.list_public_materials_v1(text,integer)'::regprocedure
+  );
+  if has_function_privilege(
+      'anon',
+      'app_api_v1.list_public_materials_v1(text,integer)',
+      'EXECUTE'
+    )
+    or not has_function_privilege(
+      'authenticated',
+      'app_api_v1.list_public_materials_v1(text,integer)',
+      'EXECUTE'
+    )
+    or not (
+      select function_row.prosecdef
+      from pg_proc function_row
+      where function_row.oid =
+        'app_api_v1.list_public_materials_v1(text,integer)'::regprocedure
+    )
+    or position('auth.uid()' in v_definition) = 0
+    or position('core.user_academic_profiles' in v_definition) = 0
+    or position('profile.organization_id = p_organization_id' in v_definition) = 0
+    or position('storage.objects' in v_definition) = 0
+    or position('requiresRepublish' in v_definition) = 0
+    or position('''filePath''' in v_definition) > 0 then
+    raise exception 'Material listing tenant or privacy checks are incomplete';
+  end if;
+
+  v_definition := pg_get_functiondef(
+    'app_api_v1.access_public_material(uuid)'::regprocedure
+  );
+  if position('for update' in lower(v_definition)) = 0
+    or position('core.material_entitlements' in v_definition) = 0
+    or position('apply_organization_shuriken_delta' in v_definition) = 0
+    or position('storage.objects' in v_definition) = 0
+    or position('split_part(v_material.file_path' in v_definition) = 0 then
+    raise exception 'Material purchase or anonymous access is not atomic';
+  end if;
+
+  select policy.qual
+  into v_definition
+  from pg_policies policy
+  where policy.schemaname = 'storage'
+    and policy.tablename = 'objects'
+    and policy.policyname =
+      'authorized users can read linked lesson material files';
+
+  if v_definition is null
+    or position('core.user_academic_profiles' in v_definition) = 0
+    or position('material.organization_id' in v_definition) = 0
+    or position('core.material_entitlements' in v_definition) = 0
+    or position('split_part(material.file_path' in v_definition) = 0 then
+    raise exception 'Material storage policy is not tenant-safe';
+  end if;
+
   foreach v_definition in array array[
     pg_get_functiondef(
       'app_api_v1.create_lesson_material(text,text,date,integer,text,text,text,text,text,text,bigint,boolean,boolean)'::regprocedure

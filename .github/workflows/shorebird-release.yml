@@ -194,26 +194,45 @@ jobs:
             --config "$RUNNER_TEMP/university.json"
 
       - name: Release iOS
-        uses: shorebirdtech/shorebird-release@fb52cad53f4ed5ce39883d51a26916ead502b93d
         env:
           SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
-        with:
-          platform: ios
-          flutter-version: 3.44.2
-          args: >-
-            --export-options-plist=${{ runner.temp }}/ExportOptions.plist
-            --target lib/main/main_production.dart
-            --
-            --dart-define-from-file=${{ runner.temp }}/university.json
-            --dart-define-from-file=${{ runner.temp }}/firebase.json
-            --dart-define=SUPABASE_URL=${{ vars.SUPABASE_URL }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/dart-symbols"
+          shorebird release ios \
+            --flutter-version 3.44.2 \
+            --export-options-plist=${{ runner.temp }}/ExportOptions.plist \
+            --target lib/main/main_production.dart \
+            --obfuscate \
+            --split-debug-info="$RUNNER_TEMP/dart-symbols" \
+            --no-confirm \
+            -- \
+            --dart-define-from-file=${{ runner.temp }}/university.json \
+            --dart-define-from-file=${{ runner.temp }}/firebase.json \
+            --dart-define=SUPABASE_URL=${{ vars.SUPABASE_URL }} \
             --dart-define=SUPABASE_PUBLISHABLE_KEY=${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
+
+      - name: Encrypt release symbols
+        run: |
+          symbols_root="$RUNNER_TEMP/release-symbols"
+          symbols_archive="$RUNNER_TEMP/ios-release-symbols.tar.gz"
+          mkdir -p "$symbols_root/dart" "$symbols_root/ios" build/release-symbols
+          cp -R "$RUNNER_TEMP/dart-symbols/." "$symbols_root/dart/"
+          if [[ -d build/ios/archive/Runner.xcarchive/dSYMs ]]; then
+            cp -R build/ios/archive/Runner.xcarchive/dSYMs/. "$symbols_root/ios/"
+          fi
+          tar -czf "$symbols_archive" -C "$symbols_root" .
+          openssl smime -encrypt -binary -aes256 -outform DER \
+            -in "$symbols_archive" \
+            -out build/release-symbols/ios-release-symbols.cms \
+            tool/release_symbols_public.pem
 
       - name: Upload iOS artifact
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: ios-shorebird-release
-          path: build/ios/ipa/*.ipa
+          path: |
+            build/ios/ipa/*.ipa
+            build/release-symbols/*.cms
           if-no-files-found: error
           retention-days: 30
 

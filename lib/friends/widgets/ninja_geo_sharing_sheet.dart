@@ -4,8 +4,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:rtu_mirea_app/friends/cubit/friends_map_cubit.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 
-part 'ninja_geo_section_card.dart';
-part 'ninja_geo_sharing_toggle_card.dart';
+part 'ninja_geo_settings_section.dart';
+part 'ninja_geo_sharing_toggle_row.dart';
 
 class NinjaGeoSharingSheet extends StatelessWidget {
   const NinjaGeoSharingSheet({super.key});
@@ -23,16 +23,19 @@ class NinjaGeoSharingSheet extends StatelessWidget {
           crossAxisAlignment: .stretch,
           children: [
             if (state.privacySyncFailed) ...[
-              NinjaBanner(
-                tone: .danger,
-                title: l10n.error,
-                body: l10n.friendsPrivacySyncError,
-                actionLabel: l10n.retry,
-                onAction: () => cubit.updateGeoSettings(settings),
+              Padding(
+                padding: const .symmetric(horizontal: AppSpacing.xl),
+                child: NinjaBanner(
+                  tone: .danger,
+                  title: l10n.error,
+                  body: l10n.friendsPrivacySyncError,
+                  actionLabel: l10n.retry,
+                  onAction: () => cubit.updateGeoSettings(settings),
+                ),
               ),
               const SizedBox(height: 14),
             ],
-            _NinjaGeoSharingToggleCard(
+            _NinjaGeoSharingToggleRow(
               icon: AppLineIcon.pin,
               title: l10n.friendsShareGeo,
               subtitle: l10n.friendsShareGeoSub,
@@ -42,7 +45,8 @@ class NinjaGeoSharingSheet extends StatelessWidget {
                   : (v) =>
                         cubit.updateGeoSettings(settings.copyWith(sharing: v)),
             ),
-            _NinjaGeoSharingToggleCard(
+            const _NinjaGeoSettingsDivider(),
+            _NinjaGeoSharingToggleRow(
               icon: AppLineIcon.hide,
               title: l10n.friendsGhostMode,
               subtitle: l10n.friendsGhostSub,
@@ -51,8 +55,8 @@ class NinjaGeoSharingSheet extends StatelessWidget {
                   ? (_) => cubit.toggleGhostMode()
                   : null,
             ),
-            const SizedBox(height: 18),
-            _NinjaGeoSectionCard(
+            const SizedBox(height: 22),
+            _NinjaGeoSettingsSection(
               title: l10n.friendsWhoSeesExact,
               helper: hidden ? l10n.friendsVisNoneSub : null,
               child: NinjaSegmented<GeoVisibility>(
@@ -75,8 +79,8 @@ class NinjaGeoSharingSheet extends StatelessWidget {
                 ],
               ),
             ),
-            const SizedBox(height: 10),
-            _NinjaGeoSectionCard(
+            const SizedBox(height: 22),
+            _NinjaGeoSettingsSection(
               title: l10n.friendsPrecisionHeader,
               child: NinjaSegmented<GeoPrecision>(
                 value: settings.precision,
@@ -102,6 +106,7 @@ class NinjaGeoSharingSheet extends StatelessWidget {
                 ],
               ),
             ),
+            const SizedBox(height: 8),
           ],
         );
       },

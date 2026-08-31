@@ -5115,6 +5115,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get knowledgeTopAuthors => 'Top authors';
 
   @override
+  String get knowledgeMaterialNoAttachment => 'No attachment';
+
+  @override
+  String get knowledgeMaterialRepublishRequired => 'Needs re-upload';
+
+  @override
   String knowledgePages(int n) {
     return '$n pp.';
   }
