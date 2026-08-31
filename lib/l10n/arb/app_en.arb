@@ -3730,7 +3730,7 @@
   "@friendsRemove": {},
   "friendsShareGeo": "Share my location",
   "@friendsShareGeo": {},
-  "friendsShareGeoSub": "friends see you on the campus map",
+  "friendsShareGeoSub": "updates while Friends on the map is open",
   "@friendsShareGeoSub": {},
   "friendsPrivacySyncError": "The server did not confirm your privacy settings. Location publishing is stopped on this device — retry the sync.",
   "@friendsPrivacySyncError": {},
@@ -5412,14 +5412,6 @@
   "miniAppsSubmitScreenPathHint": "Screen path, e.g. /stats",
   "miniAppsSubmitRemoveScreen": "Remove screen",
   "miniAppsSubmitInvalidScreens": "Check screens: paths must be unique latin paths and include /",
-  "friendsGeoServiceTitle": "Friends on the map",
-  "@friendsGeoServiceTitle": {
-    "description": "Title of the Android foreground notification while sharing location with friends"
-  },
-  "friendsGeoServiceText": "Sharing your location with friends. Turn on ghost mode to hide.",
-  "@friendsGeoServiceText": {
-    "description": "Body of the Android foreground notification while sharing location with friends"
-  },
   "peopleTitle": "People",
   "@peopleTitle": {},
   "peopleLoadError": "Couldn’t load people",

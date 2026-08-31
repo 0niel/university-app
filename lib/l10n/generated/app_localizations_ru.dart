@@ -3765,7 +3765,8 @@ class AppLocalizationsRu extends AppLocalizations {
   String get friendsShareGeo => 'Делиться геопозицией';
 
   @override
-  String get friendsShareGeoSub => 'друзья видят тебя на карте кампуса';
+  String get friendsShareGeoSub =>
+      'обновляется, пока открыт экран карты друзей';
 
   @override
   String get friendsPrivacySyncError =>
@@ -5752,13 +5753,6 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get miniAppsSubmitInvalidScreens =>
       'Проверь экраны: пути латиницей, без повторов и обязательно с /';
-
-  @override
-  String get friendsGeoServiceTitle => 'Друзья на карте';
-
-  @override
-  String get friendsGeoServiceText =>
-      'Делимся геопозицией с друзьями. Включи режим призрака, чтобы скрыться.';
 
   @override
   String get peopleTitle => 'Люди';

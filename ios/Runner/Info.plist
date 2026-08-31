@@ -8,12 +8,9 @@
 		<string>Face ID используется, чтобы разблокировать пропуск.</string>
 		<key>NSLocationWhenInUseUsageDescription</key>
 		<string>Геопозиция нужна, чтобы делиться местоположением с друзьями на карте и видеть их рядом.</string>
-		<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-		<string>Доступ в фоне позволяет друзьям видеть тебя на карте, даже когда приложение свёрнуто. Режим призрака отключает шеринг в один тап.</string>
 		<key>UIBackgroundModes</key>
 		<array>
 			<string>fetch</string>
-			<string>location</string>
 			<string>remote-notification</string>
 		</array>
 		<key>ITSAppUsesNonExemptEncryption</key>

@@ -130,7 +130,7 @@ jobs:
           packageName: ${{ env.PACKAGE_NAME }}
           releaseFiles: ${{ env.ANDROID_BUNDLE }}
           releaseName: ${{ steps.release.outputs.tag }}
-          track: internal
+          tracks: internal
           status: completed
 
       - name: Remove Google Play credentials
