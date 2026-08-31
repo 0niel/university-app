@@ -16,6 +16,7 @@ void main() {
     expect(workflow, contains('cancel-in-progress: false'));
     expect(workflow, contains('shorebirdtech/shorebird-release@'));
     expect(workflow, contains('--artifact apk'));
+    expect(workflow, contains('--target lib/main/main_production.dart'));
     expect(workflow, contains('app-production-release.apk'));
     expect(workflow, contains('app-production-release.aab'));
     expect(workflow, contains('actions/upload-artifact@'));

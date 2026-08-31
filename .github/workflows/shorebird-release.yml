@@ -114,6 +114,7 @@ jobs:
           flutter-version: 3.44.2
           args: >-
             --flavor production
+            --target lib/main/main_production.dart
             --
             --dart-define-from-file=${{ runner.temp }}/university.json
             --dart-define-from-file=${{ runner.temp }}/firebase.json
@@ -128,6 +129,7 @@ jobs:
           platform: ios
           flutter-version: 3.44.2
           args: >-
+            --target lib/main/main_production.dart
             --
             --dart-define-from-file=${{ runner.temp }}/university.json
             --dart-define-from-file=${{ runner.temp }}/firebase.json

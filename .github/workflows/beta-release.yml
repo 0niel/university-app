@@ -200,6 +200,7 @@ jobs:
           args: >-
             --artifact apk
             --flavor production
+            --target lib/main/main_production.dart
             --build-name ${{ needs.prepare.outputs.build_name }}
             --build-number ${{ needs.prepare.outputs.build_number }}
             --
