@@ -138,10 +138,17 @@ jobs:
           flutter-version-file: .fvmrc
           cache: true
 
-      - name: Set up Shorebird
-        uses: shorebirdtech/setup-shorebird@4dd9d7dc2d7930bfeadb053b6e94b5110779d1e5 # v1
-        with:
-          cache: true
+      - name: Install pinned Shorebird
+        run: |
+          shorebird_dir="$RUNNER_TEMP/shorebird-sdk"
+          shorebird_revision="5ac7f9a9a5c4a5e66a958e608da0f73e34a3d6bb"
+          mkdir "$shorebird_dir"
+          git -C "$shorebird_dir" init
+          git -C "$shorebird_dir" remote add origin https://github.com/shorebirdtech/shorebird.git
+          git -C "$shorebird_dir" fetch --depth 1 origin "$shorebird_revision"
+          git -C "$shorebird_dir" checkout --detach FETCH_HEAD
+          test "$(git -C "$shorebird_dir" rev-parse HEAD)" = "$shorebird_revision"
+          printf '%s\n' "$shorebird_dir/bin" >> "$GITHUB_PATH"
 
       - name: Install dependencies
         run: flutter pub get
@@ -190,23 +197,21 @@ jobs:
 
       - name: Release Android beta
         id: shorebird
-        uses: shorebirdtech/shorebird-release@fb52cad53f4ed5ce39883d51a26916ead502b93d # v1
         env:
           ORG_GRADLE_PROJECT_requirePrivateNfcModule: "true"
           SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
-        with:
-          platform: android
-          flutter-version: 3.44.2
-          args: >-
-            --artifact apk
-            --flavor production
-            --target lib/main/main_production.dart
-            --build-name ${{ needs.prepare.outputs.build_name }}
-            --build-number ${{ needs.prepare.outputs.build_number }}
-            --
-            --dart-define-from-file=${{ runner.temp }}/university.json
-            --dart-define-from-file=${{ runner.temp }}/firebase.json
-            --dart-define=SUPABASE_URL=${{ vars.SUPABASE_URL }}
+        run: |
+          shorebird release android \
+            --flutter-version 3.44.2 \
+            --artifact apk \
+            --flavor production \
+            --target lib/main/main_production.dart \
+            --build-name ${{ needs.prepare.outputs.build_name }} \
+            --build-number ${{ needs.prepare.outputs.build_number }} \
+            -- \
+            --dart-define-from-file=${{ runner.temp }}/university.json \
+            --dart-define-from-file=${{ runner.temp }}/firebase.json \
+            --dart-define=SUPABASE_URL=${{ vars.SUPABASE_URL }} \
             --dart-define=SUPABASE_PUBLISHABLE_KEY=${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
 
       - name: Collect artifacts
