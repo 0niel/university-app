@@ -220,5 +220,50 @@ void main() {
       expect(find.textContaining('Длинный конспект'), findsOneWidget);
       expect(tester.takeException(), isNull);
     });
+
+    testWidgets('opens the signed material before incrementing downloads', (
+      tester,
+    ) async {
+      const material = StudyMaterial(
+        id: 'material-1',
+        title: 'Открываемый конспект',
+        fileName: 'notes.pdf',
+        hasFile: true,
+      );
+      final uri = Uri.parse('https://project.supabase.co/signed/notes.pdf');
+      Uri? openedUri;
+      when(() => cubit.state).thenReturn(
+        const KnowledgeBankState(
+          status: KnowledgeBankStatus.populated,
+          materials: [material],
+        ),
+      );
+      when(() => cubit.materialUrl(material)).thenAnswer((_) async => uri);
+      when(() => cubit.materialOpened(material)).thenAnswer((_) async {});
+
+      await tester.pumpWidget(
+        _wrap(
+          BlocProvider<KnowledgeBankCubit>.value(
+            value: cubit,
+            child: KnowledgeBankView(
+              onOpenMaterial: (uri) async {
+                openedUri = uri;
+                return true;
+              },
+            ),
+          ),
+          reduceMotion: true,
+        ),
+      );
+      await tester.pump();
+      await tester.tap(find.text('Открываемый конспект'));
+      await tester.pump();
+
+      expect(openedUri, uri);
+      verifyInOrder([
+        () => cubit.materialUrl(material),
+        () => cubit.materialOpened(material),
+      ]);
+    });
   });
 }

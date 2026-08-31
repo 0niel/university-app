@@ -18,15 +18,8 @@ abstract class GroupLink with _$GroupLink {
 
   const GroupLink._();
 
-  factory GroupLink.fromJson(Map<String, Object?> json) {
-    for (final field in const ['id', 'title', 'url']) {
-      final value = json[field];
-      if (value is! String || value.trim().isEmpty) {
-        throw FormatException('GroupLink $field must be a non-empty string');
-      }
-    }
-    return _$GroupLinkFromJson(json);
-  }
+  factory GroupLink.fromJson(Map<String, Object?> json) =>
+      _$GroupLinkFromJson(_validatedGroupLinkJson(json));
 
   bool get isTelegram => kind == 'telegram';
 
@@ -34,4 +27,14 @@ abstract class GroupLink with _$GroupLink {
     url,
     telegramOnly: isTelegram,
   )?.uri;
+}
+
+Map<String, dynamic> _validatedGroupLinkJson(Map<String, Object?> json) {
+  for (final field in const ['id', 'title', 'url']) {
+    final value = json[field];
+    if (value is! String || value.trim().isEmpty) {
+      throw FormatException('GroupLink $field must be a non-empty string');
+    }
+  }
+  return Map.from(json);
 }

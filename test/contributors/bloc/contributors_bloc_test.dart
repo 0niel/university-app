@@ -72,5 +72,29 @@ void main() {
       ],
       errors: () => [isA<Exception>()],
     );
+
+    blocTest<ContributorsBloc, ContributorsState>(
+      'preserves loaded contributors when an offline refresh fails',
+      setUp: () => when(
+        () => communityRepository.getContributors(),
+      ).thenThrow(Exception('offline')),
+      seed: () => const ContributorsState(
+        status: ContributorsStatus.loaded,
+        contributors: response,
+      ),
+      build: buildBloc,
+      act: (bloc) => bloc.add(const ContributorsRequested()),
+      expect: () => const [
+        ContributorsState(
+          status: ContributorsStatus.loading,
+          contributors: response,
+        ),
+        ContributorsState(
+          status: ContributorsStatus.failure,
+          contributors: response,
+        ),
+      ],
+      errors: () => [isA<Exception>()],
+    );
   });
 }

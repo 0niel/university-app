@@ -2,4 +2,4 @@
 /// reminders.
 library;
 
-export 'src/local_notifications_client.dart';
+export 'src/local_notification_exception.dart';

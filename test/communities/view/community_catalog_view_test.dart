@@ -83,6 +83,23 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('catalog chrome fits 320px at 200% text', (tester) async {
+    tester.view.physicalSize = const Size(320, 800);
+    tester.view.devicePixelRatio = 1;
+    tester.platformDispatcher.textScaleFactorTestValue = 2;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+
+    await tester.pumpApp(
+      subject(const CommunityCatalogState(status: .success, catalog: catalog)),
+    );
+
+    expect(find.byType(NinjaCommunitySectionFilters), findsOneWidget);
+    expect(find.byType(NinjaInput), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('shows a truthful error and retries', (tester) async {
     await tester.pumpApp(
       subject(
@@ -172,6 +189,55 @@ void main() {
     );
     expect(back, findsOneWidget);
     expect(tester.getSize(back), const Size(44, 44));
+  });
+
+  testWidgets('collapses the catalog chrome and keeps search pinned', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(400, 700);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    final longCatalog = CommunityCatalog(
+      organizationId: 'university',
+      sections: [
+        CommunityCatalogSection(
+          key: 'clubs',
+          title: 'Clubs',
+          emoji: '🤖',
+          items: [
+            for (var index = 0; index < 12; index++)
+              CommunityCatalogEntry(
+                id: 'entry-$index',
+                slug: 'robotics-$index',
+                title: 'Robotics club $index',
+                description: 'Build robots together',
+                url: 'https://t.me/robotics$index',
+                platform: 'telegram',
+              ),
+          ],
+        ),
+      ],
+    );
+    await tester.pumpApp(
+      subject(
+        CommunityCatalogState(status: .success, catalog: longCatalog),
+      ),
+    );
+
+    expect(find.byType(CustomScrollView), findsOneWidget);
+    final search = find.byType(NinjaInput);
+    final initialTop = tester.getTopLeft(search).dy;
+
+    await tester.drag(find.byType(CustomScrollView), const Offset(0, -420));
+    await tester.pumpAndSettle();
+    final pinnedTop = tester.getTopLeft(search).dy;
+
+    expect(pinnedTop, lessThan(initialTop));
+    await tester.drag(find.byType(CustomScrollView), const Offset(0, -180));
+    await tester.pumpAndSettle();
+    expect(tester.getTopLeft(search).dy, closeTo(pinnedTop, 0.1));
   });
 
   testWidgets('suggestion card is the single pastel card of the catalog', (

@@ -18,6 +18,32 @@ begin
     raise exception 'Quest progress is client-writable';
   end if;
 
+  if has_table_privilege(
+      'authenticated',
+      'core.user_gamification_profiles',
+      'INSERT'
+    )
+    or has_table_privilege(
+      'authenticated',
+      'core.user_gamification_profiles',
+      'UPDATE'
+    )
+    or has_table_privilege(
+      'authenticated',
+      'core.user_gamification_profiles',
+      'DELETE'
+    ) then
+    raise exception 'Gamification balance is client-writable';
+  end if;
+
+  if not (
+    select prosecdef
+    from pg_proc
+    where oid = 'app_api_v1.create_public_material(text,text,text,text,integer,integer,boolean,text,text,text,bigint)'::regprocedure
+  ) then
+    raise exception 'Material publishing cannot apply its server reward';
+  end if;
+
   v_definition := pg_get_functiondef(
     'core.require_lesson_material_upload(uuid,text,bigint)'::regprocedure
   );

@@ -53,47 +53,41 @@ class KnowledgeBankCubit extends Cubit<KnowledgeBankState> {
 
   void typeChanged(String type) => emit(state.copyWith(type: type));
 
-  Future<bool> download(StudyMaterial material) async {
-    emit(
-      state.copyWith(
-        materials: [
-          for (final m in state.materials)
-            if (m.id == material.id) _incrementDownloads(m) else m,
-        ],
-      ),
-    );
+  Future<Uri?> materialUrl(StudyMaterial material) async {
     try {
-      await _campusRepository.incrementMaterialDownloads(material.id);
-      return true;
+      final url = await _campusRepository.createPublicMaterialUrl(material);
+      final uri = Uri.tryParse(url);
+      if (uri == null || !uri.isAbsolute) {
+        throw const FormatException('Invalid material URL');
+      }
+      return uri;
     } on Exception catch (error, stackTrace) {
       addError(error, stackTrace);
+      return null;
+    }
+  }
+
+  Future<void> materialOpened(StudyMaterial material) async {
+    try {
+      await _campusRepository.incrementMaterialDownloads(material.id);
+      if (isClosed) return;
       emit(
         state.copyWith(
           materials: [
             for (final m in state.materials)
-              if (m.id == material.id) material else m,
+              if (m.id == material.id) _incrementDownloads(m) else m,
           ],
         ),
       );
-      return false;
+    } on Exception catch (error, stackTrace) {
+      addError(error, stackTrace);
     }
   }
 
   Future<void> materialUploaded() => load();
 
-  StudyMaterial _incrementDownloads(StudyMaterial m) => .new(
-    id: m.id,
-    title: m.title,
-    subjectName: m.subjectName,
-    materialType: m.materialType,
-    downloads: m.downloads + 1,
-    likes: m.likes,
-    price: m.price,
-    pages: m.pages,
-    authorName: m.authorName,
-    isMine: m.isMine,
-    createdAt: m.createdAt,
-  );
+  StudyMaterial _incrementDownloads(StudyMaterial material) =>
+      material.copyWith(downloads: material.downloads + 1);
 
   Future<({T value, bool succeeded})> _loadSource<T>(
     Future<T> future,

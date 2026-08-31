@@ -1,4 +1,4 @@
-import 'package:community_repository/src/community_models.dart';
+import 'package:community_repository/src/contributors_response.dart';
 import 'package:discourse_api_client/discourse_api_client.dart' as discourse;
 import 'package:equatable/equatable.dart';
 import 'package:github/github.dart';

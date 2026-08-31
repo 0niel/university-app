@@ -24,6 +24,10 @@ _StudyMaterial _$StudyMaterialFromJson(Map<String, dynamic> json) =>
         price: $checkedConvert('price', (v) => (v as num?)?.toInt() ?? 0),
         pages: $checkedConvert('pages', (v) => (v as num?)?.toInt() ?? 0),
         authorName: $checkedConvert('authorName', (v) => v as String? ?? ''),
+        fileName: $checkedConvert('fileName', (v) => v as String? ?? ''),
+        mimeType: $checkedConvert('mimeType', (v) => v as String? ?? ''),
+        fileSize: $checkedConvert('fileSize', (v) => (v as num?)?.toInt() ?? 0),
+        hasFile: $checkedConvert('hasFile', (v) => v as bool? ?? false),
         isMine: $checkedConvert('isMine', (v) => v as bool? ?? false),
         createdAt: $checkedConvert('createdAt', (v) => dateTimeFromJson(v)),
       );
@@ -41,6 +45,10 @@ Map<String, dynamic> _$StudyMaterialToJson(_StudyMaterial instance) =>
       'price': instance.price,
       'pages': instance.pages,
       'authorName': instance.authorName,
+      'fileName': instance.fileName,
+      'mimeType': instance.mimeType,
+      'fileSize': instance.fileSize,
+      'hasFile': instance.hasFile,
       'isMine': instance.isMine,
       'createdAt': dateTimeToJson(instance.createdAt),
     };

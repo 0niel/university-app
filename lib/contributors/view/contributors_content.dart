@@ -36,7 +36,7 @@ class ContributorsContent extends StatelessWidget {
     ContributorsState state,
     NinjaColors colors,
   ) {
-    if (state.status == .failure) {
+    if (state.status == .failure && state.contributors.contributors.isEmpty) {
       return Padding(
         key: const ValueKey('contributors-failure'),
         padding: const EdgeInsets.symmetric(
@@ -52,7 +52,9 @@ class ContributorsContent extends StatelessWidget {
         ),
       );
     }
-    final isLoading = state.status == .loading;
+    final isLoading =
+        (state.status == .initial || state.status == .loading) &&
+        state.contributors.contributors.isEmpty;
     final items = state.contributors.contributors;
     if (!isLoading && items.isEmpty) {
       return const SizedBox.shrink(key: ValueKey('contributors-empty'));

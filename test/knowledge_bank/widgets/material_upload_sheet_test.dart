@@ -104,4 +104,37 @@ void main() {
 
     expect(readerCalled, isFalse);
   });
+
+  testWidgets('enables publishing after a file supplies the title', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: NinjaTheme.dark(),
+        locale: const Locale('ru'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: Scaffold(
+          body: SingleChildScrollView(
+            child: MaterialUploadSheet(
+              repository: _MockCampusRepository(),
+              filePickerBuilder: () async => PlatformFile(
+                name: 'lecture.pdf',
+                size: 1,
+              ),
+              fileReaderBuilder: (file) async => Uint8List.fromList(const [1]),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Перетащи файл или выбери'));
+    await tester.pump();
+
+    final publishButton = tester.widget<NinjaButton>(
+      find.widgetWithText(NinjaButton, 'Опубликовать'),
+    );
+    expect(publishButton.onPressed, isNotNull);
+  });
 }

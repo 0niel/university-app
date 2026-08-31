@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'dart:math' show Random;
 import 'dart:typed_data';
 
 import 'package:campus_repository/src/collab_note_presence_session.dart';
@@ -480,21 +481,21 @@ class CampusRepository {
     Uint8List? fileBytes,
     String? mimeType,
   }) async {
-    var filePath = '';
-    if (fileBytes != null && fileName != null) {
-      final userId = _supabase.auth.currentUser?.id ?? '';
-      filePath =
-          '$userId/bank/${DateTime.now().millisecondsSinceEpoch}_$fileName';
-      await _supabase.storage
-          .from('lesson-materials')
-          .uploadBinary(
-            filePath,
-            fileBytes,
-            fileOptions: FileOptions(
-              contentType: mimeType ?? 'application/octet-stream',
-            ),
-          );
+    if (fileBytes == null ||
+        fileBytes.isEmpty ||
+        fileName?.trim().isEmpty != false) {
+      throw ArgumentError('A material file is required');
     }
+    final filePath = 'bank/${_randomMaterialObjectKey()}';
+    await _supabase.storage
+        .from('lesson-materials')
+        .uploadBinary(
+          filePath,
+          fileBytes,
+          fileOptions: FileOptions(
+            contentType: mimeType ?? 'application/octet-stream',
+          ),
+        );
     try {
       await _supabase.rpc<Object?>(
         'create_public_material',
@@ -506,10 +507,10 @@ class CampusRepository {
           'p_price': price,
           'p_pages': pages,
           'p_is_anonymous': isAnonymous,
-          'p_file_name': fileName ?? '',
+          'p_file_name': fileName,
           'p_file_path': filePath,
           'p_mime_type': mimeType,
-          'p_file_size': fileBytes?.length ?? 0,
+          'p_file_size': fileBytes.length,
         },
       );
     } on Exception catch (error, stackTrace) {
@@ -535,6 +536,26 @@ class CampusRepository {
       'increment_material_downloads',
       params: {'p_id': id},
     );
+  }
+
+  Future<String> createPublicMaterialUrl(StudyMaterial material) async {
+    if (!material.hasFile) {
+      throw const FormatException('Material does not have an attached file');
+    }
+    final access = await _supabase.rpc<Object?>(
+      'access_public_material',
+      params: {'p_id': material.id},
+    );
+    if (access is! Map) {
+      throw const FormatException('Material access returned an invalid result');
+    }
+    final filePath = access['filePath'];
+    if (filePath is! String || filePath.isEmpty) {
+      throw const FormatException('Material access returned an invalid path');
+    }
+    return _supabase.storage
+        .from('lesson-materials')
+        .createSignedUrl(filePath, 60 * 10);
   }
 
   // ── Teacher profile ────────────────────────────────────────────────────────
@@ -669,4 +690,12 @@ class CampusRepository {
     }
     throw FormatException('$operation returned an invalid id');
   }
+}
+
+String _randomMaterialObjectKey() {
+  final random = Random.secure();
+  return List.generate(
+    16,
+    (_) => random.nextInt(256).toRadixString(16).padLeft(2, '0'),
+  ).join();
 }

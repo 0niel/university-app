@@ -5,7 +5,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:timezone/data/latest_all.dart' as tz_data;
 import 'package:timezone/timezone.dart' as tz;
 
-part 'local_notifications_client.freezed.dart';
+part 'local_notification_exception.freezed.dart';
 
 /// {@template local_notification_exception}
 /// Base failure for every [LocalNotificationsClient] operation.

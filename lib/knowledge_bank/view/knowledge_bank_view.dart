@@ -8,11 +8,27 @@ import 'package:rtu_mirea_app/knowledge_bank/cubit/knowledge_bank_cubit.dart';
 import 'package:rtu_mirea_app/knowledge_bank/view/knowledge_bank_list.dart';
 import 'package:rtu_mirea_app/knowledge_bank/widgets/widgets.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 part 'knowledge_filters.dart';
 
-class KnowledgeBankView extends StatelessWidget {
-  const KnowledgeBankView({super.key});
+class KnowledgeBankView extends StatefulWidget {
+  const KnowledgeBankView({
+    this.onOpenMaterial = _openExternal,
+    super.key,
+  });
+
+  final Future<bool> Function(Uri uri) onOpenMaterial;
+
+  static Future<bool> _openExternal(Uri uri) =>
+      launchUrl(uri, mode: .externalApplication);
+
+  @override
+  State<KnowledgeBankView> createState() => _KnowledgeBankViewState();
+}
+
+class _KnowledgeBankViewState extends State<KnowledgeBankView> {
+  final Set<String> _openingMaterialIds = {};
 
   Future<void> _upload(
     BuildContext context,
@@ -34,11 +50,25 @@ class KnowledgeBankView extends StatelessWidget {
     KnowledgeBankCubit cubit,
     StudyMaterial material,
   ) async {
-    final succeeded = await cubit.download(material);
-    if (!succeeded && context.mounted) {
+    if (_openingMaterialIds.contains(material.id)) return;
+    setState(() => _openingMaterialIds.add(material.id));
+    try {
+      final uri = await cubit.materialUrl(material);
+      if (uri == null) throw const FormatException('Material URL unavailable');
+      final opened = await widget.onOpenMaterial(uri);
+      if (!opened) throw StateError('No application can open the material');
+      if (!mounted) return;
+      await cubit.materialOpened(material);
+    } on Exception catch (_) {
+      if (!context.mounted) return;
       NinjaToastHost.maybeOf(context)?.show(
-        NinjaToastData(message: context.l10n.error, showCheck: false),
+        NinjaToastData(
+          message: context.l10n.lessonDetailsOpenFailed,
+          showCheck: false,
+        ),
       );
+    } finally {
+      if (mounted) setState(() => _openingMaterialIds.remove(material.id));
     }
   }
 
@@ -140,6 +170,7 @@ class KnowledgeBankView extends StatelessWidget {
                 isFiltered: state.type != 'all' && state.materials.isNotEmpty,
                 materials: state.filteredMaterials,
                 authors: state.authors,
+                openingMaterialIds: _openingMaterialIds,
                 onDownload: (material) =>
                     unawaited(_download(context, cubit, material)),
                 onRetry: () => unawaited(cubit.load()),
