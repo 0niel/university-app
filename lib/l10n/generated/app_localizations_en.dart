@@ -3707,7 +3707,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get friendsShareGeo => 'Share my location';
 
   @override
-  String get friendsShareGeoSub => 'friends see you on the campus map';
+  String get friendsShareGeoSub => 'updates while Friends on the map is open';
 
   @override
   String get friendsPrivacySyncError =>
@@ -5645,13 +5645,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get miniAppsSubmitInvalidScreens =>
       'Check screens: paths must be unique latin paths and include /';
-
-  @override
-  String get friendsGeoServiceTitle => 'Friends on the map';
-
-  @override
-  String get friendsGeoServiceText =>
-      'Sharing your location with friends. Turn on ghost mode to hide.';
 
   @override
   String get peopleTitle => 'People';

@@ -20,8 +20,6 @@ class FriendsMapCubit extends Cubit<FriendsMapState> {
     PreferencesRepository? preferencesRepository,
     PermissionClient permissionClient = const PermissionClient(),
     GeoFusionFilter? fusionFilter,
-    this._geoNotificationTitle = '',
-    this._geoNotificationText = '',
     this.wifiRefineInterval = const Duration(seconds: 30),
   }) : _preferences = preferencesRepository,
        _permissions = permissionClient,
@@ -35,9 +33,6 @@ class FriendsMapCubit extends Cubit<FriendsMapState> {
   final GeoFusionFilter _fusion;
 
   final Duration wifiRefineInterval;
-
-  final String _geoNotificationTitle;
-  final String _geoNotificationText;
 
   static const _geoPrefsKey = 'geo_sharing';
 
@@ -137,7 +132,10 @@ class FriendsMapCubit extends Cubit<FriendsMapState> {
     if (isClosed) return;
     _positionSub =
         Geolocator.getPositionStream(
-          locationSettings: _platformSettings(forceGnss: false),
+          locationSettings: friendsMapLocationSettings(
+            defaultTargetPlatform,
+            forceGnss: false,
+          ),
         ).listen(
           _onPositionCandidate,
           onError: (Object error) => Logger().w('fused stream error: $error'),
@@ -148,7 +146,10 @@ class FriendsMapCubit extends Cubit<FriendsMapState> {
     if (defaultTargetPlatform == .android) {
       _gnssSub =
           Geolocator.getPositionStream(
-            locationSettings: _platformSettings(forceGnss: true),
+            locationSettings: friendsMapLocationSettings(
+              defaultTargetPlatform,
+              forceGnss: true,
+            ),
           ).listen(
             _onPositionCandidate,
             onError: (Object error) => Logger().w('gnss stream error: $error'),
@@ -157,42 +158,16 @@ class FriendsMapCubit extends Cubit<FriendsMapState> {
 
     try {
       final position = await Geolocator.getCurrentPosition(
-        locationSettings: _platformSettings(forceGnss: false),
+        locationSettings: friendsMapLocationSettings(
+          defaultTargetPlatform,
+          forceGnss: false,
+        ),
       ).timeout(const Duration(seconds: 12));
       if (isClosed) return;
       _onPositionCandidate(position);
     } on Exception catch (error, stackTrace) {
       addError(error, stackTrace);
     }
-  }
-
-  LocationSettings _platformSettings({required bool forceGnss}) {
-    return switch (defaultTargetPlatform) {
-      .android => AndroidSettings(
-        accuracy: .bestForNavigation,
-        distanceFilter: 10,
-        intervalDuration: const Duration(seconds: 5),
-        forceLocationManager: forceGnss,
-        foregroundNotificationConfig: forceGnss
-            ? null
-            : ForegroundNotificationConfig(
-                notificationTitle: _geoNotificationTitle,
-                notificationText: _geoNotificationText,
-                notificationIcon: const AndroidResource(name: 'ic_launcher'),
-                setOngoing: true,
-              ),
-      ),
-      .iOS || .macOS => AppleSettings(
-        accuracy: .bestForNavigation,
-        distanceFilter: 10,
-        activityType: .fitness,
-        showBackgroundLocationIndicator: true,
-      ),
-      .fuchsia || .linux || .windows => const LocationSettings(
-        accuracy: .bestForNavigation,
-        distanceFilter: 10,
-      ),
-    };
   }
 
   @visibleForTesting
@@ -588,4 +563,29 @@ class FriendsMapCubit extends Cubit<FriendsMapState> {
     await _gnssSub?.cancel();
     return super.close();
   }
+}
+
+@visibleForTesting
+LocationSettings friendsMapLocationSettings(
+  TargetPlatform platform, {
+  required bool forceGnss,
+}) {
+  return switch (platform) {
+    .android => AndroidSettings(
+      accuracy: .bestForNavigation,
+      distanceFilter: 10,
+      intervalDuration: const Duration(seconds: 5),
+      forceLocationManager: forceGnss,
+    ),
+    .iOS || .macOS => AppleSettings(
+      accuracy: .bestForNavigation,
+      distanceFilter: 10,
+      activityType: .fitness,
+      allowBackgroundLocationUpdates: false,
+    ),
+    .fuchsia || .linux || .windows => const LocationSettings(
+      accuracy: .bestForNavigation,
+      distanceFilter: 10,
+    ),
+  };
 }

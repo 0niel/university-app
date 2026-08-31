@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:bloc_test/bloc_test.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:friends_repository/friends_repository.dart';
 import 'package:geolocator/geolocator.dart';
@@ -54,6 +55,33 @@ void main() {
         GeoSharingSettings.fromJson(const {'precision': 'city'}).precision,
         GeoPrecision.city,
       );
+    });
+  });
+
+  group('location publishing contract', () {
+    test('Android settings stay foreground-only', () {
+      final settings = friendsMapLocationSettings(
+        TargetPlatform.android,
+        forceGnss: false,
+      );
+
+      expect(settings, isA<AndroidSettings>());
+      expect(
+        (settings as AndroidSettings).foregroundNotificationConfig,
+        isNull,
+      );
+    });
+
+    test('iOS does not request a background indicator', () {
+      final settings = friendsMapLocationSettings(
+        TargetPlatform.iOS,
+        forceGnss: false,
+      );
+
+      expect(settings, isA<AppleSettings>());
+      final apple = settings as AppleSettings;
+      expect(apple.allowBackgroundLocationUpdates, false);
+      expect(apple.showBackgroundLocationIndicator, false);
     });
   });
 

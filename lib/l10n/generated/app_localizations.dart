@@ -6593,7 +6593,7 @@ abstract class AppLocalizations {
   /// No description provided for @friendsShareGeoSub.
   ///
   /// In en, this message translates to:
-  /// **'friends see you on the campus map'**
+  /// **'updates while Friends on the map is open'**
   String get friendsShareGeoSub;
 
   /// No description provided for @friendsPrivacySyncError.
@@ -9991,18 +9991,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Check screens: paths must be unique latin paths and include /'**
   String get miniAppsSubmitInvalidScreens;
-
-  /// Title of the Android foreground notification while sharing location with friends
-  ///
-  /// In en, this message translates to:
-  /// **'Friends on the map'**
-  String get friendsGeoServiceTitle;
-
-  /// Body of the Android foreground notification while sharing location with friends
-  ///
-  /// In en, this message translates to:
-  /// **'Sharing your location with friends. Turn on ghost mode to hide.'**
-  String get friendsGeoServiceText;
 
   /// No description provided for @peopleTitle.
   ///
