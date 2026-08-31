@@ -1,6 +1,3 @@
-export 'ads_retry_policy.dart';
-export 'banner_ad_container.dart';
-export 'banner_ad_content.dart';
 export 'fullscreen_image_viewer.dart';
 export 'inline_image.dart';
 export 'inline_video.dart';
@@ -8,7 +5,7 @@ export 'lock_icon.dart';
 export 'overlaid_image.dart';
 export 'post_content.dart';
 export 'post_content_category.dart';
-export 'post_footer.dart';
+export 'post_meta.dart';
 export 'progress_indicator.dart';
 export 'share_button.dart';
 export 'slideshow_category.dart';

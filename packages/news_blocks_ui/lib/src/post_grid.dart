@@ -1,14 +1,11 @@
 import 'package:app_ui/app_ui.dart';
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:news_blocks/news_blocks.dart';
 import 'package:news_blocks_ui/news_blocks_ui.dart';
 import 'package:news_blocks_ui/src/sliver_grid_custom_delegate.dart';
 
-/// {@template post_grid}
-/// A reusable post grid view.
-/// {@endtemplate}
 class PostGrid extends StatelessWidget {
-  /// {@macro post_grid}
   const PostGrid({
     required this.gridGroupBlock,
     required this.categoryName,
@@ -17,17 +14,9 @@ class PostGrid extends StatelessWidget {
     super.key,
   });
 
-  /// The associated [PostGridGroupBlock] instance.
   final PostGridGroupBlock gridGroupBlock;
-
-  /// The name of the category of the associated article.
   final String? categoryName;
-
-  /// Whether this post is a locked post.
   final bool isLocked;
-
-  /// An optional callback which is invoked when the action is triggered.
-  /// A [Uri] from the associated [BlockAction] is provided to the callback.
   final BlockActionCallback? onPressed;
 
   @override
@@ -36,36 +25,36 @@ class PostGrid extends StatelessWidget {
       return const SliverToBoxAdapter(child: SizedBox());
     }
 
-    final deviceWidth = MediaQuery.of(context).size.width;
+    final deviceWidth = MediaQuery.widthOf(context);
+    final scale = Theme.of(context).scale;
+    final spacing = scale.space(AppSpacing.sm);
 
     return SliverPadding(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+      padding: EdgeInsets.symmetric(horizontal: spacing),
       sliver: SliverGrid(
-        gridDelegate: CustomMaxCrossAxisDelegate(
-          maxCrossAxisExtent: deviceWidth / 2 - (AppSpacing.md / 2),
-          mainAxisSpacing: AppSpacing.md,
-          crossAxisSpacing: AppSpacing.md,
+        gridDelegate: SliverGridCustomDelegate(
+          maxCrossAxisExtent: deviceWidth / 2 - spacing,
+          mainAxisSpacing: spacing,
+          crossAxisSpacing: spacing,
           childAspectRatio: 3 / 2,
         ),
-        delegate: SliverChildBuilderDelegate(
-          (BuildContext context, int index) {
-            final block = gridGroupBlock.tiles[index];
-            if (index == 0) {
-              return PostLarge(
-                block: block.toPostLargeBlock(),
-                categoryName: categoryName,
-                isLocked: isLocked,
-                onPressed: onPressed,
-              );
-            }
-
-            return PostMedium(
-              block: block.toPostMediumBlock(),
+        delegate: SliverChildBuilderDelegate((context, index) {
+          final block = gridGroupBlock.tiles.elementAtOrNull(index);
+          if (block == null) return const SizedBox.shrink();
+          if (index == 0) {
+            return PostLarge(
+              block: block.toPostLargeBlock(),
+              categoryName: categoryName,
+              isLocked: isLocked,
               onPressed: onPressed,
             );
-          },
-          childCount: gridGroupBlock.tiles.length,
-        ),
+          }
+
+          return PostMedium(
+            block: block.toPostMediumBlock(),
+            onPressed: onPressed,
+          );
+        }, childCount: gridGroupBlock.tiles.length),
       ),
     );
   }

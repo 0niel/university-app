@@ -1,0 +1,670 @@
+/* =========================================================================
+   Mini Apps docs — Vercel / Geist skin
+   Pure black & white, true-neutral Geist grays, hairline borders (white-8%
+   in the dark), a near-subliminal grid that fades through a radial mask, and
+   a brand "light" glow behind the hero. UI surfaces stay flat; the drama is
+   grid + glow + type + space. Landing cards get a cursor spotlight + gradient
+   rim (see .VPFeature + theme/index.ts). Layout geometry stays VitePress's.
+   ========================================================================= */
+
+:root {
+  /* Geist neutral gray scale (true neutral, no tint) */
+  --g-100: #f7f7f7;
+  --g-200: #e5e5e5;
+  --g-300: #d4d4d4;
+  --g-400: #a3a3a3;
+  --g-500: #737373;
+  --g-600: #525252;
+  --g-700: #404040;
+  --g-800: #262626;
+  --g-900: #171717;
+  --g-950: #0a0a0a;
+
+  /* Brand accent + signature spectrum (purple → violet → pink) */
+  --accent: #6b3df5;
+  --accent-2: #8f74ff;
+  --spectrum: linear-gradient(110deg, #7c5cff 0%, #b14bff 48%, #ff5fa2 100%);
+  --vp-c-brand-1: #6b3df5;
+  --vp-c-brand-2: #7c5cff;
+  --vp-c-brand-3: #7c5cff;
+  --vp-c-brand-soft: rgba(124, 92, 255, 0.1);
+
+  /* Surfaces — light */
+  --geist-bg: #ffffff;
+  --geist-bg-2: #fafafa;
+  --geist-bg-3: #f5f5f5;
+  --geist-card: #ffffff;
+  --border: #ebebeb;
+  --border-strong: #d4d4d4;
+  --grid-line: rgba(0, 0, 0, 0.05);
+  --spot-color: rgba(124, 92, 255, 0.1);
+  --hero-name-grad: var(--spectrum);
+
+  /* Map onto VitePress */
+  --vp-c-bg: var(--geist-bg);
+  --vp-c-bg-alt: var(--geist-bg-2);
+  --vp-c-bg-soft: var(--geist-bg-3);
+  --vp-c-bg-elv: var(--geist-card);
+  --vp-c-text-1: var(--g-900);
+  --vp-c-text-2: var(--g-600);
+  --vp-c-text-3: var(--g-400);
+  --vp-c-divider: var(--border);
+  --vp-c-border: var(--border);
+  --vp-c-gutter: var(--border);
+
+  /* Type — Geist */
+  --vp-font-family-base: 'Geist', ui-sans-serif, system-ui, -apple-system,
+    'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --vp-font-family-mono: 'Geist Mono', ui-monospace, 'SF Mono', 'Cascadia Code',
+    'Fira Code', Menlo, Consolas, monospace;
+
+  /* Radii */
+  --r-s: 6px;
+  --r-m: 8px;
+  --r-l: 12px;
+
+  /* Soft layered elevation (4–12% black) */
+  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.06);
+  --shadow-2: 0 8px 30px rgba(0, 0, 0, 0.08);
+
+  /* Buttons — primary is monochrome-inverted (Vercel signature) */
+  --vp-button-brand-bg: var(--g-900);
+  --vp-button-brand-text: #fff;
+  --vp-button-brand-border: transparent;
+  --vp-button-brand-hover-bg: #000;
+  --vp-button-brand-hover-text: #fff;
+  --vp-button-brand-hover-border: transparent;
+  --vp-button-brand-active-bg: #000;
+  --vp-button-brand-active-border: transparent;
+  --vp-button-alt-bg: transparent;
+  --vp-button-alt-text: var(--g-900);
+  --vp-button-alt-border: var(--border-strong);
+  --vp-button-alt-hover-bg: var(--geist-bg-3);
+  --vp-button-alt-hover-text: var(--g-900);
+  --vp-button-alt-hover-border: var(--g-400);
+
+  /* Home hero name → spectrum gradient text */
+  --vp-home-hero-name-color: transparent;
+  --vp-home-hero-name-background: var(--hero-name-grad);
+  --vp-home-hero-image-background-image: none;
+  --vp-home-hero-image-filter: none;
+
+  /* Custom blocks */
+  --vp-custom-block-info-bg: var(--geist-bg-2);
+  --vp-custom-block-info-border: var(--border);
+  --vp-custom-block-tip-bg: var(--vp-c-brand-soft);
+  --vp-custom-block-tip-border: rgba(124, 92, 255, 0.28);
+  --vp-custom-block-tip-text: var(--vp-c-text-1);
+  --vp-custom-block-warning-bg: rgba(245, 166, 35, 0.08);
+  --vp-custom-block-warning-border: rgba(245, 166, 35, 0.32);
+  --vp-custom-block-warning-text: var(--vp-c-text-1);
+  --vp-custom-block-danger-bg: rgba(238, 0, 0, 0.07);
+  --vp-custom-block-danger-border: rgba(238, 0, 0, 0.3);
+  --vp-custom-block-danger-text: var(--vp-c-text-1);
+}
+
+.dark {
+  --accent: #8f74ff;
+  --accent-2: #a48dff;
+  --vp-c-brand-1: #b3a1ff;
+  --vp-c-brand-2: #8f74ff;
+  --vp-c-brand-3: #8f74ff;
+  --vp-c-brand-soft: rgba(143, 116, 255, 0.16);
+
+  /* Surfaces — dark (true black, white-alpha hairlines) */
+  --geist-bg: #000000;
+  --geist-bg-2: #0a0a0a;
+  --geist-bg-3: #141414;
+  --geist-card: #0a0a0a;
+  --border: rgba(255, 255, 255, 0.09);
+  --border-strong: rgba(255, 255, 255, 0.18);
+  --grid-line: rgba(255, 255, 255, 0.07);
+  --spot-color: rgba(143, 116, 255, 0.16);
+
+  --vp-c-bg: var(--geist-bg);
+  --vp-c-bg-alt: var(--geist-bg-2);
+  --vp-c-bg-soft: var(--geist-bg-3);
+  --vp-c-bg-elv: var(--geist-card);
+  --vp-c-text-1: #ededed;
+  --vp-c-text-2: var(--g-400);
+  --vp-c-text-3: var(--g-500);
+  --vp-c-divider: var(--border);
+  --vp-c-border: var(--border);
+
+  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.5);
+  --shadow-2: 0 8px 40px rgba(0, 0, 0, 0.6);
+
+  /* Dark primary button → inverted to white */
+  --vp-button-brand-bg: #ffffff;
+  --vp-button-brand-text: #000;
+  --vp-button-brand-hover-bg: var(--g-200);
+  --vp-button-brand-hover-text: #000;
+  --vp-button-brand-active-bg: var(--g-200);
+  --vp-button-alt-bg: transparent;
+  --vp-button-alt-text: #ededed;
+  --vp-button-alt-border: var(--border-strong);
+  --vp-button-alt-hover-bg: rgba(255, 255, 255, 0.06);
+  --vp-button-alt-hover-text: #fff;
+  --vp-button-alt-hover-border: rgba(255, 255, 255, 0.3);
+
+  --hero-name-grad: linear-gradient(110deg, #c9bcff 0%, #cf7bff 48%, #ff8fc0 100%);
+  --vp-custom-block-info-bg: var(--geist-bg-2);
+}
+
+/* --- Base ---------------------------------------------------------------- */
+
+html {
+  scroll-behavior: smooth;
+}
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: 'cv11', 'ss01';
+}
+
+h1,
+h2,
+h3,
+h4,
+.VPHero .name,
+.VPHero .text,
+.VPFeature .title,
+.VPNavBarTitle .title {
+  font-family: var(--vp-font-family-base);
+  letter-spacing: -0.025em;
+}
+
+/* Crisp accent focus ring */
+:where(a, button, input, summary, .VPButton):focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: var(--r-s);
+}
+
+/* --- Nav bar — translucent glass, hairline ------------------------------- */
+
+.VPNavBar {
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.25s, background-color 0.25s;
+}
+.VPNavBar:not(.home),
+.VPNavBar.has-sidebar {
+  border-bottom: 1px solid var(--vp-c-divider);
+}
+.VPNavBar .wrapper,
+.VPNavBar .content {
+  backdrop-filter: saturate(180%) blur(14px);
+  -webkit-backdrop-filter: saturate(180%) blur(14px);
+}
+.VPNavBar:not(.home) {
+  background-color: color-mix(in srgb, var(--vp-c-bg) 68%, transparent);
+}
+.VPNavBar.has-sidebar .content {
+  border-left: none;
+}
+.VPNavBarTitle .title {
+  font-weight: 600;
+  letter-spacing: -0.03em;
+}
+.VPNavBarMenuLink,
+.VPNavBarMenuGroup {
+  font-weight: 500;
+  font-size: 14px;
+  color: var(--vp-c-text-2);
+}
+.VPNavBarMenuLink:hover {
+  color: var(--vp-c-text-1);
+}
+.VPNavBarMenuLink.active {
+  color: var(--vp-c-text-1);
+  font-weight: 600;
+}
+
+/* --- Buttons — flat, soft, slight rise ----------------------------------- */
+
+.VPButton {
+  border-radius: var(--r-m) !important;
+  border-width: 1px;
+  border-style: solid;
+  font-weight: 500;
+  letter-spacing: 0;
+  transition: background-color 0.18s ease, border-color 0.18s ease,
+    color 0.18s ease, transform 0.12s ease, box-shadow 0.18s ease;
+}
+.VPButton.brand {
+  box-shadow: var(--shadow-1);
+}
+.VPButton:hover {
+  transform: translateY(-1px);
+}
+.VPButton.brand:hover {
+  box-shadow: var(--shadow-2);
+}
+.VPButton:active {
+  transform: translateY(0);
+}
+
+/* --- Home: grid backdrop + brand aurora ---------------------------------- */
+
+.VPHome {
+  position: relative;
+  isolation: isolate;
+}
+/* Subliminal grid, masked to fade out radially toward the page */
+.VPHome::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 760px;
+  z-index: -2;
+  background-image: linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
+  background-size: 56px 56px;
+  -webkit-mask-image: radial-gradient(
+    130% 75% at 50% -8%,
+    #000 32%,
+    transparent 72%
+  );
+  mask-image: radial-gradient(130% 75% at 50% -8%, #000 32%, transparent 72%);
+  pointer-events: none;
+}
+/* Aurora — two soft brand blobs that read like light */
+.VPHome::after {
+  content: '';
+  position: absolute;
+  top: -180px;
+  left: 50%;
+  width: min(1040px, 96vw);
+  height: 620px;
+  transform: translateX(-50%);
+  z-index: -1;
+  pointer-events: none;
+  background: radial-gradient(
+      42% 60% at 32% 42%,
+      rgba(124, 92, 255, 0.28),
+      transparent 70%
+    ),
+    radial-gradient(
+      40% 56% at 70% 50%,
+      rgba(255, 95, 162, 0.18),
+      transparent 70%
+    );
+  filter: blur(36px);
+  opacity: 0.85;
+}
+.dark .VPHome::after {
+  background: radial-gradient(
+      42% 60% at 32% 42%,
+      rgba(124, 92, 255, 0.32),
+      transparent 70%
+    ),
+    radial-gradient(
+      40% 56% at 70% 50%,
+      rgba(255, 95, 162, 0.16),
+      transparent 70%
+    );
+  opacity: 0.7;
+}
+
+/* --- Home hero — mono eyebrow + big tight gradient headline -------------- */
+
+.VPHero {
+  padding-top: 8px;
+}
+.hero-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  margin-bottom: 22px;
+  font-family: var(--vp-font-family-mono);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--vp-c-text-2);
+}
+.hero-eyebrow-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 0 4px var(--vp-c-brand-soft), 0 0 14px var(--accent);
+}
+.VPHero .name,
+.VPHero .text {
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -0.04em;
+}
+.VPHero .name {
+  font-size: clamp(44px, 7vw, 76px);
+}
+.VPHero .tagline {
+  color: var(--vp-c-text-2);
+  font-weight: 400;
+  font-size: 19px;
+  line-height: 1.6;
+  max-width: 600px;
+}
+
+/* --- Feature cards — gradient rim + cursor spotlight --------------------- */
+
+.VPFeatures {
+  padding-top: 12px;
+}
+/* VitePress styles .VPFeature with dynamically-injected [data-v] scoped rules
+   (border + bg + hover all = the same var), so order/specificity is unstable
+   in dev. !important on these surfaces wins cleanly — VitePress never uses it. */
+.VPFeatures .VPFeature {
+  position: relative;
+  border: 1px solid var(--border) !important;
+  border-radius: var(--r-l);
+  background: var(--geist-card) !important;
+  box-shadow: none;
+  overflow: hidden;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+}
+.VPFeature .box {
+  position: relative;
+  z-index: 1;
+}
+/* Cursor spotlight (driven by --mx/--my/--spot from theme/index.ts) */
+.VPFeature::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: radial-gradient(
+    260px circle at var(--mx, 50%) var(--my, 0%),
+    var(--spot-color),
+    transparent 60%
+  );
+  opacity: var(--spot, 0);
+  transition: opacity 0.3s ease;
+}
+/* Gradient hairline rim, revealed on hover */
+.VPFeature::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(120deg, transparent, var(--accent), transparent);
+  -webkit-mask: linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+.VPFeatures .VPFeature:hover {
+  border-color: var(--border-strong) !important;
+  box-shadow: var(--shadow-2);
+}
+.VPFeature:hover::before {
+  opacity: 0.55;
+}
+.VPFeature .icon {
+  border-radius: var(--r-m) !important;
+  border: 1px solid var(--border);
+  background: var(--geist-bg-3) !important;
+  font-size: 20px;
+  width: 44px;
+  height: 44px;
+}
+.VPFeature .title {
+  font-weight: 600;
+  letter-spacing: -0.015em;
+}
+.VPFeature .details {
+  color: var(--vp-c-text-2);
+  line-height: 1.65;
+}
+.VPFeature .link-text {
+  color: var(--accent);
+  font-weight: 500;
+}
+
+/* --- Doc content --------------------------------------------------------- */
+
+.vp-doc {
+  line-height: 1.72;
+}
+.vp-doc h1 {
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  font-size: 2.5rem;
+}
+.vp-doc h2 {
+  margin-top: 56px;
+  padding-top: 24px;
+  border-top: 1px solid var(--vp-c-divider);
+  font-weight: 650;
+  font-size: 1.5rem;
+  letter-spacing: -0.025em;
+}
+.vp-doc h3 {
+  margin-top: 38px;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+}
+
+.vp-doc a {
+  color: var(--accent);
+  font-weight: 500;
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--accent) 32%, transparent);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  transition: text-decoration-color 0.15s ease;
+}
+.vp-doc a:hover {
+  text-decoration-color: var(--accent);
+}
+
+/* Inline code → subtle chip */
+.vp-doc :not(pre) > code {
+  border-radius: var(--r-s);
+  border: 1px solid var(--border);
+  background: var(--vp-c-bg-soft);
+  color: var(--vp-c-text-1);
+  padding: 2px 6px;
+  font-size: 0.85em;
+  font-weight: 500;
+}
+
+/* Code blocks → soft rounded slab on near-black */
+.vp-doc div[class*='language-'] {
+  border-radius: var(--r-l);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-1);
+  background: var(--vp-c-bg-soft);
+  margin: 20px 0 24px;
+}
+.dark .vp-doc div[class*='language-'] {
+  background: var(--geist-bg-2);
+}
+.vp-doc [class*='language-'] code {
+  font-size: 13.5px;
+}
+.vp-doc div[class*='language-'] .lang {
+  font-weight: 500;
+  text-transform: lowercase;
+  letter-spacing: 0;
+  color: var(--vp-c-text-3);
+}
+.vp-doc [class*='language-'] > button.copy {
+  border-radius: var(--r-s);
+  border: 1px solid var(--border);
+}
+
+/* Tables → clean monochrome grid */
+.vp-doc table {
+  display: table;
+  width: 100%;
+  border-radius: var(--r-l);
+  border: 1px solid var(--border);
+  border-collapse: separate;
+  border-spacing: 0;
+  overflow: hidden;
+  box-shadow: var(--shadow-1);
+  margin: 18px 0 28px;
+}
+.vp-doc th {
+  background: var(--vp-c-bg-soft);
+  color: var(--vp-c-text-2);
+  font-weight: 600;
+  font-size: 13px;
+  text-align: left;
+  border: none;
+  border-bottom: 1px solid var(--border);
+}
+.vp-doc td {
+  border: none;
+  border-bottom: 1px solid var(--border);
+}
+.vp-doc tr {
+  background: transparent;
+}
+.vp-doc tbody tr:last-child td {
+  border-bottom: none;
+}
+.vp-doc tr:hover td {
+  background: var(--vp-c-bg-soft);
+}
+
+/* Blockquote */
+.vp-doc blockquote {
+  border-left: 2px solid var(--border-strong);
+  color: var(--vp-c-text-2);
+  padding: 2px 18px;
+}
+
+/* --- Custom blocks (:::tip / warning / danger / info) -------------------- */
+
+.vp-doc .custom-block {
+  border-radius: var(--r-m);
+  border: 1px solid var(--vp-custom-block-info-border);
+  box-shadow: none;
+  font-size: 14.5px;
+}
+.vp-doc .custom-block .custom-block-title {
+  letter-spacing: 0;
+  font-weight: 600;
+  font-family: var(--vp-font-family-base);
+  font-size: 14px;
+}
+.vp-doc .custom-block a {
+  color: inherit;
+}
+.custom-block.tip {
+  border-color: var(--vp-custom-block-tip-border);
+}
+.custom-block.warning {
+  border-color: var(--vp-custom-block-warning-border);
+}
+.custom-block.danger {
+  border-color: var(--vp-custom-block-danger-border);
+}
+
+/* --- Sidebar ------------------------------------------------------------- */
+
+.VPSidebar {
+  border-right: 1px solid var(--vp-c-divider);
+  background: var(--vp-c-bg);
+}
+.VPSidebarItem.level-0 > .item .text {
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--vp-c-text-3);
+}
+.VPSidebarItem .link .text {
+  font-weight: 400;
+  color: var(--vp-c-text-2);
+  transition: color 0.15s ease;
+}
+.VPSidebarItem .link:hover .text {
+  color: var(--vp-c-text-1);
+}
+.VPSidebarItem.is-active > .item .link .text {
+  color: var(--accent);
+  font-weight: 500;
+}
+.VPSidebarItem.is-active > .item .indicator {
+  background-color: var(--accent) !important;
+  width: 2px;
+}
+
+/* --- Search -------------------------------------------------------------- */
+
+.DocSearch-Button,
+.VPNavBarSearch .DocSearch-Button {
+  border-radius: var(--r-m) !important;
+  border: 1px solid var(--border);
+  background: var(--vp-c-bg-soft);
+  box-shadow: none;
+}
+.DocSearch-Button:hover {
+  border-color: var(--border-strong);
+}
+
+/* --- Footer -------------------------------------------------------------- */
+
+.VPFooter {
+  border-top: 1px solid var(--vp-c-divider);
+  background: var(--vp-c-bg);
+}
+.VPFooter .message,
+.VPFooter .copyright {
+  font-size: 13px;
+  color: var(--vp-c-text-3);
+}
+
+/* --- Local nav / outline ------------------------------------------------- */
+
+.VPDocAsideOutline .outline-marker {
+  background-color: var(--accent) !important;
+  width: 2px;
+}
+.VPDocAsideOutline .outline-link.active {
+  color: var(--accent);
+}
+.VPLocalNav {
+  border-bottom: 1px solid var(--vp-c-divider);
+  backdrop-filter: saturate(180%) blur(14px);
+  -webkit-backdrop-filter: saturate(180%) blur(14px);
+  background-color: color-mix(in srgb, var(--vp-c-bg) 68%, transparent);
+}
+
+/* --- Prev/next doc footer nav -------------------------------------------- */
+
+.vp-doc .pager-link {
+  border-radius: var(--r-l);
+  border: 1px solid var(--border);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.vp-doc .pager-link:hover {
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-2);
+}
+
+/* --- Accessibility: respect reduced motion ------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  .VPButton,
+  .VPFeature,
+  .VPFeature::before,
+  .VPFeature::after,
+  .vp-doc .pager-link {
+    transition: none;
+  }
+}

@@ -10,6 +10,7 @@ class PostMediumOverlaidLayout extends StatelessWidget {
   const PostMediumOverlaidLayout({
     required this.title,
     required this.imageUrl,
+    required this.publishedAt,
     super.key,
   });
 
@@ -19,32 +20,54 @@ class PostMediumOverlaidLayout extends StatelessWidget {
   /// The url of this post image displayed in overlay.
   final String imageUrl;
 
+  /// The date when this post was published.
+  final DateTime publishedAt;
+
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).extension<AppColors>()!;
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(12),
-      child: Stack(
-        alignment: Alignment.bottomLeft,
-        children: [
-          OverlaidImage(
-            imageUrl: imageUrl,
-            gradientColor: const Color(0xFF000000).withOpacity(0.7),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(AppSpacing.lg),
-            child: Text(
-              title,
-              maxLines: 4,
-              overflow: TextOverflow.ellipsis,
-              style: AppTextStyle.titleM.copyWith(
-                color: colors.white,
-                fontWeight: FontWeight.w600,
-                height: 1.3,
+    final colors = Theme.of(context).colors;
+    final scale = Theme.of(context).scale;
+
+    return Container(
+      margin: EdgeInsets.symmetric(
+        horizontal: scale.space(AppSpacing.md),
+        vertical: scale.space(AppSpacing.sm),
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(scale.radius(16)),
+        child: Stack(
+          alignment: Alignment.bottomLeft,
+          children: [
+            OverlaidImage(
+              imageUrl: imageUrl,
+              gradientColor: const Color(0xFF000000).withValues(alpha: 0.7),
+            ),
+            Padding(
+              padding: EdgeInsets.all(scale.space(AppSpacing.lg)),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    title,
+                    maxLines: 3,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppText.title.copyWith(
+                      color: colors.white,
+                      fontWeight: FontWeight.w600,
+                      height: 1.3,
+                    ),
+                  ),
+                  SizedBox(height: scale.space(AppSpacing.sm)),
+                  PostTimestamp(
+                    publishedAt: publishedAt,
+                    isContentOverlaid: true,
+                  ),
+                ],
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

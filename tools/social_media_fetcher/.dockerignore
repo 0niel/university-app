@@ -1,0 +1,11 @@
+.env
+.pytest_cache
+.ruff_cache
+.venv
+venv
+__pycache__
+data
+logs
+sessions
+*.pyc
+*.session*

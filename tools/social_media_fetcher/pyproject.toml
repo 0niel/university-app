@@ -1,0 +1,39 @@
+[project]
+name = "university-content-fetcher"
+version = "0.1.0"
+description = "Extensible university news and social content ingestion worker"
+requires-python = ">=3.12"
+dependencies = [
+  "aiohttp>=3.11,<4",
+  "beautifulsoup4>=4.13,<5",
+  "feedparser>=6.0.11,<7",
+  "httpx>=0.28,<1",
+  "loguru>=0.7,<1",
+  "pydantic>=2.11,<3",
+  "pydantic-settings>=2.10,<3",
+  "telethon>=1.40,<2",
+]
+
+[dependency-groups]
+dev = [
+  "pytest>=8.4,<9",
+  "pytest-asyncio>=1.1,<2",
+  "ruff>=0.12,<1",
+]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+pythonpath = ["."]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 88
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["ASYNC", "B", "E", "F", "I", "SIM", "UP"]
+ignore = ["E501"]
+
+[tool.ruff.lint.per-file-ignores]
+"src/news_blocks/__init__.py" = ["F403", "F405"]
+"src/news_blocks/models.py" = ["F403", "F405"]

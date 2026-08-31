@@ -1,32 +1,38 @@
-/// Default Spacings.
-abstract class AppSpacing {
-  /// The default unit of spacing
+abstract final class AppSpacing {
   static const double spaceUnit = 16;
+  static const double zero = 0;
+  static const double xxxs = 1;
+  static const double xxs = 2;
+  static const double xs = 4;
+  static const double sm = 8;
+  static const double gap = 10;
+  static const double md = 12;
+  static const double lg = 16;
+  static const double xl = 20;
+  static const double xlg = 24;
+  static const double xxlg = 40;
+  static const double xxxlg = 64;
 
-  /// xxxs spacing value (1pt)
-  static const double xxxs = 0.0625 * spaceUnit;
+  static const double pad = lg;
+}
 
-  /// xxs spacing value (2pt)
-  static const double xxs = 0.125 * spaceUnit;
+abstract final class AppRadius {
+  static const double xs = 4;
+  static const double sm = 10;
+  static const double md = 14;
 
-  /// xs spacing value (4pt)
-  static const double xs = 0.25 * spaceUnit;
+  static const double button = 18;
+  static const double lg = 20;
+  static const double xl = 24;
 
-  /// sm spacing value (8pt)
-  static const double sm = 0.5 * spaceUnit;
+  static const double sheet = 32;
+  static const double full = 999;
+}
 
-  /// md spacing value (12pt)
-  static const double md = 0.75 * spaceUnit;
-
-  /// lg spacing value (16pt)
-  static const double lg = spaceUnit;
-
-  /// xlg spacing value (24pt)
-  static const double xlg = 1.5 * spaceUnit;
-
-  /// xxlg spacing value (40pt)
-  static const double xxlg = 2.5 * spaceUnit;
-
-  /// xxxlg pacing value (64pt)
-  static const double xxxlg = 4 * spaceUnit;
+abstract final class AppIconSize {
+  static const double xs = 14;
+  static const double sm = 16;
+  static const double md = 20;
+  static const double lg = 24;
+  static const double xl = 32;
 }

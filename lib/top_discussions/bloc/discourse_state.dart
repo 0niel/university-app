@@ -1,19 +1,19 @@
 part of 'discourse_bloc.dart';
 
-enum DiscourseStatus { initial, loading, loaded, failure }
+@freezed
+abstract class DiscourseState with _$DiscourseState {
+  const factory DiscourseState({
+    TopTopicsResponse? topTopics,
+    @Default(DiscourseStatus.initial) DiscourseStatus status,
+  }) = _DiscourseState;
 
-class DiscourseState extends Equatable {
-  const DiscourseState({required this.topTopics, required this.status});
+  const DiscourseState._();
 
-  const DiscourseState.initial() : this(topTopics: null, status: DiscourseStatus.initial);
+  bool get hasTrendingContent =>
+      status == DiscourseStatus.loading ||
+      (status == DiscourseStatus.loaded &&
+          (topTopics?.topics.isNotEmpty ?? false));
 
-  final Top? topTopics;
-  final DiscourseStatus status;
-
-  @override
-  List<Object?> get props => [topTopics, status];
-
-  DiscourseState copyWith({Top? topTopics, DiscourseStatus? status}) {
-    return DiscourseState(topTopics: topTopics ?? this.topTopics, status: status ?? this.status);
-  }
+  bool get showTrendingSection =>
+      hasTrendingContent || status == DiscourseStatus.failure;
 }

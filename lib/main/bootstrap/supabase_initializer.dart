@@ -3,11 +3,18 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:yx_scope/yx_scope.dart';
 
 class SupabaseInitializer implements AsyncLifecycle {
+  const SupabaseInitializer();
   @override
   Future<void> init() async {
+    if (!Env.hasSupabaseConfig) {
+      throw StateError(
+        'SUPABASE_URL and SUPABASE_PUBLISHABLE_KEY must be provided with '
+        'Dart defines.',
+      );
+    }
     await Supabase.initialize(
       url: Env.supabaseUrl,
-      anonKey: Env.supabaseAnonKey,
+      publishableKey: Env.supabasePublishableKey,
     );
   }
 

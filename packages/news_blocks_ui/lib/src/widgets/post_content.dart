@@ -38,58 +38,61 @@ class PostContent extends StatelessWidget {
   final VoidCallback? onShare;
 
   /// Whether content is displayed overlaid.
-  ///
-  /// Defaults to false.
   final bool isContentOverlaid;
 
   /// Whether content is a part of a video article.
-  ///
-  /// Defaults to false.
   final bool isVideoContent;
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).extension<AppColors>()!;
+    final colors = Theme.of(context).colors;
+    final scale = Theme.of(context).scale;
     final category = categoryName;
-    final hasCategory = category != null && category.isNotEmpty;
+
     return Padding(
-      padding: isContentOverlaid
-          ? const EdgeInsets.symmetric(horizontal: AppSpacing.lg)
-          : EdgeInsets.zero,
+      padding:
+          isContentOverlaid
+              ? EdgeInsets.all(scale.space(AppSpacing.lg))
+              : EdgeInsets.fromLTRB(
+                scale.space(AppSpacing.lg),
+                scale.space(AppSpacing.sm),
+                scale.space(AppSpacing.lg),
+                scale.space(AppSpacing.lg),
+              ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.end,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SizedBox(height: AppSpacing.lg),
-          Row(
-            children: [
-              if (hasCategory)
-                PostContentCategory(
-                  categoryName: categoryName!,
-                  isContentOverlaid: isContentOverlaid,
-                  isVideoContent: isVideoContent,
-                ),
-            ],
-          ),
+          if (isContentOverlaid && category != null && category.isNotEmpty)
+            Padding(
+              padding: EdgeInsets.only(bottom: scale.space(AppSpacing.sm)),
+              child: PostContentCategory(
+                categoryName: category,
+                isContentOverlaid: true,
+                isVideoContent: isVideoContent,
+              ),
+            ),
           Text(
             title,
-            style: AppTextStyle.h5.copyWith(
-              color: isContentOverlaid || isVideoContent
-                  ? colors.white
-                  : colors.active,
+            style: AppText.title.copyWith(
+              color:
+                  isContentOverlaid || isVideoContent
+                      ? colors.white
+                      : colors.onSurface,
+              fontWeight: FontWeight.w600,
+              height: 1.3,
             ),
-            maxLines: 3,
+            maxLines: isContentOverlaid ? 3 : 2,
             overflow: TextOverflow.ellipsis,
           ),
           if (publishedAt != null || author != null || onShare != null) ...[
-            const SizedBox(height: AppSpacing.md),
-            PostFooter(
-              publishedAt: publishedAt,
-              author: author,
-              onShare: onShare,
-              isContentOverlaid: isContentOverlaid,
+            SizedBox(height: scale.space(AppSpacing.md)),
+            PostTimestamp(
+              publishedAt: publishedAt ?? DateTime.now(),
+              isContentOverlaid: isContentOverlaid || isVideoContent,
             ),
           ],
-          const SizedBox(height: AppSpacing.xlg + AppSpacing.sm),
+          if (!isContentOverlaid) SizedBox(height: scale.space(AppSpacing.sm)),
         ],
       ),
     );

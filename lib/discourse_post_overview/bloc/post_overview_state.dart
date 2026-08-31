@@ -1,19 +1,12 @@
 part of 'post_overview_bloc.dart';
 
-enum PostOverviewStatus { initial, loading, loaded, failure }
+@freezed
+abstract class PostOverviewState with _$PostOverviewState {
+  const factory PostOverviewState({
+    DiscoursePost? post,
+    @Default(<DiscoursePostComment>[]) List<DiscoursePostComment> comments,
+    @Default(PostOverviewStatus.initial) PostOverviewStatus status,
+  }) = _PostOverviewState;
 
-class PostOverviewState extends Equatable {
-  const PostOverviewState({required this.post, required this.status});
-
-  const PostOverviewState.initial() : this(post: null, status: PostOverviewStatus.initial);
-
-  final Post? post;
-  final PostOverviewStatus status;
-
-  @override
-  List<Object?> get props => [post, status];
-
-  PostOverviewState copyWith({Post? post, PostOverviewStatus? status}) {
-    return PostOverviewState(post: post ?? this.post, status: status ?? this.status);
-  }
+  const PostOverviewState._();
 }

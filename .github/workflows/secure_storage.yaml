@@ -10,12 +10,15 @@ on:
       - "packages/storage/secure_storage/**"
       - ".github/workflows/secure_storage.yaml"
     branches:
-      - main
+      - master
+
+permissions:
+  contents: read
 
 jobs:
   build:
-    uses: VeryGoodOpenSource/very_good_workflows/.github/workflows/flutter_package.yml@v1
+    uses: ./.github/workflows/flutter_package.yml
     with:
       coverage_excludes: "**/*.g.dart"
-      flutter_version: 3.13.5
+      flutter_version: 3.44.2
       working_directory: packages/storage/secure_storage

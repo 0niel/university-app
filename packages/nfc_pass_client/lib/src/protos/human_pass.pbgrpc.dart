@@ -29,18 +29,22 @@ class LongTimeTokenServiceClient extends $grpc.Client {
           options: options,
           interceptors: interceptors,
         );
-  static final _$getAccessTokenForDigitalPass =
-      $grpc.ClientMethod<$0.GetAccessTokenForDigitalPassRequest, $0.GetAccessTokenForDigitalPassResponse>(
+  static final _$getAccessTokenForDigitalPass = $grpc.ClientMethod<
+      $0.GetAccessTokenForDigitalPassRequest,
+      $0.GetAccessTokenForDigitalPassResponse>(
     '/rtu.humanpass.LongTimeTokenService/GetAccessTokenForDigitalPass',
     ($0.GetAccessTokenForDigitalPassRequest value) => value.writeToBuffer(),
-    ($core.List<$core.int> value) => $0.GetAccessTokenForDigitalPassResponse.fromBuffer(value),
+    ($core.List<$core.int> value) =>
+        $0.GetAccessTokenForDigitalPassResponse.fromBuffer(value),
   );
 
-  $grpc.ResponseFuture<$0.GetAccessTokenForDigitalPassResponse> getAccessTokenForDigitalPass(
+  $grpc.ResponseFuture<$0.GetAccessTokenForDigitalPassResponse>
+      getAccessTokenForDigitalPass(
     $0.GetAccessTokenForDigitalPassRequest request, {
     $grpc.CallOptions? options,
   }) {
-    return $createUnaryCall(_$getAccessTokenForDigitalPass, request, options: options);
+    return $createUnaryCall(_$getAccessTokenForDigitalPass, request,
+        options: options);
   }
 }
 
@@ -48,26 +52,31 @@ class LongTimeTokenServiceClient extends $grpc.Client {
 abstract class LongTimeTokenServiceBase extends $grpc.Service {
   LongTimeTokenServiceBase() {
     $addMethod(
-      $grpc.ServiceMethod<$0.GetAccessTokenForDigitalPassRequest, $0.GetAccessTokenForDigitalPassResponse>(
+      $grpc.ServiceMethod<$0.GetAccessTokenForDigitalPassRequest,
+          $0.GetAccessTokenForDigitalPassResponse>(
         'GetAccessTokenForDigitalPass',
         getAccessTokenForDigitalPass_Pre,
         false,
         false,
-        ($core.List<$core.int> value) => $0.GetAccessTokenForDigitalPassRequest.fromBuffer(value),
-        ($0.GetAccessTokenForDigitalPassResponse value) => value.writeToBuffer(),
+        ($core.List<$core.int> value) =>
+            $0.GetAccessTokenForDigitalPassRequest.fromBuffer(value),
+        ($0.GetAccessTokenForDigitalPassResponse value) =>
+            value.writeToBuffer(),
       ),
     );
   }
   $core.String get $name => 'rtu.humanpass.LongTimeTokenService';
 
-  $async.Future<$0.GetAccessTokenForDigitalPassResponse> getAccessTokenForDigitalPass_Pre(
+  $async.Future<$0.GetAccessTokenForDigitalPassResponse>
+      getAccessTokenForDigitalPass_Pre(
     $grpc.ServiceCall call,
     $async.Future<$0.GetAccessTokenForDigitalPassRequest> request,
   ) async {
     return getAccessTokenForDigitalPass(call, await request);
   }
 
-  $async.Future<$0.GetAccessTokenForDigitalPassResponse> getAccessTokenForDigitalPass(
+  $async.Future<$0.GetAccessTokenForDigitalPassResponse>
+      getAccessTokenForDigitalPass(
     $grpc.ServiceCall call,
     $0.GetAccessTokenForDigitalPassRequest request,
   );
@@ -84,22 +93,26 @@ class HumanPassServiceClient extends $grpc.Client {
           options: options,
           interceptors: interceptors,
         );
-  static final _$sendVerificationCode =
-      $grpc.ClientMethod<$0.SendVerificationCodeRequest, $0.SendVerificationCodeResponse>(
+  static final _$sendVerificationCode = $grpc.ClientMethod<
+      $0.SendVerificationCodeRequest, $0.SendVerificationCodeResponse>(
     '/rtu.humanpass.HumanPassService/SendVerificationCode',
     ($0.SendVerificationCodeRequest value) => value.writeToBuffer(),
-    ($core.List<$core.int> value) => $0.SendVerificationCodeResponse.fromBuffer(value),
+    ($core.List<$core.int> value) =>
+        $0.SendVerificationCodeResponse.fromBuffer(value),
   );
-  static final _$getDigitalPass = $grpc.ClientMethod<$0.GetDigitalPassRequest, $0.GetDigitalPassResponse>(
+  static final _$getDigitalPass =
+      $grpc.ClientMethod<$0.GetDigitalPassRequest, $0.GetDigitalPassResponse>(
     '/rtu.humanpass.HumanPassService/GetDigitalPass',
     ($0.GetDigitalPassRequest value) => value.writeToBuffer(),
-    ($core.List<$core.int> value) => $0.GetDigitalPassResponse.fromBuffer(value),
+    ($core.List<$core.int> value) =>
+        $0.GetDigitalPassResponse.fromBuffer(value),
   );
-  static final _$getDigitalPassStatus =
-      $grpc.ClientMethod<$0.GetDigitalPassStatusRequest, $0.GetDigitalPassStatusResponse>(
+  static final _$getDigitalPassStatus = $grpc.ClientMethod<
+      $0.GetDigitalPassStatusRequest, $0.GetDigitalPassStatusResponse>(
     '/rtu.humanpass.HumanPassService/GetDigitalPassStatus',
     ($0.GetDigitalPassStatusRequest value) => value.writeToBuffer(),
-    ($core.List<$core.int> value) => $0.GetDigitalPassStatusResponse.fromBuffer(value),
+    ($core.List<$core.int> value) =>
+        $0.GetDigitalPassStatusResponse.fromBuffer(value),
   );
 
   $grpc.ResponseFuture<$0.SendVerificationCodeResponse> sendVerificationCode(
@@ -128,12 +141,14 @@ class HumanPassServiceClient extends $grpc.Client {
 abstract class HumanPassServiceBase extends $grpc.Service {
   HumanPassServiceBase() {
     $addMethod(
-      $grpc.ServiceMethod<$0.SendVerificationCodeRequest, $0.SendVerificationCodeResponse>(
+      $grpc.ServiceMethod<$0.SendVerificationCodeRequest,
+          $0.SendVerificationCodeResponse>(
         'SendVerificationCode',
         sendVerificationCode_Pre,
         false,
         false,
-        ($core.List<$core.int> value) => $0.SendVerificationCodeRequest.fromBuffer(value),
+        ($core.List<$core.int> value) =>
+            $0.SendVerificationCodeRequest.fromBuffer(value),
         ($0.SendVerificationCodeResponse value) => value.writeToBuffer(),
       ),
     );
@@ -143,17 +158,20 @@ abstract class HumanPassServiceBase extends $grpc.Service {
         getDigitalPass_Pre,
         false,
         false,
-        ($core.List<$core.int> value) => $0.GetDigitalPassRequest.fromBuffer(value),
+        ($core.List<$core.int> value) =>
+            $0.GetDigitalPassRequest.fromBuffer(value),
         ($0.GetDigitalPassResponse value) => value.writeToBuffer(),
       ),
     );
     $addMethod(
-      $grpc.ServiceMethod<$0.GetDigitalPassStatusRequest, $0.GetDigitalPassStatusResponse>(
+      $grpc.ServiceMethod<$0.GetDigitalPassStatusRequest,
+          $0.GetDigitalPassStatusResponse>(
         'GetDigitalPassStatus',
         getDigitalPassStatus_Pre,
         false,
         false,
-        ($core.List<$core.int> value) => $0.GetDigitalPassStatusRequest.fromBuffer(value),
+        ($core.List<$core.int> value) =>
+            $0.GetDigitalPassStatusRequest.fromBuffer(value),
         ($0.GetDigitalPassStatusResponse value) => value.writeToBuffer(),
       ),
     );
@@ -185,7 +203,8 @@ abstract class HumanPassServiceBase extends $grpc.Service {
     $grpc.ServiceCall call,
     $0.SendVerificationCodeRequest request,
   );
-  $async.Future<$0.GetDigitalPassResponse> getDigitalPass($grpc.ServiceCall call, $0.GetDigitalPassRequest request);
+  $async.Future<$0.GetDigitalPassResponse> getDigitalPass(
+      $grpc.ServiceCall call, $0.GetDigitalPassRequest request);
   $async.Future<$0.GetDigitalPassStatusResponse> getDigitalPassStatus(
     $grpc.ServiceCall call,
     $0.GetDigitalPassStatusRequest request,

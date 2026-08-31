@@ -1,4 +1,3 @@
-// ignore_for_file: prefer_const_constructors
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_notifications_client/firebase_notifications_client.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -25,21 +24,18 @@ void main() {
       test('calls FirebaseMessaging.subscribeToTopic', () async {
         when(
           () => firebaseMessaging.subscribeToTopic(category),
-        ).thenAnswer((_) async {
-          return;
-        });
+        ).thenAnswer((_) => Future<void>.value());
 
         await firebaseNotificationsClient.subscribeToCategory(category);
 
         verify(() => firebaseMessaging.subscribeToTopic(category)).called(1);
       });
 
-      test(
-          'throws SubscribeToCategoryFailure '
-          'when FirebaseMessaging.subscribeToTopic fails', () async {
+      test('throws SubscribeToCategoryFailure '
+          'when FirebaseMessaging.subscribeToTopic fails', () {
         when(
           () => firebaseMessaging.subscribeToTopic(category),
-        ).thenAnswer((_) async => throw Exception());
+        ).thenAnswer((_) => Future<void>.error(Exception()));
 
         expect(
           () => firebaseNotificationsClient.subscribeToCategory(category),
@@ -52,21 +48,20 @@ void main() {
       test('calls FirebaseMessaging.unsubscribeFromTopic', () async {
         when(
           () => firebaseMessaging.unsubscribeFromTopic(category),
-        ).thenAnswer((_) async {
-          return;
-        });
+        ).thenAnswer((_) => Future<void>.value());
 
         await firebaseNotificationsClient.unsubscribeFromCategory(category);
 
-        verify(() => firebaseMessaging.unsubscribeFromTopic(category)).called(1);
+        verify(
+          () => firebaseMessaging.unsubscribeFromTopic(category),
+        ).called(1);
       });
 
-      test(
-          'throws UnsubscribeFromCategoryFailure '
-          'when FirebaseMessaging.unsubscribeFromTopic fails', () async {
+      test('throws UnsubscribeFromCategoryFailure '
+          'when FirebaseMessaging.unsubscribeFromTopic fails', () {
         when(
           () => firebaseMessaging.unsubscribeFromTopic(category),
-        ).thenAnswer((_) async => throw Exception());
+        ).thenAnswer((_) => Future<void>.error(Exception()));
 
         expect(
           () => firebaseNotificationsClient.unsubscribeFromCategory(category),

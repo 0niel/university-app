@@ -1,5 +1,5 @@
 {
-  "dart.lineLength": 120,
+  "dart.lineLength": 80,
   "files.insertFinalNewline": true,
   "java.configuration.updateBuildConfiguration": "interactive",
   "cmake.configureOnOpen": false,
@@ -30,5 +30,13 @@
     "**/coverage": true,
     "**/packages/neon": true
   },
-  "dart.flutterSdkPath": ".fvm/flutter_sdk"
+  "dart.flutterSdkPath": ".fvm/versions/3.44.2",
+  "dart.flutterRunAdditionalArgs": [
+    "--dart-define-from-file=.env",
+    "--dart-define-from-file=config/university.local.json"
+  ],
+  "dart.flutterTestAdditionalArgs": [
+    "--dart-define-from-file=.env",
+    "--dart-define-from-file=config/university.local.json"
+  ]
 }

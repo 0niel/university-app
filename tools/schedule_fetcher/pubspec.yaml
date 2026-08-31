@@ -1,0 +1,20 @@
+name: schedule_fetcher
+description: Sync university schedules into the Supabase ingest endpoint.
+publish_to: none
+
+environment:
+  sdk: ^3.12.0
+
+dependencies:
+  args: ^2.7.0
+  http: ^1.2.2
+  rtu_mirea_schedule_api_client:
+    path: ../../packages/rtu_mirea_schedule_api_client
+
+dependency_overrides:
+  schedule:
+    path: ../../packages/schedule
+
+dev_dependencies:
+  flutter_lints: ^6.0.0
+  very_good_analysis: 10.3.0

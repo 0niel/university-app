@@ -1,39 +1,164 @@
-# university-app
-[![Codemagic build status](https://api.codemagic.io/apps/650ddff0d58153d281f375fe/650ddff0d58153d281f375fd/status_badge.svg)](https://codemagic.io/apps/650ddff0d58153d281f375fe/650ddff0d58153d281f375fd/latest_build)
+# University App
 
-Это мобильное приложение с полностью открытым исходным кодом для студентов и преподавателей РТУ МИРЭА.
-<p float="left">
-  <a href="https://play.google.com/store/apps/details?id=ninja.mirea.mireaapp"><img src="https://github.com/0niel/university-app/assets/51058739/c2b2f441-46da-4c09-abaf-a29f58347595" width="145" /></a>
-  <a href="https://apps.apple.com/ru/app/ninja-mirea/id1582508025" width="128" /><img src="https://github.com/0niel/university-app/assets/51058739/cda3f020-54bb-4fcf-aea6-42f0d1279f27" width="145" /></a>
-  <a href="https://apps.rustore.ru/app/ninja.mirea.mireaapp" width="128" /><img src="https://github.com/0niel/university-app/assets/51058739/2df158ec-542e-476b-b465-8244aa0020d4" width="130" /></a>
-</p>
+Открытая платформа студенческого приложения на Flutter. Репозиторий можно
+адаптировать под другой университет без форка бизнес-логики: tenant, публичный
+брендинг и deep links задаются конфигурацией, а университетские источники данных
+подключаются через нормализованный ingest-контракт Supabase.
 
-# Скриншоты
-<p float="left">
-  <img src="https://github.com/0niel/university-app/assets/51058739/4d0fb795-3c8b-43d7-812b-9f0c319599a1" width="150" />
-  <img src="https://github.com/0niel/university-app/assets/51058739/a6e18dc0-1a13-49da-92f4-21ce47e351d8" width="150" />
-  <img src="https://github.com/0niel/university-app/assets/51058739/6b97ab7d-c651-4850-9392-2c10ba85a8cc" width="150" />
-  <img src="https://github.com/0niel/university-app/assets/51058739/25deb3cd-2847-4eff-bcb7-1ce69b1631c6" width="150" />
-  <img src="https://github.com/0niel/university-app/assets/51058739/5c73cf09-a6f9-4194-bdd5-72ff41318f0a" width="150" />
-  <img src="https://github.com/mirea-ninja/rtu-mirea-mobile/assets/121052717/64ae1e7f-19e4-473c-a3f0-93ae64439551" width="150" />
- </p>
- <p float="left">
-  <img src="https://github.com/0niel/university-app/assets/51058739/677bb516-b813-4d26-80fc-97114c054512" width="150" />
-  <img src="https://github.com/0niel/university-app/assets/51058739/f2635689-2eea-44a8-b2f7-f2eebc5e642b" width="150" />
-  <img src="https://github.com/0niel/university-app/assets/51058739/b3f9c18a-6511-4893-9386-985d266ca1e6" width="150" />
-  <img src="https://github.com/0niel/university-app/assets/51058739/e186f706-ad88-4d54-b5b9-755f622cb04d" width="150" />
-  <img src="https://github.com/0niel/university-app/assets/51058739/a0229a27-9778-4e15-8bbc-97018f775cb8" width="150" />
-  <img src="https://github.com/mirea-ninja/rtu-mirea-mobile/assets/121052717/73476d7c-eeda-47ef-8f81-80c4a95c0ca5" width="150" />
-</p>
+Конфигурация по умолчанию сохраняет совместимость с РТУ МИРЭА. Встроенный
+MIREA-фетчер выключен по умолчанию и не должен использоваться для другого
+tenant.
 
-# Ваше участие
-Это приложение является **100% бесплатными** и **Open Source** продуктом. Мы с огромным удовольствием примем любые ваши предложения и сообщения, а также мы рады любому вашему участию в проекте! Перед тем как принять участие в развитии проекта:
-1. Ознакомьтесь с нашим [CONTRIBUTING.MD](https://github.com/0niel/rtu-mirea-mobile/blob/master/CONTRIBUTING.md), в котором описано то, как должны вести себя участники проекта.
-2. Уважайте других участников, обсуждайте идеи, а не личности, ознакомьтесь с [кодексом поведения](https://github.com/Ninja-Official/rtu-mirea-mobile/blob/master/CODE_OF_CONDUCT.md).
-3. Не знаете, над чем вы хотите работать? Ознакомьтесь с нашей [дорожной картой](https://github.com/Ninja-Official/rtu-mirea-mobile/projects/1).
+## Технологии и архитектура
 
-### Разработчики
+- Flutter 3.44.2 и Dart 3.12 с null safety.
+- Feature-first BLoC-архитектура: UI и BLoC находятся в `lib/<feature>`, а
+  переиспользуемые клиенты, модели и репозитории — в Dart workspace `packages/`.
+- `bloc`/`hydrated_bloc` для состояния, `yx_scope` для dependency injection и
+  `go_router` для навигации.
+- Freezed и `json_serializable` для генерируемых immutable-моделей и JSON DTO.
+- Supabase Auth, Storage, миграции, RPC и Edge Functions как серверный контракт.
+- Отдельный Python 3.12 worker для официальных новостей, Telegram-публикаций и
+  Telegram Stories.
 
-<a href="https://github.com/mirea-ninja/rtu-mirea-mobile/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=mirea-ninja/rtu-mirea-mobile" />
-</a>
+Основной поток данных:
+
+```text
+внешний источник -> Python worker -> Edge Function /ingest
+                 -> Supabase RPC/таблицы -> repository -> BLoC -> Flutter UI
+```
+
+Flutter не должен обращаться к внутренним таблицам или использовать
+`service_role`. Привилегированная запись контента проходит через защищённую
+функцию [`supabase/functions/ingest`](supabase/functions/ingest), а схема БД
+изменяется только миграциями из
+[`supabase/migrations`](supabase/migrations).
+
+## Быстрый старт
+
+Нужны [Flutter](https://docs.flutter.dev/get-started/install), FVM и Java 17 для
+Android. Версия Flutter закреплена в `.fvmrc`.
+
+```bash
+dart pub global activate fvm
+fvm install
+fvm flutter pub get
+```
+
+Создайте две локальные compile-time конфигурации:
+
+```bash
+cp .env.example .env
+cp config/university.example.json config/university.local.json
+```
+
+В PowerShell используйте `Copy-Item` вместо `cp`. В `.env` укажите публичные
+`SUPABASE_URL` и `SUPABASE_PUBLISHABLE_KEY`. В
+`config/university.local.json` задайте tenant и брендинг. Затем проверьте
+конфигурацию и сгенерируйте код:
+
+```bash
+fvm dart run tool/configure_university.dart
+fvm dart run build_runner build
+```
+
+Запуск development flavor на Android/iOS/macOS:
+
+```bash
+fvm flutter run \
+  --flavor development \
+  --target lib/main/main_development.dart \
+  --dart-define-from-file=.env \
+  --dart-define-from-file=config/university.local.json \
+  --dart-define-from-file=config/firebase.local.json
+```
+
+Firebase-файл опционален: без него Analytics и FCM корректно отключаются.
+Нативные `google-services.json`, `GoogleService-Info.plist` и сгенерированный
+`firebase_options.dart` не являются частью открытого исходного кода.
+
+Для Windows уберите `--flavor development`. Подробности о схеме конфигурации и
+режиме `--check` описаны в
+[`docs/university-configuration.md`](docs/university-configuration.md).
+
+Локальные `.env`, tenant-файлы, Firebase-конфигурация, ключи подписи и Telegram
+session-файлы нельзя коммитить. Пример university config содержит только
+публичные значения и не заменяет настройку собственных Firebase/Supabase
+проектов.
+
+## Supabase
+
+Локальная конфигурация находится в `supabase/config.toml`. Для работы с
+миграциями нужен [Supabase CLI и Docker](https://supabase.com/docs/guides/local-development/cli/getting-started):
+
+```bash
+supabase start
+supabase db reset
+```
+
+Не изменяйте уже применённые миграции: создавайте новую через
+`supabase migration new <name>`. Секрет ingest-функции хранится только на
+сервере и в локальном окружении worker.
+
+Для одного tenant задайте Edge secrets `INGEST_API_KEY` и
+`INGEST_ORGANIZATION_ID`. Общий backend нескольких университетов должен
+использовать `INGEST_TENANT_KEYS` — JSON-карту `organization_id` к отдельному
+ключу каждого worker. Не используйте один неприкреплённый ключ для всех tenant.
+
+## Фетчер контента
+
+Worker находится в `tools/social_media_fetcher` и использует
+[uv](https://docs.astral.sh/uv/). Он нормализует контент и отправляет его в
+Edge ingest; напрямую в БД не пишет.
+
+Для RSS/Atom и официальных API предпочтителен no-code путь через self-hosted
+n8n: импортируйте готовый
+[`rss-to-ingest.json`](tools/social_media_fetcher/n8n/rss-to-ingest.json) и
+используйте HTTP Request node для Facebook Graph API, YouTube, Mastodon или
+иного документированного API. Python-коннектор оставлен для источников, которым
+нужна пользовательская сессия или особая обработка, например Telegram Stories.
+Полный контракт и правила расширения — в
+[`tools/social_media_fetcher/docs/architecture.md`](tools/social_media_fetcher/docs/architecture.md).
+
+```bash
+cd tools/social_media_fetcher
+cp .env.example .env
+uv sync --locked
+uv run python worker.py
+```
+
+`MIREA_ENABLED=true` допустим только при `APP_ORGANIZATION_ID=mirea`. Telegram
+подключается явно через `TELEGRAM_CHANNELS` и `TELEGRAM_STORY_CHANNELS`. Для
+пользовательской Telegram-сессии используйте отдельный согласованный аккаунт и
+`setup_telegram_session.py`; полученный session string считается секретом и не
+должен попадать в логи, issues или Git.
+
+Stories-медиа загружается только через подписанные Storage URL. Workflow
+`cleanup-story-media.yml` независимо от Telegram-сессии удаляет истёкшие и
+осиротевшие объекты; для него задаются `SUPABASE_URL`,
+`INGEST_ORGANIZATION_ID` и tenant-bound `INGEST_API_KEY`.
+
+## Проверки
+
+```bash
+fvm dart analyze --fatal-warnings
+fvm flutter test
+
+cd tools/social_media_fetcher
+uv run ruff format --check .
+uv run ruff check .
+uv run pytest
+```
+
+CI повторяет анализ и тесты Flutter и ключевых workspace-пакетов, проверки
+Python worker, format/lint/type-check Edge ingest и fresh replay Supabase
+миграций. CI имеет только read-доступ к репозиторию. Релиз Shorebird запускается
+только вручную отдельным workflow.
+
+## Участие
+
+Перед pull request прочитайте [CONTRIBUTING.md](CONTRIBUTING.md) и
+[CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md). Уязвимости нельзя публиковать в
+обычных issues — используйте [SECURITY.md](SECURITY.md).
+
+Проект распространяется по лицензии [MIT](LICENSE).

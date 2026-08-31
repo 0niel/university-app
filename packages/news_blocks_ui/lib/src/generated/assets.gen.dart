@@ -15,22 +15,32 @@ class $AssetsIconsGen {
   const $AssetsIconsGen();
 
   /// File path: assets/icons/arrow_left_disable.svg
-  SvgGenImage get arrowLeftDisable => const SvgGenImage('assets/icons/arrow_left_disable.svg');
+  SvgGenImage get arrowLeftDisable =>
+      const SvgGenImage('assets/icons/arrow_left_disable.svg');
 
   /// File path: assets/icons/arrow_left_enable.svg
-  SvgGenImage get arrowLeftEnable => const SvgGenImage('assets/icons/arrow_left_enable.svg');
+  SvgGenImage get arrowLeftEnable =>
+      const SvgGenImage('assets/icons/arrow_left_enable.svg');
 
   /// File path: assets/icons/arrow_right_disable.svg
-  SvgGenImage get arrowRightDisable => const SvgGenImage('assets/icons/arrow_right_disable.svg');
+  SvgGenImage get arrowRightDisable =>
+      const SvgGenImage('assets/icons/arrow_right_disable.svg');
 
   /// File path: assets/icons/arrow_right_enable.svg
-  SvgGenImage get arrowRightEnable => const SvgGenImage('assets/icons/arrow_right_enable.svg');
+  SvgGenImage get arrowRightEnable =>
+      const SvgGenImage('assets/icons/arrow_right_enable.svg');
 
   /// File path: assets/icons/play_icon.svg
   SvgGenImage get playIcon => const SvgGenImage('assets/icons/play_icon.svg');
 
   /// List of all assets
-  List<SvgGenImage> get values => [arrowLeftDisable, arrowLeftEnable, arrowRightDisable, arrowRightEnable, playIcon];
+  List<SvgGenImage> get values => [
+    arrowLeftDisable,
+    arrowLeftEnable,
+    arrowRightDisable,
+    arrowRightEnable,
+    playIcon,
+  ];
 }
 
 class Assets {
@@ -101,11 +111,7 @@ class AssetGenImage {
     AssetBundle? bundle,
     String? package = 'news_blocks_ui',
   }) {
-    return AssetImage(
-      _assetName,
-      bundle: bundle,
-      package: package,
-    );
+    return AssetImage(_assetName, bundle: bundle, package: package);
   }
 
   String get path => _assetName;

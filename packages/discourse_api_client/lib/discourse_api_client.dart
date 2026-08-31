@@ -1,4 +1,6 @@
-/// A Very Good Project created by Very Good CLI.
-library discourse_api_client;
+/// Typed access to the Discourse HTTP API.
+library;
 
 export 'src/discourse_api_client.dart';
+export 'src/discourse_api_exceptions.dart';
+export 'src/models/models.dart';

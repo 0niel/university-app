@@ -14,7 +14,7 @@ class OverlaidImage extends StatelessWidget {
   });
 
   /// The aspect ratio of this image.
-  static const aspectRatio = 3 / 2;
+  static const double aspectRatio = 3 / 2;
 
   /// The url of this image.
   final String imageUrl;
@@ -24,7 +24,7 @@ class OverlaidImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).extension<AppColors>()!;
+    final colors = Theme.of(context).colors;
     return ClipRRect(
       borderRadius: BorderRadius.circular(12),
       child: AspectRatio(
@@ -44,8 +44,8 @@ class OverlaidImage extends StatelessWidget {
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    colors.surface.withOpacity(0),
-                    gradientColor.withOpacity(0.7),
+                    colors.surface.withValues(alpha: 0),
+                    gradientColor.withValues(alpha: 0.7),
                   ],
                 ),
               ),

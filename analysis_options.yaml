@@ -1,40 +1,217 @@
-# This file configures the analyzer, which statically analyzes Dart code to
-# check for errors, warnings, and lints.
-#
-# The issues identified by the analyzer are surfaced in the UI of Dart-enabled
-# IDEs (https://dart.dev/tools#ides-and-editors). The analyzer can also be
-# invoked from the command line by running `flutter analyze`.
-
-# The following line activates a set of recommended lints for Flutter apps,
-# packages, and plugins designed to encourage good coding practices.
-include: package:flutter_lints/flutter.yaml
-
-linter:
-  # The lint rules applied to this project can be customized in the
-  # section below to disable rules from the `package:flutter_lints/flutter.yaml`
-  # included above or to enable additional rules. A list of all available lints
-  # and their documentation is published at
-  # https://dart-lang.github.io/linter/lints/index.html.
-  #
-  # Instead of disabling a lint rule for the entire project in the
-  # section below, it can also be suppressed for a single line of code
-  # or a specific dart file by using the `// ignore: name_of_lint` and
-  # `// ignore_for_file: name_of_lint` syntax on the line or in the file
-  # producing the lint.
-  rules:
-    # avoid_print: false  # Uncomment to disable the `avoid_print` rule
-    # prefer_single_quotes: true  # Uncomment to enable the `prefer_single_quotes` rule
+include: package:very_good_analysis/analysis_options.yaml
 
 analyzer:
   exclude:
-    - "**/*.g.dart"
     - "**/*.freezed.dart"
+    - "**/*.g.dart"
+    - "**/*.gen.dart"
+    - "**/*.pb.dart"
+    - "**/*.pbgrpc.dart"
+    - "**/*.pbjson.dart"
+    - "lib/l10n/generated/**"
+    - "wear/lib/l10n/generated/**"
   errors:
     invalid_annotation_target: ignore
-  plugins:
-    - custom_lint
-# Additional information about this file can be found at
-# https://dart.dev/guides/language/analysis-options
 
-formatter:  
+linter:
+  rules:
+    public_member_api_docs: false
+
+formatter:
   page_width: 80
+
+dcm:
+  extends:
+    - recommended
+  rules:
+    - no-empty-block:
+        exclude:
+          - test/**
+          - "**/test/**"
+    - prefer-match-file-name:
+        exclude:
+          - test/**
+          - "**/test/**"
+          - lib/src/animations/motion_presets.dart
+          - lib/src/colors/colors.dart
+          - lib/src/ninja/surfaces/ninja_spotlight.dart
+          - lib/src/ninja/surfaces/ninja_timeline_markers.dart
+          - lib/src/theme/theme.dart
+          - lib/src/typography/typography.dart
+          - lib/src/widgets/action_card.dart
+          - lib/src/widgets/app_activity_row.dart
+          - lib/src/widgets/app_source_badge.dart
+          - lib/src/widgets/app_tag.dart
+          - lib/src/widgets/buttons/app_button.dart
+          - lib/src/widgets/profile/app_profile_stats_strip.dart
+          - "**/banner_ad_block.dart"
+          - "**/block_action.dart"
+          - "**/spacer_block.dart"
+          - "**/text_caption_block.dart"
+    - prefer-single-widget-per-file: false
+    - prefer-returning-shorthands: false
+    - prefer-shorthands-with-constructors: false
+    - prefer-shorthands-with-enums: false
+    - prefer-shorthands-with-static-fields: false
+    - prefer-spacing: false
+    - prefer-public-exception-classes:
+        exclude:
+          - test/**
+          - "**/test/**"
+    - avoid-inferrable-type-arguments:
+        exclude:
+          - test/**
+          - "**/test/**"
+          - lib/common/widgets/app_flat_calendar.dart
+    - avoid-dynamic:
+        exclude:
+          - test/**
+          - "**/test/**"
+          - "**/news_blocks_converter.dart"
+          - "**/news_block_map_converter.dart"
+          - "**/ical_custom_fields_registry.dart"
+          - lib/src/theme/theme.dart
+    - match-getter-setter-field-names:
+        exclude:
+          - lib/tour/app_tour_controller.dart
+          - "**/src/ninja/ninja_colors.dart"
+    - prefer-correct-callback-field-name:
+        exclude:
+          - "**/src/colors/colors.dart"
+          - "**/src/ninja/ninja_colors.dart"
+          - "**/src/widgets/forms/app_input_field.dart"
+    - move-variable-closer-to-its-usage:
+        exclude:
+          - test/**
+          - "**/test/**"
+          - lib/map/widgets/svg_interactive_map.dart
+    - avoid-duplicate-initializers:
+        exclude:
+          - test/**
+          - "**/test/**"
+          - lib/map/widgets/svg_interactive_map.dart
+    - function-always-returns-same-value:
+        exclude:
+          - lib/schedule/view/schedule_page.dart
+    - dispose-fields:
+        exclude:
+          - lib/tour/view/app_tour_overlay.dart
+    - avoid-undisposed-instances:
+        exclude:
+          - lib/src/widgets/forms/six_digit_code_input.dart
+    - avoid-unsafe-collection-methods:
+        exclude:
+          - test/**
+          - "**/test/**"
+    - avoid-default-tostring:
+        exclude:
+          - test/**
+          - "**/test/**"
+    - avoid-misused-test-matchers:
+        exclude:
+          - test/**
+          - "**/test/**"
+    - avoid-never-passed-parameters:
+        exclude:
+          - test/**
+          - "**/test/**"
+    - avoid-duplicate-test-assertions:
+        exclude:
+          - test/**
+          - "**/test/**"
+    - avoid-shadowing:
+        exclude:
+          - test/**
+          - "**/test/**"
+    - avoid-duplicate-cascades:
+        exclude:
+          - test/**
+          - "**/test/**"
+    - prefer-prefixed-global-constants:
+        exclude:
+          - test/**
+          - "**/test/**"
+    - avoid-missing-controller:
+        exclude:
+          - test/**
+          - "**/test/**"
+    - prefer-correct-json-casts:
+        exclude:
+          - test/**
+          - "**/test/**"
+    - avoid-unused-assignment:
+        exclude:
+          - test/**
+          - "**/test/**"
+    - avoid-unnecessary-local-late:
+        exclude:
+          - "**/src/widgets/toast/toast_manager.dart"
+    - prefer-null-aware-elements:
+        exclude:
+          - lib/src/ninja/surfaces/ninja_dialog.dart
+          - lib/src/ninja/surfaces/ninja_state_switcher.dart
+    - function-always-returns-null:
+        exclude:
+          - test/**
+          - "**/test/**"
+    - no-equal-switch-expression-cases:
+        exclude:
+          - test/**
+          - "**/test/**"
+          - lib/src/widgets/buttons/app_button.dart
+    - avoid-passing-self-as-argument:
+        exclude:
+          - test/**
+          - "**/test/**"
+    - avoid-duplicate-constant-values:
+        exclude:
+          - lib/src/ninja/widgets/ninja_button.dart
+          - lib/src/spacing/app_spacing.dart
+    - avoid-passing-async-when-sync-expected:
+        exclude:
+          - test/**
+          - "**/test/**"
+          - "**/example/**"
+    - avoid-unnecessary-futures:
+        exclude:
+          - test/**
+          - "**/test/**"
+    - avoid-nullable-interpolation:
+        exclude:
+          - test/**
+          - "**/test/**"
+    - avoid-missing-enum-constant-in-map:
+        exclude:
+          - test/**
+          - "**/test/**"
+    - avoid-unused-parameters:
+        exclude:
+          - test/**
+          - "**/test/**"
+          - lib/src/theme/theme.dart
+    - avoid-unnecessary-local-variable:
+        exclude:
+          - test/**
+          - "**/test/**"
+    - avoid-unnecessary-nullable-parameters:
+        exclude:
+          - test/**
+          - "**/test/**"
+    - avoid-unnecessary-nullable-return-type:
+        exclude:
+          - test/**
+          - "**/test/**"
+    - prefer-parentheses-with-if-null:
+        exclude:
+          - test/**
+          - "**/test/**"
+  exclude:
+    all:
+      - "**/*.freezed.dart"
+      - "**/*.g.dart"
+      - "**/*.gen.dart"
+      - "**/*.pb.dart"
+      - "**/*.pbgrpc.dart"
+      - "**/*.pbjson.dart"
+      - "lib/l10n/generated/**"
+      - "wear/lib/l10n/generated/**"

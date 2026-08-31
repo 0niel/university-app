@@ -1,0 +1,20 @@
+include: ../../analysis_options.yaml
+
+dcm:
+  rules:
+    - avoid-dynamic:
+        exclude:
+          - lib/src/mini_apps_repository.dart
+    - avoid-inferrable-type-arguments:
+        exclude:
+          - lib/src/mini_apps_repository.dart
+    - prefer-match-file-name:
+        exclude:
+          - lib/src/mini_apps_failures.dart
+          - lib/src/models/mini_app.dart
+          - lib/src/models/mini_app_insights.dart
+          - lib/src/models/mini_app_report.dart
+          - lib/src/models/moderation_queue.dart
+    # These rules require Dart 3.10 while this reusable package supports 3.8.
+    - prefer-returning-shorthands: false
+    - prefer-shorthands-with-enums: false

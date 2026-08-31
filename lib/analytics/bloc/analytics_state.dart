@@ -1,10 +1,6 @@
 part of 'analytics_bloc.dart';
 
-abstract class AnalyticsState extends Equatable {
-  const AnalyticsState();
-}
-
-class AnalyticsInitial extends AnalyticsState {
-  @override
-  List<Object> get props => [];
+@freezed
+sealed class AnalyticsState with _$AnalyticsState {
+  const factory AnalyticsState.initial() = AnalyticsInitial;
 }

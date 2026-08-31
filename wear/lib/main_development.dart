@@ -1,6 +1,8 @@
+import 'dart:async';
+
 import 'package:wear/app/app.dart';
 import 'package:wear/bootstrap.dart';
 
 void main() {
-  bootstrap(() => const App());
+  unawaited(bootstrap(() => const App()));
 }

@@ -1,63 +1,14 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:web_oauth_interceptor_client/src/auto_fill_config.dart';
+import 'package:web_oauth_interceptor_client/src/login_success_data.dart';
+import 'package:web_oauth_interceptor_client/src/oauth_redirect_matcher.dart';
 
-/// Class representing configuration parameters for auto-filling form fields.
-class AutoFillConfig {
-  const AutoFillConfig({
-    this.usernameSelector,
-    this.passwordSelector,
-    this.submitButtonSelector,
-    this.defaultUsername,
-    this.defaultPassword,
-    this.additionalFields = const {},
-  });
-
-  /// Selector for the username input field (e.g., '#username' or 'input[name="login"]').
-  final String? usernameSelector;
-
-  /// Selector for the password input field (e.g., '#password' or 'input[name="password"]').
-  final String? passwordSelector;
-
-  /// Selector for the submit button (e.g., '#submit' or 'button[type="submit"]').
-  final String? submitButtonSelector;
-
-  /// Default value for the username.
-  final String? defaultUsername;
-
-  /// Default value for the password.
-  final String? defaultPassword;
-
-  /// Additional fields to populate in the form.
-  /// Key is a valid selector, and value is the string to set in the field.
-  final Map<String, String> additionalFields;
-}
-
-/// Data class containing information upon successful login.
-class LoginSuccessData {
-  LoginSuccessData({
-    required this.allCookies,
-    this.accessToken,
-    this.specialCookieValue,
-  });
-
-  /// The access token extracted from the URL, if available.
-  final String? accessToken;
-
-  /// All cookies associated with the current session.
-  final Map<String, String> allCookies;
-
-  /// The value of the special cookie used to determine success.
-  final String? specialCookieValue;
-}
-
-/// {@template web_oauth_interceptor_client}
-/// Class that handles OAuth authorization within an in-app browser.
-/// {@endtemplate}
 class WebOAuthInterceptorClient extends InAppBrowser {
-  /// {@macro web_oauth_interceptor_client}
   WebOAuthInterceptorClient({
     required this.oauthUrl,
     required this.expectedRedirectUrls,
@@ -107,32 +58,19 @@ class WebOAuthInterceptorClient extends InAppBrowser {
   /// Additional headers to include when opening the page, if needed.
   final Map<String, String> extraHeaders;
 
-  /// Determines whether to explicitly wait for the special cookie.
-  /// If `true`, authorization does not complete until the special cookie is found (or the browser is closed).
   final bool waitForSpecialCookie;
-
-  /// Current URL being loaded in the browser.
-  String? _currentUrl;
 
   /// Set of target domains extracted from expectedRedirectUrls and oauthUrl.
   final Set<String> _targetDomains = {};
-
-  @override
-  void onBrowserCreated() {
-    super.onBrowserCreated();
-    debugPrint('[WebOAuthInterceptorClient] Browser Created');
-  }
+  var _didComplete = false;
 
   @override
   Future<void> onLoadStart(WebUri? url) async {
     super.onLoadStart(url);
     if (url == null) return;
-    _currentUrl = url.toString();
-
-    debugPrint('[WebOAuthInterceptorClient] onLoadStart: $_currentUrl');
-
-    if (_isRedirectUrl(_currentUrl!)) {
-      await _handleOAuthRedirect(_currentUrl!);
+    final currentUrl = url.toString();
+    if (_isRedirectUrl(currentUrl)) {
+      await _handleOAuthRedirect(currentUrl);
     }
   }
 
@@ -141,19 +79,12 @@ class WebOAuthInterceptorClient extends InAppBrowser {
     super.onLoadStop(url);
     if (url == null) return;
 
-    debugPrint('[WebOAuthInterceptorClient] onLoadStop: $url');
+    await Future<void>.delayed(const Duration(milliseconds: 500));
 
-    // Add a slight delay to allow cookies to be set
-    await Future.delayed(const Duration(milliseconds: 500));
-
-    // Get the domain of the current URL
     final currentUri = Uri.parse(url.toString());
     final currentDomain = currentUri.origin;
 
-    // Create a set of domains to check: current domain + target domains
-    final domainsToCheck = Set<String>.from(_targetDomains)..add(currentDomain);
-
-    debugPrint('=== Checking Cookies for Domains: $domainsToCheck ===');
+    final domainsToCheck = {..._targetDomains, currentDomain};
 
     var specialCookieFound = false;
     String? specialCookieValue;
@@ -161,200 +92,200 @@ class WebOAuthInterceptorClient extends InAppBrowser {
 
     for (final domain in domainsToCheck) {
       final domainUri = Uri.parse(domain);
-      final domainCookies = await CookieManager.instance().getCookies(url: WebUri(domainUri.toString()));
-      debugPrint('=== COOKIES for $domain ===');
+      final domainCookies = await CookieManager.instance()
+          .getCookies(url: WebUri(domainUri.toString()));
       for (final cookie in domainCookies) {
-        debugPrint(
-          'Cookie: ${cookie.name}=${cookie.value} | httpOnly=${cookie.isHttpOnly} | secure=${cookie.isSecure}',
-        );
-        allCookies[cookie.name] = cookie.value as String;
+        final value = cookie.value;
+        if (value is! String) continue;
+        allCookies[cookie.name] = value;
         if (cookie.name == specialCookieName) {
-          debugPrint('--- Special Cookie Found on $domain ---');
           specialCookieFound = true;
-          specialCookieValue = cookie.value as String;
+          specialCookieValue = value;
         }
       }
     }
 
-    // Check if the special cookie was found
     if (specialCookieFound &&
-        (!waitForSpecialCookie || (specialCookieValue != null && specialCookieValue.isNotEmpty))) {
-      debugPrint('=== OAuth SUCCESS ===');
-      debugPrint('Special cookie [$specialCookieName]: $specialCookieValue');
-
-      final successData = LoginSuccessData(
-        allCookies: allCookies,
-        specialCookieValue: specialCookieValue,
+        (!waitForSpecialCookie ||
+            (specialCookieValue != null && specialCookieValue.isNotEmpty))) {
+      await _completeSuccess(
+        LoginSuccessData(
+          allCookies: allCookies,
+          specialCookieValue: specialCookieValue,
+        ),
       );
-
-      onLoginSuccess?.call(successData);
-
-      try {
-        await close();
-      } catch (e) {
-        debugPrint('[WebOAuthInterceptorClient] Browser already closed: $e');
-      }
       return;
     }
 
-    // Attempt to auto-fill the form if configured
     if (autoFillConfig != null) {
       await _tryAutoFillForm();
     }
   }
 
   @override
-  void onLoadError(Uri? url, int code, String message) {
-    super.onLoadError(url, code, message);
-    debugPrint('[WebOAuthInterceptorClient] onLoadError: $message (code $code)');
-    onLoginError?.call('Load error: $message (code $code)');
+  void onReceivedError(WebResourceRequest request, WebResourceError error) {
+    super.onReceivedError(request, error);
+    _reportError('Load error (${error.type}).');
   }
 
   @override
-  void onLoadHttpError(Uri? url, int statusCode, String description) {
-    super.onLoadHttpError(url, statusCode, description);
-    debugPrint('[WebOAuthInterceptorClient] onLoadHttpError: $description (status $statusCode)');
-    onLoginError?.call('HTTP error: $description (code $statusCode)');
+  void onReceivedHttpError(
+    WebResourceRequest request,
+    WebResourceResponse errorResponse,
+  ) {
+    super.onReceivedHttpError(request, errorResponse);
+    final statusCode = errorResponse.statusCode;
+    _reportError(
+      statusCode == null ? 'HTTP error.' : 'HTTP error (status $statusCode).',
+    );
   }
 
   @override
   void onExit() {
     super.onExit();
-    debugPrint('[WebOAuthInterceptorClient] onExit');
-    onBrowserExit?.call();
+    if (!_didComplete) onBrowserExit?.call();
   }
 
   /// Checks if the given URL is one of the expected redirect URLs.
   bool _isRedirectUrl(String url) {
-    return expectedRedirectUrls.any(
-      (expectedUrl) => url.startsWith(expectedUrl),
-    );
+    return OAuthRedirectMatcher.matches(url, expectedRedirectUrls);
   }
 
   /// Handles the OAuth redirect by extracting tokens and cookies.
   Future<void> _handleOAuthRedirect(String url) async {
-    final uri = Uri.parse(url);
-    final cookies = await CookieManager.instance().getCookies(url: WebUri(uri.toString()));
+    try {
+      final uri = Uri.parse(url);
+      final cookies = await CookieManager.instance()
+          .getCookies(url: WebUri(uri.toString()));
 
-    final token = _extractTokenFromUrl(url);
+      final token = _extractTokenFromUrl(url);
 
-    // Find the special cookie
-    final specialCookieValue = cookies.firstWhereOrNull((cookie) => cookie.name == specialCookieName)?.value as String?;
+      final specialCookie = cookies
+          .firstWhereOrNull((cookie) => cookie.name == specialCookieName)
+          ?.value;
+      final specialCookieValue = specialCookie is String ? specialCookie : null;
 
-    // Determine if authorization is successful
-    final isBasicSuccess =
-        (token != null && token.isNotEmpty) || (specialCookieValue != null && specialCookieValue.isNotEmpty);
+      final isBasicSuccess = (token != null && token.isNotEmpty) ||
+          (specialCookieValue != null && specialCookieValue.isNotEmpty);
 
-    final isSpecialCookieValid = !waitForSpecialCookie || (specialCookieValue != null && specialCookieValue.isNotEmpty);
+      final isSpecialCookieValid = !waitForSpecialCookie ||
+          (specialCookieValue != null && specialCookieValue.isNotEmpty);
 
-    if (isBasicSuccess && isSpecialCookieValid) {
-      debugPrint('=== OAuth SUCCESS ===');
-      debugPrint('Access token: $token');
-      debugPrint('Special cookie [$specialCookieName]: $specialCookieValue');
+      if (isBasicSuccess && isSpecialCookieValid) {
+        final allCookies = <String, String>{};
+        for (final cookie in cookies) {
+          final value = cookie.value;
+          if (value is String) allCookies[cookie.name] = value;
+        }
 
-      // Gather all cookies
-      final allCookies = <String, String>{};
-      for (final cookie in cookies) {
-        allCookies[cookie.name] = cookie.value as String;
+        await _completeSuccess(
+          LoginSuccessData(
+            accessToken: token,
+            allCookies: allCookies,
+            specialCookieValue: specialCookieValue,
+          ),
+        );
       }
-
-      final successData = LoginSuccessData(
-        accessToken: token,
-        allCookies: allCookies,
-        specialCookieValue: specialCookieValue,
-      );
-
-      onLoginSuccess?.call(successData);
-
-      try {
-        await close();
-      } catch (e) {
-        debugPrint('[WebOAuthInterceptorClient] Browser already closed: $e');
-      }
+    } on Exception {
+      _reportError('Unable to complete OAuth login.');
     }
   }
 
-  /// Helper method to extract `access_token` (or another parameter) from the URL query.
   String? _extractTokenFromUrl(String url) {
     final uri = Uri.parse(url);
     return uri.queryParameters['access_token'];
   }
 
-  /// Method to auto-fill form fields on the page using JavaScript.
-  /// Operates only if [autoFillConfig] is provided.
   Future<void> _tryAutoFillForm() async {
-    if (autoFillConfig == null) return;
+    final config = autoFillConfig;
+    if (config == null) return;
 
-    final usernameSel = autoFillConfig!.usernameSelector;
-    final passwordSel = autoFillConfig!.passwordSelector;
-    final submitBtnSel = autoFillConfig!.submitButtonSelector;
-    final defaultUsername = autoFillConfig!.defaultUsername;
-    final defaultPassword = autoFillConfig!.defaultPassword;
+    final usernameSel = config.usernameSelector;
+    final passwordSel = config.passwordSelector;
+    final submitBtnSel = config.submitButtonSelector;
+    final defaultUsername = config.defaultUsername;
+    final defaultPassword = config.defaultPassword;
 
-    // If username/password selectors or values are not provided, do nothing
-    if ((usernameSel == null || defaultUsername == null) && (passwordSel == null || defaultPassword == null)) {
+    if ((usernameSel == null || defaultUsername == null) &&
+        (passwordSel == null || defaultPassword == null)) {
       return;
     }
 
-    // Build the JavaScript script for auto-filling the form
     final jsBuffer = StringBuffer();
 
     if (usernameSel != null && defaultUsername != null) {
-      jsBuffer.writeln('''
-        (function() {
-          var el = document.querySelector("$usernameSel");
-          if (el) { el.value = "$defaultUsername"; }
-        })();
-      ''');
+      _appendInputAssignment(jsBuffer, usernameSel, defaultUsername);
     }
 
     if (passwordSel != null && defaultPassword != null) {
-      jsBuffer.writeln('''
-        (function() {
-          var el = document.querySelector("$passwordSel");
-          if (el) { el.value = "$defaultPassword"; }
-        })();
-      ''');
+      _appendInputAssignment(jsBuffer, passwordSel, defaultPassword);
     }
 
-    // Populate additional fields if any
-    if (autoFillConfig!.additionalFields.isNotEmpty) {
-      autoFillConfig!.additionalFields.forEach((selector, value) {
-        jsBuffer.writeln('''
-          (function() {
-            var el = document.querySelector("$selector");
-            if (el) { el.value = "$value"; }
-          })();
-        ''');
-      });
-    }
+    config.additionalFields.forEach((selector, value) {
+      _appendInputAssignment(jsBuffer, selector, value);
+    });
 
-    // Click the submit button if a selector is provided
     if (submitBtnSel != null) {
       jsBuffer.writeln('''
         (function() {
-          var btn = document.querySelector("$submitBtnSel");
-          if (btn) { btn.click(); }
+          const button = document.querySelector(${jsonEncode(submitBtnSel)});
+          if (button) button.click();
         })();
       ''');
     }
 
-    // Execute the script in the WebView
-    if (jsBuffer.isNotEmpty) {
-      try {
-        final script = jsBuffer.toString();
-        await webViewController?.evaluateJavascript(source: script);
-        debugPrint('[WebOAuthInterceptorClient] Auto-fill JS executed');
-      } catch (e) {
-        debugPrint('[WebOAuthInterceptorClient] Auto-fill JS error: $e');
-      }
+    try {
+      await webViewController?.evaluateJavascript(source: jsBuffer.toString());
+    } on Exception {
+      // Autofill is optional; the user can continue in the interactive browser.
     }
+  }
+
+  Future<void> _completeSuccess(LoginSuccessData successData) async {
+    if (_didComplete) return;
+    _didComplete = true;
+    try {
+      onLoginSuccess?.call(successData);
+    } finally {
+      await _closeSafely();
+    }
+  }
+
+  void _reportError(String message) {
+    if (_didComplete) return;
+    _didComplete = true;
+    onLoginError?.call(message);
+    unawaited(_closeSafely());
+  }
+
+  Future<void> _closeSafely() async {
+    try {
+      await close();
+    } on Exception {
+      // A redirect can dispose the browser before this close operation runs.
+    }
+  }
+
+  void _appendInputAssignment(
+    StringBuffer buffer,
+    String selector,
+    String value,
+  ) {
+    buffer.writeln('''
+      (function() {
+        const input = document.querySelector(${jsonEncode(selector)});
+        if (!input) return;
+        input.value = ${jsonEncode(value)};
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+        input.dispatchEvent(new Event('change', { bubbles: true }));
+      })();
+    ''');
   }
 }
 
 /// Client class to initiate and handle the OAuth interception process.
 class OAuthInterceptorClient {
-  OAuthInterceptorClient({
+  const OAuthInterceptorClient({
     required this.oauthUrl,
     required this.expectedRedirectUrls,
     required this.specialCookieName,
@@ -375,7 +306,6 @@ class OAuthInterceptorClient {
   /// Name of the special cookie that signals success.
   final String specialCookieName;
 
-  /// Determines whether to explicitly wait for the special cookie before considering the process successful.
   final bool waitForSpecialCookie;
 
   /// Additional headers to include in the request, if needed.
@@ -394,7 +324,6 @@ class OAuthInterceptorClient {
   /// Callback when the user closes the browser.
   final VoidCallback? onBrowserExit;
 
-  /// Initiates the OAuth flow using a custom [WebOAuthInterceptorClient].
   Future<LoginSuccessData> initiateOAuthFlow() async {
     final completer = Completer<LoginSuccessData>();
 
@@ -406,10 +335,16 @@ class OAuthInterceptorClient {
       extraHeaders: extraHeaders,
       autoFillConfig: autoFillConfig,
       onLoginSuccess: completer.complete,
-      onLoginError: completer.completeError,
+      onLoginError: (error) => completer.completeError(
+        error,
+        StackTrace.current,
+      ),
       onBrowserExit: () {
         if (!completer.isCompleted) {
-          completer.completeError('Browser exited before login.');
+          completer.completeError(
+            'Browser exited before login.',
+            StackTrace.current,
+          );
         }
       },
     );
@@ -427,8 +362,10 @@ class OAuthInterceptorClient {
           ),
         ),
       );
-    } catch (e) {
-      completer.completeError(e.toString());
+    } on Exception catch (_, stackTrace) {
+      if (!completer.isCompleted) {
+        completer.completeError('Unable to open OAuth browser.', stackTrace);
+      }
     }
 
     return completer.future;

@@ -1,0 +1,23 @@
+services:
+  social-media-fetcher:
+    build:
+      context: ./tools/social_media_fetcher
+      dockerfile: Dockerfile
+    env_file:
+      - .env.social-media
+    volumes:
+      - sessions_data:/app/sessions
+      - app_data:/app/data
+      - logs_data:/app/logs
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "healthcheck.py"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  sessions_data:
+  app_data:
+  logs_data:

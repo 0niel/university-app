@@ -1,39 +1,15 @@
-import 'package:equatable/equatable.dart';
-import 'package:rtu_mirea_app/map/models/models.dart';
+part of 'map_bloc.dart';
 
-abstract class MapEvent extends Equatable {
-  const MapEvent();
+@freezed
+sealed class MapEvent with _$MapEvent {
+  const factory MapEvent.initialized() = MapInitialized;
 
-  @override
-  List<Object?> get props => [];
-}
+  const factory MapEvent.campusSelected(CampusModel campus) = CampusSelected;
 
-class MapInitialized extends MapEvent {}
+  const factory MapEvent.floorSelected({
+    required FloorModel floor,
+    required CampusModel campus,
+  }) = FloorSelected;
 
-class CampusSelected extends MapEvent {
-  final CampusModel selectedCampus;
-
-  const CampusSelected(this.selectedCampus);
-
-  @override
-  List<Object?> get props => [selectedCampus];
-}
-
-class FloorSelected extends MapEvent {
-  final FloorModel selectedFloor;
-  final CampusModel selectedCampus;
-
-  const FloorSelected(this.selectedFloor, this.selectedCampus);
-
-  @override
-  List<Object?> get props => [selectedFloor];
-}
-
-class RoomTapped extends MapEvent {
-  final String roomId;
-
-  const RoomTapped(this.roomId);
-
-  @override
-  List<Object?> get props => [roomId];
+  const factory MapEvent.roomTapped(String roomId) = RoomTapped;
 }

@@ -1,137 +1,138 @@
-# Добро пожаловать
-Радостно видеть, что вам интересен этот проект. Прежде всего стоит отметить, что мы всегда рады новым участникам и готовы помочь вам внести свой вклад в развитие. В этом файле вы найдёте информацию о том, как это сделать. Не стесняйтесь создавать новые [issues](https://github.com/0niel/university-app/issues) и [дискуссии](https://github.com/0niel/university-app/discussions), если у вас возникли вопросы или проблемы, даже если они кажутся вам незначительными.
+# Участие в разработке
 
-## Участники
-Всех участники проекта, которые внесли хоть какой-то вклад, отображаются в мобильном приложении в разделе "О приложении". Это происходит автоматически, как только ваш Pull Request будет принят и включён в релиз.
+Спасибо за вклад. Перед началом проверьте существующие issues и коротко опишите
+предлагаемое поведение. Для больших архитектурных изменений сначала согласуйте
+контракт и границы задачи. Соблюдайте [кодекс поведения](CODE_OF_CONDUCT.md).
 
-# Ваше участие
-Каждый может внести свой вклад в развитие данного проекта. Мы с удовольствием рассмотрим ваш Pull Request, ознакомимся с вашими проблемами и вопросами.
+Информацию об уязвимостях отправляйте приватно по инструкции из
+[SECURITY.md](SECURITY.md), а не через публичный issue.
 
-Есть несколько принципов, которых нужно придерживаться:
-1. Уважайте чужой труд. Если вы что-то откуда-то заимствуете, то обязательно указывайте источники.
-2. Тщательно документируйте свой код.
-3. Придерживайтесь стандартов оформления кода. Например, таких, как [Effective Dart: Style](https://dart.dev/guides/language/effective-dart/style)
+## Настройка окружения
 
+Проект использует Flutter 3.44.2, Dart 3.12, Java 17 для Android и FVM. Это Dart
+workspace: `flutter pub get` из корня подключает пакеты из `packages/`, отдельный
+bootstrap-инструмент не нужен.
 
-# DCO 
-Мы используем Developer Certificate of Origin (DCO) в качестве дополнительной защиты от недобросовестных участников. Это значит, что каждый коммит должен быть подписан автором, используя `git commit -s`.  Подробнее о DCO можно прочитать [здесь](https://developercertificate.org/). Узнать, как подписать свой коммит, можно [здесь](https://docs.github.com/en/authentication/managing-commit-signature-verification/signing-commits).
-
-
-# Установка и конфигурация проекта
-Для сборки и запуска данного проекта необходима **Java 17**.  
-
-1. [Установите стабильную версию Flutter](https://docs.flutter.dev/get-started/install) для своей операционной системы, если вы этого ещё не сделали. Используйте `flutter doctor` для проверки установки и конфигурации Flutter.
-
-Этот проект использует некотоыре пакеты, которые необходимо установить перед началом работы:
-- [fvm](https://pub.dev/packages/fvm) для управления версиями Flutter.
-- [melos](https://pub.dev/packages/melos) для управления подпакетами.
-
-2. Клонирование репозитория:
-```bash
-git clone https://github.com/0niel/university-app.git
-```
-или форкните репозиторий и клонируйте свой форк.
-
-2.1. Инициализация и обновление submodules:
-В проекте используются *Git submodules* (в директории packages/neon и других). После клонирования репозитория необходимо проинициализировать и обновить submodules:
-```bash
-git submodule update --init --recursive
-```
-
-3. Установите fvm и melos:
 ```bash
 dart pub global activate fvm
-dart pub global activate melos
-```
-
-4. Используйте fvm в корневой директории проекта для установки версии Flutter, необходимой для работы над проектом:
-```bash
 fvm install
-fvm flutter precache
+fvm flutter pub get
+cp .env.example .env
+cp config/university.example.json config/university.local.json
+fvm dart run tool/configure_university.dart
+fvm dart run build_runner build
 ```
 
-5. Используйте melos в корневой директории проекта для установки зависимостей всех подпакетов:
+В PowerShell используйте `Copy-Item` вместо `cp`. В `.env` задаются публичные
+compile-time параметры приложения (`SUPABASE_URL` и
+`SUPABASE_PUBLISHABLE_KEY`), а в `config/university.local.json` — tenant и
+публичный брендинг. Оба файла передаются Flutter отдельно:
+
 ```bash
-melos bootstrap
+fvm flutter run \
+  --flavor development \
+  --target lib/main/main_development.dart \
+  --dart-define-from-file=.env \
+  --dart-define-from-file=config/university.local.json
 ```
 
-Важно: Если ваш терминал не распознает команды `fvm` и `melos`, убедитесь, что Pub Cache находится в вашем `PATH`. Подробнее об этом можно прочитать [здесь](https://dart.dev/tools/pub/cmd/pub-global).
+Подробнее: [`docs/university-configuration.md`](docs/university-configuration.md).
 
-6. После установки всех зависимостей, вы можете запустить проект, выполнив команду:
+## Архитектурные правила
+
+- Группируйте presentation-код по feature в `lib/`; выносите общие клиенты,
+  domain/data-контракты и репозитории в подходящий пакет workspace.
+- Widget отправляет события и отображает state. I/O размещается в repository и
+  client/data-source слоях, а не в `build()`.
+- Для состояния приложения используйте BLoC; зависимости регистрируйте через
+  существующий `yx_scope`. Не добавляйте второй DI/state-management подход.
+- Новые JSON DTO делайте immutable через Freezed и `json_serializable`. Не
+  пишите вручную `==`, `copyWith`, `fromJson` и `toJson`, когда их может
+  безопасно сгенерировать проект.
+- Сохраняйте null safety: не используйте `!`, если значение можно проверить и
+  сузить flow analysis.
+- Публичный Supabase-контракт — RPC/Edge Functions. Не связывайте Flutter с
+  внутренними таблицами и никогда не добавляйте `service_role` в клиент.
+- Университетская специфика должна быть конфигурацией или отдельным adapter, а
+  не условием, размазанным по UI и domain-коду.
+- Комментарий должен объяснять неочевидное решение или ограничение. Не
+  дублируйте код пересказами и шаблонными doc comments.
+
+## Изменение схемы и ingest
+
+Создавайте миграции командой:
+
 ```bash
-fvm flutter run
+supabase migration new <descriptive_name>
 ```
 
-### Дополнительные команды
-- Используйте одну из этих команд для сборки проекта:
+Не переписывайте уже применённые миграции. Проверяйте полный локальный replay
+через `supabase db reset` при доступном Docker. Сохраняйте tenant scope через
+`organization_id`, RLS и существующие публичные RPC.
+
+Фетчеры должны нормализовать данные и вызывать защищённый
+`supabase/functions/ingest`, а не писать напрямую в `core.*`. Для нового
+университета добавляйте provider/adapter и фикстуры; MIREA-provider не является
+универсальным fallback.
+
+## Генерация и форматирование
+
+После изменения Freezed, JSON, router или другой генерируемой модели выполните:
+
 ```bash
-fvm flutter build apk
-fvm flutter build ios
-fvm flutter build appbundle
+fvm dart run build_runner build
+fvm dart format lib test packages tool
 ```
 
-- Используйте melos для запуска команд во всех подпакетах:
+Builders работают в границах пакета. Если модель находится в
+`packages/<name>`, повторите `fvm dart run build_runner build` из каталога
+этого пакета.
+
+Генерируемые файлы меняются только через исходную модель и build runner.
+
+## Проверки перед pull request
+
+Минимум для Flutter/Dart:
+
 ```bash
-melos run
+fvm dart analyze --fatal-warnings
+fvm flutter test
 ```
 
-- Если возникнут какие-либо проблемы при выполнении предыдущих действий, выполните приведенную ниже команду для анализа и устанения неполадок: -->
+Если затронут Python worker:
+
 ```bash
-flutter doctor
+cd tools/social_media_fetcher
+uv sync --locked
+uv run ruff format --check .
+uv run ruff check .
+uv run pytest
 ```
 
+Если затронут `supabase/functions/ingest`:
 
-## Генерация кода
-Проект использует [build_runner](https://pub.dev/packages/build_runner) для генерации кода, например, сериализаторов JSON и маршалинга.
-
-Используйте `melos run` для запуска команды `flutter pub run build_runner build` во всех подпакетах.
-
-
-## Конфигурация Firebase Analytics
-Пропустите этот шаг, если вы не планируете распространять свою собственную сборку приложения.
-
-1. Зарегистрируйте приложение в [Firebase](https://console.firebase.google.com/).
-2. Выполните шаги для генерации `firebase_options.dart` файла с помощью [FlutterFire CLI](https://firebase.flutter.dev/docs/cli).
-3. Firebase Analytics для Android не поддерживает Dart-only конфигурацию. Как только ваше приложение для Android будет зарегистрировано в Firebase, загрузите файл конфигурации с консоли Firebase (файл называется `google-services.json`). Добавьте этот файл в каталог `android/app`.
-4. Проект готов для использования с Firebase Analytics и Crashlytics.
-
-
-## Переменные окружения
-Приложение использует переменные среды для хранения конфиденциальных данных, таких как ключи API и токены. См. файл `.env.example`.
-
-### Переменные приложения, используемые в проекте:
-- `SENTRY_DSN` - DSN для отправки отчетов об ошибках в Sentry (необязательно).
-- `STORYLY_ID` - API ключ для работы Сторис через Storyly (необязательно).
-- `MAPKIT_API_KEY` - API ключ для работы с Яндекс Картами (Yandex MapKit) (необязательно).
-
-
-# Запуск API сервера
-В папке `api` расположен исходный код сервера, который используется для получения расписания, новостей, данных о сообществе. В качестве бэкенд-фреймворка используется [dart_frog](https://github.com/VeryGoodOpenSource/dart_frog). Сервер и мобильное приложение используют общую кодовую базу, а API-клиенты, с помощью которых приложение взаимодействует с сервером, определены в `./api/lib/src/client/api_client.dart`.
-
-## Запуск сервера
-1. Установите зависимости сервера:
 ```bash
-cd api
-dart pub get
+deno fmt --check supabase/functions/ingest
+deno lint supabase/functions/ingest
+deno check supabase/functions/ingest/index.ts
+deno test supabase/functions/ingest
 ```
 
-2. Установите dart_frog_cli:
-```bash
-dart pub global activate dart_frog_cli
-```
+Добавляйте unit-тесты для repository/BLoC и regression-тест для исправленной
+ошибки. Для BLoC проверяйте успешный и ошибочный сценарии; для интеграций
+используйте локальные фикстуры вместо живого внешнего API.
 
-3. Запустите сервер:
-```bash
-dart_frog dev
-```
+## Pull request
 
-Создание production-сборки сервера:
-```bash
-dart_frog build
-```
+- Делайте одну логическую задачу на pull request и не включайте несвязанные
+  форматирования или generated-файлы.
+- Опишите пользовательский эффект, архитектурное решение и выполненные проверки.
+- Для UI приложите скриншоты и проверьте light/dark theme, большой масштаб
+  текста и semantics интерактивных элементов.
+- Используйте понятные сообщения коммитов; если применяете Conventional Commits,
+  выбирайте scope по feature или package.
 
-Используйте `ApiClient.localhost()` для взаимодействия с сервером во время разработки https://github.com/0niel/university-app/blob/eea141fc7ce7a5f26e1486822eaec0d2d2983059/lib/main.dart#L170.
-
-
-# Соглашение о коммитах
-Мы используем семантическое именование коммитов, чтобы упростить процесс релизов и автоматизировать генерацию changelog'ов. Придерживайтесь правил, определённых в [Conventional Commits](https://www.conventionalcommits.org/).
+Никогда не прикладывайте `.env`, Firebase-файлы, ключи подписи, Supabase ingest
+secret, Telegram API hash/session string, дампы пользовательских сессий или
+персональные данные. Если секрет случайно попал в Git или логи, немедленно
+отзовите его и сообщите сопровождающим приватно.

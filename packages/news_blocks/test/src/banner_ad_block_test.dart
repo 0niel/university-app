@@ -1,0 +1,11 @@
+import 'package:news_blocks/news_blocks.dart';
+import 'package:test/test.dart';
+
+void main() {
+  group('BannerAdBlock', () {
+    test('can be (de)serialized', () {
+      const block = BannerAdBlock(size: BannerSize.normal);
+      expect(BannerAdBlock.fromJson(block.toJson()), equals(block));
+    });
+  });
+}

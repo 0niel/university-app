@@ -1,18 +1,16 @@
-// CLI tool to remove duplicate keys from a JSON ARB (or any JSON) file.
-// Always writes the result back to the file (no success output).
-// Usage:
-//   dart tools/dedupe_arb.dart <path-to-json> [--sort]
-// If --sort is provided, keys will be sorted alphabetically.
-
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:collection/collection.dart';
+
 void printUsage() {
-  stdout.writeln('🧰 Usage: dart tools/dedupe_arb.dart <path-to-json> [--sort]');
+  stdout.writeln(
+    '🧰 Usage: dart tools/dedupe_arb.dart <path-to-json> [--sort]',
+  );
 }
 
 Map<String, dynamic> flattenJsonPreserveLast(Map<String, dynamic> input) {
-  final Map<String, dynamic> out = {};
+  final out = <String, dynamic>{};
   input.forEach((k, v) {
     out[k] = v;
   });
@@ -24,26 +22,26 @@ String encodePretty(Map<String, dynamic> map) {
   return '${encoder.convert(map)}\n';
 }
 
-Future<void> main(List<String> args) async {
-  if (args.isEmpty || args.first.startsWith('-')) {
+void main(List<String> args) {
+  final path = args.firstOrNull;
+  if (path == null || path.startsWith('-')) {
     printUsage();
     exit(2);
   }
 
-  final path = args.first;
   final sort = args.contains('--sort');
 
   final file = File(path);
-  if (!await file.exists()) {
+  if (!file.existsSync()) {
     stderr.writeln('❌ File not found: $path');
     exit(2);
   }
 
-  late final Map<String, dynamic> jsonMap;
+  final Map<String, dynamic> jsonMap;
   try {
-    final content = await file.readAsString();
+    final content = file.readAsStringSync();
     jsonMap = json.decode(content) as Map<String, dynamic>;
-  } catch (e) {
+  } on Exception catch (e) {
     stderr.writeln('🚫 Failed to read/parse JSON: $e');
     exit(2);
   }
@@ -52,10 +50,11 @@ Future<void> main(List<String> args) async {
 
   if (sort) {
     final sortedKeys = deduped.keys.toList()..sort();
-    final Map<String, dynamic> sorted = {for (final k in sortedKeys) k: deduped[k]};
-    deduped = sorted;
+    deduped = <String, dynamic>{
+      for (final k in sortedKeys) k: deduped[k],
+    };
   }
 
   final output = encodePretty(deduped);
-  await file.writeAsString(output);
+  file.writeAsStringSync(output);
 }

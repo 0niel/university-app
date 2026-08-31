@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:news_blocks/news_blocks.dart';
 import 'package:rtu_mirea_app/feed/feed.dart';
+import 'package:rtu_mirea_app/l10n/l10n.dart';
 
 class CategoryFeed extends StatelessWidget {
   const CategoryFeed({
@@ -18,63 +19,45 @@ class CategoryFeed extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final categoryFeed =
-        context.select((FeedBloc bloc) => bloc.state.feed[category.id]) ?? [];
+        context.select<FeedBloc, List<NewsBlock>?>(
+          (bloc) => bloc.state.feed[category.id],
+        ) ??
+        [];
 
     final hasMoreNews =
-        context.select(
-          (FeedBloc bloc) => bloc.state.hasMoreNews[category.id],
+        context.select<FeedBloc, bool?>(
+          (bloc) => bloc.state.hasMoreNews[category.id],
         ) ??
         true;
 
-    final isFailure = context.select(
-      (FeedBloc bloc) => bloc.state.status == FeedStatus.failure,
+    final isFailure = context.select<FeedBloc, bool>(
+      (bloc) => bloc.state.status == .failure,
     );
 
-    return BlocListener<FeedBloc, FeedState>(
-      listener: (context, state) {
-        if (state.status == FeedStatus.failure && state.feed.isEmpty) {
-          Navigator.of(context).push<void>(
-            MaterialPageRoute(
-              builder:
-                  (context) => Scaffold(
-                    body: FailureScreen(
-                      title: 'Ошибка загрузки',
-                      description: 'Не удалось загрузить ленту новостей',
-                      icon: Icons.error_outline,
-                      buttonText: 'Повторить',
-                      onButtonPressed: () {
-                        context.read<FeedBloc>().add(
-                          FeedRefreshRequested(category: category),
-                        );
-                        Navigator.of(context).pop();
-                      },
-                    ),
-                  ),
-            ),
-          );
-        }
-      },
-      child: RefreshIndicator(
-        onRefresh:
-            () async => context.read<FeedBloc>().add(
-              FeedRefreshRequested(category: category),
-            ),
-        displacement: 0,
-        color: Theme.of(context).extension<AppColors>()!.primary,
-        child: SelectionArea(
-          child: CustomScrollView(
-            controller: scrollController,
-            slivers: _buildSliverItems(
-              context,
-              categoryFeed,
-              hasMoreNews,
-              isFailure,
-            ),
+    return RefreshIndicator(
+      onRefresh: () async => context.read<FeedBloc>().add(
+        FeedRefreshRequested(category: category),
+      ),
+      displacement: 0,
+      backgroundColor: context.ninja.surface,
+      color: context.ninja.brand,
+      child: SelectionArea(
+        child: CustomScrollView(
+          controller: scrollController,
+          slivers: _buildSliverItems(
+            context,
+            categoryFeed,
+            hasMoreNews,
+            isFailure,
           ),
         ),
       ),
     );
   }
+
+  void _retry(BuildContext context) => context.read<FeedBloc>().add(
+    FeedRefreshRequested(category: category),
+  );
 
   List<Widget> _buildSliverItems(
     BuildContext context,
@@ -82,46 +65,84 @@ class CategoryFeed extends StatelessWidget {
     bool hasMoreNews,
     bool isFailure,
   ) {
+    final l10n = context.l10n;
     final sliverList = <Widget>[];
 
-    for (var index = 0; index < categoryFeed.length + 1; index++) {
-      late Widget result;
-      if (index == categoryFeed.length) {
-        if (isFailure) {
-          result = FailureScreen(
-            title: 'Ошибка загрузки',
-            description: 'Не удалось загрузить больше новостей',
-            icon: Icons.error_outline,
-            buttonText: 'Повторить',
-            onButtonPressed: () {
-              context.read<FeedBloc>().add(
-                FeedRefreshRequested(category: category),
-              );
-            },
-          );
-        } else {
-          result =
-              hasMoreNews
-                  ? Padding(
-                    padding: EdgeInsets.only(
-                      top: categoryFeed.isEmpty ? AppSpacing.xlg : 0,
-                    ),
-                    child: CategoryFeedLoaderItem(
-                      key: ValueKey(index),
-                      onPresented:
-                          () => context.read<FeedBloc>().add(
-                            FeedRequested(category: category),
-                          ),
-                    ),
-                  )
-                  : const SizedBox();
-        }
+    if (category.id == 'all') {
+      sliverList.add(const SliverToBoxAdapter(child: FeedSourcesRail()));
+    }
 
-        sliverList.add(SliverToBoxAdapter(child: result));
-      } else {
-        final block = categoryFeed[index];
-        sliverList.add(CategoryFeedItem(block: block));
-      }
+    if (isFailure && categoryFeed.isEmpty) {
+      sliverList.add(
+        SliverFillRemaining(
+          hasScrollBody: false,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.xl,
+              vertical: AppSpacing.xlg,
+            ),
+            child: Center(
+              child: NinjaErrorState(
+                title: l10n.loadingError,
+                message: l10n.feedLoadError,
+                retryLabel: l10n.retry,
+                onRetry: () => _retry(context),
+              ),
+            ),
+          ),
+        ),
+      );
+      return sliverList;
+    }
+
+    for (final block in categoryFeed) {
+      sliverList.add(CategoryFeedItem(block: block));
+    }
+
+    if (isFailure) {
+      sliverList.add(
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.xl,
+              AppSpacing.lg,
+              AppSpacing.xl,
+              AppSpacing.xlg,
+            ),
+            child: NinjaErrorCard(
+              title: l10n.loadingError,
+              message: l10n.feedLoadMoreError,
+              actionLabel: l10n.retry,
+              onAction: () => _retry(context),
+            ),
+          ),
+        ),
+      );
+    } else if (hasMoreNews) {
+      sliverList.add(
+        SliverToBoxAdapter(
+          child: CategoryFeedLoaderItem(
+            key: ValueKey(categoryFeed.length),
+            onPresented: () => context.read<FeedBloc>().add(
+              FeedRequested(category: category),
+            ),
+          ),
+        ),
+      );
+    } else if (categoryFeed.isEmpty) {
+      sliverList.add(
+        SliverFillRemaining(
+          hasScrollBody: false,
+          child: Center(
+            child: NinjaEmptyState.screen(
+              title: l10n.feedEmptyTitle,
+              message: l10n.feedEmptyDescription,
+              actionLabel: l10n.retry,
+              onAction: () => _retry(context),
+            ),
+          ),
+        ),
+      );
     }
 
     return sliverList;

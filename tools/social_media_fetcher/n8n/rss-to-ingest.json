@@ -1,0 +1,44 @@
+{
+  "name": "University RSS to Supabase ingest",
+  "nodes": [
+    {
+      "parameters": {"rule": {"interval": [{"field": "minutes", "minutesInterval": 30}]}},
+      "name": "Every 30 minutes",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [0, 0],
+      "id": "9e078cbf-0084-44c0-b3b1-2fed0842e6ca"
+    },
+    {
+      "parameters": {"url": "={{ $env.RSS_FEED_URL }}"},
+      "name": "Read RSS",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1,
+      "position": [220, 0],
+      "id": "15e6332f-8e98-463a-b67e-ed3f6054356b"
+    },
+    {
+      "parameters": {"jsCode": "const post = $input.item.json;\nconst url = post.link ?? post.guid;\nconst publishedAt = post.isoDate ?? new Date().toISOString();\nconst html = post.content ?? post.summary ?? '';\nif (!post.title || !url) throw new Error('Feed item needs title and link');\nconst source = {\n  source_type: 'rss',\n  source_external_id: $env.SOURCE_ID,\n  source_name: $env.SOURCE_NAME,\n  source_url: $env.SOURCE_URL,\n  category: $env.SOURCE_CATEGORY ?? 'university',\n};\nif (!source.source_external_id || !source.source_name || !source.source_url) {\n  throw new Error('SOURCE_ID, SOURCE_NAME, and SOURCE_URL are required');\n}\nreturn [{ json: {\n  entity: 'news_items',\n  organization_id: $env.APP_ORGANIZATION_ID,\n  source,\n  items: [{\n    external_id: post.guid ?? url, title: post.title, summary: post.contentSnippet ?? post.content ?? null, published_at: publishedAt, original_url: url,\n    news_blocks: [\n      { type: '__article_introduction__', category_id: source.category, author: source.source_name, published_at: publishedAt, image_url: null, title: post.title },\n      { type: '__html__', content: html }\n    ], raw_data: post\n  }]\n} }];"},
+      "name": "Build ingest payload",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [440, 0],
+      "id": "dbfc16e9-7744-43d5-9d68-0145ce5e48f6"
+    },
+    {
+      "parameters": {"method": "POST", "url": "={{ $env.SUPABASE_URL }}/functions/v1/ingest", "sendHeaders": true, "headerParameters": {"parameters": [{"name": "x-ingest-key", "value": "={{ $env.SUPABASE_INGEST_KEY }}"}]}, "sendBody": true, "specifyBody": "json", "jsonBody": "={{ $json }}"},
+      "name": "Ingest content",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [660, 0],
+      "id": "3b049c3c-8785-414d-85aa-d731869c7f5e"
+    }
+  ],
+  "connections": {
+    "Every 30 minutes": {"main": [[{"node": "Read RSS", "type": "main", "index": 0}]]},
+    "Read RSS": {"main": [[{"node": "Build ingest payload", "type": "main", "index": 0}]]},
+    "Build ingest payload": {"main": [[{"node": "Ingest content", "type": "main", "index": 0}]]}
+  },
+  "active": false,
+  "settings": {"executionOrder": "v1"}
+}

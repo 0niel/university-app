@@ -1,5 +1,3 @@
-// ignore_for_file: prefer_const_constructors
-
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:permission_client/permission_client.dart';
@@ -9,21 +7,27 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   group('PermissionClient', () {
+    const channel = MethodChannel(
+      'flutter.baseflow.com/permissions/methods',
+    );
+    final messenger =
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
     late PermissionClient permissionClient;
     late List<MethodCall> calls;
 
     setUp(() {
-      permissionClient = PermissionClient();
+      permissionClient = const PermissionClient();
       calls = [];
 
-      MethodChannel('flutter.baseflow.com/permissions/methods').setMockMethodCallHandler((call) async {
+      messenger.setMockMethodCallHandler(channel, (call) async {
         calls.add(call);
 
         if (call.method == 'checkPermissionStatus') {
           return PermissionStatus.granted.index;
         } else if (call.method == 'requestPermissions') {
-          return <dynamic, dynamic>{
-            for (final key in call.arguments as List<dynamic>) key: PermissionStatus.granted.index,
+          return <Object?, int>{
+            for (final key in call.arguments as List<Object?>)
+              key: PermissionStatus.granted.index,
           };
         } else if (call.method == 'openAppSettings') {
           return true;
@@ -32,6 +36,8 @@ void main() {
         return null;
       });
     });
+
+    tearDown(() => messenger.setMockMethodCallHandler(channel, null));
 
     Matcher permissionWasRequested(Permission permission) => contains(
       isA<MethodCall>()
@@ -48,14 +54,38 @@ void main() {
     group('requestNotifications', () {
       test('calls correct method', () async {
         await permissionClient.requestNotifications();
-        expect(calls, permissionWasRequested(Permission.notification));
+        expect(calls, permissionWasRequested(.notification));
       });
     });
 
     group('notificationsStatus', () {
       test('calls correct method', () async {
         await permissionClient.notificationsStatus();
-        expect(calls, permissionWasChecked(Permission.notification));
+        expect(calls, permissionWasChecked(.notification));
+      });
+    });
+
+    group('requestLocationWhenInUse', () {
+      test('requests foreground location permission', () async {
+        await permissionClient.requestLocationWhenInUse();
+
+        expect(calls, permissionWasRequested(.locationWhenInUse));
+      });
+    });
+
+    group('locationWhenInUseStatus', () {
+      test('checks foreground location permission', () async {
+        await permissionClient.locationWhenInUseStatus();
+
+        expect(calls, permissionWasChecked(.locationWhenInUse));
+      });
+    });
+
+    group('requestNearbyWifiDevices', () {
+      test('requests nearby Wi-Fi device permission', () async {
+        await permissionClient.requestNearbyWifiDevices();
+
+        expect(calls, permissionWasRequested(.nearbyWifiDevices));
       });
     });
 
@@ -63,7 +93,16 @@ void main() {
       test('calls correct method', () async {
         await permissionClient.openPermissionSettings();
 
-        expect(calls, contains(isA<MethodCall>().having((c) => c.method, 'method', 'openAppSettings')));
+        expect(
+          calls,
+          contains(
+            isA<MethodCall>().having(
+              (c) => c.method,
+              'method',
+              'openAppSettings',
+            ),
+          ),
+        );
       });
     });
   });

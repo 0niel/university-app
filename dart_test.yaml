@@ -1,0 +1,8 @@
+# The `gallery` suite renders screens into `test/gallery/goldens/*.png` so the
+# Metro composition can be diffed against `design_bundle/options/*.html` by eye.
+# It is a design reference, not an assertion suite, so it stays out of the
+# default run — refresh it with:
+#   flutter test test/gallery --run-skipped --update-goldens
+tags:
+  gallery:
+    skip: "design reference; run with --run-skipped --update-goldens"

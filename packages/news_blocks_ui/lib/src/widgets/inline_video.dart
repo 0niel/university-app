@@ -1,17 +1,13 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:news_blocks_ui/src/generated/generated.dart';
 import 'package:video_player/video_player.dart';
 
-/// Signature for [VideoPlayerController] builder.
-typedef VideoPlayerControllerBuilder = VideoPlayerController Function(
-  Uri videoUrl,
-);
+typedef VideoPlayerControllerBuilder =
+    VideoPlayerController Function(Uri videoUrl);
 
-/// {@template inline_video}
-/// A reusable video widget displayed inline with the content.
-/// {@endtemplate}
 class InlineVideo extends StatefulWidget {
-  /// {@macro inline_video}
   const InlineVideo({
     required this.videoUrl,
     required this.progressIndicator,
@@ -19,16 +15,10 @@ class InlineVideo extends StatefulWidget {
     super.key,
   });
 
-  /// The aspect ratio of this video.
-  static const _aspectRatio = 3 / 2;
+  static const double _aspectRatio = 3 / 2;
 
-  /// The url of this video.
   final String videoUrl;
-
-  /// Widget displayed while the target [videoUrl] is loading.
   final Widget progressIndicator;
-
-  /// The builder of [VideoPlayerController] used in this video.
   final VideoPlayerControllerBuilder videoPlayerControllerBuilder;
 
   @override
@@ -37,6 +27,7 @@ class InlineVideo extends StatefulWidget {
 
 class _InlineVideoState extends State<InlineVideo> {
   late VideoPlayerController _controller;
+  bool _initializationFailed = false;
   bool _isPlaying = false;
 
   @override
@@ -44,21 +35,26 @@ class _InlineVideoState extends State<InlineVideo> {
     super.initState();
     _controller = widget.videoPlayerControllerBuilder(
       Uri.parse(widget.videoUrl),
-    )
-      ..addListener(_onVideoUpdated)
-      ..initialize().then((_) {
-        // Ensure the first frame of the video is shown
-        // after the video is initialized.
-        if (mounted) setState(() {});
-      });
+    )..addListener(_onVideoUpdated);
+    unawaited(_initializeController());
+  }
+
+  Future<void> _initializeController() async {
+    try {
+      await _controller.initialize();
+      if (mounted) {
+        setState(() => _isPlaying = _controller.value.isPlaying);
+      }
+    } on Object {
+      if (mounted) setState(() => _initializationFailed = true);
+    }
   }
 
   @override
   void dispose() {
+    _controller.removeListener(_onVideoUpdated);
+    unawaited(_controller.dispose());
     super.dispose();
-    _controller
-      ..removeListener(_onVideoUpdated)
-      ..dispose();
   }
 
   void _onVideoUpdated() {
@@ -76,37 +72,43 @@ class _InlineVideoState extends State<InlineVideo> {
       borderRadius: BorderRadius.circular(12),
       child: AspectRatio(
         aspectRatio: InlineVideo._aspectRatio,
-        child: _controller.value.isInitialized
-            ? Stack(
-                children: [
-                  SizedBox.expand(
-                    child: FittedBox(
-                      fit: BoxFit.cover,
-                      child: SizedBox(
-                        width: _controller.value.size.width,
-                        height: _controller.value.size.height,
-                        child: VideoPlayer(_controller),
+        child:
+            !_initializationFailed && _controller.value.isInitialized
+                ? Stack(
+                  children: [
+                    SizedBox.expand(
+                      child: FittedBox(
+                        fit: BoxFit.cover,
+                        child: SizedBox(
+                          width: _controller.value.size.width,
+                          height: _controller.value.size.height,
+                          child: VideoPlayer(_controller),
+                        ),
                       ),
                     ),
-                  ),
-                  Material(
-                    type: MaterialType.transparency,
-                    child: InkWell(
-                      key: const Key('inlineVideo_gestureDetector'),
-                      onTap: _isPlaying ? _controller.pause : _controller.play,
-                      splashColor: Colors.white.withOpacity(0.12),
-                      highlightColor: Colors.transparent,
+                    Material(
+                      type: MaterialType.transparency,
+                      child: InkWell(
+                        key: const Key('inlineVideo_gestureDetector'),
+                        onTap:
+                            _isPlaying
+                                ? () => unawaited(_controller.pause())
+                                : () => unawaited(_controller.play()),
+                        splashColor: Colors.white.withValues(alpha: 0.12),
+                        highlightColor: Colors.transparent,
+                      ),
                     ),
-                  ),
-                  Center(
-                    child: Visibility(
-                      visible: !_isPlaying,
-                      child: Assets.icons.playIcon.svg(),
+                    IgnorePointer(
+                      child: Center(
+                        child: Visibility(
+                          visible: !_isPlaying,
+                          child: Assets.icons.playIcon.svg(),
+                        ),
+                      ),
                     ),
-                  ),
-                ],
-              )
-            : widget.progressIndicator,
+                  ],
+                )
+                : widget.progressIndicator,
       ),
     );
   }

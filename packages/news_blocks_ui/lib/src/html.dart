@@ -18,6 +18,7 @@ class Html extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final text = theme.textTheme;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
       child: flutter_html.Html(
@@ -30,25 +31,25 @@ class Html extends StatelessWidget {
         data: block.content,
         style: {
           'p': flutter_html.Style.fromTextStyle(
-            theme.textTheme.bodyLarge!,
+            text.bodyLarge ?? const TextStyle(),
           ),
           'h1': flutter_html.Style.fromTextStyle(
-            theme.textTheme.displayLarge!,
+            text.displayLarge ?? const TextStyle(),
           ),
           'h2': flutter_html.Style.fromTextStyle(
-            theme.textTheme.displayMedium!,
+            text.displayMedium ?? const TextStyle(),
           ),
           'h3': flutter_html.Style.fromTextStyle(
-            theme.textTheme.displaySmall!,
+            text.displaySmall ?? const TextStyle(),
           ),
           'h4': flutter_html.Style.fromTextStyle(
-            theme.textTheme.headlineMedium!,
+            text.headlineMedium ?? const TextStyle(),
           ),
           'h5': flutter_html.Style.fromTextStyle(
-            theme.textTheme.headlineSmall!,
+            text.headlineSmall ?? const TextStyle(),
           ),
           'h6': flutter_html.Style.fromTextStyle(
-            theme.textTheme.titleLarge!,
+            text.titleLarge ?? const TextStyle(),
           ),
         },
       ),

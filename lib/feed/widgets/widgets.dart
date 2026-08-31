@@ -1,3 +1,9 @@
 export 'category_feed.dart';
 export 'category_feed_item.dart';
 export 'category_feed_loader_item.dart';
+export 'feed_hero_post.dart';
+export 'feed_meta.dart';
+export 'feed_post_row.dart';
+export 'feed_section_header.dart';
+export 'feed_sources_rail.dart';
+export 'feed_thumbnail.dart';

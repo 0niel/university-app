@@ -37,62 +37,75 @@ class PostMediumDescriptionLayout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).extension<AppColors>()!;
+    final colors = Theme.of(context).colors;
+    final scale = Theme.of(context).scale;
+    final description = this.description;
 
-    return Padding(
-      padding: const EdgeInsets.all(AppSpacing.lg),
+    return Card(
+      margin: EdgeInsets.symmetric(
+        horizontal: scale.space(AppSpacing.md),
+        vertical: scale.space(AppSpacing.sm),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                flex: 1,
-                child: AspectRatio(
-                  aspectRatio: 4 / 3,
+          Padding(
+            padding: EdgeInsets.fromLTRB(
+              scale.space(AppSpacing.lg),
+              scale.space(AppSpacing.md),
+              scale.space(AppSpacing.lg),
+              scale.space(AppSpacing.sm),
+            ),
+            child: PostSourceHeader(author: author),
+          ),
+
+          Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: scale.space(AppSpacing.lg),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: AppText.title.copyWith(
+                    color: colors.onSurface,
+                    height: 1.3,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+
+                if (description != null && description.isNotEmpty) ...[
+                  SizedBox(height: scale.space(AppSpacing.sm)),
+                  Text(
+                    description,
+                    style: AppText.body.copyWith(
+                      color: colors.onSurface.withValues(alpha: 0.8),
+                      height: 1.4,
+                    ),
+                    maxLines: 3,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+
+                SizedBox(height: scale.space(AppSpacing.md)),
+
+                AspectRatio(
+                  aspectRatio: 16 / 9,
                   child: ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(scale.radius(12)),
                     child: InlineImage(imageUrl: imageUrl),
                   ),
                 ),
-              ),
-              const SizedBox(width: AppSpacing.lg),
-              Expanded(
-                flex: 2,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: AppTextStyle.titleM.copyWith(
-                        color: colors.active,
-                        height: 1.3,
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: AppSpacing.md),
-                    if (description != null && description!.isNotEmpty)
-                      Text(
-                        description!,
-                        style: AppTextStyle.body.copyWith(
-                          color: colors.onSurface.withOpacity(0.7),
-                          height: 1.45,
-                        ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                  ],
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
-          const SizedBox(height: AppSpacing.md),
-          PostFooter(
-            publishedAt: publishedAt,
-            author: author,
-            onShare: onShare,
+
+          Padding(
+            padding: EdgeInsets.all(scale.space(AppSpacing.lg)),
+            child: PostTimestamp(publishedAt: publishedAt),
           ),
         ],
       ),

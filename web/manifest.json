@@ -1,11 +1,11 @@
 {
-    "name": "rtu_mirea_app",
-    "short_name": "rtu_mirea_app",
+    "name": "University App",
+    "short_name": "University",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#2F7AFF",
+    "theme_color": "#2F7AFF",
+    "description": "An open-source university companion app.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

@@ -1,107 +1,72 @@
-import 'package:flutter/material.dart';
 import 'package:app_ui/app_ui.dart';
+import 'package:flutter/material.dart';
+import 'package:rtu_mirea_app/l10n/l10n.dart';
 
 class NfcMediaSelector extends StatelessWidget {
+  const NfcMediaSelector({
+    required this.onSelectMedia,
+    required this.hasMedia,
+    required this.isVideo,
+    this.onRemoveMedia,
+    super.key,
+  });
+
   final VoidCallback onSelectMedia;
   final VoidCallback? onRemoveMedia;
   final bool hasMedia;
   final bool isVideo;
 
-  const NfcMediaSelector({
-    super.key,
-    required this.onSelectMedia,
-    this.onRemoveMedia,
-    required this.hasMedia,
-    required this.isVideo,
-  });
-
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).extension<AppColors>()!;
+    final l10n = context.l10n;
+    final colors = context.ninja;
+    final onRemove = onRemoveMedia;
 
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          l10n.nfcPassMediaTitle,
+          style: NinjaText.title.copyWith(color: colors.ink),
+        ),
+        const SizedBox(height: 6),
+        Text(
+          l10n.nfcPassMediaDescription,
+          style: NinjaText.subtext.copyWith(
+            height: 1.45,
+            color: colors.mutedDark,
+          ),
+        ),
+        const SizedBox(height: 14),
+        Row(
           children: [
-            Row(
-              children: [
-                Icon(isVideo ? Icons.videocam_outlined : Icons.image_outlined, color: colors.active, size: 22),
-                const SizedBox(width: 12),
-                Text('Медиафайл', style: AppTextStyle.bodyL.copyWith(fontWeight: FontWeight.w600)),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Text(
-              'Выберите изображение или видео, которое будет отображаться на карточке пропуска',
-              style: AppTextStyle.body.copyWith(color: colors.deactive),
-            ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: _MediaButton(
-                    icon: Icons.add,
-                    text: hasMedia ? 'Изменить' : 'Выбрать',
-                    onPressed: onSelectMedia,
-                    isPrimary: !hasMedia,
-                  ),
+            Expanded(
+              child: NinjaButton.secondary(
+                label: hasMedia
+                    ? l10n.nfcPassMediaChange
+                    : l10n.nfcPassMediaSelect,
+                size: NinjaButtonSize.medium,
+                expanded: true,
+                icon: AppLineIconWidget(
+                  isVideo ? AppLineIcon.video : AppLineIcon.image,
                 ),
-                if (hasMedia) ...[
-                  const SizedBox(width: 12),
-                  _MediaButton(
-                    icon: Icons.delete_outline,
-                    text: 'Удалить',
-                    onPressed: onRemoveMedia,
-                    color: colors.colorful05,
-                  ),
-                ],
-              ],
+                onPressed: onSelectMedia,
+              ),
             ),
+            if (hasMedia && onRemove != null) ...[
+              const SizedBox(width: 10),
+              Expanded(
+                child: NinjaButton.destructiveOutline(
+                  label: l10n.nfcPassMediaRemove,
+                  size: NinjaButtonSize.medium,
+                  expanded: true,
+                  onPressed: onRemove,
+                ),
+              ),
+            ],
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _MediaButton extends StatelessWidget {
-  final IconData icon;
-  final String text;
-  final VoidCallback? onPressed;
-  final bool isPrimary;
-  final Color? color;
-
-  const _MediaButton({
-    required this.icon,
-    required this.text,
-    required this.onPressed,
-    this.isPrimary = false,
-    this.color,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = Theme.of(context).extension<AppColors>()!;
-    final buttonColor = color ?? (isPrimary ? colors.primary : colors.background01);
-    final textColor = isPrimary ? Colors.white : colors.active;
-
-    return ElevatedButton(
-      onPressed: onPressed,
-      style: ElevatedButton.styleFrom(
-        backgroundColor: buttonColor,
-        foregroundColor: textColor,
-        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-          side: isPrimary ? BorderSide.none : BorderSide(color: colors.divider),
-        ),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [Icon(icon, size: 18), const SizedBox(width: 8), Text(text)],
-      ),
+      ],
     );
   }
 }

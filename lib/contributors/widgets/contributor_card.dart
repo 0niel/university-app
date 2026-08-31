@@ -1,50 +1,82 @@
-import 'package:community_repository/community_repository.dart';
-import 'package:enough_platform_widgets/enough_platform_widgets.dart';
-import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'dart:async';
+import 'dart:developer';
+
 import 'package:app_ui/app_ui.dart';
+import 'package:community_repository/community_repository.dart';
+import 'package:flutter/material.dart';
+import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class ContributorCard extends StatelessWidget {
-  const ContributorCard({super.key, required this.contributor});
+  const ContributorCard({required this.contributor, super.key});
 
   final Contributor contributor;
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      color: Theme.of(context).extension<AppColors>()!.background02,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: PlatformInkWell(
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              CircleAvatar(
-                radius: 37,
-                backgroundColor:
-                    Theme.of(context).extension<AppColors>()!.background03,
-                backgroundImage: NetworkImage(contributor.avatarUrl),
-              ),
-              const SizedBox(height: 16),
-              Text(contributor.login, style: AppTextStyle.bodyBold),
-              Text(
-                '${contributor.contributions} ${Intl.plural(contributor.contributions, one: 'коммит', few: 'коммита', many: 'коммитов', other: 'коммитов')}',
-                style: AppTextStyle.body,
-              ),
-            ],
-          ),
+    final colors = context.ninja;
+    final avatarUrl = contributor.avatarUrl;
+    final profileUrl = contributor.htmlUrl;
+
+    return AppPressable(
+      onTap: () => unawaited(_openProfile(profileUrl)),
+      semanticsLabel: contributor.login,
+      semanticsButton: true,
+      child: Container(
+        width: 150,
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: colors.surface,
+          borderRadius: BorderRadius.circular(NinjaRadius.card),
         ),
-        onTap: () {
-          launchUrl(
-            Uri.parse(contributor.htmlUrl),
-            mode: LaunchMode.externalApplication,
-          );
-        },
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            ClipOval(
+              child: Container(
+                width: 64,
+                height: 64,
+                color: colors.surfaceAlt,
+                child: avatarUrl.isEmpty
+                    ? null
+                    : Image.network(
+                        avatarUrl,
+                        excludeFromSemantics: true,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, _, _) => const SizedBox.shrink(),
+                      ),
+              ),
+            ),
+            const SizedBox(height: 14),
+            Text(
+              contributor.login,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: NinjaText.body.copyWith(color: colors.ink),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              context.l10n.contributorCommitsCount(contributor.contributions),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: NinjaText.helper.copyWith(color: colors.muted),
+            ),
+          ],
+        ),
       ),
     );
+  }
+
+  Future<void> _openProfile(String profileUrl) async {
+    try {
+      await launchUrl(Uri.parse(profileUrl), mode: .externalApplication);
+    } on Exception catch (error, stackTrace) {
+      log(
+        'Could not open contributor profile',
+        error: error,
+        stackTrace: stackTrace,
+        name: 'ContributorCard',
+      );
+    }
   }
 }

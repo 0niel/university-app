@@ -1,11 +1,7 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:notifications_client/notifications_client.dart';
 
-/// {@template firebase_notifications_client}
-/// Клиенте для работы с уведомлениями на основе Firebase.
-/// {@endtemplate}
 class FirebaseNotificationsClient implements NotificationsClient {
-  /// {@macro firebase_notifications_client}
   const FirebaseNotificationsClient({
     required FirebaseMessaging firebaseMessaging,
   }) : _firebaseMessaging = firebaseMessaging;
@@ -17,10 +13,7 @@ class FirebaseNotificationsClient implements NotificationsClient {
     try {
       await _firebaseMessaging.subscribeToTopic(category);
     } catch (error, stackTrace) {
-      Error.throwWithStackTrace(
-        SubscribeToCategoryFailure(error),
-        stackTrace,
-      );
+      Error.throwWithStackTrace(SubscribeToCategoryFailure(error), stackTrace);
     }
   }
 

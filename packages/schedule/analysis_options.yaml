@@ -1,0 +1,28 @@
+include: package:very_good_analysis/analysis_options.yaml
+
+analyzer:
+  exclude:
+    - "**/*.freezed.dart"
+    - "**/*.g.dart"
+
+linter:
+  rules:
+    public_member_api_docs: false
+
+dcm:
+  extends:
+    - recommended
+  rules:
+    - avoid-dynamic:
+        exclude:
+          - lib/src/dates_converter.dart
+    - avoid-unnecessary-nullable-return-type:
+        exclude:
+          - lib/src/calendar_schedule_part.dart
+    - prefer-match-file-name:
+        exclude:
+          - lib/src/schedule_diff.dart
+  exclude:
+    all:
+      - "**/*.freezed.dart"
+      - "**/*.g.dart"

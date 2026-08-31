@@ -21,6 +21,6 @@ class AdsRetryPolicy {
   /// Returns the interval for the given retry.
   Duration getIntervalForRetry(int retry) {
     if (retry <= 0 || retry > maxRetryCount) return Duration.zero;
-    return retryIntervals[retry - 1];
+    return retryIntervals.asMap()[retry - 1] ?? Duration.zero;
   }
 }

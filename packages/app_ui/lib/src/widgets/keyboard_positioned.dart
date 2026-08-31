@@ -11,7 +11,7 @@ class KeyboardPositioned extends StatelessWidget {
     return Stack(
       children: [
         Positioned(
-          bottom: MediaQuery.of(context).viewInsets.bottom,
+          bottom: MediaQuery.viewInsetsOf(context).bottom,
           left: 0,
           right: 0,
           child: child,

@@ -3,23 +3,27 @@ import 'dart:async';
 import 'package:analytics_repository/analytics_repository.dart';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:user_repository/user_repository.dart';
 
 part 'login_with_email_link_event.dart';
+part 'login_with_email_link_bloc.freezed.dart';
 part 'login_with_email_link_state.dart';
+part 'login_with_email_link_status.dart';
 
-class LoginWithEmailLinkBloc extends Bloc<LoginWithEmailLinkEvent, LoginWithEmailLinkState> {
-  LoginWithEmailLinkBloc({required UserRepository userRepository})
-    : _userRepository = userRepository,
-      super(const LoginWithEmailLinkState()) {
+class LoginWithEmailLinkBloc
+    extends Bloc<LoginWithEmailLinkEvent, LoginWithEmailLinkState> {
+  LoginWithEmailLinkBloc({required this.userRepository})
+    : super(const LoginWithEmailLinkState()) {
     on<LoginWithEmailLinkSubmitted>(_onLoginWithEmailLinkSubmitted);
+    on<LoginWithEmailCodeSubmitted>(_onLoginWithEmailCodeSubmitted);
 
-    _incomingEmailLinksSub = _userRepository.incomingEmailLinks
+    _incomingEmailLinksSub = userRepository.incomingEmailLinks
         .handleError(addError)
         .listen((emailLink) => add(LoginWithEmailLinkSubmitted(emailLink)));
   }
 
-  final UserRepository _userRepository;
+  final UserRepository userRepository;
 
   late StreamSubscription<Uri> _incomingEmailLinksSub;
 
@@ -28,39 +32,70 @@ class LoginWithEmailLinkBloc extends Bloc<LoginWithEmailLinkEvent, LoginWithEmai
     Emitter<LoginWithEmailLinkState> emit,
   ) async {
     try {
-      emit(state.copyWith(status: LoginWithEmailLinkStatus.loading));
+      emit(state.copyWith(status: .loading));
 
-      final currentUser = await _userRepository.user.first;
+      final currentUser = await userRepository.user.first;
       if (!currentUser.isAnonymous) {
-        throw LogInWithEmailLinkFailure(Exception('The user is already logged in'));
+        throw Exception('The user is already logged in');
       }
 
       final emailLink = event.emailLink;
       if (!emailLink.queryParameters.containsKey('code')) {
-        throw LogInWithEmailLinkFailure(Exception('No `code` parameter found in the received email link'));
+        throw Exception(
+          'No `code` parameter found in the received email link',
+        );
       }
 
-      final redirectUrl = Uri.tryParse(emailLink.queryParameters['continueUrl']!);
+      final redirectUrl = Uri.tryParse(
+        emailLink.queryParameters['continueUrl']!,
+      );
 
-      if (!(redirectUrl?.queryParameters.containsKey('email') ?? false)) {
-        throw LogInWithEmailLinkFailure(Exception('No `email` parameter found in the received email link'));
+      final email = redirectUrl?.queryParameters['email'];
+      if (email == null) {
+        throw Exception(
+          'No `email` parameter found in the received email link',
+        );
       }
 
-      await _userRepository.logInWithEmailLink(
-        email: redirectUrl!.queryParameters['email']!,
+      await userRepository.logInWithEmailLink(
+        email: email,
         emailLink: emailLink.toString(),
       );
 
-      emit(state.copyWith(status: LoginWithEmailLinkStatus.success));
-    } catch (error, stackTrace) {
-      emit(state.copyWith(status: LoginWithEmailLinkStatus.failure));
+      emit(state.copyWith(status: .success));
+    } on Exception catch (error, stackTrace) {
+      emit(state.copyWith(status: .failure));
+      addError(error, stackTrace);
+    }
+  }
+
+  Future<void> _onLoginWithEmailCodeSubmitted(
+    LoginWithEmailCodeSubmitted event,
+    Emitter<LoginWithEmailLinkState> emit,
+  ) async {
+    try {
+      emit(state.copyWith(status: .loading));
+
+      final currentUser = await userRepository.user.first;
+      if (!currentUser.isAnonymous) {
+        throw Exception('The user is already logged in');
+      }
+
+      await userRepository.logInWithEmailCode(
+        email: event.email,
+        code: event.code,
+      );
+
+      emit(state.copyWith(status: .success));
+    } on Exception catch (error, stackTrace) {
+      emit(state.copyWith(status: .failure));
       addError(error, stackTrace);
     }
   }
 
   @override
-  Future<void> close() {
-    _incomingEmailLinksSub.cancel();
+  Future<void> close() async {
+    await _incomingEmailLinksSub.cancel();
     return super.close();
   }
 }

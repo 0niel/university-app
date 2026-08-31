@@ -1,0 +1,85 @@
+part of 'mini_app_submit_page.dart';
+
+class _SourceSection extends StatelessWidget {
+  const _SourceSection({
+    required this.sourceKind,
+    required this.originController,
+    required this.entryPathController,
+    required this.screens,
+    required this.onKindChanged,
+    required this.onPreview,
+    required this.onAddScreen,
+    required this.onRemoveScreen,
+  });
+
+  final MiniAppSourceKind sourceKind;
+  final TextEditingController originController;
+  final TextEditingController entryPathController;
+  final List<ScreenDraft> screens;
+  final ValueChanged<MiniAppSourceKind> onKindChanged;
+  final void Function(ScreenDraft screen) onPreview;
+  final VoidCallback onAddScreen;
+  final void Function(ScreenDraft screen) onRemoveScreen;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    return Column(
+      crossAxisAlignment: .start,
+      children: [
+        _SubmitSectionLabel(
+          title: l10n.miniAppsSubmitSource,
+          subtitle: l10n.miniAppsSubmitSourceSubtitle,
+        ),
+        NinjaSegmented<MiniAppSourceKind>(
+          value: sourceKind,
+          expanded: true,
+          onChanged: onKindChanged,
+          segments: [
+            NinjaSegment(
+              value: MiniAppSourceKind.hosted,
+              label: l10n.miniAppsSourceHosted,
+            ),
+            NinjaSegment(
+              value: MiniAppSourceKind.remote,
+              label: l10n.miniAppsSourceRemote,
+            ),
+          ],
+        ),
+        const SizedBox(height: 14),
+        if (sourceKind == .remote) ...[
+          NinjaInput(
+            controller: originController,
+            keyboardType: .url,
+            placeholder: 'https://my-app.example.com',
+          ),
+          const SizedBox(height: 12),
+          NinjaInput(
+            controller: entryPathController,
+            placeholder: l10n.miniAppsSubmitEntryPathHint,
+          ),
+        ] else ...[
+          for (var i = 0; i < screens.length; i++) ...[
+            _ScreenEditor(
+              draft: screens[i],
+              isEntry: i == 0,
+              onPreview: () => onPreview(screens[i]),
+              onRemove: i == 0 ? null : () => onRemoveScreen(screens[i]),
+            ),
+            const SizedBox(height: 14),
+          ],
+          NinjaButton.outline(
+            label: l10n.miniAppsSubmitAddScreen,
+            expanded: true,
+            icon: AppLineIconWidget(
+              .plus,
+              size: 16,
+              color: context.ninja.mutedDark,
+            ),
+            onPressed: onAddScreen,
+          ),
+        ],
+      ],
+    );
+  }
+}

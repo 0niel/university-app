@@ -22,10 +22,11 @@ class ArticleIntroduction extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final imageUrl = block.imageUrl;
     return Column(
       children: [
-        if (block.imageUrl != null && block.imageUrl!.trim().isNotEmpty)
-          InlineImage(imageUrl: block.imageUrl!),
+        if (imageUrl != null && imageUrl.trim().isNotEmpty)
+          InlineImage(imageUrl: imageUrl),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
           child: PostContent(

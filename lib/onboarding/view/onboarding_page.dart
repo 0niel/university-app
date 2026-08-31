@@ -1,218 +1,227 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
-import 'package:rtu_mirea_app/home/cubit/home_cubit.dart';
-import 'package:rtu_mirea_app/onboarding/widgets/widgets.dart';
+import 'dart:async';
+import 'dart:developer';
+
 import 'package:app_ui/app_ui.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gamification_repository/gamification_repository.dart';
+import 'package:go_router/go_router.dart';
+import 'package:local_notifications_repository/local_notifications_repository.dart';
+import 'package:permission_client/permission_client.dart';
+import 'package:rtu_mirea_app/app/bloc/app_bloc.dart';
+import 'package:rtu_mirea_app/config/config.dart';
+import 'package:rtu_mirea_app/home/cubit/home_cubit.dart';
+import 'package:rtu_mirea_app/l10n/l10n.dart';
+import 'package:rtu_mirea_app/schedule/bloc/schedule_bloc.dart';
+import 'package:rtu_mirea_app/search/bloc/search_bloc.dart';
+import 'package:rtu_mirea_app/tour/tour.dart';
+import 'package:schedule_repository/schedule_repository.dart';
 
-/// OnBoarding screen that greets new users
+part '../widgets/welcome_step.dart';
+part '../widgets/welcome_hero_card.dart';
+part '../widgets/onboard_step.dart';
+part '../widgets/onboard_header.dart';
+part '../widgets/onboard_circle_button.dart';
+part '../widgets/onboarding_lead_icon.dart';
+part '../widgets/step_pills.dart';
+part '../widgets/group_step.dart';
+part '../widgets/group_step_body.dart';
+part '../widgets/group_search_field.dart';
+part '../widgets/group_result_row.dart';
+part '../widgets/group_results_skeleton.dart';
+part '../widgets/group_result_row_skeleton.dart';
+part '../widgets/handle_check.dart';
+part '../widgets/identity_step.dart';
+part '../widgets/identity_body.dart';
+part '../widgets/permissions_step.dart';
+part '../widgets/permissions_step_body.dart';
+part '../widgets/permission_rows_skeleton.dart';
+part '../widgets/permission_row.dart';
+part '../widgets/granted_check.dart';
+part '../widgets/shuriken_mark.dart';
+part '../widgets/ninja_hero.dart';
+
 class OnBoardingPage extends StatefulWidget {
-  const OnBoardingPage({super.key});
+  const OnBoardingPage({
+    this.permissionClient = const PermissionClient(),
+    super.key,
+  });
+
+  final PermissionClient permissionClient;
 
   @override
-  State<StatefulWidget> createState() => _OnBoardingPageState();
+  State<OnBoardingPage> createState() => _OnBoardingPageState();
 }
 
-class _OnBoardingPageState extends State<OnBoardingPage> {
-  final int _numPages = 3;
+enum _OnboardingStage { welcome, group, identity, permissions }
 
-  /// Main images
-  static List<Image> containersImages = [
-    Assets.images.saly1.image(height: 375.0, width: 375.0),
-    Assets.images.saly2.image(height: 324.0, width: 328.0),
-    Assets.images.saly3.image(height: 315.0, width: 315.0),
-    // Image(
-    //   image: AssetImage('assets/images/Saly-4.png'),
-    //   height: 375.0,
-    //   width: 315.0,
-    // ),
-    // Image(
-    //   image: AssetImage('assets/images/Saly-5.png'),
-    //   height: 315.0,
-    //   width: 315.0,
-    // ),
-  ];
+class _OnBoardingPageState extends State<OnBoardingPage>
+    with SingleTickerProviderStateMixin {
+  static const double _zeroTurns = 0;
+  static const double _fullTurn = 1;
 
-  static const List titlesTexts = [
-    'Добро пожаловать!',
-    'Смотри расписание!',
-    'Будь в курсе в любой момент!',
-    // 'Ставь цели!',
-    //'Коммуницируй!',
-  ];
+  late final AnimationController _spinController;
+  late final Animation<double> _shurikenTurns;
 
-  /// Bottom text strings
-  static const List contentTexts = [
-    'Это приложение было создано студентами для студентов',
-    'Как же легко, оказывается, можно смотреть расписание, а главное – быстро',
-    'Иногда так лень заходить на сайт и искать нужную тебе информацию, мы это исправили',
-    // 'Как же много дедлайнов!? Создавать дедлайны теперь как никогда просто и удобно',
-    //'Слово сложное, но на деле всё легко. Общайся и делись материалами с другими группами мгновенно',
-  ];
+  late _OnboardingStage _stage;
 
-  /// Top padding for every image
-  double getImageTopPadding(int page) {
-    switch (page) {
-      case 0:
-        return 18.0;
-      case 1:
-        return 70.0;
-      case 2:
-        return 73.0;
-      case 3:
-        return 30.0;
-      case 4:
-        return 91.0;
-      default:
-        return 0.0;
-    }
-  }
+  String? _existingName;
+  String? _existingHandle;
+  Group? _selectedGroup;
+  var _groupQuery = '';
+  var _motionEnabled = false;
+  var _identityRevision = 0;
 
-  /// Page controller, that will execute Cubit method
-  final PageController _pageController = PageController(initialPage: 0);
-
-  int _currentPage = 0;
-
-  /// Build block with image and texts
-  List<Widget> _buildPageView() {
-    return List.generate(_numPages, (index) {
-      return Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20.0),
-        child: Stack(
-          alignment: AlignmentDirectional.center,
-          textDirection: TextDirection.ltr,
-          children: <Widget>[
-            Positioned(
-              top: 0,
-              left: 0,
-              right: 0,
-              child: Center(
-                child: Padding(
-                  padding: EdgeInsets.only(top: getImageTopPadding(index)),
-                  child: containersImages[index],
-                ),
-              ),
-            ),
-            Positioned(
-              left: 0,
-              right: 0,
-              top: MediaQuery.of(context).size.height * 0.48,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(titlesTexts[index], style: AppTextStyle.h4),
-                  const SizedBox(height: 8.0),
-                  Text(contentTexts[index], style: AppTextStyle.bodyL),
-                ],
-              ),
-            ),
-          ],
-        ),
-      );
-    });
-  }
+  bool get _identityComplete =>
+      (_existingName?.isNotEmpty ?? false) &&
+      (_existingHandle?.isNotEmpty ?? false);
 
   @override
-  Widget build(BuildContext context) {
-    GlobalKey<_PageIndicatorsState> pageStateKey = GlobalKey();
-
-    final Widget pageIndicator = PageIndicators(
-      key: pageStateKey,
-      onClick: () {
-        _pageController.nextPage(duration: const Duration(milliseconds: 300), curve: Curves.ease);
-      },
-      dotsNum: _numPages,
+  void initState() {
+    super.initState();
+    _stage = .welcome;
+    unawaited(_preloadIdentity());
+    _spinController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 6),
     );
 
-    return Scaffold(
-      backgroundColor: Theme.of(context).extension<AppColors>()!.background01,
-      body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: <Widget>[
-            Expanded(
-              child: PageView(
-                allowImplicitScrolling: true,
-                physics: const ClampingScrollPhysics(),
-                controller: _pageController,
-                onPageChanged: (int page) {
-                  _currentPage = page;
-                  pageStateKey.currentState!.updateWith(_currentPage);
-                },
-                children: _buildPageView(),
-              ),
-            ),
-            pageIndicator,
-          ],
-        ),
+    _shurikenTurns = TweenSequence<double>([
+      TweenSequenceItem(
+        tween: Tween(
+          begin: _zeroTurns,
+          end: 0.5,
+        ).chain(CurveTween(curve: Curves.easeInOut)),
+        weight: 40,
       ),
-    );
+      TweenSequenceItem(tween: ConstantTween(0.5), weight: 10),
+      TweenSequenceItem(
+        tween: Tween(
+          begin: 0.5,
+          end: _fullTurn,
+        ).chain(CurveTween(curve: Curves.easeInOut)),
+        weight: 40,
+      ),
+      TweenSequenceItem(tween: ConstantTween(1), weight: 10),
+    ]).animate(_spinController);
   }
-}
-
-class PageIndicators extends StatefulWidget {
-  const PageIndicators({super.key, required this.onClick, required this.dotsNum});
-
-  final VoidCallback onClick;
-  final int dotsNum;
 
   @override
-  State<PageIndicators> createState() => _PageIndicatorsState();
-}
-
-class _PageIndicatorsState extends State<PageIndicators> {
-  /// Build indicators depending on current opened page
-  List<Widget> _buildPageIndicators(int currentPage) {
-    List<Widget> list = [];
-    for (int i = 0; i < widget.dotsNum; i++) {
-      list.add(i == currentPage ? const PageViewIndicator(isActive: true) : const PageViewIndicator(isActive: false));
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final shouldAnimate =
+        !MediaQuery.disableAnimationsOf(context) &&
+        !MediaQuery.accessibleNavigationOf(context);
+    if (_motionEnabled == shouldAnimate) return;
+    _motionEnabled = shouldAnimate;
+    if (shouldAnimate) {
+      unawaited(_spinController.repeat());
+    } else {
+      _spinController
+        ..stop()
+        ..value = 0;
     }
-    return list;
   }
 
-  int _currentPage = 0;
+  @override
+  void dispose() {
+    _spinController.dispose();
+    super.dispose();
+  }
 
-  void updateWith(int value) {
+  Future<void> _preloadIdentity() async {
+    final revision = _identityRevision;
+    try {
+      final overview = await context
+          .read<GamificationRepository>()
+          .getProfileOverview(
+            context.read<UniversityConfig>().organizationId,
+          );
+      if (!mounted || revision != _identityRevision) return;
+      setState(() {
+        _existingName = overview.academic.fullName?.trim();
+        _existingHandle = overview.academic.handle?.trim();
+      });
+    } on Exception catch (error, stackTrace) {
+      log(
+        'Onboarding identity preload failed',
+        error: error,
+        stackTrace: stackTrace,
+        name: 'OnBoardingPage',
+      );
+    }
+  }
+
+  void _goToGroupStep() => setState(() => _stage = .group);
+
+  void _backToWelcome() => setState(() => _stage = .welcome);
+
+  void _goToIdentity() => setState(
+    () => _stage = _identityComplete ? .permissions : .identity,
+  );
+
+  void _backToGroup() => setState(() => _stage = .group);
+
+  void _completeIdentity(String name, String handle) {
+    _identityRevision++;
     setState(() {
-      _currentPage = value;
+      _existingName = name;
+      _existingHandle = handle;
+      _stage = .permissions;
     });
+  }
+
+  void _backToIdentity() => setState(
+    () => _stage = _identityComplete ? .group : .identity,
+  );
+
+  void _finish() {
+    context.read<HomeCubit>().closeOnboarding();
+    context.go('/feed');
+    unawaited(startAppTour(context));
   }
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 35.0, left: 20.0, right: 20.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          AnimatedSwitcher(
-            duration: const Duration(milliseconds: 300),
-            transitionBuilder: (Widget child, Animation<double> animation) {
-              return FadeTransition(
-                opacity: animation,
-                child: SizeTransition(sizeFactor: animation, axis: Axis.horizontal, child: child),
-              );
-            },
-            child:
-                widget.dotsNum - 1 == _currentPage
-                    ? const SizedBox.shrink()
-                    : TextButton(
-                      key: const ValueKey("skipButton"),
-                      onPressed: () {
-                        context.read<HomeCubit>().closeOnboarding();
-                        context.go('/schedule');
-                      },
-                      child: Text(
-                        "Пропустить",
-                        style: AppTextStyle.buttonS.copyWith(color: Theme.of(context).extension<AppColors>()!.active),
-                      ),
-                    ),
-          ),
-          Row(children: _buildPageIndicators(_currentPage)),
-          NextButton(isLastPage: widget.dotsNum - 1 == _currentPage, onClick: widget.onClick),
-        ],
+    return Scaffold(
+      backgroundColor: context.ninja.canvas,
+      body: SafeArea(
+        child: NinjaStateSwitcher(
+          duration: NinjaMotion.slow,
+          child: switch (_stage) {
+            .welcome => _WelcomeStep(
+              key: const ValueKey('onboarding_welcome'),
+              config: context.read(),
+              shurikenTurns: _shurikenTurns,
+              onContinue: _goToGroupStep,
+              onGuest: _finish,
+            ),
+            .group => _GroupStep(
+              key: const ValueKey('onboarding_group'),
+              initialQuery: _groupQuery,
+              initialSelected: _selectedGroup,
+              onQueryChanged: (query) => _groupQuery = query,
+              onSelected: (group) => _selectedGroup = group,
+              onBack: _backToWelcome,
+              onNext: _goToIdentity,
+            ),
+            .identity => _IdentityStep(
+              key: const ValueKey('onboarding_identity'),
+              initialName: _existingName,
+              initialHandle: _existingHandle,
+              onBack: _backToGroup,
+              onNext: _completeIdentity,
+            ),
+            .permissions => _PermissionsStep(
+              key: const ValueKey('onboarding_permissions'),
+              permissionClient: widget.permissionClient,
+              onBack: _backToIdentity,
+              onFinish: _finish,
+            ),
+          },
+        ),
       ),
     );
   }

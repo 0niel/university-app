@@ -1,10 +1,16 @@
 plugins {
     id 'com.android.application'
-    id 'org.jetbrains.kotlin.android' version '2.1.20'
-    id 'org.jetbrains.kotlin.plugin.serialization' version '2.1.20'
-    id 'org.jetbrains.kotlin.plugin.compose' version '2.1.20'
+    id 'org.jetbrains.kotlin.android' version '2.3.21'
+    id 'org.jetbrains.kotlin.plugin.serialization' version '2.3.21'
+    id 'org.jetbrains.kotlin.plugin.compose' version '2.3.21'
     id 'dev.flutter.flutter-gradle-plugin'
-    id 'com.google.gms.google-services'
+}
+
+def googleServicesFiles = fileTree(projectDir) {
+    include 'google-services.json', 'src/**/google-services.json'
+}
+if (!project.hasProperty('disableGoogleServices') && !googleServicesFiles.isEmpty()) {
+    apply plugin: 'com.google.gms.google-services'
 }
 
 def localProperties = new Properties()
@@ -18,16 +24,43 @@ if (localPropertiesFile.exists()) {
 def flutterVersionCode = localProperties.getProperty('flutter.versionCode') ?: '1'
 def flutterVersionName = localProperties.getProperty('flutter.versionName') ?: '1.0'
 
+def tenantProperties = new Properties()
+def tenantPropertiesFile = rootProject.file('tenant.properties')
+if (tenantPropertiesFile.exists()) {
+    tenantPropertiesFile.withReader('UTF-8') { reader ->
+        tenantProperties.load(reader)
+    }
+}
+def tenantAppName = tenantProperties.getProperty('APP_DISPLAY_NAME') ?: 'Ninja Mirea'
+def tenantDeepLinkScheme = tenantProperties.getProperty('APP_DEEP_LINK_SCHEME') ?: 'mireaninja'
+def tenantWebHost = tenantProperties.getProperty('APP_WEB_HOST') ?: 'mirea.ninja'
+def tenantWebPathPrefix = tenantProperties.getProperty('APP_WEB_PATH_PREFIX') ?: '/app'
+
 def keystoreProperties = new Properties()
 def keystorePropertiesFile = rootProject.file('key.properties')
 if (keystorePropertiesFile.exists()) {
     keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
 }
+def releaseStoreFile = keystoreProperties['storeFile']
+    ? file(keystoreProperties['storeFile'])
+    : null
+def hasReleaseSigning = releaseStoreFile?.isFile()
+    && ['keyAlias', 'keyPassword', 'storePassword'].every {
+        keystoreProperties[it]?.toString()?.trim()
+    }
+gradle.taskGraph.whenReady { taskGraph ->
+    def buildsProductionRelease = taskGraph.allTasks.any {
+        it.name.toLowerCase().contains('productionrelease')
+    }
+    if (buildsProductionRelease && !hasReleaseSigning) {
+        throw new GradleException('Production release signing is not configured')
+    }
+}
 
 android {
     namespace "ninja.mirea.mireaapp"
-    compileSdk 35
-    ndkVersion "27.0.12077973"
+    compileSdk 37
+    ndkVersion "28.2.13676358"
 
     defaultConfig {
         applicationId "ninja.mirea.mireaapp"
@@ -36,13 +69,19 @@ android {
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
         multiDexEnabled true
+        manifestPlaceholders = [
+            appName: tenantAppName,
+            deepLinkScheme: tenantDeepLinkScheme,
+            webAppHost: tenantWebHost,
+            webAppPathPrefix: tenantWebPathPrefix,
+        ]
     }
     
     signingConfigs {
         release {
             keyAlias keystoreProperties['keyAlias']
             keyPassword keystoreProperties['keyPassword']
-            storeFile keystoreProperties['storeFile'] ? file(keystoreProperties['storeFile']) : null
+            storeFile releaseStoreFile
             storePassword keystoreProperties['storePassword']
         }
     }
@@ -51,34 +90,33 @@ android {
     productFlavors {
         development {
             dimension "default"
-            manifestPlaceholders = [appName: "Ninja Mirea [DEV]"]
+            manifestPlaceholders.appName = "${tenantAppName} [DEV]"
         }
         production {
             dimension "default"
-            manifestPlaceholders = [appName: "Ninja Mirea"]
+            manifestPlaceholders.appName = tenantAppName
         }
     }
 
     buildTypes {
         debug {
-            minifyEnabled true
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            minifyEnabled false
         }
         release {
-            signingConfig keystoreProperties['storeFile']
+            signingConfig hasReleaseSigning
                 ? signingConfigs.release
                 : signingConfigs.debug
         }
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
         coreLibraryDesugaringEnabled true
     }
 
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "11"
     }
 
     buildFeatures {
@@ -95,6 +133,7 @@ android {
 
     lint {
         abortOnError false
+        checkReleaseBuilds false
     }
 }
 
@@ -102,41 +141,22 @@ flutter {
     source '../..'
 }
 
-configurations.all {
-    resolutionStrategy {
-        force 'com.google.crypto.tink:tink-android:1.9.0'
-        
-        // Exclude the conflicting tink library
-        eachDependency { details ->
-            if (details.requested.group == 'com.google.crypto.tink' && details.requested.name == 'tink') {
-                details.useTarget group: 'com.google.crypto.tink', name: 'tink-android', version: '1.9.0'
-            }
-        }
-    }
-
-    exclude group: 'com.google.crypto.tink', module: 'tink'
-}
-
 dependencies {
-    // ==== DESUGARING & MULTIDEX ====
     coreLibraryDesugaring "com.android.tools:desugar_jdk_libs:2.1.5"
     implementation "com.android.support:multidex:2.0.1"
 
-    // ==== KOTLIN stdlib & SERIALIZATION ====
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.9.10"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:2.3.21"
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3"
+    implementation project(':native-feature-api')
+    if (findProject(':nfc-pass-private') != null) {
+        implementation project(':nfc-pass-private')
+    }
 
-    // ==== ANDROIDX SECURITY ====
-    implementation "androidx.security:security-crypto:1.1.0-alpha07"
-
-    // ==== CONSTRAINTLAYOUT ====
     implementation "androidx.constraintlayout:constraintlayout:2.2.1"
 
-    // ==== WORKMANAGER ====
     implementation "androidx.work:work-runtime-ktx:2.10.0"
     implementation "androidx.work:work-runtime:2.10.0"
 
-    // ==== JETPACK COMPOSE & TESTING ====
     implementation "androidx.compose.ui:ui:1.7.8"
     implementation "androidx.compose.ui:ui-tooling-preview:1.7.8"
     implementation "androidx.compose.material:material:1.7.8"
@@ -144,12 +164,9 @@ dependencies {
     debugImplementation "androidx.compose.ui:ui-test-manifest:1.7.8"
     androidTestImplementation "androidx.compose.ui:ui-test-junit4:1.7.8"
 
-    // ==== GLANCE APP WIDGET ====
     implementation "androidx.glance:glance:1.1.1"
     implementation "androidx.glance:glance-appwidget:1.1.1"
 
-    // ==== PLAY SERVICES & ADS ====
     implementation "com.google.android.gms:play-services-location:21.3.0"
-    implementation "com.yandex.android:mobileads:7.12.1"
     implementation "com.google.android.gms:play-services-ads:24.0.0"
 }

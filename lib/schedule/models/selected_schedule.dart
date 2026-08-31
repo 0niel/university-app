@@ -1,78 +1,142 @@
-import 'package:equatable/equatable.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:university_app_server_api/client.dart';
+import 'package:rtu_mirea_app/schedule/models/selected_schedule_type.dart';
+import 'package:schedule_repository/schedule_repository.dart';
 
-import 'selected_classroom_schedule.dart';
-import 'selected_group_schedule.dart';
-import 'selected_teacher_schedule.dart';
-import 'selected_custom_schedule.dart';
+part 'selected_schedule.freezed.dart';
+part 'selected_schedule.g.dart';
 
-@immutable
-@JsonSerializable()
-abstract class SelectedSchedule extends Equatable {
-  const SelectedSchedule({required this.schedule, required this.type});
+@Freezed(unionKey: 'type', unionValueCase: .none)
+sealed class SelectedSchedule with _$SelectedSchedule {
+  @FreezedUnionValue('group')
+  @JsonSerializable(checked: true, explicitToJson: true)
+  const factory SelectedSchedule.group({
+    required Group group,
+    @SchedulePartsConverter() required List<SchedulePart> schedule,
+  }) = SelectedGroupSchedule;
 
-  static SelectedSchedule fromJson(Map<String, dynamic> json) {
-    switch (json['type']) {
-      case 'classroom':
-        return SelectedClassroomSchedule.fromJson(json);
-      case 'group':
-        return SelectedGroupSchedule.fromJson(json);
-      case 'teacher':
-        return SelectedTeacherSchedule.fromJson(json);
-      case 'custom':
-        return SelectedCustomSchedule.fromJson(json);
-      default:
-        throw Exception('Unknown type: ${json['type']}');
-    }
+  @FreezedUnionValue('teacher')
+  @JsonSerializable(checked: true, explicitToJson: true)
+  const factory SelectedSchedule.teacher({
+    required Teacher teacher,
+    @SchedulePartsConverter() required List<SchedulePart> schedule,
+  }) = SelectedTeacherSchedule;
+
+  @FreezedUnionValue('classroom')
+  @JsonSerializable(checked: true, explicitToJson: true)
+  const factory SelectedSchedule.classroom({
+    required Classroom classroom,
+    @SchedulePartsConverter() required List<SchedulePart> schedule,
+  }) = SelectedClassroomSchedule;
+
+  @FreezedUnionValue('custom')
+  @JsonSerializable(checked: true, explicitToJson: true)
+  const factory SelectedSchedule.custom({
+    required String id,
+    required String name,
+    @SchedulePartsConverter() required List<SchedulePart> schedule,
+    String? description,
+  }) = SelectedCustomSchedule;
+
+  const SelectedSchedule._();
+
+  factory SelectedSchedule.fromJson(Map<String, Object?> json) {
+    final dynamicJson = Map<String, dynamic>.from(json);
+    return switch (SelectedScheduleType.parse(json['type'])) {
+      .group => _$SelectedGroupScheduleFromJson(
+        dynamicJson,
+      ),
+      .teacher => _$SelectedTeacherScheduleFromJson(
+        dynamicJson,
+      ),
+      .classroom => _$SelectedClassroomScheduleFromJson(
+        dynamicJson,
+      ),
+      .custom => _$SelectedCustomScheduleFromJson(
+        dynamicJson,
+      ),
+    };
   }
 
-  static ScheduleTarget toScheduleTarget(String type) {
-    switch (type) {
-      case 'classroom':
-        return ScheduleTarget.classroom;
-      case 'group':
-        return ScheduleTarget.group;
-      case 'teacher':
-        return ScheduleTarget.teacher;
-      default:
-        throw Exception('Unknown type: $type');
-    }
-  }
+  SelectedScheduleType get scheduleType => switch (this) {
+    SelectedGroupSchedule() => .group,
+    SelectedTeacherSchedule() => .teacher,
+    SelectedClassroomSchedule() => .classroom,
+    SelectedCustomSchedule() => .custom,
+  };
 
-  static SelectedSchedule createSelectedSchedule<T>(T scheduleEntity, List<SchedulePart> scheduleParts) {
-    if (T == Group) {
-      return SelectedGroupSchedule(group: scheduleEntity as Group, schedule: scheduleParts);
-    } else if (T == Teacher) {
-      return SelectedTeacherSchedule(teacher: scheduleEntity as Teacher, schedule: scheduleParts);
-    } else if (T == Classroom) {
-      return SelectedClassroomSchedule(classroom: scheduleEntity as Classroom, schedule: scheduleParts);
-    }
-    throw Exception('Unknown schedule type');
-  }
+  String get type => scheduleType.name;
 
-  static bool isScheduleSelected<T>(SelectedSchedule? selectedSchedule, T scheduleEntity) {
-    if (selectedSchedule == null) return false;
-    if (T == Group && selectedSchedule is SelectedGroupSchedule) {
-      return (scheduleEntity as Group).name == selectedSchedule.group.name;
-    } else if (T == Teacher && selectedSchedule is SelectedTeacherSchedule) {
-      return (scheduleEntity as Teacher).name == selectedSchedule.teacher.name;
-    } else if (T == Classroom && selectedSchedule is SelectedClassroomSchedule) {
-      return (scheduleEntity as Classroom).name == selectedSchedule.classroom.name;
-    }
-    return false;
-  }
+  String get name => switch (this) {
+    SelectedGroupSchedule(:final group) => group.name,
+    SelectedTeacherSchedule(:final teacher) => teacher.name,
+    SelectedClassroomSchedule(:final classroom) => classroom.name,
+    SelectedCustomSchedule(name: final customName) => customName,
+  };
 
-  /// The name of the schedule. For example, for a group schedule, it would be
-  /// the group name.
-  String get name;
+  Map<String, dynamic> toJson() => switch (this) {
+    final SelectedGroupSchedule value => {
+      ..._$SelectedGroupScheduleToJson(value),
+      'type': 'group',
+    },
+    final SelectedTeacherSchedule value => {
+      ..._$SelectedTeacherScheduleToJson(value),
+      'type': 'teacher',
+    },
+    final SelectedClassroomSchedule value => {
+      ..._$SelectedClassroomScheduleToJson(value),
+      'type': 'classroom',
+    },
+    final SelectedCustomSchedule value => {
+      ..._$SelectedCustomScheduleToJson(value),
+      'type': 'custom',
+    },
+  };
 
-  final String type;
+  static ScheduleTarget toScheduleTarget(String type) =>
+      switch (SelectedScheduleType.parse(type)) {
+        .group => .group,
+        .teacher => .teacher,
+        .classroom => .classroom,
+        .custom => throw ArgumentError.value(
+          type,
+          'type',
+          'Custom schedules do not have a repository target',
+        ),
+      };
 
-  final List<SchedulePart> schedule;
+  static SelectedSchedule createSelectedSchedule(
+    Object scheduleEntity,
+    List<SchedulePart> scheduleParts,
+  ) => switch (scheduleEntity) {
+    Group() => SelectedGroupSchedule(
+      group: scheduleEntity,
+      schedule: scheduleParts,
+    ),
+    Teacher() => SelectedTeacherSchedule(
+      teacher: scheduleEntity,
+      schedule: scheduleParts,
+    ),
+    Classroom() => SelectedClassroomSchedule(
+      classroom: scheduleEntity,
+      schedule: scheduleParts,
+    ),
+    _ => throw ArgumentError.value(
+      scheduleEntity,
+      'scheduleEntity',
+      'Expected Group, Teacher, or Classroom',
+    ),
+  };
 
-  Map<String, dynamic> toJson();
-
-  @override
-  List<Object?> get props => [type, schedule];
+  static bool isScheduleSelected(
+    SelectedSchedule? selectedSchedule,
+    Object scheduleEntity,
+  ) => switch ((selectedSchedule, scheduleEntity)) {
+    (SelectedGroupSchedule(:final group), Group(:final name)) =>
+      name == group.name,
+    (SelectedTeacherSchedule(:final teacher), Teacher(:final name)) =>
+      name == teacher.name,
+    (SelectedClassroomSchedule(:final classroom), Classroom(:final name)) =>
+      name == classroom.name,
+    _ => false,
+  };
 }

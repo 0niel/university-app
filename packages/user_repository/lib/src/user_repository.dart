@@ -2,57 +2,21 @@ import 'dart:async';
 
 import 'package:auth_client/auth_client.dart';
 import 'package:deep_link_client/deep_link_client.dart';
-import 'package:equatable/equatable.dart';
 import 'package:package_info_client/package_info_client.dart';
-import 'package:storage/storage.dart';
-import 'package:user_repository/user_repository.dart';
+import 'package:user_repository/src/models/user.dart';
+import 'package:user_repository/src/user_failure.dart';
+import 'package:user_repository/src/user_storage.dart';
 
-part 'user_storage.dart';
+export 'user_failure.dart';
+export 'user_storage.dart';
 
-/// {@template user_failure}
-/// A base failure for the user repository failures.
-/// {@endtemplate}
-abstract class UserFailure with EquatableMixin implements Exception {
-  /// {@macro user_failure}
-  const UserFailure(this.error);
-
-  /// The error which was caught.
-  final Object error;
-
-  @override
-  List<Object> get props => [error];
-}
-
-/// {@template fetch_app_opened_count_failure}
-/// Thrown when fetching app opened count fails.
-/// {@endtemplate}
-class FetchAppOpenedCountFailure extends UserFailure {
-  /// {@macro fetch_app_opened_count_failure}
-  const FetchAppOpenedCountFailure(super.error);
-}
-
-/// {@template increment_app_opened_count_failure}
-/// Thrown when incrementing app opened count fails.
-/// {@endtemplate}
-class IncrementAppOpenedCountFailure extends UserFailure {
-  /// {@macro increment_app_opened_count_failure}
-  const IncrementAppOpenedCountFailure(super.error);
-}
-
-/// {@template user_repository}
-/// Repository which manages the user domain.
-/// {@endtemplate}
 class UserRepository {
-  /// {@macro user_repository}
-  UserRepository({
-    required AuthenticationClient authenticationClient,
-    required PackageInfoClient packageInfoClient,
-    required DeepLinkService deepLinkService,
-    required UserStorage storage,
-  })  : _authenticationClient = authenticationClient,
-        _deepLinkService = deepLinkService,
-        _packageInfoClient = packageInfoClient,
-        _storage = storage;
+  const UserRepository({
+    required this._authenticationClient,
+    required this._packageInfoClient,
+    required this._deepLinkService,
+    required this._storage,
+  });
 
   final AuthenticationClient _authenticationClient;
   final UserStorage _storage;
@@ -63,30 +27,26 @@ class UserRepository {
   /// the authentication state.
   ///
   Stream<User> get user => _authenticationClient.user.map((authenticationUser) {
-        if (authenticationUser.isAnonymous) {
-          return User.anonymous;
-        }
-        return User.fromAuthenticationUser(
-          authenticationUser: authenticationUser,
-        );
-      });
+    if (authenticationUser.isAnonymous) {
+      return User.anonymous;
+    }
+    return User.fromAuthenticationUser(authenticationUser: authenticationUser);
+  });
 
   /// A stream of incoming email links used to authenticate the user.
   ///
   /// Emits when a new email link is emitted on [DeepLinkClient.deepLinkStream],
   /// which is validated using [AuthenticationClient.isLogInWithEmailLink].
   Stream<Uri> get incomingEmailLinks => _deepLinkService.deepLinkStream.where(
-        (deepLink) => _authenticationClient.isLogInWithEmailLink(
-          emailLink: deepLink.toString(),
-        ),
-      );
+    (deepLink) => _authenticationClient.isLogInWithEmailLink(
+      emailLink: deepLink.toString(),
+    ),
+  );
 
   /// Sends an authentication link to the provided [email].
   ///
   /// Throws a [SendLoginEmailLinkFailure] if an exception occurs.
-  Future<void> sendLoginEmailLink({
-    required String email,
-  }) async {
+  Future<void> sendLoginEmailLink({required String email}) async {
     try {
       await _authenticationClient.sendLoginEmailLink(
         email: email,
@@ -94,7 +54,7 @@ class UserRepository {
       );
     } on SendLoginEmailLinkFailure {
       rethrow;
-    } catch (error, stackTrace) {
+    } on Exception catch (error, stackTrace) {
       Error.throwWithStackTrace(SendLoginEmailLinkFailure(error), stackTrace);
     }
   }
@@ -113,8 +73,107 @@ class UserRepository {
       );
     } on LogInWithEmailLinkFailure {
       rethrow;
-    } catch (error, stackTrace) {
+    } on Exception catch (error, stackTrace) {
       Error.throwWithStackTrace(LogInWithEmailLinkFailure(error), stackTrace);
+    }
+  }
+
+  /// Signs in with the provided [email] and one-time [code] from email.
+  ///
+  /// Throws a [LogInWithEmailLinkFailure] if an exception occurs.
+  Future<void> logInWithEmailCode({
+    required String email,
+    required String code,
+  }) async {
+    try {
+      await _authenticationClient.logInWithEmailCode(email: email, code: code);
+    } on LogInWithEmailLinkFailure {
+      rethrow;
+    } on Exception catch (error, stackTrace) {
+      Error.throwWithStackTrace(LogInWithEmailLinkFailure(error), stackTrace);
+    }
+  }
+
+  /// Signs in with the provided [email] and [password].
+  ///
+  /// Throws a [LogInWithPasswordFailure] if an exception occurs.
+  Future<void> logInWithPassword({
+    required String email,
+    required String password,
+  }) async {
+    try {
+      await _authenticationClient.logInWithPassword(
+        email: email,
+        password: password,
+      );
+    } on LogInWithPasswordFailure {
+      rethrow;
+    } on Exception catch (error, stackTrace) {
+      Error.throwWithStackTrace(LogInWithPasswordFailure(error), stackTrace);
+    }
+  }
+
+  /// Registers a new account with the provided [email] and [password].
+  ///
+  /// Throws a [SignUpFailure] if an exception occurs.
+  Future<void> signUp({required String email, required String password}) async {
+    try {
+      await _authenticationClient.signUp(email: email, password: password);
+    } on SignUpFailure {
+      rethrow;
+    } on Exception catch (error, stackTrace) {
+      Error.throwWithStackTrace(SignUpFailure(error), stackTrace);
+    }
+  }
+
+  /// Signs in as an anonymous (guest) user.
+  ///
+  /// Throws a [SignInAnonymouslyFailure] if an exception occurs.
+  Future<void> signInAnonymously() async {
+    try {
+      await _authenticationClient.signInAnonymously();
+    } on SignInAnonymouslyFailure {
+      rethrow;
+    } on Exception catch (error, stackTrace) {
+      Error.throwWithStackTrace(SignInAnonymouslyFailure(error), stackTrace);
+    }
+  }
+
+  /// Sends a password reset email containing a one-time code to [email].
+  ///
+  /// Throws a [SendPasswordResetEmailFailure] if an exception occurs.
+  Future<void> sendPasswordResetEmail({required String email}) async {
+    try {
+      await _authenticationClient.sendPasswordResetEmail(email: email);
+    } on SendPasswordResetEmailFailure {
+      rethrow;
+    } on Exception catch (error, stackTrace) {
+      Error.throwWithStackTrace(
+        SendPasswordResetEmailFailure(error),
+        stackTrace,
+      );
+    }
+  }
+
+  /// Confirms a password reset using the one-time [code] sent to [email] and
+  /// sets the [newPassword].
+  ///
+  /// Throws a [ResetPasswordFailure] if an exception occurs.
+  Future<void> resetPassword({
+    required String email,
+    required String code,
+    required String newPassword,
+  }) async {
+    try {
+      await _authenticationClient.resetPassword(
+        email: email,
+        code: code,
+        newPassword: newPassword,
+      );
+    } on ResetPasswordFailure {
+      rethrow;
+    } on Exception catch (error, stackTrace) {
+      Error.throwWithStackTrace(ResetPasswordFailure(error), stackTrace);
     }
   }
 
@@ -127,7 +186,7 @@ class UserRepository {
       await _authenticationClient.logOut();
     } on LogOutFailure {
       rethrow;
-    } catch (error, stackTrace) {
+    } on Exception catch (error, stackTrace) {
       Error.throwWithStackTrace(LogOutFailure(error), stackTrace);
     }
   }
@@ -138,7 +197,7 @@ class UserRepository {
       await _authenticationClient.deleteAccount();
     } on DeleteAccountFailure {
       rethrow;
-    } catch (error, stackTrace) {
+    } on Exception catch (error, stackTrace) {
       Error.throwWithStackTrace(DeleteAccountFailure(error), stackTrace);
     }
   }
@@ -147,11 +206,8 @@ class UserRepository {
   Future<int> fetchAppOpenedCount() async {
     try {
       return await _storage.fetchAppOpenedCount();
-    } catch (error, stackTrace) {
-      Error.throwWithStackTrace(
-        FetchAppOpenedCountFailure(error),
-        stackTrace,
-      );
+    } on Exception catch (error, stackTrace) {
+      Error.throwWithStackTrace(FetchAppOpenedCountFailure(error), stackTrace);
     }
   }
 
@@ -161,7 +217,7 @@ class UserRepository {
       final value = await fetchAppOpenedCount();
       final result = value + 1;
       await _storage.setAppOpenedCount(count: result);
-    } catch (error, stackTrace) {
+    } on Exception catch (error, stackTrace) {
       Error.throwWithStackTrace(
         IncrementAppOpenedCountFailure(error),
         stackTrace,

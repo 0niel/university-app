@@ -21,32 +21,21 @@ class ShareButton extends StatelessWidget {
 
   /// Color used for button font.
   ///
-  /// Defaults to [AppColors.black]
+  /// Defaults to the current platform foreground color.
   final Color? _color;
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final fallback = Theme.of(context).brightness == Brightness.dark
-        ? Colors.white
-        : Colors.black;
-    return TextButton.icon(
-      style: TextButton.styleFrom(
-        foregroundColor: _color ?? fallback,
-        padding: const EdgeInsets.symmetric(horizontal: 8),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-      ),
-      icon: Icon(
-        Icons.share,
-        color: _color ?? fallback,
-      ),
+    final fallback =
+        Theme.of(context).brightness == Brightness.dark
+            ? Colors.white
+            : Colors.black;
+    return AppButton.ghost(
+      label: shareText,
+      size: AppButtonSize.small,
+      foregroundColor: _color ?? fallback,
+      icon: const Icon(Icons.share),
       onPressed: onPressed,
-      label: Text(
-        shareText,
-        style: theme.textTheme.labelLarge?.copyWith(
-          color: _color ?? fallback,
-        ),
-      ),
     );
   }
 }

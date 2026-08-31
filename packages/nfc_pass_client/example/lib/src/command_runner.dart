@@ -3,11 +3,11 @@ import 'dart:io';
 import 'package:cli_completion/cli_completion.dart';
 import 'package:nfc_pass_client/nfc_pass_client.dart';
 
-class ExampleCommandRunner extends CompletionCommandRunner<int> {
-  ExampleCommandRunner()
+class CommandRunner extends CompletionCommandRunner<int> {
+  CommandRunner()
       : super(
           'example',
-          'A command-line tool to demonstrate the usage of the nfc_pass_client'
+          'A command-line tool to demonstrate the usage of the nfc_pass_client '
               'package.',
         );
 
@@ -17,14 +17,25 @@ class ExampleCommandRunner extends CompletionCommandRunner<int> {
       cookieProvider: () async {
         return '...';
       },
+      endpoints: NfcPassEndpoints(
+        accessTokenUrl: Uri(scheme: 'https', host: 'api.university.example'),
+        sendVerificationCodeUrl: Uri(
+          scheme: 'https',
+          host: 'api.university.example',
+        ),
+        getDigitalPassUrl: Uri(
+          scheme: 'https',
+          host: 'api.university.example',
+        ),
+      ),
     );
 
     final jwt = await client.getAccessTokenForDigitalPass();
-    print('Your JWT: $jwt');
+    stdout.writeln('Your JWT: $jwt');
 
     await client.sendVerificationCode(jwt);
 
-    print('Enter the code from the email:');
+    stdout.writeln('Enter the code from the email:');
     final code = stdin.readLineSync();
 
     final digitalPass = await client.getDigitalPass(
@@ -33,7 +44,7 @@ class ExampleCommandRunner extends CompletionCommandRunner<int> {
       deviceName: 'iPhone 12 Pro Max',
     );
 
-    print('Your digital pass: $digitalPass');
+    stdout.writeln('Your digital pass: $digitalPass');
 
     return 0;
   }

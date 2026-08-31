@@ -1,56 +1,41 @@
-import 'package:flutter/material.dart';
 import 'package:app_ui/app_ui.dart';
+import 'package:flutter/material.dart';
 
-/// A service tile widget that displays an icon and title in a grid layout
-class ServiceTile extends StatelessWidget {
-  /// Creates a service tile.
-  const ServiceTile({super.key, required this.title, required this.iconData, required this.color, required this.onTap});
+final class ServiceTile extends StatelessWidget {
+  const ServiceTile({
+    required this.title,
+    required this.icon,
+    required this.color,
+    this.size = ServiceTileSize.category,
+    this.onTap,
+    super.key,
+  });
 
-  /// The title of the service
   final String title;
-
-  /// The icon to display
-  final IconData iconData;
-
-  /// The color of the icon background
+  final AppLineIcon icon;
   final Color color;
+  final ServiceTileSize size;
+  final VoidCallback? onTap;
 
-  /// Called when the tile is tapped
-  final VoidCallback onTap;
+  bool get _pinned => size == ServiceTileSize.pinned;
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(16),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: [
-          Center(
-            child: Container(
-              width: 52,
-              height: 52,
-              decoration: BoxDecoration(color: color.withOpacity(0.15), borderRadius: BorderRadius.circular(16)),
-              child: Icon(iconData, color: color, size: 24),
-            ),
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          Text(
-            title,
-            maxLines: 2,
-            textAlign: TextAlign.center,
-            overflow: TextOverflow.visible,
-            style: AppTextStyle.captionL.copyWith(
-              height: 1.1,
-              leadingDistribution: TextLeadingDistribution.even,
-              fontWeight: FontWeight.w500,
-              color: Theme.of(context).extension<AppColors>()!.active,
-              decoration: TextDecoration.none,
-            ),
-          ),
-        ],
+    final colors = context.ninja;
+    final box = _pinned ? 60.0 : 56.0;
+    final tone = colors.accentInk(color);
+    return AppServiceTile.icon(
+      icon: AppLineIconWidget(
+        icon,
+        color: tone,
+        size: _pinned ? 26 : 23,
       ),
+      color: color,
+      label: title,
+      size: box,
+      onTap: onTap,
     );
   }
 }
+
+enum ServiceTileSize { pinned, category }

@@ -1,3 +1,4 @@
+import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart' hide Image, Spacer;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -7,36 +8,32 @@ import 'package:rtu_mirea_app/categories/categories.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 
 class ArticleContentItem extends StatelessWidget {
-  const ArticleContentItem({
-    required this.block,
-    this.onSharePressed,
-    super.key,
-  });
+  const ArticleContentItem({required this.block, super.key});
 
-  /// The associated [NewsBlock] instance.
   final NewsBlock block;
-
-  /// An optional callback which is invoked when the share button is pressed.
-  final VoidCallback? onSharePressed;
 
   @override
   Widget build(BuildContext context) {
     final newsBlock = block;
 
     if (newsBlock is DividerHorizontalBlock) {
-      return DividerHorizontal(block: newsBlock);
+      return const SizedBox(height: AppSpacing.xlg);
     } else if (newsBlock is SpacerBlock) {
       return Spacer(block: newsBlock);
     } else if (newsBlock is ImageBlock) {
-      return Image(block: newsBlock);
+      return Image(
+        block: newsBlock,
+        semanticLabel: context.l10n.articleImage,
+      );
     } else if (newsBlock is VideoBlock) {
       return Video(block: newsBlock);
     } else if (newsBlock is TextCaptionBlock) {
+      final colors = context.ninja;
       return TextCaption(
         block: newsBlock,
-        colorValues: const {
-          TextCaptionColor.normal: Colors.black87,
-          TextCaptionColor.light: Colors.black54,
+        colorValues: {
+          .normal: colors.ink,
+          .light: colors.muted,
         },
       );
     } else if (newsBlock is TextHeadlineBlock) {
@@ -56,9 +53,9 @@ class ArticleContentItem extends StatelessWidget {
       );
       return VideoIntroduction(block: newsBlock, categoryName: categoryName);
     } else if (newsBlock is BannerAdBlock) {
-      return const SizedBox(); // Remove BannerAd widget
+      return const SizedBox();
     } else if (newsBlock is NewsletterBlock) {
-      return const SizedBox(); // Remove Newsletter widget
+      return const SizedBox();
     } else if (newsBlock is HtmlBlock) {
       return Html(block: newsBlock);
     } else if (newsBlock is TrendingStoryBlock) {
@@ -69,20 +66,16 @@ class ArticleContentItem extends StatelessWidget {
         slideshowText: context.l10n.slideshow,
         onPressed: (action) => _onContentItemAction(context, action),
       );
-    } else {
-      // Render an empty widget for the unsupported block type.
-      return const SizedBox();
     }
+    return const SizedBox();
   }
 
-  /// Handles actions triggered by tapping on article content items.
   Future<void> _onContentItemAction(
     BuildContext context,
     BlockAction action,
   ) async {
     if (action is NavigateToSlideshowAction) {
-      // Use go_router navigation instead of Navigator
-      context.push(
+      await context.push<void>(
         '/slideshow',
         extra: {'slideshow': action.slideshow, 'articleId': action.articleId},
       );

@@ -1,14 +1,8 @@
 import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
+import 'package:hugeicons/hugeicons.dart';
 
-/// A reusable widget for displaying various empty states or failure scenarios.
-///
-/// This widget displays a centered layout with an icon, title, description,
-/// and an optional action button to help users recover from the state.
 class FailureScreen extends StatelessWidget {
-  /// Creates a failure screen with customizable content.
-  ///
-  /// The [title] parameter is required.
   const FailureScreen({
     required this.title,
     super.key,
@@ -24,42 +18,31 @@ class FailureScreen extends StatelessWidget {
     this.padding = const EdgeInsets.all(AppSpacing.xxlg),
   });
 
-  /// The primary message explaining the state.
   final String title;
 
-  /// An optional description providing more details about the state.
   final String? description;
 
-  /// The icon to display at the top of the screen.
-  final IconData? icon;
+  final HugeIcon? icon;
 
-  /// The size of the icon.
   final double iconSize;
 
-  /// The color of the icon.
   final Color? iconColor;
 
-  /// The background color of the circular container around the icon.
   final Color? iconBackgroundColor;
 
-  /// The text to display on the action button.
   final String? buttonText;
 
-  /// The icon to show in the action button.
-  final IconData? buttonIcon;
+  final HugeIcon? buttonIcon;
 
-  /// The callback that is called when the action button is tapped.
   final VoidCallback? onButtonPressed;
 
-  /// The background color of the action button.
   final Color? buttonBackgroundColor;
 
-  /// The padding to apply around the content of the failure screen.
   final EdgeInsets padding;
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).extension<AppColors>()!;
+    final colors = Theme.of(context).colors;
 
     return Center(
       child: Padding(
@@ -72,38 +55,41 @@ class FailureScreen extends StatelessWidget {
                 width: 80,
                 height: 80,
                 decoration: BoxDecoration(
-                  color: iconBackgroundColor ?? colors.background02.withOpacity(0.5),
+                  color: iconBackgroundColor ??
+                      colors.background02.withValues(alpha: 0.5),
                   shape: BoxShape.circle,
                 ),
                 child: Center(
-                  child: Icon(
-                    icon,
-                    size: iconSize,
-                    color: iconColor ?? colors.deactive,
-                  ),
+                  child: icon,
                 ),
               ),
               const SizedBox(height: AppSpacing.xlg),
             ],
             Text(
               title,
-              style: AppTextStyle.titleM.copyWith(fontWeight: FontWeight.w600),
+              style: AppText.heading.copyWith(fontWeight: FontWeight.w600),
               textAlign: TextAlign.center,
             ),
             if (description != null) ...[
               const SizedBox(height: AppSpacing.lg),
               Text(
                 description!,
-                style: AppTextStyle.body.copyWith(color: colors.deactive),
+                style: AppText.body.copyWith(color: colors.deactive),
                 textAlign: TextAlign.center,
               ),
             ],
             if (buttonText != null && onButtonPressed != null) ...[
               const SizedBox(height: AppSpacing.xxlg),
-              PrimaryButton(
+              AppButton.primary(
                 onPressed: onButtonPressed,
-                icon: Icon(buttonIcon ?? Icons.add),
-                text: buttonText!,
+                icon: buttonIcon ??
+                    HugeIcon(
+                      icon: HugeIcons.strokeRoundedAddSquare,
+                      color: colors.white,
+                    ),
+                label: buttonText!,
+                expanded: true,
+                backgroundColor: buttonBackgroundColor,
               ),
             ],
           ],

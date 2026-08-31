@@ -1,27 +1,13 @@
 import 'package:auth_client/auth_client.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:token_storage/token_storage.dart';
 
-/// {@template supabase_authentication_client}
-/// A Firebase implementation of the [AuthenticationClient] interface.
-/// {@endtemplate}
 class SupabaseAuthenticationClient implements AuthenticationClient {
-  /// {@macro supabase_authentication_client}
-  SupabaseAuthenticationClient({
-    required TokenStorage tokenStorage,
+  const SupabaseAuthenticationClient({
     required GoTrueClient supabaseAuth,
-  })  : _tokenStorage = tokenStorage,
-        _supabaseAuth = supabaseAuth {
-    user.listen(_onUserChanged);
-  }
+  }) : _supabaseAuth = supabaseAuth;
 
-  final TokenStorage _tokenStorage;
   final GoTrueClient _supabaseAuth;
 
-  /// Stream of [AuthenticationUser] which will emit the current user when
-  /// the authentication state changes.
-  ///
-  /// Emits [AuthenticationUser.anonymous] if the user is not authenticated.
   @override
   Stream<AuthenticationUser> get user {
     return _supabaseAuth.onAuthStateChange.map((data) {
@@ -35,13 +21,6 @@ class SupabaseAuthenticationClient implements AuthenticationClient {
     });
   }
 
-  /// Sends an authentication link to the provided [email].
-  ///
-  /// Opening the link redirects to the app with [appPackageName]
-  /// using Firebase Dynamic Links and authenticates the user
-  /// based on the provided email link.
-  ///
-  /// Throws a [SendLoginEmailLinkFailure] if an exception occurs.
   @override
   Future<void> sendLoginEmailLink({
     required String email,
@@ -50,17 +29,13 @@ class SupabaseAuthenticationClient implements AuthenticationClient {
     try {
       await _supabaseAuth.signInWithOtp(
         email: email,
-        shouldCreateUser: true,
-        emailRedirectTo: '$appPackageName://login-callback',
+        shouldCreateUser: false,
       );
     } catch (error, stackTrace) {
       Error.throwWithStackTrace(SendLoginEmailLinkFailure(error), stackTrace);
     }
   }
 
-  /// Signs in with the provided [token].
-  ///
-  /// Throws a [LogInWithEmailLinkFailure] if an exception occurs.
   Future<void> _verifyOTP({
     required String email,
     required String token,
@@ -69,17 +44,76 @@ class SupabaseAuthenticationClient implements AuthenticationClient {
       await _supabaseAuth.verifyOTP(
         email: email,
         token: token,
-        type: OtpType.signup,
+        type: OtpType.email,
       );
     } catch (error, stackTrace) {
       Error.throwWithStackTrace(LogInWithEmailLinkFailure(error), stackTrace);
     }
   }
 
-  /// Signs out the current user which will emit
-  /// [AuthenticationUser.anonymous] from the [user] Stream.
-  ///
-  /// Throws a [LogOutFailure] if an exception occurs.
+  @override
+  Future<void> logInWithPassword({
+    required String email,
+    required String password,
+  }) async {
+    try {
+      await _supabaseAuth.signInWithPassword(email: email, password: password);
+    } catch (error, stackTrace) {
+      Error.throwWithStackTrace(LogInWithPasswordFailure(error), stackTrace);
+    }
+  }
+
+  @override
+  Future<void> signUp({
+    required String email,
+    required String password,
+  }) async {
+    try {
+      await _supabaseAuth.signUp(email: email, password: password);
+    } catch (error, stackTrace) {
+      Error.throwWithStackTrace(SignUpFailure(error), stackTrace);
+    }
+  }
+
+  @override
+  Future<void> signInAnonymously() async {
+    try {
+      await _supabaseAuth.signInAnonymously();
+    } catch (error, stackTrace) {
+      Error.throwWithStackTrace(SignInAnonymouslyFailure(error), stackTrace);
+    }
+  }
+
+  @override
+  Future<void> sendPasswordResetEmail({required String email}) async {
+    try {
+      await _supabaseAuth.resetPasswordForEmail(email);
+    } catch (error, stackTrace) {
+      Error.throwWithStackTrace(
+        SendPasswordResetEmailFailure(error),
+        stackTrace,
+      );
+    }
+  }
+
+  @override
+  Future<void> resetPassword({
+    required String email,
+    required String code,
+    required String newPassword,
+  }) async {
+    try {
+      await _supabaseAuth.verifyOTP(
+        email: email,
+        token: code,
+        type: OtpType.recovery,
+      );
+      await _supabaseAuth.updateUser(UserAttributes(password: newPassword));
+    } catch (error, stackTrace) {
+      Error.throwWithStackTrace(ResetPasswordFailure(error), stackTrace);
+    }
+  }
+
   @override
   Future<void> logOut() async {
     try {
@@ -89,20 +123,13 @@ class SupabaseAuthenticationClient implements AuthenticationClient {
     }
   }
 
-  /// Deletes and signs out the user.
   @override
   Future<void> deleteAccount() async {
-    throw DeleteAccountFailure(
-      Exception('Delete account is not supported by Supabase'),
-    );
-  }
-
-  /// Updates the user token in [TokenStorage] if the user is authenticated.
-  Future<void> _onUserChanged(AuthenticationUser user) async {
-    if (!user.isAnonymous) {
-      await _tokenStorage.saveToken(user.id);
-    } else {
-      await _tokenStorage.clearToken();
+    try {
+      await Supabase.instance.client.functions.invoke('delete-account');
+      await _supabaseAuth.signOut();
+    } catch (error, stackTrace) {
+      Error.throwWithStackTrace(DeleteAccountFailure(error), stackTrace);
     }
   }
 
@@ -115,9 +142,38 @@ class SupabaseAuthenticationClient implements AuthenticationClient {
   Future<void> logInWithEmailLink({
     required String email,
     required String emailLink,
-  }) {
-    final token = Uri.parse(emailLink).queryParameters['token']!;
-    return _verifyOTP(email: email, token: token);
+  }) async {
+    final token = Uri.parse(emailLink).queryParameters['token'];
+    if (token == null || token.isEmpty) {
+      throw const LogInWithEmailLinkFailure(
+        FormatException('The login callback does not contain an OTP.'),
+      );
+    }
+    await _verifyOTP(email: email, token: token);
+  }
+
+  @override
+  Future<void> logInWithEmailCode({
+    required String email,
+    required String code,
+  }) async {
+    try {
+      await _supabaseAuth.verifyOTP(
+        email: email,
+        token: code,
+        type: OtpType.email,
+      );
+    } on AuthException {
+      try {
+        await _supabaseAuth.verifyOTP(
+          email: email,
+          token: code,
+          type: OtpType.signup,
+        );
+      } catch (error, stackTrace) {
+        Error.throwWithStackTrace(LogInWithEmailLinkFailure(error), stackTrace);
+      }
+    }
   }
 }
 

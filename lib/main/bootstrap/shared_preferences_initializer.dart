@@ -18,5 +18,8 @@ class SharedPreferencesInitializer implements AsyncLifecycle {
   }
 
   @override
-  Future<void> dispose() async {}
+  Future<void> dispose() {
+    _instance = null;
+    return Future.value();
+  }
 }

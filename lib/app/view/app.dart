@@ -1,90 +1,71 @@
+import 'dart:async';
+import 'dart:developer';
+
 import 'package:ads_ui/ads_ui.dart';
+import 'package:connectivity_client/connectivity_client.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_native_splash/flutter_native_splash.dart';
-import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:go_router/go_router.dart';
+import 'package:friends_repository/friends_repository.dart';
+import 'package:local_auth_client/local_auth_client.dart';
 import 'package:platform/platform.dart';
-import 'package:responsive_framework/responsive_framework.dart';
 import 'package:rtu_mirea_app/ads/bloc/ads_bloc.dart';
 import 'package:rtu_mirea_app/ads/bloc/full_screen_ads_bloc.dart';
-import 'package:rtu_mirea_app/app/app.dart';
-import 'package:rtu_mirea_app/categories/categories.dart';
-import 'package:rtu_mirea_app/feed/feed.dart';
-import 'package:rtu_mirea_app/lost_and_found/lost_and_found.dart';
-import 'package:rtu_mirea_app/navigation/navigation.dart';
-import 'package:rtu_mirea_app/nfc_pass/bloc/nfc_pass_cubit.dart';
-import 'package:rtu_mirea_app/schedule_management/bloc/schedule_exporter_cubit.dart';
-import 'package:flutter/services.dart';
 import 'package:rtu_mirea_app/analytics/bloc/analytics_bloc.dart';
-
-import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:rtu_mirea_app/home/cubit/home_cubit.dart';
-import 'package:rtu_mirea_app/l10n/l10n.dart';
+import 'package:rtu_mirea_app/app/app.dart';
+import 'package:rtu_mirea_app/app/locale/locale_cubit.dart';
+import 'package:rtu_mirea_app/app/services/device_token_sync_controller.dart';
 import 'package:rtu_mirea_app/app/theme/cubit/theme_cubit.dart';
-import 'package:rtu_mirea_app/app/theme/cubit/theme_state.dart';
-
-import 'package:rtu_mirea_app/schedule/bloc/schedule_bloc.dart';
-
-import 'package:adaptive_theme/adaptive_theme.dart';
-import 'package:user_repository/user_repository.dart';
+import 'package:rtu_mirea_app/app/view/app_boot_placeholder.dart';
+import 'package:rtu_mirea_app/app/view/app_device_token_sync.dart';
+import 'package:rtu_mirea_app/app/view/app_router_view.dart';
+import 'package:rtu_mirea_app/categories/categories.dart';
+import 'package:rtu_mirea_app/config/config.dart';
 import 'package:rtu_mirea_app/di/app_scope.dart';
+import 'package:rtu_mirea_app/feed/feed.dart';
+import 'package:rtu_mirea_app/home/cubit/home_cubit.dart';
+import 'package:rtu_mirea_app/nfc_pass/nfc_pass.dart';
+import 'package:rtu_mirea_app/profile/cubit/sync_preferences_cubit.dart';
+import 'package:rtu_mirea_app/profile/cubit/ui_preferences_cubit.dart';
+import 'package:rtu_mirea_app/schedule/bloc/schedule_bloc.dart';
+import 'package:rtu_mirea_app/schedule/cubit/cubit.dart';
+import 'package:rtu_mirea_app/schedule_management/bloc/schedule_exporter_cubit.dart';
+import 'package:rtu_mirea_app/services/services.dart';
+import 'package:rtu_mirea_app/watch/watch.dart';
+import 'package:user_repository/user_repository.dart';
 import 'package:yx_scope_flutter/yx_scope_flutter.dart';
-import 'package:yandex_mobileads/mobile_ads.dart';
-import 'package:syncfusion_localizations/syncfusion_localizations.dart';
-
-Future<void> yandexInterstitialAdLoader({
-  required String adUnitId,
-  required AdRequestConfiguration adRequestConfiguration,
-  required void Function(InterstitialAd ad) onAdLoaded,
-  required void Function(Object error) onAdFailedToLoad,
-}) async {
-  try {
-    final loader = await InterstitialAdLoader.create(
-      onAdLoaded: onAdLoaded,
-      onAdFailedToLoad: onAdFailedToLoad,
-    );
-
-    await loader.loadAd(adRequestConfiguration: adRequestConfiguration);
-  } catch (error) {
-    onAdFailedToLoad(error);
-  }
-}
-
-Future<void> yandexRewardedAdLoader({
-  required String adUnitId,
-  required AdRequestConfiguration adRequestConfiguration,
-  required void Function(RewardedAd ad) onAdLoaded,
-  required void Function(Object error) onAdFailedToLoad,
-}) async {
-  try {
-    final loader = await RewardedAdLoader.create(
-      onAdLoaded: onAdLoaded,
-      onAdFailedToLoad: onAdFailedToLoad,
-    );
-    await loader.loadAd(adRequestConfiguration: adRequestConfiguration);
-  } catch (error) {
-    onAdFailedToLoad(error);
-  }
-}
 
 class App extends StatelessWidget {
-  const App({super.key, required User user}) : _user = user;
+  const App({required this.user, super.key});
 
-  final User _user;
+  final User user;
+
+  bool get _supportsFirebaseMessaging => FirebaseRuntime.messagingAvailable;
+
+  bool get _supportsYandexAds =>
+      !kIsWeb &&
+      (defaultTargetPlatform == .android || defaultTargetPlatform == .iOS);
 
   @override
   Widget build(BuildContext context) {
     return ScopeBuilder<AppScopeContainer>.withPlaceholder(
       builder: (context, appScope) {
+        final tokenSyncController = _supportsFirebaseMessaging
+            ? _createTokenSyncController(appScope.friendsRepository)
+            : null;
         return MultiRepositoryProvider(
           providers: [
+            RepositoryProvider.value(
+              value: appScope.universityConfig,
+            ),
             RepositoryProvider.value(value: appScope.analyticsRepository),
             RepositoryProvider.value(value: appScope.scheduleRepository),
+            RepositoryProvider.value(value: appScope.preferencesRepository),
             RepositoryProvider.value(value: appScope.communityRepository),
-            RepositoryProvider.value(value: appScope.discourseRepository),
+            RepositoryProvider.value(
+              value: appScope.communityCatalogRepository,
+            ),
             RepositoryProvider.value(value: appScope.newsRepository),
             RepositoryProvider.value(value: appScope.articleRepository),
             RepositoryProvider.value(
@@ -92,219 +73,190 @@ class App extends StatelessWidget {
             ),
             RepositoryProvider.value(value: appScope.nfcPassRepository),
             RepositoryProvider.value(value: appScope.lostFoundRepository),
+            RepositoryProvider.value(value: appScope.miniAppsRepository),
             RepositoryProvider.value(value: appScope.userRepository),
+            RepositoryProvider.value(value: appScope.gamificationRepository),
+            RepositoryProvider.value(value: appScope.friendsRepository),
+            RepositoryProvider.value(value: appScope.campusRepository),
+            RepositoryProvider.value(value: appScope.studyGroupsRepository),
+            RepositoryProvider.value(value: appScope.serviceCatalogRepository),
+            RepositoryProvider.value(
+              value: appScope.localNotificationsRepository,
+            ),
           ],
           child: MultiBlocProvider(
             providers: [
               BlocProvider(create: (_) => HomeCubit()),
               BlocProvider(create: (_) => ThemeCubit()),
+              BlocProvider(create: (_) => LocaleCubit()),
+              BlocProvider(create: (_) => UiPreferencesCubit()),
               BlocProvider(
-                create:
-                    (_) =>
-                        CategoriesBloc(newsRepository: appScope.newsRepository)
-                          ..add(const CategoriesRequested()),
+                create: (_) {
+                  final cubit = FavoriteServicesCubit();
+                  unawaited(cubit.load());
+                  return cubit;
+                },
               ),
               BlocProvider(
-                create:
-                    (_) => FeedBloc(newsRepository: appScope.newsRepository),
+                create: (_) => ServiceCatalogCubit(
+                  appScope.serviceCatalogRepository,
+                ),
+              ),
+              BlocProvider(create: (_) => SyncPreferencesCubit()),
+              BlocProvider(
+                create: (_) =>
+                    PassSecurityCubit(localAuthClient: LocalAuthClient()),
+              ),
+              BlocProvider(
+                create: (_) =>
+                    CategoriesBloc(newsRepository: appScope.newsRepository)
+                      ..add(const CategoriesRequested()),
+              ),
+              BlocProvider(
+                create: (_) =>
+                    FeedBloc(newsRepository: appScope.newsRepository),
               ),
               BlocProvider(create: (_) => AdsBloc()),
               BlocProvider(
-                create:
-                    (_) => ScheduleExporterCubit(
-                      appScope.scheduleExporterRepository,
-                    ),
+                create: (_) => ScheduleExporterCubit(
+                  appScope.scheduleExporterRepository,
+                ),
               ),
               BlocProvider(
-                create:
-                    (_) => AppBloc(
-                      firebaseMessaging: FirebaseMessaging.instance,
-                      userRepository: appScope.userRepository,
-                      user: _user,
-                    )..add(const AppOpened()),
+                create: (_) => AppBloc(
+                  firebaseMessaging: _supportsFirebaseMessaging
+                      ? FirebaseMessaging.instance
+                      : null,
+                  userRepository: appScope.userRepository,
+                  user: user,
+                  onBeforeLogout: tokenSyncController?.stopAndUnregister,
+                )..add(const AppOpened()),
               ),
               BlocProvider(
-                create:
-                    (_) => AnalyticsBloc(
-                      analyticsRepository: appScope.analyticsRepository,
-                    ),
-                lazy: false,
-              ),
-              BlocProvider<ScheduleBloc>(
-                create:
-                    (_) => ScheduleBloc(
-                      scheduleRepository: appScope.scheduleRepository,
-                    )..add(const RefreshSelectedScheduleData()),
-              ),
-              BlocProvider<NfcPassCubit>(
-                create:
-                    (_) => NfcPassCubit(repository: appScope.nfcPassRepository),
-              ),
-              BlocProvider(
-                create:
-                    (_) =>
-                        FullScreenAdsBloc(
-                            interstitialAdLoader: yandexInterstitialAdLoader,
-                            rewardedAdLoader: yandexRewardedAdLoader,
-                            adsRetryPolicy: const AdsRetryPolicy(),
-                            localPlatform: const LocalPlatform(),
-                          )
-                          ..add(const LoadInterstitialAdRequested())
-                          ..add(const LoadRewardedAdRequested()),
+                create: (_) => AnalyticsBloc(
+                  analyticsRepository: appScope.analyticsRepository,
+                ),
                 lazy: false,
               ),
               BlocProvider(
-                create:
-                    (_) => LostFoundBloc(
-                      repository: appScope.lostFoundRepository,
-                      userRepository: appScope.userRepository,
-                    ),
+                create: (context) {
+                  final syncPreferences = context.read<SyncPreferencesCubit>();
+                  return ScheduleBloc(
+                    scheduleRepository: appScope.scheduleRepository,
+                    preferencesRepository: appScope.preferencesRepository,
+                    connectivityClient: ConnectivityClient(),
+                    syncPolicy: () => syncPreferences.state,
+                  )..add(const SelectedScheduleRefreshRequested());
+                },
               ),
+              BlocProvider(
+                create: (_) => SchedulePreferencesCubit(
+                  preferencesRepository: appScope.preferencesRepository,
+                ),
+              ),
+              BlocProvider(
+                create: (_) => LessonCommentsCubit(
+                  preferencesRepository: appScope.preferencesRepository,
+                ),
+              ),
+              BlocProvider(
+                create: (_) => LessonReactionsCubit(
+                  scheduleRepository: appScope.scheduleRepository,
+                ),
+              ),
+              BlocProvider(
+                create: (_) => UserActivitiesCubit(
+                  scheduleRepository: appScope.scheduleRepository,
+                ),
+              ),
+              BlocProvider(
+                create: (_) => ClassmatesCubit(
+                  friendsRepository: appScope.friendsRepository,
+                ),
+              ),
+              BlocProvider(
+                create: (_) => ExamReadinessCubit(
+                  scheduleRepository: appScope.scheduleRepository,
+                ),
+              ),
+              BlocProvider(
+                create: (_) => ScheduleChangesCubit(
+                  scheduleRepository: appScope.scheduleRepository,
+                ),
+              ),
+              BlocProvider(
+                create: (_) => CustomScheduleCubit(
+                  preferencesRepository: appScope.preferencesRepository,
+                  remindersRepository: appScope.localNotificationsRepository,
+                ),
+              ),
+              BlocProvider(
+                create: (_) => ScheduleComparisonCubit(),
+              ),
+              BlocProvider(
+                create: (_) =>
+                    NfcPassCubit(repository: appScope.nfcPassRepository),
+              ),
+              BlocProvider(
+                create: (_) =>
+                    NfcHceCubit(repository: appScope.nfcPassRepository),
+              ),
+              BlocProvider(
+                create: (_) {
+                  final bloc = FullScreenAdsBloc(
+                    onLoadInterstitialAd: yandexInterstitialAdLoader,
+                    onLoadRewardedAd: yandexRewardedAdLoader,
+                    adsRetryPolicy: const AdsRetryPolicy(),
+                    localPlatform: const LocalPlatform(),
+                  );
+
+                  if (_supportsYandexAds) {
+                    bloc
+                      ..add(const LoadInterstitialAdRequested())
+                      ..add(const LoadRewardedAdRequested());
+                  }
+
+                  return bloc;
+                },
+                lazy: false,
+              ),
+              BlocProvider(create: (_) => WatchConnectivityCubit()),
             ],
-            child: _AppView(),
+            child: AppDeviceTokenSync(
+              controller: tokenSyncController,
+              child: const AppRouterView(),
+            ),
           ),
         );
       },
-      placeholder: const Center(child: CircularProgressIndicator()),
-    );
-  }
-}
-
-class _AppView extends StatefulWidget {
-  const _AppView();
-
-  @override
-  State<_AppView> createState() => _AppViewState();
-}
-
-class _AppViewState extends State<_AppView> {
-  late final GoRouter _router;
-
-  @override
-  void initState() {
-    super.initState();
-    _router = createRouter();
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      FlutterNativeSplash.remove();
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return ScreenUtilInit(
-      minTextAdapt: true,
-      splitScreenMode: true,
-      builder: (_, child) {
-        return BlocBuilder<ThemeCubit, ThemeState>(
-          builder: (context, themeState) {
-            final themeCubit = context.read<ThemeCubit>();
-
-            final lightTheme = themeCubit.getLightTheme();
-            final darkTheme = themeCubit.getDarkTheme();
-
-            return PlatformProvider(
-              builder:
-                  (context) => AdaptiveTheme(
-                    light: lightTheme,
-                    dark: darkTheme,
-                    initial: AdaptiveThemeMode.dark,
-                    builder: (theme, darkTheme) {
-                      _configureSystemUI(theme);
-
-                      return PlatformTheme(
-                        themeMode:
-                            theme.brightness == Brightness.light
-                                ? ThemeMode.light
-                                : ThemeMode.dark,
-                        materialLightTheme: lightTheme,
-                        materialDarkTheme: darkTheme,
-                        cupertinoLightTheme: MaterialBasedCupertinoThemeData(
-                          materialTheme: lightTheme,
-                        ),
-                        cupertinoDarkTheme: MaterialBasedCupertinoThemeData(
-                          materialTheme: darkTheme,
-                        ),
-                        builder: (context) {
-                          final app = PlatformApp.router(
-                            restorationScopeId: 'app',
-                            localizationsDelegates: [
-                              AppLocalizations.delegate,
-                              GlobalMaterialLocalizations.delegate,
-                              GlobalWidgetsLocalizations.delegate,
-                              GlobalCupertinoLocalizations.delegate,
-                              SfGlobalLocalizations.delegate,
-                            ],
-                            supportedLocales: const [
-                              Locale('en'),
-                              Locale('ru'),
-                            ],
-                            locale: const Locale('ru'),
-                            debugShowCheckedModeBanner: false,
-                            title: 'Приложение РТУ МИРЭА',
-                            routerConfig: _router,
-                            builder:
-                                (context, child) =>
-                                    ResponsiveBreakpoints.builder(
-                                      child: child!,
-                                      breakpoints: const [
-                                        Breakpoint(
-                                          start: 0,
-                                          end: 450,
-                                          name: MOBILE,
-                                        ),
-                                        Breakpoint(
-                                          start: 451,
-                                          end: 800,
-                                          name: TABLET,
-                                        ),
-                                        Breakpoint(
-                                          start: 801,
-                                          end: 1920,
-                                          name: DESKTOP,
-                                        ),
-                                        Breakpoint(
-                                          start: 1921,
-                                          end: double.infinity,
-                                          name: '4K',
-                                        ),
-                                      ],
-                                    ),
-                          );
-
-                          return FirebaseInteractedMessageListener(
-                            child: WatchConnectivityWrapper(child: app),
-                          );
-                        },
-                      );
-                    },
-                  ),
-            );
-          },
-        );
-      },
+      placeholder: const AppBootPlaceholder(),
     );
   }
 
-  /// Hide status bar background and set transparent navigation bar while keeping top overlay visible.
-  void _configureSystemUI(ThemeData theme) {
-    SystemChrome.setEnabledSystemUIMode(
-      SystemUiMode.manual,
-      overlays: [SystemUiOverlay.top, SystemUiOverlay.bottom],
-    );
-    SystemChrome.setSystemUIOverlayStyle(
-      SystemUiOverlayStyle(
-        statusBarColor: theme.scaffoldBackgroundColor,
-        systemNavigationBarColor: theme.scaffoldBackgroundColor,
-        statusBarIconBrightness:
-            theme.brightness == Brightness.light
-                ? Brightness.dark
-                : Brightness.light,
-        systemNavigationBarIconBrightness:
-            theme.brightness == Brightness.light
-                ? Brightness.dark
-                : Brightness.light,
+  DeviceTokenSyncController _createTokenSyncController(
+    FriendsRepository repository,
+  ) {
+    final messaging = FirebaseMessaging.instance;
+    final platform = defaultTargetPlatform == .iOS ? 'ios' : 'android';
+    return DeviceTokenSyncController(
+      getToken: messaging.getToken,
+      tokenRefresh: messaging.onTokenRefresh,
+      register: (token) => repository.registerDevice(
+        token: token,
+        platform: platform,
       ),
+      unregister: repository.unregisterDevice,
+      deleteToken: messaging.deleteToken,
+      onError: _logTokenSyncError,
+    );
+  }
+
+  void _logTokenSyncError(Object error, StackTrace stackTrace) {
+    log(
+      'Device token sync failed',
+      error: error,
+      stackTrace: stackTrace,
+      name: '_DeviceTokenSync',
     );
   }
 }

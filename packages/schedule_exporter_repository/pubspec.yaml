@@ -13,10 +13,10 @@ dependencies:
       ref: develop
   flutter:
     sdk: flutter
+  schedule: any
   timezone: ^0.10.0
-  university_app_server_api: any
 dev_dependencies:
   flutter_test:
     sdk: flutter
   mocktail: ^1.0.4
-  very_good_analysis: ^10.1.0
+  very_good_analysis: 10.3.0

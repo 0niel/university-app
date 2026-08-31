@@ -1,12 +1,12 @@
+import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:rtu_mirea_app/app/app.dart';
 import 'package:rtu_mirea_app/di/app_scope.dart';
 import 'package:rtu_mirea_app/main/bootstrap/bootstrap.dart';
-import 'package:url_strategy/url_strategy.dart';
 import 'package:yx_scope_flutter/yx_scope_flutter.dart';
 
 void main() async {
   await bootstrap((_) async {
-    setPathUrlStrategy();
+    usePathUrlStrategy();
 
     final holder = AppScopeHolder();
     await holder.create();
@@ -17,6 +17,9 @@ void main() async {
     }
 
     final user = await scope.userRepository.user.first;
-    return ScopeProvider(holder: holder, child: App(user: user));
+    return ScopeProvider(
+      holder: holder,
+      child: App(user: user),
+    );
   });
 }

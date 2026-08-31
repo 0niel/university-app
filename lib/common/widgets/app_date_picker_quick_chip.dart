@@ -1,0 +1,40 @@
+part of 'app_date_picker.dart';
+
+class AppDatePickerQuickChip extends StatelessWidget {
+  const AppDatePickerQuickChip({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+    super.key,
+  });
+
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.ninja;
+    return AppPressable(
+      onTap: onTap,
+      semanticsSelected: selected,
+      semanticsLabel: label,
+      child: Container(
+        constraints: const BoxConstraints(minHeight: 44),
+        alignment: Alignment.center,
+        padding: const .symmetric(horizontal: 16),
+        decoration: BoxDecoration(
+          color: selected ? colors.ink : colors.surface,
+          borderRadius: .circular(NinjaRadius.pill),
+        ),
+        child: Text(
+          label,
+          style: NinjaText.subtext.copyWith(
+            color: selected ? colors.onInk : colors.muted,
+            fontWeight: .w600,
+          ),
+        ),
+      ),
+    );
+  }
+}

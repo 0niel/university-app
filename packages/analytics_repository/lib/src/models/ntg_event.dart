@@ -1,10 +1,6 @@
 import 'package:analytics_repository/analytics_repository.dart';
 
-/// {@template ntg_event}
-/// An analytics event following News Tagging Guidelines event taxonomy.
-/// {@endtemplate}
 abstract class NTGEvent extends AnalyticsEvent {
-  /// {@macro ntg_event}
   NTGEvent({
     required String name,
     required String category,
@@ -14,61 +10,47 @@ abstract class NTGEvent extends AnalyticsEvent {
     Object? value,
     String? hitType,
   }) : super(
-          name,
-          properties: <String, Object>{
-            'eventCategory': category,
-            'eventAction': action,
-            'nonInteraction': '$nonInteraction',
-            if (label != null) 'eventLabel': label,
-            if (value != null) 'eventValue': value,
-            if (hitType != null) 'hitType': hitType,
-          },
-        );
+         name,
+         properties: <String, Object>{
+           'eventCategory': category,
+           'eventAction': action,
+           'nonInteraction': '$nonInteraction',
+           'eventLabel': ?label,
+           'eventValue': ?value,
+           'hitType': ?hitType,
+         },
+       );
 }
 
-/// {@template view_news}
-/// An analytics event for tracking news article views.
-/// {@endtemplate}
 class ViewNews extends NTGEvent {
-  /// {@macro view_news}
-  ViewNews({
-    required String articleTitle,
-  }) : super(
-          name: 'view_news',
-          category: 'NTG news',
-          action: 'view',
-          label: articleTitle,
-          nonInteraction: false,
-        );
+  ViewNews({required String articleTitle})
+    : super(
+        name: 'view_news',
+        category: 'NTG news',
+        action: 'view',
+        label: articleTitle,
+        nonInteraction: false,
+      );
 }
 
-/// {@template view_story}
-/// An analytics event for tracking story views.
-/// {@endtemplate}
 class ViewStory extends NTGEvent {
-  /// {@macro view_story}
-  ViewStory({
-    required String storyTitle,
-  }) : super(
-          name: 'view_story',
-          category: 'NTG story',
-          action: 'view',
-          label: storyTitle,
-          nonInteraction: false,
-        );
+  ViewStory({required String storyTitle})
+    : super(
+        name: 'view_story',
+        category: 'NTG story',
+        action: 'view',
+        label: storyTitle,
+        nonInteraction: false,
+      );
 }
 
-/// {@template social_share_event}
-/// An analytics event for tracking social sharing.
-/// {@endtemplate}
 class SocialShareEvent extends NTGEvent {
-  /// {@macro social_share_event}
   SocialShareEvent()
-      : super(
-          name: 'social_share',
-          category: 'NTG social',
-          action: 'social share',
-          label: 'OS share menu',
-          nonInteraction: false,
-        );
+    : super(
+        name: 'social_share',
+        category: 'NTG social',
+        action: 'social share',
+        label: 'OS share menu',
+        nonInteraction: false,
+      );
 }

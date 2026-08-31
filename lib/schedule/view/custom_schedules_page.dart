@@ -1,15 +1,18 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:hugeicons/hugeicons.dart';
+import 'dart:async';
+
 import 'package:app_ui/app_ui.dart';
-import 'package:intl/intl.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:rtu_mirea_app/schedule/bloc/schedule_bloc.dart';
-import 'package:rtu_mirea_app/schedule/models/custom_schedule.dart';
-import 'package:rtu_mirea_app/schedule/view/custom_lesson_editor_page.dart';
-import 'package:rtu_mirea_app/schedule/widgets/lesson_card.dart';
-import 'package:university_app_server_api/client.dart';
+import 'package:intl/intl.dart';
+import 'package:rtu_mirea_app/common/widgets/ninja_form_input.dart';
+import 'package:rtu_mirea_app/l10n/l10n.dart';
+import 'package:rtu_mirea_app/schedule/schedule.dart';
+import 'package:rtu_mirea_app/search/widgets/global_search_button.dart';
+
+part 'custom_schedules_create_form.dart';
+part 'custom_schedules_empty_state.dart';
+part 'custom_schedules_more_button.dart';
 
 class CustomSchedulesPage extends StatefulWidget {
   const CustomSchedulesPage({super.key});
@@ -32,80 +35,108 @@ class _CustomSchedulesPageState extends State<CustomSchedulesPage> {
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).extension<AppColors>()!;
-    return Scaffold(
-      appBar: AppBar(title: const Text('Мои расписания')),
-      body: BlocBuilder<ScheduleBloc, ScheduleState>(
-        builder: (context, state) {
-          if (state.customSchedules.isEmpty) {
-            return _buildEmptyState();
-          }
+    final colors = context.ninja;
+    final l10n = context.l10n;
 
-          return Column(
-            children: [
-              Container(
-                padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, AppSpacing.md),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Container(
-                        height: 50,
-                        decoration: BoxDecoration(
-                          color: colors.background02,
-                          borderRadius: BorderRadius.circular(AppSpacing.lg),
+    return Scaffold(
+      backgroundColor: colors.canvas,
+      body: BlocBuilder<CustomScheduleCubit, CustomScheduleState>(
+        builder: (context, state) {
+          final schedules = state.customSchedules;
+          return CustomScrollView(
+            physics: const BouncingScrollPhysics(
+              parent: AlwaysScrollableScrollPhysics(),
+            ),
+            slivers: [
+              SliverAppBar(
+                elevation: 0,
+                scrolledUnderElevation: 0,
+                backgroundColor: colors.canvas,
+                surfaceTintColor: Colors.transparent,
+                title: Text(
+                  l10n.mySchedules,
+                  style: NinjaText.headline.copyWith(color: colors.ink),
+                ),
+                actions: [
+                  NinjaIconButton(
+                    icon: const AppLineIconWidget(.search, size: 20),
+                    tooltip: l10n.customSchedulesSearchTitle,
+                    onPressed: () => openGlobalSearch(context),
+                  ),
+                  const SizedBox(width: 8),
+                ],
+              ),
+              SliverSafeArea(
+                top: false,
+                sliver: SliverPadding(
+                  padding: const EdgeInsets.fromLTRB(
+                    NinjaMetrics.screenPadding,
+                    8,
+                    NinjaMetrics.screenPadding,
+                    32,
+                  ),
+                  sliver: SliverList.list(
+                    children: [
+                      CustomScheduleSyncBanner(
+                        status: state.syncStatus,
+                        onRetry: () => unawaited(
+                          context
+                              .read<CustomScheduleCubit>()
+                              .flushRemotePreferences(),
                         ),
-                        child: Row(
+                      ),
+                      if (state.syncStatus != .initial &&
+                          state.syncStatus != .synced)
+                        const SizedBox(height: 10),
+                      NinjaScheduleSurface(
+                        padding: EdgeInsets.zero,
+                        child: Column(
                           children: [
-                            Expanded(
-                              child: TextButton.icon(
-                                onPressed: () => _showCreateScheduleDialog(),
-                                icon: const Icon(HugeIcons.strokeRoundedCalendar01, size: 20),
-                                label: const Text('Создать расписание'),
-                                style: TextButton.styleFrom(
-                                  foregroundColor: colors.primary,
-                                  backgroundColor: Colors.transparent,
-                                  elevation: 0,
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppSpacing.lg)),
-                                  padding: const EdgeInsets.symmetric(vertical: 12),
-                                ),
-                              ),
+                            NinjaListCell(
+                              title: l10n.customSchedulesSearchTitle,
+                              subtitle: l10n.customSchedulesSearchSubtitle,
+                              onTap: () => openGlobalSearch(context),
                             ),
-                            if (state.customSchedules.isNotEmpty) ...[
-                              Container(height: 24, width: 1, color: colors.background03),
-                              Expanded(
-                                child: TextButton.icon(
-                                  onPressed: () => _addCustomLesson(state.customSchedules.first.id),
-                                  icon: const Icon(HugeIcons.strokeRoundedNotebook01, size: 20),
-                                  label: const Text('Добавить пару'),
-                                  style: TextButton.styleFrom(
-                                    foregroundColor: colors.colorful07,
-                                    backgroundColor: Colors.transparent,
-                                    elevation: 0,
-                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppSpacing.lg)),
-                                    padding: const EdgeInsets.symmetric(vertical: 12),
-                                  ),
-                                ),
-                              ),
-                            ],
+                            NinjaListCell(
+                              title: l10n.customSchedulesCreate,
+                              subtitle: l10n.customSchedulesCreateSubtitle,
+                              onTap: _showCreateScheduleDialog,
+                            ),
                           ],
                         ),
                       ),
-                    ),
-                  ],
-                ),
-              ),
-
-              // Schedule list
-              Expanded(
-                child: ListView(
-                  padding: const EdgeInsets.all(AppSpacing.lg),
-                  children: [
-                    ...state.customSchedules.map(
-                      (schedule) => _buildScheduleCard(
-                        schedule,
-                      ).animate().fadeIn(duration: 300.ms).slideY(begin: 0.1, end: 0, duration: 300.ms),
-                    ),
-                  ],
+                      const SizedBox(height: 28),
+                      if (schedules.isEmpty)
+                        _CustomSchedulesEmptyState(
+                          onCreate: _showCreateScheduleDialog,
+                        )
+                      else ...[
+                        NinjaScheduleSectionHeader(
+                          title: l10n.customSchedulesMyCount(schedules.length),
+                        ),
+                        const SizedBox(height: 10),
+                        NinjaScheduleSurface(
+                          padding: EdgeInsets.zero,
+                          child: Column(
+                            children: [
+                              for (final schedule in schedules)
+                                NinjaListCell(
+                                  key: ValueKey(
+                                    'custom_schedule_${schedule.id}',
+                                  ),
+                                  title: schedule.name,
+                                  subtitle: _scheduleSubtitle(l10n, schedule),
+                                  trailing: _CustomSchedulesMoreButton(
+                                    onTap: () => _showScheduleMenu(schedule),
+                                  ),
+                                  onTap: () => _editSchedule(schedule),
+                                ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
                 ),
               ),
             ],
@@ -115,162 +146,52 @@ class _CustomSchedulesPageState extends State<CustomSchedulesPage> {
     );
   }
 
-  Widget _buildEmptyState() {
-    return FailureScreen(
-      icon: HugeIcons.strokeRoundedCalendar01,
-      title: 'У вас пока нет своих расписаний',
-      description: 'Создайте собственное расписание, добавляя в него пары из разных доступных расписаний',
-      buttonText: 'Создать расписание',
-      buttonIcon: HugeIcons.strokeRoundedAdd01,
-      onButtonPressed: () => _showCreateScheduleDialog(),
-    );
+  void _editSchedule(CustomSchedule schedule) {
+    unawaited(context.push('/schedule/edit/${schedule.id}'));
   }
 
-  Widget _buildScheduleCard(CustomSchedule schedule) {
-    final colors = Theme.of(context).extension<AppColors>()!;
-    final formatter = DateFormat('dd.MM.yyyy в HH:mm');
-    final updatedAt = schedule.updatedAt != null ? formatter.format(schedule.updatedAt!) : 'Дата неизвестна';
+  void _selectCustomSchedule(CustomSchedule schedule) {
+    final selected = context.read<CustomScheduleCubit>().buildSelectedSchedule(
+      schedule.id,
+    );
+    if (selected != null) {
+      context.read<ScheduleBloc>().add(
+        ScheduleSelected(selectedSchedule: selected),
+      );
+    }
+    context.go('/schedule');
+  }
 
-    return Card(
-      margin: const EdgeInsets.only(bottom: AppSpacing.lg),
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppSpacing.lg),
-        side: BorderSide(color: colors.background03.withOpacity(0.5)),
-      ),
+  Future<void> _showScheduleMenu(CustomSchedule schedule) async {
+    await showAppSheet<void>(
+      context,
+      title: schedule.name,
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: .min,
         children: [
-          // Header
-          InkWell(
-            onTap: () => _selectCustomSchedule(schedule),
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(AppSpacing.lg)),
-            child: Container(
-              padding: const EdgeInsets.all(AppSpacing.lg),
-              decoration: BoxDecoration(
-                color: colors.background03.withOpacity(0.3),
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(AppSpacing.lg)),
-              ),
-              child: Row(
-                children: [
-                  Container(
-                    width: 48,
-                    height: 48,
-                    decoration: BoxDecoration(color: colors.primary.withOpacity(0.1), shape: BoxShape.circle),
-                    child: Center(child: Icon(HugeIcons.strokeRoundedCalendar01, size: 24, color: colors.primary)),
-                  ),
-                  const SizedBox(width: AppSpacing.lg),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(schedule.name, style: AppTextStyle.titleM.copyWith(fontWeight: FontWeight.w600)),
-                        if (schedule.description != null && schedule.description!.isNotEmpty)
-                          Text(
-                            schedule.description!,
-                            style: AppTextStyle.body.copyWith(color: colors.deactive),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                      ],
-                    ),
-                  ),
-                  IconButton(icon: const Icon(Icons.more_vert), onPressed: () => _showScheduleOptions(schedule)),
-                ],
-              ),
-            ),
+          NinjaListCell(
+            title: context.l10n.customSchedulesOpen,
+            onTap: () {
+              Navigator.of(context, rootNavigator: true).pop();
+              _selectCustomSchedule(schedule);
+            },
           ),
-
-          // Stats
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.md),
-            child: Row(
-              children: [
-                _buildStatistic(context, '${schedule.lessons.length}', 'пар', HugeIcons.strokeRoundedNotebook01),
-                const SizedBox(width: AppSpacing.xlg),
-                Expanded(
-                  child: Text(
-                    'Обновлено: $updatedAt',
-                    style: AppTextStyle.captionL.copyWith(color: colors.deactive),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              ],
-            ),
+          NinjaListCell(
+            title: context.l10n.customSchedulesRename,
+            onTap: () {
+              Navigator.of(context, rootNavigator: true).pop();
+              _showEditDialog(schedule);
+            },
           ),
-
-          // Actions
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.md),
-            child: Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton.icon(
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      side: BorderSide(color: colors.background03),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppSpacing.md)),
-                    ),
-                    onPressed: () => _showScheduleLessons(schedule),
-                    icon: const Icon(HugeIcons.strokeRoundedListView, size: 18),
-                    label: const Text('Список пар'),
-                  ),
-                ),
-                const SizedBox(width: AppSpacing.md),
-                OutlinedButton.icon(
-                  style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 12, horizontal: AppSpacing.lg),
-                    side: BorderSide(color: colors.colorful07.withOpacity(0.5)),
-                    foregroundColor: colors.colorful07,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppSpacing.md)),
-                  ),
-                  onPressed: () => _addCustomLesson(schedule.id),
-                  icon: const Icon(HugeIcons.strokeRoundedAdd01, size: 18),
-                  label: const Text('Пара'),
-                ),
-                const SizedBox(width: AppSpacing.md),
-                FilledButton.icon(
-                  style: FilledButton.styleFrom(
-                    backgroundColor: colors.primary,
-                    padding: const EdgeInsets.symmetric(vertical: 12, horizontal: AppSpacing.lg),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppSpacing.md)),
-                  ),
-                  onPressed: () => _selectCustomSchedule(schedule),
-                  icon: const Icon(Icons.visibility, size: 18),
-                  label: const Text('Открыть'),
-                ),
-              ],
-            ),
+          NinjaListCell(
+            title: context.l10n.delete,
+            onTap: () {
+              Navigator.of(context, rootNavigator: true).pop();
+              _showDeleteConfirmation(schedule);
+            },
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildStatistic(BuildContext context, String value, String label, IconData icon) {
-    final colors = Theme.of(context).extension<AppColors>()!;
-
-    return Row(
-      children: [
-        Container(
-          width: 36,
-          height: 36,
-          decoration: BoxDecoration(
-            color: colors.background03.withOpacity(0.5),
-            borderRadius: BorderRadius.circular(AppSpacing.sm),
-          ),
-          child: Center(child: Icon(icon, size: 18, color: colors.deactive)),
-        ),
-        const SizedBox(width: AppSpacing.md),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(value, style: AppTextStyle.titleS.copyWith(fontWeight: FontWeight.bold)),
-            Text(label, style: AppTextStyle.captionL.copyWith(color: colors.deactive)),
-          ],
-        ),
-      ],
     );
   }
 
@@ -278,88 +199,27 @@ class _CustomSchedulesPageState extends State<CustomSchedulesPage> {
     _nameController.clear();
     _descriptionController.clear();
 
-    BottomModalSheet.show(
-      context,
-      title: 'Создание расписания',
-      description: 'Введите название и описание для нового расписания',
-      isDismissible: true,
-      child: Form(
-        key: _formKey,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextInput(
-              controller: _nameController,
-              labelText: 'Название расписания',
-              hintText: 'Например: Моё расписание',
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Введите название';
-                }
-                if (value.length > 50) {
-                  return 'Слишком длинное название';
-                }
-                return null;
-              },
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            TextInput(
-              controller: _descriptionController,
-              labelText: 'Описание (необязательно)',
-              hintText: 'Добавьте описание расписания',
-              maxLines: 3,
-            ),
-            const SizedBox(height: AppSpacing.xlg),
-            PrimaryButton(
-              text: 'Создать расписание',
-              onPressed: () {
-                if (_formKey.currentState!.validate()) {
-                  context.read<ScheduleBloc>().add(
-                    CreateCustomSchedule(
-                      name: _nameController.text.trim(),
-                      description: _descriptionController.text.trim(),
-                    ),
-                  );
-
-                  Navigator.pop(context);
-                }
-              },
-            ),
-          ],
+    unawaited(
+      showAppSheet<void>(
+        context,
+        title: context.l10n.customSchedulesCreateTitle,
+        subtitle: context.l10n.customSchedulesCreateDesc,
+        child: _CustomSchedulesCreateForm(
+          formKey: _formKey,
+          nameController: _nameController,
+          descriptionController: _descriptionController,
+          onSubmit: () {
+            if (_formKey.currentState?.validate() ?? false) {
+              final schedule = context.read<CustomScheduleCubit>().create(
+                name: _nameController.text.trim(),
+                description: _descriptionController.text.trim(),
+              );
+              Navigator.of(context, rootNavigator: true).pop();
+              unawaited(context.push('/schedule/edit/${schedule.id}'));
+            }
+          },
         ),
       ),
-    );
-  }
-
-  void _showScheduleOptions(CustomSchedule schedule) {
-    showModalBottomSheet(
-      context: context,
-      builder:
-          (context) => SafeArea(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                ListTile(
-                  leading: const Icon(Icons.edit),
-                  title: const Text('Редактировать'),
-                  onTap: () {
-                    Navigator.pop(context);
-                    _showEditDialog(schedule);
-                  },
-                ),
-                ListTile(
-                  leading: const Icon(Icons.delete),
-                  title: const Text('Удалить'),
-                  textColor: Colors.red,
-                  iconColor: Colors.red,
-                  onTap: () {
-                    Navigator.pop(context);
-                    _showDeleteConfirmation(schedule);
-                  },
-                ),
-              ],
-            ),
-          ),
     );
   }
 
@@ -367,268 +227,76 @@ class _CustomSchedulesPageState extends State<CustomSchedulesPage> {
     _nameController.text = schedule.name;
     _descriptionController.text = schedule.description ?? '';
 
-    showDialog(
-      context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text('Редактирование расписания'),
-            content: Form(
-              key: _formKey,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  TextInput(
-                    controller: _nameController,
-                    labelText: 'Название расписания',
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Введите название';
-                      }
-                      if (value.length > 50) {
-                        return 'Слишком длинное название';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: AppSpacing.lg),
-                  TextInput(
-                    controller: _descriptionController,
-                    labelText: 'Описание (необязательно)',
-                    hintText: 'Добавьте описание расписания',
-                    maxLines: 3,
-                  ),
-                ],
-              ),
-            ),
-            actions: [
-              TextButton(onPressed: () => Navigator.pop(context), child: const Text('Отмена')),
-              FilledButton(
-                onPressed: () {
-                  if (_formKey.currentState!.validate()) {
-                    context.read<ScheduleBloc>().add(
-                      UpdateCustomSchedule(
-                        schedule: schedule.copyWith(
-                          name: _nameController.text.trim(),
-                          description:
-                              _descriptionController.text.trim().isNotEmpty ? _descriptionController.text.trim() : null,
-                          updatedAt: DateTime.now(),
-                        ),
-                      ),
-                    );
-                    Navigator.pop(context);
-                  }
-                },
-                child: const Text('Сохранить'),
-              ),
-            ],
-          ),
+    unawaited(
+      showAppSheet<void>(
+        context,
+        title: context.l10n.customSchedulesEditTitle,
+        subtitle: context.l10n.customSchedulesEditDesc,
+        child: _CustomSchedulesCreateForm(
+          formKey: _formKey,
+          nameController: _nameController,
+          descriptionController: _descriptionController,
+          isEditing: true,
+          onSubmit: () {
+            if (_formKey.currentState?.validate() ?? false) {
+              context.read<CustomScheduleCubit>().update(
+                schedule.copyWith(
+                  name: _nameController.text.trim(),
+                  description: _descriptionController.text.trim().isNotEmpty
+                      ? _descriptionController.text.trim()
+                      : null,
+                  updatedAt: DateTime.now(),
+                ),
+              );
+              Navigator.of(context, rootNavigator: true).pop();
+            }
+          },
+        ),
+      ),
     );
   }
 
   void _showDeleteConfirmation(CustomSchedule schedule) {
-    showDialog(
-      context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text('Удаление расписания'),
-            content: Text('Вы уверены, что хотите удалить расписание "${schedule.name}"?'),
-            actions: [
-              TextButton(onPressed: () => Navigator.pop(context), child: const Text('Отмена')),
-              FilledButton(
-                style: FilledButton.styleFrom(backgroundColor: Colors.red),
-                onPressed: () {
-                  context.read<ScheduleBloc>().add(DeleteCustomSchedule(scheduleId: schedule.id));
-                  Navigator.pop(context);
-                },
-                child: const Text('Удалить'),
-              ),
-            ],
-          ),
+    unawaited(
+      showNinjaConfirmDialog(
+        context,
+        title: context.l10n.deleteSchedule,
+        message: context.l10n.deleteScheduleConfirm(schedule.name),
+        confirmLabel: context.l10n.delete,
+        cancelLabel: context.l10n.cancel,
+        destructive: true,
+      ).then((confirmed) {
+        if (confirmed && mounted) {
+          context.read<CustomScheduleCubit>().delete(schedule.id);
+        }
+      }),
     );
   }
+}
 
-  void _showScheduleLessons(CustomSchedule schedule) {
-    final colors = Theme.of(context).extension<AppColors>()!;
-    final controller = ScrollController();
-
-    final content = Column(
-      children: [
-        // Кнопка добавления пары
-        Padding(
-          padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.sm, AppSpacing.lg, AppSpacing.lg),
-          child: OutlinedButton.icon(
-            onPressed: () {
-              Navigator.pop(context);
-              _addCustomLesson(schedule.id);
-            },
-            icon: const Icon(HugeIcons.strokeRoundedAdd01),
-            label: const Text('Создать новую пару'),
-          ),
-        ),
-
-        Expanded(
-          child:
-              schedule.lessons.isEmpty
-                  ? Center(
-                    child: Text('Нет добавленных пар', style: AppTextStyle.body.copyWith(color: colors.deactive)),
-                  )
-                  : ListView.separated(
-                    controller: controller,
-                    padding: const EdgeInsets.all(AppSpacing.lg),
-                    itemCount: schedule.lessons.length,
-                    separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.md),
-                    itemBuilder: (context, index) {
-                      final lesson = schedule.lessons[index];
-                      return _buildLessonListItem(schedule.id, lesson);
-                    },
-                  ),
-        ),
-      ],
-    );
-
-    BottomModalSheet.show(
-      context,
-      title: 'Список пар',
-      description: 'Вы можете добавить новую пару в расписание ${schedule.name}',
-      isDismissible: true,
-      child: content,
-    );
+String _formatUpdateTime(AppLocalizations l10n, DateTime? dateTime) {
+  if (dateTime == null) return l10n.customSchedulesUnknown;
+  final difference = DateTime.now().difference(dateTime);
+  if (difference.inDays > 7) return DateFormat('dd.MM.yy').format(dateTime);
+  if (difference.inDays > 0) {
+    return l10n.customSchedulesDaysAgo(difference.inDays);
   }
-
-  Widget _buildLessonListItem(String scheduleId, LessonSchedulePart lesson) {
-    final colors = Theme.of(context).extension<AppColors>()!;
-    final lessonColor = LessonCard.getColorByType(lesson.lessonType);
-
-    return Container(
-      decoration: BoxDecoration(
-        color: colors.background02,
-        borderRadius: BorderRadius.circular(AppSpacing.md),
-        border: Border.all(color: colors.background03.withOpacity(0.5)),
-      ),
-      child: IntrinsicHeight(
-        child: Row(
-          children: [
-            Container(
-              width: 8,
-              decoration: BoxDecoration(
-                color: lessonColor,
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(AppSpacing.md),
-                  bottomLeft: Radius.circular(AppSpacing.md),
-                ),
-              ),
-            ),
-            Expanded(
-              child: InkWell(
-                onTap: () => _editLesson(scheduleId, lesson),
-                child: Padding(
-                  padding: const EdgeInsets.all(AppSpacing.lg),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(lesson.subject, style: AppTextStyle.titleS.copyWith(fontWeight: FontWeight.w600)),
-                      const SizedBox(height: AppSpacing.sm),
-                      Row(
-                        children: [
-                          _buildLessonInfoChip(
-                            context,
-                            LessonCard.getLessonTypeName(lesson.lessonType),
-                            lessonColor,
-                            icon: HugeIcons.strokeRoundedNotebook01,
-                          ),
-                          const SizedBox(width: AppSpacing.sm),
-                          _buildLessonInfoChip(
-                            context,
-                            '${lesson.lessonBells.startTime} - ${lesson.lessonBells.endTime}',
-                            colors.colorful01,
-                            icon: HugeIcons.strokeRoundedClock01,
-                          ),
-                        ],
-                      ),
-                      if (lesson.classrooms.isNotEmpty) ...[
-                        const SizedBox(height: AppSpacing.sm),
-                        Text(
-                          'Аудитория: ${lesson.classrooms.map((e) => e.name).join(", ")}',
-                          style: AppTextStyle.captionL.copyWith(color: colors.deactive),
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
-              ),
-            ),
-            Material(
-              color: Colors.transparent,
-              child: InkWell(
-                onTap: () => _confirmRemoveLesson(scheduleId, lesson),
-                borderRadius: const BorderRadius.only(
-                  topRight: Radius.circular(AppSpacing.md),
-                  bottomRight: Radius.circular(AppSpacing.md),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(AppSpacing.lg),
-                  child: Icon(Icons.delete, color: colors.deactive),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
+  if (difference.inHours > 0) {
+    return l10n.customSchedulesHoursAgo(difference.inHours);
   }
-
-  Widget _buildLessonInfoChip(BuildContext context, String text, Color color, {IconData? icon}) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.xs),
-      decoration: BoxDecoration(color: color.withOpacity(0.1), borderRadius: BorderRadius.circular(AppSpacing.sm)),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (icon != null) ...[Icon(icon, size: 12, color: color), const SizedBox(width: AppSpacing.xs)],
-          Text(text, style: AppTextStyle.captionS.copyWith(color: color, fontWeight: FontWeight.w600)),
-        ],
-      ),
-    );
+  if (difference.inMinutes > 0) {
+    return l10n.customSchedulesMinutesAgo(difference.inMinutes);
   }
+  return l10n.customSchedulesJustNow;
+}
 
-  void _confirmRemoveLesson(String scheduleId, LessonSchedulePart lesson) {
-    showDialog(
-      context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text('Удаление пары'),
-            content: Text('Вы уверены, что хотите удалить пару "${lesson.subject}" из расписания?'),
-            actions: [
-              TextButton(onPressed: () => Navigator.pop(context), child: const Text('Отмена')),
-              FilledButton(
-                style: FilledButton.styleFrom(backgroundColor: Colors.red),
-                onPressed: () {
-                  context.read<ScheduleBloc>().add(
-                    RemoveLessonFromCustomSchedule(scheduleId: scheduleId, lesson: lesson),
-                  );
-                  Navigator.pop(context);
-                },
-                child: const Text('Удалить'),
-              ),
-            ],
-          ),
-    );
-  }
-
-  void _selectCustomSchedule(CustomSchedule schedule) {
-    final bloc = context.read<ScheduleBloc>();
-    bloc.add(SelectCustomSchedule(scheduleId: schedule.id));
-    context.go('/schedule');
-  }
-
-  void _addCustomLesson(String scheduleId) {
-    Navigator.push(context, MaterialPageRoute(builder: (context) => CustomLessonEditorPage(scheduleId: scheduleId)));
-  }
-
-  void _editLesson(String scheduleId, LessonSchedulePart lesson) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => CustomLessonEditorPage(scheduleId: scheduleId, lesson: lesson)),
-    );
-  }
+String _scheduleSubtitle(
+  AppLocalizations l10n,
+  CustomSchedule schedule,
+) {
+  final lessons = l10n.customSchedulesLessonsCount(schedule.lessons.length);
+  final updated = l10n.customSchedulesUpdated(
+    _formatUpdateTime(l10n, schedule.updatedAt),
+  );
+  return '$lessons · $updated';
 }

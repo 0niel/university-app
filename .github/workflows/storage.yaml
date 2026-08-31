@@ -10,11 +10,14 @@ on:
       - "packages/storage/storage/**"
       - ".github/workflows/storage.yaml"
     branches:
-      - main
+      - master
+
+permissions:
+  contents: read
 
 jobs:
   build:
-    uses: VeryGoodOpenSource/very_good_workflows/.github/workflows/dart_package.yml@v1
+    uses: ./.github/workflows/flutter_package.yml
     with:
-      dart_sdk: 3.1.2
+      flutter_version: 3.44.2
       working_directory: packages/storage/storage

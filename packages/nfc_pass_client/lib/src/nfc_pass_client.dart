@@ -3,6 +3,7 @@ import 'dart:developer' as developer;
 import 'dart:typed_data';
 
 import 'package:http/http.dart' as http;
+import 'package:nfc_pass_client/src/nfc_pass_endpoints.dart';
 import 'package:nfc_pass_client/src/protos/human_pass.pb.dart';
 import 'package:random_user_agents/random_user_agents.dart';
 
@@ -12,7 +13,7 @@ import 'package:random_user_agents/random_user_agents.dart';
 typedef CookieProvider = FutureOr<String> Function();
 
 /// {@template nfc_pass_client}
-/// A class that encapsulates  access to gRPC endpoints:
+/// A client that encapsulates access to gRPC endpoints:
 ///  - GetAccessTokenForDigitalPass
 ///  - SendVerificationCode
 ///  - GetDigitalPass
@@ -20,12 +21,16 @@ typedef CookieProvider = FutureOr<String> Function();
 class NfcPassClient {
   /// {@macro nfc_pass_client}
   NfcPassClient({
-    required this.cookieProvider,
+    required CookieProvider cookieProvider,
+    required this.endpoints,
     http.Client? httpClient,
-  }) : httpClient = httpClient ?? http.Client();
+  })  : _onCookieRequested = cookieProvider,
+        httpClient = httpClient ?? http.Client();
 
-  /// {@macro cookie_provider}
-  final CookieProvider cookieProvider;
+  final CookieProvider _onCookieRequested;
+
+  /// Institution-specific gRPC-Web endpoints.
+  final NfcPassEndpoints endpoints;
 
   /// The HTTP client used to send requests.
   final http.Client httpClient;
@@ -33,7 +38,7 @@ class NfcPassClient {
   /// Creates a gRPC-Web frame from the specified protobuf message.
   Uint8List _makeGrpcWebFrame(Uint8List protobufMessage) {
     final header = Uint8List(5);
-    header[0] = 0; // flags
+    header[0] = 0;
     final length = protobufMessage.length;
     header[1] = (length >> 24) & 0xFF;
     header[2] = (length >> 16) & 0xFF;
@@ -44,24 +49,30 @@ class NfcPassClient {
 
   /// Parses the gRPC-Web response.
   Uint8List _parseGrpcWebResponse(Uint8List responseBody) {
-    developer.log(
-      'hex response: ${responseBody.map((e) => e.toRadixString(16).padLeft(2, '0')).join(' ')}',
-    );
+    final responseHex = responseBody
+        .map((byte) => byte.toRadixString(16).padLeft(2, '0'))
+        .join(' ');
+    developer.log('hex response: $responseHex');
 
     if (responseBody.length < 5) {
       throw const FormatException('Слишком короткий ответ, нет gRPC header.');
     }
 
-    final flags = responseBody[0];
+    final [flags, lengthByte1, lengthByte2, lengthByte3, lengthByte4, ...] =
+        responseBody;
     if (flags != 0) {
       throw FormatException('Неподдерживаемые gRPC flags: $flags');
     }
 
-    final length = (responseBody[1] << 24) | (responseBody[2] << 16) | (responseBody[3] << 8) | responseBody[4];
+    final length = (lengthByte1 << 24) |
+        (lengthByte2 << 16) |
+        (lengthByte3 << 8) |
+        lengthByte4;
 
     if (responseBody.length < 5 + length) {
       throw FormatException(
-        'Длина gRPC payload $length не совпадает с фактической ${responseBody.length - 5}',
+        'Длина gRPC payload $length не совпадает с фактической '
+        '${responseBody.length - 5}',
       );
     }
 
@@ -69,7 +80,8 @@ class NfcPassClient {
 
     if (responseBody.length > 5 + length) {
       developer.log(
-        'Внимание: Дополнительные байты в ответе: ${responseBody.length - (5 + length)}',
+        'Внимание: Дополнительные байты в ответе: '
+        '${responseBody.length - (5 + length)}',
       );
     }
 
@@ -80,7 +92,7 @@ class NfcPassClient {
   Future<Uint8List> _sendGrpcWebRequest({
     required String url,
     required Uint8List protobufMessage,
-    Map<String, String>? headers,
+    Map<String, String> headers = const {},
   }) async {
     final frame = _makeGrpcWebFrame(protobufMessage);
     final ua = RandomUserAgents.random();
@@ -90,7 +102,7 @@ class NfcPassClient {
         'Content-Type': 'application/grpc-web+proto',
         'x-grpc-web': '1',
         'User-Agent': ua,
-        if (headers != null) ...headers,
+        ...headers,
       },
       body: frame,
     );
@@ -109,14 +121,12 @@ class NfcPassClient {
   ///
   /// This token is used to authenticate subsequent requests.
   Future<String> getAccessTokenForDigitalPass() async {
-    final cookie = await cookieProvider();
-    const url = 'https://attendance.mirea.ru/rtu.pulse_app.LongTimeTokenService/GetAccessTokenForDigitalPass';
-
+    final cookie = await _onCookieRequested();
     final request = GetAccessTokenForDigitalPassRequest();
     final protobufBytes = request.writeToBuffer();
 
     final responseBytes = await _sendGrpcWebRequest(
-      url: url,
+      url: endpoints.accessTokenUrl.toString(),
       protobufMessage: protobufBytes,
       headers: {
         'Cookie': '.AspNetCore.Cookies=$cookie',
@@ -131,14 +141,12 @@ class NfcPassClient {
 
   /// Sending a verification code to the user's email.
   Future<void> sendVerificationCode(String bearerToken) async {
-    final cookie = await cookieProvider();
-    const url = 'https://attendance.mirea.ru/rtu_tc.rtu_attend.humanpass.HumanPassService/SendVerificationCode';
-
+    final cookie = await _onCookieRequested();
     final request = SendVerificationCodeRequest();
     final protobufBytes = request.writeToBuffer();
 
     await _sendGrpcWebRequest(
-      url: url,
+      url: endpoints.sendVerificationCodeUrl.toString(),
       protobufMessage: protobufBytes,
       headers: {
         'Authorization': 'Bearer $bearerToken',
@@ -155,16 +163,14 @@ class NfcPassClient {
     required String sixDigitCode,
     required String deviceName,
   }) async {
-    final cookie = await cookieProvider();
-    const url = 'https://attendance.mirea.ru/rtu_tc.rtu_attend.humanpass.HumanPassService/GetDigitalPass';
-
+    final cookie = await _onCookieRequested();
     final request = GetDigitalPassRequest()
       ..code = sixDigitCode
       ..deviceInfo = (DeviceInfo()..deviceName = deviceName);
     final protobufBytes = request.writeToBuffer();
 
     final responseBytes = await _sendGrpcWebRequest(
-      url: url,
+      url: endpoints.getDigitalPassUrl.toString(),
       protobufMessage: protobufBytes,
       headers: {
         'Authorization': 'Bearer $bearerToken',

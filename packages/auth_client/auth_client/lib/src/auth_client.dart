@@ -1,59 +1,8 @@
-import 'dart:async';
+import 'package:auth_client/src/authentication_exception.dart';
+import 'package:auth_client/src/models/authentication_user.dart';
 
-import 'package:auth_client/auth_client.dart';
+export 'authentication_exception.dart';
 
-/// {@template authentication_exception}
-/// Exceptions from the authentication client.
-/// {@endtemplate}
-abstract class AuthenticationException implements Exception {
-  /// {@macro authentication_exception}
-  const AuthenticationException(this.error);
-
-  /// The error which was caught.
-  final Object error;
-}
-
-/// {@template send_login_email_link_failure}
-/// Thrown during the sending login email link process if a failure occurs.
-/// {@endtemplate}
-class SendLoginEmailLinkFailure extends AuthenticationException {
-  /// {@macro send_login_email_link_failure}
-  const SendLoginEmailLinkFailure(super.error);
-}
-
-/// {@template is_log_in_email_link_failure}
-/// Thrown during the validation of the email link process if a failure occurs.
-/// {@endtemplate}
-class IsLogInWithEmailLinkFailure extends AuthenticationException {
-  /// {@macro is_log_in_email_link_failure}
-  const IsLogInWithEmailLinkFailure(super.error);
-}
-
-/// {@template log_in_with_email_link_failure}
-/// Thrown during the sign in with email link process if a failure occurs.
-/// {@endtemplate}
-class LogInWithEmailLinkFailure extends AuthenticationException {
-  /// {@macro log_in_with_email_link_failure}
-  const LogInWithEmailLinkFailure(super.error);
-}
-
-/// {@template log_out_failure}
-/// Thrown during the logout process if a failure occurs.
-/// {@endtemplate}
-class LogOutFailure extends AuthenticationException {
-  /// {@macro log_out_failure}
-  const LogOutFailure(super.error);
-}
-
-/// {@template delete_account_failure}
-/// Thrown during the delete account process if a failure occurs.
-/// {@endtemplate}
-class DeleteAccountFailure extends AuthenticationException {
-  /// {@macro delete_account_failure}
-  const DeleteAccountFailure(super.error);
-}
-
-/// A generic Authentication Client Interface.
 abstract class AuthenticationClient {
   /// Stream of [AuthenticationUser] which will emit the current user when
   /// the authentication state changes.
@@ -75,9 +24,7 @@ abstract class AuthenticationClient {
   /// Checks if an incoming [emailLink] is a sign-in with email link.
   ///
   /// Throws a [IsLogInWithEmailLinkFailure] if an exception occurs.
-  bool isLogInWithEmailLink({
-    required String emailLink,
-  });
+  bool isLogInWithEmailLink({required String emailLink});
 
   /// Signs in with the provided [email] and [emailLink].
   ///
@@ -85,6 +32,56 @@ abstract class AuthenticationClient {
   Future<void> logInWithEmailLink({
     required String email,
     required String emailLink,
+  });
+
+  /// Signs in with the provided [email] and one-time [code] from email.
+  ///
+  /// Throws a [LogInWithEmailLinkFailure] if an exception occurs.
+  Future<void> logInWithEmailCode({
+    required String email,
+    required String code,
+  });
+
+  /// Signs in with the provided [email] and [password].
+  ///
+  /// Throws a [LogInWithPasswordFailure] if an exception occurs.
+  Future<void> logInWithPassword({
+    required String email,
+    required String password,
+  });
+
+  /// Registers a new account with the provided [email] and [password].
+  ///
+  /// Depending on the project's confirmation settings the user may need to
+  /// confirm their email (via link or [logInWithEmailCode]) before a session
+  /// is established.
+  ///
+  /// Throws a [SignUpFailure] if an exception occurs.
+  Future<void> signUp({
+    required String email,
+    required String password,
+  });
+
+  /// Signs in as an anonymous (guest) user, creating a temporary session that
+  /// is not tied to any email.
+  ///
+  /// Throws a [SignInAnonymouslyFailure] if an exception occurs.
+  Future<void> signInAnonymously();
+
+  /// Sends a password reset email containing a one-time code to the provided
+  /// [email].
+  ///
+  /// Throws a [SendPasswordResetEmailFailure] if an exception occurs.
+  Future<void> sendPasswordResetEmail({required String email});
+
+  /// Confirms a password reset using the one-time [code] sent to [email] and
+  /// sets the [newPassword].
+  ///
+  /// Throws a [ResetPasswordFailure] if an exception occurs.
+  Future<void> resetPassword({
+    required String email,
+    required String code,
+    required String newPassword,
   });
 
   /// Signs out the current user which will emit

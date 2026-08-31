@@ -7,14 +7,15 @@ environment:
   flutter: ^3.24.0
 resolution: workspace
 dependencies:
+  equatable: ^2.0.7
+  flutter:
+    sdk: flutter
+  http: ^1.6.0
   nfc_pass_client: any
   storage: any
   web_oauth_interceptor_client: any
-  flutter:
-    sdk: flutter
-  equatable: ^2.0.7
 dev_dependencies:
   flutter_test:
     sdk: flutter
   mocktail: ^1.0.4
-  very_good_analysis: ^10.1.0
+  very_good_analysis: 10.3.0

@@ -1,13 +1,13 @@
-import 'package:equatable/equatable.dart';
-import 'package:rtu_mirea_app/map/models/models.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:rtu_mirea_app/map/models/floor_model.dart';
 
-class CampusModel extends Equatable {
-  final String id;
-  final String displayName;
-  final List<FloorModel> floors;
+part 'campus_model.freezed.dart';
 
-  const CampusModel({required this.id, required this.displayName, required this.floors});
-
-  @override
-  List<Object?> get props => [id, displayName, floors];
+@freezed
+abstract class CampusModel with _$CampusModel {
+  const factory CampusModel({
+    required String id,
+    required String displayName,
+    required List<FloorModel> floors,
+  }) = _CampusModel;
 }

@@ -1,0 +1,10 @@
+include: ../../analysis_options.yaml
+
+dcm:
+  rules:
+    - prefer-match-file-name:
+        exclude:
+          - test/**
+    - prefer-shorthands-with-enums:
+        exclude:
+          - lib/src/local_auth_client.dart

@@ -1,3 +1,9 @@
-export 'view/profile_page.dart';
+export 'cubit/ninja_path_cubit.dart';
+export 'cubit/profile_cubit.dart';
 export 'view/about_app_page.dart';
+export 'view/account_management_page.dart';
+export 'view/ninja_path_page.dart';
+export 'view/notifications_settings_page.dart';
+export 'view/profile_page.dart';
+export 'view/profile_settings_page.dart';
 export 'widgets/widgets.dart';

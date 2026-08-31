@@ -19,20 +19,22 @@ class SectionHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).extension<AppColors>()!;
+    final colors = Theme.of(context).colors;
     final title = Text(
       block.title,
-      style: AppTextStyle.titleM.copyWith(color: colors.active),
+      style: AppText.heading.copyWith(color: colors.active),
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
     );
     final action = block.action;
-    final trailing = action != null
-        ? IconButton(
-            icon: Icon(Icons.chevron_right, color: colors.deactive),
-            onPressed: () => onPressed?.call(action),
-          )
-        : null;
+    final trailing =
+        action != null
+            ? AppIconButton(
+              icon: const Icon(Icons.chevron_right),
+              foregroundColor: colors.deactive,
+              onPressed: () => onPressed?.call(action),
+            )
+            : null;
 
     return ListTile(
       title: title,

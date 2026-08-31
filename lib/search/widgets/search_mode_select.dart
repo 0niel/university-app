@@ -1,8 +1,9 @@
+import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:app_ui/app_ui.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:rtu_mirea_app/search/search.dart';
+import 'package:rtu_mirea_app/search/widgets/search_scope_chip.dart';
 
 class SearchModeSelect extends StatelessWidget {
   const SearchModeSelect({super.key});
@@ -10,69 +11,37 @@ class SearchModeSelect extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<SearchBloc, SearchState>(
+      buildWhen: (prev, curr) => prev.searchMode != curr.searchMode,
       builder: (context, state) {
-        final tabs = [
-          context.l10n.all,
-          context.l10n.groups,
-          context.l10n.teachers,
-          context.l10n.classrooms,
-        ];
-        final selectedIndex = SearchMode.values.indexOf(state.searchMode);
-
-        final icons = <Widget?>[
-          null,
-          _buildIcon(
-            context,
-            Assets.icons.hugeicons.userGroup,
-            selectedIndex == 1,
-          ),
-          _buildIcon(
-            context,
-            Assets.icons.hugeicons.teaching,
-            selectedIndex == 2,
-          ),
-          _buildIcon(
-            context,
-            Assets.icons.hugeicons.building06,
-            selectedIndex == 3,
-          ),
+        final l10n = context.l10n;
+        final scopes = [
+          (SearchMode.all, l10n.searchScopeAll),
+          (SearchMode.schedule, l10n.searchScopeClasses),
+          (SearchMode.people, l10n.peopleTitle),
+          (SearchMode.community, l10n.searchScopeCommunity),
+          (SearchMode.classrooms, l10n.searchScopeClassrooms),
         ];
 
-        return Padding(
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          child: CategoryAnimatedTabBar(
-            tabs: tabs,
-            icons: icons,
-            selectedIndex: selectedIndex,
-            height: 40,
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            onTap: (index) {
-              final mode = SearchMode.values[index];
-              context.read<SearchBloc>().add(
-                ChangeSearchMode(searchMode: mode),
-              );
-            },
+        return SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          padding: const EdgeInsets.symmetric(
+            horizontal: NinjaMetrics.screenPadding,
+          ),
+          child: Row(
+            spacing: AppSpacing.sm,
+            children: [
+              for (final scope in scopes)
+                SearchScopeChip(
+                  label: scope.$2,
+                  selected: state.searchMode == scope.$1,
+                  onTap: () => context.read<SearchBloc>().add(
+                    SearchModeChanged(searchMode: scope.$1),
+                  ),
+                ),
+            ],
           ),
         );
       },
     );
-  }
-
-  Widget _buildIcon(BuildContext context, dynamic iconAsset, bool isActive) {
-    return SizedBox(
-      width: 16,
-      height: 16,
-      child: iconAsset.svg(
-        color: _getIconColor(context, isActive),
-        width: 16.0,
-        height: 16.0,
-      ),
-    );
-  }
-
-  Color _getIconColor(BuildContext context, bool isActive) {
-    return isActive
-        ? Theme.of(context).extension<AppColors>()!.active
-        : Theme.of(context).extension<AppColors>()!.deactive;
   }
 }

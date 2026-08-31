@@ -1,134 +1,237 @@
-name: Shorebird Master Push Workflow
+name: CI
 
-env:
-  SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
-  MAPKIT_API_KEY: ${{ secrets.MAPKIT_API_KEY }}
-  SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  build_and_release:
-    name: Build & Release for Android/iOS with Shorebird
-    runs-on: macos-latest
+  flutter:
+    name: Flutter
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
 
     steps:
-      - name: 📚 Checkout Repository
-        uses: actions/checkout@v3
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
-          submodules: 'recursive'
-          fetch-depth: 0     
+          fetch-depth: 0
+          persist-credentials: false
 
-      - name: ♻️ Cache Flutter Pub
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/.pub-cache
-            build/
-          # Ключ кэша основан на ОС и файле pubspec.lock
-          key: ${{ runner.os }}-pub-cache-${{ hashFiles('pubspec.lock') }}
-
-      - name: 🚀 Setup Flutter
-        uses: subosito/flutter-action@v2
+      - name: Set up Flutter
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
         with:
           channel: stable
+          flutter-version-file: .fvmrc
+          cache: true
 
-      - name: 📦 Flutter Pub Get
+      - name: Verify private native boundary
+        run: dart tool/verify_private_native_boundary.dart --history
+
+      - name: Install dependencies
         run: flutter pub get
 
+      - name: Install Wear dependencies
+        working-directory: wear
+        run: flutter pub get
 
-      - name: 🛠️ Generate Build Runner (env.g.dart)
-        run: flutter pub run build_runner build --delete-conflicting-outputs
+      - name: Generate code
+        run: dart run build_runner build
 
-      - name: 🔄 Bump Version in pubspec.yaml
-        id: bump_version
-        run: |
-          CURRENT_VERSION_LINE=$(grep '^version:' pubspec.yaml)
-          CURRENT_VERSION=$(echo "$CURRENT_VERSION_LINE" | awk '{print $2}')  # "1.2.3+4"
+      - name: Analyze
+        run: dart analyze --fatal-warnings
 
-          echo "Current pubspec version: $CURRENT_VERSION"
+      - name: Test
+        run: flutter test
 
-          IFS='+' read -r SEMVER BUILD_NUMBER <<< "$CURRENT_VERSION"
+  wear:
+    name: Wear
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: wear
 
-          NEW_BUILD_NUMBER=$((BUILD_NUMBER + 1))
-          NEW_VERSION="$SEMVER+$NEW_BUILD_NUMBER"
-
-          echo "Updated pubspec version: $NEW_VERSION"
-
-          sed -i.bak "s/^version: .*/version: $NEW_VERSION/" pubspec.yaml
-
-          echo "VERSION=$NEW_VERSION" >> $GITHUB_ENV
-
-      - name: 📝 Commit and Push Version
-        run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-
-          git add pubspec.yaml
-          git commit -m "chore: bump version to ${{ env.VERSION }} [skip ci]" || echo "No changes to commit."
-          git push origin master || echo "No push required."
-
-      - name: 🐦 Setup Shorebird
-        uses: shorebirdtech/setup-shorebird@v1
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
-          cache: true  # Опционально, чтобы быстрее повторно ставить CLI
+          persist-credentials: false
 
-      - name: 🛠️ Build Android
-        run: flutter build apk --release
-      
-      - name: 🛠️ Build iOS
-        run: flutter build ios --release --no-codesign
-
-      - name: 🛠️ Shorebird Patch (Android)
-        id: shorebird-patch-android
-        uses: shorebirdtech/shorebird-patch@v0
+      - name: Set up Flutter
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
         with:
-          platform: android
+          channel: stable
+          flutter-version-file: .fvmrc
+          cache: true
 
-      - name: 🛠️ Shorebird Patch (iOS)
-        id: shorebird-patch-ios
-        uses: shorebirdtech/shorebird-patch@v0
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Analyze
+        run: dart analyze --fatal-warnings
+
+      - name: Test
+        run: flutter test
+
+  content-fetcher:
+    name: Content fetcher
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: tools/social_media_fetcher
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
-          platform: ios
+          persist-credentials: false
 
-      - name: 📝 Print Patch Numbers
-        run: |
-          echo "Android Patch Number: ${{ steps.shorebird-patch-android.outputs.patch-number }}"
-          echo "iOS Patch Number: ${{ steps.shorebird-patch-ios.outputs.patch-number }}"
-
-      - name: 🔖 Create GitHub Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Set up Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
         with:
-          tag_name: v${{ env.VERSION }}
-          release_name: "Release ${{ env.VERSION }}"
-          body: |
-            **Android Patch Number**: ${{ steps.shorebird-patch-android.outputs.patch-number }}
-            **iOS Patch Number**: ${{ steps.shorebird-patch-ios.outputs.patch-number }}
-          draft: false
-          prerelease: false
+          python-version: "3.12"
 
-      - name: 📦 Upload Android APK
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Set up uv
+        uses: astral-sh/setup-uv@11f9893b081a58869d3b5fccaea48c9e9e46f990 # v8.3.2
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: build/app/outputs/flutter-apk/app-release.apk
-          asset_name: "myapp-${{ env.VERSION }}-release.apk"
-          asset_content_type: application/vnd.android.package-archive
+          enable-cache: true
+          cache-dependency-glob: tools/social_media_fetcher/uv.lock
 
-      - name: 📦 Zip iOS .app
-        run: |
-          cd build/ios/iphoneos
-          zip -r Runner.app.zip Runner.app
+      - name: Install dependencies
+        run: uv sync --locked
 
-      - name: 📦 Upload iOS .app
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Check formatting
+        run: uv run ruff format --check .
+
+      - name: Lint
+        run: uv run ruff check .
+
+      - name: Test
+        run: uv run pytest
+
+  workspace-packages:
+    name: Package ${{ matrix.package }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - package: discourse_api_client
+            codegen: true
+            test-command: dart test
+          - package: campus_repository
+            codegen: false
+            test-command: flutter test
+          - package: news_repository
+            codegen: true
+            test-command: dart test
+          - package: study_groups_repository
+            codegen: true
+            test-command: dart test
+          - package: news_blocks_ui
+            codegen: false
+            test-command: flutter test
+          - package: web_oauth_interceptor_client
+            codegen: false
+            test-command: flutter test
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: build/ios/iphoneos/Runner.app.zip
-          asset_name: "myapp-${{ env.VERSION }}-ios.zip"
-          asset_content_type: application/zip
+          persist-credentials: false
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
+        with:
+          channel: stable
+          flutter-version-file: .fvmrc
+          cache: true
+
+      - name: Install workspace dependencies
+        run: flutter pub get
+
+      - name: Generate package code
+        if: matrix.codegen
+        working-directory: packages/${{ matrix.package }}
+        run: dart run build_runner build
+
+      - name: Test package
+        working-directory: packages/${{ matrix.package }}
+        run: ${{ matrix.test-command }}
+
+  edge-functions:
+    name: Edge Functions
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+
+      - name: Set up Deno
+        uses: denoland/setup-deno@22d081ff2d3a40755e97629de92e3bcbfa7cf2ed # v2.0.5
+        with:
+          deno-version: lts
+          cache: true
+
+      - name: Check formatting
+        run: deno fmt --check supabase/functions/ingest
+
+      - name: Type-check
+        run: >-
+          deno check --frozen --config=supabase/functions/deno.json
+          supabase/functions/ingest/index.ts
+
+      - name: Lint
+        run: deno lint supabase/functions/ingest
+
+      - name: Test
+        run: >-
+          deno test --frozen --config=supabase/functions/deno.json
+          supabase/functions/ingest
+
+  supabase-migrations:
+    name: Supabase migration replay
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+
+      - name: Set up Supabase CLI
+        uses: supabase/setup-cli@46f7f98c7f948ad727d22c1e67fab04c223a0520 # v3.0.0
+        with:
+          version: latest
+
+      - name: Start local Supabase
+        run: supabase start
+
+      - name: Replay migrations
+        run: supabase db reset
+
+      - name: Verify database security contracts
+        run: >-
+          psql postgresql://postgres:postgres@127.0.0.1:54322/postgres
+          --set ON_ERROR_STOP=1
+          --file supabase/tests/security_regressions_contract.sql
+
+      - name: Lint database
+        run: supabase db lint --local --level warning

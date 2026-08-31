@@ -6,26 +6,26 @@ part of 'feed_bloc.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-FeedState _$FeedStateFromJson(Map<String, dynamic> json) => FeedState(
-      status: $enumDecode(_$FeedStatusEnumMap, json['status']),
-      feed: (json['feed'] as Map<String, dynamic>?)?.map(
-            (k, e) => MapEntry(
-                k,
-                (e as List<dynamic>)
-                    .map((e) => NewsBlock.fromJson(e as Map<String, dynamic>))
-                    .toList()),
-          ) ??
-          const {},
-      hasMoreNews: (json['hasMoreNews'] as Map<String, dynamic>?)?.map(
-            (k, e) => MapEntry(k, e as bool),
-          ) ??
-          const {},
-    );
+_FeedState _$FeedStateFromJson(Map<String, dynamic> json) => _FeedState(
+  status:
+      $enumDecodeNullable(_$FeedStatusEnumMap, json['status']) ??
+      FeedStatus.initial,
+  feed: json['feed'] == null
+      ? const <String, List<NewsBlock>>{}
+      : const NewsBlockMapConverter().fromJson(
+          json['feed'] as Map<String, dynamic>,
+        ),
+  hasMoreNews:
+      (json['hasMoreNews'] as Map<String, dynamic>?)?.map(
+        (k, e) => MapEntry(k, e as bool),
+      ) ??
+      const <String, bool>{},
+);
 
-Map<String, dynamic> _$FeedStateToJson(FeedState instance) => <String, dynamic>{
+Map<String, dynamic> _$FeedStateToJson(_FeedState instance) =>
+    <String, dynamic>{
       'status': _$FeedStatusEnumMap[instance.status]!,
-      'feed': instance.feed
-          .map((k, e) => MapEntry(k, e.map((e) => e.toJson()).toList())),
+      'feed': const NewsBlockMapConverter().toJson(instance.feed),
       'hasMoreNews': instance.hasMoreNews,
     };
 

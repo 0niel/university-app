@@ -1,102 +1,16 @@
+import 'dart:developer';
+
+import 'package:article_repository/src/article_failure.dart';
+import 'package:article_repository/src/article_models.dart';
 import 'package:clock/clock.dart';
-import 'package:equatable/equatable.dart';
+import 'package:news_blocks/news_blocks.dart' as nb;
+import 'package:news_repository/news_repository.dart' as news;
 import 'package:storage/storage.dart';
-import 'package:university_app_server_api/client.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 part 'article_storage.dart';
 
-/// {@template article_failure}
-/// A base failure for the article repository failures.
-/// {@endtemplate}
-abstract class ArticleFailure with EquatableMixin implements Exception {
-  /// {@macro article_failure}
-  const ArticleFailure(this.error);
-
-  /// The error which was caught.
-  final Object error;
-
-  @override
-  List<Object> get props => [error];
-}
-
-/// {@template get_article_failure}
-/// Thrown when fetching an article fails.
-/// {@endtemplate}
-class GetArticleFailure extends ArticleFailure {
-  /// {@macro get_article_failure}
-  const GetArticleFailure(super.error);
-}
-
-/// {@template get_related_articles_failure}
-/// Thrown when fetching related articles fails.
-/// {@endtemplate}
-class GetRelatedArticlesFailure extends ArticleFailure {
-  /// {@macro get_related_articles_failure}
-  const GetRelatedArticlesFailure(super.error);
-}
-
-/// {@template increment_article_views_failure}
-/// Thrown when incrementing article views fails.
-/// {@endtemplate}
-class IncrementArticleViewsFailure extends ArticleFailure {
-  /// {@macro increment_article_views_failure}
-  const IncrementArticleViewsFailure(super.error);
-}
-
-/// {@template decrement_article_views_failure}
-/// Thrown when decrementing article views fails.
-/// {@endtemplate}
-class DecrementArticleViewsFailure extends ArticleFailure {
-  /// {@macro decrement_article_views_failure}
-  const DecrementArticleViewsFailure(super.error);
-}
-
-/// {@template reset_article_views_failure}
-/// Thrown when resetting article views fails.
-/// {@endtemplate}
-class ResetArticleViewsFailure extends ArticleFailure {
-  /// {@macro reset_article_views_failure}
-  const ResetArticleViewsFailure(super.error);
-}
-
-/// {@template fetch_article_views_failure}
-/// Thrown when fetching article views fails.
-/// {@endtemplate}
-class FetchArticleViewsFailure extends ArticleFailure {
-  /// {@macro fetch_article_views_failure}
-  const FetchArticleViewsFailure(super.error);
-}
-
-/// {@template increment_total_article_views_failure}
-/// Thrown when incrementing total article views fails.
-/// {@endtemplate}
-class IncrementTotalArticleViewsFailure extends ArticleFailure {
-  /// {@macro increment_total_article_views_failure}
-  const IncrementTotalArticleViewsFailure(super.error);
-}
-
-/// {@template fetch_total_article_views_failure}
-/// Thrown when fetching total article views fails.
-/// {@endtemplate}
-class FetchTotalArticleViewsFailure extends ArticleFailure {
-  /// {@macro fetch_total_article_views_failure}
-  const FetchTotalArticleViewsFailure(super.error);
-}
-
-/// {@template article_views}
-/// Represents the number of article views and the date
-/// when the number of article views was last reset.
-/// {@endtemplate}
-class ArticleViews {
-  /// {@macro article_views}
-  ArticleViews(this.views, this.resetAt);
-
-  /// The number of article views.
-  final int views;
-
-  /// The date when the number of article views was last reset.
-  final DateTime? resetAt;
-}
+typedef JsonMap = Map<String, Object?>;
 
 /// {@template article_repository}
 /// A repository that manages article data.
@@ -104,29 +18,78 @@ class ArticleViews {
 class ArticleRepository {
   /// {@macro article_repository}
   const ArticleRepository({
-    required ApiClient apiClient,
+    required SupabaseClient supabase,
+    required String organizationId,
     required ArticleStorage storage,
-  })  : _apiClient = apiClient,
-        _storage = storage;
+  }) : _supabase = supabase,
+       _organizationId = organizationId,
+       _storage = storage;
 
-  final ApiClient _apiClient;
+  final SupabaseClient _supabase;
+  final String _organizationId;
   final ArticleStorage _storage;
 
-  /// Requests article content metadata.
-  ///
-  /// Supported parameters:
-  /// * [id] - Article id for which content is requested.
-  /// * [limit] - The number of results to return.
-  /// * [offset] - The (zero-based) offset of the first item
-  /// in the collection to return.
+  /// Loads article content by ID.
   Future<ArticleResponse> getArticle({
     required String id,
-    int? limit,
-    int? offset,
   }) async {
     try {
-      return await _apiClient.getArticle(id: id, limit: limit, offset: offset);
+      final res = await _supabase.rpc<Object?>(
+        'get_news_article',
+        params: {'p_id': id, 'p_organization_id': _organizationId},
+      );
+      final row = _asJsonMap(res);
+
+      final blocks = <nb.NewsBlock>[];
+      final rawBlocks = row['newsBlocks'];
+      if (rawBlocks is List) {
+        for (final raw in rawBlocks.whereType<Map<Object?, Object?>>()) {
+          try {
+            final block = nb.NewsBlock.fromJson(_toLegacyJson(_asJsonMap(raw)));
+            if (block is! nb.UnknownBlock) blocks.add(block);
+          } on Object catch (e, st) {
+            // Broad on purpose: a single malformed block (bad JSON shape) can
+            // throw TypeError — skip it and keep the rest of the article.
+            log(
+              'Skipping malformed news block',
+              error: e,
+              stackTrace: st,
+              name: 'ArticleRepository',
+            );
+          }
+        }
+      }
+
+      final hasIntroductionBlock = switch (blocks) {
+        [nb.ArticleIntroductionBlock() || nb.VideoIntroductionBlock(), ...] =>
+          true,
+        _ => false,
+      };
+      if (!hasIntroductionBlock) {
+        blocks.insert(
+          0,
+          nb.ArticleIntroductionBlock(
+            categoryId: news.newsCategoryKey(
+              row['sourceType'] as String?,
+              row['sourceId'] as String?,
+            ),
+            author: row['sourceName'] as String? ?? '',
+            publishedAt:
+                DateTime.tryParse(row['publishedAt'] as String? ?? '') ??
+                DateTime.now(),
+            title: row['title'] as String? ?? '',
+          ),
+        );
+      }
+
+      return ArticleResponse(
+        title: row['title'] as String? ?? '',
+        content: blocks,
+        url: Uri.tryParse(row['originalUrl'] as String? ?? '') ?? Uri(),
+      );
     } catch (error, stackTrace) {
+      // Broad on purpose: dynamic RPC payload casts can throw TypeError, not
+      // just Exception — wrap everything into the domain failure.
       Error.throwWithStackTrace(GetArticleFailure(error), stackTrace);
     }
   }
@@ -144,14 +107,59 @@ class ArticleRepository {
     int? offset,
   }) async {
     try {
-      return await _apiClient.getRelatedArticles(
-        id: id,
-        limit: limit,
-        offset: offset,
+      final res = await _supabase.rpc<Object?>(
+        'get_news_feed',
+        params: {
+          'p_organization_id': _organizationId,
+          'p_category': '',
+          'p_limit': 100,
+          'p_offset': 0,
+        },
+      );
+      final rows =
+          res is List
+              ? res.whereType<Map<Object?, Object?>>().map(_asJsonMap).toList()
+              : <JsonMap>[];
+      final base = rows.where((r) => r['id'] == id).firstOrNull;
+      if (base == null) {
+        return const RelatedArticlesResponse(
+          relatedArticles: [],
+          totalCount: 0,
+        );
+      }
+      final related =
+          rows
+              .where((r) => r['id'] != id && _areRelated(base, r))
+              .skip(offset ?? 0)
+              .take(limit ?? 20)
+              .toList();
+      final blocks = <nb.NewsBlock>[
+        for (final (i, row) in related.indexed)
+          news.mapNewsFeedItem(
+            news.NewsFeedItem.fromJson(_toLegacyJson(row)),
+            i + 1,
+          ),
+      ];
+      return RelatedArticlesResponse(
+        relatedArticles: blocks,
+        totalCount: blocks.length,
       );
     } catch (error, stackTrace) {
+      // Broad on purpose: dynamic RPC payload casts can throw TypeError, not
+      // just Exception — wrap everything into the domain failure.
       Error.throwWithStackTrace(GetRelatedArticlesFailure(error), stackTrace);
     }
+  }
+
+  static bool _areRelated(JsonMap a, JsonMap b) {
+    if (a['sourceType'] == b['sourceType']) return true;
+    Set<String> words(JsonMap row) =>
+        (row['title'] as String? ?? '')
+            .toLowerCase()
+            .split(RegExp(r'\s+'))
+            .where((w) => w.length > 3)
+            .toSet();
+    return words(a).intersection(words(b)).length >= 2;
   }
 
   /// Increments the number of article views by 1.
@@ -160,6 +168,8 @@ class ArticleRepository {
       final currentArticleViews = await _storage.fetchArticleViews();
       await _storage.setArticleViews(currentArticleViews + 1);
     } catch (error, stackTrace) {
+      // Broad on purpose: storage may surface non-Exception errors on corrupt
+      // data — wrap everything into the domain failure (failure pattern).
       Error.throwWithStackTrace(
         IncrementArticleViewsFailure(error),
         stackTrace,
@@ -173,6 +183,8 @@ class ArticleRepository {
       final currentArticleViews = await _storage.fetchArticleViews();
       await _storage.setArticleViews(currentArticleViews - 1);
     } catch (error, stackTrace) {
+      // Broad on purpose: storage may surface non-Exception errors on corrupt
+      // data — wrap everything into the domain failure (failure pattern).
       Error.throwWithStackTrace(
         DecrementArticleViewsFailure(error),
         stackTrace,
@@ -188,6 +200,8 @@ class ArticleRepository {
         _storage.setArticleViewsResetDate(clock.now()),
       ]);
     } catch (error, stackTrace) {
+      // Broad on purpose: storage may surface non-Exception errors on corrupt
+      // data — wrap everything into the domain failure (failure pattern).
       Error.throwWithStackTrace(ResetArticleViewsFailure(error), stackTrace);
     }
   }
@@ -201,8 +215,10 @@ class ArticleRepository {
         (() async => views = await _storage.fetchArticleViews())(),
         (() async => resetAt = await _storage.fetchArticleViewsResetDate())(),
       ]);
-      return ArticleViews(views, resetAt);
+      return ArticleViews(views: views, resetAt: resetAt);
     } catch (error, stackTrace) {
+      // Broad on purpose: storage may surface non-Exception errors on corrupt
+      // data — wrap everything into the domain failure (failure pattern).
       Error.throwWithStackTrace(FetchArticleViewsFailure(error), stackTrace);
     }
   }
@@ -213,6 +229,8 @@ class ArticleRepository {
       final totalArticleViews = await _storage.fetchTotalArticleViews();
       await _storage.setTotalArticleViews(totalArticleViews + 1);
     } catch (error, stackTrace) {
+      // Broad on purpose: storage may surface non-Exception errors on corrupt
+      // data — wrap everything into the domain failure (failure pattern).
       Error.throwWithStackTrace(
         IncrementTotalArticleViewsFailure(error),
         stackTrace,
@@ -225,6 +243,8 @@ class ArticleRepository {
     try {
       return await _storage.fetchTotalArticleViews();
     } catch (error, stackTrace) {
+      // Broad on purpose: storage may surface non-Exception errors on corrupt
+      // data — wrap everything into the domain failure (failure pattern).
       Error.throwWithStackTrace(
         FetchTotalArticleViewsFailure(error),
         stackTrace,
@@ -232,3 +252,19 @@ class ArticleRepository {
     }
   }
 }
+
+JsonMap _asJsonMap(Object? value) {
+  if (value is! Map<Object?, Object?>) {
+    throw FormatException(
+      'Expected a JSON object, received ${value.runtimeType}',
+    );
+  }
+  return {
+    for (final entry in value.entries)
+      if (entry.key case final String key) key: entry.value,
+  };
+}
+
+// The news packages retain json_serializable's legacy
+// `Map<String, dynamic>` API.
+Map<String, dynamic> _toLegacyJson(JsonMap value) => Map.from(value);

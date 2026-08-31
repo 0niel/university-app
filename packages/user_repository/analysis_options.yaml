@@ -1,1 +1,10 @@
-include: package:very_good_analysis/analysis_options.6.0.0.yaml
+include: ../../analysis_options.yaml
+
+dcm:
+  rules:
+    - prefer-match-file-name:
+        exclude:
+          - test/**
+    - no-empty-block:
+        exclude:
+          - test/**

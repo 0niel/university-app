@@ -1,0 +1,72 @@
+name: Flutter package
+
+on:
+  workflow_call:
+    inputs:
+      coverage_excludes:
+        required: false
+        type: string
+        default: ""
+      flutter_version:
+        required: true
+        type: string
+      min_coverage:
+        required: false
+        type: number
+        default: 100
+      working_directory:
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: ${{ inputs.working_directory }}
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
+        with:
+          channel: stable
+          flutter-version: ${{ inputs.flutter_version }}
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Install quality tools
+        run: |
+          flutter pub global activate bloc_tools 0.1.0-dev.24
+          flutter pub global activate very_good_cli 1.1.1
+
+      - name: Check formatting
+        run: dart format --output=none --set-exit-if-changed lib test
+
+      - name: Analyze
+        run: flutter analyze lib test
+
+      - name: Bloc lint
+        run: bloc lint .
+
+      - name: Test
+        run: >-
+          very_good test
+          -j 4
+          --optimization
+          --coverage
+          --min-coverage ${{ inputs.min_coverage }}
+          ${{ inputs.coverage_excludes != '' && format('--exclude-coverage "{0}"', inputs.coverage_excludes) || '' }}
+          --report-on "lib"
+          --show-uncovered
+          --test-randomize-ordering-seed random

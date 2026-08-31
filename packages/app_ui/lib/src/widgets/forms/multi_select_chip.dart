@@ -21,67 +21,55 @@ class MultiSelectChip<T> extends StatelessWidget {
     this.label,
   });
 
-  /// Список всех доступных элементов
   final List<T> items;
 
-  /// Список выбранных элементов
   final List<T> selectedItems;
 
-  /// Вызывается при изменении выбора
-  final Function(List<T>) onSelectionChanged;
+  final void Function(List<T>) onSelectionChanged;
 
-  /// Функция для создания текста чипа
   final String Function(T item) labelBuilder;
 
-  /// Функция для создания цвета чипа (опционально)
   final Color? Function(T item)? chipColorBuilder;
 
-  /// Цвет выбранного чипа
   final Color? selectedColor;
 
-  /// Цвет невыбранного чипа
   final Color? unselectedColor;
 
-  /// Радиус скругления чипов
   final double borderRadius;
 
-  /// Горизонтальный отступ между чипами
   final double spacing;
 
-  /// Вертикальный отступ между строками чипов
   final double runSpacing;
 
-  /// Максимальное количество отображаемых чипов
   final int? maxItems;
 
-  /// Направление списка чипов
   final Axis direction;
 
-  /// Иконка для чипов (опционально)
   final IconData? icon;
 
-  /// Если true, можно выбрать только один элемент
   final bool isSingleSelect;
 
-  /// Заголовок для группы чипов (опционально)
   final String? label;
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).extension<AppColors>()!;
+    final colors = Theme.of(context).colors;
     final defaultSelectedColor = colors.primary;
     final defaultUnselectedColor = colors.background03;
+    final maxItems = this.maxItems;
+    final label = this.label;
 
-    // Применяем ограничение количества элементов, если задано
-    final displayedItems = maxItems != null && items.length > maxItems! ? items.sublist(0, maxItems) : items;
+    final displayedItems = maxItems != null && items.length > maxItems
+        ? items.sublist(0, maxItems)
+        : items;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (label != null) ...[
           Text(
-            label!,
-            style: AppTextStyle.titleS.copyWith(
+            label,
+            style: AppText.bodyStrong.copyWith(
               color: colors.active,
               fontWeight: FontWeight.w600,
             ),
@@ -96,67 +84,78 @@ class MultiSelectChip<T> extends StatelessWidget {
             final isSelected = selectedItems.contains(item);
             final itemColor = chipColorBuilder?.call(item);
 
-            // Для выбранного чипа используем заданный цвет или цвет элемента, или цвет по умолчанию
-            final activeColor = selectedColor ?? itemColor ?? defaultSelectedColor;
-            // Для невыбранного чипа используем заданный цвет или прозрачный фон
+            final activeColor =
+                selectedColor ?? itemColor ?? defaultSelectedColor;
             final inactiveColor = unselectedColor ?? defaultUnselectedColor;
 
-            return ChoiceChip(
-              label: Text(
-                labelBuilder(item),
-                style: AppTextStyle.captionL.copyWith(
-                  color: isSelected ? activeColor : colors.deactive,
-                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                ),
-              ),
-              avatar: icon != null
-                  ? Icon(
-                      icon,
-                      size: 16,
-                      color: isSelected ? activeColor : colors.deactive,
-                    )
-                  : null,
-              selected: isSelected,
-              selectedColor: activeColor.withOpacity(0.15),
-              backgroundColor: inactiveColor.withOpacity(0.1),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(borderRadius),
-                side: BorderSide(
-                  color: isSelected ? activeColor : Colors.transparent,
-                  width: 1.5,
-                ),
-              ),
-              onSelected: (selected) {
-                var newSelectedItems = <T>[...selectedItems];
+            void handleSelected() {
+              final selected = !isSelected;
+              var newSelectedItems = <T>[...selectedItems];
 
-                // Для режима единственного выбора
-                if (isSingleSelect) {
-                  if (selected) {
-                    newSelectedItems = [item];
-                  } else {
-                    newSelectedItems = [];
-                  }
+              if (isSingleSelect) {
+                if (selected) {
+                  newSelectedItems = [item];
                 } else {
-                  // Для множественного выбора
-                  if (selected) {
-                    newSelectedItems.add(item);
-                  } else {
-                    newSelectedItems.remove(item);
-                  }
+                  newSelectedItems = [];
                 }
+              } else {
+                if (selected) {
+                  newSelectedItems.add(item);
+                } else {
+                  newSelectedItems.remove(item);
+                }
+              }
 
-                onSelectionChanged(newSelectedItems);
-              },
+              onSelectionChanged(newSelectedItems);
+            }
+
+            return AppPressable(
+              onTap: handleSelected,
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
+                decoration: BoxDecoration(
+                  color: isSelected
+                      ? activeColor.withValues(alpha: 0.15)
+                      : inactiveColor.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(borderRadius),
+                  border: Border.all(
+                    color: isSelected ? activeColor : Colors.transparent,
+                    width: 1.5,
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (icon != null) ...[
+                      Icon(
+                        icon,
+                        size: 16,
+                        color: isSelected ? activeColor : colors.deactive,
+                      ),
+                      const SizedBox(width: 6),
+                    ],
+                    Text(
+                      labelBuilder(item),
+                      style: AppText.caption.copyWith(
+                        color: isSelected ? activeColor : colors.deactive,
+                        fontWeight:
+                            isSelected ? FontWeight.bold : FontWeight.normal,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             );
           }).toList(),
         ),
-
-        // Показываем "Ещё X элементов" если есть ограничение
-        if (maxItems != null && items.length > maxItems!) ...[
+        if (maxItems != null && items.length > maxItems) ...[
           const SizedBox(height: 8),
           Text(
-            'Ещё ${items.length - maxItems!} элемент(ов)',
-            style: AppTextStyle.captionL.copyWith(
+            'Ещё ${items.length - maxItems} элемент(ов)',
+            style: AppText.caption.copyWith(
               color: colors.deactive,
             ),
           ),

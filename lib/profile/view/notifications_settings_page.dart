@@ -1,10 +1,12 @@
-import 'package:flutter/cupertino.dart';
+import 'dart:async';
+
+import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:rtu_mirea_app/presentation/bloc/notification_preferences/notification_preferences_bloc.dart';
-import 'package:app_ui/app_ui.dart';
-import 'package:rtu_mirea_app/schedule/bloc/schedule_bloc.dart';
-import 'package:rtu_mirea_app/schedule/models/models.dart';
+import 'package:gamification_repository/gamification_repository.dart';
+import 'package:rtu_mirea_app/l10n/l10n.dart';
+import 'package:rtu_mirea_app/profile/cubit/profile_cubit.dart';
+import 'package:rtu_mirea_app/profile/widgets/widgets.dart';
 
 class NotificationsSettingsPage extends StatelessWidget {
   const NotificationsSettingsPage({super.key});
@@ -12,108 +14,146 @@ class NotificationsSettingsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Настройки уведомлений")),
-      body: const SafeArea(child: _NotificationPreferencesView()),
+      backgroundColor: context.ninja.canvas,
+      body: BlocBuilder<ProfileCubit, ProfileState>(
+        builder: _buildBody,
+      ),
     );
   }
-}
 
-class _NotificationPreferencesView extends StatefulWidget {
-  const _NotificationPreferencesView();
+  Widget _buildBody(BuildContext context, ProfileState state) {
+    final colors = context.ninja;
+    final l10n = context.l10n;
+    final settings = state.settings;
+    final isMasterOn = settings.notificationsEnabled;
+    final cold =
+        state.status == ProfileStatus.loading &&
+        state.gamificationProfile.isEmpty;
 
-  @override
-  State<_NotificationPreferencesView> createState() => _NotificationPreferencesViewState();
-}
-
-class _NotificationPreferencesViewState extends State<_NotificationPreferencesView> {
-  String _getDescription(String category) {
-    switch (category) {
-      case 'Объявления':
-        return 'Важные общеуниверситетские объявления';
-      case 'Обновления расписания':
-        return 'Изменения в расписании вашей группы';
-      default:
-        return '';
+    void update(UserSettings next) {
+      unawaited(context.read<ProfileCubit>().updateSettings(next));
     }
-  }
 
-  late final ScheduleBloc _scheduleBloc;
+    ValueChanged<bool>? whenMasterOn(ValueChanged<bool> onChanged) =>
+        isMasterOn ? onChanged : null;
 
-  @override
-  void initState() {
-    super.initState();
-    _scheduleBloc = context.read<ScheduleBloc>();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    String? activeGroup =
-        _scheduleBloc.state.selectedSchedule is SelectedGroupSchedule
-            ? (_scheduleBloc.state.selectedSchedule as SelectedGroupSchedule).group.name
-            : null;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const SizedBox(height: 24),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Text('Категории уведомлений', style: Theme.of(context).textTheme.titleMedium),
-        ),
-        const SizedBox(height: 8),
-        Expanded(
-          child: BlocBuilder<NotificationPreferencesBloc, NotificationPreferencesState>(
-            builder: (context, state) {
-              return ListView(
-                children:
-                    state.categories
-                        .map<Widget>(
-                          (category) => _NotificationsSwitch(
-                            name: category,
-                            description: _getDescription(category),
-                            value: state.selectedCategories.contains(category),
-                            onChanged:
-                                (value) => context.read<NotificationPreferencesBloc>().add(
-                                  CategoriesPreferenceToggled(category: category, group: activeGroup),
-                                ),
-                          ),
-                        )
-                        .toList(),
-              );
-            },
+    return CustomScrollView(
+      physics: const BouncingScrollPhysics(
+        parent: AlwaysScrollableScrollPhysics(),
+      ),
+      slivers: [
+        SliverAppBar(
+          pinned: true,
+          backgroundColor: colors.canvas,
+          surfaceTintColor: Colors.transparent,
+          elevation: 0,
+          scrolledUnderElevation: 0,
+          leadingWidth: 60,
+          leading: Center(
+            child: NinjaIconButton(
+              icon: const AppLineIconWidget(.chevronL, size: 20),
+              tooltip: l10n.back,
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+          ),
+          title: Text(
+            l10n.notifications,
+            style: NinjaText.appBarTitle.copyWith(color: colors.ink),
           ),
         ),
+        if (cold)
+          const SliverToBoxAdapter(child: SettingsSkeleton.notifications())
+        else ...[
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const .fromLTRB(
+                NinjaMetrics.screenPadding,
+                8,
+                NinjaMetrics.screenPadding,
+                6,
+              ),
+              child: Text(
+                l10n.settingsNotificationsPushSub,
+                style: NinjaText.subtext.copyWith(color: colors.mutedDark),
+              ),
+            ),
+          ),
+          SliverList.list(
+            children: [
+              if (state.hasFailed(.settings))
+                SettingsFailureCard(
+                  onRetry: () => unawaited(
+                    context.read<ProfileCubit>().reloadSection(.settings),
+                  ),
+                ),
+              Padding(
+                padding: const .fromLTRB(
+                  NinjaMetrics.screenPadding,
+                  12,
+                  NinjaMetrics.screenPadding,
+                  0,
+                ),
+                child: SettingsCard(
+                  children: [
+                    NotificationsToggleRow(
+                      label: l10n.settingsNotificationsPushTitle,
+                      sub: l10n.settingsNotificationsPushSub,
+                    ),
+                  ],
+                ),
+              ),
+              SettingsSection(
+                label: l10n.settingsNotificationsScheduleSection,
+                children: [
+                  SettingsToggleRow(
+                    label: l10n.settingsNotificationsScheduleTitle,
+                    sub: l10n.settingsNotificationsScheduleSub,
+                    value: settings.scheduleChangeAlerts && isMasterOn,
+                    onChanged: whenMasterOn(
+                      (value) => update(
+                        settings.copyWith(scheduleChangeAlerts: value),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              SettingsSection(
+                label: l10n.settingsNotificationsGamificationSection,
+                children: [
+                  SettingsToggleRow(
+                    label: l10n.settingsNotificationsQuestsTitle,
+                    sub: l10n.settingsNotificationsQuestsSub,
+                    value: settings.questReminders && isMasterOn,
+                    onChanged: whenMasterOn(
+                      (value) =>
+                          update(settings.copyWith(questReminders: value)),
+                    ),
+                  ),
+                  SettingsToggleRow(
+                    label: l10n.settingsNotificationsAchievementsTitle,
+                    sub: l10n.settingsNotificationsAchievementsSub,
+                    value: settings.achievementAlerts && isMasterOn,
+                    onChanged: whenMasterOn(
+                      (value) =>
+                          update(settings.copyWith(achievementAlerts: value)),
+                    ),
+                  ),
+                  SettingsToggleRow(
+                    label: l10n.settingsNotificationsLeaderboardTitle,
+                    sub: l10n.settingsNotificationsLeaderboardSub,
+                    value: settings.leaderboardUpdates && isMasterOn,
+                    onChanged: whenMasterOn(
+                      (value) =>
+                          update(settings.copyWith(leaderboardUpdates: value)),
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: MediaQuery.paddingOf(context).bottom + 32),
+            ],
+          ),
+        ],
       ],
-    );
-  }
-}
-
-class _NotificationsSwitch extends StatelessWidget {
-  final String name;
-  final String description;
-  final bool value;
-  final Function(bool) onChanged;
-
-  const _NotificationsSwitch({
-    required this.name,
-    required this.description,
-    required this.value,
-    required this.onChanged,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return ListTile(
-      title: Text(description),
-      subtitle: Text(name, maxLines: 2, overflow: TextOverflow.ellipsis),
-      trailing: CupertinoSwitch(
-        activeTrackColor: Theme.of(context).extension<AppColors>()!.primary,
-        value: value,
-        onChanged: onChanged,
-      ),
-      onTap: () {
-        onChanged(!value);
-      },
-    );
+    ).animatePageEntrance();
   }
 }

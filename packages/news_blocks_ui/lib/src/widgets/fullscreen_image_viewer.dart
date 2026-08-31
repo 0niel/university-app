@@ -1,22 +1,16 @@
 import 'package:app_ui/app_ui.dart';
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:news_blocks/news_blocks.dart';
 
-/// {@template fullscreen_image_viewer}
-/// A fullscreen image viewer for slideshow images.
-/// {@endtemplate}
 class FullscreenImageViewer extends StatefulWidget {
-  /// {@macro fullscreen_image_viewer}
   const FullscreenImageViewer({
     required this.slides,
     required this.initialIndex,
     super.key,
   });
 
-  /// The list of slides to display.
   final List<SlideBlock> slides;
-
-  /// The initial slide index to display.
   final int initialIndex;
 
   @override
@@ -48,24 +42,23 @@ class _FullscreenImageViewerState extends State<FullscreenImageViewer> {
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).extension<AppColors>()!;
+    final colors = Theme.of(context).colors;
+    final currentSlide = widget.slides.elementAtOrNull(_currentIndex);
 
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
-        backgroundColor: Colors.black.withOpacity(0.8),
+        backgroundColor: Colors.black.withValues(alpha: 0.8),
         foregroundColor: colors.white,
         elevation: 0,
-        leading: IconButton(
-          icon: Icon(
-            Icons.close,
-            color: colors.white,
-          ),
+        leading: AppIconButton(
+          icon: const Icon(Icons.close),
+          foregroundColor: colors.white,
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: Text(
           '${_currentIndex + 1} / ${widget.slides.length}',
-          style: AppTextStyle.body.copyWith(color: colors.white),
+          style: AppText.body.copyWith(color: colors.white),
         ),
       ),
       body: Stack(
@@ -75,22 +68,27 @@ class _FullscreenImageViewerState extends State<FullscreenImageViewer> {
             onPageChanged: _onPageChanged,
             itemCount: widget.slides.length,
             itemBuilder: (context, index) {
-              final slide = widget.slides[index];
+              final slide = widget.slides.elementAtOrNull(index);
+              if (slide == null) return const SizedBox.shrink();
               return InteractiveViewer(
                 minScale: 0.5,
-                maxScale: 4.0,
+                maxScale: 4,
                 child: Center(
                   child: Image.network(
                     slide.imageUrl,
                     fit: BoxFit.contain,
+                    semanticLabel: slide.caption,
                     loadingBuilder: (context, child, loadingProgress) {
                       if (loadingProgress == null) return child;
+                      final expectedTotalBytes =
+                          loadingProgress.expectedTotalBytes;
                       return Center(
                         child: CircularProgressIndicator(
-                          value: loadingProgress.expectedTotalBytes != null
-                              ? loadingProgress.cumulativeBytesLoaded /
-                                  loadingProgress.expectedTotalBytes!
-                              : null,
+                          value:
+                              expectedTotalBytes != null
+                                  ? loadingProgress.cumulativeBytesLoaded /
+                                      expectedTotalBytes
+                                  : null,
                           color: colors.white,
                         ),
                       );
@@ -109,54 +107,54 @@ class _FullscreenImageViewerState extends State<FullscreenImageViewer> {
               );
             },
           ),
-          // Image info overlay
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            child: Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.bottomCenter,
-                  end: Alignment.topCenter,
-                  colors: [
-                    Colors.black.withOpacity(0.8),
-                    Colors.black.withOpacity(0.4),
-                    Colors.transparent,
+          if (currentSlide != null)
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: 0,
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.bottomCenter,
+                    end: Alignment.topCenter,
+                    colors: [
+                      Colors.black.withValues(alpha: 0.8),
+                      Colors.black.withValues(alpha: 0.4),
+                      Colors.transparent,
+                    ],
+                  ),
+                ),
+                padding: const EdgeInsets.all(AppSpacing.lg),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      currentSlide.caption,
+                      style: AppText.heading.copyWith(
+                        color: colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.sm),
+                    Text(
+                      currentSlide.description,
+                      style: AppText.body.copyWith(
+                        color: colors.white.withValues(alpha: 0.9),
+                        height: 1.4,
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.xs),
+                    Text(
+                      currentSlide.photoCredit,
+                      style: AppText.caption.copyWith(
+                        color: colors.white.withValues(alpha: 0.7),
+                      ),
+                    ),
                   ],
                 ),
               ),
-              padding: const EdgeInsets.all(AppSpacing.lg),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    widget.slides[_currentIndex].caption,
-                    style: AppTextStyle.titleM.copyWith(
-                      color: colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.sm),
-                  Text(
-                    widget.slides[_currentIndex].description,
-                    style: AppTextStyle.body.copyWith(
-                      color: colors.white.withOpacity(0.9),
-                      height: 1.4,
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.xs),
-                  Text(
-                    widget.slides[_currentIndex].photoCredit,
-                    style: AppTextStyle.captionL.copyWith(
-                      color: colors.white.withOpacity(0.7),
-                    ),
-                  ),
-                ],
-              ),
             ),
-          ),
         ],
       ),
     );

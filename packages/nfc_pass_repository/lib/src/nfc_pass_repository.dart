@@ -6,6 +6,25 @@ import 'package:nfc_pass_client/nfc_pass_client.dart';
 import 'package:storage/storage.dart' as storage;
 import 'package:web_oauth_interceptor_client/web_oauth_interceptor_client.dart';
 
+/// OAuth and gRPC settings for an institution's NFC-pass provider.
+final class NfcPassConfiguration {
+  /// Creates settings for a provider that supports the digital-pass protocol.
+  const NfcPassConfiguration({
+    required this.oauthUrl,
+    required this.expectedRedirectUrls,
+    required this.endpoints,
+  });
+
+  /// Starts the provider's interactive authentication flow.
+  final Uri oauthUrl;
+
+  /// Redirect destinations that complete authentication successfully.
+  final List<Uri> expectedRedirectUrls;
+
+  /// gRPC-Web endpoints used after authentication.
+  final NfcPassEndpoints endpoints;
+}
+
 /// {@template nfc_pass_failure}
 /// Custom exceptions for NFC Pass operations.
 /// {@endtemplate}
@@ -59,24 +78,33 @@ class NfcPassRepository {
   /// {@macro nfc_pass_repository}
   NfcPassRepository({
     required storage.Storage storage,
+    required NfcPassConfiguration configuration,
     OAuthInterceptorClient? oauthInterceptorClient,
     http.Client? httpClient,
+    DigitalPassChannel? digitalPassChannel,
   })  : _secureStorage = storage,
+        _digitalPassChannel = digitalPassChannel ?? const DigitalPassChannel(),
         oauthInterceptorClient = oauthInterceptorClient ??
             OAuthInterceptorClient(
-              oauthUrl:
-                  'https://attendance.mirea.ru/api/auth/login?redirectUri=https%3A%2F%2Fattendance-app.mirea.ru&rememberMe=True',
-              expectedRedirectUrls: ['https://attendance-app.mirea.ru/'],
+              oauthUrl: configuration.oauthUrl.toString(),
+              expectedRedirectUrls: configuration.expectedRedirectUrls
+                  .map((url) => url.toString())
+                  .toList(growable: false),
               specialCookieName: '.AspNetCore.Cookies',
             ),
         _nfcPassClient = NfcPassClient(
           cookieProvider: () async {
             return await storage.read(key: _kKeyCookie) ?? '';
           },
+          endpoints: configuration.endpoints,
           httpClient: httpClient,
         );
 
   final storage.Storage _secureStorage;
+
+  /// Bridge to the native store the Android HCE service reads when answering a
+  /// turnstile. flutter_secure_storage's own store is not readable natively.
+  final DigitalPassChannel _digitalPassChannel;
 
   /// Client for OAuth flow in an embedded browser.
   final OAuthInterceptorClient oauthInterceptorClient;
@@ -97,17 +125,47 @@ class NfcPassRepository {
   }
 
   /// Returns the saved passId (or null if not saved).
+  ///
+  /// Re-mirrors the id to the native store on every read so already-bound users
+  /// self-heal when they open the pass screen (best-effort — a native hiccup
+  /// must not break reading the pass).
   Future<int?> getPassId() async {
     final passIdString = await _secureStorage.read(key: _kKeyPassId);
     if (passIdString == null) return null;
-    return int.tryParse(passIdString);
+    final passId = int.tryParse(passIdString);
+    if (passId != null) {
+      try {
+        await _digitalPassChannel.savePassId(passId);
+      } on Object {
+        // Best-effort sync; ignore native errors.
+      }
+    }
+    return passId;
   }
+
+  /// Whether the device can emulate the pass (NFC + HCE present).
+  Future<bool> isNfcAvailable() => _digitalPassChannel.isHceAvailable();
+
+  /// Whether turnstile card emulation is currently enabled.
+  Future<bool> isNfcEnabled() => _digitalPassChannel.isHceEnabled();
+
+  /// Turns turnstile card emulation on/off. When off, our app leaves NFC
+  /// routing so a reader no longer offers it in the app-chooser.
+  Future<void> setNfcEnabled({required bool enabled}) =>
+      _digitalPassChannel.setHceEnabled(enabled: enabled);
+
+  /// Makes our pass the foreground-preferred service ([enabled] true) so a tap
+  /// skips the app-chooser, or releases that preference. Call when the pass
+  /// screen opens/closes — it only applies while the app is in the foreground.
+  Future<void> setForegroundPreference({required bool enabled}) =>
+      _digitalPassChannel.setForegroundPreference(enabled: enabled);
 
   /// Unbinds the pass (clears cookie, token, passId).
   Future<void> unbindPass() async {
     await _secureStorage.delete(key: _kKeyCookie);
     await _secureStorage.delete(key: _kKeyJwt);
     await _secureStorage.delete(key: _kKeyPassId);
+    await _digitalPassChannel.clearPassId();
   }
 
   /// Initiates the authorization and code sending flow:
@@ -187,7 +245,11 @@ class NfcPassRepository {
     }
   }
 
-  Future<int> _getDigitalPass(String jwt, String code, String deviceName) async {
+  Future<int> _getDigitalPass(
+    String jwt,
+    String code,
+    String deviceName,
+  ) async {
     try {
       final passId = await _nfcPassClient.getDigitalPass(
         bearerToken: jwt,
@@ -195,6 +257,7 @@ class NfcPassRepository {
         deviceName: deviceName,
       );
       await _secureStorage.write(key: _kKeyPassId, value: passId.toString());
+      await _digitalPassChannel.savePassId(passId);
       return passId;
     } catch (error, stackTrace) {
       Error.throwWithStackTrace(NfcPassGetPassFailure(error), stackTrace);

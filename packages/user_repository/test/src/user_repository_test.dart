@@ -1,5 +1,3 @@
-// ignore_for_file: prefer_const_constructors
-
 import 'dart:async';
 
 import 'package:auth_client/auth_client.dart';
@@ -17,15 +15,28 @@ class MockDeepLinkService extends Mock implements DeepLinkService {}
 
 class MockUserStorage extends Mock implements UserStorage {}
 
-class MockUser extends Mock implements AuthenticationUser {}
-
 class FakeLogOutFailure extends Fake implements LogOutFailure {}
 
 class FakeDeleteAccountFailure extends Fake implements DeleteAccountFailure {}
 
-class FakeSendLoginEmailLinkFailure extends Fake implements SendLoginEmailLinkFailure {}
+class FakeSendLoginEmailLinkFailure extends Fake
+    implements SendLoginEmailLinkFailure {}
 
-class FakeLogInWithEmailLinkFailure extends Fake implements LogInWithEmailLinkFailure {}
+class FakeLogInWithEmailLinkFailure extends Fake
+    implements LogInWithEmailLinkFailure {}
+
+class FakeLogInWithPasswordFailure extends Fake
+    implements LogInWithPasswordFailure {}
+
+class FakeSignUpFailure extends Fake implements SignUpFailure {}
+
+class FakeSignInAnonymouslyFailure extends Fake
+    implements SignInAnonymouslyFailure {}
+
+class FakeSendPasswordResetEmailFailure extends Fake
+    implements SendPasswordResetEmailFailure {}
+
+class FakeResetPasswordFailure extends Fake implements ResetPasswordFailure {}
 
 void main() {
   group('UserRepository', () {
@@ -35,7 +46,6 @@ void main() {
     late UserStorage storage;
     late StreamController<Uri> deepLinkClientController;
     late UserRepository userRepository;
-    late MockFlutterNewsExampleApiClient apiClient;
 
     setUp(() {
       authenticationClient = MockAuthenticationClient();
@@ -43,12 +53,12 @@ void main() {
       deepLinkService = MockDeepLinkService();
       storage = MockUserStorage();
       deepLinkClientController = StreamController<Uri>.broadcast();
-      apiClient = MockFlutterNewsExampleApiClient();
 
-      when(() => deepLinkService.deepLinkStream).thenAnswer((_) => deepLinkClientController.stream);
+      when(
+        () => deepLinkService.deepLinkStream,
+      ).thenAnswer((_) => deepLinkClientController.stream);
 
       userRepository = UserRepository(
-        apiClient: apiClient,
         authenticationClient: authenticationClient,
         packageInfoClient: packageInfoClient,
         deepLinkService: deepLinkService,
@@ -56,27 +66,26 @@ void main() {
       );
     });
 
-    test(
-        'currentSubscriptionPlan emits none '
-        'when initialized and authenticationClient.user is anonymous', () async {
-      when(() => authenticationClient.user).thenAnswer(
-        (invocation) => Stream.value(AuthenticationUser.anonymous),
-      );
-      final response = await userRepository.user.first;
-      expect(
-        response.subscriptionPlan,
-        equals(api.SubscriptionPlan.none),
-      );
-    });
-
     group('user', () {
-      test('calls user on AuthenticationClient', () {
-        when(() => authenticationClient.user).thenAnswer(
-          (_) => const Stream.empty(),
-        );
-        userRepository.user;
+      test('calls user on AuthenticationClient', () async {
+        when(
+          () => authenticationClient.user,
+        ).thenAnswer((_) => const Stream.empty());
+        await expectLater(userRepository.user, emitsDone);
         verify(() => authenticationClient.user).called(1);
       });
+
+      test(
+        'emits User.anonymous '
+        'when authenticationClient.user is anonymous',
+        () async {
+          when(() => authenticationClient.user).thenAnswer(
+            (_) => Stream.value(AuthenticationUser.anonymous),
+          );
+          final user = await userRepository.user.first;
+          expect(user, equals(User.anonymous));
+        },
+      );
     });
 
     group('incomingEmailLinks', () {
@@ -85,183 +94,47 @@ void main() {
       final invalidEmailLink = Uri.https('invalid.email.link');
 
       test(
-          'emits a new email link '
-          'for every valid email link from DeepLinkClient.deepLinkStream', () {
-        when(
-          () => authenticationClient.isLogInWithEmailLink(
-            emailLink: validEmailLink.toString(),
-          ),
-        ).thenReturn(true);
+        'emits a new email link '
+        'for every valid email link from DeepLinkClient.deepLinkStream',
+        () async {
+          when(
+            () => authenticationClient.isLogInWithEmailLink(
+              emailLink: validEmailLink.toString(),
+            ),
+          ).thenReturn(true);
 
-        when(
-          () => authenticationClient.isLogInWithEmailLink(
-            emailLink: validEmailLink2.toString(),
-          ),
-        ).thenReturn(true);
+          when(
+            () => authenticationClient.isLogInWithEmailLink(
+              emailLink: validEmailLink2.toString(),
+            ),
+          ).thenReturn(true);
 
-        when(
-          () => authenticationClient.isLogInWithEmailLink(
-            emailLink: invalidEmailLink.toString(),
-          ),
-        ).thenReturn(false);
+          when(
+            () => authenticationClient.isLogInWithEmailLink(
+              emailLink: invalidEmailLink.toString(),
+            ),
+          ).thenReturn(false);
 
-        expectLater(
-          userRepository.incomingEmailLinks,
-          emitsInOrder(<Uri>[
-            validEmailLink,
-            validEmailLink2,
-          ]),
-        );
+          final expectation = expectLater(
+            userRepository.incomingEmailLinks,
+            emitsInOrder(<Uri>[validEmailLink, validEmailLink2]),
+          );
 
-        deepLinkClientController
-          ..add(validEmailLink)
-          ..add(invalidEmailLink)
-          ..add(validEmailLink2);
-      });
-    });
+          deepLinkClientController
+            ..add(validEmailLink)
+            ..add(invalidEmailLink)
+            ..add(validEmailLink2);
 
-    group('logInWithApple', () {
-      test('calls logInWithApple on AuthenticationClient', () async {
-        when(
-          () => authenticationClient.logInWithApple(),
-        ).thenAnswer((_) async {
-          return null;
-        });
-        await userRepository.logInWithApple();
-        verify(() => authenticationClient.logInWithApple()).called(1);
-      });
-
-      test('rethrows LogInWithAppleFailure', () async {
-        final exception = FakeLogInWithAppleFailure();
-        when(
-          () => authenticationClient.logInWithApple(),
-        ).thenThrow(exception);
-        expect(
-          () => userRepository.logInWithApple(),
-          throwsA(exception),
-        );
-      });
-
-      test('throws LogInWithAppleFailure on generic exception', () async {
-        when(
-          () => authenticationClient.logInWithApple(),
-        ).thenThrow(Exception());
-        expect(
-          () => userRepository.logInWithApple(),
-          throwsA(isA<LogInWithAppleFailure>()),
-        );
-      });
-    });
-
-    group('logInWithGoogle', () {
-      test('calls logInWithGoogle on AuthenticationClient', () async {
-        when(
-          () => authenticationClient.logInWithGoogle(),
-        ).thenAnswer((_) async {
-          return null;
-        });
-        await userRepository.logInWithGoogle();
-        verify(() => authenticationClient.logInWithGoogle()).called(1);
-      });
-
-      test('rethrows LogInWithGoogleFailure', () async {
-        final exception = FakeLogInWithGoogleFailure();
-        when(() => authenticationClient.logInWithGoogle()).thenThrow(exception);
-        expect(() => userRepository.logInWithGoogle(), throwsA(exception));
-      });
-
-      test('rethrows LogInWithGoogleCanceled', () async {
-        final exception = FakeLogInWithGoogleCanceled();
-        when(() => authenticationClient.logInWithGoogle()).thenThrow(exception);
-        expect(userRepository.logInWithGoogle(), throwsA(exception));
-      });
-
-      test('throws LogInWithGoogleFailure on generic exception', () async {
-        when(
-          () => authenticationClient.logInWithGoogle(),
-        ).thenThrow(Exception());
-        expect(
-          () => userRepository.logInWithGoogle(),
-          throwsA(isA<LogInWithGoogleFailure>()),
-        );
-      });
-    });
-
-    group('logInWithTwitter', () {
-      test('calls logInWithTwitter on AuthenticationClient', () async {
-        when(
-          () => authenticationClient.logInWithTwitter(),
-        ).thenAnswer((_) async {
-          return null;
-        });
-        await userRepository.logInWithTwitter();
-        verify(() => authenticationClient.logInWithTwitter()).called(1);
-      });
-
-      test('rethrows LogInWithTwitterFailure', () async {
-        final exception = FakeLogInWithTwitterFailure();
-        when(() => authenticationClient.logInWithTwitter()).thenThrow(exception);
-        expect(() => userRepository.logInWithTwitter(), throwsA(exception));
-      });
-
-      test('rethrows LogInWithTwitterCanceled', () async {
-        final exception = FakeLogInWithTwitterCanceled();
-        when(() => authenticationClient.logInWithTwitter()).thenThrow(exception);
-        expect(userRepository.logInWithTwitter(), throwsA(exception));
-      });
-
-      test('throws LogInWithTwitterFailure on generic exception', () async {
-        when(
-          () => authenticationClient.logInWithTwitter(),
-        ).thenThrow(Exception());
-        expect(
-          () => userRepository.logInWithTwitter(),
-          throwsA(isA<LogInWithTwitterFailure>()),
-        );
-      });
-    });
-
-    group('logInWithFacebook', () {
-      test('calls logInWithFacebook on AuthenticationClient', () async {
-        when(
-          () => authenticationClient.logInWithFacebook(),
-        ).thenAnswer((_) async {
-          return null;
-        });
-        await userRepository.logInWithFacebook();
-        verify(() => authenticationClient.logInWithFacebook()).called(1);
-      });
-
-      test('rethrows LogInWithFacebookFailure', () async {
-        final exception = FakeLogInWithFacebookFailure();
-        when(() => authenticationClient.logInWithFacebook()).thenThrow(exception);
-        expect(() => userRepository.logInWithFacebook(), throwsA(exception));
-      });
-
-      test('rethrows LogInWithFacebookCanceled', () async {
-        final exception = FakeLogInWithFacebookCanceled();
-        when(() => authenticationClient.logInWithFacebook()).thenThrow(exception);
-        expect(userRepository.logInWithFacebook(), throwsA(exception));
-      });
-
-      test('throws LogInWithFacebookFailure on generic exception', () async {
-        when(
-          () => authenticationClient.logInWithFacebook(),
-        ).thenThrow(Exception());
-        expect(
-          () => userRepository.logInWithFacebook(),
-          throwsA(isA<LogInWithFacebookFailure>()),
-        );
-      });
+          await expectation;
+        },
+      );
     });
 
     group('sendLoginEmailLink', () {
       const packageName = 'appPackageName';
 
       setUp(() {
-        when(
-          () => packageInfoClient.packageName,
-        ).thenReturn(packageName);
+        when(() => packageInfoClient.packageName).thenReturn(packageName);
         when(
           () => authenticationClient.sendLoginEmailLink(
             email: any(named: 'email'),
@@ -270,8 +143,7 @@ void main() {
         ).thenAnswer((_) async {});
       });
 
-      test(
-          'calls sendLoginEmailLink on AuthenticationClient '
+      test('calls sendLoginEmailLink on AuthenticationClient '
           'with email and app package name from PackageInfoClient', () async {
         await userRepository.sendLoginEmailLink(
           email: 'ben_franklin@upenn.edu',
@@ -301,8 +173,7 @@ void main() {
         );
       });
 
-      test(
-          'throws FakeSendLoginEmailLinkFailure '
+      test('throws SendLoginEmailLinkFailure '
           'on generic exception', () async {
         when(
           () => authenticationClient.sendLoginEmailLink(
@@ -378,6 +249,289 @@ void main() {
       });
     });
 
+    group('logInWithEmailCode', () {
+      const email = 'email@example.com';
+      const code = '123456';
+
+      test('calls logInWithEmailCode on AuthenticationClient', () async {
+        when(
+          () => authenticationClient.logInWithEmailCode(
+            email: any(named: 'email'),
+            code: any(named: 'code'),
+          ),
+        ).thenAnswer((_) async {});
+
+        await userRepository.logInWithEmailCode(email: email, code: code);
+
+        verify(
+          () => authenticationClient.logInWithEmailCode(
+            email: email,
+            code: code,
+          ),
+        ).called(1);
+      });
+
+      test('throws LogInWithEmailLinkFailure on generic exception', () async {
+        when(
+          () => authenticationClient.logInWithEmailCode(
+            email: any(named: 'email'),
+            code: any(named: 'code'),
+          ),
+        ).thenThrow(Exception());
+        expect(
+          () => userRepository.logInWithEmailCode(email: email, code: code),
+          throwsA(isA<LogInWithEmailLinkFailure>()),
+        );
+      });
+    });
+
+    group('logInWithPassword', () {
+      const email = 'email@example.com';
+      const password = 'password';
+
+      test('calls logInWithPassword on AuthenticationClient', () async {
+        when(
+          () => authenticationClient.logInWithPassword(
+            email: any(named: 'email'),
+            password: any(named: 'password'),
+          ),
+        ).thenAnswer((_) async {});
+
+        await userRepository.logInWithPassword(
+          email: email,
+          password: password,
+        );
+
+        verify(
+          () => authenticationClient.logInWithPassword(
+            email: email,
+            password: password,
+          ),
+        ).called(1);
+      });
+
+      test('rethrows LogInWithPasswordFailure', () async {
+        final exception = FakeLogInWithPasswordFailure();
+        when(
+          () => authenticationClient.logInWithPassword(
+            email: any(named: 'email'),
+            password: any(named: 'password'),
+          ),
+        ).thenThrow(exception);
+        expect(
+          () => userRepository.logInWithPassword(
+            email: email,
+            password: password,
+          ),
+          throwsA(exception),
+        );
+      });
+
+      test('throws LogInWithPasswordFailure on generic exception', () async {
+        when(
+          () => authenticationClient.logInWithPassword(
+            email: any(named: 'email'),
+            password: any(named: 'password'),
+          ),
+        ).thenThrow(Exception());
+        expect(
+          () => userRepository.logInWithPassword(
+            email: email,
+            password: password,
+          ),
+          throwsA(isA<LogInWithPasswordFailure>()),
+        );
+      });
+    });
+
+    group('signUp', () {
+      const email = 'email@example.com';
+      const password = 'password';
+
+      test('calls signUp on AuthenticationClient', () async {
+        when(
+          () => authenticationClient.signUp(
+            email: any(named: 'email'),
+            password: any(named: 'password'),
+          ),
+        ).thenAnswer((_) async {});
+
+        await userRepository.signUp(email: email, password: password);
+
+        verify(
+          () => authenticationClient.signUp(email: email, password: password),
+        ).called(1);
+      });
+
+      test('rethrows SignUpFailure', () async {
+        final exception = FakeSignUpFailure();
+        when(
+          () => authenticationClient.signUp(
+            email: any(named: 'email'),
+            password: any(named: 'password'),
+          ),
+        ).thenThrow(exception);
+        expect(
+          () => userRepository.signUp(email: email, password: password),
+          throwsA(exception),
+        );
+      });
+
+      test('throws SignUpFailure on generic exception', () async {
+        when(
+          () => authenticationClient.signUp(
+            email: any(named: 'email'),
+            password: any(named: 'password'),
+          ),
+        ).thenThrow(Exception());
+        expect(
+          () => userRepository.signUp(email: email, password: password),
+          throwsA(isA<SignUpFailure>()),
+        );
+      });
+    });
+
+    group('signInAnonymously', () {
+      test('calls signInAnonymously on AuthenticationClient', () async {
+        when(
+          () => authenticationClient.signInAnonymously(),
+        ).thenAnswer((_) async {});
+
+        await userRepository.signInAnonymously();
+
+        verify(() => authenticationClient.signInAnonymously()).called(1);
+      });
+
+      test('rethrows SignInAnonymouslyFailure', () async {
+        final exception = FakeSignInAnonymouslyFailure();
+        when(
+          () => authenticationClient.signInAnonymously(),
+        ).thenThrow(exception);
+        expect(() => userRepository.signInAnonymously(), throwsA(exception));
+      });
+
+      test('throws SignInAnonymouslyFailure on generic exception', () async {
+        when(
+          () => authenticationClient.signInAnonymously(),
+        ).thenThrow(Exception());
+        expect(
+          () => userRepository.signInAnonymously(),
+          throwsA(isA<SignInAnonymouslyFailure>()),
+        );
+      });
+    });
+
+    group('sendPasswordResetEmail', () {
+      const email = 'email@example.com';
+
+      test('calls sendPasswordResetEmail on AuthenticationClient', () async {
+        when(
+          () => authenticationClient.sendPasswordResetEmail(
+            email: any(named: 'email'),
+          ),
+        ).thenAnswer((_) async {});
+
+        await userRepository.sendPasswordResetEmail(email: email);
+
+        verify(
+          () => authenticationClient.sendPasswordResetEmail(email: email),
+        ).called(1);
+      });
+
+      test('rethrows SendPasswordResetEmailFailure', () async {
+        final exception = FakeSendPasswordResetEmailFailure();
+        when(
+          () => authenticationClient.sendPasswordResetEmail(
+            email: any(named: 'email'),
+          ),
+        ).thenThrow(exception);
+        expect(
+          () => userRepository.sendPasswordResetEmail(email: email),
+          throwsA(exception),
+        );
+      });
+
+      test('throws SendPasswordResetEmailFailure '
+          'on generic exception', () async {
+        when(
+          () => authenticationClient.sendPasswordResetEmail(
+            email: any(named: 'email'),
+          ),
+        ).thenThrow(Exception());
+        expect(
+          () => userRepository.sendPasswordResetEmail(email: email),
+          throwsA(isA<SendPasswordResetEmailFailure>()),
+        );
+      });
+    });
+
+    group('resetPassword', () {
+      const email = 'email@example.com';
+      const code = '123456';
+      const newPassword = 'newPassword';
+
+      test('calls resetPassword on AuthenticationClient', () async {
+        when(
+          () => authenticationClient.resetPassword(
+            email: any(named: 'email'),
+            code: any(named: 'code'),
+            newPassword: any(named: 'newPassword'),
+          ),
+        ).thenAnswer((_) async {});
+
+        await userRepository.resetPassword(
+          email: email,
+          code: code,
+          newPassword: newPassword,
+        );
+
+        verify(
+          () => authenticationClient.resetPassword(
+            email: email,
+            code: code,
+            newPassword: newPassword,
+          ),
+        ).called(1);
+      });
+
+      test('rethrows ResetPasswordFailure', () async {
+        final exception = FakeResetPasswordFailure();
+        when(
+          () => authenticationClient.resetPassword(
+            email: any(named: 'email'),
+            code: any(named: 'code'),
+            newPassword: any(named: 'newPassword'),
+          ),
+        ).thenThrow(exception);
+        expect(
+          () => userRepository.resetPassword(
+            email: email,
+            code: code,
+            newPassword: newPassword,
+          ),
+          throwsA(exception),
+        );
+      });
+
+      test('throws ResetPasswordFailure on generic exception', () async {
+        when(
+          () => authenticationClient.resetPassword(
+            email: any(named: 'email'),
+            code: any(named: 'code'),
+            newPassword: any(named: 'newPassword'),
+          ),
+        ).thenThrow(Exception());
+        expect(
+          () => userRepository.resetPassword(
+            email: email,
+            code: code,
+            newPassword: newPassword,
+          ),
+          throwsA(isA<ResetPasswordFailure>()),
+        );
+      });
+    });
+
     group('logOut', () {
       test('calls logOut on AuthenticationClient', () async {
         when(() => authenticationClient.logOut()).thenAnswer((_) async {});
@@ -398,8 +552,10 @@ void main() {
     });
 
     group('deleteAccount', () {
-      test('calls logOut on AuthenticationClient', () async {
-        when(() => authenticationClient.deleteAccount()).thenAnswer((_) async {});
+      test('calls deleteAccount on AuthenticationClient', () async {
+        when(
+          () => authenticationClient.deleteAccount(),
+        ).thenAnswer((_) async {});
         await userRepository.deleteAccount();
         verify(() => authenticationClient.deleteAccount()).called(1);
       });
@@ -439,35 +595,22 @@ void main() {
       test('returns the app opened count from UserStorage ', () async {
         when(storage.fetchAppOpenedCount).thenAnswer((_) async => 1);
 
-        final result = await UserRepository(
-          apiClient: apiClient,
-          authenticationClient: authenticationClient,
-          packageInfoClient: packageInfoClient,
-          deepLinkService: deepLinkService,
-          storage: storage,
-        ).fetchAppOpenedCount();
+        final result = await userRepository.fetchAppOpenedCount();
         expect(result, 1);
       });
 
-      test(
-          'throws a FetchAppOpenedCountFailure '
+      test('throws a FetchAppOpenedCountFailure '
           'when fetching app opened count fails', () async {
         when(() => storage.fetchAppOpenedCount()).thenThrow(Exception());
 
         expect(
-          UserRepository(
-            apiClient: apiClient,
-            authenticationClient: authenticationClient,
-            packageInfoClient: packageInfoClient,
-            deepLinkService: deepLinkService,
-            storage: storage,
-          ).fetchAppOpenedCount(),
+          userRepository.fetchAppOpenedCount(),
           throwsA(isA<FetchAppOpenedCountFailure>()),
         );
       });
     });
 
-    group('setAppOpenedCount', () {
+    group('incrementAppOpenedCount', () {
       test('increments app opened count by 1 in UserStorage', () async {
         when(() => storage.fetchAppOpenedCount()).thenAnswer((_) async => 3);
 
@@ -475,59 +618,19 @@ void main() {
           () => storage.setAppOpenedCount(count: 4),
         ).thenAnswer((_) async {});
 
-        await expectLater(
-          UserRepository(
-            apiClient: apiClient,
-            authenticationClient: authenticationClient,
-            packageInfoClient: packageInfoClient,
-            deepLinkService: deepLinkService,
-            storage: storage,
-          ).incrementAppOpenedCount(),
-          completes,
-        );
+        await expectLater(userRepository.incrementAppOpenedCount(), completes);
       });
 
-      test(
-          'throws a IncrementAppOpenedCountFailure '
+      test('throws a IncrementAppOpenedCountFailure '
           'when setting app opened count fails', () async {
+        when(() => storage.fetchAppOpenedCount()).thenAnswer((_) async => 3);
         when(
           () => storage.setAppOpenedCount(count: any(named: 'count')),
         ).thenThrow(Exception());
 
         expect(
-          UserRepository(
-            apiClient: apiClient,
-            authenticationClient: authenticationClient,
-            packageInfoClient: packageInfoClient,
-            deepLinkService: deepLinkService,
-            storage: storage,
-          ).incrementAppOpenedCount(),
+          userRepository.incrementAppOpenedCount(),
           throwsA(isA<IncrementAppOpenedCountFailure>()),
-        );
-      });
-    });
-
-    group('updateSubscriptionPlan', () {
-      test('calls getCurrentUser on ApiClient', () async {
-        when(() => apiClient.getCurrentUser()).thenAnswer(
-          (_) async => api.CurrentUserResponse(
-            user: api.User(
-              id: 'id',
-              subscription: api.SubscriptionPlan.none,
-            ),
-          ),
-        );
-        await userRepository.updateSubscriptionPlan();
-        verify(() => apiClient.getCurrentUser()).called(1);
-      });
-
-      test('throws FetchCurrentSubscriptionFailure on failure', () async {
-        when(
-          () => apiClient.getCurrentUser(),
-        ).thenThrow(Exception());
-        expect(
-          () => userRepository.updateSubscriptionPlan(),
-          throwsA(isA<FetchCurrentSubscriptionFailure>()),
         );
       });
     });

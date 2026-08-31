@@ -1,36 +1,31 @@
 import 'package:auth_client/auth_client.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 
-/// {@template user}
-/// User model represents the current user with subscription plan.
-/// {@endtemplate}
-class User extends AuthenticationUser {
-  /// {@macro user}
-  const User({
-    required super.id,
-    super.email,
-    super.name,
-    super.photo,
-    super.isNewUser,
-  });
+part 'user.freezed.dart';
 
-  /// Converts [AuthenticationUser] to [User].
+@freezed
+abstract class User with _$User {
+  const factory User({
+    required String id,
+    String? email,
+    String? name,
+    String? photo,
+    @Default(true) bool isNewUser,
+  }) = _User;
+
+  const User._();
+
   factory User.fromAuthenticationUser({
     required AuthenticationUser authenticationUser,
-  }) =>
-      User(
-        email: authenticationUser.email,
-        id: authenticationUser.id,
-        name: authenticationUser.name,
-        photo: authenticationUser.photo,
-        isNewUser: authenticationUser.isNewUser,
-      );
+  }) => User(
+    email: authenticationUser.email,
+    id: authenticationUser.id,
+    name: authenticationUser.name,
+    photo: authenticationUser.photo,
+    isNewUser: authenticationUser.isNewUser,
+  );
 
-  /// Whether the current user is anonymous.
-  @override
   bool get isAnonymous => this == anonymous;
 
-  /// Anonymous user which represents an unauthenticated user.
-  static const User anonymous = User(
-    id: '',
-  );
+  static const User anonymous = User(id: '');
 }

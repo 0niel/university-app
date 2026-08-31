@@ -6,118 +6,113 @@ import 'package:news_blocks_ui/news_blocks_ui.dart';
 import 'package:news_blocks_ui/src/widgets/widgets.dart';
 
 /// {@template post_small}
-/// A reusable post small news block widget.
+/// A compact news card.
 /// {@endtemplate}
 class PostSmall extends StatelessWidget {
   /// {@macro post_small}
   const PostSmall({required this.block, this.onPressed, super.key});
 
-  /// The size of this post image.
-  static const _imageSize = 100.0;
-
   /// The associated [PostSmallBlock] instance.
   final PostSmallBlock block;
 
-  /// An optional callback which is invoked when the action is triggered.
-  /// A [Uri] from the associated [BlockAction] is provided to the callback.
+  /// Called when the block is tapped.
   final BlockActionCallback? onPressed;
 
   @override
   Widget build(BuildContext context) {
+    final scale = Theme.of(context).scale;
     final imageUrl = block.imageUrl;
+    final action = block.action;
+    final callback = onPressed;
 
-    return Material(
-      color: Colors.transparent,
+    return Card(
+      margin: EdgeInsets.symmetric(
+        horizontal: scale.space(AppSpacing.md),
+        vertical: scale.space(AppSpacing.sm),
+      ),
       child: InkWell(
-        borderRadius: BorderRadius.circular(12),
-        onTap: () {
-          if (block.hasNavigationAction) onPressed?.call(block.action!);
-        },
+        onTap:
+            action == null || callback == null ? null : () => callback(action),
         child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.lg),
-          child: Row(
+          padding: EdgeInsets.all(scale.space(AppSpacing.md)),
+          child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              if (imageUrl != null && imageUrl.trim().isNotEmpty)
-                Padding(
-                  padding: const EdgeInsets.only(right: AppSpacing.lg),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child: CachedNetworkImage(
-                      imageUrl: imageUrl,
-                      width: _imageSize,
-                      height: _imageSize,
-                      fit: BoxFit.cover,
-                      placeholder: (context, url) => ColoredBox(
-                        color: Theme.of(context)
-                                .extension<AppColors>()
-                                ?.surfaceHigh ??
-                            const Color(0xFFF2F2F2),
-                      ),
-                      errorWidget: (context, url, error) => ColoredBox(
-                        color: Theme.of(context)
-                                .extension<AppColors>()
-                                ?.surfaceLow ??
-                            const Color(0xFFEAEAEA),
-                      ),
-                      fadeInDuration: const Duration(milliseconds: 200),
-                      fadeOutDuration: const Duration(milliseconds: 150),
-                    ),
-                  ),
-                ),
-              Flexible(
-                child: PostSmallContent(
-                  title: block.title,
-                  publishedAt: block.publishedAt,
-                ),
+              PostSourceHeader(author: block.author),
+              SizedBox(height: scale.space(AppSpacing.sm)),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(child: _buildTextContent(context)),
+                  if (imageUrl != null && imageUrl.trim().isNotEmpty) ...[
+                    SizedBox(width: scale.space(AppSpacing.md)),
+                    _buildImage(context, imageUrl),
+                  ],
+                ],
               ),
+              SizedBox(height: scale.space(AppSpacing.xs)),
+              PostTimestamp(publishedAt: block.publishedAt, iconSize: 12),
             ],
           ),
         ),
       ),
     );
   }
-}
 
-/// {@template post_small_content}
-/// The content of [PostSmall].
-/// {@endtemplate}
-@visibleForTesting
-class PostSmallContent extends StatelessWidget {
-  /// {@macro post_small_content}
-  const PostSmallContent({
-    required this.title,
-    required this.publishedAt,
-    super.key,
-  });
+  Widget _buildTextContent(BuildContext context) {
+    final colors = Theme.of(context).colors;
+    final description = block.description;
 
-  /// The title of this post.
-  final String title;
+    final content =
+        description != null && description.isNotEmpty
+            ? description
+            : block.title;
 
-  /// The date when this post was published.
-  final DateTime publishedAt;
+    return Text(
+      content,
+      style: AppText.body.copyWith(color: colors.onSurface, height: 1.4),
+      maxLines: 3,
+      overflow: TextOverflow.ellipsis,
+    );
+  }
 
-  @override
-  Widget build(BuildContext context) {
-    final colors = Theme.of(context).extension<AppColors>()!;
+  Widget _buildImage(BuildContext context, String imageUrl) {
+    final colors = Theme.of(context).colors;
+    final scale = Theme.of(context).scale;
+    final imageSize = scale.size(64);
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          title,
-          style: AppTextStyle.titleM.copyWith(
-            color: colors.active,
-            height: 1.3,
-          ),
-          maxLines: 3,
-          overflow: TextOverflow.ellipsis,
-        ),
-        const SizedBox(height: AppSpacing.md),
-        PostFooter(
-          publishedAt: publishedAt,
-        ),
-      ],
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(scale.radius(8)),
+      child: CachedNetworkImage(
+        imageUrl: imageUrl,
+        width: imageSize,
+        height: imageSize,
+        fit: BoxFit.cover,
+        placeholder:
+            (context, url) => Container(
+              width: imageSize,
+              height: imageSize,
+              color: colors.surfaceHigh,
+              child: Icon(
+                Icons.image_outlined,
+                color: colors.onSurface.withValues(alpha: 0.4),
+                size: scale.icon(24),
+              ),
+            ),
+        errorWidget:
+            (context, url, error) => Container(
+              width: imageSize,
+              height: imageSize,
+              color: colors.surfaceLow,
+              child: Icon(
+                Icons.broken_image_outlined,
+                color: colors.onSurface.withValues(alpha: 0.4),
+                size: scale.icon(24),
+              ),
+            ),
+        fadeInDuration: const Duration(milliseconds: 200),
+        fadeOutDuration: const Duration(milliseconds: 150),
+      ),
     );
   }
 }

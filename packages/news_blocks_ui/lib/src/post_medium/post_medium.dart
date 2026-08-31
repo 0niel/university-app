@@ -1,3 +1,4 @@
+import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:news_blocks/news_blocks.dart';
 import 'package:news_blocks_ui/news_blocks_ui.dart';
@@ -18,25 +19,31 @@ class PostMedium extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scale = Theme.of(context).scale;
+    final action = block.action;
+
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        borderRadius: BorderRadius.circular(12),
-        onTap: block.hasNavigationAction
-            ? () => onPressed?.call(block.action!)
-            : null,
-        child: block.isContentOverlaid
-            ? PostMediumOverlaidLayout(
-                title: block.title,
-                imageUrl: block.imageUrl!,
-              )
-            : PostMediumDescriptionLayout(
-                title: block.title,
-                imageUrl: block.imageUrl!,
-                description: block.description,
-                publishedAt: block.publishedAt,
-                author: block.author,
-              ),
+        borderRadius: BorderRadius.circular(scale.radius(16)),
+        onTap:
+            block.hasNavigationAction && action != null
+                ? () => onPressed?.call(action)
+                : null,
+        child:
+            block.isContentOverlaid
+                ? PostMediumOverlaidLayout(
+                  title: block.title,
+                  imageUrl: block.imageUrl,
+                  publishedAt: block.publishedAt,
+                )
+                : PostMediumDescriptionLayout(
+                  title: block.title,
+                  imageUrl: block.imageUrl,
+                  description: block.description,
+                  publishedAt: block.publishedAt,
+                  author: block.author,
+                ),
       ),
     );
   }

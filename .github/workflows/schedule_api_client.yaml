@@ -7,15 +7,19 @@ concurrency:
 on:
   pull_request:
     paths:
-      - "packages/schedule_api_client/**"
+      - "packages/rtu_mirea_schedule_api_client/**"
       - ".github/workflows/schedule_api_client.yaml"
     branches:
-      - main
+      - master
+
+permissions:
+  contents: read
 
 jobs:
   build:
-    uses: VeryGoodOpenSource/very_good_workflows/.github/workflows/flutter_package.yml@v1
+    uses: ./.github/workflows/flutter_package.yml
     with:
       coverage_excludes: "**/*.g.dart"
-      flutter_version: 3.13.5
-      working_directory: packages/schedule_api_client
+      flutter_version: 3.44.2
+      min_coverage: 75
+      working_directory: packages/rtu_mirea_schedule_api_client

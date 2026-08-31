@@ -1,40 +1,39 @@
 {
-  // Use IntelliSense to learn about possible attributes.
-  // Hover to view descriptions of existing attributes.
-  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Launch Development",
+      "name": "development",
       "request": "launch",
       "type": "dart",
       "program": "lib/main/main_development.dart",
-      "args": [
+      "toolArgs": [
         "--flavor",
         "development",
-        "--target",
-        "lib/main/main_development.dart",
-      ],
-      "presentation": {
-        "group": "1_frontend",
-        "order": 1
-      }
+        "--dart-define-from-file=.env",
+        "--dart-define-from-file=config/university.local.json"
+      ]
     },
     {
-      "name": "Launch Production",
+      "name": "development (Windows)",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main/main_development.dart",
+      "toolArgs": [
+        "--dart-define-from-file=.env",
+        "--dart-define-from-file=config/university.local.json"
+      ]
+    },
+    {
+      "name": "production",
       "request": "launch",
       "type": "dart",
       "program": "lib/main/main_production.dart",
-      "args": [
+      "toolArgs": [
         "--flavor",
         "production",
-        "--target",
-        "lib/main/main_production.dart"
-      ],
-      "presentation": {
-        "group": "1_frontend",
-        "order": 2
-      }
+        "--dart-define-from-file=.env",
+        "--dart-define-from-file=config/university.local.json"
+      ]
     }
   ]
 }

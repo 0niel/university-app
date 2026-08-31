@@ -13,8 +13,8 @@ class SearchQueryChanged extends SearchEvent {
   List<Object?> get props => [searchQuery];
 }
 
-class AddQueryToSearchHistory extends SearchEvent {
-  const AddQueryToSearchHistory({required this.query});
+class SearchHistoryQueryAdded extends SearchEvent {
+  const SearchHistoryQueryAdded({required this.query});
 
   final String query;
 
@@ -22,15 +22,15 @@ class AddQueryToSearchHistory extends SearchEvent {
   List<Object?> get props => [query];
 }
 
-class ClearSearchHistory extends SearchEvent {
-  const ClearSearchHistory();
+class SearchHistoryCleared extends SearchEvent {
+  const SearchHistoryCleared();
 
   @override
   List<Object?> get props => [];
 }
 
-class RemoveQueryFromSearchHistory extends SearchEvent {
-  const RemoveQueryFromSearchHistory({required this.query});
+class SearchHistoryQueryRemoved extends SearchEvent {
+  const SearchHistoryQueryRemoved({required this.query});
 
   final String query;
 
@@ -38,8 +38,15 @@ class RemoveQueryFromSearchHistory extends SearchEvent {
   List<Object?> get props => [query];
 }
 
-class ChangeSearchMode extends SearchEvent {
-  const ChangeSearchMode({required this.searchMode});
+class SearchTrendingRequested extends SearchEvent {
+  const SearchTrendingRequested();
+
+  @override
+  List<Object?> get props => [];
+}
+
+class SearchModeChanged extends SearchEvent {
+  const SearchModeChanged({required this.searchMode});
 
   final SearchMode searchMode;
 

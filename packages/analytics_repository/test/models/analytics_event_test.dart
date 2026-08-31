@@ -1,4 +1,3 @@
-// ignore_for_file: prefer_const_constructors
 import 'package:analytics_repository/analytics_repository.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -21,7 +20,7 @@ void main() {
   group('AnalyticsEventMixin', () {
     const id = 'mock-id';
     test('uses value equality', () {
-      expect(TestEvent(id: id), equals(TestEvent(id: id)));
+      expect(const TestEvent(id: id), equals(const TestEvent(id: id)));
     });
   });
 }
