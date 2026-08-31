@@ -265,5 +265,72 @@ void main() {
         () => cubit.materialOpened(material),
       ]);
     });
+
+    testWidgets('shows fileless materials as a disabled separate state', (
+      tester,
+    ) async {
+      const material = StudyMaterial(
+        id: 'fileless',
+        title: 'Описание без файла',
+      );
+      when(() => cubit.state).thenReturn(
+        const KnowledgeBankState(
+          status: KnowledgeBankStatus.populated,
+          materials: [material],
+        ),
+      );
+
+      await tester.pumpWidget(
+        _wrap(
+          BlocProvider<KnowledgeBankCubit>.value(
+            value: cubit,
+            child: const KnowledgeBankView(),
+          ),
+          reduceMotion: true,
+        ),
+      );
+      await tester.pump();
+
+      expect(find.text('Без вложения'), findsOneWidget);
+      await tester.tap(find.text('Описание без файла'));
+      verifyNever(() => cubit.materialUrl(material));
+      verifyNever(() => cubit.materialOpened(material));
+    });
+
+    testWidgets('marks protected legacy anonymous files for republishing', (
+      tester,
+    ) async {
+      when(() => cubit.state).thenReturn(
+        const KnowledgeBankState(
+          status: KnowledgeBankStatus.populated,
+          materials: [
+            StudyMaterial(
+              id: 'legacy-anonymous',
+              title: 'Старый анонимный файл',
+              requiresRepublish: true,
+            ),
+          ],
+        ),
+      );
+
+      await tester.pumpWidget(
+        _wrap(
+          BlocProvider<KnowledgeBankCubit>.value(
+            value: cubit,
+            child: const KnowledgeBankView(),
+          ),
+          reduceMotion: true,
+        ),
+      );
+      await tester.pump();
+
+      expect(find.text('Нужно загрузить заново'), findsOneWidget);
+      expect(
+        find.bySemanticsLabel(
+          RegExp('Нужно загрузить заново'),
+        ),
+        findsWidgets,
+      );
+    });
   });
 }

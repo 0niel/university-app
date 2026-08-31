@@ -160,6 +160,7 @@ app.*.symbols
 !.env.example
 *.key
 *.pem
+!tool/release_symbols_public.pem
 *.p12
 *.pfx
 

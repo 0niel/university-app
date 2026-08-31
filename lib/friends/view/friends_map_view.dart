@@ -192,6 +192,7 @@ class _FriendsMapViewState extends State<FriendsMapView>
       showAppSheet<void>(
         context,
         title: context.l10n.friendsGeoSharing,
+        contentPadding: .zero,
         child: BlocProvider.value(
           value: cubit,
           child: const NinjaGeoSharingSheet(),

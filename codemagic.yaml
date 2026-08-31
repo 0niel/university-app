@@ -144,17 +144,33 @@ workflows:
             --target=lib/main/main_production.dart \
             --build-name="$BUILD_NAME" \
             --build-number="$BUILD_NUMBER" \
+            --obfuscate \
+            --split-debug-info="$CM_BUILD_DIR/build/dart-symbols" \
             --no-confirm \
             -- \
             --dart-define-from-file="$CM_BUILD_DIR/.ci-university.json" \
             --dart-define-from-file="$CM_BUILD_DIR/.ci-firebase.json" \
             --dart-define=SUPABASE_URL="$SUPABASE_URL" \
             --dart-define=SUPABASE_PUBLISHABLE_KEY="$SUPABASE_PUBLISHABLE_KEY"
+      - name: Encrypt release symbols
+        script: |
+          symbols_root="$CM_BUILD_DIR/build/release-symbols-plain"
+          symbols_archive="$CM_BUILD_DIR/build/ios-release-symbols.tar.gz"
+          mkdir -p "$symbols_root/dart" "$symbols_root/ios" "$CM_BUILD_DIR/build/release-symbols"
+          cp -R "$CM_BUILD_DIR/build/dart-symbols/." "$symbols_root/dart/"
+          if [[ -d "$CM_BUILD_DIR/build/ios/archive/Runner.xcarchive/dSYMs" ]]; then
+            cp -R "$CM_BUILD_DIR/build/ios/archive/Runner.xcarchive/dSYMs/." "$symbols_root/ios/"
+          fi
+          tar -czf "$symbols_archive" -C "$symbols_root" .
+          openssl smime -encrypt -binary -aes256 -outform DER \
+            -in "$symbols_archive" \
+            -out "$CM_BUILD_DIR/build/release-symbols/ios-release-symbols.cms" \
+            "$CM_BUILD_DIR/tool/release_symbols_public.pem"
+          rm -rf "$symbols_root" "$symbols_archive" "$CM_BUILD_DIR/build/dart-symbols"
       - *cleanup_configuration
     artifacts:
       - build/ios/ipa/*.ipa
-      - build/ios/archive/Runner.xcarchive/dSYMs/*.dSYM
-      - build/**/*.symbols
+      - build/release-symbols/*.cms
     publishing:
       app_store_connect:
         api_key: $APP_STORE_CONNECT_PRIVATE_KEY
@@ -190,13 +206,26 @@ workflows:
             --release-version=${{ inputs.release_version }} \
             --export-options-plist="$HOME/export_options.plist" \
             --target=lib/main/main_production.dart \
+            --split-debug-info="$CM_BUILD_DIR/build/dart-symbols" \
             --no-confirm \
             -- \
             --dart-define-from-file="$CM_BUILD_DIR/.ci-university.json" \
             --dart-define-from-file="$CM_BUILD_DIR/.ci-firebase.json" \
             --dart-define=SUPABASE_URL="$SUPABASE_URL" \
             --dart-define=SUPABASE_PUBLISHABLE_KEY="$SUPABASE_PUBLISHABLE_KEY"
+      - name: Encrypt patch symbols
+        script: |
+          symbols_root="$CM_BUILD_DIR/build/release-symbols-plain"
+          symbols_archive="$CM_BUILD_DIR/build/ios-patch-symbols.tar.gz"
+          mkdir -p "$symbols_root/dart" "$CM_BUILD_DIR/build/release-symbols"
+          cp -R "$CM_BUILD_DIR/build/dart-symbols/." "$symbols_root/dart/"
+          tar -czf "$symbols_archive" -C "$symbols_root" .
+          openssl smime -encrypt -binary -aes256 -outform DER \
+            -in "$symbols_archive" \
+            -out "$CM_BUILD_DIR/build/release-symbols/ios-patch-symbols.cms" \
+            "$CM_BUILD_DIR/tool/release_symbols_public.pem"
+          rm -rf "$symbols_root" "$symbols_archive" "$CM_BUILD_DIR/build/dart-symbols"
       - *cleanup_configuration
     artifacts:
       - build/ios/ipa/*.ipa
-      - build/**/*.symbols
+      - build/release-symbols/*.cms

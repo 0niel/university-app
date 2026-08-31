@@ -4792,6 +4792,14 @@
   "@knowledgeTopAuthors": {
     "description": "Top authors section title"
   },
+  "knowledgeMaterialNoAttachment": "No attachment",
+  "@knowledgeMaterialNoAttachment": {
+    "description": "Status shown when a material has no downloadable file"
+  },
+  "knowledgeMaterialRepublishRequired": "Needs re-upload",
+  "@knowledgeMaterialRepublishRequired": {
+    "description": "Status shown for a protected legacy anonymous attachment"
+  },
   "knowledgePages": "{n} pp.",
   "@knowledgePages": {
     "description": "Page count shown on a material card",

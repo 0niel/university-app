@@ -2822,6 +2822,8 @@
   "knowledgeEmptyTitle": "Пока пусто",
   "knowledgeEmptySub": "Залей первый конспект — получишь сюрикены за каждое скачивание",
   "knowledgeTopAuthors": "Топ авторов",
+  "knowledgeMaterialNoAttachment": "Без вложения",
+  "knowledgeMaterialRepublishRequired": "Нужно загрузить заново",
   "knowledgePages": "{n} стр",
   "knowledgeAuthorStats": "{downloads} · {materials} мат.",
   "knowledgeUploadTypeLabel": "ТИП",

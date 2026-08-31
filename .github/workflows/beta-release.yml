@@ -201,6 +201,7 @@ jobs:
           ORG_GRADLE_PROJECT_requirePrivateNfcModule: "true"
           SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
         run: |
+          mkdir -p "$RUNNER_TEMP/dart-symbols"
           shorebird release android \
             --flutter-version 3.44.2 \
             --artifact apk \
@@ -208,6 +209,8 @@ jobs:
             --target lib/main/main_production.dart \
             --build-name ${{ needs.prepare.outputs.build_name }} \
             --build-number ${{ needs.prepare.outputs.build_number }} \
+            --obfuscate \
+            --split-debug-info="$RUNNER_TEMP/dart-symbols" \
             -- \
             --dart-define-from-file=${{ runner.temp }}/university.json \
             --dart-define-from-file=${{ runner.temp }}/firebase.json \
@@ -225,14 +228,23 @@ jobs:
           mkdir -p dist
           cp "$apk" "dist/university-app-$RELEASE_VERSION.apk"
           cp "$aab" "dist/university-app-$RELEASE_VERSION.aab"
+          symbols_root="$RUNNER_TEMP/release-symbols"
+          symbols_archive="$RUNNER_TEMP/university-app-$RELEASE_VERSION-symbols.tar.gz"
+          mkdir -p "$symbols_root/dart" "$symbols_root/android"
+          cp -R "$RUNNER_TEMP/dart-symbols/." "$symbols_root/dart/"
           if [[ -s build/app/outputs/mapping/productionRelease/mapping.txt ]]; then
             cp build/app/outputs/mapping/productionRelease/mapping.txt \
-              "dist/university-app-$RELEASE_VERSION-mapping.txt"
+              "$symbols_root/android/mapping.txt"
           fi
           if [[ -s build/app/outputs/native-debug-symbols/productionRelease/native-debug-symbols.zip ]]; then
             cp build/app/outputs/native-debug-symbols/productionRelease/native-debug-symbols.zip \
-              "dist/university-app-$RELEASE_VERSION-native-symbols.zip"
+              "$symbols_root/android/native-debug-symbols.zip"
           fi
+          tar -czf "$symbols_archive" -C "$symbols_root" .
+          openssl smime -encrypt -binary -aes256 -outform DER \
+            -in "$symbols_archive" \
+            -out "dist/university-app-$RELEASE_VERSION-symbols.cms" \
+            tool/release_symbols_public.pem
           (cd dist && shasum -a 256 ./* > SHA256SUMS)
 
       - name: Upload Android artifacts

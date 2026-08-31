@@ -5220,6 +5220,12 @@ class AppLocalizationsRu extends AppLocalizations {
   String get knowledgeTopAuthors => 'Топ авторов';
 
   @override
+  String get knowledgeMaterialNoAttachment => 'Без вложения';
+
+  @override
+  String get knowledgeMaterialRepublishRequired => 'Нужно загрузить заново';
+
+  @override
   String knowledgePages(int n) {
     return '$n стр';
   }

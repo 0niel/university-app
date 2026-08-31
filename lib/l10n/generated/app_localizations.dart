@@ -9020,6 +9020,18 @@ abstract class AppLocalizations {
   /// **'Top authors'**
   String get knowledgeTopAuthors;
 
+  /// Status shown when a material has no downloadable file
+  ///
+  /// In en, this message translates to:
+  /// **'No attachment'**
+  String get knowledgeMaterialNoAttachment;
+
+  /// Status shown for a protected legacy anonymous attachment
+  ///
+  /// In en, this message translates to:
+  /// **'Needs re-upload'**
+  String get knowledgeMaterialRepublishRequired;
+
   /// Page count shown on a material card
   ///
   /// In en, this message translates to:

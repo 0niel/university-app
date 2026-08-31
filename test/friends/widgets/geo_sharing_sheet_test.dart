@@ -10,6 +10,8 @@ import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'mock_friends_map_cubit.dart';
 
 void main() {
+  setUpAll(() => registerFallbackValue(const GeoSharingSettings()));
+
   testWidgets('shows a retryable warning when privacy sync fails', (
     tester,
   ) async {
@@ -74,14 +76,56 @@ void main() {
 
     expect(find.text('тебя нет на карте'), findsOneWidget);
   });
+
+  testWidgets('the full sharing row toggles its setting', (tester) async {
+    final cubit = MockFriendsMapCubit();
+    addTearDown(cubit.close);
+    const state = FriendsMapState();
+    when(() => cubit.state).thenReturn(state);
+    when(() => cubit.updateGeoSettings(any())).thenAnswer((_) async {});
+
+    await tester.pumpWidget(_app(cubit));
+    await tester.tap(find.text('Делиться геопозицией'));
+
+    verify(
+      () => cubit.updateGeoSettings(
+        const GeoSharingSettings(sharing: false),
+      ),
+    ).called(1);
+  });
+
+  testWidgets('settings remain usable with large text on a compact screen', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(360, 720));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final cubit = MockFriendsMapCubit();
+    addTearDown(cubit.close);
+    when(() => cubit.state).thenReturn(const FriendsMapState());
+
+    await tester.pumpWidget(
+      _app(cubit, textScaler: const TextScaler.linear(2)),
+    );
+
+    expect(tester.takeException(), isNull);
+    expect(find.text('Точно'), findsOneWidget);
+    expect(find.text('Корпус'), findsOneWidget);
+    expect(find.text('Город'), findsOneWidget);
+  });
 }
 
-Widget _app(FriendsMapCubit cubit) {
+Widget _app(FriendsMapCubit cubit, {TextScaler? textScaler}) {
   return MaterialApp(
     theme: AppTheme.darkTheme,
     locale: const Locale('ru'),
     localizationsDelegates: AppLocalizations.localizationsDelegates,
     supportedLocales: AppLocalizations.supportedLocales,
+    builder: textScaler == null
+        ? null
+        : (context, child) => MediaQuery(
+            data: MediaQuery.of(context).copyWith(textScaler: textScaler),
+            child: child!,
+          ),
     home: Scaffold(
       body: BlocProvider.value(
         value: cubit,
