@@ -108,6 +108,7 @@ class _SchedulePageState extends State<SchedulePage> with _ScheduleClockTicker {
   late PageController _weekController;
   late PageController _monthController;
   late int _monthTargetPage;
+  late int _monthPreferredDay;
   int _pagerGuards = 0;
   int _monthPagerGuards = 0;
 
@@ -133,6 +134,7 @@ class _SchedulePageState extends State<SchedulePage> with _ScheduleClockTicker {
       initialPage: _paging.weekPageOfDayPage(page),
     );
     _monthTargetPage = _monthPaging.pageOf(_selectedDay);
+    _monthPreferredDay = _selectedDay.day;
     _monthController = PageController(initialPage: _monthTargetPage);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
@@ -477,7 +479,10 @@ class _SchedulePageState extends State<SchedulePage> with _ScheduleClockTicker {
       0,
       _monthPaging.pageCount - 1,
     );
-    _applySelectedDay(_monthPaging.dayInPage(target, _selectedDay.day));
+    _applySelectedDay(
+      _monthPaging.dayInPage(target, _monthPreferredDay),
+      preserveMonthDay: true,
+    );
     unawaited(
       _driveMonthPager(
         target,
@@ -566,11 +571,16 @@ class _SchedulePageState extends State<SchedulePage> with _ScheduleClockTicker {
     _syncMonthPager(next);
   }
 
-  void _applySelectedDay(DateTime day, {_ScheduleView? view}) {
+  void _applySelectedDay(
+    DateTime day, {
+    _ScheduleView? view,
+    bool preserveMonthDay = false,
+  }) {
     final monthChanged =
         day.year != _selectedDay.year || day.month != _selectedDay.month;
     setState(() {
       _selectedDay = day;
+      if (!preserveMonthDay) _monthPreferredDay = day.day;
       _showPast = false;
       if (view != null) _view = view;
     });
@@ -731,7 +741,10 @@ class _SchedulePageState extends State<SchedulePage> with _ScheduleClockTicker {
     _monthTargetPage = page;
     _selectorCollapse.value = 0;
     unawaited(HapticFeedback.selectionClick());
-    _applySelectedDay(_monthPaging.dayInPage(page, _selectedDay.day));
+    _applySelectedDay(
+      _monthPaging.dayInPage(page, _monthPreferredDay),
+      preserveMonthDay: true,
+    );
   }
 
   Future<void> _refreshSchedule() async {
