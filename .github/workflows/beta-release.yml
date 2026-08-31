@@ -1,0 +1,295 @@
+name: Beta Release
+
+on:
+  workflow_run:
+    workflows:
+      - CI
+    types:
+      - completed
+    branches:
+      - master
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: beta-release-${{ github.event.workflow_run.head_sha || github.sha }}
+  cancel-in-progress: false
+
+jobs:
+  prepare:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'push')
+    runs-on: ubuntu-latest
+    outputs:
+      build_name: ${{ steps.metadata.outputs.build_name }}
+      build_number: ${{ steps.metadata.outputs.build_number }}
+      release_sha: ${{ steps.metadata.outputs.release_sha }}
+      release_version: ${{ steps.metadata.outputs.release_version }}
+      tag: ${{ steps.metadata.outputs.tag }}
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+          persist-credentials: false
+
+      - name: Prepare release metadata
+        id: metadata
+        shell: bash
+        run: |
+          release_sha="$(git rev-parse HEAD)"
+          source_version="$(sed -n 's/^version:[[:space:]]*//p' pubspec.yaml)"
+          build_name="${source_version%%+*}"
+          test "$GITHUB_RUN_ATTEMPT" -le 99
+          build_number="$((1000000 + GITHUB_RUN_NUMBER * 100 + GITHUB_RUN_ATTEMPT))"
+          test -n "$build_name"
+          test "$build_number" -gt 0
+          test "$build_number" -le 2100000000
+          release_version="$build_name+$build_number"
+          tag="v$build_name-beta.$build_number"
+          {
+            echo "build_name=$build_name"
+            echo "build_number=$build_number"
+            echo "release_sha=$release_sha"
+            echo "release_version=$release_version"
+            echo "tag=$tag"
+          } >> "$GITHUB_OUTPUT"
+
+  android:
+    name: Android beta
+    needs: prepare
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    environment: beta
+    defaults:
+      run:
+        shell: bash
+    env:
+      SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ needs.prepare.outputs.release_sha }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Verify release configuration
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          NFC_MODULE_DEPLOY_KEY: ${{ secrets.NFC_MODULE_DEPLOY_KEY }}
+          UNIVERSITY_CONFIG_JSON: ${{ vars.UNIVERSITY_CONFIG_JSON }}
+          FIREBASE_CONFIG_JSON: ${{ vars.FIREBASE_CONFIG_JSON }}
+          SUPABASE_URL: ${{ vars.SUPABASE_URL }}
+          SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
+        run: |
+          required=(
+            SHOREBIRD_TOKEN
+            ANDROID_KEYSTORE_BASE64
+            ANDROID_KEYSTORE_PASSWORD
+            ANDROID_KEY_ALIAS
+            ANDROID_KEY_PASSWORD
+            NFC_MODULE_DEPLOY_KEY
+            UNIVERSITY_CONFIG_JSON
+            FIREBASE_CONFIG_JSON
+            SUPABASE_URL
+            SUPABASE_PUBLISHABLE_KEY
+          )
+          missing=()
+          for name in "${required[@]}"; do
+            if [[ -z "${!name:-}" ]]; then
+              missing+=("$name")
+            fi
+          done
+          if (( ${#missing[@]} > 0 )); then
+            printf 'Missing beta release configuration: %s\n' "${missing[*]}" >&2
+            exit 1
+          fi
+
+      - name: Check out private NFC module
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          repository: 0niel/university-app-nfc-private
+          ref: 6226b9b4c3f2ed2c4a0727ae062f8a5239e5aba5
+          ssh-key: ${{ secrets.NFC_MODULE_DEPLOY_KEY }}
+          path: android/private/nfc-pass-android
+          persist-credentials: false
+
+      - name: Set up Java
+        uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: gradle
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
+        with:
+          channel: stable
+          flutter-version-file: .fvmrc
+          cache: true
+
+      - name: Set up Shorebird
+        uses: shorebirdtech/setup-shorebird@4dd9d7dc2d7930bfeadb053b6e94b5110779d1e5 # v1
+        with:
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Generate code
+        run: dart run build_runner build
+
+      - name: Configure signing
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          python3 - <<'PY'
+          import base64
+          import os
+          from pathlib import Path
+
+          Path("android/app/release.jks").write_bytes(
+              base64.b64decode(os.environ["ANDROID_KEYSTORE_BASE64"], validate=True)
+          )
+          Path("android/key.properties").write_text(
+              "\n".join(
+                  (
+                      f"storePassword={os.environ['ANDROID_KEYSTORE_PASSWORD']}",
+                      f"keyPassword={os.environ['ANDROID_KEY_PASSWORD']}",
+                      f"keyAlias={os.environ['ANDROID_KEY_ALIAS']}",
+                      "storeFile=release.jks",
+                  )
+              )
+              + "\n",
+              encoding="utf-8",
+          )
+          PY
+
+      - name: Configure university
+        env:
+          UNIVERSITY_CONFIG_JSON: ${{ vars.UNIVERSITY_CONFIG_JSON }}
+          FIREBASE_CONFIG_JSON: ${{ vars.FIREBASE_CONFIG_JSON }}
+        run: |
+          printf '%s\n' "$UNIVERSITY_CONFIG_JSON" > "$RUNNER_TEMP/university.json"
+          printf '%s\n' "$FIREBASE_CONFIG_JSON" > "$RUNNER_TEMP/firebase.json"
+          dart run tool/configure_university.dart \
+            --config "$RUNNER_TEMP/university.json"
+
+      - name: Release Android beta
+        id: shorebird
+        uses: shorebirdtech/shorebird-release@fb52cad53f4ed5ce39883d51a26916ead502b93d # v1
+        env:
+          ORG_GRADLE_PROJECT_requirePrivateNfcModule: "true"
+          SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
+        with:
+          platform: android
+          flutter-version: 3.44.2
+          args: >-
+            --artifact apk
+            --flavor production
+            --build-name ${{ needs.prepare.outputs.build_name }}
+            --build-number ${{ needs.prepare.outputs.build_number }}
+            --
+            --dart-define-from-file=${{ runner.temp }}/university.json
+            --dart-define-from-file=${{ runner.temp }}/firebase.json
+            --dart-define=SUPABASE_URL=${{ vars.SUPABASE_URL }}
+            --dart-define=SUPABASE_PUBLISHABLE_KEY=${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
+
+      - name: Collect artifacts
+        env:
+          RELEASE_VERSION: ${{ needs.prepare.outputs.release_version }}
+        run: |
+          apk="build/app/outputs/flutter-apk/app-production-release.apk"
+          aab="build/app/outputs/bundle/productionRelease/app-production-release.aab"
+          test -s "$apk"
+          test -s "$aab"
+          mkdir -p dist
+          cp "$apk" "dist/university-app-$RELEASE_VERSION.apk"
+          cp "$aab" "dist/university-app-$RELEASE_VERSION.aab"
+          if [[ -s build/app/outputs/mapping/productionRelease/mapping.txt ]]; then
+            cp build/app/outputs/mapping/productionRelease/mapping.txt \
+              "dist/university-app-$RELEASE_VERSION-mapping.txt"
+          fi
+          if [[ -s build/app/outputs/native-debug-symbols/productionRelease/native-debug-symbols.zip ]]; then
+            cp build/app/outputs/native-debug-symbols/productionRelease/native-debug-symbols.zip \
+              "dist/university-app-$RELEASE_VERSION-native-symbols.zip"
+          fi
+          (cd dist && shasum -a 256 ./* > SHA256SUMS)
+
+      - name: Upload Android artifacts
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: android-beta-${{ needs.prepare.outputs.release_version }}
+          path: dist/
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 0
+
+      - name: Remove signing material
+        if: always()
+        run: rm -f android/key.properties android/app/release.jks
+
+  publish:
+    name: Publish beta
+    needs:
+      - prepare
+      - android
+    runs-on: ubuntu-latest
+    environment:
+      name: beta
+      url: >-
+        https://github.com/${{ github.repository }}/releases/tag/${{ needs.prepare.outputs.tag }}
+    permissions:
+      attestations: write
+      contents: write
+      id-token: write
+
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5
+        with:
+          name: android-beta-${{ needs.prepare.outputs.release_version }}
+          path: dist
+
+      - name: Attest artifacts
+        uses: actions/attest-build-provenance@977bb373ede98d70efdf65b84cb5f73e068dcc2a # v3
+        with:
+          subject-path: dist/*
+
+      - name: Publish GitHub prerelease
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_SHA: ${{ needs.prepare.outputs.release_sha }}
+          RELEASE_VERSION: ${{ needs.prepare.outputs.release_version }}
+          TAG: ${{ needs.prepare.outputs.tag }}
+        run: |
+          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release upload "$TAG" dist/* \
+              --clobber \
+              --repo "$GITHUB_REPOSITORY"
+            gh release edit "$TAG" \
+              --prerelease \
+              --target "$RELEASE_SHA" \
+              --title "Beta $RELEASE_VERSION" \
+              --repo "$GITHUB_REPOSITORY"
+          else
+            gh release create "$TAG" dist/* \
+              --generate-notes \
+              --prerelease \
+              --target "$RELEASE_SHA" \
+              --title "Beta $RELEASE_VERSION" \
+              --repo "$GITHUB_REPOSITORY"
+          fi

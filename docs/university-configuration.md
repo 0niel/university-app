@@ -97,8 +97,24 @@ Generated platform files and `config/university.local.json` are ignored because
 they represent a developer's selected tenant. Review the generated text before
 connecting it to a release build.
 
-The manual Shorebird workflow reads the same JSON from the public repository
-variable `UNIVERSITY_CONFIG_JSON`, validates it with this generator, and passes
-it to Flutter as a Dart define file. Firebase identifiers come from the separate
+The release workflows read the same JSON from the repository variable
+`UNIVERSITY_CONFIG_JSON`, validate it with this generator, and pass it to
+Flutter as a Dart define file. Firebase identifiers come from the separate
 `FIREBASE_CONFIG_JSON` variable. Never point a release workflow at the example
 university configuration.
+
+## Automated beta releases
+
+Every successful `CI` run caused by a push to `master` starts the beta release
+workflow. It creates a Shorebird Android release, uploads the signed APK, AAB,
+mapping file, native symbols, and checksums as workflow artifacts, attests their
+provenance, and publishes them in a GitHub prerelease. A manual dispatch uses
+the same fail-closed path.
+
+The `beta` GitHub environment accepts protected branches only. Configure
+`UNIVERSITY_CONFIG_JSON`, `FIREBASE_CONFIG_JSON`, and `SUPABASE_URL` as
+repository variables. Configure `SUPABASE_PUBLISHABLE_KEY`, `SHOREBIRD_TOKEN`,
+`NFC_MODULE_DEPLOY_KEY`, `ANDROID_KEYSTORE_BASE64`,
+`ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS`, and `ANDROID_KEY_PASSWORD`
+as repository secrets. The signing values must identify the same long-lived
+Android key for every beta so installed builds remain upgradeable.
