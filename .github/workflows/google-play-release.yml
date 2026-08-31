@@ -25,7 +25,8 @@ jobs:
     if: >-
       github.event_name == 'workflow_dispatch' ||
       (github.event.workflow_run.conclusion == 'success' &&
-      github.event.workflow_run.event == 'push')
+      github.event.workflow_run.event == 'workflow_run' &&
+      github.event.workflow_run.head_branch == 'master')
     runs-on: ubuntu-latest
     timeout-minutes: 20
     environment: beta
@@ -122,25 +123,6 @@ jobs:
           destination.chmod(0o600)
           PY
 
-      - name: Set up Google Cloud CLI
-        uses: google-github-actions/setup-gcloud@aa5489c8933f4cc7a4f7d45035b3b1440c9c10db
-        with:
-          version: 528.0.0
-
-      - name: Enable Google Play Developer API
-        env:
-          CLOUDSDK_CONFIG: ${{ runner.temp }}/gcloud
-        shell: bash
-        run: |
-          project_id="$(
-            python3 -c 'import json, os; print(json.load(open(os.path.join(os.environ["RUNNER_TEMP"], "google-play-service-account.json"), encoding="utf-8"))["project_id"])'
-          )"
-          gcloud auth activate-service-account \
-            --key-file="$RUNNER_TEMP/google-play-service-account.json"
-          gcloud services enable androidpublisher.googleapis.com \
-            --project="$project_id" \
-            --quiet
-
       - name: Upload beta to Google Play
         uses: r0adkll/upload-google-play@e738b9dd8f2476ea806d921b64aacd24f34515a5
         with:
@@ -156,4 +138,3 @@ jobs:
         shell: bash
         run: |
           rm -f "$RUNNER_TEMP/google-play-service-account.json"
-          rm -rf "$RUNNER_TEMP/gcloud"
