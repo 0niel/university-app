@@ -43,7 +43,6 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
         email: email,
         isEmailValid: email.isValid,
         isValid: Formz.validate([email, state.password]),
-        errorMessage: null,
         errorKind: null,
       ),
     );
@@ -58,7 +57,6 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
       state.copyWith(
         password: password,
         isValid: Formz.validate([state.email, password]),
-        errorMessage: null,
         errorKind: null,
       ),
     );
@@ -69,23 +67,18 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     Emitter<LoginState> emit,
   ) async {
     if (!state.isValid) return;
-    emit(
-      state.copyWith(status: .inProgress, errorMessage: null, errorKind: null),
-    );
+    emit(state.copyWith(status: .inProgress, errorKind: null));
     try {
       await userRepository.logInWithPassword(
         email: state.email.value,
         password: state.password.value,
       );
-      emit(
-        state.copyWith(status: .success, errorMessage: null, errorKind: null),
-      );
+      emit(state.copyWith(status: .success, errorKind: null));
     } on Exception catch (error, stackTrace) {
       emit(
         state.copyWith(
           status: .failure,
-          errorMessage: _serverMessage(error),
-          errorKind: .invalidCredentials,
+          errorKind: _passwordErrorKind(error),
         ),
       );
       addError(error, stackTrace);
@@ -97,16 +90,12 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     Emitter<LoginState> emit,
   ) async {
     if (!state.isEmailValid) return;
-    emit(
-      state.copyWith(status: .inProgress, errorMessage: null, errorKind: null),
-    );
+    emit(state.copyWith(status: .inProgress, errorKind: null));
     try {
       await userRepository.sendLoginEmailLink(email: state.email.value);
-      emit(
-        state.copyWith(status: .success, errorMessage: null, errorKind: null),
-      );
+      emit(state.copyWith(status: .success, errorKind: null));
     } on Exception catch (error, stackTrace) {
-      emit(state.copyWith(status: .failure));
+      emit(state.copyWith(status: .failure, errorKind: .generic));
       addError(error, stackTrace);
     }
   }
@@ -115,19 +104,14 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     ContinueAsGuestRequested event,
     Emitter<LoginState> emit,
   ) async {
-    emit(
-      state.copyWith(status: .inProgress, errorMessage: null, errorKind: null),
-    );
+    emit(state.copyWith(status: .inProgress, errorKind: null));
     try {
       await userRepository.signInAnonymously();
-      emit(
-        state.copyWith(status: .success, errorMessage: null, errorKind: null),
-      );
+      emit(state.copyWith(status: .success, errorKind: null));
     } on Exception catch (error, stackTrace) {
       emit(
         state.copyWith(
           status: .failure,
-          errorMessage: _serverMessage(error),
           errorKind: .guestUnavailable,
         ),
       );
@@ -135,19 +119,12 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     }
   }
 
-  String? _serverMessage(Object error) {
+  LoginErrorKind _passwordErrorKind(Object error) {
     final cause = error is AuthenticationException ? error.error : error;
-    final errorMessage = switch (cause) {
-      AuthException(message: final authMessage) => authMessage,
-      Exception() => _exceptionMessage(cause),
-      _ => null,
+    return switch (cause) {
+      AuthException(code: 'invalid_credentials') =>
+        LoginErrorKind.invalidCredentials,
+      _ => LoginErrorKind.generic,
     };
-    return (errorMessage?.trim().isNotEmpty ?? false) ? errorMessage : null;
-  }
-
-  String? _exceptionMessage(Exception exception) {
-    final text = exception.toString();
-    const prefix = 'Exception: ';
-    return text.startsWith(prefix) ? text.substring(prefix.length) : null;
   }
 }

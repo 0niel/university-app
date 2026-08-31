@@ -4,26 +4,53 @@ import 'package:flutter_map/flutter_map.dart';
 class AppMapTiles {
   const AppMapTiles._();
 
-  static const _userAgent = 'university-app';
+  static const _packageName = 'ninja.mirea.mireaapp';
+  static const _userAgent =
+      'NinjaMirea ($_packageName; https://mirea.ninja; support@mirea.ninja)';
+  static const int maxCacheSizeBytes = 128 * 1024 * 1024;
 
-  static const String attribution = '© CARTO · © OpenStreetMap';
+  static const String urlTemplate =
+      'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
+  static const String attribution = '© OpenStreetMap contributors';
 
-  static const ColorFilter _softenDark = ColorFilter.matrix(<double>[
-    0.90,
+  static const _darkMap = ColorFilter.matrix(<double>[
+    -0.1594,
+    -0.5355,
+    -0.0541,
+    0,
+    205,
+    -0.1594,
+    -0.5355,
+    -0.0541,
+    0,
+    210,
+    -0.1594,
+    -0.5355,
+    -0.0541,
+    0,
+    220,
     0,
     0,
     0,
-    24,
+    1,
     0,
-    0.90,
+  ]);
+  static const _lightMap = ColorFilter.matrix(<double>[
+    1,
     0,
     0,
-    24,
     0,
     0,
-    0.95,
     0,
-    30,
+    1,
+    0,
+    0,
+    0,
+    0,
+    0,
+    1,
+    0,
+    0,
     0,
     0,
     0,
@@ -31,24 +58,46 @@ class AppMapTiles {
     0,
   ]);
 
-  static Widget tileLayer(BuildContext context) {
-    final isDark = Theme.of(context).brightness == .dark;
-    return isDark ? _carto(context, 'dark_all') : _carto(context, 'voyager');
+  static NetworkTileProvider createTileProvider({
+    MapCachingProvider? cachingProvider,
+  }) {
+    return NetworkTileProvider(
+      headers: const {'User-Agent': _userAgent},
+      silenceExceptions: true,
+      attemptDecodeOfHttpErrorResponses: false,
+      cachingProvider:
+          cachingProvider ??
+          BuiltInMapCachingProvider.getOrCreateInstance(
+            maxCacheSize: maxCacheSizeBytes,
+          ),
+    );
   }
 
-  static TileLayer _carto(BuildContext context, String style) {
-    final softenDark = style == 'dark_all';
-    return TileLayer(
-      urlTemplate:
-          'https://{s}.basemaps.cartocdn.com/rastertiles/$style/{z}/{x}/{y}{r}.png',
-      subdomains: const ['a', 'b', 'c', 'd'],
-      userAgentPackageName: _userAgent,
-      retinaMode: RetinaMode.isHighDensity(context),
-      maxNativeZoom: 20,
-      tileBuilder: softenDark
-          ? (context, tileWidget, tile) =>
-                ColorFiltered(colorFilter: _softenDark, child: tileWidget)
-          : null,
+  static Widget tileLayer(
+    BuildContext context, {
+    required TileProvider tileProvider,
+  }) {
+    final isDark = Theme.of(context).brightness == .dark;
+    final layer = TileLayer(
+      urlTemplate: urlTemplate,
+      tileProvider: tileProvider,
+      userAgentPackageName: _packageName,
+      subdomains: const [],
+      keepBuffer: 1,
+      panBuffer: 0,
+      tileDisplay: const TileDisplay.fadeIn(
+        duration: Duration(milliseconds: 80),
+      ),
+      evictErrorTileStrategy: EvictErrorTileStrategy.notVisible,
+    );
+    return RepaintBoundary(
+      child: ColoredBox(
+        color: isDark ? const Color(0xFF171A20) : const Color(0xFFF1EFEA),
+        child: ColorFiltered(
+          colorFilter: isDark ? _darkMap : _lightMap,
+          child: layer,
+        ),
+      ),
     );
   }
 }

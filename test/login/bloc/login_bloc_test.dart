@@ -3,12 +3,17 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:formz/formz.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:rtu_mirea_app/login/bloc/login_bloc.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:user_repository/user_repository.dart';
 
 class MockUserRepository extends Mock implements UserRepository {}
 
 class _MessagelessException implements Exception {
   const _MessagelessException();
+}
+
+class _TestAuthenticationFailure extends AuthenticationException {
+  const _TestAuthenticationFailure(super.error);
 }
 
 void main() {
@@ -205,15 +210,22 @@ void main() {
       );
 
       blocTest<LoginBloc, LoginState>(
-        'emits [inProgress, failure] surfacing the error message when login '
-        'throws',
+        'maps the stable auth code to invalid credentials',
         setUp: () {
           when(
             () => userRepository.logInWithPassword(
               email: any(named: 'email'),
               password: any(named: 'password'),
             ),
-          ).thenThrow(Exception('Invalid login credentials'));
+          ).thenThrow(
+            const _TestAuthenticationFailure(
+              AuthException(
+                'Invalid login credentials',
+                statusCode: '400',
+                code: 'invalid_credentials',
+              ),
+            ),
+          );
         },
         build: buildBloc,
         seed: () => validState,
@@ -222,14 +234,13 @@ void main() {
           validState.copyWith(status: FormzSubmissionStatus.inProgress),
           validState.copyWith(
             status: FormzSubmissionStatus.failure,
-            errorMessage: 'Invalid login credentials',
             errorKind: LoginErrorKind.invalidCredentials,
           ),
         ],
       );
 
       blocTest<LoginBloc, LoginState>(
-        'emits the invalid-credentials kind when the error has no message',
+        'maps an unclassified failure to the localized generic state',
         setUp: () {
           when(
             () => userRepository.logInWithPassword(
@@ -245,7 +256,7 @@ void main() {
           validState.copyWith(status: FormzSubmissionStatus.inProgress),
           validState.copyWith(
             status: FormzSubmissionStatus.failure,
-            errorKind: LoginErrorKind.invalidCredentials,
+            errorKind: LoginErrorKind.generic,
           ),
         ],
       );
@@ -301,7 +312,10 @@ void main() {
           validEmailState.copyWith(
             status: FormzSubmissionStatus.inProgress,
           ),
-          validEmailState.copyWith(status: FormzSubmissionStatus.failure),
+          validEmailState.copyWith(
+            status: FormzSubmissionStatus.failure,
+            errorKind: LoginErrorKind.generic,
+          ),
         ],
       );
     });

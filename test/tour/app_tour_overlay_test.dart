@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart' show debugPaintBaselinesEnabled;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
@@ -40,19 +39,28 @@ class _Screen extends StatelessWidget {
   );
 }
 
-Widget _app(GoRouter router, AppTourController controller) =>
-    MaterialApp.router(
-      locale: const Locale('ru'),
-      theme: AppTheme.lightTheme,
-      localizationsDelegates: AppLocalizations.localizationsDelegates,
-      supportedLocales: AppLocalizations.supportedLocales,
-      routerConfig: router,
-      builder: (context, child) => AppTourOverlay(
-        router: router,
-        controller: controller,
-        child: child ?? const SizedBox.shrink(),
-      ),
+Widget _app(
+  GoRouter router,
+  AppTourController controller, {
+  TextStyle? outerTextStyle,
+}) => MaterialApp.router(
+  locale: const Locale('ru'),
+  theme: AppTheme.lightTheme,
+  localizationsDelegates: AppLocalizations.localizationsDelegates,
+  supportedLocales: AppLocalizations.supportedLocales,
+  routerConfig: router,
+  builder: (context, child) {
+    final overlay = AppTourOverlay(
+      router: router,
+      controller: controller,
+      child: child ?? const SizedBox.shrink(),
     );
+    final style = outerTextStyle;
+    return style == null
+        ? overlay
+        : DefaultTextStyle(style: style, child: overlay);
+  },
+);
 
 Future<void> _advance(WidgetTester tester) async {
   for (var tick = 0; tick < 24; tick++) {
@@ -90,7 +98,6 @@ void main() {
   });
 
   tearDown(() {
-    debugPaintBaselinesEnabled = false;
     controller
       ..stop()
       ..dispose();
@@ -126,17 +133,29 @@ void main() {
     expect(spotlight.hole!.inflate(-8), anchor);
   });
 
-  testWidgets('disables baseline debug paint when the tour opens', (
+  testWidgets('coach copy clears the outer fallback text decoration', (
     tester,
   ) async {
-    await tester.pumpWidget(_app(router, controller));
+    await tester.pumpWidget(
+      _app(
+        router,
+        controller,
+        outerTextStyle: const TextStyle(
+          decoration: TextDecoration.underline,
+          decorationColor: Colors.yellow,
+          decorationStyle: TextDecorationStyle.double,
+        ),
+      ),
+    );
     await tester.pump();
-    debugPaintBaselinesEnabled = true;
 
     unawaited(controller.start(_steps));
     await tester.pump();
 
-    expect(debugPaintBaselinesEnabled, isFalse);
+    final finder = find.text('Поиск по всему кампусу');
+    final text = tester.widget<Text>(finder);
+    final inherited = DefaultTextStyle.of(tester.element(finder)).style;
+    expect(inherited.merge(text.style).decoration, TextDecoration.none);
     controller.stop();
     await _advance(tester);
   });

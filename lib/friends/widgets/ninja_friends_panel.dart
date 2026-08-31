@@ -23,7 +23,6 @@ class NinjaFriendsPanel extends StatelessWidget {
     this.onRetry,
     this.myLatitude,
     this.myLongitude,
-    this.attribution,
     this.controller,
   });
 
@@ -36,7 +35,6 @@ class NinjaFriendsPanel extends StatelessWidget {
   final double? myLatitude;
   final double? myLongitude;
 
-  final String? attribution;
   final DraggableScrollableController? controller;
 
   String? _distanceTo(Friend friend, AppLocalizations l10n) {
@@ -173,15 +171,6 @@ class NinjaFriendsPanel extends StatelessWidget {
                 ),
               ),
               NinjaStateSwitcher(child: _content(l10n)),
-              if (attribution case final attributionText?) ...[
-                const SizedBox(height: 14),
-                Center(
-                  child: Text(
-                    attributionText,
-                    style: NinjaText.helper.copyWith(color: colors.muted),
-                  ),
-                ),
-              ],
             ],
           ),
         );

@@ -6,17 +6,6 @@ import 'package:app_ui/src/ninja/ninja_text.dart';
 import 'package:app_ui/src/widgets/app_line_icon.dart';
 import 'package:app_ui/src/widgets/app_pressable.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart' show debugPaintBaselinesEnabled;
-
-void _disableTextDebugPaint() {
-  assert(
-    () {
-      debugPaintBaselinesEnabled = false;
-      return true;
-    }(),
-    'Text baseline debug paint must be disabled.',
-  );
-}
 
 class NinjaToast extends StatelessWidget {
   const NinjaToast({
@@ -211,7 +200,6 @@ class NinjaToastHostState extends State<NinjaToastHost>
   }
 
   void show(NinjaToastData toast) {
-    _disableTextDebugPaint();
     _queue.add(toast);
     if (_current == null) _showNext();
   }
