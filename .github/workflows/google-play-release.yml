@@ -134,6 +134,10 @@ jobs:
           required = {"client_email", "private_key", "project_id"}
           if not required.issubset(credentials):
               raise SystemExit("Invalid Google Play service account configuration")
+          client_email = credentials["client_email"]
+          if not isinstance(client_email, str) or not client_email.endswith(".iam.gserviceaccount.com"):
+              raise SystemExit("Invalid Google Play service account email")
+          print(f"Google Play service account: {client_email}")
           destination = Path(os.environ["RUNNER_TEMP"]) / "google-play-service-account.json"
           destination.write_text(json.dumps(credentials), encoding="utf-8")
           destination.chmod(0o600)
