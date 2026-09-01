@@ -131,7 +131,11 @@ Deno.serve(async (req) => {
     return jsonResponse({ error: message }, 400);
   }
 
-  const authError = requireIngestKey(req, payload.organization_id);
+  const authError = requireIngestKey(
+    req,
+    payload.organization_id,
+    payload.entity,
+  );
   if (authError) return authError;
 
   const supabaseUrl = Deno.env.get("SUPABASE_URL");

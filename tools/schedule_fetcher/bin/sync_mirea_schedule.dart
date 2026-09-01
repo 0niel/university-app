@@ -51,6 +51,7 @@ Future<void> main(List<String> arguments) async {
     ..addOption('skip', defaultsTo: '0', help: 'Matching targets to skip.')
     ..addOption('limit', help: 'Maximum targets to sync.')
     ..addOption('batch-size', defaultsTo: '1')
+    ..addOption('fetch-concurrency', defaultsTo: '8')
     ..addOption('target-part-batch-size', defaultsTo: '20')
     ..addOption('payload-output', help: 'Write each ingest payload to a file.')
     ..addOption(
@@ -97,6 +98,10 @@ Future<void> main(List<String> arguments) async {
   final skip = _nonNegativeInt(args.option('skip')!, 'skip');
   final limit = _optionalPositiveInt(args.option('limit'), 'limit');
   final batchSize = _positiveInt(args.option('batch-size')!, 'batch-size');
+  final fetchConcurrency = _positiveInt(
+    args.option('fetch-concurrency')!,
+    'fetch-concurrency',
+  );
   final targetPartBatchSize = _positiveInt(
     args.option('target-part-batch-size')!,
     'target-part-batch-size',
@@ -114,6 +119,7 @@ Future<void> main(List<String> arguments) async {
       supabaseApiKey: supabaseApiKey,
       organizationId: organizationId,
       batchSize: batchSize,
+      fetchConcurrency: fetchConcurrency,
       targetPartBatchSize: targetPartBatchSize,
       payloadOutput: payloadOutput,
       ingestTransport: ingestTransport,
@@ -136,13 +142,14 @@ Future<void> main(List<String> arguments) async {
 }
 
 class SyncMireaSchedule {
-  const SyncMireaSchedule({
+  SyncMireaSchedule({
     required this._httpClient,
     required this._ingestUrl,
     required this._ingestKey,
     required this._supabaseApiKey,
     required this._organizationId,
     required this._batchSize,
+    required this._fetchConcurrency,
     required this._targetPartBatchSize,
     required this._payloadOutput,
     required this._ingestTransport,
@@ -160,6 +167,7 @@ class SyncMireaSchedule {
   final String? _supabaseApiKey;
   final String _organizationId;
   final int _batchSize;
+  final int _fetchConcurrency;
   final int _targetPartBatchSize;
   final String? _payloadOutput;
   final String _ingestTransport;
@@ -169,6 +177,7 @@ class SyncMireaSchedule {
   final String _sourceName;
   final String _sourceOrganizationName;
   final String _sourceTimezone;
+  String? _syncRunId;
 
   Future<void> run({
     required String? targetType,
@@ -176,7 +185,59 @@ class SyncMireaSchedule {
     required int skip,
     required int? limit,
   }) async {
+    final fullSync =
+        targetType == null &&
+        (match == null || match.trim().isEmpty) &&
+        skip == 0 &&
+        limit == null;
+    if (!_dryRun) {
+      _syncRunId = await _startSync(fullSync: fullSync);
+    }
+
+    try {
+      final result = await _syncTargets(
+        targetType: targetType,
+        match: match,
+        skip: skip,
+        limit: limit,
+      );
+      if (result.failed > 0) {
+        throw StateError(
+          'Schedule sync incomplete: ${result.failed} failures',
+        );
+      }
+      if (_syncRunId != null) {
+        await _finishSync(
+          status: 'succeeded',
+          checkpoint: {
+            'completed_at': DateTime.now().toUtc().toIso8601String(),
+            'targets': result.handled,
+            'full_sync': fullSync,
+          },
+        );
+      }
+    } on Object catch (error, stackTrace) {
+      if (_syncRunId != null) {
+        try {
+          await _finishSync(status: 'failed', errorMessage: '$error');
+        } on Object catch (finishError) {
+          stderr.writeln('Failed to record sync failure: $finishError');
+        }
+      }
+      Error.throwWithStackTrace(error, stackTrace);
+    } finally {
+      _syncRunId = null;
+    }
+  }
+
+  Future<({int handled, int failed})> _syncTargets({
+    required String? targetType,
+    required String? match,
+    required int skip,
+    required int? limit,
+  }) async {
     final batch = <Map<String, Object?>>[];
+    final targets = <_ScheduleTarget>[];
     var seenMatching = 0;
     var handled = 0;
     var failed = 0;
@@ -185,41 +246,65 @@ class SyncMireaSchedule {
       if (targetType != null && target.targetType != targetType) continue;
       seenMatching++;
       if (seenMatching <= skip) continue;
-      if (limit != null && handled >= limit) break;
+      if (limit != null && targets.length >= limit) break;
+      targets.add(target);
+    }
 
-      try {
-        final normalized = await _normalizeTarget(target);
-        final parts = normalized['parts'];
-        if (parts is! List<Object?>) {
-          throw StateError('Normalized target has no parts list');
+    for (var offset = 0; offset < targets.length; offset += _fetchConcurrency) {
+      final end = offset + _fetchConcurrency > targets.length
+          ? targets.length
+          : offset + _fetchConcurrency;
+      final preparedTargets = await Future.wait(
+        targets.sublist(offset, end).map(_prepareTarget),
+      );
+
+      for (final prepared in preparedTargets) {
+        final target = prepared.target;
+        if (prepared.error != null) {
+          failed++;
+          stderr
+            ..writeln(
+              'Failed ${target.targetType}:${target.id} ${target.fullTitle}: '
+              '${prepared.error}',
+            )
+            ..writeln(prepared.stackTrace);
+          continue;
         }
-        final chunks = _splitTargetPayload(normalized);
-        handled++;
 
-        stdout.writeln(
-          'Prepared #$handled ${target.targetType}:${target.id} '
-          '${target.fullTitle} parts=${parts.length} '
-          'chunks=${chunks.length}',
-        );
+        try {
+          final normalized = prepared.normalized!;
+          final parts = normalized['parts'];
+          if (parts is! List<Object?>) {
+            throw StateError('Normalized target has no parts list');
+          }
+          final chunks = _splitTargetPayload(normalized);
+          handled++;
 
-        for (final chunk in chunks) {
-          batch.add(chunk);
-          if (batch.length >= _batchSize) {
-            try {
-              await _flush(batch);
-            } finally {
-              batch.clear();
+          stdout.writeln(
+            'Prepared #$handled ${target.targetType}:${target.id} '
+            '${target.fullTitle} parts=${parts.length} '
+            'chunks=${chunks.length}',
+          );
+
+          for (final chunk in chunks) {
+            batch.add(chunk);
+            if (batch.length >= _batchSize) {
+              try {
+                await _flush(batch);
+              } finally {
+                batch.clear();
+              }
             }
           }
+        } on Object catch (error, stackTrace) {
+          failed++;
+          stderr
+            ..writeln(
+              'Failed ${target.targetType}:${target.id} ${target.fullTitle}: '
+              '$error',
+            )
+            ..writeln(stackTrace);
         }
-      } on Object catch (error, stackTrace) {
-        failed++;
-        stderr
-          ..writeln(
-            'Failed ${target.targetType}:${target.id} ${target.fullTitle}: '
-            '$error',
-          )
-          ..writeln(stackTrace);
       }
     }
 
@@ -237,6 +322,70 @@ class SyncMireaSchedule {
     }
 
     stdout.writeln('Done. targets=$handled failed=$failed dryRun=$_dryRun');
+    return (handled: handled, failed: failed);
+  }
+
+  Future<_PreparedTarget> _prepareTarget(_ScheduleTarget target) async {
+    try {
+      return _PreparedTarget(
+        target: target,
+        normalized: await _normalizeTarget(target),
+      );
+    } on Object catch (error, stackTrace) {
+      return _PreparedTarget(
+        target: target,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+  }
+
+  Future<String> _startSync({required bool fullSync}) async {
+    final response = await _postControl({
+      'entity': 'sync_start',
+      'organization_id': _organizationId,
+      'source': _sourceId,
+      'source_type': 'schedule',
+      'metadata': {'full_sync': fullSync},
+    });
+    final result = response['result'];
+    if (result is! Map<String, Object?> || result['sync_run_id'] is! String) {
+      throw StateError('Sync start response has no sync_run_id');
+    }
+    return result['sync_run_id']! as String;
+  }
+
+  Future<void> _finishSync({
+    required String status,
+    Map<String, Object?>? checkpoint,
+    String? errorMessage,
+  }) async {
+    final boundedError = errorMessage != null && errorMessage.length > 2000
+        ? errorMessage.substring(0, 2000)
+        : errorMessage;
+    await _postControl({
+      'entity': 'sync_finish',
+      'organization_id': _organizationId,
+      'sync_run_id': _syncRunId,
+      'status': status,
+      'checkpoint': checkpoint,
+      'error_message': boundedError,
+      'metadata': const <String, Object?>{},
+    });
+  }
+
+  Future<Map<String, Object?>> _postControl(
+    Map<String, Object?> payload,
+  ) async {
+    final response = await _postIngest(
+      jsonEncode(payload),
+      label: payload['entity']! as String,
+    );
+    final decoded = jsonDecode(response.body);
+    if (decoded is! Map<String, Object?>) {
+      throw StateError('Ingest control response is not a JSON object');
+    }
+    return decoded;
   }
 
   Stream<_ScheduleTarget> _fetchTargets({required String? match}) async* {
@@ -251,12 +400,12 @@ class SyncMireaSchedule {
       final uri = _scheduleBaseUrl
           .resolve('/schedule/api/search')
           .replace(queryParameters: query.isEmpty ? null : query);
-      final response = await _httpClient
-          .get(
-            uri,
-            headers: const {HttpHeaders.acceptHeader: 'application/json'},
-          )
-          .timeout(const Duration(seconds: 30));
+      final response = await _getWithRetry(
+        uri,
+        accept: 'application/json',
+        timeout: const Duration(seconds: 30),
+        label: 'schedule search',
+      );
 
       if (response.statusCode != HttpStatus.ok) {
         throw StateError(
@@ -280,12 +429,12 @@ class SyncMireaSchedule {
         'includeMeta': 'true',
       },
     );
-    final response = await _httpClient
-        .get(
-          calendarFeedUri,
-          headers: const {HttpHeaders.acceptHeader: 'text/calendar,*/*'},
-        )
-        .timeout(const Duration(seconds: 60));
+    final response = await _getWithRetry(
+      calendarFeedUri,
+      accept: 'text/calendar,*/*',
+      timeout: const Duration(seconds: 60),
+      label: 'iCal fetch',
+    );
 
     if (response.statusCode != HttpStatus.ok) {
       throw StateError(
@@ -312,14 +461,39 @@ class SyncMireaSchedule {
       },
       'full_replace': true,
       'parts': parts,
-      // Full set of this target's part UIDs (across all chunks) so the ingest
-      // can reconcile vanished lessons (cancellations) without partial state.
       'source_uids': parts
           .map((part) => part['uid'])
           .whereType<String>()
           .toList(),
       'metadata': {'scheduleTarget': target.scheduleTarget},
     };
+  }
+
+  Future<http.Response> _getWithRetry(
+    Uri uri, {
+    required String accept,
+    required Duration timeout,
+    required String label,
+  }) async {
+    for (var attempt = 1; attempt <= 3; attempt++) {
+      try {
+        final response = await _httpClient
+            .get(uri, headers: {HttpHeaders.acceptHeader: accept})
+            .timeout(timeout);
+        if (!_isRetryableStatus(response.statusCode) || attempt == 3) {
+          return response;
+        }
+      } on Object catch (error) {
+        if (attempt == 3 || !_isRetryableIngestError(error)) rethrow;
+      }
+
+      final delay = Duration(seconds: attempt * 2);
+      stderr.writeln(
+        'Retry $label attempt=${attempt + 1} after ${delay.inSeconds}s',
+      );
+      await Future<void>.delayed(delay);
+    }
+    throw StateError('$label retry loop ended unexpectedly');
   }
 
   List<Map<String, Object?>> _splitTargetPayload(Map<String, Object?> target) {
@@ -358,6 +532,7 @@ class SyncMireaSchedule {
         'timezone': _sourceTimezone,
       },
       'targets': targets,
+      'sync_run_id': _syncRunId,
     });
     if (_payloadOutput != null) {
       final file = File(_payloadOutput);
@@ -379,35 +554,48 @@ class SyncMireaSchedule {
       return;
     }
 
+    final response = await _postIngest(
+      body,
+      label: 'schedule batch size=${targets.length}',
+    );
+    final decoded = jsonDecode(response.body);
+    if (decoded is! Map<String, Object?>) {
+      throw StateError('Schedule ingest response is not a JSON object');
+    }
+    final result = decoded['result'];
+    if (result is! Map<String, Object?>) {
+      throw StateError('Schedule ingest response has no result object');
+    }
+    final skipped = result['items_skipped'];
+    if (skipped is int && skipped > 0) {
+      throw StateError('Schedule ingest skipped $skipped items');
+    }
+    stdout.writeln(
+      'Ingested batch size=${targets.length}: ${response.body}',
+    );
+  }
+
+  Future<http.Response> _postIngest(
+    String body, {
+    required String label,
+  }) async {
     for (var attempt = 1; attempt <= 3; attempt++) {
       try {
         final response = await _httpClient
             .post(
               _ingestUrl,
-              headers: {
-                HttpHeaders.acceptHeader: 'application/json',
-                HttpHeaders.authorizationHeader: 'Bearer $_ingestKey',
-                HttpHeaders.connectionHeader: 'close',
-                HttpHeaders.contentTypeHeader: ContentType.json.mimeType,
-                HttpHeaders.userAgentHeader:
-                    'university-app-schedule-fetcher/0.1',
-                'apikey': ?_supabaseApiKey,
-                'x-ingest-key': _ingestKey,
-              },
+              headers: _ingestHeaders,
               body: body,
             )
             .timeout(const Duration(seconds: 90));
 
         if (response.statusCode >= 200 && response.statusCode < 300) {
-          stdout.writeln(
-            'Ingested batch size=${targets.length}: ${response.body}',
-          );
-          return;
+          return response;
         }
 
-        if (attempt == 3 || response.statusCode < 500) {
+        if (attempt == 3 || !_isRetryableStatus(response.statusCode)) {
           throw StateError(
-            'Ingest failed: ${response.statusCode} ${response.body}',
+            '$label failed: ${response.statusCode} ${response.body}',
           );
         }
       } catch (error) {
@@ -416,12 +604,23 @@ class SyncMireaSchedule {
 
       final delay = Duration(seconds: attempt * 2);
       stderr.writeln(
-        'Retry ingest batch size=${targets.length} '
+        'Retry $label '
         'attempt=${attempt + 1} after ${delay.inSeconds}s',
       );
       await Future<void>.delayed(delay);
     }
+    throw StateError('$label retry loop ended unexpectedly');
   }
+
+  Map<String, String> get _ingestHeaders => {
+    HttpHeaders.acceptHeader: 'application/json',
+    HttpHeaders.authorizationHeader: 'Bearer $_ingestKey',
+    HttpHeaders.connectionHeader: 'close',
+    HttpHeaders.contentTypeHeader: ContentType.json.mimeType,
+    HttpHeaders.userAgentHeader: 'university-app-schedule-fetcher/0.1',
+    'apikey': ?_supabaseApiKey,
+    'x-ingest-key': _ingestKey,
+  };
 
   Future<void> _flushWithDeno(String body, int targetCount) async {
     const script = r'''
@@ -492,6 +691,20 @@ if (!response.ok) Deno.exit(1);
       await Future<void>.delayed(delay);
     }
   }
+}
+
+class _PreparedTarget {
+  const _PreparedTarget({
+    required this.target,
+    this.normalized,
+    this.error,
+    this.stackTrace,
+  });
+
+  final _ScheduleTarget target;
+  final Map<String, Object?>? normalized;
+  final Object? error;
+  final StackTrace? stackTrace;
 }
 
 class _ScheduleTarget {
@@ -601,4 +814,8 @@ bool _isRetryableIngestError(Object error) {
   return error is http.ClientException ||
       error is SocketException ||
       error is TimeoutException;
+}
+
+bool _isRetryableStatus(int statusCode) {
+  return statusCode == HttpStatus.tooManyRequests || statusCode >= 500;
 }

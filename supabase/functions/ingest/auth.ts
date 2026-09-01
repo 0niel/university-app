@@ -5,7 +5,20 @@ type EnvironmentReader = (name: string) => string | undefined;
 export function resolveIngestKey(
   organizationId: string,
   readEnvironment: EnvironmentReader = (name) => Deno.env.get(name),
+  entity?: string,
 ): string | null {
+  if (entity === "schedule") {
+    const scheduleKey = readEnvironment("SCHEDULE_INGEST_KEY");
+    const scheduleOrganization = readEnvironment(
+      "SCHEDULE_INGEST_ORGANIZATION_ID",
+    );
+    if (scheduleKey || scheduleOrganization) {
+      return scheduleKey && scheduleOrganization === organizationId
+        ? scheduleKey
+        : null;
+    }
+  }
+
   const tenantKeys = readEnvironment("INGEST_TENANT_KEYS");
   if (tenantKeys) {
     const parsed = JSON.parse(tenantKeys) as unknown;
@@ -27,15 +40,27 @@ export function resolveIngestKey(
 export function requireIngestKey(
   req: Request,
   organizationId: string,
+  entity?: string,
+  readEnvironment: EnvironmentReader = (name) => Deno.env.get(name),
 ): Response | null {
-  let expected: string | null;
+  let expectedKeys: string[];
   try {
-    expected = resolveIngestKey(organizationId);
+    const expected = resolveIngestKey(
+      organizationId,
+      readEnvironment,
+      entity,
+    );
+    const scheduleExpected = entity === "sync_start" || entity === "sync_finish"
+      ? resolveIngestKey(organizationId, readEnvironment, "schedule")
+      : null;
+    expectedKeys = [expected, scheduleExpected].filter((value) =>
+      value != null
+    );
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     return jsonResponse({ error: message }, 500);
   }
-  if (!expected) {
+  if (expectedKeys.length === 0) {
     return jsonResponse(
       { error: "Ingest key is not configured for tenant" },
       500,
@@ -47,6 +72,10 @@ export function requireIngestKey(
   const bearer = authorization.toLowerCase().startsWith("bearer ")
     ? authorization.slice("bearer ".length)
     : null;
-  if (headerKey === expected || bearer === expected) return null;
+  if (
+    expectedKeys.some((expected) =>
+      headerKey === expected || bearer === expected
+    )
+  ) return null;
   return jsonResponse({ error: "Unauthorized" }, 401);
 }
