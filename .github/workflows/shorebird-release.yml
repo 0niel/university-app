@@ -8,6 +8,16 @@ on:
         required: false
         type: string
         default: ''
+      verify_build_number:
+        description: Existing App Store build number
+        required: false
+        type: string
+        default: ''
+      verify_marketing_version:
+        description: Existing App Store marketing version
+        required: false
+        type: string
+        default: ''
 
 permissions:
   actions: read
@@ -19,7 +29,7 @@ concurrency:
 
 jobs:
   release:
-    if: ${{ inputs.artifact_run_id == '' }}
+    if: ${{ inputs.artifact_run_id == '' && inputs.verify_build_number == '' && inputs.verify_marketing_version == '' }}
     runs-on: macos-15
     timeout-minutes: 60
     environment: beta
@@ -108,6 +118,7 @@ jobs:
         run: |
           flutter analyze lib test
           flutter test
+          python3 -m unittest discover -s test/tool -p app_store_build_status_test.py
 
       - name: Configure iOS signing
         env:
@@ -277,20 +288,27 @@ jobs:
 
   publish:
     needs: release
-    if: ${{ always() && (needs.release.result == 'success' || inputs.artifact_run_id != '') }}
+    if: ${{ always() && (needs.release.result == 'success' || inputs.artifact_run_id != '' || inputs.verify_build_number != '' || inputs.verify_marketing_version != '') }}
     runs-on: macos-15
-    timeout-minutes: 20
+    timeout-minutes: 30
     environment: beta
+    env:
+      IOS_APP_BUNDLE_ID: pro.oniel.it.university
     defaults:
       run:
         shell: bash
     steps:
+      - name: Check out repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+
       - name: Verify publishing configuration
         env:
           APPSTORE_API_KEY_ID: ${{ secrets.APPSTORE_API_KEY_ID }}
           APPSTORE_API_ISSUER_ID: ${{ secrets.APPSTORE_API_ISSUER_ID }}
           APPSTORE_API_PRIVATE_KEY: ${{ secrets.APPSTORE_API_PRIVATE_KEY }}
           ARTIFACT_RUN_ID: ${{ inputs.artifact_run_id }}
+          VERIFY_BUILD_NUMBER: ${{ inputs.verify_build_number }}
+          VERIFY_MARKETING_VERSION: ${{ inputs.verify_marketing_version }}
         run: |
           required=(
             APPSTORE_API_KEY_ID
@@ -307,16 +325,32 @@ jobs:
             printf 'Invalid iOS artifact run ID\n' >&2
             exit 1
           fi
+          if [[ -n "$VERIFY_BUILD_NUMBER" && ! "$VERIFY_BUILD_NUMBER" =~ ^[0-9]{1,4}(\.[0-9]{1,2}){0,2}$ ]]; then
+            printf 'Invalid App Store build number\n' >&2
+            exit 1
+          fi
+          if [[ -n "$VERIFY_BUILD_NUMBER" && ! "$VERIFY_MARKETING_VERSION" =~ ^[0-9]+(\.[0-9]+){1,2}$ ]]; then
+            printf 'Invalid App Store marketing version\n' >&2
+            exit 1
+          fi
+          if [[ -z "$VERIFY_BUILD_NUMBER" && -n "$VERIFY_MARKETING_VERSION" ]]; then
+            printf 'App Store build number is required for verification\n' >&2
+            exit 1
+          fi
+          if [[ -n "$ARTIFACT_RUN_ID" && -n "$VERIFY_BUILD_NUMBER" ]]; then
+            printf 'Artifact recovery and build verification are mutually exclusive\n' >&2
+            exit 1
+          fi
 
       - name: Download iOS artifact
-        if: ${{ inputs.artifact_run_id == '' }}
+        if: ${{ inputs.artifact_run_id == '' && inputs.verify_build_number == '' }}
         uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0
         with:
           name: ios-shorebird-release
           path: ${{ runner.temp }}/ios
 
       - name: Download existing iOS artifact
-        if: ${{ inputs.artifact_run_id != '' }}
+        if: ${{ inputs.artifact_run_id != '' && inputs.verify_build_number == '' }}
         uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0
         with:
           name: ios-shorebird-release
@@ -348,6 +382,7 @@ jobs:
           PY
 
       - name: Upload iOS beta to TestFlight
+        if: ${{ inputs.verify_build_number == '' }}
         env:
           APPSTORE_API_KEY_ID: ${{ secrets.APPSTORE_API_KEY_ID }}
           APPSTORE_API_ISSUER_ID: ${{ secrets.APPSTORE_API_ISSUER_ID }}
@@ -363,6 +398,41 @@ jobs:
             --file "$ipa" \
             --apiKey "$APPSTORE_API_KEY_ID" \
             --apiIssuer "$APPSTORE_API_ISSUER_ID"
+
+      - name: Verify TestFlight processing
+        env:
+          APPSTORE_API_KEY_ID: ${{ secrets.APPSTORE_API_KEY_ID }}
+          APPSTORE_API_ISSUER_ID: ${{ secrets.APPSTORE_API_ISSUER_ID }}
+          VERIFY_BUILD_NUMBER: ${{ inputs.verify_build_number }}
+          VERIFY_MARKETING_VERSION: ${{ inputs.verify_marketing_version }}
+        run: |
+          build_number="$VERIFY_BUILD_NUMBER"
+          marketing_version="$VERIFY_MARKETING_VERSION"
+          if [[ -z "$build_number" ]]; then
+            ipa="$(find "$RUNNER_TEMP/ios" -type f -name '*.ipa' -print -quit)"
+            if [[ -z "$ipa" ]]; then
+              printf 'Signed iOS artifact is unavailable\n' >&2
+              exit 1
+            fi
+            extraction_root="$RUNNER_TEMP/app-store-verification"
+            unzip -q "$ipa" -d "$extraction_root"
+            app_plist="$(find "$extraction_root/Payload" -maxdepth 2 -type f -path '*.app/Info.plist' -print -quit)"
+            if [[ -z "$app_plist" ]]; then
+              printf 'Application metadata is unavailable in the iOS artifact\n' >&2
+              exit 1
+            fi
+            build_number="$(plutil -extract CFBundleVersion raw -o - "$app_plist")"
+            marketing_version="$(plutil -extract CFBundleShortVersionString raw -o - "$app_plist")"
+          fi
+          python3 tool/app_store_build_status.py \
+            --bundle-id "$IOS_APP_BUNDLE_ID" \
+            --build-number "$build_number" \
+            --marketing-version "$marketing_version" \
+            --key-id "$APPSTORE_API_KEY_ID" \
+            --issuer-id "$APPSTORE_API_ISSUER_ID" \
+            --private-key "$HOME/.appstoreconnect/private_keys/AuthKey_$APPSTORE_API_KEY_ID.p8" \
+            --timeout 1200 \
+            --interval 30
 
       - name: Remove App Store Connect key
         if: always()
