@@ -1,6 +1,8 @@
 name: Google Play Internal Release
 
 on:
+  schedule:
+    - cron: '17,47 * * * *'
   workflow_run:
     workflows:
       - Beta Release
@@ -28,12 +30,13 @@ permissions:
   contents: read
 
 concurrency:
-  group: google-play-internal-${{ github.event.workflow_run.head_sha || inputs.release_tag || 'store-icon' }}
+  group: google-play-internal-${{ github.event.workflow_run.head_sha || inputs.release_tag || github.sha }}
   cancel-in-progress: false
 
 jobs:
   publish:
     if: >-
+      github.event_name == 'schedule' ||
       github.event_name == 'workflow_dispatch' ||
       (github.event.workflow_run.conclusion == 'success' &&
       github.event.workflow_run.event == 'workflow_run' &&
@@ -64,12 +67,15 @@ jobs:
         id: release
         env:
           GH_TOKEN: ${{ github.token }}
-          RELEASE_SHA: ${{ github.event.workflow_run.head_sha }}
+          RELEASE_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
           REQUESTED_TAG: ${{ inputs.release_tag }}
         shell: bash
         run: |
           if [[ -n "$REQUESTED_TAG" ]]; then
             tag="$REQUESTED_TAG"
+          elif [[ "$GITHUB_EVENT_NAME" == "workflow_dispatch" ]]; then
+            printf 'A release tag is required for a manual bundle upload\n' >&2
+            exit 1
           else
             tag="$(
               gh api "repos/$GITHUB_REPOSITORY/releases?per_page=100" \
@@ -145,15 +151,14 @@ jobs:
 
       - name: Upload beta to Google Play
         if: ${{ inputs.update_icon_only != true }}
-        uses: r0adkll/upload-google-play@e738b9dd8f2476ea806d921b64aacd24f34515a5
-        with:
-          serviceAccountJson: ${{ runner.temp }}/google-play-service-account.json
-          packageName: ${{ env.PACKAGE_NAME }}
-          releaseFiles: ${{ env.ANDROID_BUNDLE }}
-          releaseName: ${{ steps.release.outputs.tag }}
-          tracks: internal
-          status: completed
-          changesNotSentForReview: true
+        shell: bash
+        run: |
+          python3 -m unittest discover -s test/tool -p google_play_internal_release_test.py
+          python3 tool/google_play_internal_release.py \
+            --credentials "$RUNNER_TEMP/google-play-service-account.json" \
+            --bundle "$ANDROID_BUNDLE" \
+            --package-name "$PACKAGE_NAME" \
+            --release-name "${{ steps.release.outputs.tag }}"
 
       - name: Update Google Play store icon
         env:

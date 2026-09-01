@@ -54,8 +54,21 @@ void main() {
     expect(iconIndex, greaterThan(uploadIndex));
     expect(cleanupIndex, greaterThan(iconIndex));
     expect(workflow, contains('tool/google_play_store_icon.py'));
+    expect(workflow, contains('tool/google_play_internal_release.py'));
+    expect(workflow, isNot(contains('r0adkll/upload-google-play@')));
+    expect(workflow, isNot(contains('changesNotSentForReview:')));
     expect(workflow, contains('update_icon_only:'));
     expect(workflow, contains('submit_icon_for_review:'));
+    expect(
+      workflow,
+      contains('A release tag is required for a manual bundle upload'),
+    );
+    expect(workflow, contains("github.event_name == 'schedule'"));
+    expect(workflow, contains("cron: '17,47 * * * *'"));
+    expect(
+      workflow,
+      contains('github.event.workflow_run.head_sha || github.sha'),
+    );
     expect(workflow, contains("inputs.update_icon_only != true"));
     expect(workflow, contains('arguments+=(--submit-for-review)'));
     expect(
