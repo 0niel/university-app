@@ -202,9 +202,7 @@ class SyncMireaSchedule {
         limit: limit,
       );
       if (result.failed > 0) {
-        throw StateError(
-          'Schedule sync incomplete: ${result.failed} failures',
-        );
+        throw StateError('Schedule sync incomplete: ${result.failed} failures');
       }
       if (_syncRunId != null) {
         await _finishSync(
@@ -403,7 +401,7 @@ class SyncMireaSchedule {
       final response = await _getWithRetry(
         uri,
         accept: 'application/json',
-        timeout: const Duration(seconds: 30),
+        timeout: const Duration(seconds: 45),
         label: 'schedule search',
       );
 
@@ -478,7 +476,14 @@ class SyncMireaSchedule {
     for (var attempt = 1; attempt <= 3; attempt++) {
       try {
         final response = await _httpClient
-            .get(uri, headers: {HttpHeaders.acceptHeader: accept})
+            .get(
+              uri,
+              headers: {
+                HttpHeaders.acceptHeader: accept,
+                HttpHeaders.userAgentHeader:
+                    'university-app-schedule-fetcher/0.1',
+              },
+            )
             .timeout(timeout);
         if (!_isRetryableStatus(response.statusCode) || attempt == 3) {
           return response;
@@ -570,9 +575,7 @@ class SyncMireaSchedule {
     if (skipped is int && skipped > 0) {
       throw StateError('Schedule ingest skipped $skipped items');
     }
-    stdout.writeln(
-      'Ingested batch size=${targets.length}: ${response.body}',
-    );
+    stdout.writeln('Ingested batch size=${targets.length}: ${response.body}');
   }
 
   Future<http.Response> _postIngest(
@@ -582,11 +585,7 @@ class SyncMireaSchedule {
     for (var attempt = 1; attempt <= 3; attempt++) {
       try {
         final response = await _httpClient
-            .post(
-              _ingestUrl,
-              headers: _ingestHeaders,
-              body: body,
-            )
+            .post(_ingestUrl, headers: _ingestHeaders, body: body)
             .timeout(const Duration(seconds: 90));
 
         if (response.statusCode >= 200 && response.statusCode < 300) {
