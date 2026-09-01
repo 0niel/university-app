@@ -1169,7 +1169,7 @@ void main() {
   testWidgets('month calendar stays pinned while its grid scrolls', (
     tester,
   ) async {
-    await tester.pumpApp(subject(), size: const Size(390, 568));
+    await tester.pumpApp(subject(), size: const Size(390, 480));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Месяц'));
     await tester.pumpAndSettle();
