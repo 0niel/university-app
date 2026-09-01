@@ -102,6 +102,9 @@ Future<void> main(List<String> arguments) async {
     args.option('schedule-base-url')!,
     'schedule-base-url',
   );
+  final sourceAuthorization = Platform
+      .environment['SCHEDULE_SOURCE_AUTHORIZATION']
+      ?.trim();
   final targetType = args.option('target-type');
   final match = args.option('match');
   final skip = _nonNegativeInt(args.option('skip')!, 'skip');
@@ -134,6 +137,7 @@ Future<void> main(List<String> arguments) async {
       ingestTransport: ingestTransport,
       dryRun: dryRun,
       scheduleBaseUrl: scheduleBaseUrl,
+      sourceAuthorization: sourceAuthorization,
       sourceId: args.option('source-id')!,
       sourceName: args.option('source-name')!,
       sourceOrganizationName: args.option('source-organization-name')!,
@@ -164,6 +168,7 @@ class SyncMireaSchedule {
     required this._ingestTransport,
     required this._dryRun,
     required this._scheduleBaseUrl,
+    required this._sourceAuthorization,
     required this._sourceId,
     required this._sourceName,
     required this._sourceOrganizationName,
@@ -182,6 +187,7 @@ class SyncMireaSchedule {
   final String _ingestTransport;
   final bool _dryRun;
   final Uri _scheduleBaseUrl;
+  final String? _sourceAuthorization;
   final String _sourceId;
   final String _sourceName;
   final String _sourceOrganizationName;
@@ -567,7 +573,17 @@ class SyncMireaSchedule {
   }
 
   Future<Map<String, Object?>> _normalizeTarget(_ScheduleTarget target) async {
-    final sourceUri = target.calendarFeedUri;
+    final originalUri = target.calendarFeedUri;
+    final officialHost = Uri.parse(kScheduleBaseUrl).host.toLowerCase();
+    final sourceUri =
+        originalUri.host.toLowerCase() == officialHost &&
+            originalUri.host.toLowerCase() !=
+                _scheduleBaseUrl.host.toLowerCase()
+        ? _scheduleBaseUrl.replace(
+            path: originalUri.path,
+            query: originalUri.hasQuery ? originalUri.query : null,
+          )
+        : originalUri;
     if (sourceUri.scheme != 'https' ||
         sourceUri.host.toLowerCase() != _scheduleBaseUrl.host.toLowerCase() ||
         sourceUri.port != _scheduleBaseUrl.port ||
@@ -653,6 +669,9 @@ class SyncMireaSchedule {
               uri,
               headers: {
                 HttpHeaders.acceptHeader: accept,
+                if (_sourceAuthorization != null &&
+                    _sourceAuthorization.isNotEmpty)
+                  HttpHeaders.authorizationHeader: _sourceAuthorization,
                 HttpHeaders.userAgentHeader:
                     'university-app-schedule-fetcher/0.1',
               },
