@@ -91,6 +91,8 @@ async def _sync_source(
         await ingest.finish_sync(
             settings.APP_ORGANIZATION_ID,
             run.sync_run_id,
+            source=f"website:{source_config.external_id}",
+            source_type="website",
             status="succeeded",
             checkpoint={
                 "version": 1,
@@ -136,6 +138,8 @@ async def _record_sync_failure(
         await ingest.finish_sync(
             settings.APP_ORGANIZATION_ID,
             sync_run_id,
+            source=f"website:{source_id}",
+            source_type="website",
             status="failed",
             error_message=str(error),
             metadata={"source_id": source_id},

@@ -207,6 +207,7 @@ async def _drain_message_source(
                 ingest,
                 run.sync_run_id,
                 channel=channel,
+                source_type="telegram",
                 error=error,
             )
             raise
@@ -272,6 +273,7 @@ async def _reconcile_messages(
             ingest,
             run.sync_run_id,
             channel=channel,
+            source_type="telegram",
             error=error,
         )
         raise
@@ -326,6 +328,7 @@ async def _sync_story_snapshot(
             ingest,
             run.sync_run_id,
             channel=channel,
+            source_type="telegram_stories",
             error=error,
         )
         raise
@@ -358,6 +361,8 @@ async def _ingest_observed_batch(
     await ingest.finish_sync(
         settings.APP_ORGANIZATION_ID,
         run_id,
+        source=f"{source_type}:{channel}",
+        source_type=source_type,
         status="succeeded",
         checkpoint=checkpoint,
         metadata=metadata,
@@ -370,6 +375,7 @@ async def _record_sync_failure(
     run_id: UUID,
     *,
     channel: str,
+    source_type: str,
     error: Exception,
     metadata: dict[str, Any] | None = None,
 ) -> None:
@@ -377,6 +383,8 @@ async def _record_sync_failure(
         await ingest.finish_sync(
             settings.APP_ORGANIZATION_ID,
             run_id,
+            source=f"{source_type}:{channel}",
+            source_type=source_type,
             status="failed",
             error_message=str(error),
             metadata=metadata or {"channel": channel},

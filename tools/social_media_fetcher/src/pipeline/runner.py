@@ -76,6 +76,8 @@ async def _sync_source(
         await ingest.finish_sync(
             settings.APP_ORGANIZATION_ID,
             run.sync_run_id,
+            source=f"{source.provider}:{source.id}",
+            source_type=source.provider,
             status="succeeded",
             checkpoint={
                 "version": 1,
@@ -87,6 +89,8 @@ async def _sync_source(
         await ingest.finish_sync(
             settings.APP_ORGANIZATION_ID,
             run.sync_run_id,
+            source=f"{source.provider}:{source.id}",
+            source_type=source.provider,
             status="failed",
             error_message=str(error),
             metadata={"source_id": source.id},

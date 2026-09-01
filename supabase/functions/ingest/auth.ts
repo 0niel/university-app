@@ -43,24 +43,18 @@ export function requireIngestKey(
   entity?: string,
   readEnvironment: EnvironmentReader = (name) => Deno.env.get(name),
 ): Response | null {
-  let expectedKeys: string[];
+  let expected: string | null;
   try {
-    const expected = resolveIngestKey(
+    expected = resolveIngestKey(
       organizationId,
       readEnvironment,
       entity,
-    );
-    const scheduleExpected = entity === "sync_start" || entity === "sync_finish"
-      ? resolveIngestKey(organizationId, readEnvironment, "schedule")
-      : null;
-    expectedKeys = [expected, scheduleExpected].filter((value) =>
-      value != null
     );
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     return jsonResponse({ error: message }, 500);
   }
-  if (expectedKeys.length === 0) {
+  if (expected == null) {
     return jsonResponse(
       { error: "Ingest key is not configured for tenant" },
       500,
@@ -73,9 +67,7 @@ export function requireIngestKey(
     ? authorization.slice("bearer ".length)
     : null;
   if (
-    expectedKeys.some((expected) =>
-      headerKey === expected || bearer === expected
-    )
+    headerKey === expected || bearer === expected
   ) return null;
   return jsonResponse({ error: "Unauthorized" }, 401);
 }

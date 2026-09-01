@@ -15,6 +15,8 @@ export type SyncFinishPayload = {
   entity: "sync_finish";
   organization_id: string;
   sync_run_id: string;
+  source: string | null;
+  source_type: string | null;
   status: "succeeded" | "failed" | "partial";
   checkpoint: Record<string, unknown> | null;
   error_message: string | null;
@@ -54,6 +56,8 @@ export function validateSyncFinish(
     entity: "sync_finish",
     organization_id: validateOrganizationId(value.organization_id),
     sync_run_id: syncRunId,
+    source: optionalText(value.source, "source", 300),
+    source_type: optionalText(value.source_type, "source_type", 100),
     status,
     checkpoint,
     error_message: optionalText(value.error_message, "error_message", 2000),

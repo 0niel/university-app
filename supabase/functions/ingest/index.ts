@@ -28,21 +28,34 @@ function syncRpc(
   supabase: SupabaseClient,
   payload: Extract<IngestPayload, { entity: "sync_start" | "sync_finish" }>,
 ) {
-  return payload.entity === "sync_start"
-    ? supabase.rpc("begin_content_sync", {
+  if (payload.entity === "sync_start") {
+    return supabase.rpc("begin_content_sync", {
       p_organization_id: payload.organization_id,
       p_source: payload.source,
       p_source_type: payload.source_type,
       p_metadata: payload.metadata,
-    })
-    : supabase.rpc("finish_content_sync", {
+    });
+  }
+  if (payload.source !== null && payload.source_type !== null) {
+    return supabase.rpc("finish_content_sync", {
       p_organization_id: payload.organization_id,
       p_sync_run_id: payload.sync_run_id,
+      p_source: payload.source,
+      p_source_type: payload.source_type,
       p_status: payload.status,
       p_checkpoint: payload.checkpoint,
       p_error_message: payload.error_message,
       p_metadata: payload.metadata,
     });
+  }
+  return supabase.rpc("finish_content_sync", {
+    p_organization_id: payload.organization_id,
+    p_sync_run_id: payload.sync_run_id,
+    p_status: payload.status,
+    p_checkpoint: payload.checkpoint,
+    p_error_message: payload.error_message,
+    p_metadata: payload.metadata,
+  });
 }
 
 async function createStoryMediaUpload(
@@ -131,10 +144,14 @@ Deno.serve(async (req) => {
     return jsonResponse({ error: message }, 400);
   }
 
+  const authScope = (payload.entity === "sync_start" ||
+      payload.entity === "sync_finish") && payload.source_type === "schedule"
+    ? "schedule"
+    : payload.entity;
   const authError = requireIngestKey(
     req,
     payload.organization_id,
-    payload.entity,
+    authScope,
   );
   if (authError) return authError;
 

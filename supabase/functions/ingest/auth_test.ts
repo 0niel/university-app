@@ -46,5 +46,13 @@ Deno.test("uses an isolated schedule key for schedule ingestion", () => {
   const request = new Request("https://example.test", {
     headers: { "x-ingest-key": "schedule" },
   });
-  assertEquals(requireIngestKey(request, "mirea", "sync_start", read), null);
+  assertEquals(requireIngestKey(request, "mirea", "schedule", read), null);
+
+  const legacyRequest = new Request("https://example.test", {
+    headers: { "x-ingest-key": "legacy" },
+  });
+  assertEquals(
+    requireIngestKey(legacyRequest, "mirea", "schedule", read)?.status,
+    401,
+  );
 });

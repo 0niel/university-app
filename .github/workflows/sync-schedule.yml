@@ -18,7 +18,7 @@ jobs:
       vars.SCHEDULE_INGEST_URL != '' &&
       vars.SCHEDULE_ORGANIZATION_ID == 'mirea'
     runs-on: windows-latest
-    timeout-minutes: 350
+    timeout-minutes: 45
 
     steps:
       - name: Check out repository
@@ -46,4 +46,4 @@ jobs:
         run: >-
           dart run bin/sync_mirea_schedule.dart
           --fetch-concurrency 16
-          --batch-size 4
+          --batch-size 8

@@ -4,10 +4,19 @@ import 'dart:io';
 
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart' show UsageException;
+import 'package:crypto/crypto.dart';
 import 'package:http/http.dart' as http;
 import 'package:rtu_mirea_schedule_api_client/rtu_mirea_schedule_api_client.dart';
 
 const kScheduleBaseUrl = 'https://schedule-of.mirea.ru';
+const _minimumFullSyncTargetCounts = {
+  'group': 750,
+  'teacher': 1100,
+  'classroom': 550,
+};
+const _minimumFullSyncDatedParts = 10000;
+const _maximumFullSyncUndatedRatio = 0.05;
+const _fullReingestInterval = Duration(hours: 24);
 
 Future<void> main(List<String> arguments) async {
   final parser = ArgParser()
@@ -178,6 +187,9 @@ class SyncMireaSchedule {
   final String _sourceOrganizationName;
   final String _sourceTimezone;
   String? _syncRunId;
+  Map<String, String> _previousTargetHashes = const {};
+  DateTime? _lastFullReingestAt;
+  var _reingestUnchanged = true;
 
   Future<void> run({
     required String? targetType,
@@ -191,7 +203,16 @@ class SyncMireaSchedule {
         skip == 0 &&
         limit == null;
     if (!_dryRun) {
-      _syncRunId = await _startSync(fullSync: fullSync);
+      final started = await _startSync(fullSync: fullSync);
+      _syncRunId = started.syncRunId;
+      _previousTargetHashes = started.targetHashes;
+      _lastFullReingestAt = started.lastFullReingestAt;
+      final lastFullReingestAt = _lastFullReingestAt;
+      _reingestUnchanged =
+          !fullSync ||
+          lastFullReingestAt == null ||
+          DateTime.now().toUtc().difference(lastFullReingestAt) >=
+              _fullReingestInterval;
     }
 
     try {
@@ -200,16 +221,47 @@ class SyncMireaSchedule {
         match: match,
         skip: skip,
         limit: limit,
+        enforceCoverage: fullSync,
       );
       if (result.failed > 0) {
         throw StateError('Schedule sync incomplete: ${result.failed} failures');
       }
+      if (fullSync) {
+        if (result.datedParts < _minimumFullSyncDatedParts) {
+          throw StateError(
+            'Schedule dated part coverage is below threshold: '
+            '${result.datedParts} minimum=$_minimumFullSyncDatedParts',
+          );
+        }
+        final totalParts = result.datedParts + result.undatedParts;
+        if (totalParts > 0 &&
+            result.undatedParts / totalParts > _maximumFullSyncUndatedRatio) {
+          throw StateError(
+            'Schedule undated part ratio is above threshold: '
+            '${result.undatedParts}/$totalParts',
+          );
+        }
+      }
       if (_syncRunId != null) {
+        final completedAt = DateTime.now().toUtc();
+        final checkpointHashes = fullSync
+            ? result.targetHashes
+            : {..._previousTargetHashes, ...result.targetHashes};
         await _finishSync(
           status: 'succeeded',
           checkpoint: {
-            'completed_at': DateTime.now().toUtc().toIso8601String(),
+            'completed_at': completedAt.toIso8601String(),
             'targets': result.handled,
+            'targets_ingested': result.ingested,
+            'target_counts': result.targetCounts,
+            'part_counts': {
+              'dated': result.datedParts,
+              'undated': result.undatedParts,
+            },
+            'target_hashes': checkpointHashes,
+            'last_full_reingest_at': fullSync && _reingestUnchanged
+                ? completedAt.toIso8601String()
+                : _lastFullReingestAt?.toIso8601String(),
             'full_sync': fullSync,
           },
         );
@@ -225,20 +277,39 @@ class SyncMireaSchedule {
       Error.throwWithStackTrace(error, stackTrace);
     } finally {
       _syncRunId = null;
+      _previousTargetHashes = const {};
+      _lastFullReingestAt = null;
+      _reingestUnchanged = true;
     }
   }
 
-  Future<({int handled, int failed})> _syncTargets({
+  Future<
+    ({
+      int handled,
+      int ingested,
+      int failed,
+      int datedParts,
+      int undatedParts,
+      Map<String, int> targetCounts,
+      Map<String, String> targetHashes,
+    })
+  >
+  _syncTargets({
     required String? targetType,
     required String? match,
     required int skip,
     required int? limit,
+    required bool enforceCoverage,
   }) async {
     final batch = <Map<String, Object?>>[];
     final targets = <_ScheduleTarget>[];
     var seenMatching = 0;
     var handled = 0;
+    var ingested = 0;
     var failed = 0;
+    var datedParts = 0;
+    var undatedParts = 0;
+    final targetHashes = <String, String>{};
 
     await for (final target in _fetchTargets(match: match)) {
       if (targetType != null && target.targetType != targetType) continue;
@@ -246,6 +317,21 @@ class SyncMireaSchedule {
       if (seenMatching <= skip) continue;
       if (limit != null && targets.length >= limit) break;
       targets.add(target);
+    }
+
+    final targetCounts = {
+      for (final type in _minimumFullSyncTargetCounts.keys)
+        type: targets.where((target) => target.targetType == type).length,
+    };
+    if (enforceCoverage) {
+      for (final entry in _minimumFullSyncTargetCounts.entries) {
+        if (targetCounts[entry.key]! < entry.value) {
+          throw StateError(
+            'Schedule target coverage is below threshold: '
+            '${entry.key}=${targetCounts[entry.key]} minimum=${entry.value}',
+          );
+        }
+      }
     }
 
     for (var offset = 0; offset < targets.length; offset += _fetchConcurrency) {
@@ -275,13 +361,37 @@ class SyncMireaSchedule {
           if (parts is! List<Object?>) {
             throw StateError('Normalized target has no parts list');
           }
-          final chunks = _splitTargetPayload(normalized);
+          final metadata = normalized['metadata'];
+          final currentUndated = metadata is Map<String, Object?>
+              ? metadata['undated_parts'] as int? ?? 0
+              : 0;
+          datedParts += parts.length;
+          undatedParts += currentUndated;
+          final sourceHash = metadata is Map<String, Object?>
+              ? metadata['source_hash'] as String?
+              : null;
+          if (sourceHash == null) {
+            throw StateError('Normalized target has no source hash');
+          }
+          final targetKey = '${target.targetType}:${target.id}';
+          targetHashes[targetKey] = sourceHash;
           handled++;
+          if (!_reingestUnchanged &&
+              _previousTargetHashes[targetKey] == sourceHash) {
+            stdout.writeln(
+              'Unchanged #$handled ${target.targetType}:${target.id} '
+              '${target.fullTitle} parts=${parts.length} '
+              'undated=$currentUndated',
+            );
+            continue;
+          }
+          final chunks = _splitTargetPayload(normalized);
+          ingested++;
 
           stdout.writeln(
             'Prepared #$handled ${target.targetType}:${target.id} '
             '${target.fullTitle} parts=${parts.length} '
-            'chunks=${chunks.length}',
+            'undated=$currentUndated chunks=${chunks.length}',
           );
 
           for (final chunk in chunks) {
@@ -320,7 +430,15 @@ class SyncMireaSchedule {
     }
 
     stdout.writeln('Done. targets=$handled failed=$failed dryRun=$_dryRun');
-    return (handled: handled, failed: failed);
+    return (
+      handled: handled,
+      ingested: ingested,
+      failed: failed,
+      datedParts: datedParts,
+      undatedParts: undatedParts,
+      targetCounts: targetCounts,
+      targetHashes: targetHashes,
+    );
   }
 
   Future<_PreparedTarget> _prepareTarget(_ScheduleTarget target) async {
@@ -338,7 +456,14 @@ class SyncMireaSchedule {
     }
   }
 
-  Future<String> _startSync({required bool fullSync}) async {
+  Future<
+    ({
+      String syncRunId,
+      Map<String, String> targetHashes,
+      DateTime? lastFullReingestAt,
+    })
+  >
+  _startSync({required bool fullSync}) async {
     final response = await _postControl({
       'entity': 'sync_start',
       'organization_id': _organizationId,
@@ -350,7 +475,26 @@ class SyncMireaSchedule {
     if (result is! Map<String, Object?> || result['sync_run_id'] is! String) {
       throw StateError('Sync start response has no sync_run_id');
     }
-    return result['sync_run_id']! as String;
+    final checkpoint = result['checkpoint'];
+    final checkpointMap = checkpoint is Map<String, Object?>
+        ? checkpoint
+        : const <String, Object?>{};
+    final rawHashes = checkpointMap['target_hashes'];
+    final targetHashes =
+        (rawHashes is Map<String, Object?>
+              ? rawHashes.map(
+                  (key, value) => MapEntry(key, value is String ? value : ''),
+                )
+              : <String, String>{})
+          ..removeWhere((_, value) => value.isEmpty);
+    final rawReingestAt = checkpointMap['last_full_reingest_at'];
+    return (
+      syncRunId: result['sync_run_id']! as String,
+      targetHashes: targetHashes,
+      lastFullReingestAt: rawReingestAt is String
+          ? DateTime.tryParse(rawReingestAt)?.toUtc()
+          : null,
+    );
   }
 
   Future<void> _finishSync({
@@ -365,6 +509,8 @@ class SyncMireaSchedule {
       'entity': 'sync_finish',
       'organization_id': _organizationId,
       'sync_run_id': _syncRunId,
+      'source': _sourceId,
+      'source_type': 'schedule',
       'status': status,
       'checkpoint': checkpoint,
       'error_message': boundedError,
@@ -421,9 +567,18 @@ class SyncMireaSchedule {
   }
 
   Future<Map<String, Object?>> _normalizeTarget(_ScheduleTarget target) async {
-    final calendarFeedUri = target.calendarFeedUri.replace(
+    final sourceUri = target.calendarFeedUri;
+    if (sourceUri.scheme != 'https' ||
+        sourceUri.host.toLowerCase() != _scheduleBaseUrl.host.toLowerCase() ||
+        sourceUri.port != _scheduleBaseUrl.port ||
+        sourceUri.userInfo.isNotEmpty ||
+        sourceUri.fragment.isNotEmpty ||
+        !sourceUri.path.startsWith('/schedule/api/ical/')) {
+      throw const FormatException('Invalid iCal source URL');
+    }
+    final calendarFeedUri = sourceUri.replace(
       queryParameters: {
-        ...target.calendarFeedUri.queryParameters,
+        ...sourceUri.queryParameters,
         'includeMeta': 'true',
       },
     );
@@ -440,9 +595,22 @@ class SyncMireaSchedule {
       );
     }
 
-    final parts = ICalParser.fromString(
+    final parsedParts = ICalParser.fromString(
       response.body,
     ).parse().map((part) => part.toJson()).toList();
+    final parts = parsedParts.where((part) {
+      final dates = part['dates'];
+      return dates is List && dates.isNotEmpty;
+    }).toList();
+    final undatedParts = parsedParts.length - parts.length;
+    final sourceHash = sha256
+        .convert(
+          utf8.encode(
+            '${target.targetType}\n${target.id}\n${target.targetTitle}\n'
+            '${target.fullTitle}\n${target.calendarFeedLink}\n${response.body}',
+          ),
+        )
+        .toString();
 
     return {
       'target_type': target.targetType,
@@ -463,7 +631,12 @@ class SyncMireaSchedule {
           .map((part) => part['uid'])
           .whereType<String>()
           .toList(),
-      'metadata': {'scheduleTarget': target.scheduleTarget},
+      'metadata': {
+        'scheduleTarget': target.scheduleTarget,
+        'raw_parts': parsedParts.length,
+        'undated_parts': undatedParts,
+        'source_hash': sourceHash,
+      },
     };
   }
 
@@ -646,7 +819,7 @@ const response = await fetch(Deno.env.get("INGEST_URL"), {
   body: bytes,
 });
 const text = await response.text();
-console.log(`${response.status} ${text}`);
+console.log(JSON.stringify({ status: response.status, body: text }));
 if (!response.ok) Deno.exit(1);
 ''';
 
@@ -671,7 +844,25 @@ if (!response.ok) Deno.exit(1);
       ).wait;
 
       if (exitCode == 0) {
-        stdout.writeln('Ingested batch size=$targetCount: $stdoutText');
+        final transportResult = jsonDecode(stdoutText.trim());
+        if (transportResult is! Map<String, Object?> ||
+            transportResult['body'] is! String) {
+          throw StateError('Deno ingest response is invalid');
+        }
+        final responseBody = transportResult['body']! as String;
+        final decoded = jsonDecode(responseBody);
+        if (decoded is! Map<String, Object?>) {
+          throw StateError('Schedule ingest response is not a JSON object');
+        }
+        final result = decoded['result'];
+        if (result is! Map<String, Object?>) {
+          throw StateError('Schedule ingest response has no result object');
+        }
+        final skipped = result['items_skipped'];
+        if (skipped is int && skipped > 0) {
+          throw StateError('Schedule ingest skipped $skipped items');
+        }
+        stdout.writeln('Ingested batch size=$targetCount: $responseBody');
         return;
       }
 
