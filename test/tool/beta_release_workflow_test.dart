@@ -69,6 +69,8 @@ void main() {
 
     expect(verifyIndex, isNonNegative);
     expect(verifySourceIndex, greaterThan(verifyIndex));
+    expect(workflow, contains('flutter analyze lib test'));
+    expect(workflow, isNot(contains('          flutter analyze\n')));
     expect(configureIosIndex, greaterThan(verifyIndex));
     expect(configureIosIndex, greaterThan(verifySourceIndex));
     expect(releaseIosIndex, greaterThan(configureIosIndex));
