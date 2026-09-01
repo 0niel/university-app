@@ -2,7 +2,7 @@ name: Sync MIREA schedule
 
 on:
   schedule:
-    - cron: "0 1 * * *"
+    - cron: "7,37 * * * *"
   workflow_dispatch:
 
 permissions:
@@ -16,18 +16,19 @@ jobs:
   sync:
     if: >-
       vars.SCHEDULE_INGEST_URL != '' &&
-      vars.SCHEDULE_ORGANIZATION_ID == 'mirea'
-    runs-on: ubuntu-latest
-    timeout-minutes: 350
+      vars.SCHEDULE_ORGANIZATION_ID == 'mirea' &&
+      vars.SCHEDULE_SOURCE_BASE_URL != ''
+    runs-on: windows-latest
+    timeout-minutes: 45
 
     steps:
       - name: Check out repository
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           persist-credentials: false
 
       - name: Set up Flutter
-        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
         with:
           channel: stable
           flutter-version-file: .fvmrc
@@ -43,4 +44,10 @@ jobs:
           SCHEDULE_INGEST_URL: ${{ vars.SCHEDULE_INGEST_URL }}
           SCHEDULE_ORGANIZATION_ID: ${{ vars.SCHEDULE_ORGANIZATION_ID }}
           SCHEDULE_INGEST_KEY: ${{ secrets.SCHEDULE_INGEST_KEY }}
-        run: dart run bin/sync_mirea_schedule.dart
+          SCHEDULE_SOURCE_AUTHORIZATION: ${{ secrets.SCHEDULE_SOURCE_AUTHORIZATION }}
+          SCHEDULE_SOURCE_BASE_URL: ${{ vars.SCHEDULE_SOURCE_BASE_URL }}
+        run: >-
+          dart run bin/sync_mirea_schedule.dart
+          --schedule-base-url "$env:SCHEDULE_SOURCE_BASE_URL"
+          --fetch-concurrency 16
+          --batch-size 8

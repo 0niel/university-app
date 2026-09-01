@@ -26,6 +26,8 @@ Deno.test("successful sync requires a UUID and checkpoint", () => {
         entity: "sync_finish",
         organization_id: "university",
         sync_run_id: "not-a-uuid",
+        source: "telegram:news",
+        source_type: "telegram",
         status: "succeeded",
         checkpoint: {},
       }),
@@ -38,6 +40,8 @@ Deno.test("successful sync requires a UUID and checkpoint", () => {
         entity: "sync_finish",
         organization_id: "university",
         sync_run_id: "10000000-0000-4000-8000-000000000001",
+        source: "telegram:news",
+        source_type: "telegram",
         status: "succeeded",
       }),
     Error,
@@ -68,5 +72,19 @@ Deno.test("database ingest rejects malformed sync run ids", () => {
       }),
     Error,
     "source",
+  );
+});
+
+Deno.test("schedule ingest requires a sync run", () => {
+  assertThrows(
+    () =>
+      validatePayload({
+        entity: "schedule",
+        organization_id: "university",
+        source: {},
+        targets: [],
+      }),
+    Error,
+    "required",
   );
 });

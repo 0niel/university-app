@@ -79,6 +79,8 @@ async def test_official_news_sync_uses_checkpointed_ingest_contract() -> None:
     assert ingest.items is not None
     assert ingest.finish_calls == [
         {
+            "source": "website:official-news",
+            "source_type": "website",
             "status": "succeeded",
             "checkpoint": {
                 "version": 1,
@@ -103,6 +105,8 @@ async def test_official_news_sync_records_fetch_failure() -> None:
     assert ingest.items is None
     assert ingest.finish_calls == [
         {
+            "source": "website:official-news",
+            "source_type": "website",
             "status": "failed",
             "error_message": "website unavailable",
             "metadata": {"source_id": "official-news"},

@@ -105,6 +105,8 @@ async def test_sync_lifecycle_uses_typed_edge_contracts() -> None:
         result = await client.finish_sync(
             "university",
             run.sync_run_id,
+            source="telegram:news",
+            source_type="telegram",
             status="succeeded",
             checkpoint={"version": 1, "last_message_id": 50},
         )
@@ -124,6 +126,8 @@ async def test_sync_lifecycle_uses_typed_edge_contracts() -> None:
             "entity": "sync_finish",
             "organization_id": "university",
             "sync_run_id": run_id,
+            "source": "telegram:news",
+            "source_type": "telegram",
             "status": "succeeded",
             "checkpoint": {"version": 1, "last_message_id": 50},
             "error_message": None,

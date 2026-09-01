@@ -4,10 +4,19 @@ import 'dart:io';
 
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart' show UsageException;
+import 'package:crypto/crypto.dart';
 import 'package:http/http.dart' as http;
 import 'package:rtu_mirea_schedule_api_client/rtu_mirea_schedule_api_client.dart';
 
 const kScheduleBaseUrl = 'https://schedule-of.mirea.ru';
+const _minimumFullSyncTargetCounts = {
+  'group': 750,
+  'teacher': 1100,
+  'classroom': 550,
+};
+const _minimumFullSyncDatedParts = 10000;
+const _maximumFullSyncUndatedRatio = 0.05;
+const _fullReingestInterval = Duration(hours: 24);
 
 Future<void> main(List<String> arguments) async {
   final parser = ArgParser()
@@ -51,6 +60,7 @@ Future<void> main(List<String> arguments) async {
     ..addOption('skip', defaultsTo: '0', help: 'Matching targets to skip.')
     ..addOption('limit', help: 'Maximum targets to sync.')
     ..addOption('batch-size', defaultsTo: '1')
+    ..addOption('fetch-concurrency', defaultsTo: '8')
     ..addOption('target-part-batch-size', defaultsTo: '20')
     ..addOption('payload-output', help: 'Write each ingest payload to a file.')
     ..addOption(
@@ -92,11 +102,18 @@ Future<void> main(List<String> arguments) async {
     args.option('schedule-base-url')!,
     'schedule-base-url',
   );
+  final sourceAuthorization = Platform
+      .environment['SCHEDULE_SOURCE_AUTHORIZATION']
+      ?.trim();
   final targetType = args.option('target-type');
   final match = args.option('match');
   final skip = _nonNegativeInt(args.option('skip')!, 'skip');
   final limit = _optionalPositiveInt(args.option('limit'), 'limit');
   final batchSize = _positiveInt(args.option('batch-size')!, 'batch-size');
+  final fetchConcurrency = _positiveInt(
+    args.option('fetch-concurrency')!,
+    'fetch-concurrency',
+  );
   final targetPartBatchSize = _positiveInt(
     args.option('target-part-batch-size')!,
     'target-part-batch-size',
@@ -114,11 +131,13 @@ Future<void> main(List<String> arguments) async {
       supabaseApiKey: supabaseApiKey,
       organizationId: organizationId,
       batchSize: batchSize,
+      fetchConcurrency: fetchConcurrency,
       targetPartBatchSize: targetPartBatchSize,
       payloadOutput: payloadOutput,
       ingestTransport: ingestTransport,
       dryRun: dryRun,
       scheduleBaseUrl: scheduleBaseUrl,
+      sourceAuthorization: sourceAuthorization,
       sourceId: args.option('source-id')!,
       sourceName: args.option('source-name')!,
       sourceOrganizationName: args.option('source-organization-name')!,
@@ -136,18 +155,20 @@ Future<void> main(List<String> arguments) async {
 }
 
 class SyncMireaSchedule {
-  const SyncMireaSchedule({
+  SyncMireaSchedule({
     required this._httpClient,
     required this._ingestUrl,
     required this._ingestKey,
     required this._supabaseApiKey,
     required this._organizationId,
     required this._batchSize,
+    required this._fetchConcurrency,
     required this._targetPartBatchSize,
     required this._payloadOutput,
     required this._ingestTransport,
     required this._dryRun,
     required this._scheduleBaseUrl,
+    required this._sourceAuthorization,
     required this._sourceId,
     required this._sourceName,
     required this._sourceOrganizationName,
@@ -160,15 +181,21 @@ class SyncMireaSchedule {
   final String? _supabaseApiKey;
   final String _organizationId;
   final int _batchSize;
+  final int _fetchConcurrency;
   final int _targetPartBatchSize;
   final String? _payloadOutput;
   final String _ingestTransport;
   final bool _dryRun;
   final Uri _scheduleBaseUrl;
+  final String? _sourceAuthorization;
   final String _sourceId;
   final String _sourceName;
   final String _sourceOrganizationName;
   final String _sourceTimezone;
+  String? _syncRunId;
+  Map<String, String> _previousTargetHashes = const {};
+  DateTime? _lastFullReingestAt;
+  var _reingestUnchanged = true;
 
   Future<void> run({
     required String? targetType,
@@ -176,50 +203,222 @@ class SyncMireaSchedule {
     required int skip,
     required int? limit,
   }) async {
+    final fullSync =
+        targetType == null &&
+        (match == null || match.trim().isEmpty) &&
+        skip == 0 &&
+        limit == null;
+    if (!_dryRun) {
+      final started = await _startSync(fullSync: fullSync);
+      _syncRunId = started.syncRunId;
+      _previousTargetHashes = started.targetHashes;
+      _lastFullReingestAt = started.lastFullReingestAt;
+      final lastFullReingestAt = _lastFullReingestAt;
+      _reingestUnchanged =
+          !fullSync ||
+          lastFullReingestAt == null ||
+          DateTime.now().toUtc().difference(lastFullReingestAt) >=
+              _fullReingestInterval;
+    }
+
+    try {
+      final result = await _syncTargets(
+        targetType: targetType,
+        match: match,
+        skip: skip,
+        limit: limit,
+        enforceCoverage: fullSync,
+      );
+      if (result.failed > 0) {
+        throw StateError('Schedule sync incomplete: ${result.failed} failures');
+      }
+      if (fullSync) {
+        if (result.datedParts < _minimumFullSyncDatedParts) {
+          throw StateError(
+            'Schedule dated part coverage is below threshold: '
+            '${result.datedParts} minimum=$_minimumFullSyncDatedParts',
+          );
+        }
+        final totalParts = result.datedParts + result.undatedParts;
+        if (totalParts > 0 &&
+            result.undatedParts / totalParts > _maximumFullSyncUndatedRatio) {
+          throw StateError(
+            'Schedule undated part ratio is above threshold: '
+            '${result.undatedParts}/$totalParts',
+          );
+        }
+      }
+      if (_syncRunId != null) {
+        final completedAt = DateTime.now().toUtc();
+        final checkpointHashes = fullSync
+            ? result.targetHashes
+            : {..._previousTargetHashes, ...result.targetHashes};
+        await _finishSync(
+          status: 'succeeded',
+          checkpoint: {
+            'completed_at': completedAt.toIso8601String(),
+            'targets': result.handled,
+            'targets_ingested': result.ingested,
+            'target_counts': result.targetCounts,
+            'part_counts': {
+              'dated': result.datedParts,
+              'undated': result.undatedParts,
+            },
+            'target_hashes': checkpointHashes,
+            'last_full_reingest_at': fullSync && _reingestUnchanged
+                ? completedAt.toIso8601String()
+                : _lastFullReingestAt?.toIso8601String(),
+            'full_sync': fullSync,
+          },
+        );
+      }
+    } on Object catch (error, stackTrace) {
+      if (_syncRunId != null) {
+        try {
+          await _finishSync(status: 'failed', errorMessage: '$error');
+        } on Object catch (finishError) {
+          stderr.writeln('Failed to record sync failure: $finishError');
+        }
+      }
+      Error.throwWithStackTrace(error, stackTrace);
+    } finally {
+      _syncRunId = null;
+      _previousTargetHashes = const {};
+      _lastFullReingestAt = null;
+      _reingestUnchanged = true;
+    }
+  }
+
+  Future<
+    ({
+      int handled,
+      int ingested,
+      int failed,
+      int datedParts,
+      int undatedParts,
+      Map<String, int> targetCounts,
+      Map<String, String> targetHashes,
+    })
+  >
+  _syncTargets({
+    required String? targetType,
+    required String? match,
+    required int skip,
+    required int? limit,
+    required bool enforceCoverage,
+  }) async {
     final batch = <Map<String, Object?>>[];
+    final targets = <_ScheduleTarget>[];
     var seenMatching = 0;
     var handled = 0;
+    var ingested = 0;
     var failed = 0;
+    var datedParts = 0;
+    var undatedParts = 0;
+    final targetHashes = <String, String>{};
 
     await for (final target in _fetchTargets(match: match)) {
       if (targetType != null && target.targetType != targetType) continue;
       seenMatching++;
       if (seenMatching <= skip) continue;
-      if (limit != null && handled >= limit) break;
+      if (limit != null && targets.length >= limit) break;
+      targets.add(target);
+    }
 
-      try {
-        final normalized = await _normalizeTarget(target);
-        final parts = normalized['parts'];
-        if (parts is! List<Object?>) {
-          throw StateError('Normalized target has no parts list');
+    final targetCounts = {
+      for (final type in _minimumFullSyncTargetCounts.keys)
+        type: targets.where((target) => target.targetType == type).length,
+    };
+    if (enforceCoverage) {
+      for (final entry in _minimumFullSyncTargetCounts.entries) {
+        if (targetCounts[entry.key]! < entry.value) {
+          throw StateError(
+            'Schedule target coverage is below threshold: '
+            '${entry.key}=${targetCounts[entry.key]} minimum=${entry.value}',
+          );
         }
-        final chunks = _splitTargetPayload(normalized);
-        handled++;
+      }
+    }
 
-        stdout.writeln(
-          'Prepared #$handled ${target.targetType}:${target.id} '
-          '${target.fullTitle} parts=${parts.length} '
-          'chunks=${chunks.length}',
-        );
+    for (var offset = 0; offset < targets.length; offset += _fetchConcurrency) {
+      final end = offset + _fetchConcurrency > targets.length
+          ? targets.length
+          : offset + _fetchConcurrency;
+      final preparedTargets = await Future.wait(
+        targets.sublist(offset, end).map(_prepareTarget),
+      );
 
-        for (final chunk in chunks) {
-          batch.add(chunk);
-          if (batch.length >= _batchSize) {
-            try {
-              await _flush(batch);
-            } finally {
-              batch.clear();
+      for (final prepared in preparedTargets) {
+        final target = prepared.target;
+        if (prepared.error != null) {
+          failed++;
+          stderr
+            ..writeln(
+              'Failed ${target.targetType}:${target.id} ${target.fullTitle}: '
+              '${prepared.error}',
+            )
+            ..writeln(prepared.stackTrace);
+          continue;
+        }
+
+        try {
+          final normalized = prepared.normalized!;
+          final parts = normalized['parts'];
+          if (parts is! List<Object?>) {
+            throw StateError('Normalized target has no parts list');
+          }
+          final metadata = normalized['metadata'];
+          final currentUndated = metadata is Map<String, Object?>
+              ? metadata['undated_parts'] as int? ?? 0
+              : 0;
+          datedParts += parts.length;
+          undatedParts += currentUndated;
+          final sourceHash = metadata is Map<String, Object?>
+              ? metadata['source_hash'] as String?
+              : null;
+          if (sourceHash == null) {
+            throw StateError('Normalized target has no source hash');
+          }
+          final targetKey = '${target.targetType}:${target.id}';
+          targetHashes[targetKey] = sourceHash;
+          handled++;
+          if (!_reingestUnchanged &&
+              _previousTargetHashes[targetKey] == sourceHash) {
+            stdout.writeln(
+              'Unchanged #$handled ${target.targetType}:${target.id} '
+              '${target.fullTitle} parts=${parts.length} '
+              'undated=$currentUndated',
+            );
+            continue;
+          }
+          final chunks = _splitTargetPayload(normalized);
+          ingested++;
+
+          stdout.writeln(
+            'Prepared #$handled ${target.targetType}:${target.id} '
+            '${target.fullTitle} parts=${parts.length} '
+            'undated=$currentUndated chunks=${chunks.length}',
+          );
+
+          for (final chunk in chunks) {
+            batch.add(chunk);
+            if (batch.length >= _batchSize) {
+              try {
+                await _flush(batch);
+              } finally {
+                batch.clear();
+              }
             }
           }
+        } on Object catch (error, stackTrace) {
+          failed++;
+          stderr
+            ..writeln(
+              'Failed ${target.targetType}:${target.id} ${target.fullTitle}: '
+              '$error',
+            )
+            ..writeln(stackTrace);
         }
-      } on Object catch (error, stackTrace) {
-        failed++;
-        stderr
-          ..writeln(
-            'Failed ${target.targetType}:${target.id} ${target.fullTitle}: '
-            '$error',
-          )
-          ..writeln(stackTrace);
       }
     }
 
@@ -237,6 +436,106 @@ class SyncMireaSchedule {
     }
 
     stdout.writeln('Done. targets=$handled failed=$failed dryRun=$_dryRun');
+    return (
+      handled: handled,
+      ingested: ingested,
+      failed: failed,
+      datedParts: datedParts,
+      undatedParts: undatedParts,
+      targetCounts: targetCounts,
+      targetHashes: targetHashes,
+    );
+  }
+
+  Future<_PreparedTarget> _prepareTarget(_ScheduleTarget target) async {
+    try {
+      return _PreparedTarget(
+        target: target,
+        normalized: await _normalizeTarget(target),
+      );
+    } on Object catch (error, stackTrace) {
+      return _PreparedTarget(
+        target: target,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+  }
+
+  Future<
+    ({
+      String syncRunId,
+      Map<String, String> targetHashes,
+      DateTime? lastFullReingestAt,
+    })
+  >
+  _startSync({required bool fullSync}) async {
+    final response = await _postControl({
+      'entity': 'sync_start',
+      'organization_id': _organizationId,
+      'source': _sourceId,
+      'source_type': 'schedule',
+      'metadata': {'full_sync': fullSync},
+    });
+    final result = response['result'];
+    if (result is! Map<String, Object?> || result['sync_run_id'] is! String) {
+      throw StateError('Sync start response has no sync_run_id');
+    }
+    final checkpoint = result['checkpoint'];
+    final checkpointMap = checkpoint is Map<String, Object?>
+        ? checkpoint
+        : const <String, Object?>{};
+    final rawHashes = checkpointMap['target_hashes'];
+    final targetHashes =
+        (rawHashes is Map<String, Object?>
+              ? rawHashes.map(
+                  (key, value) => MapEntry(key, value is String ? value : ''),
+                )
+              : <String, String>{})
+          ..removeWhere((_, value) => value.isEmpty);
+    final rawReingestAt = checkpointMap['last_full_reingest_at'];
+    return (
+      syncRunId: result['sync_run_id']! as String,
+      targetHashes: targetHashes,
+      lastFullReingestAt: rawReingestAt is String
+          ? DateTime.tryParse(rawReingestAt)?.toUtc()
+          : null,
+    );
+  }
+
+  Future<void> _finishSync({
+    required String status,
+    Map<String, Object?>? checkpoint,
+    String? errorMessage,
+  }) async {
+    final boundedError = errorMessage != null && errorMessage.length > 2000
+        ? errorMessage.substring(0, 2000)
+        : errorMessage;
+    await _postControl({
+      'entity': 'sync_finish',
+      'organization_id': _organizationId,
+      'sync_run_id': _syncRunId,
+      'source': _sourceId,
+      'source_type': 'schedule',
+      'status': status,
+      'checkpoint': checkpoint,
+      'error_message': boundedError,
+      'metadata': const <String, Object?>{},
+    });
+  }
+
+  Future<Map<String, Object?>> _postControl(
+    Map<String, Object?> payload,
+  ) async {
+    final response = await _postIngest(
+      jsonEncode(payload),
+      label: payload['entity']! as String,
+    );
+    final decoded = jsonDecode(response.body);
+    if (decoded is! Map<String, Object?>) {
+      throw StateError('Ingest control response is not a JSON object');
+    }
+    return decoded;
   }
 
   Stream<_ScheduleTarget> _fetchTargets({required String? match}) async* {
@@ -251,12 +550,12 @@ class SyncMireaSchedule {
       final uri = _scheduleBaseUrl
           .resolve('/schedule/api/search')
           .replace(queryParameters: query.isEmpty ? null : query);
-      final response = await _httpClient
-          .get(
-            uri,
-            headers: const {HttpHeaders.acceptHeader: 'application/json'},
-          )
-          .timeout(const Duration(seconds: 30));
+      final response = await _getWithRetry(
+        uri,
+        accept: 'application/json',
+        timeout: const Duration(seconds: 45),
+        label: 'schedule search',
+      );
 
       if (response.statusCode != HttpStatus.ok) {
         throw StateError(
@@ -274,18 +573,37 @@ class SyncMireaSchedule {
   }
 
   Future<Map<String, Object?>> _normalizeTarget(_ScheduleTarget target) async {
-    final calendarFeedUri = target.calendarFeedUri.replace(
+    final originalUri = target.calendarFeedUri;
+    final officialHost = Uri.parse(kScheduleBaseUrl).host.toLowerCase();
+    final sourceUri =
+        originalUri.host.toLowerCase() == officialHost &&
+            originalUri.host.toLowerCase() !=
+                _scheduleBaseUrl.host.toLowerCase()
+        ? _scheduleBaseUrl.replace(
+            path: originalUri.path,
+            query: originalUri.hasQuery ? originalUri.query : null,
+          )
+        : originalUri;
+    if (sourceUri.scheme != 'https' ||
+        sourceUri.host.toLowerCase() != _scheduleBaseUrl.host.toLowerCase() ||
+        sourceUri.port != _scheduleBaseUrl.port ||
+        sourceUri.userInfo.isNotEmpty ||
+        sourceUri.fragment.isNotEmpty ||
+        !sourceUri.path.startsWith('/schedule/api/ical/')) {
+      throw const FormatException('Invalid iCal source URL');
+    }
+    final calendarFeedUri = sourceUri.replace(
       queryParameters: {
-        ...target.calendarFeedUri.queryParameters,
+        ...sourceUri.queryParameters,
         'includeMeta': 'true',
       },
     );
-    final response = await _httpClient
-        .get(
-          calendarFeedUri,
-          headers: const {HttpHeaders.acceptHeader: 'text/calendar,*/*'},
-        )
-        .timeout(const Duration(seconds: 60));
+    final response = await _getWithRetry(
+      calendarFeedUri,
+      accept: 'text/calendar,*/*',
+      timeout: const Duration(seconds: 60),
+      label: 'iCal fetch',
+    );
 
     if (response.statusCode != HttpStatus.ok) {
       throw StateError(
@@ -293,9 +611,22 @@ class SyncMireaSchedule {
       );
     }
 
-    final parts = ICalParser.fromString(
+    final parsedParts = ICalParser.fromString(
       response.body,
     ).parse().map((part) => part.toJson()).toList();
+    final parts = parsedParts.where((part) {
+      final dates = part['dates'];
+      return dates is List && dates.isNotEmpty;
+    }).toList();
+    final undatedParts = parsedParts.length - parts.length;
+    final sourceHash = sha256
+        .convert(
+          utf8.encode(
+            '${target.targetType}\n${target.id}\n${target.targetTitle}\n'
+            '${target.fullTitle}\n${target.calendarFeedLink}\n${response.body}',
+          ),
+        )
+        .toString();
 
     return {
       'target_type': target.targetType,
@@ -312,14 +643,54 @@ class SyncMireaSchedule {
       },
       'full_replace': true,
       'parts': parts,
-      // Full set of this target's part UIDs (across all chunks) so the ingest
-      // can reconcile vanished lessons (cancellations) without partial state.
       'source_uids': parts
           .map((part) => part['uid'])
           .whereType<String>()
           .toList(),
-      'metadata': {'scheduleTarget': target.scheduleTarget},
+      'metadata': {
+        'scheduleTarget': target.scheduleTarget,
+        'raw_parts': parsedParts.length,
+        'undated_parts': undatedParts,
+        'source_hash': sourceHash,
+      },
     };
+  }
+
+  Future<http.Response> _getWithRetry(
+    Uri uri, {
+    required String accept,
+    required Duration timeout,
+    required String label,
+  }) async {
+    for (var attempt = 1; attempt <= 3; attempt++) {
+      try {
+        final response = await _httpClient
+            .get(
+              uri,
+              headers: {
+                HttpHeaders.acceptHeader: accept,
+                if (_sourceAuthorization != null &&
+                    _sourceAuthorization.isNotEmpty)
+                  HttpHeaders.authorizationHeader: _sourceAuthorization,
+                HttpHeaders.userAgentHeader:
+                    'university-app-schedule-fetcher/0.1',
+              },
+            )
+            .timeout(timeout);
+        if (!_isRetryableStatus(response.statusCode) || attempt == 3) {
+          return response;
+        }
+      } on Object catch (error) {
+        if (attempt == 3 || !_isRetryableIngestError(error)) rethrow;
+      }
+
+      final delay = Duration(seconds: attempt * 2);
+      stderr.writeln(
+        'Retry $label attempt=${attempt + 1} after ${delay.inSeconds}s',
+      );
+      await Future<void>.delayed(delay);
+    }
+    throw StateError('$label retry loop ended unexpectedly');
   }
 
   List<Map<String, Object?>> _splitTargetPayload(Map<String, Object?> target) {
@@ -358,6 +729,7 @@ class SyncMireaSchedule {
         'timezone': _sourceTimezone,
       },
       'targets': targets,
+      'sync_run_id': _syncRunId,
     });
     if (_payloadOutput != null) {
       final file = File(_payloadOutput);
@@ -379,35 +751,42 @@ class SyncMireaSchedule {
       return;
     }
 
+    final response = await _postIngest(
+      body,
+      label: 'schedule batch size=${targets.length}',
+    );
+    final decoded = jsonDecode(response.body);
+    if (decoded is! Map<String, Object?>) {
+      throw StateError('Schedule ingest response is not a JSON object');
+    }
+    final result = decoded['result'];
+    if (result is! Map<String, Object?>) {
+      throw StateError('Schedule ingest response has no result object');
+    }
+    final skipped = result['items_skipped'];
+    if (skipped is int && skipped > 0) {
+      throw StateError('Schedule ingest skipped $skipped items');
+    }
+    stdout.writeln('Ingested batch size=${targets.length}: ${response.body}');
+  }
+
+  Future<http.Response> _postIngest(
+    String body, {
+    required String label,
+  }) async {
     for (var attempt = 1; attempt <= 3; attempt++) {
       try {
         final response = await _httpClient
-            .post(
-              _ingestUrl,
-              headers: {
-                HttpHeaders.acceptHeader: 'application/json',
-                HttpHeaders.authorizationHeader: 'Bearer $_ingestKey',
-                HttpHeaders.connectionHeader: 'close',
-                HttpHeaders.contentTypeHeader: ContentType.json.mimeType,
-                HttpHeaders.userAgentHeader:
-                    'university-app-schedule-fetcher/0.1',
-                'apikey': ?_supabaseApiKey,
-                'x-ingest-key': _ingestKey,
-              },
-              body: body,
-            )
+            .post(_ingestUrl, headers: _ingestHeaders, body: body)
             .timeout(const Duration(seconds: 90));
 
         if (response.statusCode >= 200 && response.statusCode < 300) {
-          stdout.writeln(
-            'Ingested batch size=${targets.length}: ${response.body}',
-          );
-          return;
+          return response;
         }
 
-        if (attempt == 3 || response.statusCode < 500) {
+        if (attempt == 3 || !_isRetryableStatus(response.statusCode)) {
           throw StateError(
-            'Ingest failed: ${response.statusCode} ${response.body}',
+            '$label failed: ${response.statusCode} ${response.body}',
           );
         }
       } catch (error) {
@@ -416,12 +795,23 @@ class SyncMireaSchedule {
 
       final delay = Duration(seconds: attempt * 2);
       stderr.writeln(
-        'Retry ingest batch size=${targets.length} '
+        'Retry $label '
         'attempt=${attempt + 1} after ${delay.inSeconds}s',
       );
       await Future<void>.delayed(delay);
     }
+    throw StateError('$label retry loop ended unexpectedly');
   }
+
+  Map<String, String> get _ingestHeaders => {
+    HttpHeaders.acceptHeader: 'application/json',
+    HttpHeaders.authorizationHeader: 'Bearer $_ingestKey',
+    HttpHeaders.connectionHeader: 'close',
+    HttpHeaders.contentTypeHeader: ContentType.json.mimeType,
+    HttpHeaders.userAgentHeader: 'university-app-schedule-fetcher/0.1',
+    'apikey': ?_supabaseApiKey,
+    'x-ingest-key': _ingestKey,
+  };
 
   Future<void> _flushWithDeno(String body, int targetCount) async {
     const script = r'''
@@ -448,7 +838,7 @@ const response = await fetch(Deno.env.get("INGEST_URL"), {
   body: bytes,
 });
 const text = await response.text();
-console.log(`${response.status} ${text}`);
+console.log(JSON.stringify({ status: response.status, body: text }));
 if (!response.ok) Deno.exit(1);
 ''';
 
@@ -473,7 +863,25 @@ if (!response.ok) Deno.exit(1);
       ).wait;
 
       if (exitCode == 0) {
-        stdout.writeln('Ingested batch size=$targetCount: $stdoutText');
+        final transportResult = jsonDecode(stdoutText.trim());
+        if (transportResult is! Map<String, Object?> ||
+            transportResult['body'] is! String) {
+          throw StateError('Deno ingest response is invalid');
+        }
+        final responseBody = transportResult['body']! as String;
+        final decoded = jsonDecode(responseBody);
+        if (decoded is! Map<String, Object?>) {
+          throw StateError('Schedule ingest response is not a JSON object');
+        }
+        final result = decoded['result'];
+        if (result is! Map<String, Object?>) {
+          throw StateError('Schedule ingest response has no result object');
+        }
+        final skipped = result['items_skipped'];
+        if (skipped is int && skipped > 0) {
+          throw StateError('Schedule ingest skipped $skipped items');
+        }
+        stdout.writeln('Ingested batch size=$targetCount: $responseBody');
         return;
       }
 
@@ -492,6 +900,20 @@ if (!response.ok) Deno.exit(1);
       await Future<void>.delayed(delay);
     }
   }
+}
+
+class _PreparedTarget {
+  const _PreparedTarget({
+    required this.target,
+    this.normalized,
+    this.error,
+    this.stackTrace,
+  });
+
+  final _ScheduleTarget target;
+  final Map<String, Object?>? normalized;
+  final Object? error;
+  final StackTrace? stackTrace;
 }
 
 class _ScheduleTarget {
@@ -601,4 +1023,8 @@ bool _isRetryableIngestError(Object error) {
   return error is http.ClientException ||
       error is SocketException ||
       error is TimeoutException;
+}
+
+bool _isRetryableStatus(int statusCode) {
+  return statusCode == HttpStatus.tooManyRequests || statusCode >= 500;
 }

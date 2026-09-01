@@ -71,6 +71,10 @@ export function validatePayload(payload: unknown): IngestPayload {
   if (value.entity === "schedule" && !Array.isArray(value.targets)) {
     throw new Error("targets array is required");
   }
+  const syncRunId = validateOptionalUuid(value.sync_run_id);
+  if (value.entity === "schedule" && syncRunId == null) {
+    throw new Error("sync_run_id is required for schedule ingest");
+  }
 
   return {
     entity: value.entity,
@@ -78,7 +82,7 @@ export function validatePayload(payload: unknown): IngestPayload {
     source: value.source as Record<string, unknown>,
     items: value.items as unknown[] | undefined,
     targets: value.targets as unknown[] | undefined,
-    sync_run_id: validateOptionalUuid(value.sync_run_id),
+    sync_run_id: syncRunId,
   };
 }
 
