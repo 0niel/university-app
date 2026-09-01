@@ -36,6 +36,41 @@ void main() {
     expect(workflow, isNot(contains('shorebirdtech/shorebird-release@')));
   });
 
+  test('updates the Google Play store icon after internal release', () {
+    final workflow = File(
+      '.github/workflows/google-play-release.yml',
+    ).readAsStringSync();
+    final uploadIndex = workflow.indexOf(
+      '      - name: Upload beta to Google Play',
+    );
+    final iconIndex = workflow.indexOf(
+      '      - name: Update Google Play store icon',
+    );
+    final cleanupIndex = workflow.indexOf(
+      '      - name: Remove Google Play credentials',
+    );
+
+    expect(uploadIndex, isNonNegative);
+    expect(iconIndex, greaterThan(uploadIndex));
+    expect(cleanupIndex, greaterThan(iconIndex));
+    expect(workflow, contains('tool/google_play_store_icon.py'));
+    expect(workflow, contains('update_icon_only:'));
+    expect(workflow, contains('submit_icon_for_review:'));
+    expect(workflow, contains("inputs.update_icon_only != true"));
+    expect(workflow, contains('arguments+=(--submit-for-review)'));
+    expect(
+      workflow,
+      contains('android/app/src/main/ic_launcher-playstore.png'),
+    );
+    expect(
+      workflow,
+      contains(
+        'python3 -m unittest discover -s test/tool '
+        '-p google_play_store_icon_test.py',
+      ),
+    );
+  });
+
   test('manual iOS Shorebird releases use the production entrypoint', () {
     final workflow = File(
       '.github/workflows/shorebird-release.yml',

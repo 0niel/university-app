@@ -10,14 +10,25 @@ on:
     inputs:
       release_tag:
         description: GitHub release tag
-        required: true
+        required: false
+        default: ''
+      update_icon_only:
+        description: Update store icon without uploading a bundle
+        required: false
+        type: boolean
+        default: false
+      submit_icon_for_review:
+        description: Submit the store icon change for review
+        required: false
+        type: boolean
+        default: false
 
 permissions:
   attestations: read
   contents: read
 
 concurrency:
-  group: google-play-internal-${{ github.event.workflow_run.head_sha || inputs.release_tag }}
+  group: google-play-internal-${{ github.event.workflow_run.head_sha || inputs.release_tag || 'store-icon' }}
   cancel-in-progress: false
 
 jobs:
@@ -34,6 +45,9 @@ jobs:
       PACKAGE_NAME: ninja.mirea.mireaapp
 
     steps:
+      - name: Check out repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+
       - name: Verify publishing configuration
         env:
           GOOGLE_PLAY_SERVICE_ACCOUNT_JSON: >-
@@ -46,6 +60,7 @@ jobs:
           fi
 
       - name: Resolve beta release
+        if: ${{ inputs.update_icon_only != true }}
         id: release
         env:
           GH_TOKEN: ${{ github.token }}
@@ -68,6 +83,7 @@ jobs:
           printf 'tag=%s\n' "$tag" >> "$GITHUB_OUTPUT"
 
       - name: Download signed Android bundle
+        if: ${{ inputs.update_icon_only != true }}
         env:
           GH_TOKEN: ${{ github.token }}
           RELEASE_TAG: ${{ steps.release.outputs.tag }}
@@ -124,6 +140,7 @@ jobs:
           PY
 
       - name: Upload beta to Google Play
+        if: ${{ inputs.update_icon_only != true }}
         uses: r0adkll/upload-google-play@e738b9dd8f2476ea806d921b64aacd24f34515a5
         with:
           serviceAccountJson: ${{ runner.temp }}/google-play-service-account.json
@@ -133,6 +150,22 @@ jobs:
           tracks: internal
           status: completed
           changesNotSentForReview: true
+
+      - name: Update Google Play store icon
+        env:
+          SUBMIT_ICON_FOR_REVIEW: ${{ inputs.submit_icon_for_review }}
+        shell: bash
+        run: |
+          python3 -m unittest discover -s test/tool -p google_play_store_icon_test.py
+          arguments=(
+            --credentials "$RUNNER_TEMP/google-play-service-account.json"
+            --icon android/app/src/main/ic_launcher-playstore.png
+            --package-name "$PACKAGE_NAME"
+          )
+          if [[ "$SUBMIT_ICON_FOR_REVIEW" == "true" ]]; then
+            arguments+=(--submit-for-review)
+          fi
+          python3 tool/google_play_store_icon.py "${arguments[@]}"
 
       - name: Remove Google Play credentials
         if: always()
