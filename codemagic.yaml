@@ -10,8 +10,8 @@ definitions:
         - university
       vars:
         FLUTTER_VERSION: 3.44.2
-        BUNDLE_ID: com.ituniversity.app
-        WIDGET_BUNDLE_ID: com.ituniversity.app.HomeWidget
+        BUNDLE_ID: pro.oniel.it.university
+        WIDGET_BUNDLE_ID: pro.oniel.it.university.homewidget
       ios_signing:
         distribution_type: app_store
         bundle_identifier: $BUNDLE_ID

@@ -82,7 +82,7 @@ void main() {
         r'--export-options-plist=${{ runner.temp }}/ExportOptions.plist',
       ),
     );
-    expect(workflow, contains('com.ituniversity.app.HomeWidget'));
+    expect(workflow, contains('pro.oniel.it.university.homewidget'));
     expect(workflow, contains('if: always()'));
     expect(workflow, contains('publish:\n    needs: release'));
     expect(workflow, contains('actions/upload-artifact@'));

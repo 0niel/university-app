@@ -10,13 +10,13 @@ void main() {
 
     expect(
       RegExp(
-        r'PRODUCT_BUNDLE_IDENTIFIER = com\.ituniversity\.app\.HomeWidget;',
+        r'PRODUCT_BUNDLE_IDENTIFIER = pro\.oniel\.it\.university\.homewidget;',
       ).allMatches(project),
       hasLength(3),
     );
     expect(
       RegExp(
-        r'PRODUCT_BUNDLE_IDENTIFIER = com\.ituniversity\.app;',
+        r'PRODUCT_BUNDLE_IDENTIFIER = pro\.oniel\.it\.university;',
       ).allMatches(project),
       hasLength(3),
     );
