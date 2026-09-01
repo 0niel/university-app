@@ -16,6 +16,7 @@ jobs:
         shell: bash
     env:
       APPLE_TEAM_ID: J935XAGDUL
+      DEVELOPER_DIR: /Applications/Xcode_26.3.app/Contents/Developer
       IOS_APP_BUNDLE_ID: pro.oniel.it.university
       IOS_WIDGET_BUNDLE_ID: pro.oniel.it.university.homewidget
 
@@ -60,6 +61,11 @@ jobs:
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
         with:
           persist-credentials: false
+
+      - name: Verify Xcode toolchain
+        run: |
+          test -d "$DEVELOPER_DIR"
+          test "$(xcodebuild -version | head -n 1)" = "Xcode 26.3"
 
       - name: Set up Flutter
         uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2

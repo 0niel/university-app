@@ -66,8 +66,19 @@ void main() {
       '      - name: Upload iOS beta to TestFlight',
     );
     final verifySourceIndex = workflow.indexOf('      - name: Verify source');
+    final verifyXcodeIndex = workflow.indexOf(
+      '      - name: Verify Xcode toolchain',
+    );
+    final setupFlutterIndex = workflow.indexOf('      - name: Set up Flutter');
 
     expect(verifyIndex, isNonNegative);
+    expect(verifyXcodeIndex, greaterThan(verifyIndex));
+    expect(setupFlutterIndex, greaterThan(verifyXcodeIndex));
+    expect(
+      workflow,
+      contains('/Applications/Xcode_26.3.app/Contents/Developer'),
+    );
+    expect(workflow, contains('"Xcode 26.3"'));
     expect(verifySourceIndex, greaterThan(verifyIndex));
     expect(workflow, contains('flutter analyze lib test'));
     expect(workflow, isNot(contains('          flutter analyze\n')));
