@@ -17,7 +17,7 @@ jobs:
     if: >-
       vars.SCHEDULE_INGEST_URL != '' &&
       vars.SCHEDULE_ORGANIZATION_ID == 'mirea'
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     timeout-minutes: 350
 
     steps:
