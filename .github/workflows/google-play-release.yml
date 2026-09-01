@@ -132,6 +132,7 @@ jobs:
           releaseName: ${{ steps.release.outputs.tag }}
           tracks: internal
           status: completed
+          changesNotSentForReview: true
 
       - name: Remove Google Play credentials
         if: always()
