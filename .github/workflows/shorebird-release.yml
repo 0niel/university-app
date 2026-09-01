@@ -2,12 +2,24 @@ name: Shorebird iOS Release
 
 on:
   workflow_dispatch:
+    inputs:
+      artifact_run_id:
+        description: Existing iOS artifact run ID
+        required: false
+        type: string
+        default: ''
 
 permissions:
+  actions: read
   contents: read
+
+concurrency:
+  group: shorebird-ios-release
+  cancel-in-progress: false
 
 jobs:
   release:
+    if: ${{ inputs.artifact_run_id == '' }}
     runs-on: macos-15
     timeout-minutes: 60
     environment: beta
@@ -204,6 +216,11 @@ jobs:
           SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
         run: |
           mkdir -p "$RUNNER_TEMP/dart-symbols"
+          build_number="$(python3 -c 'from datetime import datetime, timezone; now = datetime.now(timezone.utc); epoch = datetime(2020, 1, 1, tzinfo=timezone.utc); print(f"{(now - epoch).days}.{now.hour}.{now.minute}")')"
+          if [[ ! "$build_number" =~ ^[0-9]{1,4}\.[0-9]{1,2}\.[0-9]{1,2}$ ]]; then
+            printf 'Invalid iOS build number\n' >&2
+            exit 1
+          fi
           shorebird release ios \
             --flutter-version 3.44.2 \
             --export-options-plist=${{ runner.temp }}/ExportOptions.plist \
@@ -215,7 +232,8 @@ jobs:
             --dart-define-from-file=${{ runner.temp }}/university.json \
             --dart-define-from-file=${{ runner.temp }}/firebase.json \
             --dart-define=SUPABASE_URL=${{ vars.SUPABASE_URL }} \
-            --dart-define=SUPABASE_PUBLISHABLE_KEY=${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
+            --dart-define=SUPABASE_PUBLISHABLE_KEY=${{ secrets.SUPABASE_PUBLISHABLE_KEY }} \
+            --build-number="$build_number"
 
       - name: Encrypt release symbols
         run: |
@@ -259,6 +277,7 @@ jobs:
 
   publish:
     needs: release
+    if: ${{ always() && (needs.release.result == 'success' || inputs.artifact_run_id != '') }}
     runs-on: macos-15
     timeout-minutes: 20
     environment: beta
@@ -271,6 +290,7 @@ jobs:
           APPSTORE_API_KEY_ID: ${{ secrets.APPSTORE_API_KEY_ID }}
           APPSTORE_API_ISSUER_ID: ${{ secrets.APPSTORE_API_ISSUER_ID }}
           APPSTORE_API_PRIVATE_KEY: ${{ secrets.APPSTORE_API_PRIVATE_KEY }}
+          ARTIFACT_RUN_ID: ${{ inputs.artifact_run_id }}
         run: |
           required=(
             APPSTORE_API_KEY_ID
@@ -283,12 +303,26 @@ jobs:
               exit 1
             fi
           done
+          if [[ -n "$ARTIFACT_RUN_ID" && ! "$ARTIFACT_RUN_ID" =~ ^[0-9]+$ ]]; then
+            printf 'Invalid iOS artifact run ID\n' >&2
+            exit 1
+          fi
 
       - name: Download iOS artifact
+        if: ${{ inputs.artifact_run_id == '' }}
         uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0
         with:
           name: ios-shorebird-release
           path: ${{ runner.temp }}/ios
+
+      - name: Download existing iOS artifact
+        if: ${{ inputs.artifact_run_id != '' }}
+        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0
+        with:
+          name: ios-shorebird-release
+          path: ${{ runner.temp }}/ios
+          github-token: ${{ github.token }}
+          run-id: ${{ inputs.artifact_run_id }}
 
       - name: Configure App Store Connect key
         env:

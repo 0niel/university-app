@@ -91,6 +91,21 @@ void main() {
     expect(workflow, contains('APPSTORE_API_ISSUER_ID'));
     expect(workflow, contains('"".join(private_key.split())'));
     expect(workflow, contains('base64.b64decode(encoded_key, validate=True)'));
+    expect(workflow, contains('artifact_run_id:'));
+    expect(workflow, contains('actions: read'));
+    expect(workflow, contains('group: shorebird-ios-release'));
+    expect(workflow, contains('cancel-in-progress: false'));
+    expect(workflow, contains('datetime(2020, 1, 1, tzinfo=timezone.utc)'));
+    expect(workflow, contains(r'--build-number="$build_number"'));
+    expect(workflow, isNot(contains(r'--build-number="$GITHUB_RUN_ID"')));
+    expect(
+      workflow,
+      contains(r'^[0-9]{1,4}\.[0-9]{1,2}\.[0-9]{1,2}$'),
+    );
+    expect(workflow, contains("inputs.artifact_run_id == ''"));
+    expect(workflow, contains("inputs.artifact_run_id != ''"));
+    expect(workflow, contains(r'run-id: ${{ inputs.artifact_run_id }}'));
+    expect(workflow, contains(r'github-token: ${{ github.token }}'));
     expect(
       workflow,
       contains(
