@@ -26,9 +26,25 @@ void main() {
     final infoPlist = File(
       'ios/HomeWidget/Info.plist',
     ).readAsStringSync();
+    final project = File(
+      'ios/Runner.xcodeproj/project.pbxproj',
+    ).readAsStringSync();
 
     expect(infoPlist, contains(r'<string>$(FLUTTER_BUILD_NAME)</string>'));
     expect(infoPlist, contains(r'<string>$(FLUTTER_BUILD_NUMBER)</string>'));
+    for (final marker in [
+      '26239B262749523700ADE724 /* Debug */',
+      '26239B272749523700ADE724 /* Release */',
+      '26239B282749523700ADE724 /* Profile */',
+    ]) {
+      expect(
+        buildConfiguration(project, marker),
+        contains(
+          'baseConfigurationReference = 9740EEB31CF90195004384FC '
+          '/* Generated.xcconfig */;',
+        ),
+      );
+    }
   });
 
   test('release archive uses supported iOS and distribution signing', () {
