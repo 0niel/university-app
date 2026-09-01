@@ -24,10 +24,10 @@ void main() {
   });
 
   test('signs the app and widget with current bundle identifiers', () {
-    expect(workflow, contains('BUNDLE_ID: com.ituniversity.app'));
+    expect(workflow, contains('BUNDLE_ID: pro.oniel.it.university'));
     expect(
       workflow,
-      contains('WIDGET_BUNDLE_ID: com.ituniversity.app.HomeWidget'),
+      contains('WIDGET_BUNDLE_ID: pro.oniel.it.university.homewidget'),
     );
     expect(
       RegExp(

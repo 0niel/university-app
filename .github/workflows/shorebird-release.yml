@@ -16,8 +16,8 @@ jobs:
         shell: bash
     env:
       APPLE_TEAM_ID: J935XAGDUL
-      IOS_APP_BUNDLE_ID: com.ituniversity.app
-      IOS_WIDGET_BUNDLE_ID: com.ituniversity.app.HomeWidget
+      IOS_APP_BUNDLE_ID: pro.oniel.it.university
+      IOS_WIDGET_BUNDLE_ID: pro.oniel.it.university.homewidget
 
     steps:
       - name: Verify release configuration
