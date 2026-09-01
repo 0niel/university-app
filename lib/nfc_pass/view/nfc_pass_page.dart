@@ -1,8 +1,7 @@
 import 'dart:async';
-import 'dart:developer';
 
 import 'package:app_ui/app_ui.dart';
-import 'package:device_info_plus/device_info_plus.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:local_auth_client/local_auth_client.dart';
@@ -10,12 +9,11 @@ import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:rtu_mirea_app/nfc_pass/bloc/nfc_hce_cubit.dart';
 import 'package:rtu_mirea_app/nfc_pass/bloc/nfc_pass_cubit.dart';
 import 'package:rtu_mirea_app/nfc_pass/bloc/pass_security_cubit.dart';
+import 'package:rtu_mirea_app/nfc_pass/device_label.dart';
 import 'package:rtu_mirea_app/nfc_pass/view/nfc_pass_view.dart';
 import 'package:rtu_mirea_app/nfc_pass/widgets/widgets.dart';
 
 part 'pass_lock_screen.dart';
-
-const kFallbackDeviceName = 'Unknown device';
 
 class NfcPassPage extends StatefulWidget {
   const NfcPassPage({super.key});
@@ -26,7 +24,7 @@ class NfcPassPage extends StatefulWidget {
 
 class _NfcPassPageState extends State<NfcPassPage> {
   late final NfcPassCubit _nfcPassCubit;
-  String _deviceName = kFallbackDeviceName;
+  late final String _deviceName;
 
   bool _unlocked = true;
   bool _authInFlight = false;
@@ -34,9 +32,9 @@ class _NfcPassPageState extends State<NfcPassPage> {
   @override
   void initState() {
     super.initState();
+    _deviceName = deviceLabelFor(defaultTargetPlatform);
     _nfcPassCubit = context.read<NfcPassCubit>();
     unawaited(_nfcPassCubit.checkBound());
-    unawaited(_resolveDeviceName());
     final security = context.read<PassSecurityCubit>();
     if (security.state.enabled) {
       _unlocked = false;
@@ -84,30 +82,6 @@ class _NfcPassPageState extends State<NfcPassPage> {
     final cubit = context.read<NfcPassCubit>();
     if (cubit.state.status == .bound) {
       await cubit.claimTurnstilePriority();
-    }
-  }
-
-  Future<void> _resolveDeviceName() async {
-    final name = await _readDeviceName();
-    if (!mounted) return;
-    setState(() => _deviceName = name);
-  }
-
-  Future<String> _readDeviceName() async {
-    try {
-      final data = (await DeviceInfoPlugin().deviceInfo).data;
-      final name = data['model'] ?? data['name'] ?? data['utsname'];
-      return (name?.toString().trim().isNotEmpty ?? false)
-          ? name.toString()
-          : kFallbackDeviceName;
-    } on Exception catch (e, st) {
-      log(
-        'Failed to read device name',
-        error: e,
-        stackTrace: st,
-        name: 'NfcPassPage',
-      );
-      return kFallbackDeviceName;
     }
   }
 

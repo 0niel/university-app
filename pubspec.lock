@@ -466,22 +466,6 @@ packages:
       url: "https://github.com/0niel/device_calendar.git"
     source: git
     version: "4.3.2"
-  device_info_plus:
-    dependency: "direct main"
-    description:
-      name: device_info_plus
-      sha256: "6a642e1daa10190af89ba6cb6386c0df7d071a3592080bfe1e44faa63ae1df65"
-      url: "https://pub.dev"
-    source: hosted
-    version: "13.1.0"
-  device_info_plus_platform_interface:
-    dependency: transitive
-    description:
-      name: device_info_plus_platform_interface
-      sha256: "04b173a92e2d9161dfead145667037c8d834db725ce2e7b942bfe18fd2f45a46"
-      url: "https://pub.dev"
-    source: hosted
-    version: "8.1.0"
   diff_match_patch:
     dependency: transitive
     description:
@@ -2965,14 +2949,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "6.3.0"
-  win32_registry:
-    dependency: transitive
-    description:
-      name: win32_registry
-      sha256: "73b1d78920a9d6e03f8b4e43e612b87bf3152a0e5c5e5150267762b7c4116904"
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.0.3"
   wkt_parser:
     dependency: transitive
     description:

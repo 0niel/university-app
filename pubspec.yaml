@@ -107,7 +107,6 @@ dependencies:
     git:
       url: https://github.com/0niel/device_calendar.git
       ref: develop
-  device_info_plus: ^13.1.0
   dio: ^5.1.2
   dismissible_page: ^1.0.2
   dot_navigation_bar:
