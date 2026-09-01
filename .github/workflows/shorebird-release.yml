@@ -303,7 +303,8 @@ jobs:
 
           private_key = os.environ["APPSTORE_API_PRIVATE_KEY"].strip()
           if "BEGIN PRIVATE KEY" not in private_key:
-              private_key = base64.b64decode(private_key, validate=True).decode("utf-8")
+              encoded_key = "".join(private_key.split())
+              private_key = base64.b64decode(encoded_key, validate=True).decode("utf-8")
           private_key = private_key.replace("\\n", "\n")
           if "BEGIN PRIVATE KEY" not in private_key:
               raise SystemExit("Invalid App Store Connect private key")

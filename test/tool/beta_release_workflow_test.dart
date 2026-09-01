@@ -89,6 +89,8 @@ void main() {
     expect(workflow, contains('BUILD_PROVISION_PROFILE_BASE64'));
     expect(workflow, contains('BUILD_WIDGET_PROVISION_PROFILE_BASE64'));
     expect(workflow, contains('APPSTORE_API_ISSUER_ID'));
+    expect(workflow, contains('"".join(private_key.split())'));
+    expect(workflow, contains('base64.b64decode(encoded_key, validate=True)'));
     expect(
       workflow,
       contains(
