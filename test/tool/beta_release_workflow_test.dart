@@ -65,6 +65,9 @@ void main() {
     final testFlightIndex = workflow.indexOf(
       '      - name: Upload iOS beta to TestFlight',
     );
+    final processingIndex = workflow.indexOf(
+      '      - name: Verify TestFlight processing',
+    );
     final verifySourceIndex = workflow.indexOf('      - name: Verify source');
     final verifyXcodeIndex = workflow.indexOf(
       '      - name: Verify Xcode toolchain',
@@ -86,12 +89,15 @@ void main() {
     expect(configureIosIndex, greaterThan(verifySourceIndex));
     expect(releaseIosIndex, greaterThan(configureIosIndex));
     expect(testFlightIndex, greaterThan(releaseIosIndex));
+    expect(processingIndex, greaterThan(testFlightIndex));
     expect(workflow, contains('BUILD_PROVISION_PROFILE_BASE64'));
     expect(workflow, contains('BUILD_WIDGET_PROVISION_PROFILE_BASE64'));
     expect(workflow, contains('APPSTORE_API_ISSUER_ID'));
     expect(workflow, contains('"".join(private_key.split())'));
     expect(workflow, contains('base64.b64decode(encoded_key, validate=True)'));
     expect(workflow, contains('artifact_run_id:'));
+    expect(workflow, contains('verify_build_number:'));
+    expect(workflow, contains('verify_marketing_version:'));
     expect(workflow, contains('actions: read'));
     expect(workflow, contains('group: shorebird-ios-release'));
     expect(workflow, contains('cancel-in-progress: false'));
@@ -106,6 +112,19 @@ void main() {
     expect(workflow, contains("inputs.artifact_run_id != ''"));
     expect(workflow, contains(r'run-id: ${{ inputs.artifact_run_id }}'));
     expect(workflow, contains(r'github-token: ${{ github.token }}'));
+    expect(workflow, contains('tool/app_store_build_status.py'));
+    expect(workflow, contains(r'--marketing-version "$marketing_version"'));
+    expect(workflow, contains('--timeout 1200'));
+    expect(workflow, contains('--interval 30'));
+    expect(workflow, contains("inputs.verify_build_number == ''"));
+    expect(workflow, contains("inputs.verify_build_number != ''"));
+    expect(
+      workflow,
+      contains(
+        'python3 -m unittest discover -s test/tool '
+        '-p app_store_build_status_test.py',
+      ),
+    );
     expect(
       workflow,
       contains(
