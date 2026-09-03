@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$GroupAnnouncement {
 
-@JsonKey(defaultValue: '') String get id;@JsonKey(defaultValue: '') String get title;@JsonKey(defaultValue: '') String get body;@JsonKey(defaultValue: '') String get authorName;@JsonKey(fromJson: dateTimeFromJson, toJson: dateTimeToJson) DateTime? get createdAt; bool get isMine;
+@JsonKey(defaultValue: '') String get id;@JsonKey(defaultValue: '') String get title;@JsonKey(defaultValue: '') String get body;@JsonKey(defaultValue: '') String get authorName;@JsonKey(fromJson: dateTimeFromJson, toJson: dateTimeToJson) DateTime? get createdAt; bool get isMine; int get commentsCount;
 /// Create a copy of GroupAnnouncement
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +28,16 @@ $GroupAnnouncementCopyWith<GroupAnnouncement> get copyWith => _$GroupAnnouncemen
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is GroupAnnouncement&&(identical(other.id, id) || other.id == id)&&(identical(other.title, title) || other.title == title)&&(identical(other.body, body) || other.body == body)&&(identical(other.authorName, authorName) || other.authorName == authorName)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.isMine, isMine) || other.isMine == isMine));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is GroupAnnouncement&&(identical(other.id, id) || other.id == id)&&(identical(other.title, title) || other.title == title)&&(identical(other.body, body) || other.body == body)&&(identical(other.authorName, authorName) || other.authorName == authorName)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.isMine, isMine) || other.isMine == isMine)&&(identical(other.commentsCount, commentsCount) || other.commentsCount == commentsCount));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,title,body,authorName,createdAt,isMine);
+int get hashCode => Object.hash(runtimeType,id,title,body,authorName,createdAt,isMine,commentsCount);
 
 @override
 String toString() {
-  return 'GroupAnnouncement(id: $id, title: $title, body: $body, authorName: $authorName, createdAt: $createdAt, isMine: $isMine)';
+  return 'GroupAnnouncement(id: $id, title: $title, body: $body, authorName: $authorName, createdAt: $createdAt, isMine: $isMine, commentsCount: $commentsCount)';
 }
 
 
@@ -48,7 +48,7 @@ abstract mixin class $GroupAnnouncementCopyWith<$Res>  {
   factory $GroupAnnouncementCopyWith(GroupAnnouncement value, $Res Function(GroupAnnouncement) _then) = _$GroupAnnouncementCopyWithImpl;
 @useResult
 $Res call({
-@JsonKey(defaultValue: '') String id,@JsonKey(defaultValue: '') String title,@JsonKey(defaultValue: '') String body,@JsonKey(defaultValue: '') String authorName,@JsonKey(fromJson: dateTimeFromJson, toJson: dateTimeToJson) DateTime? createdAt, bool isMine
+@JsonKey(defaultValue: '') String id,@JsonKey(defaultValue: '') String title,@JsonKey(defaultValue: '') String body,@JsonKey(defaultValue: '') String authorName,@JsonKey(fromJson: dateTimeFromJson, toJson: dateTimeToJson) DateTime? createdAt, bool isMine, int commentsCount
 });
 
 
@@ -65,7 +65,7 @@ class _$GroupAnnouncementCopyWithImpl<$Res>
 
 /// Create a copy of GroupAnnouncement
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? title = null,Object? body = null,Object? authorName = null,Object? createdAt = freezed,Object? isMine = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? title = null,Object? body = null,Object? authorName = null,Object? createdAt = freezed,Object? isMine = null,Object? commentsCount = null,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,title: null == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
@@ -73,7 +73,8 @@ as String,body: null == body ? _self.body : body // ignore: cast_nullable_to_non
 as String,authorName: null == authorName ? _self.authorName : authorName // ignore: cast_nullable_to_non_nullable
 as String,createdAt: freezed == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime?,isMine: null == isMine ? _self.isMine : isMine // ignore: cast_nullable_to_non_nullable
-as bool,
+as bool,commentsCount: null == commentsCount ? _self.commentsCount : commentsCount // ignore: cast_nullable_to_non_nullable
+as int,
   ));
 }
 
@@ -158,10 +159,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(defaultValue: '')  String id, @JsonKey(defaultValue: '')  String title, @JsonKey(defaultValue: '')  String body, @JsonKey(defaultValue: '')  String authorName, @JsonKey(fromJson: dateTimeFromJson, toJson: dateTimeToJson)  DateTime? createdAt,  bool isMine)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(defaultValue: '')  String id, @JsonKey(defaultValue: '')  String title, @JsonKey(defaultValue: '')  String body, @JsonKey(defaultValue: '')  String authorName, @JsonKey(fromJson: dateTimeFromJson, toJson: dateTimeToJson)  DateTime? createdAt,  bool isMine,  int commentsCount)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _GroupAnnouncement() when $default != null:
-return $default(_that.id,_that.title,_that.body,_that.authorName,_that.createdAt,_that.isMine);case _:
+return $default(_that.id,_that.title,_that.body,_that.authorName,_that.createdAt,_that.isMine,_that.commentsCount);case _:
   return orElse();
 
 }
@@ -179,10 +180,10 @@ return $default(_that.id,_that.title,_that.body,_that.authorName,_that.createdAt
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(defaultValue: '')  String id, @JsonKey(defaultValue: '')  String title, @JsonKey(defaultValue: '')  String body, @JsonKey(defaultValue: '')  String authorName, @JsonKey(fromJson: dateTimeFromJson, toJson: dateTimeToJson)  DateTime? createdAt,  bool isMine)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(defaultValue: '')  String id, @JsonKey(defaultValue: '')  String title, @JsonKey(defaultValue: '')  String body, @JsonKey(defaultValue: '')  String authorName, @JsonKey(fromJson: dateTimeFromJson, toJson: dateTimeToJson)  DateTime? createdAt,  bool isMine,  int commentsCount)  $default,) {final _that = this;
 switch (_that) {
 case _GroupAnnouncement():
-return $default(_that.id,_that.title,_that.body,_that.authorName,_that.createdAt,_that.isMine);case _:
+return $default(_that.id,_that.title,_that.body,_that.authorName,_that.createdAt,_that.isMine,_that.commentsCount);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -199,10 +200,10 @@ return $default(_that.id,_that.title,_that.body,_that.authorName,_that.createdAt
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(defaultValue: '')  String id, @JsonKey(defaultValue: '')  String title, @JsonKey(defaultValue: '')  String body, @JsonKey(defaultValue: '')  String authorName, @JsonKey(fromJson: dateTimeFromJson, toJson: dateTimeToJson)  DateTime? createdAt,  bool isMine)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(defaultValue: '')  String id, @JsonKey(defaultValue: '')  String title, @JsonKey(defaultValue: '')  String body, @JsonKey(defaultValue: '')  String authorName, @JsonKey(fromJson: dateTimeFromJson, toJson: dateTimeToJson)  DateTime? createdAt,  bool isMine,  int commentsCount)?  $default,) {final _that = this;
 switch (_that) {
 case _GroupAnnouncement() when $default != null:
-return $default(_that.id,_that.title,_that.body,_that.authorName,_that.createdAt,_that.isMine);case _:
+return $default(_that.id,_that.title,_that.body,_that.authorName,_that.createdAt,_that.isMine,_that.commentsCount);case _:
   return null;
 
 }
@@ -214,7 +215,7 @@ return $default(_that.id,_that.title,_that.body,_that.authorName,_that.createdAt
 @JsonSerializable()
 
 class _GroupAnnouncement implements GroupAnnouncement {
-  const _GroupAnnouncement({@JsonKey(defaultValue: '') required this.id, @JsonKey(defaultValue: '') required this.title, @JsonKey(defaultValue: '') required this.body, @JsonKey(defaultValue: '') required this.authorName, @JsonKey(fromJson: dateTimeFromJson, toJson: dateTimeToJson) this.createdAt, this.isMine = false});
+  const _GroupAnnouncement({@JsonKey(defaultValue: '') required this.id, @JsonKey(defaultValue: '') required this.title, @JsonKey(defaultValue: '') required this.body, @JsonKey(defaultValue: '') required this.authorName, @JsonKey(fromJson: dateTimeFromJson, toJson: dateTimeToJson) this.createdAt, this.isMine = false, this.commentsCount = 0});
   factory _GroupAnnouncement.fromJson(Map<String, dynamic> json) => _$GroupAnnouncementFromJson(json);
 
 @override@JsonKey(defaultValue: '') final  String id;
@@ -223,6 +224,7 @@ class _GroupAnnouncement implements GroupAnnouncement {
 @override@JsonKey(defaultValue: '') final  String authorName;
 @override@JsonKey(fromJson: dateTimeFromJson, toJson: dateTimeToJson) final  DateTime? createdAt;
 @override@JsonKey() final  bool isMine;
+@override@JsonKey() final  int commentsCount;
 
 /// Create a copy of GroupAnnouncement
 /// with the given fields replaced by the non-null parameter values.
@@ -237,16 +239,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _GroupAnnouncement&&(identical(other.id, id) || other.id == id)&&(identical(other.title, title) || other.title == title)&&(identical(other.body, body) || other.body == body)&&(identical(other.authorName, authorName) || other.authorName == authorName)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.isMine, isMine) || other.isMine == isMine));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _GroupAnnouncement&&(identical(other.id, id) || other.id == id)&&(identical(other.title, title) || other.title == title)&&(identical(other.body, body) || other.body == body)&&(identical(other.authorName, authorName) || other.authorName == authorName)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.isMine, isMine) || other.isMine == isMine)&&(identical(other.commentsCount, commentsCount) || other.commentsCount == commentsCount));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,title,body,authorName,createdAt,isMine);
+int get hashCode => Object.hash(runtimeType,id,title,body,authorName,createdAt,isMine,commentsCount);
 
 @override
 String toString() {
-  return 'GroupAnnouncement(id: $id, title: $title, body: $body, authorName: $authorName, createdAt: $createdAt, isMine: $isMine)';
+  return 'GroupAnnouncement(id: $id, title: $title, body: $body, authorName: $authorName, createdAt: $createdAt, isMine: $isMine, commentsCount: $commentsCount)';
 }
 
 
@@ -257,7 +259,7 @@ abstract mixin class _$GroupAnnouncementCopyWith<$Res> implements $GroupAnnounce
   factory _$GroupAnnouncementCopyWith(_GroupAnnouncement value, $Res Function(_GroupAnnouncement) _then) = __$GroupAnnouncementCopyWithImpl;
 @override @useResult
 $Res call({
-@JsonKey(defaultValue: '') String id,@JsonKey(defaultValue: '') String title,@JsonKey(defaultValue: '') String body,@JsonKey(defaultValue: '') String authorName,@JsonKey(fromJson: dateTimeFromJson, toJson: dateTimeToJson) DateTime? createdAt, bool isMine
+@JsonKey(defaultValue: '') String id,@JsonKey(defaultValue: '') String title,@JsonKey(defaultValue: '') String body,@JsonKey(defaultValue: '') String authorName,@JsonKey(fromJson: dateTimeFromJson, toJson: dateTimeToJson) DateTime? createdAt, bool isMine, int commentsCount
 });
 
 
@@ -274,7 +276,7 @@ class __$GroupAnnouncementCopyWithImpl<$Res>
 
 /// Create a copy of GroupAnnouncement
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? title = null,Object? body = null,Object? authorName = null,Object? createdAt = freezed,Object? isMine = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? title = null,Object? body = null,Object? authorName = null,Object? createdAt = freezed,Object? isMine = null,Object? commentsCount = null,}) {
   return _then(_GroupAnnouncement(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,title: null == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
@@ -282,7 +284,8 @@ as String,body: null == body ? _self.body : body // ignore: cast_nullable_to_non
 as String,authorName: null == authorName ? _self.authorName : authorName // ignore: cast_nullable_to_non_nullable
 as String,createdAt: freezed == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime?,isMine: null == isMine ? _self.isMine : isMine // ignore: cast_nullable_to_non_nullable
-as bool,
+as bool,commentsCount: null == commentsCount ? _self.commentsCount : commentsCount // ignore: cast_nullable_to_non_nullable
+as int,
   ));
 }
 

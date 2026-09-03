@@ -5,13 +5,53 @@ class NinjaStudyGroupMemberRow extends StatelessWidget {
     required this.member,
     required this.canRemove,
     required this.onRemove,
+    required this.onTransfer,
     this.pending = false,
     super.key,
   });
   final StudyGroupMember member;
   final bool canRemove;
   final VoidCallback onRemove;
+  final VoidCallback onTransfer;
   final bool pending;
+
+  Future<void> _openTools(BuildContext context) async {
+    final l10n = context.l10n;
+    final action = await showAppSheet<_MemberToolsAction>(
+      context,
+      title: member.fullName,
+      child: Column(
+        mainAxisSize: .min,
+        children: [
+          AppListRow(
+            isFirst: true,
+            leading: const AppLineIconWidget(.swap, size: 18),
+            title: l10n.studyGroupTransferOwnership,
+            onTap: () => Navigator.of(context).pop(_MemberToolsAction.transfer),
+          ),
+          AppListRow(
+            destructive: true,
+            leading: AppLineIconWidget(
+              .close,
+              size: 18,
+              color: context.colors.danger,
+            ),
+            title: l10n.studyGroupRemove,
+            onTap: () => Navigator.of(context).pop(_MemberToolsAction.remove),
+          ),
+        ],
+      ),
+    );
+    switch (action) {
+      case _MemberToolsAction.transfer:
+        onTransfer();
+      case _MemberToolsAction.remove:
+        onRemove();
+      case null:
+        break;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
@@ -60,12 +100,14 @@ class NinjaStudyGroupMemberRow extends StatelessWidget {
                 duration: NinjaMotion.of(context, NinjaMotion.fast),
                 child: NinjaIconButton(
                   icon: AppLineIconWidget(
-                    .close,
+                    .more,
                     size: 18,
-                    color: colors.exam,
+                    color: colors.muted,
                   ),
-                  tooltip: l10n.studyGroupRemove,
-                  onPressed: pending ? null : onRemove,
+                  tooltip: l10n.studyGroupMemberTools,
+                  onPressed: pending
+                      ? null
+                      : () => unawaited(_openTools(context)),
                 ),
               ),
           ],
@@ -74,3 +116,5 @@ class NinjaStudyGroupMemberRow extends StatelessWidget {
     );
   }
 }
+
+enum _MemberToolsAction { transfer, remove }

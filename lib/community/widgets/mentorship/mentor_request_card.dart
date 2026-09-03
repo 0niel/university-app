@@ -113,7 +113,7 @@ class MentorRequestCard extends StatelessWidget {
         NinjaButton.secondary(
           label: context.l10n.mentorshipReplyTelegram,
           expanded: true,
-          onPressed: (request.counterpartHandle?.isNotEmpty ?? false)
+          onPressed: (request.replyTelegramHandle?.isNotEmpty ?? false)
               ? onReply
               : null,
         ),

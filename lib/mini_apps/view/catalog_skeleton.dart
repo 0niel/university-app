@@ -10,7 +10,7 @@ class _CatalogSkeleton extends StatelessWidget {
     return NinjaSkeletonGroup(
       semanticsLabel: context.l10n.loadingContent,
       child: ListView(
-        padding: const .only(bottom: _CatalogLayout.bottomInset),
+        padding: EdgeInsets.only(bottom: _CatalogLayout.bottomInset(context)),
         physics: const NeverScrollableScrollPhysics(),
         children: [
           const _CatalogSectionLabelSkeleton(width: 132),

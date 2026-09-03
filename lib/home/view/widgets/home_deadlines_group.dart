@@ -25,11 +25,10 @@ class HomeDeadlinesGroup extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final deadlines = [...state.deadlines]
-      ..sort((a, b) {
-        if (a.isDone != b.isDone) return a.isDone ? 1 : -1;
-        return a.dueAt.compareTo(b.dueAt);
-      });
+    final deadlines = [
+      for (final deadline in state.deadlines)
+        if (!deadline.isDone) deadline,
+    ]..sort((a, b) => a.dueAt.compareTo(b.dueAt));
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -63,6 +62,7 @@ class HomeDeadlinesGroup extends StatelessWidget {
                   meta: homeDeadlineMeta(l10n, deadline, now),
                   left: homeDeadlineLeft(l10n, deadline, now),
                   urgent: deadline.isUrgentAt(now),
+                  warn: deadline.isWarnAt(now),
                   done: deadline.isDone,
                   onTap: onOpen,
                   onToggle:

@@ -43,7 +43,8 @@ class TopTopicsContent extends StatelessWidget {
     final textScale = MediaQuery.textScalerOf(context).scale(1);
     final railHeight = 200 + ((textScale - 1).clamp(0, 1).toDouble() * 72);
 
-    final loading = state.status == .loading;
+    final hasTopics = state.topTopics?.topics.isNotEmpty ?? false;
+    final loading = state.status == .loading && !hasTopics;
     final topics = loading
         ? const <DiscourseTopic>[]
         : (state.topTopics?.topics ?? const <DiscourseTopic>[]);

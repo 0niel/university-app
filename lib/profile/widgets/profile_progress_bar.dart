@@ -1,8 +1,6 @@
 import 'package:app_ui/app_ui.dart';
 import 'package:flutter/widgets.dart';
 
-const _kPastelTrack = Color(0x8CFFFFFF);
-
 class ProfileProgressBar extends StatelessWidget {
   const ProfileProgressBar({
     required this.value,
@@ -30,7 +28,9 @@ class ProfileProgressBar extends StatelessWidget {
           builder: (context, animated, _) => Stack(
             fit: StackFit.expand,
             children: [
-              ColoredBox(color: pastel ? _kPastelTrack : colors.surface2),
+              ColoredBox(
+                color: pastel ? colors.white.withAlpha(140) : colors.surface2,
+              ),
               FractionallySizedBox(
                 alignment: AlignmentDirectional.centerStart,
                 widthFactor: animated.clamp(0.0, 1.0),
@@ -60,7 +60,11 @@ class ProfileProgressBar extends StatelessWidget {
       return Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [bar, const SizedBox(height: AppSpacing.xsm), text],
+        children: [
+          bar,
+          const SizedBox(height: AppSpacing.xsm),
+          text,
+        ],
       );
     }
     return Row(

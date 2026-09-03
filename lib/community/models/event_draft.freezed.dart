@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$EventDraft {
 
- String get title; DateTime get startsAt; String get emoji; EventCategory get category; String get place; String get description;
+ String get title; DateTime get startsAt; String get emoji; EventCategory get category; DateTime? get endsAt; String get place; String get description;
 /// Create a copy of EventDraft
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +25,16 @@ $EventDraftCopyWith<EventDraft> get copyWith => _$EventDraftCopyWithImpl<EventDr
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is EventDraft&&(identical(other.title, title) || other.title == title)&&(identical(other.startsAt, startsAt) || other.startsAt == startsAt)&&(identical(other.emoji, emoji) || other.emoji == emoji)&&(identical(other.category, category) || other.category == category)&&(identical(other.place, place) || other.place == place)&&(identical(other.description, description) || other.description == description));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is EventDraft&&(identical(other.title, title) || other.title == title)&&(identical(other.startsAt, startsAt) || other.startsAt == startsAt)&&(identical(other.emoji, emoji) || other.emoji == emoji)&&(identical(other.category, category) || other.category == category)&&(identical(other.endsAt, endsAt) || other.endsAt == endsAt)&&(identical(other.place, place) || other.place == place)&&(identical(other.description, description) || other.description == description));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,title,startsAt,emoji,category,place,description);
+int get hashCode => Object.hash(runtimeType,title,startsAt,emoji,category,endsAt,place,description);
 
 @override
 String toString() {
-  return 'EventDraft(title: $title, startsAt: $startsAt, emoji: $emoji, category: $category, place: $place, description: $description)';
+  return 'EventDraft(title: $title, startsAt: $startsAt, emoji: $emoji, category: $category, endsAt: $endsAt, place: $place, description: $description)';
 }
 
 
@@ -45,7 +45,7 @@ abstract mixin class $EventDraftCopyWith<$Res>  {
   factory $EventDraftCopyWith(EventDraft value, $Res Function(EventDraft) _then) = _$EventDraftCopyWithImpl;
 @useResult
 $Res call({
- String title, DateTime startsAt, String emoji, EventCategory category, String place, String description
+ String title, DateTime startsAt, String emoji, EventCategory category, DateTime? endsAt, String place, String description
 });
 
 
@@ -62,13 +62,14 @@ class _$EventDraftCopyWithImpl<$Res>
 
 /// Create a copy of EventDraft
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? title = null,Object? startsAt = null,Object? emoji = null,Object? category = null,Object? place = null,Object? description = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? title = null,Object? startsAt = null,Object? emoji = null,Object? category = null,Object? endsAt = freezed,Object? place = null,Object? description = null,}) {
   return _then(_self.copyWith(
 title: null == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
 as String,startsAt: null == startsAt ? _self.startsAt : startsAt // ignore: cast_nullable_to_non_nullable
 as DateTime,emoji: null == emoji ? _self.emoji : emoji // ignore: cast_nullable_to_non_nullable
 as String,category: null == category ? _self.category : category // ignore: cast_nullable_to_non_nullable
-as EventCategory,place: null == place ? _self.place : place // ignore: cast_nullable_to_non_nullable
+as EventCategory,endsAt: freezed == endsAt ? _self.endsAt : endsAt // ignore: cast_nullable_to_non_nullable
+as DateTime?,place: null == place ? _self.place : place // ignore: cast_nullable_to_non_nullable
 as String,description: null == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
 as String,
   ));
@@ -155,10 +156,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String title,  DateTime startsAt,  String emoji,  EventCategory category,  String place,  String description)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String title,  DateTime startsAt,  String emoji,  EventCategory category,  DateTime? endsAt,  String place,  String description)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _EventDraft() when $default != null:
-return $default(_that.title,_that.startsAt,_that.emoji,_that.category,_that.place,_that.description);case _:
+return $default(_that.title,_that.startsAt,_that.emoji,_that.category,_that.endsAt,_that.place,_that.description);case _:
   return orElse();
 
 }
@@ -176,10 +177,10 @@ return $default(_that.title,_that.startsAt,_that.emoji,_that.category,_that.plac
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String title,  DateTime startsAt,  String emoji,  EventCategory category,  String place,  String description)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String title,  DateTime startsAt,  String emoji,  EventCategory category,  DateTime? endsAt,  String place,  String description)  $default,) {final _that = this;
 switch (_that) {
 case _EventDraft():
-return $default(_that.title,_that.startsAt,_that.emoji,_that.category,_that.place,_that.description);case _:
+return $default(_that.title,_that.startsAt,_that.emoji,_that.category,_that.endsAt,_that.place,_that.description);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -196,10 +197,10 @@ return $default(_that.title,_that.startsAt,_that.emoji,_that.category,_that.plac
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String title,  DateTime startsAt,  String emoji,  EventCategory category,  String place,  String description)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String title,  DateTime startsAt,  String emoji,  EventCategory category,  DateTime? endsAt,  String place,  String description)?  $default,) {final _that = this;
 switch (_that) {
 case _EventDraft() when $default != null:
-return $default(_that.title,_that.startsAt,_that.emoji,_that.category,_that.place,_that.description);case _:
+return $default(_that.title,_that.startsAt,_that.emoji,_that.category,_that.endsAt,_that.place,_that.description);case _:
   return null;
 
 }
@@ -211,13 +212,14 @@ return $default(_that.title,_that.startsAt,_that.emoji,_that.category,_that.plac
 
 
 class _EventDraft implements EventDraft {
-  const _EventDraft({required this.title, required this.startsAt, required this.emoji, required this.category, this.place = '', this.description = ''});
+  const _EventDraft({required this.title, required this.startsAt, required this.emoji, required this.category, this.endsAt, this.place = '', this.description = ''});
 
 
 @override final  String title;
 @override final  DateTime startsAt;
 @override final  String emoji;
 @override final  EventCategory category;
+@override final  DateTime? endsAt;
 @override@JsonKey() final  String place;
 @override@JsonKey() final  String description;
 
@@ -231,16 +233,16 @@ _$EventDraftCopyWith<_EventDraft> get copyWith => __$EventDraftCopyWithImpl<_Eve
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _EventDraft&&(identical(other.title, title) || other.title == title)&&(identical(other.startsAt, startsAt) || other.startsAt == startsAt)&&(identical(other.emoji, emoji) || other.emoji == emoji)&&(identical(other.category, category) || other.category == category)&&(identical(other.place, place) || other.place == place)&&(identical(other.description, description) || other.description == description));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _EventDraft&&(identical(other.title, title) || other.title == title)&&(identical(other.startsAt, startsAt) || other.startsAt == startsAt)&&(identical(other.emoji, emoji) || other.emoji == emoji)&&(identical(other.category, category) || other.category == category)&&(identical(other.endsAt, endsAt) || other.endsAt == endsAt)&&(identical(other.place, place) || other.place == place)&&(identical(other.description, description) || other.description == description));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,title,startsAt,emoji,category,place,description);
+int get hashCode => Object.hash(runtimeType,title,startsAt,emoji,category,endsAt,place,description);
 
 @override
 String toString() {
-  return 'EventDraft(title: $title, startsAt: $startsAt, emoji: $emoji, category: $category, place: $place, description: $description)';
+  return 'EventDraft(title: $title, startsAt: $startsAt, emoji: $emoji, category: $category, endsAt: $endsAt, place: $place, description: $description)';
 }
 
 
@@ -251,7 +253,7 @@ abstract mixin class _$EventDraftCopyWith<$Res> implements $EventDraftCopyWith<$
   factory _$EventDraftCopyWith(_EventDraft value, $Res Function(_EventDraft) _then) = __$EventDraftCopyWithImpl;
 @override @useResult
 $Res call({
- String title, DateTime startsAt, String emoji, EventCategory category, String place, String description
+ String title, DateTime startsAt, String emoji, EventCategory category, DateTime? endsAt, String place, String description
 });
 
 
@@ -268,13 +270,14 @@ class __$EventDraftCopyWithImpl<$Res>
 
 /// Create a copy of EventDraft
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? title = null,Object? startsAt = null,Object? emoji = null,Object? category = null,Object? place = null,Object? description = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? title = null,Object? startsAt = null,Object? emoji = null,Object? category = null,Object? endsAt = freezed,Object? place = null,Object? description = null,}) {
   return _then(_EventDraft(
 title: null == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
 as String,startsAt: null == startsAt ? _self.startsAt : startsAt // ignore: cast_nullable_to_non_nullable
 as DateTime,emoji: null == emoji ? _self.emoji : emoji // ignore: cast_nullable_to_non_nullable
 as String,category: null == category ? _self.category : category // ignore: cast_nullable_to_non_nullable
-as EventCategory,place: null == place ? _self.place : place // ignore: cast_nullable_to_non_nullable
+as EventCategory,endsAt: freezed == endsAt ? _self.endsAt : endsAt // ignore: cast_nullable_to_non_nullable
+as DateTime?,place: null == place ? _self.place : place // ignore: cast_nullable_to_non_nullable
 as String,description: null == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
 as String,
   ));

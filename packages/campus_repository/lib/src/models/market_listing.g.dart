@@ -16,11 +16,16 @@ _MarketListing _$MarketListingFromJson(Map<String, dynamic> json) =>
         category: $checkedConvert('category', (v) => v as String? ?? 'other'),
         emoji: $checkedConvert('emoji', (v) => v as String? ?? '📦'),
         isSold: $checkedConvert('isSold', (v) => v as bool? ?? false),
+        isFree: $checkedConvert('isFree', (v) => v as bool? ?? false),
         createdAt: $checkedConvert('createdAt', (v) => dateTimeFromJson(v)),
         isMine: $checkedConvert('isMine', (v) => v as bool? ?? false),
         sellerName: $checkedConvert('sellerName', (v) => v as String? ?? ''),
         showContact: $checkedConvert('showContact', (v) => v as bool? ?? false),
-        sellerHandle: $checkedConvert('sellerHandle', (v) => v as String?),
+        media: $checkedConvert(
+          'media',
+          (v) => v == null ? const <MarketMediaItem>[] : _mediaFromJson(v),
+        ),
+        telegramHandle: $checkedConvert('telegramHandle', (v) => v as String?),
       );
       return val;
     });
@@ -34,9 +39,11 @@ Map<String, dynamic> _$MarketListingToJson(_MarketListing instance) =>
       'category': instance.category,
       'emoji': instance.emoji,
       'isSold': instance.isSold,
+      'isFree': instance.isFree,
       'createdAt': dateTimeToJson(instance.createdAt),
       'isMine': instance.isMine,
       'sellerName': instance.sellerName,
       'showContact': instance.showContact,
-      'sellerHandle': instance.sellerHandle,
+      'media': _mediaToJson(instance.media),
+      'telegramHandle': instance.telegramHandle,
     };

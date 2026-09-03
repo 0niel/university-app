@@ -21,6 +21,8 @@ class _LessonMaterialsPageState extends State<LessonMaterialsPage> {
   bool _loading = true;
   Object? _error;
   int _loadRevision = 0;
+  String? _openingId;
+  final Map<String, String> _urlCache = {};
 
   @override
   void initState() {
@@ -70,6 +72,51 @@ class _LessonMaterialsPageState extends State<LessonMaterialsPage> {
         showCheck: false,
         message: context.l10n.lessonDetailsOpenFailed,
       );
+    }
+  }
+
+  Future<String> _urlFor(
+    ScheduleRepository repository,
+    LessonMaterial material,
+  ) async {
+    final cached = _urlCache[material.id];
+    if (cached != null) return cached;
+    final url = await repository.createLessonMaterialUrl(material);
+    _urlCache[material.id] = url;
+    return url;
+  }
+
+  Future<void> _openViewer(LessonMaterial material) async {
+    final index = _materials.indexWhere((m) => m.id == material.id);
+    if (index < 0 || _openingId != null) return;
+    setState(() => _openingId = material.id);
+    try {
+      final repository = context.read<ScheduleRepository>();
+      final urls = await Future.wait(
+        _materials.map((m) => _urlFor(repository, m)),
+      );
+      if (!mounted) return;
+      final items = [
+        for (final (i, m) in _materials.indexed)
+          MediaItem(
+            url: urls[i],
+            kind: MediaItem.kindOf(mimeType: m.mimeType, fileName: m.fileName),
+            title: m.title,
+            fileName: m.fileName,
+            mimeType: m.mimeType,
+            sizeBytes: m.fileSize,
+          ),
+      ];
+      await showMediaViewer(context, items: items, initialIndex: index);
+    } on Exception catch (_) {
+      if (!mounted) return;
+      showNinjaToast(
+        context,
+        showCheck: false,
+        message: context.l10n.lessonDetailsOpenFailed,
+      );
+    } finally {
+      if (mounted) setState(() => _openingId = null);
     }
   }
 
@@ -127,6 +174,7 @@ class _LessonMaterialsPageState extends State<LessonMaterialsPage> {
             padding: const .only(bottom: AppSpacing.gap),
             child: _MaterialCard(
               material: material,
+              onOpen: () => unawaited(_openViewer(material)),
               onDownload: () => unawaited(_download(material)),
             ),
           ).animateListItem(index: index),

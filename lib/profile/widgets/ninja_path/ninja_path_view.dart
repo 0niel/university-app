@@ -46,7 +46,7 @@ class _NinjaPathViewState extends State<NinjaPathView> {
               AppSpacing.screen,
               24,
               AppSpacing.screen,
-              MediaQuery.paddingOf(context).bottom + 32,
+              ninjaBottomInset(context) + AppSpacing.lg,
             ),
             sliver: SliverList.list(
               children: [

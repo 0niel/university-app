@@ -74,7 +74,7 @@ class _PasswordResetViewState extends State<_PasswordResetView> {
               return AppInputField(
                 key: const Key('passwordResetPage_emailInput'),
                 controller: _emailController,
-                enabled: !state.status.isInProgress,
+                readOnly: state.status.isInProgress,
                 label: l10n.authYourEmail,
                 leadingIcon: AppLineIcon.at,
                 placeholder: l10n.loginEmailPlaceholder,
@@ -88,6 +88,7 @@ class _PasswordResetViewState extends State<_PasswordResetView> {
                     bloc.add(PasswordResetRequested());
                   }
                 },
+                validateOnBlur: true,
                 errorText: showError ? l10n.authInvalidEmail : null,
               );
             },

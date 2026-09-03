@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$Deadline {
 
-@_NonEmptyStringConverter() String get id;@_NonEmptyStringConverter() String get title;@_LocalDateTimeConverter() DateTime get dueAt;@JsonKey(unknownEnumValue: DeadlineSource.me) DeadlineSource get source; String get subjectName;@_DeadlineProgressConverter() int get progress; bool get isDone; bool get isMine;@JsonKey(unknownEnumValue: DeadlinePriority.medium) DeadlinePriority get priority; bool get remind;
+@_NonEmptyStringConverter() String get id;@_NonEmptyStringConverter() String get title;@_LocalDateTimeConverter() DateTime get dueAt;@JsonKey(unknownEnumValue: DeadlineSource.me) DeadlineSource get source; String get subjectName;@_DeadlineProgressConverter() int get progress; bool get isDone; bool get isMine;@JsonKey(unknownEnumValue: DeadlinePriority.medium) DeadlinePriority get priority; bool get remind; int get remindMinutes;
 /// Create a copy of Deadline
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +28,16 @@ $DeadlineCopyWith<Deadline> get copyWith => _$DeadlineCopyWithImpl<Deadline>(thi
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Deadline&&(identical(other.id, id) || other.id == id)&&(identical(other.title, title) || other.title == title)&&(identical(other.dueAt, dueAt) || other.dueAt == dueAt)&&(identical(other.source, source) || other.source == source)&&(identical(other.subjectName, subjectName) || other.subjectName == subjectName)&&(identical(other.progress, progress) || other.progress == progress)&&(identical(other.isDone, isDone) || other.isDone == isDone)&&(identical(other.isMine, isMine) || other.isMine == isMine)&&(identical(other.priority, priority) || other.priority == priority)&&(identical(other.remind, remind) || other.remind == remind));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Deadline&&(identical(other.id, id) || other.id == id)&&(identical(other.title, title) || other.title == title)&&(identical(other.dueAt, dueAt) || other.dueAt == dueAt)&&(identical(other.source, source) || other.source == source)&&(identical(other.subjectName, subjectName) || other.subjectName == subjectName)&&(identical(other.progress, progress) || other.progress == progress)&&(identical(other.isDone, isDone) || other.isDone == isDone)&&(identical(other.isMine, isMine) || other.isMine == isMine)&&(identical(other.priority, priority) || other.priority == priority)&&(identical(other.remind, remind) || other.remind == remind)&&(identical(other.remindMinutes, remindMinutes) || other.remindMinutes == remindMinutes));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,title,dueAt,source,subjectName,progress,isDone,isMine,priority,remind);
+int get hashCode => Object.hash(runtimeType,id,title,dueAt,source,subjectName,progress,isDone,isMine,priority,remind,remindMinutes);
 
 @override
 String toString() {
-  return 'Deadline(id: $id, title: $title, dueAt: $dueAt, source: $source, subjectName: $subjectName, progress: $progress, isDone: $isDone, isMine: $isMine, priority: $priority, remind: $remind)';
+  return 'Deadline(id: $id, title: $title, dueAt: $dueAt, source: $source, subjectName: $subjectName, progress: $progress, isDone: $isDone, isMine: $isMine, priority: $priority, remind: $remind, remindMinutes: $remindMinutes)';
 }
 
 
@@ -48,7 +48,7 @@ abstract mixin class $DeadlineCopyWith<$Res>  {
   factory $DeadlineCopyWith(Deadline value, $Res Function(Deadline) _then) = _$DeadlineCopyWithImpl;
 @useResult
 $Res call({
-@_NonEmptyStringConverter() String id,@_NonEmptyStringConverter() String title,@_LocalDateTimeConverter() DateTime dueAt,@JsonKey(unknownEnumValue: DeadlineSource.me) DeadlineSource source, String subjectName,@_DeadlineProgressConverter() int progress, bool isDone, bool isMine,@JsonKey(unknownEnumValue: DeadlinePriority.medium) DeadlinePriority priority, bool remind
+@_NonEmptyStringConverter() String id,@_NonEmptyStringConverter() String title,@_LocalDateTimeConverter() DateTime dueAt,@JsonKey(unknownEnumValue: DeadlineSource.me) DeadlineSource source, String subjectName,@_DeadlineProgressConverter() int progress, bool isDone, bool isMine,@JsonKey(unknownEnumValue: DeadlinePriority.medium) DeadlinePriority priority, bool remind, int remindMinutes
 });
 
 
@@ -65,7 +65,7 @@ class _$DeadlineCopyWithImpl<$Res>
 
 /// Create a copy of Deadline
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? title = null,Object? dueAt = null,Object? source = null,Object? subjectName = null,Object? progress = null,Object? isDone = null,Object? isMine = null,Object? priority = null,Object? remind = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? title = null,Object? dueAt = null,Object? source = null,Object? subjectName = null,Object? progress = null,Object? isDone = null,Object? isMine = null,Object? priority = null,Object? remind = null,Object? remindMinutes = null,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,title: null == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
@@ -77,7 +77,8 @@ as int,isDone: null == isDone ? _self.isDone : isDone // ignore: cast_nullable_t
 as bool,isMine: null == isMine ? _self.isMine : isMine // ignore: cast_nullable_to_non_nullable
 as bool,priority: null == priority ? _self.priority : priority // ignore: cast_nullable_to_non_nullable
 as DeadlinePriority,remind: null == remind ? _self.remind : remind // ignore: cast_nullable_to_non_nullable
-as bool,
+as bool,remindMinutes: null == remindMinutes ? _self.remindMinutes : remindMinutes // ignore: cast_nullable_to_non_nullable
+as int,
   ));
 }
 
@@ -162,10 +163,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@_NonEmptyStringConverter()  String id, @_NonEmptyStringConverter()  String title, @_LocalDateTimeConverter()  DateTime dueAt, @JsonKey(unknownEnumValue: DeadlineSource.me)  DeadlineSource source,  String subjectName, @_DeadlineProgressConverter()  int progress,  bool isDone,  bool isMine, @JsonKey(unknownEnumValue: DeadlinePriority.medium)  DeadlinePriority priority,  bool remind)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@_NonEmptyStringConverter()  String id, @_NonEmptyStringConverter()  String title, @_LocalDateTimeConverter()  DateTime dueAt, @JsonKey(unknownEnumValue: DeadlineSource.me)  DeadlineSource source,  String subjectName, @_DeadlineProgressConverter()  int progress,  bool isDone,  bool isMine, @JsonKey(unknownEnumValue: DeadlinePriority.medium)  DeadlinePriority priority,  bool remind,  int remindMinutes)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Deadline() when $default != null:
-return $default(_that.id,_that.title,_that.dueAt,_that.source,_that.subjectName,_that.progress,_that.isDone,_that.isMine,_that.priority,_that.remind);case _:
+return $default(_that.id,_that.title,_that.dueAt,_that.source,_that.subjectName,_that.progress,_that.isDone,_that.isMine,_that.priority,_that.remind,_that.remindMinutes);case _:
   return orElse();
 
 }
@@ -183,10 +184,10 @@ return $default(_that.id,_that.title,_that.dueAt,_that.source,_that.subjectName,
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@_NonEmptyStringConverter()  String id, @_NonEmptyStringConverter()  String title, @_LocalDateTimeConverter()  DateTime dueAt, @JsonKey(unknownEnumValue: DeadlineSource.me)  DeadlineSource source,  String subjectName, @_DeadlineProgressConverter()  int progress,  bool isDone,  bool isMine, @JsonKey(unknownEnumValue: DeadlinePriority.medium)  DeadlinePriority priority,  bool remind)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@_NonEmptyStringConverter()  String id, @_NonEmptyStringConverter()  String title, @_LocalDateTimeConverter()  DateTime dueAt, @JsonKey(unknownEnumValue: DeadlineSource.me)  DeadlineSource source,  String subjectName, @_DeadlineProgressConverter()  int progress,  bool isDone,  bool isMine, @JsonKey(unknownEnumValue: DeadlinePriority.medium)  DeadlinePriority priority,  bool remind,  int remindMinutes)  $default,) {final _that = this;
 switch (_that) {
 case _Deadline():
-return $default(_that.id,_that.title,_that.dueAt,_that.source,_that.subjectName,_that.progress,_that.isDone,_that.isMine,_that.priority,_that.remind);case _:
+return $default(_that.id,_that.title,_that.dueAt,_that.source,_that.subjectName,_that.progress,_that.isDone,_that.isMine,_that.priority,_that.remind,_that.remindMinutes);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -203,10 +204,10 @@ return $default(_that.id,_that.title,_that.dueAt,_that.source,_that.subjectName,
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@_NonEmptyStringConverter()  String id, @_NonEmptyStringConverter()  String title, @_LocalDateTimeConverter()  DateTime dueAt, @JsonKey(unknownEnumValue: DeadlineSource.me)  DeadlineSource source,  String subjectName, @_DeadlineProgressConverter()  int progress,  bool isDone,  bool isMine, @JsonKey(unknownEnumValue: DeadlinePriority.medium)  DeadlinePriority priority,  bool remind)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@_NonEmptyStringConverter()  String id, @_NonEmptyStringConverter()  String title, @_LocalDateTimeConverter()  DateTime dueAt, @JsonKey(unknownEnumValue: DeadlineSource.me)  DeadlineSource source,  String subjectName, @_DeadlineProgressConverter()  int progress,  bool isDone,  bool isMine, @JsonKey(unknownEnumValue: DeadlinePriority.medium)  DeadlinePriority priority,  bool remind,  int remindMinutes)?  $default,) {final _that = this;
 switch (_that) {
 case _Deadline() when $default != null:
-return $default(_that.id,_that.title,_that.dueAt,_that.source,_that.subjectName,_that.progress,_that.isDone,_that.isMine,_that.priority,_that.remind);case _:
+return $default(_that.id,_that.title,_that.dueAt,_that.source,_that.subjectName,_that.progress,_that.isDone,_that.isMine,_that.priority,_that.remind,_that.remindMinutes);case _:
   return null;
 
 }
@@ -218,7 +219,7 @@ return $default(_that.id,_that.title,_that.dueAt,_that.source,_that.subjectName,
 @JsonSerializable()
 
 class _Deadline extends Deadline {
-  const _Deadline({@_NonEmptyStringConverter() required this.id, @_NonEmptyStringConverter() required this.title, @_LocalDateTimeConverter() required this.dueAt, @JsonKey(unknownEnumValue: DeadlineSource.me) required this.source, this.subjectName = '', @_DeadlineProgressConverter() this.progress = 0, this.isDone = false, this.isMine = false, @JsonKey(unknownEnumValue: DeadlinePriority.medium) this.priority = DeadlinePriority.medium, this.remind = true}): super._();
+  const _Deadline({@_NonEmptyStringConverter() required this.id, @_NonEmptyStringConverter() required this.title, @_LocalDateTimeConverter() required this.dueAt, @JsonKey(unknownEnumValue: DeadlineSource.me) required this.source, this.subjectName = '', @_DeadlineProgressConverter() this.progress = 0, this.isDone = false, this.isMine = false, @JsonKey(unknownEnumValue: DeadlinePriority.medium) this.priority = DeadlinePriority.medium, this.remind = true, this.remindMinutes = 60}): super._();
   factory _Deadline.fromJson(Map<String, dynamic> json) => _$DeadlineFromJson(json);
 
 @override@_NonEmptyStringConverter() final  String id;
@@ -231,6 +232,7 @@ class _Deadline extends Deadline {
 @override@JsonKey() final  bool isMine;
 @override@JsonKey(unknownEnumValue: DeadlinePriority.medium) final  DeadlinePriority priority;
 @override@JsonKey() final  bool remind;
+@override@JsonKey() final  int remindMinutes;
 
 /// Create a copy of Deadline
 /// with the given fields replaced by the non-null parameter values.
@@ -245,16 +247,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Deadline&&(identical(other.id, id) || other.id == id)&&(identical(other.title, title) || other.title == title)&&(identical(other.dueAt, dueAt) || other.dueAt == dueAt)&&(identical(other.source, source) || other.source == source)&&(identical(other.subjectName, subjectName) || other.subjectName == subjectName)&&(identical(other.progress, progress) || other.progress == progress)&&(identical(other.isDone, isDone) || other.isDone == isDone)&&(identical(other.isMine, isMine) || other.isMine == isMine)&&(identical(other.priority, priority) || other.priority == priority)&&(identical(other.remind, remind) || other.remind == remind));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Deadline&&(identical(other.id, id) || other.id == id)&&(identical(other.title, title) || other.title == title)&&(identical(other.dueAt, dueAt) || other.dueAt == dueAt)&&(identical(other.source, source) || other.source == source)&&(identical(other.subjectName, subjectName) || other.subjectName == subjectName)&&(identical(other.progress, progress) || other.progress == progress)&&(identical(other.isDone, isDone) || other.isDone == isDone)&&(identical(other.isMine, isMine) || other.isMine == isMine)&&(identical(other.priority, priority) || other.priority == priority)&&(identical(other.remind, remind) || other.remind == remind)&&(identical(other.remindMinutes, remindMinutes) || other.remindMinutes == remindMinutes));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,title,dueAt,source,subjectName,progress,isDone,isMine,priority,remind);
+int get hashCode => Object.hash(runtimeType,id,title,dueAt,source,subjectName,progress,isDone,isMine,priority,remind,remindMinutes);
 
 @override
 String toString() {
-  return 'Deadline(id: $id, title: $title, dueAt: $dueAt, source: $source, subjectName: $subjectName, progress: $progress, isDone: $isDone, isMine: $isMine, priority: $priority, remind: $remind)';
+  return 'Deadline(id: $id, title: $title, dueAt: $dueAt, source: $source, subjectName: $subjectName, progress: $progress, isDone: $isDone, isMine: $isMine, priority: $priority, remind: $remind, remindMinutes: $remindMinutes)';
 }
 
 
@@ -265,7 +267,7 @@ abstract mixin class _$DeadlineCopyWith<$Res> implements $DeadlineCopyWith<$Res>
   factory _$DeadlineCopyWith(_Deadline value, $Res Function(_Deadline) _then) = __$DeadlineCopyWithImpl;
 @override @useResult
 $Res call({
-@_NonEmptyStringConverter() String id,@_NonEmptyStringConverter() String title,@_LocalDateTimeConverter() DateTime dueAt,@JsonKey(unknownEnumValue: DeadlineSource.me) DeadlineSource source, String subjectName,@_DeadlineProgressConverter() int progress, bool isDone, bool isMine,@JsonKey(unknownEnumValue: DeadlinePriority.medium) DeadlinePriority priority, bool remind
+@_NonEmptyStringConverter() String id,@_NonEmptyStringConverter() String title,@_LocalDateTimeConverter() DateTime dueAt,@JsonKey(unknownEnumValue: DeadlineSource.me) DeadlineSource source, String subjectName,@_DeadlineProgressConverter() int progress, bool isDone, bool isMine,@JsonKey(unknownEnumValue: DeadlinePriority.medium) DeadlinePriority priority, bool remind, int remindMinutes
 });
 
 
@@ -282,7 +284,7 @@ class __$DeadlineCopyWithImpl<$Res>
 
 /// Create a copy of Deadline
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? title = null,Object? dueAt = null,Object? source = null,Object? subjectName = null,Object? progress = null,Object? isDone = null,Object? isMine = null,Object? priority = null,Object? remind = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? title = null,Object? dueAt = null,Object? source = null,Object? subjectName = null,Object? progress = null,Object? isDone = null,Object? isMine = null,Object? priority = null,Object? remind = null,Object? remindMinutes = null,}) {
   return _then(_Deadline(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,title: null == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
@@ -294,7 +296,8 @@ as int,isDone: null == isDone ? _self.isDone : isDone // ignore: cast_nullable_t
 as bool,isMine: null == isMine ? _self.isMine : isMine // ignore: cast_nullable_to_non_nullable
 as bool,priority: null == priority ? _self.priority : priority // ignore: cast_nullable_to_non_nullable
 as DeadlinePriority,remind: null == remind ? _self.remind : remind // ignore: cast_nullable_to_non_nullable
-as bool,
+as bool,remindMinutes: null == remindMinutes ? _self.remindMinutes : remindMinutes // ignore: cast_nullable_to_non_nullable
+as int,
   ));
 }
 

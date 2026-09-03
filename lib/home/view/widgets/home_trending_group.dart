@@ -4,6 +4,8 @@ import 'package:flutter/widgets.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:rtu_mirea_app/top_discussions/top_discussions.dart';
 
+const homeTrendingTopicsLimit = 5;
+
 class HomeTrendingGroup extends StatelessWidget {
   const HomeTrendingGroup({
     required this.state,
@@ -40,16 +42,23 @@ class HomeTrendingGroup extends StatelessWidget {
         if (topics.isEmpty &&
             (state.status == DiscourseStatus.loading ||
                 state.status == DiscourseStatus.initial))
-          const AppListGroup(children: [AppSkeletonRow(), AppSkeletonRow()])
+          AppListGroup(
+            children: [
+              for (var i = 0; i < homeTrendingTopicsLimit; i++)
+                const AppSkeletonRow(),
+            ],
+          )
         else if (topics.isEmpty && state.status != DiscourseStatus.failure)
           AppEmptyState.compact(title: l10n.homeTrendingEmpty)
         else if (topics.isNotEmpty)
           AppListGroup(
             children: [
-              for (final topic in topics.take(2))
+              for (final topic in topics.take(homeTrendingTopicsLimit))
                 _HomeTrendingRow(
                   title: topic.title,
-                  subtitle: l10n.homeRepliesCount(topic.replyCount),
+                  subtitle:
+                      '${l10n.homeRepliesCount(topic.replyCount)} · '
+                      '${l10n.homeLikesCount(topic.likeCount)}',
                   onTap: () => onOpen(topic),
                 ),
             ],

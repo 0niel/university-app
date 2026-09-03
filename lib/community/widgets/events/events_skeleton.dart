@@ -16,41 +16,43 @@ class EventsSkeleton extends StatelessWidget {
             if (index > 0) const SizedBox(height: AppSpacing.cardGap),
             const AppCard(
               radius: AppRadius.row,
-              padding: EdgeInsets.zero,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  NinjaSkeletonMedia(
-                    height: EventLayout.coverHeight,
-                    radius: AppRadius.row,
-                  ),
-                  Padding(
-                    padding: EdgeInsets.fromLTRB(
-                      AppSpacing.lg,
-                      AppSpacing.sectionGap,
-                      AppSpacing.lg,
-                      AppSpacing.sectionGap,
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        NinjaSkeleton.bar(widthFactor: .7, height: 16),
-                        SizedBox(height: AppSpacing.sm),
-                        NinjaSkeleton.bar(widthFactor: .5),
-                        SizedBox(height: AppSpacing.gap),
-                        Row(
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      NinjaSkeleton(
+                        height: EventLayout.emojiTileSize,
+                        width: EventLayout.emojiTileSize,
+                        radius: AppRadius.field,
+                      ),
+                      SizedBox(width: AppSpacing.md),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            NinjaSkeleton(height: 12.5, width: 72),
-                            Spacer(),
-                            NinjaSkeleton(
-                              height: EventLayout.rsvpHeight,
-                              width: 96,
-                              radius: AppRadius.full,
-                            ),
+                            NinjaSkeleton.bar(widthFactor: .4, height: 18),
+                            SizedBox(height: AppSpacing.sm),
+                            NinjaSkeleton.bar(widthFactor: .7, height: 16),
+                            SizedBox(height: AppSpacing.xs),
+                            NinjaSkeleton.bar(widthFactor: .5),
                           ],
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: AppSpacing.sectionGap),
+                  Row(
+                    children: [
+                      NinjaSkeleton(height: 12.5, width: 90),
+                      Spacer(),
+                      NinjaSkeleton(
+                        height: EventLayout.rsvpHeight,
+                        width: 96,
+                        radius: AppRadius.full,
+                      ),
+                    ],
                   ),
                 ],
               ),

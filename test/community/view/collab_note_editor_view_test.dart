@@ -1,14 +1,13 @@
-import 'package:app_ui/app_ui.dart';
 import 'package:campus_repository/campus_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:rtu_mirea_app/community/community.dart';
+import 'package:rtu_mirea_app/community/cubit/note_editor/note_editor.dart';
 import 'package:rtu_mirea_app/community/view/collab_note_editor_view.dart';
-import 'package:rtu_mirea_app/l10n/l10n.dart';
 
 import '../../helpers/mocks/mock_campus_repository.dart';
+import '../../helpers/pump_app.dart';
 
 void main() {
   group('CollabNoteEditorView', () {
@@ -17,6 +16,9 @@ void main() {
 
     setUp(() {
       repository = MockCampusRepository();
+      when(
+        () => repository.renameGroupNote(any(), any()),
+      ).thenAnswer((_) async {});
       cubit = NoteEditorCubit(
         repository: repository,
         note: const CollabNote(
@@ -33,118 +35,127 @@ void main() {
 
     tearDown(() async => cubit.close());
 
-    Widget buildSubject({double textScale = 1}) => MaterialApp(
-      theme: AppTheme.darkTheme,
-      localizationsDelegates: AppLocalizations.localizationsDelegates,
-      supportedLocales: AppLocalizations.supportedLocales,
-      locale: const Locale('ru'),
-      builder: (context, child) => MediaQuery(
-        data: MediaQuery.of(
-          context,
-        ).copyWith(textScaler: TextScaler.linear(textScale)),
-        child: child!,
-      ),
-      home: NinjaToastHost(
-        child: BlocProvider.value(
-          value: cubit,
-          child: const Scaffold(body: SafeArea(child: CollabNoteEditorView())),
-        ),
-      ),
+    Widget buildSubject() => BlocProvider.value(
+      value: cubit,
+      child: const Scaffold(body: SafeArea(child: CollabNoteEditorView())),
     );
 
-    GroupNoteSaveResult saved() => GroupNoteSaveResult(
-      revision: 1,
-      updatedAt: DateTime(2026, 7, 11, 12),
-    );
+    GroupNoteDocumentSaveResult saved(List<Object?> document) =>
+        GroupNoteDocumentSaveResult(
+          revision: 1,
+          updatedAt: DateTime(2026, 7, 11, 12),
+          document: document,
+        );
 
-    testWidgets('updates the header immediately and saves on back', (
-      tester,
-    ) async {
-      when(
-        () => repository.saveGroupNote(
-          id: 'note-1',
-          title: 'Новый заголовок',
-          content: 'Исходный текст',
-          expectedRevision: 0,
-        ),
-      ).thenAnswer((_) async => saved());
-      await tester.pumpWidget(buildSubject());
+    testWidgets('shows the note title in the header', (tester) async {
+      await tester.pumpApp(buildSubject());
+
+      expect(find.text('Алгоритмы'), findsOneWidget);
+    });
+
+    testWidgets('updates the title as the user types', (tester) async {
+      await tester.pumpApp(buildSubject());
 
       await tester.enterText(
-        find.byType(TextField).first,
+        find.byKey(const ValueKey('collab-note-title-field')),
         'Новый заголовок',
       );
       await tester.pump();
-      expect(find.text('Конспект · Новый заголовок'), findsOneWidget);
 
-      await tester.tap(find.byTooltip('Назад'));
+      expect(cubit.state.title, 'Новый заголовок');
+      expect(await cubit.flush(), isTrue);
       await tester.pump();
-      verify(
-        () => repository.saveGroupNote(
+    });
+
+    testWidgets('title save failure opens the discard confirmation', (
+      tester,
+    ) async {
+      when(
+        () => repository.renameGroupNote(any(), any()),
+      ).thenThrow(Exception('rename failed'));
+      await tester.pumpApp(buildSubject());
+      await tester.enterText(
+        find.byKey(const ValueKey('collab-note-title-field')),
+        'Несохранённый заголовок',
+      );
+      await tester.tap(find.bySemanticsLabel('Назад'));
+      await tester.pumpAndSettle();
+      expect(cubit.state.hasUnsavedChanges, isTrue);
+      expect(cubit.state.status, NoteEditorStatus.failure);
+      expect(find.text('Выйти без сохранения?'), findsOneWidget);
+      cubit.discardChanges();
+    });
+
+    testWidgets('makes the title read-only for another note owner', (
+      tester,
+    ) async {
+      addTearDown(cubit.close);
+      cubit = NoteEditorCubit(
+        repository: repository,
+        note: const CollabNote(
           id: 'note-1',
-          title: 'Новый заголовок',
-          content: 'Исходный текст',
+          title: 'Чужая заметка',
+          isPersonal: true,
+        ),
+        editorName: 'Alex',
+      );
+      await tester.pumpApp(buildSubject());
+      final title = tester.widget<EditableText>(
+        find.byKey(const ValueKey('collab-note-title-field')),
+      );
+      expect(title.readOnly, isTrue);
+      expect(cubit.state.readOnly, isFalse);
+    });
+
+    testWidgets('flushes a pending edit and pops on back', (tester) async {
+      when(
+        () => repository.saveGroupNoteDocument(
+          id: any(named: 'id'),
+          document: any(named: 'document'),
+          expectedRevision: any(named: 'expectedRevision'),
+        ),
+      ).thenAnswer(
+        (invocation) async =>
+            saved(invocation.namedArguments[#document] as List<Object?>),
+      );
+      await tester.pumpApp(buildSubject());
+      cubit.controller.document.insert(0, 'Ещё текст ');
+      await tester.pump();
+
+      await tester.tap(find.bySemanticsLabel('Назад'));
+      await tester.pumpAndSettle();
+
+      verify(
+        () => repository.saveGroupNoteDocument(
+          id: 'note-1',
+          document: any(named: 'document'),
           expectedRevision: 0,
         ),
       ).called(1);
     });
 
-    testWidgets('keeps local text visible after a save conflict', (
-      tester,
-    ) async {
+    testWidgets('deletes the note from the overflow menu', (tester) async {
       when(
-        () => repository.saveGroupNote(
-          id: any(named: 'id'),
-          title: any(named: 'title'),
-          content: any(named: 'content'),
-          expectedRevision: any(named: 'expectedRevision'),
-        ),
-      ).thenThrow(const CollabNoteConflictException());
-      await tester.pumpWidget(buildSubject());
+        () => repository.deleteGroupNote('note-1'),
+      ).thenAnswer((_) async {});
+      await tester.pumpApp(buildSubject());
 
-      await tester.enterText(
-        find.byType(TextField).last,
-        'Важный локальный текст',
-      );
-      await tester.tap(find.byTooltip('Сохранить'));
-      await tester.pump();
+      await tester.tap(find.bySemanticsLabel('Ещё'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Удалить'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Удалить').last);
+      await tester.pumpAndSettle();
 
-      expect(find.text('Важный локальный текст'), findsOneWidget);
-      expect(
-        find.text(
-          'Конспект изменили в другом редакторе. Ваш текст остался здесь.',
-        ),
-        findsOneWidget,
-      );
-      await tester.pump(const Duration(seconds: 4));
-
-      await tester.tap(find.byTooltip('Назад'));
-      await tester.pump();
-      expect(find.text('Выйти без сохранения?'), findsOneWidget);
-      await tester.tap(find.text('Продолжить редактирование'));
-      await tester.pump();
-      expect(find.text('Важный локальный текст'), findsOneWidget);
+      verify(() => repository.deleteGroupNote('note-1')).called(1);
     });
 
-    testWidgets('fits 320 logical pixels at 200 percent text scale', (
-      tester,
-    ) async {
-      tester.view.physicalSize = const Size(640, 1400);
-      tester.view.devicePixelRatio = 2;
-      addTearDown(tester.view.resetPhysicalSize);
-      addTearDown(tester.view.resetDevicePixelRatio);
+    testWidgets('renders the formatting toolbar', (tester) async {
+      await tester.pumpApp(buildSubject());
 
-      await tester.pumpWidget(buildSubject(textScale: 2));
-
-      expect(tester.takeException(), isNull);
-      expect(
-        tester.getSize(find.byTooltip('Сохранить')).height,
-        NinjaMetrics.minTouchTarget,
-      );
-      expect(
-        tester.getSize(find.byTooltip('Удалить')).height,
-        NinjaMetrics.minTouchTarget,
-      );
+      expect(find.bySemanticsLabel('Голосовой ввод'), findsOneWidget);
+      expect(find.bySemanticsLabel('Жирный'), findsOneWidget);
+      expect(find.bySemanticsLabel('Рисунок'), findsOneWidget);
     });
   });
 }

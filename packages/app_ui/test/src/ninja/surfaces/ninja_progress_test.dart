@@ -90,6 +90,58 @@ void main() {
     test('AppProgressBar is the same widget', () {
       expect(AppProgressBar, NinjaProgressBar);
     });
+
+    testWidgets(
+        'indeterminate sweeps a 40% segment and skips under reduced '
+        'motion', (tester) async {
+      await tester.pumpWidget(
+        wrapKit(
+          const MediaQuery(
+            data: MediaQueryData(disableAnimations: true),
+            child: SizedBox(
+              width: 200,
+              child: NinjaProgressBar(indeterminate: true),
+            ),
+          ),
+        ),
+      );
+
+      final fill = tester.widget<FractionallySizedBox>(
+        find.descendant(
+          of: find.byType(NinjaProgressBar),
+          matching: find.byType(FractionallySizedBox),
+        ),
+      );
+      expect(fill.widthFactor, closeTo(0.4, 0.001));
+      expect(
+        find.descendant(
+          of: find.byType(NinjaProgressBar),
+          matching: find.byType(FractionalTranslation),
+        ),
+        findsNothing,
+      );
+    });
+
+    testWidgets('indeterminate animates a sliding fill', (tester) async {
+      await tester.pumpWidget(
+        wrapKit(
+          const SizedBox(
+            width: 200,
+            child: NinjaProgressBar(indeterminate: true),
+          ),
+        ),
+      );
+
+      expect(
+        find.descendant(
+          of: find.byType(NinjaProgressBar),
+          matching: find.byType(FractionalTranslation),
+        ),
+        findsOneWidget,
+      );
+      await tester.pump(const Duration(milliseconds: 700));
+      await tester.pumpWidget(const SizedBox());
+    });
   });
 
   group('AppSegmentedBar', () {
@@ -180,8 +232,9 @@ void main() {
       await tester.pumpWidget(const SizedBox());
     });
 
-    test('AppSpinner is the same widget', () {
-      expect(AppSpinner, NinjaSpinner);
+    testWidgets('AppSpinner renders at the requested size', (tester) async {
+      await tester.pumpWidget(wrapKit(const AppSpinner(size: 18)));
+      expect(tester.getSize(find.byType(AppSpinner)), const Size(18, 18));
     });
 
     testWidgets('AppPulseDot collapses to a single dot under reduced motion', (

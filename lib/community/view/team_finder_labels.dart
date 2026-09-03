@@ -9,6 +9,13 @@ String teamKindLabel(AppLocalizations l10n, String key) => switch (key) {
   _ => humanizeTeamKey(key),
 };
 
+String teamKindFilterLabel(AppLocalizations l10n, String key) => switch (key) {
+  'hackathon' => l10n.teamFinderFilterHackathons,
+  'project' => l10n.teamFinderFilterProjects,
+  'study' => l10n.teamFinderFilterStudy,
+  _ => teamKindLabel(l10n, key),
+};
+
 String teamRoleLabel(AppLocalizations l10n, String key) => switch (key) {
   'frontend' => l10n.teamFinderRoleFrontend,
   'ml' => l10n.teamFinderRoleMl,
@@ -41,3 +48,8 @@ String humanizeTeamKey(String key) => key
     .where((part) => part.isNotEmpty)
     .map((part) => '${part.substring(0, 1).toUpperCase()}${part.substring(1)}')
     .join(' ');
+
+List<String> parseCustomRoles(String input) => {
+  for (final part in input.split(','))
+    if (part.trim().isNotEmpty) part.trim(),
+}.toList(growable: false);

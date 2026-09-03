@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:app_ui/app_ui.dart';
 import 'package:campus_repository/campus_repository.dart';
 import 'package:flutter/material.dart';
@@ -6,6 +8,7 @@ import 'package:rtu_mirea_app/community/cubit/collab_notes/collab_notes.dart';
 import 'package:rtu_mirea_app/community/widgets/collab_notes/collab_note_card.dart';
 import 'package:rtu_mirea_app/community/widgets/collab_notes/collab_notes_failure.dart';
 import 'package:rtu_mirea_app/community/widgets/collab_notes/collab_notes_skeleton.dart';
+import 'package:rtu_mirea_app/community/widgets/collab_notes/note_actions_sheet.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 
 class CollabNotesBody extends StatefulWidget {
@@ -20,6 +23,14 @@ class CollabNotesBody extends StatefulWidget {
 
 class _CollabNotesBodyState extends State<CollabNotesBody> {
   String _filter = 'all';
+  final _searchController = TextEditingController();
+  String _query = '';
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -28,6 +39,15 @@ class _CollabNotesBodyState extends State<CollabNotesBody> {
     return Column(
       children: [
         const SizedBox(height: AppSpacing.screen),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screen),
+          child: AppSearchField(
+            controller: _searchController,
+            hintText: l10n.collabNotesSearchHint,
+            onChanged: (value) => setState(() => _query = value.trim()),
+          ),
+        ),
+        const SizedBox(height: AppSpacing.sectionGap),
         AppChipRow<String>(
           value: _filter,
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screen),
@@ -44,7 +64,7 @@ class _CollabNotesBodyState extends State<CollabNotesBody> {
           onChanged: (value) => setState(() => _filter = value),
         ),
         const SizedBox(height: AppSpacing.sectionGap),
-        Expanded(child: NinjaStateSwitcher(child: _content(context, state))),
+        Expanded(child: AppStateSwitcher(child: _content(context, state))),
       ],
     );
   }
@@ -60,6 +80,7 @@ class _CollabNotesBodyState extends State<CollabNotesBody> {
       );
     }
     final cutoff = DateTime.now().subtract(const Duration(days: 7));
+    final query = _query.toLowerCase();
     final notes = state.notes
         .where(
           (note) => switch (_filter) {
@@ -70,6 +91,12 @@ class _CollabNotesBodyState extends State<CollabNotesBody> {
             _ => true,
           },
         )
+        .where(
+          (note) =>
+              query.isEmpty ||
+              note.title.toLowerCase().contains(query) ||
+              note.content.toLowerCase().contains(query),
+        )
         .toList(growable: false);
     if (notes.isEmpty) {
       return ListView(
@@ -77,19 +104,19 @@ class _CollabNotesBodyState extends State<CollabNotesBody> {
         physics: const AlwaysScrollableScrollPhysics(),
         children: [
           Padding(
-            padding: const .fromLTRB(
+            padding: const EdgeInsets.fromLTRB(
               AppSpacing.screen,
               AppSpacing.xxxlg,
               AppSpacing.screen,
               AppSpacing.zero,
             ),
-            child: NinjaEmptyState.screen(
-              icon: const AppLineIconWidget(AppLineIcon.pencil, size: 24),
+            child: AppEmptyState(
+              lineIcon: AppLineIcon.pencil,
               title: context.l10n.collabNotesEmptyTitle,
-              message: context.l10n.collabNotesEmptySubtitle,
+              subtitle: context.l10n.collabNotesEmptySubtitle,
               actionLabel: context.l10n.collabNotesCreateTitle,
               onAction: widget.onCreate,
-            ).animateEmptyState(),
+            ),
           ),
         ],
       );
@@ -100,11 +127,11 @@ class _CollabNotesBodyState extends State<CollabNotesBody> {
       onRefresh: context.read<CollabNotesCubit>().load,
       child: ListView(
         physics: const AlwaysScrollableScrollPhysics(),
-        padding: const .fromLTRB(
+        padding: EdgeInsets.fromLTRB(
           AppSpacing.screen,
           AppSpacing.zero,
           AppSpacing.screen,
-          96,
+          ninjaBottomInset(context) + AppSpacing.lg,
         ),
         children: [
           AppListGroup(
@@ -114,6 +141,9 @@ class _CollabNotesBodyState extends State<CollabNotesBody> {
                   key: ValueKey(note.id),
                   note: note,
                   onTap: () => widget.onOpen?.call(note),
+                  onLongPress: () => unawaited(
+                    showNoteActionsSheet(context, note),
+                  ),
                 ),
             ],
           ),

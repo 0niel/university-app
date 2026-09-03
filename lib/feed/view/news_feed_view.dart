@@ -78,11 +78,11 @@ class NewsFeedView extends StatelessWidget {
             ),
           ),
           SliverPadding(
-            padding: const EdgeInsets.fromLTRB(
+            padding: EdgeInsets.fromLTRB(
               AppSpacing.screen,
               AppSpacing.contentGap,
               AppSpacing.screen,
-              AppSpacing.xxlg,
+              ninjaBottomInset(context) + AppSpacing.lg,
             ),
             sliver: NewsFeedContent(
               key: ValueKey('newsFeed_${category.id}'),

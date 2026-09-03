@@ -13,12 +13,14 @@ class ExamTopics extends StatelessWidget {
     required this.exam,
     required this.cubit,
     required this.onChanged,
+    this.now,
     super.key,
   });
 
   final SessionExam exam;
   final ExamTopicsCubit cubit;
   final VoidCallback onChanged;
+  final DateTime? now;
 
   @override
   Widget build(BuildContext context) {
@@ -111,7 +113,7 @@ class ExamTopics extends StatelessWidget {
                           DateFormat.MMMd(
                             Localizations.localeOf(context).toString(),
                           ).format(
-                            DateTime.now().add(
+                            (now ?? DateTime.now()).add(
                               Duration(
                                 days: exam.days <= 1
                                     ? 0

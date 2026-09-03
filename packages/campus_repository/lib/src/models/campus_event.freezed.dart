@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$CampusEvent {
 
-@JsonKey(defaultValue: '') String get id;@JsonKey(defaultValue: '') String get title;@JsonKey(fromJson: requiredDateTimeFromJson, toJson: requiredDateTimeToJson) DateTime get startsAt; String get description; String get emoji; String get category; String get place; int get goingCount; bool get isGoing; bool get isMine;@JsonKey(fromJson: stringListFromJson, toJson: stringListToJson) List<String> get goingNames;
+@JsonKey(defaultValue: '') String get id;@JsonKey(defaultValue: '') String get title;@JsonKey(fromJson: requiredDateTimeFromJson, toJson: requiredDateTimeToJson) DateTime get startsAt;@JsonKey(fromJson: dateTimeFromJson, toJson: dateTimeToJson) DateTime? get endsAt; String get description; String get emoji; String get category; String get place; int get goingCount; bool get isGoing; bool get isMine;@JsonKey(fromJson: stringListFromJson, toJson: stringListToJson) List<String> get goingNames;
 /// Create a copy of CampusEvent
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +28,16 @@ $CampusEventCopyWith<CampusEvent> get copyWith => _$CampusEventCopyWithImpl<Camp
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is CampusEvent&&(identical(other.id, id) || other.id == id)&&(identical(other.title, title) || other.title == title)&&(identical(other.startsAt, startsAt) || other.startsAt == startsAt)&&(identical(other.description, description) || other.description == description)&&(identical(other.emoji, emoji) || other.emoji == emoji)&&(identical(other.category, category) || other.category == category)&&(identical(other.place, place) || other.place == place)&&(identical(other.goingCount, goingCount) || other.goingCount == goingCount)&&(identical(other.isGoing, isGoing) || other.isGoing == isGoing)&&(identical(other.isMine, isMine) || other.isMine == isMine)&&const DeepCollectionEquality().equals(other.goingNames, goingNames));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is CampusEvent&&(identical(other.id, id) || other.id == id)&&(identical(other.title, title) || other.title == title)&&(identical(other.startsAt, startsAt) || other.startsAt == startsAt)&&(identical(other.endsAt, endsAt) || other.endsAt == endsAt)&&(identical(other.description, description) || other.description == description)&&(identical(other.emoji, emoji) || other.emoji == emoji)&&(identical(other.category, category) || other.category == category)&&(identical(other.place, place) || other.place == place)&&(identical(other.goingCount, goingCount) || other.goingCount == goingCount)&&(identical(other.isGoing, isGoing) || other.isGoing == isGoing)&&(identical(other.isMine, isMine) || other.isMine == isMine)&&const DeepCollectionEquality().equals(other.goingNames, goingNames));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,title,startsAt,description,emoji,category,place,goingCount,isGoing,isMine,const DeepCollectionEquality().hash(goingNames));
+int get hashCode => Object.hash(runtimeType,id,title,startsAt,endsAt,description,emoji,category,place,goingCount,isGoing,isMine,const DeepCollectionEquality().hash(goingNames));
 
 @override
 String toString() {
-  return 'CampusEvent(id: $id, title: $title, startsAt: $startsAt, description: $description, emoji: $emoji, category: $category, place: $place, goingCount: $goingCount, isGoing: $isGoing, isMine: $isMine, goingNames: $goingNames)';
+  return 'CampusEvent(id: $id, title: $title, startsAt: $startsAt, endsAt: $endsAt, description: $description, emoji: $emoji, category: $category, place: $place, goingCount: $goingCount, isGoing: $isGoing, isMine: $isMine, goingNames: $goingNames)';
 }
 
 
@@ -48,7 +48,7 @@ abstract mixin class $CampusEventCopyWith<$Res>  {
   factory $CampusEventCopyWith(CampusEvent value, $Res Function(CampusEvent) _then) = _$CampusEventCopyWithImpl;
 @useResult
 $Res call({
-@JsonKey(defaultValue: '') String id,@JsonKey(defaultValue: '') String title,@JsonKey(fromJson: requiredDateTimeFromJson, toJson: requiredDateTimeToJson) DateTime startsAt, String description, String emoji, String category, String place, int goingCount, bool isGoing, bool isMine,@JsonKey(fromJson: stringListFromJson, toJson: stringListToJson) List<String> goingNames
+@JsonKey(defaultValue: '') String id,@JsonKey(defaultValue: '') String title,@JsonKey(fromJson: requiredDateTimeFromJson, toJson: requiredDateTimeToJson) DateTime startsAt,@JsonKey(fromJson: dateTimeFromJson, toJson: dateTimeToJson) DateTime? endsAt, String description, String emoji, String category, String place, int goingCount, bool isGoing, bool isMine,@JsonKey(fromJson: stringListFromJson, toJson: stringListToJson) List<String> goingNames
 });
 
 
@@ -65,12 +65,13 @@ class _$CampusEventCopyWithImpl<$Res>
 
 /// Create a copy of CampusEvent
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? title = null,Object? startsAt = null,Object? description = null,Object? emoji = null,Object? category = null,Object? place = null,Object? goingCount = null,Object? isGoing = null,Object? isMine = null,Object? goingNames = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? title = null,Object? startsAt = null,Object? endsAt = freezed,Object? description = null,Object? emoji = null,Object? category = null,Object? place = null,Object? goingCount = null,Object? isGoing = null,Object? isMine = null,Object? goingNames = null,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,title: null == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
 as String,startsAt: null == startsAt ? _self.startsAt : startsAt // ignore: cast_nullable_to_non_nullable
-as DateTime,description: null == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
+as DateTime,endsAt: freezed == endsAt ? _self.endsAt : endsAt // ignore: cast_nullable_to_non_nullable
+as DateTime?,description: null == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
 as String,emoji: null == emoji ? _self.emoji : emoji // ignore: cast_nullable_to_non_nullable
 as String,category: null == category ? _self.category : category // ignore: cast_nullable_to_non_nullable
 as String,place: null == place ? _self.place : place // ignore: cast_nullable_to_non_nullable
@@ -163,10 +164,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(defaultValue: '')  String id, @JsonKey(defaultValue: '')  String title, @JsonKey(fromJson: requiredDateTimeFromJson, toJson: requiredDateTimeToJson)  DateTime startsAt,  String description,  String emoji,  String category,  String place,  int goingCount,  bool isGoing,  bool isMine, @JsonKey(fromJson: stringListFromJson, toJson: stringListToJson)  List<String> goingNames)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(defaultValue: '')  String id, @JsonKey(defaultValue: '')  String title, @JsonKey(fromJson: requiredDateTimeFromJson, toJson: requiredDateTimeToJson)  DateTime startsAt, @JsonKey(fromJson: dateTimeFromJson, toJson: dateTimeToJson)  DateTime? endsAt,  String description,  String emoji,  String category,  String place,  int goingCount,  bool isGoing,  bool isMine, @JsonKey(fromJson: stringListFromJson, toJson: stringListToJson)  List<String> goingNames)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _CampusEvent() when $default != null:
-return $default(_that.id,_that.title,_that.startsAt,_that.description,_that.emoji,_that.category,_that.place,_that.goingCount,_that.isGoing,_that.isMine,_that.goingNames);case _:
+return $default(_that.id,_that.title,_that.startsAt,_that.endsAt,_that.description,_that.emoji,_that.category,_that.place,_that.goingCount,_that.isGoing,_that.isMine,_that.goingNames);case _:
   return orElse();
 
 }
@@ -184,10 +185,10 @@ return $default(_that.id,_that.title,_that.startsAt,_that.description,_that.emoj
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(defaultValue: '')  String id, @JsonKey(defaultValue: '')  String title, @JsonKey(fromJson: requiredDateTimeFromJson, toJson: requiredDateTimeToJson)  DateTime startsAt,  String description,  String emoji,  String category,  String place,  int goingCount,  bool isGoing,  bool isMine, @JsonKey(fromJson: stringListFromJson, toJson: stringListToJson)  List<String> goingNames)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(defaultValue: '')  String id, @JsonKey(defaultValue: '')  String title, @JsonKey(fromJson: requiredDateTimeFromJson, toJson: requiredDateTimeToJson)  DateTime startsAt, @JsonKey(fromJson: dateTimeFromJson, toJson: dateTimeToJson)  DateTime? endsAt,  String description,  String emoji,  String category,  String place,  int goingCount,  bool isGoing,  bool isMine, @JsonKey(fromJson: stringListFromJson, toJson: stringListToJson)  List<String> goingNames)  $default,) {final _that = this;
 switch (_that) {
 case _CampusEvent():
-return $default(_that.id,_that.title,_that.startsAt,_that.description,_that.emoji,_that.category,_that.place,_that.goingCount,_that.isGoing,_that.isMine,_that.goingNames);case _:
+return $default(_that.id,_that.title,_that.startsAt,_that.endsAt,_that.description,_that.emoji,_that.category,_that.place,_that.goingCount,_that.isGoing,_that.isMine,_that.goingNames);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -204,10 +205,10 @@ return $default(_that.id,_that.title,_that.startsAt,_that.description,_that.emoj
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(defaultValue: '')  String id, @JsonKey(defaultValue: '')  String title, @JsonKey(fromJson: requiredDateTimeFromJson, toJson: requiredDateTimeToJson)  DateTime startsAt,  String description,  String emoji,  String category,  String place,  int goingCount,  bool isGoing,  bool isMine, @JsonKey(fromJson: stringListFromJson, toJson: stringListToJson)  List<String> goingNames)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(defaultValue: '')  String id, @JsonKey(defaultValue: '')  String title, @JsonKey(fromJson: requiredDateTimeFromJson, toJson: requiredDateTimeToJson)  DateTime startsAt, @JsonKey(fromJson: dateTimeFromJson, toJson: dateTimeToJson)  DateTime? endsAt,  String description,  String emoji,  String category,  String place,  int goingCount,  bool isGoing,  bool isMine, @JsonKey(fromJson: stringListFromJson, toJson: stringListToJson)  List<String> goingNames)?  $default,) {final _that = this;
 switch (_that) {
 case _CampusEvent() when $default != null:
-return $default(_that.id,_that.title,_that.startsAt,_that.description,_that.emoji,_that.category,_that.place,_that.goingCount,_that.isGoing,_that.isMine,_that.goingNames);case _:
+return $default(_that.id,_that.title,_that.startsAt,_that.endsAt,_that.description,_that.emoji,_that.category,_that.place,_that.goingCount,_that.isGoing,_that.isMine,_that.goingNames);case _:
   return null;
 
 }
@@ -219,12 +220,13 @@ return $default(_that.id,_that.title,_that.startsAt,_that.description,_that.emoj
 @JsonSerializable()
 
 class _CampusEvent implements CampusEvent {
-  const _CampusEvent({@JsonKey(defaultValue: '') required this.id, @JsonKey(defaultValue: '') required this.title, @JsonKey(fromJson: requiredDateTimeFromJson, toJson: requiredDateTimeToJson) required this.startsAt, this.description = '', this.emoji = '🎉', this.category = 'other', this.place = '', this.goingCount = 0, this.isGoing = false, this.isMine = false, @JsonKey(fromJson: stringListFromJson, toJson: stringListToJson) final  List<String> goingNames = const <String>[]}): _goingNames = goingNames;
+  const _CampusEvent({@JsonKey(defaultValue: '') required this.id, @JsonKey(defaultValue: '') required this.title, @JsonKey(fromJson: requiredDateTimeFromJson, toJson: requiredDateTimeToJson) required this.startsAt, @JsonKey(fromJson: dateTimeFromJson, toJson: dateTimeToJson) this.endsAt, this.description = '', this.emoji = '🎉', this.category = 'other', this.place = '', this.goingCount = 0, this.isGoing = false, this.isMine = false, @JsonKey(fromJson: stringListFromJson, toJson: stringListToJson) final  List<String> goingNames = const <String>[]}): _goingNames = goingNames;
   factory _CampusEvent.fromJson(Map<String, dynamic> json) => _$CampusEventFromJson(json);
 
 @override@JsonKey(defaultValue: '') final  String id;
 @override@JsonKey(defaultValue: '') final  String title;
 @override@JsonKey(fromJson: requiredDateTimeFromJson, toJson: requiredDateTimeToJson) final  DateTime startsAt;
+@override@JsonKey(fromJson: dateTimeFromJson, toJson: dateTimeToJson) final  DateTime? endsAt;
 @override@JsonKey() final  String description;
 @override@JsonKey() final  String emoji;
 @override@JsonKey() final  String category;
@@ -253,16 +255,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _CampusEvent&&(identical(other.id, id) || other.id == id)&&(identical(other.title, title) || other.title == title)&&(identical(other.startsAt, startsAt) || other.startsAt == startsAt)&&(identical(other.description, description) || other.description == description)&&(identical(other.emoji, emoji) || other.emoji == emoji)&&(identical(other.category, category) || other.category == category)&&(identical(other.place, place) || other.place == place)&&(identical(other.goingCount, goingCount) || other.goingCount == goingCount)&&(identical(other.isGoing, isGoing) || other.isGoing == isGoing)&&(identical(other.isMine, isMine) || other.isMine == isMine)&&const DeepCollectionEquality().equals(other._goingNames, _goingNames));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _CampusEvent&&(identical(other.id, id) || other.id == id)&&(identical(other.title, title) || other.title == title)&&(identical(other.startsAt, startsAt) || other.startsAt == startsAt)&&(identical(other.endsAt, endsAt) || other.endsAt == endsAt)&&(identical(other.description, description) || other.description == description)&&(identical(other.emoji, emoji) || other.emoji == emoji)&&(identical(other.category, category) || other.category == category)&&(identical(other.place, place) || other.place == place)&&(identical(other.goingCount, goingCount) || other.goingCount == goingCount)&&(identical(other.isGoing, isGoing) || other.isGoing == isGoing)&&(identical(other.isMine, isMine) || other.isMine == isMine)&&const DeepCollectionEquality().equals(other._goingNames, _goingNames));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,title,startsAt,description,emoji,category,place,goingCount,isGoing,isMine,const DeepCollectionEquality().hash(_goingNames));
+int get hashCode => Object.hash(runtimeType,id,title,startsAt,endsAt,description,emoji,category,place,goingCount,isGoing,isMine,const DeepCollectionEquality().hash(_goingNames));
 
 @override
 String toString() {
-  return 'CampusEvent(id: $id, title: $title, startsAt: $startsAt, description: $description, emoji: $emoji, category: $category, place: $place, goingCount: $goingCount, isGoing: $isGoing, isMine: $isMine, goingNames: $goingNames)';
+  return 'CampusEvent(id: $id, title: $title, startsAt: $startsAt, endsAt: $endsAt, description: $description, emoji: $emoji, category: $category, place: $place, goingCount: $goingCount, isGoing: $isGoing, isMine: $isMine, goingNames: $goingNames)';
 }
 
 
@@ -273,7 +275,7 @@ abstract mixin class _$CampusEventCopyWith<$Res> implements $CampusEventCopyWith
   factory _$CampusEventCopyWith(_CampusEvent value, $Res Function(_CampusEvent) _then) = __$CampusEventCopyWithImpl;
 @override @useResult
 $Res call({
-@JsonKey(defaultValue: '') String id,@JsonKey(defaultValue: '') String title,@JsonKey(fromJson: requiredDateTimeFromJson, toJson: requiredDateTimeToJson) DateTime startsAt, String description, String emoji, String category, String place, int goingCount, bool isGoing, bool isMine,@JsonKey(fromJson: stringListFromJson, toJson: stringListToJson) List<String> goingNames
+@JsonKey(defaultValue: '') String id,@JsonKey(defaultValue: '') String title,@JsonKey(fromJson: requiredDateTimeFromJson, toJson: requiredDateTimeToJson) DateTime startsAt,@JsonKey(fromJson: dateTimeFromJson, toJson: dateTimeToJson) DateTime? endsAt, String description, String emoji, String category, String place, int goingCount, bool isGoing, bool isMine,@JsonKey(fromJson: stringListFromJson, toJson: stringListToJson) List<String> goingNames
 });
 
 
@@ -290,12 +292,13 @@ class __$CampusEventCopyWithImpl<$Res>
 
 /// Create a copy of CampusEvent
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? title = null,Object? startsAt = null,Object? description = null,Object? emoji = null,Object? category = null,Object? place = null,Object? goingCount = null,Object? isGoing = null,Object? isMine = null,Object? goingNames = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? title = null,Object? startsAt = null,Object? endsAt = freezed,Object? description = null,Object? emoji = null,Object? category = null,Object? place = null,Object? goingCount = null,Object? isGoing = null,Object? isMine = null,Object? goingNames = null,}) {
   return _then(_CampusEvent(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,title: null == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
 as String,startsAt: null == startsAt ? _self.startsAt : startsAt // ignore: cast_nullable_to_non_nullable
-as DateTime,description: null == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
+as DateTime,endsAt: freezed == endsAt ? _self.endsAt : endsAt // ignore: cast_nullable_to_non_nullable
+as DateTime?,description: null == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
 as String,emoji: null == emoji ? _self.emoji : emoji // ignore: cast_nullable_to_non_nullable
 as String,category: null == category ? _self.category : category // ignore: cast_nullable_to_non_nullable
 as String,place: null == place ? _self.place : place // ignore: cast_nullable_to_non_nullable

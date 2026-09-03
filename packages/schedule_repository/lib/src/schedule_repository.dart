@@ -18,16 +18,7 @@ import 'package:schedule_repository/src/schedule_target_type.dart';
 import 'package:schedule_repository/src/user_activity.dart';
 import 'package:supabase/supabase.dart';
 
-/// {@template schedule_repository}
-/// Orchestrates schedule data through Supabase.
-///
-/// The repository is a thin facade over focused data sources
-/// ([ScheduleRemoteDataSource], [LessonReactionsDataSource] and
-/// [LessonMaterialsDataSource]). Its only added responsibility is translating
-/// low-level errors into typed [ScheduleFailure]s.
-/// {@endtemplate}
 class ScheduleRepository {
-  /// {@macro schedule_repository}
   ScheduleRepository({
     required SupabaseClient supabaseClient,
     required String organizationId,
@@ -55,9 +46,6 @@ class ScheduleRepository {
          organizationId: organizationId,
        );
 
-  /// {@template schedule_repository.test}
-  /// Test seam that lets unit tests inject fake data sources.
-  /// {@endtemplate}
   const ScheduleRepository.fromDataSources({
     required this._auth,
     required this._schedule,
@@ -92,6 +80,7 @@ class ScheduleRepository {
     DeadlineSource source = DeadlineSource.me,
     DeadlinePriority priority = DeadlinePriority.medium,
     bool remind = true,
+    int remindMinutes = 60,
   }) {
     return _guard(
       () => _requireSource(_deadlines).createDeadline(
@@ -101,12 +90,49 @@ class ScheduleRepository {
         source: source,
         priority: priority,
         remind: remind,
+        remindMinutes: remindMinutes,
       ),
       CreateDeadlineFailure.new,
     );
   }
 
-  /// Schedules a server-side push reminder (delivered by pg_cron via FCM).
+  Future<void> updateDeadline({
+    required String id,
+    String? title,
+    String? subjectName,
+    DateTime? dueAt,
+    DeadlinePriority? priority,
+    int? progress,
+    bool? remind,
+    int? remindMinutes,
+  }) {
+    return _guard(
+      () => _requireSource(_deadlines).updateDeadline(
+        id: id,
+        title: title,
+        subjectName: subjectName,
+        dueAt: dueAt,
+        priority: priority,
+        progress: progress,
+        remind: remind,
+        remindMinutes: remindMinutes,
+      ),
+      UpdateDeadlineFailure.new,
+    );
+  }
+
+  Future<int> postponeDeadlines({
+    required List<String> ids,
+    required DateTime until,
+  }) {
+    return _guard(
+      () => _requireSource(
+        _deadlines,
+      ).postponeDeadlines(ids: ids, until: until),
+      PostponeDeadlinesFailure.new,
+    );
+  }
+
   Future<void> createReminder({
     required DateTime fireAt,
     required String title,
@@ -143,7 +169,6 @@ class ScheduleRepository {
 
   bool get hasAuthenticatedUser => _auth.currentUser != null;
 
-  /// Requests the schedule for the provided [group].
   Future<ScheduleResponse> getSchedule({
     required String group,
     DateTime? dateFrom,
@@ -329,7 +354,6 @@ class ScheduleRepository {
     return _materials.createSignedUrl(material);
   }
 
-  /// Loads the current user's activities between [from] and [to] (inclusive).
   Future<List<UserActivity>> getUserActivities({
     required DateTime from,
     required DateTime to,
@@ -354,7 +378,6 @@ class ScheduleRepository {
     );
   }
 
-  /// Recent schedule changes (переносы, отмены, замены) for one target.
   Future<List<ScheduleChange>> getScheduleChanges({
     required ScheduleTargetType targetType,
     required String target,
@@ -370,7 +393,6 @@ class ScheduleRepository {
     );
   }
 
-  /// The current user's per-subject exam readiness.
   Future<List<ExamReadiness>> getExamReadiness() {
     return _guard(
       () => _requireSource(_examReadiness).getExamReadiness(),
@@ -412,8 +434,6 @@ class ScheduleRepository {
     return ScheduleResponse(data: data);
   }
 
-  /// Runs [action], rethrowing any error wrapped by [wrapError] while keeping
-  /// the original stack trace.
   Future<T> _guard<T>(
     Future<T> Function() action,
     ScheduleFailure Function(Object error) wrapError,

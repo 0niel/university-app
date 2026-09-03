@@ -5,7 +5,6 @@ import 'package:campus_repository/campus_repository.dart';
 import 'package:collection/collection.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:rtu_mirea_app/community/cubit/events/events_status.dart';
-import 'package:rtu_mirea_app/community/models/event_category.dart';
 import 'package:rtu_mirea_app/community/models/event_draft.dart';
 
 part 'events_cubit.freezed.dart';
@@ -27,7 +26,7 @@ class EventsCubit extends Cubit<EventsState> {
     if (!hasContent) emit(state.copyWith(status: .loading));
 
     try {
-      final events = await _campusRepository.getEvents();
+      final events = await _campusRepository.getEvents(includePast: true);
       if (!_isCurrentLoad(revision)) return false;
       _eventsRevision++;
       emit(state.copyWith(status: .ready, events: events));
@@ -38,11 +37,6 @@ class EventsCubit extends Cubit<EventsState> {
       addError(error, stackTrace);
       return false;
     }
-  }
-
-  void categoryChanged(EventCategory category) {
-    if (category == state.category) return;
-    emit(state.copyWith(category: category));
   }
 
   Future<bool> toggleRsvp(String eventId) async {
@@ -80,6 +74,7 @@ class EventsCubit extends Cubit<EventsState> {
       await _campusRepository.createEvent(
         title: draft.title,
         startsAt: draft.startsAt,
+        endsAt: draft.endsAt,
         place: draft.place,
         emoji: draft.emoji,
         category: draft.category.wireName,
@@ -92,6 +87,45 @@ class EventsCubit extends Cubit<EventsState> {
     } on Exception catch (error, stackTrace) {
       if (isClosed) return false;
       emit(state.copyWith(isCreating: false));
+      addError(error, stackTrace);
+      return false;
+    }
+  }
+
+  Future<bool> updateEvent(String eventId, EventDraft draft) async {
+    if (state.isSaving) return false;
+    emit(state.copyWith(isSaving: true));
+    try {
+      await _campusRepository.updateEvent(
+        id: eventId,
+        title: draft.title,
+        startsAt: draft.startsAt,
+        endsAt: draft.endsAt,
+        place: draft.place,
+        emoji: draft.emoji,
+        category: draft.category.wireName,
+        description: draft.description,
+      );
+      if (isClosed) return false;
+      emit(state.copyWith(isSaving: false));
+      await load();
+      return true;
+    } on Exception catch (error, stackTrace) {
+      if (isClosed) return false;
+      emit(state.copyWith(isSaving: false));
+      addError(error, stackTrace);
+      return false;
+    }
+  }
+
+  Future<bool> deleteEvent(String eventId) async {
+    try {
+      await _campusRepository.deleteEvent(eventId);
+      if (isClosed) return false;
+      await load();
+      return true;
+    } on Exception catch (error, stackTrace) {
+      if (isClosed) return false;
       addError(error, stackTrace);
       return false;
     }

@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$ProfileState {
 
- ProfileStatus get status; User get user; UserGamificationProfile get gamificationProfile; ProfileOverview get overview; List<GamificationQuest> get quests; List<LeaderboardEntry> get leaderboard; List<GamificationBadge> get badges; UserSettings get settings; Set<ProfileSection> get failedSections; List<GamificationBadge> get newlyEarnedBadges;
+ ProfileStatus get status; User get user; UserGamificationProfile get gamificationProfile; ProfileOverview get overview; List<GamificationQuest> get quests; List<LeaderboardEntry> get leaderboard; List<GamificationBadge> get badges; List<ActivityDay> get activityCalendar; UserSettings get settings; Set<ProfileSection> get failedSections; List<GamificationBadge> get newlyEarnedBadges;
 /// Create a copy of ProfileState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +25,16 @@ $ProfileStateCopyWith<ProfileState> get copyWith => _$ProfileStateCopyWithImpl<P
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ProfileState&&(identical(other.status, status) || other.status == status)&&(identical(other.user, user) || other.user == user)&&(identical(other.gamificationProfile, gamificationProfile) || other.gamificationProfile == gamificationProfile)&&(identical(other.overview, overview) || other.overview == overview)&&const DeepCollectionEquality().equals(other.quests, quests)&&const DeepCollectionEquality().equals(other.leaderboard, leaderboard)&&const DeepCollectionEquality().equals(other.badges, badges)&&(identical(other.settings, settings) || other.settings == settings)&&const DeepCollectionEquality().equals(other.failedSections, failedSections)&&const DeepCollectionEquality().equals(other.newlyEarnedBadges, newlyEarnedBadges));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ProfileState&&(identical(other.status, status) || other.status == status)&&(identical(other.user, user) || other.user == user)&&(identical(other.gamificationProfile, gamificationProfile) || other.gamificationProfile == gamificationProfile)&&(identical(other.overview, overview) || other.overview == overview)&&const DeepCollectionEquality().equals(other.quests, quests)&&const DeepCollectionEquality().equals(other.leaderboard, leaderboard)&&const DeepCollectionEquality().equals(other.badges, badges)&&const DeepCollectionEquality().equals(other.activityCalendar, activityCalendar)&&(identical(other.settings, settings) || other.settings == settings)&&const DeepCollectionEquality().equals(other.failedSections, failedSections)&&const DeepCollectionEquality().equals(other.newlyEarnedBadges, newlyEarnedBadges));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,status,user,gamificationProfile,overview,const DeepCollectionEquality().hash(quests),const DeepCollectionEquality().hash(leaderboard),const DeepCollectionEquality().hash(badges),settings,const DeepCollectionEquality().hash(failedSections),const DeepCollectionEquality().hash(newlyEarnedBadges));
+int get hashCode => Object.hash(runtimeType,status,user,gamificationProfile,overview,const DeepCollectionEquality().hash(quests),const DeepCollectionEquality().hash(leaderboard),const DeepCollectionEquality().hash(badges),const DeepCollectionEquality().hash(activityCalendar),settings,const DeepCollectionEquality().hash(failedSections),const DeepCollectionEquality().hash(newlyEarnedBadges));
 
 @override
 String toString() {
-  return 'ProfileState(status: $status, user: $user, gamificationProfile: $gamificationProfile, overview: $overview, quests: $quests, leaderboard: $leaderboard, badges: $badges, settings: $settings, failedSections: $failedSections, newlyEarnedBadges: $newlyEarnedBadges)';
+  return 'ProfileState(status: $status, user: $user, gamificationProfile: $gamificationProfile, overview: $overview, quests: $quests, leaderboard: $leaderboard, badges: $badges, activityCalendar: $activityCalendar, settings: $settings, failedSections: $failedSections, newlyEarnedBadges: $newlyEarnedBadges)';
 }
 
 
@@ -45,7 +45,7 @@ abstract mixin class $ProfileStateCopyWith<$Res>  {
   factory $ProfileStateCopyWith(ProfileState value, $Res Function(ProfileState) _then) = _$ProfileStateCopyWithImpl;
 @useResult
 $Res call({
- ProfileStatus status, User user, UserGamificationProfile gamificationProfile, ProfileOverview overview, List<GamificationQuest> quests, List<LeaderboardEntry> leaderboard, List<GamificationBadge> badges, UserSettings settings, Set<ProfileSection> failedSections, List<GamificationBadge> newlyEarnedBadges
+ ProfileStatus status, User user, UserGamificationProfile gamificationProfile, ProfileOverview overview, List<GamificationQuest> quests, List<LeaderboardEntry> leaderboard, List<GamificationBadge> badges, List<ActivityDay> activityCalendar, UserSettings settings, Set<ProfileSection> failedSections, List<GamificationBadge> newlyEarnedBadges
 });
 
 
@@ -62,7 +62,7 @@ class _$ProfileStateCopyWithImpl<$Res>
 
 /// Create a copy of ProfileState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? status = null,Object? user = null,Object? gamificationProfile = null,Object? overview = null,Object? quests = null,Object? leaderboard = null,Object? badges = null,Object? settings = null,Object? failedSections = null,Object? newlyEarnedBadges = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? status = null,Object? user = null,Object? gamificationProfile = null,Object? overview = null,Object? quests = null,Object? leaderboard = null,Object? badges = null,Object? activityCalendar = null,Object? settings = null,Object? failedSections = null,Object? newlyEarnedBadges = null,}) {
   return _then(_self.copyWith(
 status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as ProfileStatus,user: null == user ? _self.user : user // ignore: cast_nullable_to_non_nullable
@@ -71,7 +71,8 @@ as UserGamificationProfile,overview: null == overview ? _self.overview : overvie
 as ProfileOverview,quests: null == quests ? _self.quests : quests // ignore: cast_nullable_to_non_nullable
 as List<GamificationQuest>,leaderboard: null == leaderboard ? _self.leaderboard : leaderboard // ignore: cast_nullable_to_non_nullable
 as List<LeaderboardEntry>,badges: null == badges ? _self.badges : badges // ignore: cast_nullable_to_non_nullable
-as List<GamificationBadge>,settings: null == settings ? _self.settings : settings // ignore: cast_nullable_to_non_nullable
+as List<GamificationBadge>,activityCalendar: null == activityCalendar ? _self.activityCalendar : activityCalendar // ignore: cast_nullable_to_non_nullable
+as List<ActivityDay>,settings: null == settings ? _self.settings : settings // ignore: cast_nullable_to_non_nullable
 as UserSettings,failedSections: null == failedSections ? _self.failedSections : failedSections // ignore: cast_nullable_to_non_nullable
 as Set<ProfileSection>,newlyEarnedBadges: null == newlyEarnedBadges ? _self.newlyEarnedBadges : newlyEarnedBadges // ignore: cast_nullable_to_non_nullable
 as List<GamificationBadge>,
@@ -195,10 +196,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( ProfileStatus status,  User user,  UserGamificationProfile gamificationProfile,  ProfileOverview overview,  List<GamificationQuest> quests,  List<LeaderboardEntry> leaderboard,  List<GamificationBadge> badges,  UserSettings settings,  Set<ProfileSection> failedSections,  List<GamificationBadge> newlyEarnedBadges)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( ProfileStatus status,  User user,  UserGamificationProfile gamificationProfile,  ProfileOverview overview,  List<GamificationQuest> quests,  List<LeaderboardEntry> leaderboard,  List<GamificationBadge> badges,  List<ActivityDay> activityCalendar,  UserSettings settings,  Set<ProfileSection> failedSections,  List<GamificationBadge> newlyEarnedBadges)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ProfileState() when $default != null:
-return $default(_that.status,_that.user,_that.gamificationProfile,_that.overview,_that.quests,_that.leaderboard,_that.badges,_that.settings,_that.failedSections,_that.newlyEarnedBadges);case _:
+return $default(_that.status,_that.user,_that.gamificationProfile,_that.overview,_that.quests,_that.leaderboard,_that.badges,_that.activityCalendar,_that.settings,_that.failedSections,_that.newlyEarnedBadges);case _:
   return orElse();
 
 }
@@ -216,10 +217,10 @@ return $default(_that.status,_that.user,_that.gamificationProfile,_that.overview
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( ProfileStatus status,  User user,  UserGamificationProfile gamificationProfile,  ProfileOverview overview,  List<GamificationQuest> quests,  List<LeaderboardEntry> leaderboard,  List<GamificationBadge> badges,  UserSettings settings,  Set<ProfileSection> failedSections,  List<GamificationBadge> newlyEarnedBadges)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( ProfileStatus status,  User user,  UserGamificationProfile gamificationProfile,  ProfileOverview overview,  List<GamificationQuest> quests,  List<LeaderboardEntry> leaderboard,  List<GamificationBadge> badges,  List<ActivityDay> activityCalendar,  UserSettings settings,  Set<ProfileSection> failedSections,  List<GamificationBadge> newlyEarnedBadges)  $default,) {final _that = this;
 switch (_that) {
 case _ProfileState():
-return $default(_that.status,_that.user,_that.gamificationProfile,_that.overview,_that.quests,_that.leaderboard,_that.badges,_that.settings,_that.failedSections,_that.newlyEarnedBadges);case _:
+return $default(_that.status,_that.user,_that.gamificationProfile,_that.overview,_that.quests,_that.leaderboard,_that.badges,_that.activityCalendar,_that.settings,_that.failedSections,_that.newlyEarnedBadges);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -236,10 +237,10 @@ return $default(_that.status,_that.user,_that.gamificationProfile,_that.overview
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( ProfileStatus status,  User user,  UserGamificationProfile gamificationProfile,  ProfileOverview overview,  List<GamificationQuest> quests,  List<LeaderboardEntry> leaderboard,  List<GamificationBadge> badges,  UserSettings settings,  Set<ProfileSection> failedSections,  List<GamificationBadge> newlyEarnedBadges)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( ProfileStatus status,  User user,  UserGamificationProfile gamificationProfile,  ProfileOverview overview,  List<GamificationQuest> quests,  List<LeaderboardEntry> leaderboard,  List<GamificationBadge> badges,  List<ActivityDay> activityCalendar,  UserSettings settings,  Set<ProfileSection> failedSections,  List<GamificationBadge> newlyEarnedBadges)?  $default,) {final _that = this;
 switch (_that) {
 case _ProfileState() when $default != null:
-return $default(_that.status,_that.user,_that.gamificationProfile,_that.overview,_that.quests,_that.leaderboard,_that.badges,_that.settings,_that.failedSections,_that.newlyEarnedBadges);case _:
+return $default(_that.status,_that.user,_that.gamificationProfile,_that.overview,_that.quests,_that.leaderboard,_that.badges,_that.activityCalendar,_that.settings,_that.failedSections,_that.newlyEarnedBadges);case _:
   return null;
 
 }
@@ -251,7 +252,7 @@ return $default(_that.status,_that.user,_that.gamificationProfile,_that.overview
 
 
 class _ProfileState extends ProfileState {
-  const _ProfileState({this.status = ProfileStatus.initial, this.user = User.anonymous, this.gamificationProfile = UserGamificationProfile.empty, this.overview = ProfileOverview.empty, final  List<GamificationQuest> quests = const <GamificationQuest>[], final  List<LeaderboardEntry> leaderboard = const <LeaderboardEntry>[], final  List<GamificationBadge> badges = const <GamificationBadge>[], this.settings = const UserSettings(), final  Set<ProfileSection> failedSections = const <ProfileSection>{}, final  List<GamificationBadge> newlyEarnedBadges = const <GamificationBadge>[]}): _quests = quests,_leaderboard = leaderboard,_badges = badges,_failedSections = failedSections,_newlyEarnedBadges = newlyEarnedBadges,super._();
+  const _ProfileState({this.status = ProfileStatus.initial, this.user = User.anonymous, this.gamificationProfile = UserGamificationProfile.empty, this.overview = ProfileOverview.empty, final  List<GamificationQuest> quests = const <GamificationQuest>[], final  List<LeaderboardEntry> leaderboard = const <LeaderboardEntry>[], final  List<GamificationBadge> badges = const <GamificationBadge>[], final  List<ActivityDay> activityCalendar = const <ActivityDay>[], this.settings = const UserSettings(), final  Set<ProfileSection> failedSections = const <ProfileSection>{}, final  List<GamificationBadge> newlyEarnedBadges = const <GamificationBadge>[]}): _quests = quests,_leaderboard = leaderboard,_badges = badges,_activityCalendar = activityCalendar,_failedSections = failedSections,_newlyEarnedBadges = newlyEarnedBadges,super._();
 
 
 @override@JsonKey() final  ProfileStatus status;
@@ -277,6 +278,13 @@ class _ProfileState extends ProfileState {
   if (_badges is EqualUnmodifiableListView) return _badges;
   // ignore: implicit_dynamic_type
   return EqualUnmodifiableListView(_badges);
+}
+
+ final  List<ActivityDay> _activityCalendar;
+@override@JsonKey() List<ActivityDay> get activityCalendar {
+  if (_activityCalendar is EqualUnmodifiableListView) return _activityCalendar;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_activityCalendar);
 }
 
 @override@JsonKey() final  UserSettings settings;
@@ -305,16 +313,16 @@ _$ProfileStateCopyWith<_ProfileState> get copyWith => __$ProfileStateCopyWithImp
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ProfileState&&(identical(other.status, status) || other.status == status)&&(identical(other.user, user) || other.user == user)&&(identical(other.gamificationProfile, gamificationProfile) || other.gamificationProfile == gamificationProfile)&&(identical(other.overview, overview) || other.overview == overview)&&const DeepCollectionEquality().equals(other._quests, _quests)&&const DeepCollectionEquality().equals(other._leaderboard, _leaderboard)&&const DeepCollectionEquality().equals(other._badges, _badges)&&(identical(other.settings, settings) || other.settings == settings)&&const DeepCollectionEquality().equals(other._failedSections, _failedSections)&&const DeepCollectionEquality().equals(other._newlyEarnedBadges, _newlyEarnedBadges));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ProfileState&&(identical(other.status, status) || other.status == status)&&(identical(other.user, user) || other.user == user)&&(identical(other.gamificationProfile, gamificationProfile) || other.gamificationProfile == gamificationProfile)&&(identical(other.overview, overview) || other.overview == overview)&&const DeepCollectionEquality().equals(other._quests, _quests)&&const DeepCollectionEquality().equals(other._leaderboard, _leaderboard)&&const DeepCollectionEquality().equals(other._badges, _badges)&&const DeepCollectionEquality().equals(other._activityCalendar, _activityCalendar)&&(identical(other.settings, settings) || other.settings == settings)&&const DeepCollectionEquality().equals(other._failedSections, _failedSections)&&const DeepCollectionEquality().equals(other._newlyEarnedBadges, _newlyEarnedBadges));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,status,user,gamificationProfile,overview,const DeepCollectionEquality().hash(_quests),const DeepCollectionEquality().hash(_leaderboard),const DeepCollectionEquality().hash(_badges),settings,const DeepCollectionEquality().hash(_failedSections),const DeepCollectionEquality().hash(_newlyEarnedBadges));
+int get hashCode => Object.hash(runtimeType,status,user,gamificationProfile,overview,const DeepCollectionEquality().hash(_quests),const DeepCollectionEquality().hash(_leaderboard),const DeepCollectionEquality().hash(_badges),const DeepCollectionEquality().hash(_activityCalendar),settings,const DeepCollectionEquality().hash(_failedSections),const DeepCollectionEquality().hash(_newlyEarnedBadges));
 
 @override
 String toString() {
-  return 'ProfileState(status: $status, user: $user, gamificationProfile: $gamificationProfile, overview: $overview, quests: $quests, leaderboard: $leaderboard, badges: $badges, settings: $settings, failedSections: $failedSections, newlyEarnedBadges: $newlyEarnedBadges)';
+  return 'ProfileState(status: $status, user: $user, gamificationProfile: $gamificationProfile, overview: $overview, quests: $quests, leaderboard: $leaderboard, badges: $badges, activityCalendar: $activityCalendar, settings: $settings, failedSections: $failedSections, newlyEarnedBadges: $newlyEarnedBadges)';
 }
 
 
@@ -325,7 +333,7 @@ abstract mixin class _$ProfileStateCopyWith<$Res> implements $ProfileStateCopyWi
   factory _$ProfileStateCopyWith(_ProfileState value, $Res Function(_ProfileState) _then) = __$ProfileStateCopyWithImpl;
 @override @useResult
 $Res call({
- ProfileStatus status, User user, UserGamificationProfile gamificationProfile, ProfileOverview overview, List<GamificationQuest> quests, List<LeaderboardEntry> leaderboard, List<GamificationBadge> badges, UserSettings settings, Set<ProfileSection> failedSections, List<GamificationBadge> newlyEarnedBadges
+ ProfileStatus status, User user, UserGamificationProfile gamificationProfile, ProfileOverview overview, List<GamificationQuest> quests, List<LeaderboardEntry> leaderboard, List<GamificationBadge> badges, List<ActivityDay> activityCalendar, UserSettings settings, Set<ProfileSection> failedSections, List<GamificationBadge> newlyEarnedBadges
 });
 
 
@@ -342,7 +350,7 @@ class __$ProfileStateCopyWithImpl<$Res>
 
 /// Create a copy of ProfileState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? status = null,Object? user = null,Object? gamificationProfile = null,Object? overview = null,Object? quests = null,Object? leaderboard = null,Object? badges = null,Object? settings = null,Object? failedSections = null,Object? newlyEarnedBadges = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? status = null,Object? user = null,Object? gamificationProfile = null,Object? overview = null,Object? quests = null,Object? leaderboard = null,Object? badges = null,Object? activityCalendar = null,Object? settings = null,Object? failedSections = null,Object? newlyEarnedBadges = null,}) {
   return _then(_ProfileState(
 status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as ProfileStatus,user: null == user ? _self.user : user // ignore: cast_nullable_to_non_nullable
@@ -351,7 +359,8 @@ as UserGamificationProfile,overview: null == overview ? _self.overview : overvie
 as ProfileOverview,quests: null == quests ? _self._quests : quests // ignore: cast_nullable_to_non_nullable
 as List<GamificationQuest>,leaderboard: null == leaderboard ? _self._leaderboard : leaderboard // ignore: cast_nullable_to_non_nullable
 as List<LeaderboardEntry>,badges: null == badges ? _self._badges : badges // ignore: cast_nullable_to_non_nullable
-as List<GamificationBadge>,settings: null == settings ? _self.settings : settings // ignore: cast_nullable_to_non_nullable
+as List<GamificationBadge>,activityCalendar: null == activityCalendar ? _self._activityCalendar : activityCalendar // ignore: cast_nullable_to_non_nullable
+as List<ActivityDay>,settings: null == settings ? _self.settings : settings // ignore: cast_nullable_to_non_nullable
 as UserSettings,failedSections: null == failedSections ? _self._failedSections : failedSections // ignore: cast_nullable_to_non_nullable
 as Set<ProfileSection>,newlyEarnedBadges: null == newlyEarnedBadges ? _self._newlyEarnedBadges : newlyEarnedBadges // ignore: cast_nullable_to_non_nullable
 as List<GamificationBadge>,

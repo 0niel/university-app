@@ -10,41 +10,80 @@ class HomeStoriesRail extends StatelessWidget {
     required this.sources,
     this.seenSourceIds = const {},
     this.onSourceOpened,
+    this.loading = false,
     super.key,
   });
 
   final List<NewsSourceItem> sources;
   final Set<String> seenSourceIds;
   final ValueChanged<String>? onSourceOpened;
+  final bool loading;
 
   @override
   Widget build(BuildContext context) {
-    if (sources.isEmpty) return const SizedBox.shrink();
+    if (sources.isEmpty && !loading) return const SizedBox.shrink();
     return Padding(
       padding: const EdgeInsets.only(top: 18),
       child: SizedBox(
         height: 66 + MediaQuery.textScalerOf(context).scale(13),
-        child: ListView.separated(
-          scrollDirection: .horizontal,
-          clipBehavior: .none,
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screen),
-          physics: const BouncingScrollPhysics(),
-          itemCount: sources.length,
-          separatorBuilder: (_, _) => const SizedBox(width: 10),
-          itemBuilder: (context, index) => HomeStoryItem(
-            source: sources[index],
-            highlighted: !seenSourceIds.contains(sources[index].sourceId),
-            onTap: () {
-              onSourceOpened?.call(sources[index].sourceId);
-              unawaited(
-                showStoryViewer(context, sourceId: sources[index].sourceId),
-              );
-            },
-          ),
-        ),
+        child: sources.isEmpty
+            ? ListView.separated(
+                key: const Key('homeStoriesRail_skeleton'),
+                scrollDirection: .horizontal,
+                clipBehavior: .none,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.screen,
+                ),
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: 5,
+                separatorBuilder: (_, _) => const SizedBox(width: 10),
+                itemBuilder: (_, _) => const _HomeStorySkeletonItem(),
+              )
+            : ListView.separated(
+                scrollDirection: .horizontal,
+                clipBehavior: .none,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.screen,
+                ),
+                physics: const BouncingScrollPhysics(),
+                itemCount: sources.length,
+                separatorBuilder: (_, _) => const SizedBox(width: 10),
+                itemBuilder: (context, index) => HomeStoryItem(
+                  source: sources[index],
+                  highlighted: !seenSourceIds.contains(
+                    sources[index].sourceId,
+                  ),
+                  onTap: () {
+                    onSourceOpened?.call(sources[index].sourceId);
+                    unawaited(
+                      showStoryViewer(
+                        context,
+                        sourceId: sources[index].sourceId,
+                      ),
+                    );
+                  },
+                ),
+              ),
       ),
     );
   }
+}
+
+class _HomeStorySkeletonItem extends StatelessWidget {
+  const _HomeStorySkeletonItem();
+
+  @override
+  Widget build(BuildContext context) => const SizedBox(
+    width: 64,
+    child: Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        AppSkeleton.avatar(size: 60),
+        SizedBox(height: 6),
+        AppSkeleton(height: 10, widthFactor: .7),
+      ],
+    ),
+  );
 }
 
 class HomeStoryItem extends StatelessWidget {

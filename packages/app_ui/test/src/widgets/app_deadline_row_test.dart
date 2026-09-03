@@ -104,6 +104,23 @@ void main() {
       await tester.tap(find.text('Эссе'));
       expect(taps, 1);
     });
+
+    testWidgets('warn tier paints the left label in warn, not danger', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        host(
+          const AppDeadlineRow(
+            title: 'Курсовая',
+            meta: 'ООП · 2 дня',
+            left: '2 дн',
+            warn: true,
+          ),
+        ),
+      );
+
+      expect(kitStyleOf(tester, '2 дн')?.color, kitColors.warn);
+    });
   });
 
   group('AppDeadlineCard', () {

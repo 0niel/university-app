@@ -124,14 +124,24 @@ class _CustomLessonEditorViewState extends State<CustomLessonEditorView> {
                     const SizedBox(height: AppSpacing.sheetBottom),
                     LessonEditorSectionLabel(l10n.lessonEditorColorLabel),
                     const SizedBox(height: AppSpacing.gap),
-                    LessonEditorColorPicker(
-                      colors: widget.colors,
-                      selected: state.color,
-                      semanticLabelBuilder: (index) =>
-                          '${l10n.lessonEditorColorLabel} ${index + 1}',
-                      onSelected: context
+                    AppColorPalette(
+                      value: state.color,
+                      onChanged: context
                           .read<CustomLessonEditorCubit>()
                           .colorChanged,
+                      customLabel: l10n.settingsColorCustom,
+                      hexLabel: l10n.settingsColorHex,
+                      hexInvalidLabel: l10n.settingsColorHexInvalid,
+                      swatches: {
+                        ...widget.colors,
+                        ...kAppColorPaletteSwatches,
+                      }.toList(),
+                      markedValues: widget.colors.toSet(),
+                      defaultValue: widget.colors.firstOrNull,
+                      resetLabel: widget.colors.isEmpty ? null : l10n.reset,
+                      swatchSemanticsLabel: (color) =>
+                          '${l10n.lessonEditorColorLabel} #'
+                          '${appColorHexOf(color)}',
                     ),
                     const SizedBox(height: AppSpacing.sheetBottom),
                     LessonEditorFieldCard(

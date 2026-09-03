@@ -198,7 +198,7 @@ void main() {
     (tester) async {
       final repository = _MockCampusRepository();
       final bytes = Uint8List.fromList([1]);
-      final result = Completer<void>();
+      final result = Completer<String>();
       when(
         () => repository.searchMaterialSubjects(any()),
       ).thenAnswer((_) async => ['Математика']);

@@ -245,7 +245,7 @@ void main() {
         ),
       );
 
-      final colors = NinjaColors.light();
+      const colors = AppColors.light;
       expect(find.byType(Chip), findsNothing);
       expect(find.byType(ChoiceChip), findsNothing);
       expect(
@@ -258,7 +258,7 @@ void main() {
                   .widget<AnimatedContainer>(find.byType(AnimatedContainer))
                   .decoration!
               as BoxDecoration;
-      expect(selected.color, colors.brand);
+      expect(selected.color, colors.accent);
       expect(selected.border, isNull);
       expect(selected.boxShadow, isNull);
       expect(
@@ -276,13 +276,13 @@ void main() {
         ),
       );
 
-      final colors = NinjaColors.light();
+      const colors = AppColors.light;
       final chip =
           tester
                   .widget<AnimatedContainer>(find.byType(AnimatedContainer))
                   .decoration!
               as BoxDecoration;
-      expect(chip.color, colors.surfaceAlt);
+      expect(chip.color, colors.surface2);
       expect(chip.border, isNull);
       expect(
         tester.widget<Text>(find.text('Люди')).style?.color,

@@ -1,66 +1,68 @@
 import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:rtu_mirea_app/marketplace/marketplace.dart';
+
+import '../../helpers/pump_app.dart';
 
 void main() {
   Widget buildSubject({
-    required bool isBusy,
+    bool isSold = false,
     VoidCallback? onToggleSold,
+    VoidCallback? onEdit,
+    VoidCallback? onArchive,
     VoidCallback? onDelete,
-  }) => MaterialApp(
-    theme: NinjaTheme.dark(),
-    localizationsDelegates: AppLocalizations.localizationsDelegates,
-    supportedLocales: AppLocalizations.supportedLocales,
-    locale: const Locale('ru'),
-    home: Scaffold(
-      body: MarketOwnerActions(
-        isSold: false,
-        isBusy: isBusy,
-        onToggleSold: onToggleSold ?? () {},
-        onDelete: onDelete ?? () {},
-      ),
+  }) => Scaffold(
+    body: MarketOwnerActions(
+      isSold: isSold,
+      onToggleSold: onToggleSold,
+      onEdit: onEdit,
+      onArchive: onArchive,
+      onDelete: onDelete,
     ),
   );
 
-  testWidgets('hides the busy spinner when idle', (tester) async {
-    await tester.pumpWidget(buildSubject(isBusy: false));
+  testWidgets('renders the mark-sold label when the listing is active', (
+    tester,
+  ) async {
+    await tester.pumpApp(buildSubject(onToggleSold: () {}));
 
-    expect(find.byType(NinjaSpinner), findsNothing);
+    expect(find.text('Отметить проданным'), findsOneWidget);
   });
 
-  testWidgets('overlays a spinner and disables actions while busy', (
+  testWidgets('renders the mark-available label when already sold', (
+    tester,
+  ) async {
+    await tester.pumpApp(buildSubject(isSold: true, onToggleSold: () {}));
+
+    expect(find.text('Снова доступно'), findsOneWidget);
+  });
+
+  testWidgets('invokes each callback and disables missing ones', (
     tester,
   ) async {
     var toggled = false;
-    var deleted = false;
-    await tester.pumpWidget(
+    var edited = false;
+    await tester.pumpApp(
       buildSubject(
-        isBusy: true,
         onToggleSold: () => toggled = true,
-        onDelete: () => deleted = true,
+        onEdit: () => edited = true,
       ),
     );
 
-    expect(find.byType(NinjaSpinner), findsOneWidget);
-    final buttons = tester.widgetList<NinjaIconButton>(
-      find.byType(NinjaIconButton),
-    );
-    for (final button in buttons) {
-      expect(button.onPressed, isNull);
-    }
+    await tester.tap(find.text('Отметить проданным'));
+    await tester.tap(find.text('Редактировать'));
+    expect(toggled, isTrue);
+    expect(edited, isTrue);
 
-    await tester.tap(
-      find.byTooltip('Отметить проданным'),
-      warnIfMissed: false,
+    final buttons = tester.widgetList<AppButton>(find.byType(AppButton));
+    final archiveButton = buttons.firstWhere(
+      (button) => button.label == 'В архив',
     );
-    await tester.tap(
-      find.byTooltip('Удалить объявление'),
-      warnIfMissed: false,
+    final deleteButton = buttons.firstWhere(
+      (button) => button.label == 'Удалить объявление',
     );
-
-    expect(toggled, isFalse);
-    expect(deleted, isFalse);
+    expect(archiveButton.onPressed, isNull);
+    expect(deleteButton.onPressed, isNull);
   });
 }

@@ -108,6 +108,73 @@ void main() {
     });
   });
 
+  group('AppStreakCalendarCard', () {
+    testWidgets('renders the heatmap for the given history', (tester) async {
+      final today = DateTime(2026, 9, 3);
+      await tester.pumpWidget(
+        wrap(
+          SizedBox(
+            width: 340,
+            child: AppStreakCalendarCard(
+              streakDays: 5,
+              days: [
+                AppHeatmapDay(date: today, count: 3),
+                AppHeatmapDay(
+                  date: today.subtract(const Duration(days: 1)),
+                  count: 1,
+                ),
+              ],
+              streakDaysLabel: '5 дней',
+              streakWordLabel: ' · стрик',
+              hintLabel: 'Держи стрик каждый день',
+              today: today,
+            ),
+          ),
+        ),
+      );
+
+      expect(find.textContaining('5 дней'), findsOneWidget);
+      expect(find.byType(AppActivityHeatmap), findsOneWidget);
+    });
+
+    testWidgets('skips the heatmap when there is no history yet', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        wrap(
+          const AppStreakCalendarCard(
+            streakDays: 0,
+            days: [],
+            streakDaysLabel: '0 дней',
+            streakWordLabel: ' · стрик',
+            hintLabel: 'Держи стрик каждый день',
+          ),
+        ),
+      );
+
+      expect(find.byType(AppActivityHeatmap), findsNothing);
+    });
+
+    testWidgets('renders the trailing slot below the heatmap', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        wrap(
+          AppStreakCalendarCard(
+            streakDays: 5,
+            days: [AppHeatmapDay(date: DateTime(2026, 9, 3), count: 2)],
+            streakDaysLabel: '5 дней',
+            streakWordLabel: ' · стрик',
+            hintLabel: 'Держи стрик каждый день',
+            trailing: const Text('Поделиться'),
+          ),
+        ),
+      );
+
+      expect(find.text('Поделиться'), findsOneWidget);
+    });
+  });
+
   group('AppXpProgressBar', () {
     testWidgets('clamps the fraction it fills', (tester) async {
       await tester.pumpWidget(

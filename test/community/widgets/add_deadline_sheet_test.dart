@@ -16,19 +16,34 @@ void main() {
   late MockDeadlinesCubit cubit;
   final today = DateTime(2026, 9, 2, 10);
 
-  setUpAll(
-    () => registerFallbackValue(
+  setUpAll(() {
+    registerFallbackValue(
       DeadlineDraft(title: '', dueAt: today, source: .me),
-    ),
-  );
+    );
+    registerFallbackValue(
+      Deadline(id: 'x', title: '', dueAt: today, source: .me),
+    );
+  });
   setUp(() {
     ToastManager.debugReset();
     cubit = MockDeadlinesCubit();
     when(() => cubit.createDeadline(any())).thenAnswer((_) async => true);
+    when(
+      () => cubit.updateDeadline(
+        any(),
+        title: any(named: 'title'),
+        subjectName: any(named: 'subjectName'),
+        dueAt: any(named: 'dueAt'),
+        priority: any(named: 'priority'),
+        progress: any(named: 'progress'),
+        remind: any(named: 'remind'),
+        remindMinutes: any(named: 'remindMinutes'),
+      ),
+    ).thenAnswer((_) async => true);
   });
   tearDown(ToastManager.debugReset);
 
-  Future<void> open(WidgetTester tester) async {
+  Future<void> open(WidgetTester tester, {Deadline? editing}) async {
     await tester.pumpApp(
       Builder(
         builder: (context) => AppButton.primary(
@@ -40,6 +55,7 @@ void main() {
                 cubit: cubit,
                 subjects: const ['Math', 'Physics'],
                 now: today,
+                editing: editing,
               ),
             ),
           ),
@@ -155,5 +171,139 @@ void main() {
     expect(submit.height, 52);
     expect(options.top - submit.bottom, 14);
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('editing mode prefills fields and calls updateDeadline', (
+    tester,
+  ) async {
+    final editing = Deadline(
+      id: 'deadline-1',
+      title: 'Old title',
+      subjectName: 'Physics',
+      dueAt: DateTime(2026, 9, 10, 18),
+      source: DeadlineSource.me,
+      isMine: true,
+      priority: DeadlinePriority.urgent,
+      progress: 25,
+      remindMinutes: 1440,
+    );
+    await open(tester, editing: editing);
+
+    expect(find.text('Old title'), findsOneWidget);
+    expect(
+      tester
+          .widget<AppButton>(find.byKey(const ValueKey('add-deadline-submit')))
+          .label,
+      'Сохранить',
+    );
+    expect(find.byKey(const ValueKey('add-deadline-shared')), findsNothing);
+
+    await tester.enterText(find.byType(EditableText).first, 'New title');
+    await tester.tap(find.byKey(const ValueKey('add-deadline-submit')));
+    await tester.pumpAndSettle();
+
+    final captured = verify(
+      () => cubit.updateDeadline(
+        editing,
+        title: captureAny(named: 'title'),
+        subjectName: any(named: 'subjectName'),
+        dueAt: any(named: 'dueAt'),
+        priority: any(named: 'priority'),
+        progress: any(named: 'progress'),
+        remind: any(named: 'remind'),
+        remindMinutes: any(named: 'remindMinutes'),
+      ),
+    ).captured;
+    expect(captured.single, 'New title');
+    await tester.pump(const Duration(seconds: 4));
+  });
+
+  testWidgets('unmodified due date is not resent on an overdue edit', (
+    tester,
+  ) async {
+    final editing = Deadline(
+      id: 'deadline-1',
+      title: 'Overdue task',
+      dueAt: today.subtract(const Duration(days: 2)),
+      source: DeadlineSource.me,
+      isMine: true,
+    );
+    await open(tester, editing: editing);
+
+    await tester.tap(find.byKey(const ValueKey('add-deadline-submit')));
+    await tester.pumpAndSettle();
+
+    final captured = verify(
+      () => cubit.updateDeadline(
+        editing,
+        title: any(named: 'title'),
+        subjectName: any(named: 'subjectName'),
+        dueAt: captureAny(named: 'dueAt'),
+        priority: any(named: 'priority'),
+        progress: any(named: 'progress'),
+        remind: any(named: 'remind'),
+        remindMinutes: any(named: 'remindMinutes'),
+      ),
+    ).captured;
+    expect(captured.single, isNull);
+    await tester.pump(const Duration(seconds: 4));
+  });
+
+  testWidgets('remind lead-time chips update the selected lead time', (
+    tester,
+  ) async {
+    await open(tester);
+    await tester.enterText(find.byType(EditableText).first, 'Task');
+    await tester.pump();
+    await tester.tap(find.text('Настройки'));
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(
+      find.byKey(const ValueKey('deadline-remind-day')),
+    );
+    await tester.tap(find.byKey(const ValueKey('deadline-remind-day')));
+    await tester.pump();
+    final submit = find.byKey(const ValueKey('add-deadline-submit'));
+    await tester.ensureVisible(submit);
+    await tester.tap(submit);
+    await tester.pumpAndSettle();
+    final draft =
+        verify(() => cubit.createDeadline(captureAny())).captured.single
+            as DeadlineDraft;
+    expect(draft.remindMinutes, 1440);
+    await tester.pump(const Duration(seconds: 4));
+  });
+
+  testWidgets('progress control updates the saved progress', (tester) async {
+    final editing = Deadline(
+      id: 'deadline-1',
+      title: 'Task',
+      dueAt: DateTime(2026, 9, 10),
+      source: DeadlineSource.me,
+      isMine: true,
+    );
+    await open(tester, editing: editing);
+    await tester.tap(find.text('Настройки'));
+    await tester.pumpAndSettle();
+    final progress = tester.widget<AppSegmentedControl<int>>(
+      find.byType(AppSegmentedControl<int>),
+    );
+    progress.onChanged!(75);
+    await tester.pump();
+    await tester.tap(find.byKey(const ValueKey('add-deadline-submit')));
+    await tester.pumpAndSettle();
+    final captured = verify(
+      () => cubit.updateDeadline(
+        editing,
+        title: any(named: 'title'),
+        subjectName: any(named: 'subjectName'),
+        dueAt: any(named: 'dueAt'),
+        priority: any(named: 'priority'),
+        progress: captureAny(named: 'progress'),
+        remind: any(named: 'remind'),
+        remindMinutes: any(named: 'remindMinutes'),
+      ),
+    ).captured;
+    expect(captured.single, 75);
+    await tester.pump(const Duration(seconds: 4));
   });
 }

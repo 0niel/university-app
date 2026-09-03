@@ -165,6 +165,67 @@ void main() {
       expect(badge.progress, 1.0);
       expect(badge.progress, isA<double>());
     });
+
+    test('fromJson matches the real get_badges_for_user RPC row shape', () {
+      final badge = GamificationBadge.fromJson({
+        'id': 'streak_3',
+        'category': 'Активность',
+        'name': 'Разогрев',
+        'description': 'Стрик 3 дня',
+        'emoji': '🔥',
+        'rarity': 'common',
+        'xpReward': 20,
+        'shurikenReward': 10,
+        'isEarned': true,
+        'progress': 1,
+        'earnedAt': '2026-08-13T19:24:37.287867+00:00',
+      });
+
+      expect(badge.id, 'streak_3');
+      expect(badge.category, 'Активность');
+      expect(badge.name, 'Разогрев');
+      expect(badge.emoji, '🔥');
+      expect(badge.isEarned, isTrue);
+      expect(badge.progress, 1.0);
+      expect(badge.earnedAt, DateTime.utc(2026, 8, 13, 19, 24, 37, 287, 867));
+    });
+
+    test('fromJson keeps unearned badges locked with a null earnedAt', () {
+      final badge = GamificationBadge.fromJson({
+        'id': 'material_25',
+        'category': 'Учёба',
+        'name': 'Хранитель знаний',
+        'description': '25 публичных материалов',
+        'emoji': '🏛️',
+        'rarity': 'epic',
+        'xpReward': 100,
+        'shurikenReward': 50,
+        'isEarned': false,
+        'progress': 0.24,
+        'earnedAt': null,
+      });
+
+      expect(badge.isEarned, isFalse);
+      expect(badge.progress, closeTo(0.24, 0.001));
+      expect(badge.earnedAt, isNull);
+    });
+  });
+
+  group('ActivityDay', () {
+    test('fromJson maps the day and count columns', () {
+      final day = ActivityDay.fromJson({'day': '2026-09-03', 'count': 3});
+
+      expect(day.day, DateTime(2026, 9, 3));
+      expect(day.count, 3);
+      expect(day.isActive, isTrue);
+    });
+
+    test('fromJson defaults count to zero and stays inactive', () {
+      final day = ActivityDay.fromJson({'day': '2026-09-01'});
+
+      expect(day.count, 0);
+      expect(day.isActive, isFalse);
+    });
   });
 
   group('GamificationQuest', () {
@@ -330,7 +391,6 @@ void main() {
         'endsAt': future.toIso8601String(),
       });
 
-      // ~9 due to truncation of partial day; allow a small window.
       expect(challenge.daysLeft, inInclusiveRange(8, 10));
     });
 
@@ -568,7 +628,6 @@ void main() {
 
       expect(updated.themeMode, 'dark');
       expect(updated.showMascot, isFalse);
-      // Unchanged fields keep defaults.
       expect(updated.notificationsEnabled, isTrue);
       expect(updated.accentColor, 'blue');
       expect(updated.density, 'default');

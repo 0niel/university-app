@@ -67,6 +67,7 @@ class ProfileCubit extends Cubit<ProfileState> {
       ),
       _capture(_gamification.getBadges),
       _capture(_gamification.getSettings),
+      _capture(_gamification.getActivityCalendar),
     ).wait;
     if (isClosed || revision != _loadRevision) return;
 
@@ -77,6 +78,7 @@ class ProfileCubit extends Cubit<ProfileState> {
       if (results.$4.error != null) .leaderboard,
       if (results.$5.error != null) .badges,
       if (results.$6.error != null) .settings,
+      if (results.$7.error != null) .activity,
     };
     final loadedSettings = results.$6.value;
     final canApplySettings =
@@ -95,6 +97,7 @@ class ProfileCubit extends Cubit<ProfileState> {
         leaderboard: results.$4.value ?? state.leaderboard,
         badges: results.$5.value ?? state.badges,
         settings: canApplySettings ? loadedSettings : state.settings,
+        activityCalendar: results.$7.value ?? state.activityCalendar,
         failedSections: failures,
         newlyEarnedBadges: synced.value ?? const [],
       ),
@@ -106,6 +109,7 @@ class ProfileCubit extends Cubit<ProfileState> {
     _report(results.$4);
     _report(results.$5);
     _report(results.$6);
+    _report(results.$7);
   }
 
   Future<void> reloadSection(ProfileSection section) => switch (section) {
@@ -136,6 +140,11 @@ class ProfileCubit extends Cubit<ProfileState> {
       section,
       _gamification.getBadges,
       (value) => state.copyWith(badges: value),
+    ),
+    .activity => _reload(
+      section,
+      _gamification.getActivityCalendar,
+      (value) => state.copyWith(activityCalendar: value),
     ),
     .settings => _reloadSettings(),
   };

@@ -19,11 +19,11 @@ class MarketplaceCategoryPicker extends StatelessWidget {
   Widget build(BuildContext context) {
     final callback = onChanged;
     return Wrap(
-      spacing: 8,
-      runSpacing: 8,
+      spacing: AppSpacing.sm,
+      runSpacing: AppSpacing.sm,
       children: [
         for (final key in keys)
-          NinjaChip(
+          AppChip(
             label: MarketplaceCategories.label(context.l10n, key),
             selected: selectedKey == key,
             enabled: callback != null,

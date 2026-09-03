@@ -6,13 +6,19 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:rtu_mirea_app/mini_apps/cubit/mini_app_runner_cubit.dart';
+import 'package:rtu_mirea_app/mini_apps/runtime/mini_app_accent.dart';
 import 'package:rtu_mirea_app/mini_apps/view/mini_app_runner_skeleton.dart';
 import 'package:stac_bridge/stac_bridge.dart';
 
 class MiniAppRunnerBody extends StatelessWidget {
-  const MiniAppRunnerBody({required this.state, super.key});
+  const MiniAppRunnerBody({
+    required this.state,
+    super.key,
+    this.offline = false,
+  });
 
   final MiniAppRunnerState state;
+  final bool offline;
 
   @override
   Widget build(BuildContext context) {
@@ -28,23 +34,26 @@ class MiniAppRunnerBody extends StatelessWidget {
         return const MiniAppRunnerSkeleton(key: ValueKey('runner-loading'));
       case .notFound:
         return _framed(
+          context,
           const ValueKey('runner-not-found'),
-          NinjaEmptyState(
-            icon: const AppLineIconWidget(AppLineIcon.alert),
+          AppEmptyState(
+            lineIcon: AppLineIcon.grid,
             title: l10n.miniAppsRunnerNotFound,
-            message: l10n.miniAppsRunnerNotFoundSubtitle,
+            subtitle: l10n.miniAppsRunnerNotFoundSubtitle,
             actionLabel: l10n.miniAppsCatalogSection,
             onAction: () => context.go('/services/apps'),
           ).animateEmptyState(),
         );
       case .failure:
         return _framed(
+          context,
           const ValueKey('runner-failure'),
-          NinjaErrorState(
+          AppErrorState(
             title: l10n.loadingError,
             message: l10n.tryAgain,
-            retryLabel: l10n.retry,
-            onRetry: () => unawaited(context.read<MiniAppRunnerCubit>().load()),
+            primaryLabel: l10n.retry,
+            footnote: null,
+            onPrimary: () => unawaited(_reload(context)),
           ).animateEmptyState(),
         );
       case .ready:
@@ -52,27 +61,64 @@ class MiniAppRunnerBody extends StatelessWidget {
         if (screen == null) return _renderError(context);
         return KeyedSubtree(
           key: const ValueKey('runner-ready'),
-          child: StacBridge.render(screen, context) ?? _renderError(context),
+          child: MiniAppAccentTheme(
+            accentColor: state.app?.accentColor,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                if (offline)
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(
+                      AppSpacing.screen,
+                      0,
+                      AppSpacing.screen,
+                      AppSpacing.md,
+                    ),
+                    child: AppBanner(
+                      message: l10n.offlineBannerCached,
+                      tone: AppBannerTone.warn,
+                      actionLabel: l10n.retry,
+                      onAction: () => unawaited(_reload(context)),
+                    ),
+                  ),
+                Expanded(
+                  child: Builder(
+                    builder: (themedContext) =>
+                        StacBridge.render(screen, themedContext) ??
+                        _renderError(themedContext),
+                  ),
+                ),
+              ],
+            ),
+          ),
         );
     }
   }
 
+  Future<void> _reload(BuildContext context) =>
+      context.read<MiniAppRunnerCubit>().load();
+
   Widget _renderError(BuildContext context) => _framed(
+    context,
     const ValueKey('runner-render-error'),
-    NinjaEmptyState(
-      icon: const AppLineIconWidget(AppLineIcon.grid),
+    AppErrorState(
+      lineIcon: AppLineIcon.grid,
       title: context.l10n.miniAppsRunnerError,
-      actionLabel: context.l10n.retry,
-      onAction: () => unawaited(context.read<MiniAppRunnerCubit>().load()),
+      message: null,
+      footnote: null,
+      primaryLabel: context.l10n.retry,
+      onPrimary: () => unawaited(_reload(context)),
     ).animateEmptyState(),
   );
 
-  Widget _framed(Key key, Widget child) => Center(
+  Widget _framed(BuildContext context, Key key, Widget child) => Center(
     key: key,
     child: SingleChildScrollView(
-      padding: const .symmetric(
-        horizontal: AppSpacing.screen,
-        vertical: 24,
+      padding: EdgeInsets.fromLTRB(
+        AppSpacing.screen,
+        AppSpacing.xlg,
+        AppSpacing.screen,
+        ninjaBottomInset(context) + AppSpacing.lg,
       ),
       child: child,
     ),

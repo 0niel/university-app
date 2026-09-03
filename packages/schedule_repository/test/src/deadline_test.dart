@@ -32,6 +32,7 @@ void main() {
         'isMine': true,
         'priority': 'urgent',
         'remind': false,
+        'remindMinutes': 60,
       });
     });
 
@@ -112,6 +113,60 @@ void main() {
         Deadline.fromJson(payload(id: 'deadline-1')).isMine,
         isFalse,
       );
+    });
+
+    test('defaults remindMinutes to 60 and round-trips a custom value', () {
+      final withoutLead = Deadline.fromJson({
+        'id': 'deadline-1',
+        'title': 'Lab report',
+        'subjectName': '',
+        'dueAt': '2026-09-01T12:00:00.000Z',
+        'source': 'me',
+        'progress': 0,
+        'isDone': false,
+        'isMine': true,
+      });
+      expect(withoutLead.remindMinutes, 60);
+
+      final withLead = Deadline.fromJson({
+        'id': 'deadline-1',
+        'title': 'Lab report',
+        'subjectName': '',
+        'dueAt': '2026-09-01T12:00:00.000Z',
+        'source': 'me',
+        'progress': 0,
+        'isDone': false,
+        'isMine': true,
+        'remindMinutes': 1440,
+      });
+      expect(withLead.remindMinutes, 1440);
+      expect(withLead.toJson()['remindMinutes'], 1440);
+    });
+
+    test('urgency tiers: danger under 48h, warn under 3 days, else normal', () {
+      final now = DateTime(2026, 1, 10);
+      Deadline dueIn(Duration duration) => Deadline(
+        id: 'deadline-1',
+        title: 'Lab report',
+        dueAt: now.add(duration),
+        source: DeadlineSource.me,
+        isMine: true,
+      );
+
+      expect(dueIn(const Duration(hours: 10)).isUrgentAt(now), isTrue);
+      expect(dueIn(const Duration(hours: 10)).isWarnAt(now), isFalse);
+
+      final warn = dueIn(const Duration(days: 2));
+      expect(warn.isUrgentAt(now), isFalse);
+      expect(warn.isWarnAt(now), isTrue);
+
+      final normal = dueIn(const Duration(days: 5));
+      expect(normal.isUrgentAt(now), isFalse);
+      expect(normal.isWarnAt(now), isFalse);
+
+      final done = dueIn(const Duration(hours: 10)).copyWith(isDone: true);
+      expect(done.isUrgentAt(now), isFalse);
+      expect(done.isWarnAt(now), isFalse);
     });
   });
 }

@@ -1,6 +1,5 @@
 import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
-import 'package:rtu_mirea_app/common/utils/ninja_initials.dart';
 
 part 'ring.dart';
 
@@ -28,7 +27,7 @@ class TeamAvatarStack extends StatelessWidget {
               padding: .only(left: i * (size - 8)),
               child: _Ring(
                 color: colors.surface,
-                child: NinjaAvatar(initials: ninjaInitials(name), size: size),
+                child: AppAvatar(name: name, size: size),
               ),
             ),
           for (var i = 0; i < emptySlots; i++)

@@ -67,7 +67,7 @@ void main() {
       await tester.pumpWidget(buildSubject());
       await tester.pumpAndSettle();
 
-      final colors = tester.element(find.byType(DiscoverGroupsPage)).ninja;
+      final colors = tester.element(find.byType(DiscoverGroupsPage)).colors;
       final card = tester.widget<DecoratedBox>(
         find
             .descendant(
@@ -78,12 +78,12 @@ void main() {
       );
       final decoration = card.decoration as BoxDecoration;
       expect(decoration.color, colors.surface);
-      expect(decoration.color, isNot(colors.accentSoft));
+      expect(decoration.color, isNot(colors.tint2));
       expect(decoration.border, isNull);
       expect(decoration.boxShadow, isNull);
       expect(
         decoration.borderRadius,
-        BorderRadius.circular(NinjaRadius.card),
+        BorderRadius.circular(AppRadius.card),
       );
 
       final action = find.descendant(

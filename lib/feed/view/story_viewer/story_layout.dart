@@ -7,4 +7,5 @@ abstract final class StoryLayout {
   static const bottomInset = 40.0;
   static const navigationBottomInset = 120.0;
   static const stripeWidth = 12.0;
+  static const wideBreakpoint = 720.0;
 }

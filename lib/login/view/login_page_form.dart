@@ -31,7 +31,7 @@ class _LoginPageForm extends StatelessWidget {
             return AppInputField(
               key: const Key('loginPage_emailInput'),
               controller: emailController,
-              enabled: !state.status.isInProgress,
+              readOnly: state.status.isInProgress,
               label: l10n.authYourEmail,
               leadingIcon: AppLineIcon.at,
               placeholder: l10n.loginEmailPlaceholder,
@@ -40,6 +40,7 @@ class _LoginPageForm extends StatelessWidget {
               autofillHints: const [AutofillHints.email],
               onChanged: onEmailChanged,
               onSubmitted: (_) => passwordFocusNode.requestFocus(),
+              validateOnBlur: true,
               errorText: showError ? l10n.loginEmailError : null,
             );
           },
@@ -56,7 +57,7 @@ class _LoginPageForm extends StatelessWidget {
               key: const Key('loginPage_passwordInput'),
               controller: passwordController,
               focusNode: passwordFocusNode,
-              enabled: !state.status.isInProgress,
+              readOnly: state.status.isInProgress,
               label: l10n.authPasswordLabel,
               leadingIcon: AppLineIcon.lock,
               placeholder: '••••••••',
@@ -71,6 +72,7 @@ class _LoginPageForm extends StatelessWidget {
                   bloc.add(LoginWithPasswordSubmitted());
                 }
               },
+              validateOnBlur: true,
               errorText: showError
                   ? l10n.loginPasswordError(Password.minLength)
                   : null,

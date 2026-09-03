@@ -56,7 +56,7 @@ class AuthPageLayout extends StatelessWidget {
 
     return CustomScrollView(
       physics: const BouncingScrollPhysics(),
-      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
       slivers: [
         SliverPadding(
           padding: EdgeInsets.fromLTRB(

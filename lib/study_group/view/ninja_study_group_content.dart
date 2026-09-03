@@ -6,6 +6,7 @@ class NinjaStudyGroupContent extends StatelessWidget {
     required this.group,
     required this.onInvite,
     required this.onRemoveMember,
+    required this.onTransferOwnership,
     required this.onAcceptRequest,
     required this.onDeclineRequest,
     required this.onLeaveOrDelete,
@@ -15,6 +16,7 @@ class NinjaStudyGroupContent extends StatelessWidget {
   final StudyGroup group;
   final VoidCallback onInvite;
   final ValueChanged<StudyGroupMember> onRemoveMember;
+  final ValueChanged<StudyGroupMember> onTransferOwnership;
   final ValueChanged<StudyGroupJoinRequest> onAcceptRequest;
   final ValueChanged<StudyGroupJoinRequest> onDeclineRequest;
   final VoidCallback onLeaveOrDelete;
@@ -95,6 +97,7 @@ class NinjaStudyGroupContent extends StatelessWidget {
                     canRemove: isOwner && !member.isMe && !member.isOwner,
                     pending: state.pendingMemberIds.contains(member.userId),
                     onRemove: () => onRemoveMember(member),
+                    onTransfer: () => onTransferOwnership(member),
                   ).animateListItem(index: index),
                 ),
             ],

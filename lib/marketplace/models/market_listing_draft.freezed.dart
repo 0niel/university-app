@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$MarketListingDraft {
 
- String get title; int get price; String get category; String get description; bool get showContact;
+ String get title; int get price; String get category; String get description; bool get showContact; bool get isFree; String get telegramHandle; List<MarketMediaItem> get media;
 /// Create a copy of MarketListingDraft
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +25,16 @@ $MarketListingDraftCopyWith<MarketListingDraft> get copyWith => _$MarketListingD
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is MarketListingDraft&&(identical(other.title, title) || other.title == title)&&(identical(other.price, price) || other.price == price)&&(identical(other.category, category) || other.category == category)&&(identical(other.description, description) || other.description == description)&&(identical(other.showContact, showContact) || other.showContact == showContact));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is MarketListingDraft&&(identical(other.title, title) || other.title == title)&&(identical(other.price, price) || other.price == price)&&(identical(other.category, category) || other.category == category)&&(identical(other.description, description) || other.description == description)&&(identical(other.showContact, showContact) || other.showContact == showContact)&&(identical(other.isFree, isFree) || other.isFree == isFree)&&(identical(other.telegramHandle, telegramHandle) || other.telegramHandle == telegramHandle)&&const DeepCollectionEquality().equals(other.media, media));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,title,price,category,description,showContact);
+int get hashCode => Object.hash(runtimeType,title,price,category,description,showContact,isFree,telegramHandle,const DeepCollectionEquality().hash(media));
 
 @override
 String toString() {
-  return 'MarketListingDraft(title: $title, price: $price, category: $category, description: $description, showContact: $showContact)';
+  return 'MarketListingDraft(title: $title, price: $price, category: $category, description: $description, showContact: $showContact, isFree: $isFree, telegramHandle: $telegramHandle, media: $media)';
 }
 
 
@@ -45,7 +45,7 @@ abstract mixin class $MarketListingDraftCopyWith<$Res>  {
   factory $MarketListingDraftCopyWith(MarketListingDraft value, $Res Function(MarketListingDraft) _then) = _$MarketListingDraftCopyWithImpl;
 @useResult
 $Res call({
- String title, int price, String category, String description, bool showContact
+ String title, int price, String category, String description, bool showContact, bool isFree, String telegramHandle, List<MarketMediaItem> media
 });
 
 
@@ -62,14 +62,17 @@ class _$MarketListingDraftCopyWithImpl<$Res>
 
 /// Create a copy of MarketListingDraft
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? title = null,Object? price = null,Object? category = null,Object? description = null,Object? showContact = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? title = null,Object? price = null,Object? category = null,Object? description = null,Object? showContact = null,Object? isFree = null,Object? telegramHandle = null,Object? media = null,}) {
   return _then(_self.copyWith(
 title: null == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
 as String,price: null == price ? _self.price : price // ignore: cast_nullable_to_non_nullable
 as int,category: null == category ? _self.category : category // ignore: cast_nullable_to_non_nullable
 as String,description: null == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
 as String,showContact: null == showContact ? _self.showContact : showContact // ignore: cast_nullable_to_non_nullable
-as bool,
+as bool,isFree: null == isFree ? _self.isFree : isFree // ignore: cast_nullable_to_non_nullable
+as bool,telegramHandle: null == telegramHandle ? _self.telegramHandle : telegramHandle // ignore: cast_nullable_to_non_nullable
+as String,media: null == media ? _self.media : media // ignore: cast_nullable_to_non_nullable
+as List<MarketMediaItem>,
   ));
 }
 
@@ -154,10 +157,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String title,  int price,  String category,  String description,  bool showContact)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String title,  int price,  String category,  String description,  bool showContact,  bool isFree,  String telegramHandle,  List<MarketMediaItem> media)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _MarketListingDraft() when $default != null:
-return $default(_that.title,_that.price,_that.category,_that.description,_that.showContact);case _:
+return $default(_that.title,_that.price,_that.category,_that.description,_that.showContact,_that.isFree,_that.telegramHandle,_that.media);case _:
   return orElse();
 
 }
@@ -175,10 +178,10 @@ return $default(_that.title,_that.price,_that.category,_that.description,_that.s
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String title,  int price,  String category,  String description,  bool showContact)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String title,  int price,  String category,  String description,  bool showContact,  bool isFree,  String telegramHandle,  List<MarketMediaItem> media)  $default,) {final _that = this;
 switch (_that) {
 case _MarketListingDraft():
-return $default(_that.title,_that.price,_that.category,_that.description,_that.showContact);case _:
+return $default(_that.title,_that.price,_that.category,_that.description,_that.showContact,_that.isFree,_that.telegramHandle,_that.media);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -195,10 +198,10 @@ return $default(_that.title,_that.price,_that.category,_that.description,_that.s
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String title,  int price,  String category,  String description,  bool showContact)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String title,  int price,  String category,  String description,  bool showContact,  bool isFree,  String telegramHandle,  List<MarketMediaItem> media)?  $default,) {final _that = this;
 switch (_that) {
 case _MarketListingDraft() when $default != null:
-return $default(_that.title,_that.price,_that.category,_that.description,_that.showContact);case _:
+return $default(_that.title,_that.price,_that.category,_that.description,_that.showContact,_that.isFree,_that.telegramHandle,_that.media);case _:
   return null;
 
 }
@@ -210,7 +213,7 @@ return $default(_that.title,_that.price,_that.category,_that.description,_that.s
 
 
 class _MarketListingDraft extends MarketListingDraft {
-  const _MarketListingDraft({this.title = '', this.price = -1, this.category = 'other', this.description = '', this.showContact = false}): super._();
+  const _MarketListingDraft({this.title = '', this.price = -1, this.category = 'other', this.description = '', this.showContact = false, this.isFree = false, this.telegramHandle = '', final  List<MarketMediaItem> media = const <MarketMediaItem>[]}): _media = media,super._();
 
 
 @override@JsonKey() final  String title;
@@ -218,6 +221,15 @@ class _MarketListingDraft extends MarketListingDraft {
 @override@JsonKey() final  String category;
 @override@JsonKey() final  String description;
 @override@JsonKey() final  bool showContact;
+@override@JsonKey() final  bool isFree;
+@override@JsonKey() final  String telegramHandle;
+ final  List<MarketMediaItem> _media;
+@override@JsonKey() List<MarketMediaItem> get media {
+  if (_media is EqualUnmodifiableListView) return _media;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_media);
+}
+
 
 /// Create a copy of MarketListingDraft
 /// with the given fields replaced by the non-null parameter values.
@@ -229,16 +241,16 @@ _$MarketListingDraftCopyWith<_MarketListingDraft> get copyWith => __$MarketListi
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _MarketListingDraft&&(identical(other.title, title) || other.title == title)&&(identical(other.price, price) || other.price == price)&&(identical(other.category, category) || other.category == category)&&(identical(other.description, description) || other.description == description)&&(identical(other.showContact, showContact) || other.showContact == showContact));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _MarketListingDraft&&(identical(other.title, title) || other.title == title)&&(identical(other.price, price) || other.price == price)&&(identical(other.category, category) || other.category == category)&&(identical(other.description, description) || other.description == description)&&(identical(other.showContact, showContact) || other.showContact == showContact)&&(identical(other.isFree, isFree) || other.isFree == isFree)&&(identical(other.telegramHandle, telegramHandle) || other.telegramHandle == telegramHandle)&&const DeepCollectionEquality().equals(other._media, _media));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,title,price,category,description,showContact);
+int get hashCode => Object.hash(runtimeType,title,price,category,description,showContact,isFree,telegramHandle,const DeepCollectionEquality().hash(_media));
 
 @override
 String toString() {
-  return 'MarketListingDraft(title: $title, price: $price, category: $category, description: $description, showContact: $showContact)';
+  return 'MarketListingDraft(title: $title, price: $price, category: $category, description: $description, showContact: $showContact, isFree: $isFree, telegramHandle: $telegramHandle, media: $media)';
 }
 
 
@@ -249,7 +261,7 @@ abstract mixin class _$MarketListingDraftCopyWith<$Res> implements $MarketListin
   factory _$MarketListingDraftCopyWith(_MarketListingDraft value, $Res Function(_MarketListingDraft) _then) = __$MarketListingDraftCopyWithImpl;
 @override @useResult
 $Res call({
- String title, int price, String category, String description, bool showContact
+ String title, int price, String category, String description, bool showContact, bool isFree, String telegramHandle, List<MarketMediaItem> media
 });
 
 
@@ -266,14 +278,17 @@ class __$MarketListingDraftCopyWithImpl<$Res>
 
 /// Create a copy of MarketListingDraft
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? title = null,Object? price = null,Object? category = null,Object? description = null,Object? showContact = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? title = null,Object? price = null,Object? category = null,Object? description = null,Object? showContact = null,Object? isFree = null,Object? telegramHandle = null,Object? media = null,}) {
   return _then(_MarketListingDraft(
 title: null == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
 as String,price: null == price ? _self.price : price // ignore: cast_nullable_to_non_nullable
 as int,category: null == category ? _self.category : category // ignore: cast_nullable_to_non_nullable
 as String,description: null == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
 as String,showContact: null == showContact ? _self.showContact : showContact // ignore: cast_nullable_to_non_nullable
-as bool,
+as bool,isFree: null == isFree ? _self.isFree : isFree // ignore: cast_nullable_to_non_nullable
+as bool,telegramHandle: null == telegramHandle ? _self.telegramHandle : telegramHandle // ignore: cast_nullable_to_non_nullable
+as String,media: null == media ? _self._media : media // ignore: cast_nullable_to_non_nullable
+as List<MarketMediaItem>,
   ));
 }
 

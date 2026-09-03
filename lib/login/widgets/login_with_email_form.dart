@@ -43,7 +43,7 @@ class _LoginWithEmailFormState extends State<LoginWithEmailForm> {
           AppInputField(
             key: const Key('loginWithEmailForm_emailInput_textField'),
             controller: _controller,
-            enabled: !state.status.isInProgress,
+            readOnly: state.status.isInProgress,
             label: l10n.authYourEmail,
             placeholder: l10n.loginEmailPlaceholder,
             leadingIcon: AppLineIcon.at,
@@ -58,6 +58,7 @@ class _LoginWithEmailFormState extends State<LoginWithEmailForm> {
                 bloc.add(EmailLinkRequested());
               }
             },
+            validateOnBlur: true,
             errorText: !state.email.isPure && !state.email.isValid
                 ? l10n.authInvalidEmail
                 : null,

@@ -8,10 +8,12 @@ class HomeQuickActions extends StatelessWidget {
   const HomeQuickActions({
     required this.services,
     required this.onAll,
+    this.loading = false,
     super.key,
   });
   final List<ServiceEntry> services;
   final VoidCallback onAll;
+  final bool loading;
 
   @override
   Widget build(BuildContext context) => AppTourAnchor(
@@ -24,7 +26,9 @@ class HomeQuickActions extends StatelessWidget {
           action: context.l10n.homeAllServices,
           onActionTap: onAll,
         ),
-        if (services.isEmpty)
+        if (services.isEmpty && loading)
+          const _HomeQuickActionsSkeleton()
+        else if (services.isEmpty)
           AppEmptyState.compact(title: context.l10n.homeFavoritesEmpty)
         else
           LayoutBuilder(
@@ -91,4 +95,26 @@ class HomeQuickActions extends StatelessWidget {
         '/schedule/session' => l10n.serviceExamsTitle,
         _ => entry.title,
       };
+}
+
+class _HomeQuickActionsSkeleton extends StatelessWidget {
+  const _HomeQuickActionsSkeleton();
+
+  @override
+  Widget build(BuildContext context) => Row(
+    children: [
+      for (var i = 0; i < 5; i++) ...[
+        if (i > 0) const SizedBox(width: 4),
+        const Expanded(
+          child: Column(
+            children: [
+              AppSkeleton(height: 48, radius: AppRadius.banner),
+              SizedBox(height: 7),
+              AppSkeleton(height: 10, widthFactor: .6),
+            ],
+          ),
+        ),
+      ],
+    ],
+  );
 }

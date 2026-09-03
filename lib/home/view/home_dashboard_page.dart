@@ -5,7 +5,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:rtu_mirea_app/community/cubit/deadlines/deadlines.dart';
+import 'package:rtu_mirea_app/config/config.dart';
 import 'package:rtu_mirea_app/home/cubit/home_gamification_cubit.dart';
+import 'package:rtu_mirea_app/home/cubit/home_identity_cubit.dart';
 import 'package:rtu_mirea_app/home/cubit/home_stories_cubit.dart';
 import 'package:rtu_mirea_app/home/view/home_dashboard_content.dart';
 import 'package:rtu_mirea_app/home/view/home_dashboard_metrics.dart';
@@ -28,6 +30,7 @@ class _HomeDashboardPageState extends State<HomeDashboardPage>
   late final DeadlinesCubit _deadlines;
   late final DiscourseBloc _discourse;
   late final HomeGamificationCubit _gamification;
+  late final HomeIdentityCubit _identity;
   final HomeStoriesCubit _stories = HomeStoriesCubit();
   DateTime _now = DateTime.now();
   late DateTime _selectedDay = DateUtils.dateOnly(_now);
@@ -45,8 +48,13 @@ class _HomeDashboardPageState extends State<HomeDashboardPage>
     _discourse = DiscourseBloc(context.read())
       ..add(const DiscourseTopTopicsRequested());
     _gamification = HomeGamificationCubit(context.read());
+    _identity = HomeIdentityCubit(
+      context.read(),
+      context.read<UniversityConfig>().organizationId,
+    );
     unawaited(_deadlines.load());
     unawaited(_gamification.load());
+    unawaited(_identity.load());
     unawaited(context.read<ExamReadinessCubit>().load());
     unawaited(_loadChanges());
     _scheduleSubscription = context.read<ScheduleBloc>().stream.listen((_) {
@@ -140,6 +148,7 @@ class _HomeDashboardPageState extends State<HomeDashboardPage>
     final waits = <Future<void>>[
       _deadlines.load().then((_) {}),
       _gamification.load(),
+      _identity.load(),
       _loadChanges(force: true),
       _discourse.stream
           .firstWhere(
@@ -179,6 +188,7 @@ class _HomeDashboardPageState extends State<HomeDashboardPage>
     unawaited(_deadlines.close());
     unawaited(_discourse.close());
     unawaited(_gamification.close());
+    unawaited(_identity.close());
     unawaited(_stories.close());
     super.dispose();
   }
@@ -189,6 +199,7 @@ class _HomeDashboardPageState extends State<HomeDashboardPage>
       BlocProvider.value(value: _deadlines),
       BlocProvider.value(value: _discourse),
       BlocProvider.value(value: _gamification),
+      BlocProvider.value(value: _identity),
       BlocProvider.value(value: _stories),
     ],
     child: Scaffold(

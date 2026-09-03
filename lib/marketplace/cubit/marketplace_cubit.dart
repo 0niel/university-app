@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:bloc/bloc.dart';
 import 'package:campus_repository/campus_repository.dart';
 import 'package:collection/collection.dart';
@@ -17,7 +19,7 @@ class MarketplaceCubit extends Cubit<MarketplaceState> {
   Future<bool> load() async {
     if (state.pendingSoldIds.isNotEmpty ||
         state.pendingDeleteIds.isNotEmpty ||
-        state.isCreating) {
+        state.isSaving) {
       return false;
     }
     final revision = ++_loadRevision;
@@ -34,6 +36,16 @@ class MarketplaceCubit extends Cubit<MarketplaceState> {
       return false;
     }
   }
+
+  Future<String> uploadMedia({
+    required List<int> bytes,
+    required String contentType,
+    required String extension,
+  }) => _repository.uploadListingMedia(
+    bytes: Uint8List.fromList(bytes),
+    contentType: contentType,
+    extension: extension,
+  );
 
   void filterChanged(String filterKey) {
     if (filterKey == state.filterKey) return;
@@ -124,27 +136,107 @@ class MarketplaceCubit extends Cubit<MarketplaceState> {
     }
   }
 
+  Future<bool> archive(MarketListing item) async {
+    if (state.pendingDeleteIds.contains(item.id)) return false;
+    final current = state.items.firstWhereOrNull(
+      (candidate) => candidate.id == item.id,
+    );
+    if (current == null) return false;
+    final fallbackStatus = _stableStatus;
+    final index = state.items.indexWhere(
+      (candidate) => candidate.id == item.id,
+    );
+    if (index < 0) return false;
+    _loadRevision++;
+    emit(
+      state.copyWith(
+        status: fallbackStatus,
+        items: state.items
+            .where((candidate) => candidate.id != item.id)
+            .toList(growable: false),
+        pendingDeleteIds: {...state.pendingDeleteIds, item.id},
+      ),
+    );
+    try {
+      await _repository.archiveListing(item.id);
+      if (isClosed) return false;
+      emit(
+        state.copyWith(
+          pendingDeleteIds: {...state.pendingDeleteIds}..remove(item.id),
+        ),
+      );
+      return true;
+    } on Exception catch (error, stackTrace) {
+      if (!isClosed) {
+        emit(
+          state.copyWith(
+            status: fallbackStatus,
+            items: _insert(current, index),
+            pendingDeleteIds: {...state.pendingDeleteIds}..remove(item.id),
+          ),
+        );
+        addError(error, stackTrace);
+      }
+      return false;
+    }
+  }
+
   Future<bool> create(MarketListingDraft draft) async {
-    if (state.isCreating || !draft.isValid) return false;
+    if (state.isSaving || !draft.isValid) return false;
     final fallbackStatus = _stableStatus;
     _loadRevision++;
-    emit(state.copyWith(status: fallbackStatus, isCreating: true));
+    emit(state.copyWith(status: fallbackStatus, isSaving: true));
     try {
       await _repository.createListing(
         title: draft.title.trim(),
-        price: draft.price,
+        price: draft.isFree ? 0 : draft.price,
         category: draft.category.trim(),
         description: draft.description.trim(),
+        isFree: draft.isFree,
+        media: draft.media,
+        telegramContact: draft.normalizedTelegramHandle,
         showContact: draft.showContact,
       );
       if (isClosed) return false;
-      emit(state.copyWith(isCreating: false));
+      emit(state.copyWith(isSaving: false));
       await load();
       return true;
     } on Exception catch (error, stackTrace) {
       if (!isClosed) {
         emit(
-          state.copyWith(status: fallbackStatus, isCreating: false),
+          state.copyWith(status: fallbackStatus, isSaving: false),
+        );
+        addError(error, stackTrace);
+      }
+      return false;
+    }
+  }
+
+  Future<bool> update(String id, MarketListingDraft draft) async {
+    if (state.isSaving || !draft.isValid) return false;
+    final fallbackStatus = _stableStatus;
+    _loadRevision++;
+    emit(state.copyWith(status: fallbackStatus, isSaving: true));
+    try {
+      await _repository.updateListing(
+        id: id,
+        title: draft.title.trim(),
+        price: draft.isFree ? 0 : draft.price,
+        category: draft.category.trim(),
+        description: draft.description.trim(),
+        isFree: draft.isFree,
+        media: draft.media,
+        telegramContact: draft.normalizedTelegramHandle,
+        showContact: draft.showContact,
+      );
+      if (isClosed) return false;
+      emit(state.copyWith(isSaving: false));
+      await load();
+      return true;
+    } on Exception catch (error, stackTrace) {
+      if (!isClosed) {
+        emit(
+          state.copyWith(status: fallbackStatus, isSaving: false),
         );
         addError(error, stackTrace);
       }

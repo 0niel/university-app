@@ -7619,7 +7619,7 @@ abstract class AppLocalizations {
   /// No description provided for @deadlineRemindSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'a day before and 2 hours before'**
+  /// **'at the chosen lead time before the deadline'**
   String get deadlineRemindSubtitle;
 
   /// No description provided for @deadlineShareTitle.
@@ -18937,6 +18937,1974 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Not enough shurikens'**
   String get knowledgePurchaseInsufficient;
+
+  /// Media viewer page counter
+  ///
+  /// In en, this message translates to:
+  /// **'{index} / {total}'**
+  String mediaViewerIndex(int index, int total);
+
+  /// No description provided for @mediaViewerDownloading.
+  ///
+  /// In en, this message translates to:
+  /// **'Downloading'**
+  String get mediaViewerDownloading;
+
+  /// No description provided for @mediaViewerOpenExternally.
+  ///
+  /// In en, this message translates to:
+  /// **'Open externally'**
+  String get mediaViewerOpenExternally;
+
+  /// No description provided for @mediaViewerDownloadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t download the file'**
+  String get mediaViewerDownloadFailed;
+
+  /// No description provided for @mediaViewerSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved'**
+  String get mediaViewerSaved;
+
+  /// Home trending row meta
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{{count} like} other{{count} likes}}'**
+  String homeLikesCount(int count);
+
+  /// No description provided for @teamFinderCreateOtherRole.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get teamFinderCreateOtherRole;
+
+  /// No description provided for @teamFinderCreateCustomRoleLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'CUSTOM ROLE'**
+  String get teamFinderCreateCustomRoleLabel;
+
+  /// No description provided for @teamFinderCreateCustomRoleHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. DevOps, Analyst'**
+  String get teamFinderCreateCustomRoleHint;
+
+  /// No description provided for @teamFinderCreateCustomRoleHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Comma-separated adds several roles'**
+  String get teamFinderCreateCustomRoleHelper;
+
+  /// No description provided for @teamFinderCreateTitleError.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a team name'**
+  String get teamFinderCreateTitleError;
+
+  /// No description provided for @teamFinderCreateRolesError.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick at least one role'**
+  String get teamFinderCreateRolesError;
+
+  /// No description provided for @teamFinderCreateDeadlinePlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a date'**
+  String get teamFinderCreateDeadlinePlaceholder;
+
+  /// No description provided for @teamFinderRemoveDeadline.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get teamFinderRemoveDeadline;
+
+  /// No description provided for @teamFinderCreateBoostInsufficient.
+  ///
+  /// In en, this message translates to:
+  /// **'Need 50 shurikens, you have {balance}'**
+  String teamFinderCreateBoostInsufficient(int balance);
+
+  /// No description provided for @teamFinderEditSheetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit team'**
+  String get teamFinderEditSheetTitle;
+
+  /// No description provided for @teamFinderSaveChanges.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get teamFinderSaveChanges;
+
+  /// No description provided for @teamFinderSaving.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving…'**
+  String get teamFinderSaving;
+
+  /// No description provided for @teamFinderUpdateError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t save changes'**
+  String get teamFinderUpdateError;
+
+  /// No description provided for @teamFinderTeamUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Changes saved'**
+  String get teamFinderTeamUpdated;
+
+  /// No description provided for @teamFinderEditTeam.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get teamFinderEditTeam;
+
+  /// No description provided for @teamFinderCloseTeam.
+  ///
+  /// In en, this message translates to:
+  /// **'Close recruiting'**
+  String get teamFinderCloseTeam;
+
+  /// No description provided for @teamFinderReopenTeam.
+  ///
+  /// In en, this message translates to:
+  /// **'Reopen recruiting'**
+  String get teamFinderReopenTeam;
+
+  /// No description provided for @teamFinderCloseConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Close recruiting for this team?'**
+  String get teamFinderCloseConfirmTitle;
+
+  /// No description provided for @teamFinderCloseConfirmBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The team will disappear from search. Reopen it anytime from «Mine».'**
+  String get teamFinderCloseConfirmBody;
+
+  /// No description provided for @teamFinderCloseError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t close recruiting'**
+  String get teamFinderCloseError;
+
+  /// No description provided for @teamFinderClosedStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Recruiting closed'**
+  String get teamFinderClosedStatus;
+
+  /// No description provided for @teamFinderSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Team, role, event…'**
+  String get teamFinderSearchHint;
+
+  /// No description provided for @teamFinderSearchEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing found'**
+  String get teamFinderSearchEmptyTitle;
+
+  /// No description provided for @teamFinderSearchEmptySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Try another query or filter'**
+  String get teamFinderSearchEmptySubtitle;
+
+  /// No description provided for @teamFinderRolesFilterLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'ROLES'**
+  String get teamFinderRolesFilterLabel;
+
+  /// No description provided for @collabNotesSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search notes'**
+  String get collabNotesSearchHint;
+
+  /// No description provided for @collabNotesActionRename.
+  ///
+  /// In en, this message translates to:
+  /// **'Rename'**
+  String get collabNotesActionRename;
+
+  /// No description provided for @collabNotesActionVisibility.
+  ///
+  /// In en, this message translates to:
+  /// **'Change visibility'**
+  String get collabNotesActionVisibility;
+
+  /// No description provided for @collabNotesRenameTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Rename note'**
+  String get collabNotesRenameTitle;
+
+  /// No description provided for @collabNotesRenameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Note title'**
+  String get collabNotesRenameHint;
+
+  /// No description provided for @collabNotesRenameError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not rename the note'**
+  String get collabNotesRenameError;
+
+  /// No description provided for @collabNotesVisibilityTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Note visibility'**
+  String get collabNotesVisibilityTitle;
+
+  /// No description provided for @collabNotesVisibilityError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not change visibility'**
+  String get collabNotesVisibilityError;
+
+  /// No description provided for @collabNotesReadOnlyBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'View only — you can\'t edit this note'**
+  String get collabNotesReadOnlyBanner;
+
+  /// No description provided for @collabNotesOfflineStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'No connection — will save later'**
+  String get collabNotesOfflineStatus;
+
+  /// No description provided for @collabNotesConflictResolved.
+  ///
+  /// In en, this message translates to:
+  /// **'Merged changes from another editor'**
+  String get collabNotesConflictResolved;
+
+  /// No description provided for @collabNotesCollaboratorsTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Note collaborators'**
+  String get collabNotesCollaboratorsTooltip;
+
+  /// No description provided for @noteToolbarBold.
+  ///
+  /// In en, this message translates to:
+  /// **'Bold'**
+  String get noteToolbarBold;
+
+  /// No description provided for @noteToolbarItalic.
+  ///
+  /// In en, this message translates to:
+  /// **'Italic'**
+  String get noteToolbarItalic;
+
+  /// No description provided for @noteToolbarUnderline.
+  ///
+  /// In en, this message translates to:
+  /// **'Underline'**
+  String get noteToolbarUnderline;
+
+  /// No description provided for @noteToolbarStrike.
+  ///
+  /// In en, this message translates to:
+  /// **'Strikethrough'**
+  String get noteToolbarStrike;
+
+  /// No description provided for @noteToolbarHeading1.
+  ///
+  /// In en, this message translates to:
+  /// **'Heading 1'**
+  String get noteToolbarHeading1;
+
+  /// No description provided for @noteToolbarHeading2.
+  ///
+  /// In en, this message translates to:
+  /// **'Heading 2'**
+  String get noteToolbarHeading2;
+
+  /// No description provided for @noteToolbarHeading3.
+  ///
+  /// In en, this message translates to:
+  /// **'Heading 3'**
+  String get noteToolbarHeading3;
+
+  /// No description provided for @noteToolbarBulletList.
+  ///
+  /// In en, this message translates to:
+  /// **'Bulleted list'**
+  String get noteToolbarBulletList;
+
+  /// No description provided for @noteToolbarNumberedList.
+  ///
+  /// In en, this message translates to:
+  /// **'Numbered list'**
+  String get noteToolbarNumberedList;
+
+  /// No description provided for @noteToolbarChecklist.
+  ///
+  /// In en, this message translates to:
+  /// **'Checklist'**
+  String get noteToolbarChecklist;
+
+  /// No description provided for @noteToolbarQuote.
+  ///
+  /// In en, this message translates to:
+  /// **'Quote'**
+  String get noteToolbarQuote;
+
+  /// No description provided for @noteToolbarCodeBlock.
+  ///
+  /// In en, this message translates to:
+  /// **'Code block'**
+  String get noteToolbarCodeBlock;
+
+  /// No description provided for @noteToolbarLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Link'**
+  String get noteToolbarLink;
+
+  /// No description provided for @noteToolbarDivider.
+  ///
+  /// In en, this message translates to:
+  /// **'Divider'**
+  String get noteToolbarDivider;
+
+  /// No description provided for @noteToolbarColor.
+  ///
+  /// In en, this message translates to:
+  /// **'Text colour'**
+  String get noteToolbarColor;
+
+  /// No description provided for @noteToolbarHighlight.
+  ///
+  /// In en, this message translates to:
+  /// **'Highlight'**
+  String get noteToolbarHighlight;
+
+  /// No description provided for @noteToolbarImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Image'**
+  String get noteToolbarImage;
+
+  /// No description provided for @noteToolbarDrawing.
+  ///
+  /// In en, this message translates to:
+  /// **'Drawing'**
+  String get noteToolbarDrawing;
+
+  /// No description provided for @noteToolbarMic.
+  ///
+  /// In en, this message translates to:
+  /// **'Voice input'**
+  String get noteToolbarMic;
+
+  /// No description provided for @noteToolbarUndo.
+  ///
+  /// In en, this message translates to:
+  /// **'Undo'**
+  String get noteToolbarUndo;
+
+  /// No description provided for @noteToolbarRedo.
+  ///
+  /// In en, this message translates to:
+  /// **'Redo'**
+  String get noteToolbarRedo;
+
+  /// No description provided for @noteColorDefault.
+  ///
+  /// In en, this message translates to:
+  /// **'Default'**
+  String get noteColorDefault;
+
+  /// No description provided for @noteVoicePermissionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow microphone access'**
+  String get noteVoicePermissionTitle;
+
+  /// No description provided for @noteVoicePermissionBody.
+  ///
+  /// In en, this message translates to:
+  /// **'We use speech recognition to type your note by voice. Audio is processed on-device or by the system service and isn\'t stored.'**
+  String get noteVoicePermissionBody;
+
+  /// No description provided for @noteVoicePermissionAllow.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow'**
+  String get noteVoicePermissionAllow;
+
+  /// No description provided for @noteVoiceListening.
+  ///
+  /// In en, this message translates to:
+  /// **'Listening…'**
+  String get noteVoiceListening;
+
+  /// No description provided for @noteVoiceUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Voice input isn\'t available on this device'**
+  String get noteVoiceUnavailable;
+
+  /// No description provided for @noteVoiceError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t recognise speech'**
+  String get noteVoiceError;
+
+  /// No description provided for @noteVoicePermissionDenied.
+  ///
+  /// In en, this message translates to:
+  /// **'Microphone access is denied. Enable it in system settings.'**
+  String get noteVoicePermissionDenied;
+
+  /// No description provided for @noteDrawingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Drawing'**
+  String get noteDrawingTitle;
+
+  /// No description provided for @noteDrawingPen.
+  ///
+  /// In en, this message translates to:
+  /// **'Pen'**
+  String get noteDrawingPen;
+
+  /// No description provided for @noteDrawingMarker.
+  ///
+  /// In en, this message translates to:
+  /// **'Marker'**
+  String get noteDrawingMarker;
+
+  /// No description provided for @noteDrawingEraser.
+  ///
+  /// In en, this message translates to:
+  /// **'Eraser'**
+  String get noteDrawingEraser;
+
+  /// No description provided for @noteDrawingUndo.
+  ///
+  /// In en, this message translates to:
+  /// **'Undo stroke'**
+  String get noteDrawingUndo;
+
+  /// No description provided for @noteDrawingRedo.
+  ///
+  /// In en, this message translates to:
+  /// **'Redo stroke'**
+  String get noteDrawingRedo;
+
+  /// No description provided for @noteDrawingClear.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear canvas'**
+  String get noteDrawingClear;
+
+  /// No description provided for @noteDrawingClearConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear the drawing?'**
+  String get noteDrawingClearConfirmTitle;
+
+  /// No description provided for @noteDrawingClearConfirmBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This can\'t be undone.'**
+  String get noteDrawingClearConfirmBody;
+
+  /// No description provided for @noteDrawingInsert.
+  ///
+  /// In en, this message translates to:
+  /// **'Insert'**
+  String get noteDrawingInsert;
+
+  /// No description provided for @noteDrawingWidthThin.
+  ///
+  /// In en, this message translates to:
+  /// **'Thin stroke'**
+  String get noteDrawingWidthThin;
+
+  /// No description provided for @noteDrawingWidthMedium.
+  ///
+  /// In en, this message translates to:
+  /// **'Medium stroke'**
+  String get noteDrawingWidthMedium;
+
+  /// No description provided for @noteDrawingWidthThick.
+  ///
+  /// In en, this message translates to:
+  /// **'Thick stroke'**
+  String get noteDrawingWidthThick;
+
+  /// No description provided for @noteDrawingEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Draw something first'**
+  String get noteDrawingEmpty;
+
+  /// No description provided for @noteLinkTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add link'**
+  String get noteLinkTitle;
+
+  /// No description provided for @noteLinkUrlLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'URL'**
+  String get noteLinkUrlLabel;
+
+  /// No description provided for @noteLinkUrlHint.
+  ///
+  /// In en, this message translates to:
+  /// **'https://example.com'**
+  String get noteLinkUrlHint;
+
+  /// No description provided for @noteLinkTextLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Link text'**
+  String get noteLinkTextLabel;
+
+  /// No description provided for @noteLinkTextHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Link'**
+  String get noteLinkTextHint;
+
+  /// No description provided for @noteLinkInsert.
+  ///
+  /// In en, this message translates to:
+  /// **'Add link'**
+  String get noteLinkInsert;
+
+  /// No description provided for @noteImageSourceTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add image'**
+  String get noteImageSourceTitle;
+
+  /// No description provided for @noteImageSourceCamera.
+  ///
+  /// In en, this message translates to:
+  /// **'Camera'**
+  String get noteImageSourceCamera;
+
+  /// No description provided for @noteImageSourceGallery.
+  ///
+  /// In en, this message translates to:
+  /// **'Gallery'**
+  String get noteImageSourceGallery;
+
+  /// No description provided for @noteImageUploadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t upload the image'**
+  String get noteImageUploadError;
+
+  /// No description provided for @noteImageUploading.
+  ///
+  /// In en, this message translates to:
+  /// **'Uploading image…'**
+  String get noteImageUploading;
+
+  /// No description provided for @serviceWalletShurikensSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Balance and shuriken history'**
+  String get serviceWalletShurikensSub;
+
+  /// No description provided for @mentorshipSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Name, group, topic, bio'**
+  String get mentorshipSearchHint;
+
+  /// No description provided for @mentorshipSearchEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No one found'**
+  String get mentorshipSearchEmptyTitle;
+
+  /// No description provided for @mentorshipSearchEmptySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Try a different name or topic'**
+  String get mentorshipSearchEmptySubtitle;
+
+  /// No description provided for @mentorshipTopicFilterAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get mentorshipTopicFilterAll;
+
+  /// No description provided for @mentorshipTelegramLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'TELEGRAM'**
+  String get mentorshipTelegramLabel;
+
+  /// No description provided for @mentorshipTelegramPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'username'**
+  String get mentorshipTelegramPlaceholder;
+
+  /// No description provided for @mentorshipTelegramError.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid Telegram username (5-32 chars: letters, digits, _)'**
+  String get mentorshipTelegramError;
+
+  /// No description provided for @mentorshipTelegramButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Telegram'**
+  String get mentorshipTelegramButton;
+
+  /// Long-press tooltip on an activity heatmap cell
+  ///
+  /// In en, this message translates to:
+  /// **'{date} · {count, plural, one{{count} action} other{{count} actions}}'**
+  String profileActivityTooltip(String date, int count);
+
+  /// Activity heatmap legend, low-intensity side
+  ///
+  /// In en, this message translates to:
+  /// **'less'**
+  String get profileActivityLegendLess;
+
+  /// Activity heatmap legend, high-intensity side
+  ///
+  /// In en, this message translates to:
+  /// **'more'**
+  String get profileActivityLegendMore;
+
+  /// No description provided for @scheduleLessonLongPressHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Long-press a class to open actions'**
+  String get scheduleLessonLongPressHint;
+
+  /// No description provided for @settingsColorHexInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid hex code'**
+  String get settingsColorHexInvalid;
+
+  /// No description provided for @deadlinesViewList.
+  ///
+  /// In en, this message translates to:
+  /// **'List'**
+  String get deadlinesViewList;
+
+  /// No description provided for @deadlinesViewCalendar.
+  ///
+  /// In en, this message translates to:
+  /// **'Calendar'**
+  String get deadlinesViewCalendar;
+
+  /// No description provided for @deadlinesGroupOverdue.
+  ///
+  /// In en, this message translates to:
+  /// **'Overdue'**
+  String get deadlinesGroupOverdue;
+
+  /// No description provided for @deadlinesGroupTomorrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Tomorrow'**
+  String get deadlinesGroupTomorrow;
+
+  /// No description provided for @deadlinesGroupDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get deadlinesGroupDone;
+
+  /// No description provided for @deadlinesOverdueBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{{count} deadline is overdue} other{{count} deadlines are overdue}}'**
+  String deadlinesOverdueBanner(int count);
+
+  /// No description provided for @deadlinesPostponeAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Move to tomorrow'**
+  String get deadlinesPostponeAction;
+
+  /// No description provided for @deadlinesPostponedToast.
+  ///
+  /// In en, this message translates to:
+  /// **'Moved to tomorrow'**
+  String get deadlinesPostponedToast;
+
+  /// No description provided for @deadlinesPostponeError.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to move deadlines. Try again.'**
+  String get deadlinesPostponeError;
+
+  /// No description provided for @deadlineDeleteSemantics.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete deadline'**
+  String get deadlineDeleteSemantics;
+
+  /// No description provided for @deadlineDeletedToast.
+  ///
+  /// In en, this message translates to:
+  /// **'Deadline deleted'**
+  String get deadlineDeletedToast;
+
+  /// No description provided for @deadlineDeleteError.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to delete the deadline. Try again.'**
+  String get deadlineDeleteError;
+
+  /// No description provided for @deadlineActionDuplicate.
+  ///
+  /// In en, this message translates to:
+  /// **'Duplicate'**
+  String get deadlineActionDuplicate;
+
+  /// No description provided for @deadlineEditTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit deadline'**
+  String get deadlineEditTitle;
+
+  /// No description provided for @deadlineUpdatedToast.
+  ///
+  /// In en, this message translates to:
+  /// **'Deadline updated'**
+  String get deadlineUpdatedToast;
+
+  /// No description provided for @deadlineDuplicatedToast.
+  ///
+  /// In en, this message translates to:
+  /// **'Deadline duplicated'**
+  String get deadlineDuplicatedToast;
+
+  /// No description provided for @deadlineProgressLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'PROGRESS'**
+  String get deadlineProgressLabel;
+
+  /// No description provided for @deadlineRemindLeadHour.
+  ///
+  /// In en, this message translates to:
+  /// **'1 hour before'**
+  String get deadlineRemindLeadHour;
+
+  /// No description provided for @deadlineRemindLeadDay.
+  ///
+  /// In en, this message translates to:
+  /// **'1 day before'**
+  String get deadlineRemindLeadDay;
+
+  /// No description provided for @deadlinesCalendarDayEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No deadlines on this day'**
+  String get deadlinesCalendarDayEmpty;
+
+  /// No description provided for @deadlineShareMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'{title} — due {when}'**
+  String deadlineShareMessage(Object title, Object when);
+
+  /// No description provided for @deadlineActionsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Deadline'**
+  String get deadlineActionsTitle;
+
+  /// No description provided for @roomPhotoAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add photo'**
+  String get roomPhotoAdd;
+
+  /// No description provided for @roomPhotoUploadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t upload the photo'**
+  String get roomPhotoUploadFailed;
+
+  /// No description provided for @roomPhotoUploaded.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo added'**
+  String get roomPhotoUploaded;
+
+  /// No description provided for @roomPhotoDeleteConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this photo?'**
+  String get roomPhotoDeleteConfirmTitle;
+
+  /// No description provided for @roomPhotoDeleteConfirmMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This can\'t be undone.'**
+  String get roomPhotoDeleteConfirmMessage;
+
+  /// No description provided for @roomPhotoDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo deleted'**
+  String get roomPhotoDeleted;
+
+  /// No description provided for @roomPhotoDeleteFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t delete the photo'**
+  String get roomPhotoDeleteFailed;
+
+  /// No description provided for @roomPhotosOfflineMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Check your connection to see room photos.'**
+  String get roomPhotosOfflineMessage;
+
+  /// Room photo caption: author name and relative upload time
+  ///
+  /// In en, this message translates to:
+  /// **'{author} · {date}'**
+  String roomPhotoCaption(Object author, Object date);
+
+  /// No description provided for @marketMediaLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Photos and video'**
+  String get marketMediaLabel;
+
+  /// No description provided for @marketMediaHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Up to 6 photos and 1 video. The first photo is the cover.'**
+  String get marketMediaHint;
+
+  /// No description provided for @marketAddPhotoAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Add photo'**
+  String get marketAddPhotoAction;
+
+  /// No description provided for @marketAddVideoAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Add video'**
+  String get marketAddVideoAction;
+
+  /// No description provided for @marketRemoveMediaItem.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get marketRemoveMediaItem;
+
+  /// No description provided for @marketCoverBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Cover'**
+  String get marketCoverBadge;
+
+  /// No description provided for @marketMediaLimitError.
+  ///
+  /// In en, this message translates to:
+  /// **'Up to 6 photos and 1 video are allowed'**
+  String get marketMediaLimitError;
+
+  /// No description provided for @marketMediaTypeError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t add this file'**
+  String get marketMediaTypeError;
+
+  /// No description provided for @marketVideoTooLong.
+  ///
+  /// In en, this message translates to:
+  /// **'The video is longer than 60 seconds'**
+  String get marketVideoTooLong;
+
+  /// No description provided for @marketVideoTooLarge.
+  ///
+  /// In en, this message translates to:
+  /// **'The video is larger than 50 MB'**
+  String get marketVideoTooLarge;
+
+  /// No description provided for @marketUploadingMedia.
+  ///
+  /// In en, this message translates to:
+  /// **'Uploading media…'**
+  String get marketUploadingMedia;
+
+  /// No description provided for @marketTelegramLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Telegram'**
+  String get marketTelegramLabel;
+
+  /// No description provided for @marketTelegramHint.
+  ///
+  /// In en, this message translates to:
+  /// **'username'**
+  String get marketTelegramHint;
+
+  /// No description provided for @marketTelegramRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Add your Telegram so buyers can reach you'**
+  String get marketTelegramRequired;
+
+  /// No description provided for @marketTelegramInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'5 to 32 characters: latin letters, digits, _'**
+  String get marketTelegramInvalid;
+
+  /// No description provided for @marketSortNew.
+  ///
+  /// In en, this message translates to:
+  /// **'Newest'**
+  String get marketSortNew;
+
+  /// No description provided for @marketSortCheap.
+  ///
+  /// In en, this message translates to:
+  /// **'Cheapest'**
+  String get marketSortCheap;
+
+  /// No description provided for @marketEditTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit listing'**
+  String get marketEditTitle;
+
+  /// No description provided for @marketSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get marketSave;
+
+  /// No description provided for @marketSaving.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving…'**
+  String get marketSaving;
+
+  /// No description provided for @marketEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get marketEdit;
+
+  /// No description provided for @marketArchive.
+  ///
+  /// In en, this message translates to:
+  /// **'Archive'**
+  String get marketArchive;
+
+  /// No description provided for @marketArchiveConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Archive this listing?'**
+  String get marketArchiveConfirmTitle;
+
+  /// No description provided for @marketArchiveConfirmBody.
+  ///
+  /// In en, this message translates to:
+  /// **'It will disappear from the marketplace, its photos and video will be removed.'**
+  String get marketArchiveConfirmBody;
+
+  /// No description provided for @marketArchiveError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t archive the listing'**
+  String get marketArchiveError;
+
+  /// No description provided for @marketCreateSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Listing published'**
+  String get marketCreateSuccess;
+
+  /// No description provided for @marketUpdateSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Changes saved'**
+  String get marketUpdateSuccess;
+
+  /// No description provided for @marketArchiveSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Listing archived'**
+  String get marketArchiveSuccess;
+
+  /// No description provided for @marketDeleteSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Listing deleted'**
+  String get marketDeleteSuccess;
+
+  /// No description provided for @marketShare.
+  ///
+  /// In en, this message translates to:
+  /// **'Share'**
+  String get marketShare;
+
+  /// No description provided for @marketShareText.
+  ///
+  /// In en, this message translates to:
+  /// **'Check out “{title}” on the marketplace'**
+  String marketShareText(Object title);
+
+  /// No description provided for @marketFreeToggleLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Give away for free'**
+  String get marketFreeToggleLabel;
+
+  /// No description provided for @teamFinderTeamCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Team published'**
+  String get teamFinderTeamCreated;
+
+  /// No description provided for @deadlineDueInHours.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{in {count}h} other{in {count}h}}'**
+  String deadlineDueInHours(int count);
+
+  /// No description provided for @deadlineDueInDays.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{in {count} day} other{in {count} days}}'**
+  String deadlineDueInDays(int count);
+
+  /// No description provided for @deadlineDueInWeeks.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{in {count} week} other{in {count} weeks}}'**
+  String deadlineDueInWeeks(int count);
+
+  /// No description provided for @deadlineOverdueByHours.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{overdue by {count}h} other{overdue by {count}h}}'**
+  String deadlineOverdueByHours(int count);
+
+  /// No description provided for @deadlineOverdueByDays.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{overdue by {count}d} other{overdue by {count}d}}'**
+  String deadlineOverdueByDays(int count);
+
+  /// No description provided for @eventsFilterPast.
+  ///
+  /// In en, this message translates to:
+  /// **'Past'**
+  String get eventsFilterPast;
+
+  /// No description provided for @eventsViewList.
+  ///
+  /// In en, this message translates to:
+  /// **'List'**
+  String get eventsViewList;
+
+  /// No description provided for @eventsViewCalendar.
+  ///
+  /// In en, this message translates to:
+  /// **'Calendar'**
+  String get eventsViewCalendar;
+
+  /// No description provided for @eventsDayYesterday.
+  ///
+  /// In en, this message translates to:
+  /// **'Yesterday'**
+  String get eventsDayYesterday;
+
+  /// No description provided for @eventsEmptyPastSub.
+  ///
+  /// In en, this message translates to:
+  /// **'No past events yet'**
+  String get eventsEmptyPastSub;
+
+  /// No description provided for @eventsCalendarEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing on this day'**
+  String get eventsCalendarEmptyTitle;
+
+  /// No description provided for @eventsMineBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Yours'**
+  String get eventsMineBadge;
+
+  /// No description provided for @eventsCreateEndLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'UNTIL'**
+  String get eventsCreateEndLabel;
+
+  /// No description provided for @eventsCreateEndPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'No end time'**
+  String get eventsCreateEndPlaceholder;
+
+  /// No description provided for @eventsCreateTitleError.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a title'**
+  String get eventsCreateTitleError;
+
+  /// No description provided for @eventsCreateEndBeforeStartError.
+  ///
+  /// In en, this message translates to:
+  /// **'The event can\'t end before it starts'**
+  String get eventsCreateEndBeforeStartError;
+
+  /// No description provided for @eventsEditSheetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit event'**
+  String get eventsEditSheetTitle;
+
+  /// No description provided for @eventsSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get eventsSave;
+
+  /// No description provided for @eventsCreateSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Event created'**
+  String get eventsCreateSuccess;
+
+  /// No description provided for @eventsUpdateSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Changes saved'**
+  String get eventsUpdateSuccess;
+
+  /// No description provided for @eventsUpdateError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t save changes. Try again'**
+  String get eventsUpdateError;
+
+  /// No description provided for @eventsDeleteConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete event?'**
+  String get eventsDeleteConfirmTitle;
+
+  /// No description provided for @eventsDeleteConfirmMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'It will disappear from the board for everyone'**
+  String get eventsDeleteConfirmMessage;
+
+  /// No description provided for @eventsDeleteSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Event deleted'**
+  String get eventsDeleteSuccess;
+
+  /// No description provided for @eventsDeleteError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t delete the event. Try again'**
+  String get eventsDeleteError;
+
+  /// No description provided for @eventsEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get eventsEdit;
+
+  /// No description provided for @eventsDetailMap.
+  ///
+  /// In en, this message translates to:
+  /// **'On the map'**
+  String get eventsDetailMap;
+
+  /// No description provided for @eventsDetailDescriptionEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No description'**
+  String get eventsDetailDescriptionEmpty;
+
+  /// Group space search field hint
+  ///
+  /// In en, this message translates to:
+  /// **'Search posts'**
+  String get groupSpaceSearchHint;
+
+  /// Group space search empty state title
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing found'**
+  String get groupSpaceSearchEmpty;
+
+  /// Group post comments sheet title
+  ///
+  /// In en, this message translates to:
+  /// **'Comments'**
+  String get groupSpaceCommentsTitle;
+
+  /// Group post comments empty state
+  ///
+  /// In en, this message translates to:
+  /// **'No comments yet'**
+  String get groupSpaceCommentsEmpty;
+
+  /// Group post comment input hint
+  ///
+  /// In en, this message translates to:
+  /// **'Write a comment…'**
+  String get groupSpaceCommentHint;
+
+  /// Send comment button semantics label
+  ///
+  /// In en, this message translates to:
+  /// **'Send'**
+  String get groupSpaceCommentSend;
+
+  /// Comments count on a group post card
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{{count} comment} other{{count} comments}}'**
+  String groupSpaceCommentsCount(int count);
+
+  /// Online member count in the group space hero
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{{count} online} other{{count} online}}'**
+  String groupSpaceOnlineCount(int count);
+
+  /// Group space quick action: create announcement
+  ///
+  /// In en, this message translates to:
+  /// **'Announcement'**
+  String get groupSpaceQuickAnnouncement;
+
+  /// Group space quick action: open shared notes
+  ///
+  /// In en, this message translates to:
+  /// **'Note'**
+  String get groupSpaceQuickNote;
+
+  /// Group space quick action: add a link
+  ///
+  /// In en, this message translates to:
+  /// **'Link'**
+  String get groupSpaceQuickLink;
+
+  /// Expand truncated group post text
+  ///
+  /// In en, this message translates to:
+  /// **'Show more'**
+  String get groupSpaceShowFull;
+
+  /// Collapse expanded group post text
+  ///
+  /// In en, this message translates to:
+  /// **'Collapse'**
+  String get groupSpaceCollapse;
+
+  /// Group space collab-notes preview empty state
+  ///
+  /// In en, this message translates to:
+  /// **'No shared notes yet'**
+  String get groupSpaceNotesPreviewEmpty;
+
+  /// Group space set-my-birthday CTA title
+  ///
+  /// In en, this message translates to:
+  /// **'Add your birthday'**
+  String get groupSpaceSetBirthdayCta;
+
+  /// Group space set-my-birthday CTA subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Groupmates will see a reminder before it'**
+  String get groupSpaceSetBirthdaySubtitle;
+
+  /// Group space set-my-birthday date picker title
+  ///
+  /// In en, this message translates to:
+  /// **'Your birthday'**
+  String get groupSpaceSetBirthdayTitle;
+
+  /// Group post composer validation error
+  ///
+  /// In en, this message translates to:
+  /// **'Add a title or a body'**
+  String get groupSpacePostEmptyError;
+
+  /// Group post composer pin toggle (owner only)
+  ///
+  /// In en, this message translates to:
+  /// **'Pin to the top'**
+  String get groupSpacePostPinToggle;
+
+  /// Transfer study group ownership action
+  ///
+  /// In en, this message translates to:
+  /// **'Make an owner'**
+  String get studyGroupTransferOwnership;
+
+  /// Transfer ownership confirm dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Make an owner?'**
+  String get studyGroupTransferOwnershipTitle;
+
+  /// Transfer ownership confirm dialog body
+  ///
+  /// In en, this message translates to:
+  /// **'{name} will manage the group instead of you.'**
+  String studyGroupTransferOwnershipBody(Object name);
+
+  /// Study group member row more-actions tooltip
+  ///
+  /// In en, this message translates to:
+  /// **'Member tools'**
+  String get studyGroupMemberTools;
+
+  /// No description provided for @knowledgeChipBoard.
+  ///
+  /// In en, this message translates to:
+  /// **'Board photos'**
+  String get knowledgeChipBoard;
+
+  /// No description provided for @knowledgeChipExtra.
+  ///
+  /// In en, this message translates to:
+  /// **'Extra'**
+  String get knowledgeChipExtra;
+
+  /// No description provided for @knowledgeTypeBoard.
+  ///
+  /// In en, this message translates to:
+  /// **'Board photo'**
+  String get knowledgeTypeBoard;
+
+  /// No description provided for @knowledgeTypeExtra.
+  ///
+  /// In en, this message translates to:
+  /// **'Extra material'**
+  String get knowledgeTypeExtra;
+
+  /// No description provided for @knowledgeLike.
+  ///
+  /// In en, this message translates to:
+  /// **'Like'**
+  String get knowledgeLike;
+
+  /// No description provided for @knowledgeSortNew.
+  ///
+  /// In en, this message translates to:
+  /// **'Newest'**
+  String get knowledgeSortNew;
+
+  /// No description provided for @knowledgeSortPopular.
+  ///
+  /// In en, this message translates to:
+  /// **'Popular'**
+  String get knowledgeSortPopular;
+
+  /// No description provided for @knowledgeSubjectsFilterCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Subjects ({count})'**
+  String knowledgeSubjectsFilterCount(int count);
+
+  /// No description provided for @collabNotesKindLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Type'**
+  String get collabNotesKindLabel;
+
+  /// No description provided for @collabNotesKindLectureFull.
+  ///
+  /// In en, this message translates to:
+  /// **'Lecture'**
+  String get collabNotesKindLectureFull;
+
+  /// No description provided for @collabNotesKindPracticeFull.
+  ///
+  /// In en, this message translates to:
+  /// **'Practice'**
+  String get collabNotesKindPracticeFull;
+
+  /// No description provided for @collabNotesKindLabFull.
+  ///
+  /// In en, this message translates to:
+  /// **'Lab work'**
+  String get collabNotesKindLabFull;
+
+  /// No description provided for @collabNotesKindDocFull.
+  ///
+  /// In en, this message translates to:
+  /// **'Document'**
+  String get collabNotesKindDocFull;
+
+  /// No description provided for @knowledgeBatchAddImages.
+  ///
+  /// In en, this message translates to:
+  /// **'Photos'**
+  String get knowledgeBatchAddImages;
+
+  /// No description provided for @knowledgeBatchAddFiles.
+  ///
+  /// In en, this message translates to:
+  /// **'Files'**
+  String get knowledgeBatchAddFiles;
+
+  /// No description provided for @knowledgeBatchAddCamera.
+  ///
+  /// In en, this message translates to:
+  /// **'Camera'**
+  String get knowledgeBatchAddCamera;
+
+  /// No description provided for @knowledgeBatchEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Add photos or files to publish them together'**
+  String get knowledgeBatchEmpty;
+
+  /// No description provided for @knowledgeBatchStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Uploaded {done} of {total}'**
+  String knowledgeBatchStatus(int done, int total);
+
+  /// No description provided for @knowledgeMaterialDetailTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Material'**
+  String get knowledgeMaterialDetailTitle;
+
+  /// No description provided for @knowledgeMaterialShareLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Share link'**
+  String get knowledgeMaterialShareLink;
+
+  /// No description provided for @knowledgeMaterialDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get knowledgeMaterialDelete;
+
+  /// No description provided for @knowledgeMaterialDeleteConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this material? This can\'t be undone.'**
+  String get knowledgeMaterialDeleteConfirm;
+
+  /// No description provided for @knowledgeMaterialDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Material deleted'**
+  String get knowledgeMaterialDeleted;
+
+  /// No description provided for @knowledgeMaterialDeleteFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t delete the material'**
+  String get knowledgeMaterialDeleteFailed;
+
+  /// No description provided for @knowledgeMaterialAuthor.
+  ///
+  /// In en, this message translates to:
+  /// **'Author'**
+  String get knowledgeMaterialAuthor;
+
+  /// No description provided for @knowledgeViewGrid.
+  ///
+  /// In en, this message translates to:
+  /// **'Grid view'**
+  String get knowledgeViewGrid;
+
+  /// No description provided for @knowledgeViewList.
+  ///
+  /// In en, this message translates to:
+  /// **'List view'**
+  String get knowledgeViewList;
+
+  /// No description provided for @knowledgeMaterialDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Date'**
+  String get knowledgeMaterialDate;
+
+  /// No description provided for @knowledgeMaterialSize.
+  ///
+  /// In en, this message translates to:
+  /// **'Size'**
+  String get knowledgeMaterialSize;
+
+  /// Polls filter: all
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get pollsFilterAll;
+
+  /// Polls filter: active
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get pollsFilterActive;
+
+  /// Polls filter: closed
+  ///
+  /// In en, this message translates to:
+  /// **'Closed'**
+  String get pollsFilterClosed;
+
+  /// Polls filter: mine
+  ///
+  /// In en, this message translates to:
+  /// **'Mine'**
+  String get pollsFilterMine;
+
+  /// Polls filter: completed by me
+  ///
+  /// In en, this message translates to:
+  /// **'Completed'**
+  String get pollsFilterVoted;
+
+  /// Poll category filter: all
+  ///
+  /// In en, this message translates to:
+  /// **'All topics'**
+  String get pollsCategoryAll;
+
+  /// Poll category
+  ///
+  /// In en, this message translates to:
+  /// **'General'**
+  String get pollsCategoryGeneral;
+
+  /// Poll category
+  ///
+  /// In en, this message translates to:
+  /// **'Academic'**
+  String get pollsCategoryAcademic;
+
+  /// Poll category
+  ///
+  /// In en, this message translates to:
+  /// **'Events'**
+  String get pollsCategoryEvents;
+
+  /// Poll category
+  ///
+  /// In en, this message translates to:
+  /// **'Feedback'**
+  String get pollsCategoryFeedback;
+
+  /// Poll category
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get pollsCategoryOther;
+
+  /// Polls search field hint
+  ///
+  /// In en, this message translates to:
+  /// **'Search polls'**
+  String get pollsSearchHint;
+
+  /// Poll card author fallback
+  ///
+  /// In en, this message translates to:
+  /// **'Anonymous'**
+  String get pollsAuthorAnonymous;
+
+  /// Poll card participants count
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{{count} participant} other{{count} participants}}'**
+  String pollsParticipantsCount(int count);
+
+  /// Poll card action to take the poll
+  ///
+  /// In en, this message translates to:
+  /// **'Take'**
+  String get pollsTakeAction;
+
+  /// Poll card/results action label
+  ///
+  /// In en, this message translates to:
+  /// **'Results'**
+  String get pollsResultsAction;
+
+  /// Owner actions sheet title
+  ///
+  /// In en, this message translates to:
+  /// **'Manage poll'**
+  String get pollsOwnerActions;
+
+  /// Owner action to close a poll
+  ///
+  /// In en, this message translates to:
+  /// **'Close poll'**
+  String get pollsCloseAction;
+
+  /// Close poll confirm dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Close this poll?'**
+  String get pollsCloseConfirmTitle;
+
+  /// Close poll confirm dialog body
+  ///
+  /// In en, this message translates to:
+  /// **'No one will be able to answer after this. This cannot be undone.'**
+  String get pollsCloseConfirmBody;
+
+  /// Toast after closing a poll
+  ///
+  /// In en, this message translates to:
+  /// **'Poll closed'**
+  String get pollsCloseSuccess;
+
+  /// Toast after failing to close a poll
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to close the poll'**
+  String get pollsCloseError;
+
+  /// Toast after deleting a poll
+  ///
+  /// In en, this message translates to:
+  /// **'Poll deleted'**
+  String get pollsDeleteSuccess;
+
+  /// Marks the option the user picked in results
+  ///
+  /// In en, this message translates to:
+  /// **'Your choice'**
+  String get pollsMyChoice;
+
+  /// Results empty state for a question
+  ///
+  /// In en, this message translates to:
+  /// **'No answers yet'**
+  String get pollsResultsNoAnswers;
+
+  /// Rating question results average
+  ///
+  /// In en, this message translates to:
+  /// **'Average rating {value}'**
+  String pollsRatingAverage(String value);
+
+  /// Rating question responses count
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{{count} response} other{{count} responses}}'**
+  String pollsRatingResponses(int count);
+
+  /// Text question answers list title
+  ///
+  /// In en, this message translates to:
+  /// **'Answers'**
+  String get pollsTextAnswers;
+
+  /// Runner/creator step counter
+  ///
+  /// In en, this message translates to:
+  /// **'{current} of {total}'**
+  String pollsStepCounter(int current, int total);
+
+  /// Runner inline validation error
+  ///
+  /// In en, this message translates to:
+  /// **'This question is required'**
+  String get pollsRequiredError;
+
+  /// Runner/creator next step button
+  ///
+  /// In en, this message translates to:
+  /// **'Next'**
+  String get pollsNext;
+
+  /// Runner submit answers button
+  ///
+  /// In en, this message translates to:
+  /// **'Submit'**
+  String get pollsSubmit;
+
+  /// Toast after submitting poll answers
+  ///
+  /// In en, this message translates to:
+  /// **'Your answers were saved'**
+  String get pollsRunnerSuccess;
+
+  /// Runner text question input hint
+  ///
+  /// In en, this message translates to:
+  /// **'Type your answer…'**
+  String get pollsTextAnswerHint;
+
+  /// Runner rating chip semantics label
+  ///
+  /// In en, this message translates to:
+  /// **'Rating {value}'**
+  String pollsRatingOption(int value);
+
+  /// Creator wizard step: basics
+  ///
+  /// In en, this message translates to:
+  /// **'Basics'**
+  String get pollsStepBasics;
+
+  /// Creator wizard step: questions
+  ///
+  /// In en, this message translates to:
+  /// **'Questions'**
+  String get pollsStepQuestions;
+
+  /// Creator wizard step: preview
+  ///
+  /// In en, this message translates to:
+  /// **'Preview'**
+  String get pollsStepPreview;
+
+  /// Creator wizard title field hint
+  ///
+  /// In en, this message translates to:
+  /// **'Poll title'**
+  String get pollsTitleHint;
+
+  /// Creator wizard description field hint
+  ///
+  /// In en, this message translates to:
+  /// **'Description (optional)'**
+  String get pollsDescriptionHint;
+
+  /// Creator wizard category field label
+  ///
+  /// In en, this message translates to:
+  /// **'Topic'**
+  String get pollsCategoryLabel;
+
+  /// Creator wizard add question button
+  ///
+  /// In en, this message translates to:
+  /// **'Add question'**
+  String get pollsAddQuestion;
+
+  /// Creator wizard remove question action
+  ///
+  /// In en, this message translates to:
+  /// **'Remove question'**
+  String get pollsRemoveQuestion;
+
+  /// Creator wizard question index label
+  ///
+  /// In en, this message translates to:
+  /// **'Question {number}'**
+  String pollsQuestionNumber(int number);
+
+  /// Poll question kind
+  ///
+  /// In en, this message translates to:
+  /// **'Single choice'**
+  String get pollsQuestionKindSingle;
+
+  /// Poll question kind
+  ///
+  /// In en, this message translates to:
+  /// **'Multiple choice'**
+  String get pollsQuestionKindMultiple;
+
+  /// Poll question kind
+  ///
+  /// In en, this message translates to:
+  /// **'Text'**
+  String get pollsQuestionKindText;
+
+  /// Poll question kind
+  ///
+  /// In en, this message translates to:
+  /// **'Rating'**
+  String get pollsQuestionKindRating;
+
+  /// Creator wizard required toggle
+  ///
+  /// In en, this message translates to:
+  /// **'Required question'**
+  String get pollsQuestionRequired;
+
+  /// Creator wizard reorder question up
+  ///
+  /// In en, this message translates to:
+  /// **'Move up'**
+  String get pollsMoveUp;
+
+  /// Creator wizard reorder question down
+  ///
+  /// In en, this message translates to:
+  /// **'Move down'**
+  String get pollsMoveDown;
+
+  /// Creator wizard results visibility setting
+  ///
+  /// In en, this message translates to:
+  /// **'Who can see results'**
+  String get pollsResultsVisibility;
+
+  /// Results visibility: always
+  ///
+  /// In en, this message translates to:
+  /// **'Everyone, right away'**
+  String get pollsResultsVisibilityAlways;
+
+  /// Results visibility: after vote
+  ///
+  /// In en, this message translates to:
+  /// **'After answering'**
+  String get pollsResultsVisibilityAfterVote;
+
+  /// Results visibility: after close
+  ///
+  /// In en, this message translates to:
+  /// **'After the poll closes'**
+  String get pollsResultsVisibilityAfterClose;
+
+  /// Creator wizard allow change toggle
+  ///
+  /// In en, this message translates to:
+  /// **'Allow changing the answer'**
+  String get pollsAllowChange;
+
+  /// Creator wizard closing date setting
+  ///
+  /// In en, this message translates to:
+  /// **'Closing date'**
+  String get pollsClosesAt;
+
+  /// Creator wizard closing date: none
+  ///
+  /// In en, this message translates to:
+  /// **'No deadline'**
+  String get pollsClosesAtNone;
+
+  /// Creator wizard closing date: pick
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a date'**
+  String get pollsClosesAtPick;
+
+  /// Creator wizard preview validation
+  ///
+  /// In en, this message translates to:
+  /// **'Add at least one question'**
+  String get pollsPreviewEmptyQuestions;
+
+  /// Creator wizard title validation
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a poll title'**
+  String get pollsTitleRequired;
+
+  /// Creator wizard question validation
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the question text'**
+  String get pollsQuestionTextRequired;
+
+  /// Creator wizard options validation
+  ///
+  /// In en, this message translates to:
+  /// **'Add at least two options'**
+  String get pollsQuestionOptionsRequired;
+
+  /// Polls empty state for a non-default filter
+  ///
+  /// In en, this message translates to:
+  /// **'No polls match this filter'**
+  String get pollsEmptyFiltered;
+
+  /// Polls empty state for a search query
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing found for “{query}”'**
+  String pollsEmptySearch(String query);
+
+  /// No description provided for @pollsLoadMore.
+  ///
+  /// In en, this message translates to:
+  /// **'Load more'**
+  String get pollsLoadMore;
+
+  /// No description provided for @pollsChangeAnswers.
+  ///
+  /// In en, this message translates to:
+  /// **'Change answers'**
+  String get pollsChangeAnswers;
+
+  /// No description provided for @pollsResultsHidden.
+  ///
+  /// In en, this message translates to:
+  /// **'Results are not available yet'**
+  String get pollsResultsHidden;
+
+  /// No description provided for @pollsEmptyQuestions.
+  ///
+  /// In en, this message translates to:
+  /// **'This poll has no questions'**
+  String get pollsEmptyQuestions;
+
+  /// No description provided for @pollsClosesFuture.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a future closing time'**
+  String get pollsClosesFuture;
+
+  /// No description provided for @pollsDistinctOptionsRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Add at least two distinct options and choose a non-empty correct answer for a quiz'**
+  String get pollsDistinctOptionsRequired;
+
+  /// No description provided for @pollsCorrectAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'Correct answer'**
+  String get pollsCorrectAnswer;
+
+  /// Creator wizard question text field hint
+  ///
+  /// In en, this message translates to:
+  /// **'Question text'**
+  String get pollsQuestionTextHint;
 }
 
 class _AppLocalizationsDelegate

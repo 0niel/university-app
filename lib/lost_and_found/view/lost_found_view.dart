@@ -116,11 +116,11 @@ class _LostFoundViewState extends State<LostFoundView> {
                   ),
                 ),
                 SliverPadding(
-                  padding: const EdgeInsets.fromLTRB(
+                  padding: EdgeInsets.fromLTRB(
                     AppSpacing.screen,
                     AppSpacing.screen,
                     AppSpacing.screen,
-                    AppSpacing.xxlg,
+                    ninjaBottomInset(context) + AppSpacing.lg,
                   ),
                   sliver: SliverToBoxAdapter(
                     child: Column(

@@ -46,6 +46,7 @@ class AppInputField extends StatefulWidget {
     this.textStyle,
     this.validator,
     this.autovalidateMode,
+    this.validateOnBlur = false,
   });
 
   const AppInputField.multiline({
@@ -69,6 +70,7 @@ class AppInputField extends StatefulWidget {
     this.inputFormatters,
     this.validator,
     this.autovalidateMode,
+    this.validateOnBlur = false,
     this.textStyle,
     this.borderRadius = AppRadius.field,
   })  : leadingIcon = null,
@@ -122,6 +124,8 @@ class AppInputField extends StatefulWidget {
   final FormFieldValidator<String>? validator;
   final AutovalidateMode? autovalidateMode;
 
+  final bool validateOnBlur;
+
   @override
   State<AppInputField> createState() => _AppInputFieldState();
 }
@@ -132,6 +136,7 @@ class _AppInputFieldState extends State<AppInputField> {
   late FocusNode _focusNode = widget.focusNode ?? FocusNode();
   late bool _obscured = widget.obscureText;
   late bool _focused = _focusNode.hasFocus;
+  var _blurred = false;
 
   @override
   void initState() {
@@ -169,13 +174,20 @@ class _AppInputFieldState extends State<AppInputField> {
 
   void _onFocusChanged() {
     if (!mounted) return;
-    setState(() => _focused = _focusNode.hasFocus);
+    final focused = _focusNode.hasFocus;
+    setState(() {
+      if (_focused && !focused) _blurred = true;
+      _focused = focused;
+    });
   }
+
+  String? _visibleError(String? errorText) =>
+      widget.validateOnBlur && !_blurred ? null : errorText;
 
   @override
   Widget build(BuildContext context) {
     if (widget.validator == null) {
-      return _build(context, widget.errorText, null);
+      return _build(context, _visibleError(widget.errorText), null);
     }
     return FormField<String>(
       key: ObjectKey(_controller),
@@ -183,7 +195,8 @@ class _AppInputFieldState extends State<AppInputField> {
       validator: widget.validator,
       autovalidateMode:
           widget.autovalidateMode ?? AutovalidateMode.onUserInteraction,
-      builder: (state) => _build(context, state.errorText, state.didChange),
+      builder: (state) =>
+          _build(context, _visibleError(state.errorText), state.didChange),
     );
   }
 

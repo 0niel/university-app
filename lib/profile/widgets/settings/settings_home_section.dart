@@ -9,7 +9,6 @@ import 'package:rtu_mirea_app/profile/cubit/ui_preferences_cubit.dart';
 import 'package:rtu_mirea_app/profile/widgets/settings_row.dart';
 import 'package:rtu_mirea_app/profile/widgets/settings_section.dart';
 import 'package:rtu_mirea_app/profile/widgets/settings_sheets.dart';
-import 'package:rtu_mirea_app/profile/widgets/settings_toggle_row.dart';
 import 'package:rtu_mirea_app/services/services.dart';
 import 'package:rtu_mirea_app/tour/tour.dart';
 
@@ -49,14 +48,6 @@ class SettingsHomeSection extends StatelessWidget {
           title: l10n.settingsScreenWidgets,
           lineIcon: AppLineIcon.services,
           onTap: () => showWidgetSheet(context),
-        ),
-        SettingsToggleRow(
-          label: l10n.settingsLessonReactions,
-          lineIcon: AppLineIcon.smile,
-          value: preferences.showLessonReactions,
-          onChanged: (value) => context
-              .read<UiPreferencesCubit>()
-              .setShowLessonReactions(value: value),
         ),
       ],
     );

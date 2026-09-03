@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$MarketplaceState {
 
- MarketplaceStatus get status; List<MarketListing> get items; String get filterKey; Set<String> get pendingSoldIds; Set<String> get pendingDeleteIds; bool get isCreating;
+ MarketplaceStatus get status; List<MarketListing> get items; String get filterKey; Set<String> get pendingSoldIds; Set<String> get pendingDeleteIds; bool get isSaving;
 /// Create a copy of MarketplaceState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +25,16 @@ $MarketplaceStateCopyWith<MarketplaceState> get copyWith => _$MarketplaceStateCo
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is MarketplaceState&&(identical(other.status, status) || other.status == status)&&const DeepCollectionEquality().equals(other.items, items)&&(identical(other.filterKey, filterKey) || other.filterKey == filterKey)&&const DeepCollectionEquality().equals(other.pendingSoldIds, pendingSoldIds)&&const DeepCollectionEquality().equals(other.pendingDeleteIds, pendingDeleteIds)&&(identical(other.isCreating, isCreating) || other.isCreating == isCreating));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is MarketplaceState&&(identical(other.status, status) || other.status == status)&&const DeepCollectionEquality().equals(other.items, items)&&(identical(other.filterKey, filterKey) || other.filterKey == filterKey)&&const DeepCollectionEquality().equals(other.pendingSoldIds, pendingSoldIds)&&const DeepCollectionEquality().equals(other.pendingDeleteIds, pendingDeleteIds)&&(identical(other.isSaving, isSaving) || other.isSaving == isSaving));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,status,const DeepCollectionEquality().hash(items),filterKey,const DeepCollectionEquality().hash(pendingSoldIds),const DeepCollectionEquality().hash(pendingDeleteIds),isCreating);
+int get hashCode => Object.hash(runtimeType,status,const DeepCollectionEquality().hash(items),filterKey,const DeepCollectionEquality().hash(pendingSoldIds),const DeepCollectionEquality().hash(pendingDeleteIds),isSaving);
 
 @override
 String toString() {
-  return 'MarketplaceState(status: $status, items: $items, filterKey: $filterKey, pendingSoldIds: $pendingSoldIds, pendingDeleteIds: $pendingDeleteIds, isCreating: $isCreating)';
+  return 'MarketplaceState(status: $status, items: $items, filterKey: $filterKey, pendingSoldIds: $pendingSoldIds, pendingDeleteIds: $pendingDeleteIds, isSaving: $isSaving)';
 }
 
 
@@ -45,7 +45,7 @@ abstract mixin class $MarketplaceStateCopyWith<$Res>  {
   factory $MarketplaceStateCopyWith(MarketplaceState value, $Res Function(MarketplaceState) _then) = _$MarketplaceStateCopyWithImpl;
 @useResult
 $Res call({
- MarketplaceStatus status, List<MarketListing> items, String filterKey, Set<String> pendingSoldIds, Set<String> pendingDeleteIds, bool isCreating
+ MarketplaceStatus status, List<MarketListing> items, String filterKey, Set<String> pendingSoldIds, Set<String> pendingDeleteIds, bool isSaving
 });
 
 
@@ -62,14 +62,14 @@ class _$MarketplaceStateCopyWithImpl<$Res>
 
 /// Create a copy of MarketplaceState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? status = null,Object? items = null,Object? filterKey = null,Object? pendingSoldIds = null,Object? pendingDeleteIds = null,Object? isCreating = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? status = null,Object? items = null,Object? filterKey = null,Object? pendingSoldIds = null,Object? pendingDeleteIds = null,Object? isSaving = null,}) {
   return _then(_self.copyWith(
 status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as MarketplaceStatus,items: null == items ? _self.items : items // ignore: cast_nullable_to_non_nullable
 as List<MarketListing>,filterKey: null == filterKey ? _self.filterKey : filterKey // ignore: cast_nullable_to_non_nullable
 as String,pendingSoldIds: null == pendingSoldIds ? _self.pendingSoldIds : pendingSoldIds // ignore: cast_nullable_to_non_nullable
 as Set<String>,pendingDeleteIds: null == pendingDeleteIds ? _self.pendingDeleteIds : pendingDeleteIds // ignore: cast_nullable_to_non_nullable
-as Set<String>,isCreating: null == isCreating ? _self.isCreating : isCreating // ignore: cast_nullable_to_non_nullable
+as Set<String>,isSaving: null == isSaving ? _self.isSaving : isSaving // ignore: cast_nullable_to_non_nullable
 as bool,
   ));
 }
@@ -155,10 +155,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( MarketplaceStatus status,  List<MarketListing> items,  String filterKey,  Set<String> pendingSoldIds,  Set<String> pendingDeleteIds,  bool isCreating)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( MarketplaceStatus status,  List<MarketListing> items,  String filterKey,  Set<String> pendingSoldIds,  Set<String> pendingDeleteIds,  bool isSaving)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _MarketplaceState() when $default != null:
-return $default(_that.status,_that.items,_that.filterKey,_that.pendingSoldIds,_that.pendingDeleteIds,_that.isCreating);case _:
+return $default(_that.status,_that.items,_that.filterKey,_that.pendingSoldIds,_that.pendingDeleteIds,_that.isSaving);case _:
   return orElse();
 
 }
@@ -176,10 +176,10 @@ return $default(_that.status,_that.items,_that.filterKey,_that.pendingSoldIds,_t
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( MarketplaceStatus status,  List<MarketListing> items,  String filterKey,  Set<String> pendingSoldIds,  Set<String> pendingDeleteIds,  bool isCreating)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( MarketplaceStatus status,  List<MarketListing> items,  String filterKey,  Set<String> pendingSoldIds,  Set<String> pendingDeleteIds,  bool isSaving)  $default,) {final _that = this;
 switch (_that) {
 case _MarketplaceState():
-return $default(_that.status,_that.items,_that.filterKey,_that.pendingSoldIds,_that.pendingDeleteIds,_that.isCreating);case _:
+return $default(_that.status,_that.items,_that.filterKey,_that.pendingSoldIds,_that.pendingDeleteIds,_that.isSaving);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -196,10 +196,10 @@ return $default(_that.status,_that.items,_that.filterKey,_that.pendingSoldIds,_t
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( MarketplaceStatus status,  List<MarketListing> items,  String filterKey,  Set<String> pendingSoldIds,  Set<String> pendingDeleteIds,  bool isCreating)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( MarketplaceStatus status,  List<MarketListing> items,  String filterKey,  Set<String> pendingSoldIds,  Set<String> pendingDeleteIds,  bool isSaving)?  $default,) {final _that = this;
 switch (_that) {
 case _MarketplaceState() when $default != null:
-return $default(_that.status,_that.items,_that.filterKey,_that.pendingSoldIds,_that.pendingDeleteIds,_that.isCreating);case _:
+return $default(_that.status,_that.items,_that.filterKey,_that.pendingSoldIds,_that.pendingDeleteIds,_that.isSaving);case _:
   return null;
 
 }
@@ -211,7 +211,7 @@ return $default(_that.status,_that.items,_that.filterKey,_that.pendingSoldIds,_t
 
 
 class _MarketplaceState extends MarketplaceState {
-  const _MarketplaceState({this.status = MarketplaceStatus.initial, final  List<MarketListing> items = const <MarketListing>[], this.filterKey = 'all', final  Set<String> pendingSoldIds = const <String>{}, final  Set<String> pendingDeleteIds = const <String>{}, this.isCreating = false}): _items = items,_pendingSoldIds = pendingSoldIds,_pendingDeleteIds = pendingDeleteIds,super._();
+  const _MarketplaceState({this.status = MarketplaceStatus.initial, final  List<MarketListing> items = const <MarketListing>[], this.filterKey = 'all', final  Set<String> pendingSoldIds = const <String>{}, final  Set<String> pendingDeleteIds = const <String>{}, this.isSaving = false}): _items = items,_pendingSoldIds = pendingSoldIds,_pendingDeleteIds = pendingDeleteIds,super._();
 
 
 @override@JsonKey() final  MarketplaceStatus status;
@@ -237,7 +237,7 @@ class _MarketplaceState extends MarketplaceState {
   return EqualUnmodifiableSetView(_pendingDeleteIds);
 }
 
-@override@JsonKey() final  bool isCreating;
+@override@JsonKey() final  bool isSaving;
 
 /// Create a copy of MarketplaceState
 /// with the given fields replaced by the non-null parameter values.
@@ -249,16 +249,16 @@ _$MarketplaceStateCopyWith<_MarketplaceState> get copyWith => __$MarketplaceStat
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _MarketplaceState&&(identical(other.status, status) || other.status == status)&&const DeepCollectionEquality().equals(other._items, _items)&&(identical(other.filterKey, filterKey) || other.filterKey == filterKey)&&const DeepCollectionEquality().equals(other._pendingSoldIds, _pendingSoldIds)&&const DeepCollectionEquality().equals(other._pendingDeleteIds, _pendingDeleteIds)&&(identical(other.isCreating, isCreating) || other.isCreating == isCreating));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _MarketplaceState&&(identical(other.status, status) || other.status == status)&&const DeepCollectionEquality().equals(other._items, _items)&&(identical(other.filterKey, filterKey) || other.filterKey == filterKey)&&const DeepCollectionEquality().equals(other._pendingSoldIds, _pendingSoldIds)&&const DeepCollectionEquality().equals(other._pendingDeleteIds, _pendingDeleteIds)&&(identical(other.isSaving, isSaving) || other.isSaving == isSaving));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,status,const DeepCollectionEquality().hash(_items),filterKey,const DeepCollectionEquality().hash(_pendingSoldIds),const DeepCollectionEquality().hash(_pendingDeleteIds),isCreating);
+int get hashCode => Object.hash(runtimeType,status,const DeepCollectionEquality().hash(_items),filterKey,const DeepCollectionEquality().hash(_pendingSoldIds),const DeepCollectionEquality().hash(_pendingDeleteIds),isSaving);
 
 @override
 String toString() {
-  return 'MarketplaceState(status: $status, items: $items, filterKey: $filterKey, pendingSoldIds: $pendingSoldIds, pendingDeleteIds: $pendingDeleteIds, isCreating: $isCreating)';
+  return 'MarketplaceState(status: $status, items: $items, filterKey: $filterKey, pendingSoldIds: $pendingSoldIds, pendingDeleteIds: $pendingDeleteIds, isSaving: $isSaving)';
 }
 
 
@@ -269,7 +269,7 @@ abstract mixin class _$MarketplaceStateCopyWith<$Res> implements $MarketplaceSta
   factory _$MarketplaceStateCopyWith(_MarketplaceState value, $Res Function(_MarketplaceState) _then) = __$MarketplaceStateCopyWithImpl;
 @override @useResult
 $Res call({
- MarketplaceStatus status, List<MarketListing> items, String filterKey, Set<String> pendingSoldIds, Set<String> pendingDeleteIds, bool isCreating
+ MarketplaceStatus status, List<MarketListing> items, String filterKey, Set<String> pendingSoldIds, Set<String> pendingDeleteIds, bool isSaving
 });
 
 
@@ -286,14 +286,14 @@ class __$MarketplaceStateCopyWithImpl<$Res>
 
 /// Create a copy of MarketplaceState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? status = null,Object? items = null,Object? filterKey = null,Object? pendingSoldIds = null,Object? pendingDeleteIds = null,Object? isCreating = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? status = null,Object? items = null,Object? filterKey = null,Object? pendingSoldIds = null,Object? pendingDeleteIds = null,Object? isSaving = null,}) {
   return _then(_MarketplaceState(
 status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as MarketplaceStatus,items: null == items ? _self._items : items // ignore: cast_nullable_to_non_nullable
 as List<MarketListing>,filterKey: null == filterKey ? _self.filterKey : filterKey // ignore: cast_nullable_to_non_nullable
 as String,pendingSoldIds: null == pendingSoldIds ? _self._pendingSoldIds : pendingSoldIds // ignore: cast_nullable_to_non_nullable
 as Set<String>,pendingDeleteIds: null == pendingDeleteIds ? _self._pendingDeleteIds : pendingDeleteIds // ignore: cast_nullable_to_non_nullable
-as Set<String>,isCreating: null == isCreating ? _self.isCreating : isCreating // ignore: cast_nullable_to_non_nullable
+as Set<String>,isSaving: null == isSaving ? _self.isSaving : isSaving // ignore: cast_nullable_to_non_nullable
 as bool,
   ));
 }

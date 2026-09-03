@@ -11,11 +11,11 @@ class PostOverviewSkeleton extends StatelessWidget {
     return NinjaSkeletonGroup(
       child: ListView(
         physics: const NeverScrollableScrollPhysics(),
-        padding: const EdgeInsets.fromLTRB(
+        padding: EdgeInsets.fromLTRB(
           AppSpacing.screen,
           AppSpacing.md,
           AppSpacing.screen,
-          AppSpacing.xxlg,
+          ninjaBottomInset(context) + AppSpacing.lg,
         ),
         children: [
           DecoratedBox(

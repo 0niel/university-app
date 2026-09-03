@@ -3,11 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stac/stac.dart';
 import 'package:stac_bridge/src/actions/stac_toast_action_parser.dart';
-import 'package:stac_bridge/src/widgets/app_input_field_parser.dart';
-import 'package:stac_bridge/src/widgets/app_text_parser.dart';
-import 'package:stac_bridge/src/widgets/stac_app_card_parser.dart';
-import 'package:stac_bridge/src/widgets/stac_app_chip_parser.dart';
-import 'package:stac_bridge/src/widgets/stac_app_icon_button.dart';
+import 'package:stac_bridge/src/widgets/kit/kit_widget_parsers.dart';
 
 void main() {
   testWidgets('cards and typography resolve shared kit colors', (tester) async {
@@ -91,14 +87,17 @@ void main() {
         ),
       ),
     );
-    const StacToastActionParser().onCall(context, 'Saved');
+    const StacToastActionParser().onCall(context, {
+      'message': 'Saved',
+      'type': 'success',
+    });
     await tester.pumpAndSettle();
     expect(find.byType(AppToast), findsOneWidget);
     expect(find.byType(SnackBar), findsNothing);
     ToastManager.debugReset();
   });
 
-  testWidgets('legacy chip JSON renders a kit filter', (tester) async {
+  testWidgets('legacy chip JSON renders a kit filter chip', (tester) async {
     const parser = StacAppChipParser();
     final model = parser.getModel({
       'label': 'Все',
@@ -114,10 +113,9 @@ void main() {
       ),
     );
     expect(find.text('Все'), findsOneWidget);
-    expect(
-      tester.widget<AppFilterChip>(find.byType(AppFilterChip)).isSelected,
-      isTrue,
-    );
+    final chip = tester.widget<AppChip>(find.byType(AppChip));
+    expect(chip.selected, isTrue);
+    expect(chip.style, AppChipStyle.filter);
     expect(tester.takeException(), isNull);
   });
 

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:campus_repository/campus_repository.dart';
 import 'package:collection/collection.dart';
@@ -9,6 +10,8 @@ import 'package:rtu_mirea_app/marketplace/marketplace.dart';
 import '../../helpers/mocks/mock_campus_repository.dart';
 
 void main() {
+  setUpAll(() => registerFallbackValue(Uint8List(0)));
+
   late CampusRepository repository;
   const book = MarketListing(
     id: 'l-1',
@@ -21,6 +24,14 @@ void main() {
     title: 'Калькулятор',
     price: 1200,
     category: 'tech',
+  );
+  const validDraft = MarketListingDraft(
+    title: ' Desk ',
+    price: 3000,
+    category: ' furniture ',
+    description: ' Almost new ',
+    showContact: true,
+    telegramHandle: ' @seller_user ',
   );
 
   setUp(() => repository = MockCampusRepository());
@@ -76,24 +87,14 @@ void main() {
         price: 3000,
         category: 'furniture',
         description: 'Almost new',
+        telegramContact: 'seller_user',
         showContact: true,
       ),
     ).thenAnswer((_) async => '123e4567-e89b-42d3-a456-426614174000');
     when(() => repository.getListings()).thenAnswer((_) async => [book]);
     final cubit = buildCubit();
 
-    expect(
-      await cubit.create(
-        const MarketListingDraft(
-          title: ' Desk ',
-          price: 3000,
-          category: ' furniture ',
-          description: ' Almost new ',
-          showContact: true,
-        ),
-      ),
-      isTrue,
-    );
+    expect(await cubit.create(validDraft), isTrue);
     expect(cubit.state.items, [book]);
     verify(
       () => repository.createListing(
@@ -101,9 +102,34 @@ void main() {
         price: 3000,
         category: 'furniture',
         description: 'Almost new',
+        telegramContact: 'seller_user',
         showContact: true,
       ),
     ).called(1);
+    await cubit.close();
+  });
+
+  test('rejects a draft without a valid telegram handle', () async {
+    final cubit = buildCubit();
+
+    expect(
+      await cubit.create(
+        const MarketListingDraft(title: 'Book', price: 100),
+      ),
+      isFalse,
+    );
+    verifyNever(
+      () => repository.createListing(
+        title: any(named: 'title'),
+        price: any(named: 'price'),
+        category: any(named: 'category'),
+        description: any(named: 'description'),
+        isFree: any(named: 'isFree'),
+        media: any(named: 'media'),
+        telegramContact: any(named: 'telegramContact'),
+        showContact: any(named: 'showContact'),
+      ),
+    );
     await cubit.close();
   });
 
@@ -117,7 +143,8 @@ void main() {
           const MarketListingDraft(
             title: 'Fake gift',
             price: 100,
-            category: 'free',
+            isFree: true,
+            telegramHandle: 'seller_user',
           ),
         ),
         isFalse,
@@ -128,12 +155,37 @@ void main() {
           price: any(named: 'price'),
           category: any(named: 'category'),
           description: any(named: 'description'),
+          isFree: any(named: 'isFree'),
+          media: any(named: 'media'),
+          telegramContact: any(named: 'telegramContact'),
           showContact: any(named: 'showContact'),
         ),
       );
       await cubit.close();
     },
   );
+
+  test('updates a listing and reloads', () async {
+    when(
+      () => repository.updateListing(
+        id: 'l-1',
+        title: 'Desk',
+        price: 3000,
+        category: 'furniture',
+        description: 'Almost new',
+        isFree: false,
+        media: const [],
+        telegramContact: 'seller_user',
+        showContact: true,
+      ),
+    ).thenAnswer((_) async {});
+    when(() => repository.getListings()).thenAnswer((_) async => [book]);
+    final cubit = buildCubit();
+
+    expect(await cubit.update('l-1', validDraft), isTrue);
+    expect(cubit.state.items, [book]);
+    await cubit.close();
+  });
 
   test('optimistically toggles once and rolls back on failure', () async {
     when(() => repository.getListings()).thenAnswer((_) async => [book]);
@@ -213,6 +265,50 @@ void main() {
     deleted.complete();
     expect(await deletion, isTrue);
     expect(cubit.state.items, [gadget]);
+    await cubit.close();
+  });
+
+  test(
+    'optimistically archives once and restores the original position',
+    () async {
+      when(
+        () => repository.getListings(),
+      ).thenAnswer((_) async => [book, gadget]);
+      final archived = Completer<void>();
+      when(
+        () => repository.archiveListing('l-1'),
+      ).thenAnswer((_) => archived.future);
+      final cubit = buildCubit();
+      await cubit.load();
+
+      final firstArchive = cubit.archive(book);
+      expect(cubit.state.items, [gadget]);
+      expect(await cubit.archive(book), isFalse);
+      archived.completeError(Exception('offline'), .current);
+      expect(await firstArchive, isFalse);
+      expect(cubit.state.items, [book, gadget]);
+      expect(cubit.state.pendingDeleteIds, isEmpty);
+      await cubit.close();
+    },
+  );
+
+  test('uploadMedia delegates to the repository', () async {
+    when(
+      () => repository.uploadListingMedia(
+        bytes: any(named: 'bytes'),
+        contentType: 'image/jpeg',
+        extension: 'jpg',
+      ),
+    ).thenAnswer((_) async => 'user-1/a.jpg');
+    final cubit = buildCubit();
+
+    final path = await cubit.uploadMedia(
+      bytes: const [1, 2, 3],
+      contentType: 'image/jpeg',
+      extension: 'jpg',
+    );
+
+    expect(path, 'user-1/a.jpg');
     await cubit.close();
   });
 }

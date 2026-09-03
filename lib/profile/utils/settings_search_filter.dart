@@ -30,7 +30,12 @@ class SettingsSearchFilter {
     l10n.settingsNfcEmulation,
   ]);
 
-  bool get showSchedule => _matches([l10n.schedule, l10n.settingsMyGroup]);
+  bool get showSchedule => _matches([
+    l10n.schedule,
+    l10n.settingsMyGroup,
+    l10n.settingsLessonReactions,
+    l10n.settingsExportCalendar,
+  ]);
 
   bool get showHome => _matches([
     l10n.settingsHomeAndWidgets,
@@ -38,7 +43,6 @@ class SettingsSearchFilter {
     l10n.settingsHomeContent,
     l10n.settingsQuickServices,
     l10n.settingsScreenWidgets,
-    l10n.settingsLessonReactions,
   ]);
 
   bool get showSupport => _matches([l10n.supportOurService]);
@@ -48,7 +52,6 @@ class SettingsSearchFilter {
     l10n.settingsLanguage,
     l10n.settingsSync,
     l10n.settingsClearCache,
-    l10n.settingsExportSchedule,
   ]);
 
   bool get showAbout => _matches([l10n.aboutApp]);

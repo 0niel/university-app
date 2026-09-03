@@ -5,10 +5,8 @@ import 'package:schedule_repository/src/deadline_source.dart';
 part 'deadline.freezed.dart';
 part 'deadline.g.dart';
 
-/// A personal or shared academic deadline.
 @freezed
 abstract class Deadline with _$Deadline {
-  /// Creates a validated deadline value.
   const factory Deadline({
     @_NonEmptyStringConverter() required String id,
     @_NonEmptyStringConverter() required String title,
@@ -23,28 +21,29 @@ abstract class Deadline with _$Deadline {
     @Default(DeadlinePriority.medium)
     DeadlinePriority priority,
     @Default(true) bool remind,
+    @Default(60) int remindMinutes,
   }) = _Deadline;
 
   const Deadline._();
 
-  /// Creates a checked model from an RPC row.
   factory Deadline.fromJson(Map<String, Object?> json) =>
       _$DeadlineFromJson(json);
 
-  /// Time remaining until the deadline at [now].
   Duration timeLeftAt(DateTime now) => dueAt.difference(now);
 
-  /// Time remaining until the deadline.
   Duration get timeLeft => timeLeftAt(DateTime.now());
 
-  /// Whether the deadline needs immediate attention at [now].
   bool isUrgentAt(DateTime now) =>
       !isDone &&
       (priority == DeadlinePriority.urgent ||
           timeLeftAt(now) < const Duration(hours: 48));
 
-  /// Whether the active deadline needs immediate attention.
   bool get isUrgent => isUrgentAt(DateTime.now());
+
+  bool isWarnAt(DateTime now) =>
+      !isDone && !isUrgentAt(now) && timeLeftAt(now) < const Duration(days: 3);
+
+  bool get isWarn => isWarnAt(DateTime.now());
 }
 
 class _NonEmptyStringConverter implements JsonConverter<String, Object?> {

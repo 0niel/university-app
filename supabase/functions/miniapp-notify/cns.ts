@@ -93,16 +93,41 @@ export async function publishPush(
   });
 }
 
-/// True when the error text means the token/endpoint is dead and the
-/// device row should be dropped.
 export function isStaleEndpointError(error: unknown): boolean {
-  const text = `${error}`;
-  return text.includes("EndpointDisabled") ||
-    text.includes("InvalidParameter") ||
-    text.includes("NotFound");
+  return error instanceof CnsRequestError && error.action === "Publish" &&
+    (error.code === "EndpointDisabled" || error.subCode === "EndpointDisabled");
 }
 
-/// Signed SNS Query call; throws with the response body on non-2xx.
+export function isMissingEndpointError(error: unknown): boolean {
+  return error instanceof CnsRequestError && error.action === "Publish" &&
+    (error.code === "EndpointNotFound" ||
+      (error.code === "NotFound" && error.subCode === "EndpointNotFound"));
+}
+
+class CnsRequestError extends Error {
+  readonly code: string;
+  readonly subCode: string;
+
+  constructor(readonly action: string, status: number, body: string) {
+    super(`CNS ${action} failed (${status})`);
+    let fields: Record<string, unknown> = {};
+    try {
+      const parsed = JSON.parse(body);
+      const detail = parsed?.ErrorResponse?.Error ?? parsed?.Error;
+      if (detail && typeof detail === "object" && !Array.isArray(detail)) {
+        fields = detail;
+      }
+    } catch {
+      fields = {
+        Code: /<Code>\s*([A-Za-z0-9]+)\s*<\/Code>/.exec(body)?.[1],
+        SubCode: /<SubCode>\s*([A-Za-z0-9]+)\s*<\/SubCode>/.exec(body)?.[1],
+      };
+    }
+    this.code = typeof fields.Code === "string" ? fields.Code : "";
+    this.subCode = typeof fields.SubCode === "string" ? fields.SubCode : "";
+  }
+}
+
 async function cnsCall(
   config: CnsConfig,
   params: Record<string, string>,
@@ -159,7 +184,7 @@ async function cnsCall(
   });
   const text = await response.text();
   if (!response.ok) {
-    throw new Error(`CNS ${params.Action} failed (${response.status}): ${text}`);
+    throw new CnsRequestError(params.Action, response.status, text);
   }
   return text;
 }
@@ -185,7 +210,7 @@ async function hmac(
 ): Promise<Uint8Array> {
   const cryptoKey = await crypto.subtle.importKey(
     "raw",
-    key,
+    new Uint8Array(key),
     { name: "HMAC", hash: "SHA-256" },
     false,
     ["sign"],

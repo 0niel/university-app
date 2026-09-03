@@ -362,10 +362,6 @@ RouteBase get $shellRouteData => StatefulShellRouteData.$route(
               factory: $FriendsRoute._fromState,
             ),
             GoRouteData.$route(
-              path: 'cowork',
-              factory: $CoworkRoute._fromState,
-            ),
-            GoRouteData.$route(
               path: 'people',
               factory: $PeopleRoute._fromState,
               routes: [
@@ -1204,26 +1200,6 @@ mixin $FriendsRoute on GoRouteData {
 
   @override
   String get location => GoRouteData.$location('/services/friends');
-
-  @override
-  void go(BuildContext context) => context.go(location);
-
-  @override
-  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
-
-  @override
-  void pushReplacement(BuildContext context) =>
-      context.pushReplacement(location);
-
-  @override
-  void replace(BuildContext context) => context.replace(location);
-}
-
-mixin $CoworkRoute on GoRouteData {
-  static CoworkRoute _fromState(GoRouterState state) => const CoworkRoute();
-
-  @override
-  String get location => GoRouteData.$location('/services/cowork');
 
   @override
   void go(BuildContext context) => context.go(location);

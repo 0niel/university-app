@@ -4,7 +4,6 @@ import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:rtu_mirea_app/free_rooms/cubit/free_rooms_cubit.dart';
-import 'package:rtu_mirea_app/free_rooms/cubit/room_booking_cubit.dart';
 import 'package:rtu_mirea_app/free_rooms/widgets/free_room_sheet.dart';
 import 'package:rtu_mirea_app/free_rooms/widgets/free_rooms_list.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
@@ -42,9 +41,6 @@ class _FreeRoomsViewState extends State<FreeRoomsView> {
     final l10n = context.l10n;
     final cubit = context.read<FreeRoomsCubit>();
     final state = context.watch<FreeRoomsCubit>().state;
-    final saved = context.watch<RoomBookingCubit>().state.activeAt(
-      DateTime.now(),
-    );
     return Scaffold(
       backgroundColor: context.colors.canvas,
       body: RefreshIndicator(
@@ -52,7 +48,9 @@ class _FreeRoomsViewState extends State<FreeRoomsView> {
         onRefresh: cubit.load,
         child: ListView(
           physics: const AlwaysScrollableScrollPhysics(),
-          padding: const EdgeInsets.only(bottom: 40),
+          padding: EdgeInsets.only(
+            bottom: ninjaBottomInset(context) + AppSpacing.lg,
+          ),
           children: [
             AppInnerHeader(
               title: l10n.freeRoomsNowTitle,
@@ -95,8 +93,6 @@ class _FreeRoomsViewState extends State<FreeRoomsView> {
               padding: const EdgeInsets.fromLTRB(20, 14, 20, 0),
               child: FreeRoomsList(
                 state: state,
-                bookedRoom: saved?.room,
-                bookedCampus: saved?.campus,
                 onRetry: () => unawaited(cubit.load()),
                 onRoomTap: (room) =>
                     unawaited(showFreeRoomSheet(context, room)),

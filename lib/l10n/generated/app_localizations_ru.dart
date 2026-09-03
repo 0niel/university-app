@@ -4403,7 +4403,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get deadlineRemindTitle => 'Напомнить заранее';
 
   @override
-  String get deadlineRemindSubtitle => 'за день и за 2 часа';
+  String get deadlineRemindSubtitle => 'за выбранное время до дедлайна';
 
   @override
   String get deadlineShareTitle => 'Поделиться с группой';
@@ -11050,4 +11050,1157 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get knowledgePurchaseInsufficient => 'Недостаточно сюрикенов';
+
+  @override
+  String mediaViewerIndex(int index, int total) {
+    return '$index / $total';
+  }
+
+  @override
+  String get mediaViewerDownloading => 'Загрузка';
+
+  @override
+  String get mediaViewerOpenExternally => 'Открыть в другом приложении';
+
+  @override
+  String get mediaViewerDownloadFailed => 'Не удалось скачать файл';
+
+  @override
+  String get mediaViewerSaved => 'Сохранено';
+
+  @override
+  String homeLikesCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count лайков',
+      few: '$count лайка',
+      one: '$count лайк',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get teamFinderCreateOtherRole => 'Другое';
+
+  @override
+  String get teamFinderCreateCustomRoleLabel => 'СВОЯ РОЛЬ';
+
+  @override
+  String get teamFinderCreateCustomRoleHint => 'Например: DevOps, Аналитик';
+
+  @override
+  String get teamFinderCreateCustomRoleHelper =>
+      'Через запятую — добавится несколько';
+
+  @override
+  String get teamFinderCreateTitleError => 'Введите название команды';
+
+  @override
+  String get teamFinderCreateRolesError => 'Выберите хотя бы одну роль';
+
+  @override
+  String get teamFinderCreateDeadlinePlaceholder => 'Выбрать дату';
+
+  @override
+  String get teamFinderRemoveDeadline => 'Убрать';
+
+  @override
+  String teamFinderCreateBoostInsufficient(int balance) {
+    return 'Нужно 50 сюрикенов, у вас $balance';
+  }
+
+  @override
+  String get teamFinderEditSheetTitle => 'Изменить команду';
+
+  @override
+  String get teamFinderSaveChanges => 'Сохранить';
+
+  @override
+  String get teamFinderSaving => 'Сохраняем…';
+
+  @override
+  String get teamFinderUpdateError => 'Не удалось сохранить изменения';
+
+  @override
+  String get teamFinderTeamUpdated => 'Изменения сохранены';
+
+  @override
+  String get teamFinderEditTeam => 'Изменить';
+
+  @override
+  String get teamFinderCloseTeam => 'Закрыть набор';
+
+  @override
+  String get teamFinderReopenTeam => 'Открыть набор снова';
+
+  @override
+  String get teamFinderCloseConfirmTitle => 'Закрыть набор в команду?';
+
+  @override
+  String get teamFinderCloseConfirmBody =>
+      'Команда пропадёт из поиска. Открыть её снова можно из вкладки «Мои».';
+
+  @override
+  String get teamFinderCloseError => 'Не удалось закрыть набор';
+
+  @override
+  String get teamFinderClosedStatus => 'Набор закрыт';
+
+  @override
+  String get teamFinderSearchHint => 'Команда, роль, ивент…';
+
+  @override
+  String get teamFinderSearchEmptyTitle => 'Ничего не найдено';
+
+  @override
+  String get teamFinderSearchEmptySubtitle =>
+      'Попробуйте другой запрос или фильтр';
+
+  @override
+  String get teamFinderRolesFilterLabel => 'РОЛИ';
+
+  @override
+  String get collabNotesSearchHint => 'Поиск по конспектам';
+
+  @override
+  String get collabNotesActionRename => 'Переименовать';
+
+  @override
+  String get collabNotesActionVisibility => 'Изменить видимость';
+
+  @override
+  String get collabNotesRenameTitle => 'Переименовать конспект';
+
+  @override
+  String get collabNotesRenameHint => 'Название конспекта';
+
+  @override
+  String get collabNotesRenameError => 'Не удалось переименовать конспект';
+
+  @override
+  String get collabNotesVisibilityTitle => 'Видимость конспекта';
+
+  @override
+  String get collabNotesVisibilityError => 'Не удалось изменить видимость';
+
+  @override
+  String get collabNotesReadOnlyBanner =>
+      'Только просмотр — редактировать нельзя';
+
+  @override
+  String get collabNotesOfflineStatus => 'Нет сети — сохраним позже';
+
+  @override
+  String get collabNotesConflictResolved =>
+      'Объединили изменения с другим редактором';
+
+  @override
+  String get collabNotesCollaboratorsTooltip => 'Соавторы конспекта';
+
+  @override
+  String get noteToolbarBold => 'Жирный';
+
+  @override
+  String get noteToolbarItalic => 'Курсив';
+
+  @override
+  String get noteToolbarUnderline => 'Подчёркнутый';
+
+  @override
+  String get noteToolbarStrike => 'Зачёркнутый';
+
+  @override
+  String get noteToolbarHeading1 => 'Заголовок 1';
+
+  @override
+  String get noteToolbarHeading2 => 'Заголовок 2';
+
+  @override
+  String get noteToolbarHeading3 => 'Заголовок 3';
+
+  @override
+  String get noteToolbarBulletList => 'Маркированный список';
+
+  @override
+  String get noteToolbarNumberedList => 'Нумерованный список';
+
+  @override
+  String get noteToolbarChecklist => 'Список задач';
+
+  @override
+  String get noteToolbarQuote => 'Цитата';
+
+  @override
+  String get noteToolbarCodeBlock => 'Блок кода';
+
+  @override
+  String get noteToolbarLink => 'Ссылка';
+
+  @override
+  String get noteToolbarDivider => 'Разделитель';
+
+  @override
+  String get noteToolbarColor => 'Цвет текста';
+
+  @override
+  String get noteToolbarHighlight => 'Выделение';
+
+  @override
+  String get noteToolbarImage => 'Изображение';
+
+  @override
+  String get noteToolbarDrawing => 'Рисунок';
+
+  @override
+  String get noteToolbarMic => 'Голосовой ввод';
+
+  @override
+  String get noteToolbarUndo => 'Отменить';
+
+  @override
+  String get noteToolbarRedo => 'Повторить';
+
+  @override
+  String get noteColorDefault => 'Без цвета';
+
+  @override
+  String get noteVoicePermissionTitle => 'Разрешить доступ к микрофону';
+
+  @override
+  String get noteVoicePermissionBody =>
+      'Мы используем распознавание речи, чтобы печатать конспект голосом. Звук обрабатывается системой и не сохраняется.';
+
+  @override
+  String get noteVoicePermissionAllow => 'Разрешить';
+
+  @override
+  String get noteVoiceListening => 'Слушаю…';
+
+  @override
+  String get noteVoiceUnavailable =>
+      'Голосовой ввод недоступен на этом устройстве';
+
+  @override
+  String get noteVoiceError => 'Не удалось распознать речь';
+
+  @override
+  String get noteVoicePermissionDenied =>
+      'Доступ к микрофону запрещён. Включите его в настройках системы.';
+
+  @override
+  String get noteDrawingTitle => 'Рисунок';
+
+  @override
+  String get noteDrawingPen => 'Ручка';
+
+  @override
+  String get noteDrawingMarker => 'Маркер';
+
+  @override
+  String get noteDrawingEraser => 'Ластик';
+
+  @override
+  String get noteDrawingUndo => 'Отменить штрих';
+
+  @override
+  String get noteDrawingRedo => 'Повторить штрих';
+
+  @override
+  String get noteDrawingClear => 'Очистить холст';
+
+  @override
+  String get noteDrawingClearConfirmTitle => 'Очистить рисунок?';
+
+  @override
+  String get noteDrawingClearConfirmBody => 'Действие нельзя отменить.';
+
+  @override
+  String get noteDrawingInsert => 'Вставить';
+
+  @override
+  String get noteDrawingWidthThin => 'Тонкая линия';
+
+  @override
+  String get noteDrawingWidthMedium => 'Средняя линия';
+
+  @override
+  String get noteDrawingWidthThick => 'Толстая линия';
+
+  @override
+  String get noteDrawingEmpty => 'Сначала что-нибудь нарисуйте';
+
+  @override
+  String get noteLinkTitle => 'Добавить ссылку';
+
+  @override
+  String get noteLinkUrlLabel => 'Адрес';
+
+  @override
+  String get noteLinkUrlHint => 'https://example.com';
+
+  @override
+  String get noteLinkTextLabel => 'Текст ссылки';
+
+  @override
+  String get noteLinkTextHint => 'Ссылка';
+
+  @override
+  String get noteLinkInsert => 'Добавить';
+
+  @override
+  String get noteImageSourceTitle => 'Добавить изображение';
+
+  @override
+  String get noteImageSourceCamera => 'Камера';
+
+  @override
+  String get noteImageSourceGallery => 'Галерея';
+
+  @override
+  String get noteImageUploadError => 'Не удалось загрузить изображение';
+
+  @override
+  String get noteImageUploading => 'Загружаем изображение…';
+
+  @override
+  String get serviceWalletShurikensSub => 'Баланс и история сюрикенов';
+
+  @override
+  String get mentorshipSearchHint => 'Имя, группа, тема, о себе';
+
+  @override
+  String get mentorshipSearchEmptyTitle => 'Никого не нашли';
+
+  @override
+  String get mentorshipSearchEmptySubtitle => 'Попробуйте другое имя или тему';
+
+  @override
+  String get mentorshipTopicFilterAll => 'Все';
+
+  @override
+  String get mentorshipTelegramLabel => 'TELEGRAM';
+
+  @override
+  String get mentorshipTelegramPlaceholder => 'username';
+
+  @override
+  String get mentorshipTelegramError =>
+      'Укажите юзернейм Telegram (5-32 симв.: латиница, цифры, _)';
+
+  @override
+  String get mentorshipTelegramButton => 'Telegram';
+
+  @override
+  String profileActivityTooltip(String date, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count действий',
+      many: '$count действий',
+      few: '$count действия',
+      one: '$count действие',
+    );
+    return '$date · $_temp0';
+  }
+
+  @override
+  String get profileActivityLegendLess => 'меньше';
+
+  @override
+  String get profileActivityLegendMore => 'больше';
+
+  @override
+  String get scheduleLessonLongPressHint =>
+      'Зажми пару, чтобы открыть действия';
+
+  @override
+  String get settingsColorHexInvalid => 'Неверный HEX-код';
+
+  @override
+  String get deadlinesViewList => 'Список';
+
+  @override
+  String get deadlinesViewCalendar => 'Календарь';
+
+  @override
+  String get deadlinesGroupOverdue => 'Просрочено';
+
+  @override
+  String get deadlinesGroupTomorrow => 'Завтра';
+
+  @override
+  String get deadlinesGroupDone => 'Готово';
+
+  @override
+  String deadlinesOverdueBanner(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count дедлайна просрочено',
+      many: '$count дедлайнов просрочено',
+      few: '$count дедлайна просрочено',
+      one: '$count дедлайн просрочен',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get deadlinesPostponeAction => 'Перенести на завтра';
+
+  @override
+  String get deadlinesPostponedToast => 'Перенесено на завтра';
+
+  @override
+  String get deadlinesPostponeError =>
+      'Не удалось перенести дедлайны. Попробуй ещё раз.';
+
+  @override
+  String get deadlineDeleteSemantics => 'Удалить дедлайн';
+
+  @override
+  String get deadlineDeletedToast => 'Дедлайн удалён';
+
+  @override
+  String get deadlineDeleteError =>
+      'Не удалось удалить дедлайн. Попробуй ещё раз.';
+
+  @override
+  String get deadlineActionDuplicate => 'Дублировать';
+
+  @override
+  String get deadlineEditTitle => 'Изменить дедлайн';
+
+  @override
+  String get deadlineUpdatedToast => 'Дедлайн обновлён';
+
+  @override
+  String get deadlineDuplicatedToast => 'Дедлайн скопирован';
+
+  @override
+  String get deadlineProgressLabel => 'ПРОГРЕСС';
+
+  @override
+  String get deadlineRemindLeadHour => 'За час';
+
+  @override
+  String get deadlineRemindLeadDay => 'За день';
+
+  @override
+  String get deadlinesCalendarDayEmpty => 'Дедлайнов в этот день нет';
+
+  @override
+  String deadlineShareMessage(Object title, Object when) {
+    return '$title — срок до $when';
+  }
+
+  @override
+  String get deadlineActionsTitle => 'Дедлайн';
+
+  @override
+  String get roomPhotoAdd => 'Добавить фото';
+
+  @override
+  String get roomPhotoUploadFailed => 'Не удалось загрузить фото';
+
+  @override
+  String get roomPhotoUploaded => 'Фото добавлено';
+
+  @override
+  String get roomPhotoDeleteConfirmTitle => 'Удалить фото?';
+
+  @override
+  String get roomPhotoDeleteConfirmMessage => 'Действие нельзя отменить.';
+
+  @override
+  String get roomPhotoDeleted => 'Фото удалено';
+
+  @override
+  String get roomPhotoDeleteFailed => 'Не удалось удалить фото';
+
+  @override
+  String get roomPhotosOfflineMessage =>
+      'Проверь интернет, чтобы увидеть фото аудитории.';
+
+  @override
+  String roomPhotoCaption(Object author, Object date) {
+    return '$author · $date';
+  }
+
+  @override
+  String get marketMediaLabel => 'Фото и видео';
+
+  @override
+  String get marketMediaHint => 'До 6 фото и 1 видео. Первое фото — обложка.';
+
+  @override
+  String get marketAddPhotoAction => 'Добавить фото';
+
+  @override
+  String get marketAddVideoAction => 'Добавить видео';
+
+  @override
+  String get marketRemoveMediaItem => 'Удалить';
+
+  @override
+  String get marketCoverBadge => 'Обложка';
+
+  @override
+  String get marketMediaLimitError =>
+      'Можно добавить не больше 6 фото и 1 видео';
+
+  @override
+  String get marketMediaTypeError => 'Не удалось добавить файл';
+
+  @override
+  String get marketVideoTooLong => 'Видео длиннее 60 секунд';
+
+  @override
+  String get marketVideoTooLarge => 'Видео больше 50 МБ';
+
+  @override
+  String get marketUploadingMedia => 'Загружаем медиа…';
+
+  @override
+  String get marketTelegramLabel => 'Telegram';
+
+  @override
+  String get marketTelegramHint => 'username';
+
+  @override
+  String get marketTelegramRequired =>
+      'Укажите Telegram, чтобы покупатели могли написать';
+
+  @override
+  String get marketTelegramInvalid => 'От 5 до 32 символов: латиница, цифры, _';
+
+  @override
+  String get marketSortNew => 'Новые';
+
+  @override
+  String get marketSortCheap => 'Дешевле';
+
+  @override
+  String get marketEditTitle => 'Изменить объявление';
+
+  @override
+  String get marketSave => 'Сохранить';
+
+  @override
+  String get marketSaving => 'Сохраняем…';
+
+  @override
+  String get marketEdit => 'Редактировать';
+
+  @override
+  String get marketArchive => 'В архив';
+
+  @override
+  String get marketArchiveConfirmTitle => 'Архивировать объявление?';
+
+  @override
+  String get marketArchiveConfirmBody =>
+      'Оно исчезнет из барахолки, фото и видео будут удалены.';
+
+  @override
+  String get marketArchiveError => 'Не удалось архивировать объявление';
+
+  @override
+  String get marketCreateSuccess => 'Объявление опубликовано';
+
+  @override
+  String get marketUpdateSuccess => 'Изменения сохранены';
+
+  @override
+  String get marketArchiveSuccess => 'Объявление отправлено в архив';
+
+  @override
+  String get marketDeleteSuccess => 'Объявление удалено';
+
+  @override
+  String get marketShare => 'Поделиться';
+
+  @override
+  String marketShareText(Object title) {
+    return 'Смотри объявление «$title» в Маркете';
+  }
+
+  @override
+  String get marketFreeToggleLabel => 'Отдать даром';
+
+  @override
+  String get teamFinderTeamCreated => 'Команда опубликована';
+
+  @override
+  String deadlineDueInHours(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'через $count ч',
+      many: 'через $count ч',
+      few: 'через $count ч',
+      one: 'через $count ч',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String deadlineDueInDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'через $count дня',
+      many: 'через $count дней',
+      few: 'через $count дня',
+      one: 'через $count день',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String deadlineDueInWeeks(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'через $count недели',
+      many: 'через $count недель',
+      few: 'через $count недели',
+      one: 'через $count неделю',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String deadlineOverdueByHours(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'просрочено $count ч',
+      many: 'просрочено $count ч',
+      few: 'просрочено $count ч',
+      one: 'просрочено $count ч',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String deadlineOverdueByDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'просрочено $count д',
+      many: 'просрочено $count д',
+      few: 'просрочено $count д',
+      one: 'просрочено $count д',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get eventsFilterPast => 'Прошедшие';
+
+  @override
+  String get eventsViewList => 'Список';
+
+  @override
+  String get eventsViewCalendar => 'Календарь';
+
+  @override
+  String get eventsDayYesterday => 'Вчера';
+
+  @override
+  String get eventsEmptyPastSub => 'Прошедших событий пока нет';
+
+  @override
+  String get eventsCalendarEmptyTitle => 'В этот день событий нет';
+
+  @override
+  String get eventsMineBadge => 'Моё';
+
+  @override
+  String get eventsCreateEndLabel => 'ДО';
+
+  @override
+  String get eventsCreateEndPlaceholder => 'Без ограничения';
+
+  @override
+  String get eventsCreateTitleError => 'Введите название';
+
+  @override
+  String get eventsCreateEndBeforeStartError =>
+      'Событие не может закончиться раньше начала';
+
+  @override
+  String get eventsEditSheetTitle => 'Редактировать событие';
+
+  @override
+  String get eventsSave => 'Сохранить';
+
+  @override
+  String get eventsCreateSuccess => 'Событие создано';
+
+  @override
+  String get eventsUpdateSuccess => 'Изменения сохранены';
+
+  @override
+  String get eventsUpdateError =>
+      'Не удалось сохранить изменения. Попробуй ещё раз';
+
+  @override
+  String get eventsDeleteConfirmTitle => 'Удалить событие?';
+
+  @override
+  String get eventsDeleteConfirmMessage => 'Оно исчезнет из афиши для всех';
+
+  @override
+  String get eventsDeleteSuccess => 'Событие удалено';
+
+  @override
+  String get eventsDeleteError =>
+      'Не удалось удалить событие. Попробуй ещё раз';
+
+  @override
+  String get eventsEdit => 'Редактировать';
+
+  @override
+  String get eventsDetailMap => 'На карте';
+
+  @override
+  String get eventsDetailDescriptionEmpty => 'Без описания';
+
+  @override
+  String get groupSpaceSearchHint => 'Поиск по постам';
+
+  @override
+  String get groupSpaceSearchEmpty => 'Ничего не нашлось';
+
+  @override
+  String get groupSpaceCommentsTitle => 'Комментарии';
+
+  @override
+  String get groupSpaceCommentsEmpty => 'Пока нет комментариев';
+
+  @override
+  String get groupSpaceCommentHint => 'Написать комментарий…';
+
+  @override
+  String get groupSpaceCommentSend => 'Отправить';
+
+  @override
+  String groupSpaceCommentsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count комментариев',
+      many: '$count комментариев',
+      few: '$count комментария',
+      one: '$count комментарий',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String groupSpaceOnlineCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count онлайн',
+      many: '$count онлайн',
+      few: '$count онлайн',
+      one: '$count онлайн',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get groupSpaceQuickAnnouncement => 'Объявление';
+
+  @override
+  String get groupSpaceQuickNote => 'Заметка';
+
+  @override
+  String get groupSpaceQuickLink => 'Ссылка';
+
+  @override
+  String get groupSpaceShowFull => 'Показать полностью';
+
+  @override
+  String get groupSpaceCollapse => 'Свернуть';
+
+  @override
+  String get groupSpaceNotesPreviewEmpty => 'Пока нет общих заметок';
+
+  @override
+  String get groupSpaceSetBirthdayCta => 'Укажи дату рождения';
+
+  @override
+  String get groupSpaceSetBirthdaySubtitle =>
+      'Одногруппники увидят напоминание заранее';
+
+  @override
+  String get groupSpaceSetBirthdayTitle => 'Дата рождения';
+
+  @override
+  String get groupSpacePostEmptyError => 'Добавь заголовок или текст';
+
+  @override
+  String get groupSpacePostPinToggle => 'Закрепить сверху';
+
+  @override
+  String get studyGroupTransferOwnership => 'Сделать организатором';
+
+  @override
+  String get studyGroupTransferOwnershipTitle => 'Сделать организатором?';
+
+  @override
+  String studyGroupTransferOwnershipBody(Object name) {
+    return '$name станет управлять группой вместо вас.';
+  }
+
+  @override
+  String get studyGroupMemberTools => 'Управление участником';
+
+  @override
+  String get knowledgeChipBoard => 'Фото доски';
+
+  @override
+  String get knowledgeChipExtra => 'Доп.';
+
+  @override
+  String get knowledgeTypeBoard => 'Фото доски';
+
+  @override
+  String get knowledgeTypeExtra => 'Доп. материал';
+
+  @override
+  String get knowledgeLike => 'Нравится';
+
+  @override
+  String get knowledgeSortNew => 'Новые';
+
+  @override
+  String get knowledgeSortPopular => 'Популярные';
+
+  @override
+  String knowledgeSubjectsFilterCount(int count) {
+    return 'Предметы ($count)';
+  }
+
+  @override
+  String get collabNotesKindLabel => 'Тип';
+
+  @override
+  String get collabNotesKindLectureFull => 'Лекция';
+
+  @override
+  String get collabNotesKindPracticeFull => 'Практика';
+
+  @override
+  String get collabNotesKindLabFull => 'Лабораторная';
+
+  @override
+  String get collabNotesKindDocFull => 'Документ';
+
+  @override
+  String get knowledgeBatchAddImages => 'Фото';
+
+  @override
+  String get knowledgeBatchAddFiles => 'Файлы';
+
+  @override
+  String get knowledgeBatchAddCamera => 'Камера';
+
+  @override
+  String get knowledgeBatchEmpty =>
+      'Добавьте фото или файлы, чтобы опубликовать их вместе';
+
+  @override
+  String knowledgeBatchStatus(int done, int total) {
+    return 'Загружено $done из $total';
+  }
+
+  @override
+  String get knowledgeMaterialDetailTitle => 'Материал';
+
+  @override
+  String get knowledgeMaterialShareLink => 'Поделиться ссылкой';
+
+  @override
+  String get knowledgeMaterialDelete => 'Удалить';
+
+  @override
+  String get knowledgeMaterialDeleteConfirm =>
+      'Удалить материал? Это действие нельзя отменить.';
+
+  @override
+  String get knowledgeMaterialDeleted => 'Материал удалён';
+
+  @override
+  String get knowledgeMaterialDeleteFailed => 'Не удалось удалить материал';
+
+  @override
+  String get knowledgeMaterialAuthor => 'Автор';
+
+  @override
+  String get knowledgeViewGrid => 'Сетка';
+
+  @override
+  String get knowledgeViewList => 'Список';
+
+  @override
+  String get knowledgeMaterialDate => 'Дата';
+
+  @override
+  String get knowledgeMaterialSize => 'Размер';
+
+  @override
+  String get pollsFilterAll => 'Все';
+
+  @override
+  String get pollsFilterActive => 'Активные';
+
+  @override
+  String get pollsFilterClosed => 'Завершённые';
+
+  @override
+  String get pollsFilterMine => 'Мои';
+
+  @override
+  String get pollsFilterVoted => 'Пройденные';
+
+  @override
+  String get pollsCategoryAll => 'Все темы';
+
+  @override
+  String get pollsCategoryGeneral => 'Общее';
+
+  @override
+  String get pollsCategoryAcademic => 'Учёба';
+
+  @override
+  String get pollsCategoryEvents => 'События';
+
+  @override
+  String get pollsCategoryFeedback => 'Обратная связь';
+
+  @override
+  String get pollsCategoryOther => 'Другое';
+
+  @override
+  String get pollsSearchHint => 'Поиск опросов';
+
+  @override
+  String get pollsAuthorAnonymous => 'Аноним';
+
+  @override
+  String pollsParticipantsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count участников',
+      many: '$count участников',
+      few: '$count участника',
+      one: '$count участник',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get pollsTakeAction => 'Пройти';
+
+  @override
+  String get pollsResultsAction => 'Результаты';
+
+  @override
+  String get pollsOwnerActions => 'Управление опросом';
+
+  @override
+  String get pollsCloseAction => 'Завершить опрос';
+
+  @override
+  String get pollsCloseConfirmTitle => 'Завершить опрос?';
+
+  @override
+  String get pollsCloseConfirmBody =>
+      'Больше нельзя будет ответить. Действие необратимо.';
+
+  @override
+  String get pollsCloseSuccess => 'Опрос завершён';
+
+  @override
+  String get pollsCloseError => 'Не удалось завершить опрос';
+
+  @override
+  String get pollsDeleteSuccess => 'Опрос удалён';
+
+  @override
+  String get pollsMyChoice => 'Ваш выбор';
+
+  @override
+  String get pollsResultsNoAnswers => 'Пока нет ответов';
+
+  @override
+  String pollsRatingAverage(String value) {
+    return 'Средняя оценка $value';
+  }
+
+  @override
+  String pollsRatingResponses(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count ответов',
+      many: '$count ответов',
+      few: '$count ответа',
+      one: '$count ответ',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get pollsTextAnswers => 'Ответы';
+
+  @override
+  String pollsStepCounter(int current, int total) {
+    return '$current из $total';
+  }
+
+  @override
+  String get pollsRequiredError => 'Это обязательный вопрос';
+
+  @override
+  String get pollsNext => 'Далее';
+
+  @override
+  String get pollsSubmit => 'Отправить';
+
+  @override
+  String get pollsRunnerSuccess => 'Ответы сохранены';
+
+  @override
+  String get pollsTextAnswerHint => 'Введите ответ…';
+
+  @override
+  String pollsRatingOption(int value) {
+    return 'Оценка $value';
+  }
+
+  @override
+  String get pollsStepBasics => 'Основное';
+
+  @override
+  String get pollsStepQuestions => 'Вопросы';
+
+  @override
+  String get pollsStepPreview => 'Превью';
+
+  @override
+  String get pollsTitleHint => 'Название опроса';
+
+  @override
+  String get pollsDescriptionHint => 'Описание (необязательно)';
+
+  @override
+  String get pollsCategoryLabel => 'Тема';
+
+  @override
+  String get pollsAddQuestion => 'Добавить вопрос';
+
+  @override
+  String get pollsRemoveQuestion => 'Удалить вопрос';
+
+  @override
+  String pollsQuestionNumber(int number) {
+    return 'Вопрос $number';
+  }
+
+  @override
+  String get pollsQuestionKindSingle => 'Один вариант';
+
+  @override
+  String get pollsQuestionKindMultiple => 'Несколько вариантов';
+
+  @override
+  String get pollsQuestionKindText => 'Текст';
+
+  @override
+  String get pollsQuestionKindRating => 'Оценка';
+
+  @override
+  String get pollsQuestionRequired => 'Обязательный вопрос';
+
+  @override
+  String get pollsMoveUp => 'Переместить вверх';
+
+  @override
+  String get pollsMoveDown => 'Переместить вниз';
+
+  @override
+  String get pollsResultsVisibility => 'Кто видит результаты';
+
+  @override
+  String get pollsResultsVisibilityAlways => 'Все, сразу';
+
+  @override
+  String get pollsResultsVisibilityAfterVote => 'После ответа';
+
+  @override
+  String get pollsResultsVisibilityAfterClose => 'После завершения';
+
+  @override
+  String get pollsAllowChange => 'Можно менять ответ';
+
+  @override
+  String get pollsClosesAt => 'Дата завершения';
+
+  @override
+  String get pollsClosesAtNone => 'Без срока';
+
+  @override
+  String get pollsClosesAtPick => 'Выбрать дату';
+
+  @override
+  String get pollsPreviewEmptyQuestions => 'Добавьте хотя бы один вопрос';
+
+  @override
+  String get pollsTitleRequired => 'Введите название опроса';
+
+  @override
+  String get pollsQuestionTextRequired => 'Введите текст вопроса';
+
+  @override
+  String get pollsQuestionOptionsRequired => 'Добавьте хотя бы два варианта';
+
+  @override
+  String get pollsEmptyFiltered => 'Нет опросов по этому фильтру';
+
+  @override
+  String pollsEmptySearch(String query) {
+    return 'Ничего не найдено по запросу «$query»';
+  }
+
+  @override
+  String get pollsLoadMore => 'Показать ещё';
+
+  @override
+  String get pollsChangeAnswers => 'Изменить ответы';
+
+  @override
+  String get pollsResultsHidden => 'Результаты пока скрыты';
+
+  @override
+  String get pollsEmptyQuestions => 'В этом опросе нет вопросов';
+
+  @override
+  String get pollsClosesFuture => 'Выберите время завершения в будущем';
+
+  @override
+  String get pollsDistinctOptionsRequired =>
+      'Добавьте не менее двух разных вариантов и выберите заполненный правильный ответ для квиза';
+
+  @override
+  String get pollsCorrectAnswer => 'Правильный ответ';
+
+  @override
+  String get pollsQuestionTextHint => 'Текст вопроса';
 }

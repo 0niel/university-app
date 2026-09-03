@@ -65,6 +65,7 @@ void main() {
     progress: 1,
   );
   const settings = UserSettings(notificationsEnabled: false);
+  final activityDay = ActivityDay(day: DateTime(2026, 9, 2), count: 2);
 
   late GamificationRepository gamificationRepository;
 
@@ -104,6 +105,11 @@ void main() {
     when(
       () => gamificationRepository.getSettings(),
     ).thenAnswer((_) async => settings);
+    when(
+      () => gamificationRepository.getActivityCalendar(
+        days: any(named: 'days'),
+      ),
+    ).thenAnswer((_) async => [activityDay]);
   });
 
   ProfileCubit buildCubit() => ProfileCubit(
@@ -231,18 +237,6 @@ void main() {
           ['b', 'd', 'c'],
         );
       });
-
-      test('hasStreakHistory requires a full two-week history', () {
-        expect(const ProfileState().hasStreakHistory, isFalse);
-        expect(
-          ProfileState(
-            overview: ProfileOverview(
-              streakHistory: List.filled(kStreakHistoryDays, true),
-            ),
-          ).hasStreakHistory,
-          isTrue,
-        );
-      });
     });
 
     group('load', () {
@@ -268,6 +262,11 @@ void main() {
           ).called(1);
           verify(() => gamificationRepository.getBadges()).called(1);
           verify(() => gamificationRepository.getSettings()).called(1);
+          verify(
+            () => gamificationRepository.getActivityCalendar(
+              days: any(named: 'days'),
+            ),
+          ).called(1);
 
           expect(cubit.state.status, ProfileStatus.loaded);
           expect(cubit.state.gamificationProfile, profile);
@@ -276,6 +275,7 @@ void main() {
           expect(cubit.state.leaderboard, [entry]);
           expect(cubit.state.badges, [badge]);
           expect(cubit.state.settings, settings);
+          expect(cubit.state.activityCalendar, [activityDay]);
           expect(cubit.state.failedSections, isEmpty);
         },
       );
@@ -332,6 +332,22 @@ void main() {
           expect(cubit.state.badges, isEmpty);
           expect(cubit.state.leaderboard, [entry]);
           expect(cubit.state.overview, overview);
+        },
+      );
+
+      blocTest<ProfileCubit, ProfileState>(
+        'flags the activity section when the calendar fails to load',
+        setUp: () => when(
+          () => gamificationRepository.getActivityCalendar(
+            days: any(named: 'days'),
+          ),
+        ).thenThrow(Exception('activity')),
+        build: buildCubit,
+        act: (cubit) => cubit.load(),
+        verify: (cubit) {
+          expect(cubit.state.status, ProfileStatus.loaded);
+          expect(cubit.state.hasFailed(ProfileSection.activity), isTrue);
+          expect(cubit.state.activityCalendar, isEmpty);
         },
       );
 
@@ -456,6 +472,21 @@ void main() {
       );
 
       blocTest<ProfileCubit, ProfileState>(
+        'clears the activity failure flag once the calendar loads',
+        build: buildCubit,
+        seed: () => const ProfileState(
+          user: currentUser,
+          status: ProfileStatus.loaded,
+          failedSections: {ProfileSection.activity},
+        ),
+        act: (cubit) => cubit.reloadSection(ProfileSection.activity),
+        verify: (cubit) {
+          expect(cubit.state.activityCalendar, [activityDay]);
+          expect(cubit.state.failedSections, isEmpty);
+        },
+      );
+
+      blocTest<ProfileCubit, ProfileState>(
         'refreshes the settings section',
         build: buildCubit,
         seed: () => const ProfileState(
@@ -493,8 +524,6 @@ void main() {
           ProfileState(user: currentUser, settings: persisted),
         ],
         verify: (_) {
-          // The last known server state travels along so the RPC only has to
-          // write the fields that actually changed.
           verify(
             () => gamificationRepository.updateSettings(
               next,

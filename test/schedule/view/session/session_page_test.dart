@@ -4,6 +4,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
+import 'package:intl/intl.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:rtu_mirea_app/schedule/bloc/schedule_bloc.dart';
 import 'package:rtu_mirea_app/schedule/cubit/exam_readiness/exam_readiness_cubit.dart';
@@ -46,16 +47,17 @@ void main() {
     when(() => repository.hasAuthenticatedUser).thenReturn(false);
   });
 
-  Widget subject() => RepositoryProvider<ScheduleRepository>.value(
-    value: repository,
-    child: MultiBlocProvider(
-      providers: [
-        BlocProvider<ScheduleBloc>.value(value: schedule),
-        BlocProvider<ExamReadinessCubit>.value(value: readiness),
-      ],
-      child: const SessionPage(),
-    ),
-  );
+  Widget subject({DateTime? now}) =>
+      RepositoryProvider<ScheduleRepository>.value(
+        value: repository,
+        child: MultiBlocProvider(
+          providers: [
+            BlocProvider<ScheduleBloc>.value(value: schedule),
+            BlocProvider<ExamReadinessCubit>.value(value: readiness),
+          ],
+          child: SessionPage(now: now),
+        ),
+      );
 
   testWidgets('shows an honest empty state without fabricated exams', (
     tester,
@@ -119,6 +121,116 @@ void main() {
     expect(exams.first.teacher, 'Преподаватель');
     expect(exams.last.days, 1);
   });
+
+  testWidgets('injected calendar day excludes past exams and retains today', (
+    tester,
+  ) async {
+    final supplied = DateTime(2031, 12, 30, 23, 50);
+    when(() => schedule.state).thenReturn(
+      ScheduleState(
+        selectedSchedule: SelectedGroupSchedule(
+          group: const Group(name: 'Test'),
+          schedule: [
+            scheduleTestLesson(
+              subject: 'Прошедший экзамен',
+              day: DateTime(2031, 12, 29),
+              type: LessonType.exam,
+            ),
+            scheduleTestLesson(
+              subject: 'Будущий экзамен',
+              day: DateTime(2032, 1, 5),
+              type: LessonType.exam,
+            ),
+            scheduleTestLesson(
+              subject: 'Сегодняшний экзамен',
+              day: DateTime(2031, 12, 30),
+              type: LessonType.credit,
+            ),
+          ],
+        ),
+      ),
+    );
+
+    await tester.pumpApp(subject(now: supplied));
+
+    final hero = tester.widget<CountdownHero>(find.byType(CountdownHero));
+    final topics = tester.widget<ExamTopics>(find.byType(ExamTopics));
+    expect(hero.exam.subject, 'Сегодняшний экзамен');
+    expect(hero.exam.date, DateTime(2031, 12, 30, 9));
+    expect(hero.exam.days, 0);
+    expect(topics.now, supplied);
+    expect(topics.exam.key, hero.exam.key);
+    expect(find.text('Прошедший экзамен'), findsNothing);
+  });
+
+  testWidgets('supplied date produces an empty state when all exams are past', (
+    tester,
+  ) async {
+    when(() => schedule.state).thenReturn(
+      ScheduleState(
+        selectedSchedule: SelectedGroupSchedule(
+          group: const Group(name: 'Test'),
+          schedule: [
+            scheduleTestLesson(
+              day: DateTime(2031, 12, 29),
+              type: LessonType.exam,
+            ),
+          ],
+        ),
+      ),
+    );
+
+    await tester.pumpApp(subject(now: DateTime(2032)));
+
+    expect(find.byType(AppEmptyState), findsOneWidget);
+    expect(find.byType(CountdownHero), findsNothing);
+    expect(find.byType(ExamTopics), findsNothing);
+  });
+
+  testWidgets(
+    'study plan dates use the same injected instant across year end',
+    (
+      tester,
+    ) async {
+      final supplied = DateTime(2031, 12, 30, 23, 50);
+      when(() => schedule.state).thenReturn(
+        ScheduleState(
+          selectedSchedule: SelectedGroupSchedule(
+            group: const Group(name: 'Test'),
+            schedule: [
+              scheduleTestLesson(
+                day: DateTime(2032, 1, 5),
+                type: LessonType.exam,
+              ),
+            ],
+          ),
+        ),
+      );
+      await tester.pumpApp(subject(now: supplied));
+      final topics = tester.widget<ExamTopics>(find.byType(ExamTopics));
+      expect(topics.exam.days, 6);
+      for (final title in ['Тема один', 'Тема два', 'Тема три']) {
+        topics.cubit.addTopic(topics.exam.key, title);
+      }
+      await tester.pumpAndSettle();
+
+      for (final date in [
+        DateTime(2031, 12, 30),
+        DateTime(2032),
+        DateTime(2032, 1, 3),
+      ]) {
+        expect(
+          find.descendant(
+            of: find.byType(ExamTopics),
+            matching: find.text(DateFormat.MMMd('ru').format(date)),
+          ),
+          findsOneWidget,
+        );
+      }
+      expect(tester.widget<ExamTopics>(find.byType(ExamTopics)).now, supplied);
+      expect(tester.takeException(), isNull);
+    },
+  );
 
   testWidgets('real exams fit a narrow screen with large text', (tester) async {
     when(() => schedule.state).thenReturn(

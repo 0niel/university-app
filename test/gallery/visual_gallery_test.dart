@@ -90,7 +90,7 @@ void main() {
                     child: Text(
                       'Достижения',
                       style: NinjaText.title.copyWith(
-                        color: context.ninja.ink,
+                        color: context.colors.ink,
                       ),
                     ),
                   ),
@@ -113,7 +113,7 @@ void main() {
       'visual_icon_badges',
       Builder(
         builder: (context) {
-          final colors = context.ninja;
+          final colors = context.colors;
           return Padding(
             padding: const EdgeInsets.all(NinjaMetrics.screenPadding),
             child: Row(
@@ -127,7 +127,7 @@ void main() {
                 ]) ...[
                   DecoratedBox(
                     decoration: BoxDecoration(
-                      color: colors.brandTint,
+                      color: colors.tint,
                       shape: BoxShape.circle,
                     ),
                     child: SizedBox.square(
@@ -135,7 +135,7 @@ void main() {
                       child: AppLineIconWidget(
                         icon,
                         size: 20,
-                        color: colors.brand,
+                        color: colors.accent,
                       ),
                     ),
                   ),
@@ -165,7 +165,7 @@ void main() {
                   width: 52,
                   child: Column(
                     children: [
-                      AppLineIconWidget(icon, color: context.ninja.ink),
+                      AppLineIconWidget(icon, color: context.colors.ink),
                       const SizedBox(height: 3),
                       Text(
                         icon.name,
@@ -173,7 +173,7 @@ void main() {
                         overflow: TextOverflow.ellipsis,
                         style: NinjaText.helper.copyWith(
                           fontSize: 7,
-                          color: context.ninja.muted,
+                          color: context.colors.muted,
                         ),
                       ),
                     ],
@@ -222,13 +222,13 @@ void main() {
                       AppLineIconWidget(
                         icon,
                         size: 64,
-                        color: context.ninja.ink,
+                        color: context.colors.ink,
                       ),
                       Text(
                         icon.name,
                         style: NinjaText.helper.copyWith(
                           fontSize: 9,
-                          color: context.ninja.muted,
+                          color: context.colors.muted,
                         ),
                       ),
                     ],
@@ -250,11 +250,11 @@ void main() {
           children: [
             Positioned.fill(
               child: ColoredBox(
-                color: context.ninja.surface,
+                color: context.colors.surface,
                 child: Center(
                   child: Text(
                     'страница под панелью',
-                    style: NinjaText.title.copyWith(color: context.ninja.ink),
+                    style: NinjaText.title.copyWith(color: context.colors.ink),
                   ),
                 ),
               ),
@@ -348,7 +348,7 @@ Future<void> _shot(
       supportedLocales: AppLocalizations.supportedLocales,
       home: Builder(
         builder: (context) => Scaffold(
-          backgroundColor: context.ninja.canvas,
+          backgroundColor: context.colors.canvas,
           body: child,
         ),
       ),

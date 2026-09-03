@@ -17,6 +17,7 @@ abstract class GroupNote with _$GroupNote {
     @Default(false) bool isMine,
     @Default(0) int likes,
     @Default(false) bool likedByMe,
+    @Default(0) int commentsCount,
   }) = _GroupNote;
 
   factory GroupNote.fromJson(Map<String, Object?> json) =>

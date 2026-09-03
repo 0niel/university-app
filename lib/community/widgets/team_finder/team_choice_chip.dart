@@ -7,14 +7,21 @@ class TeamChoiceChip extends StatelessWidget {
     required this.selected,
     required this.onPressed,
     super.key,
+    this.enabled = true,
   });
 
   final String label;
   final bool selected;
   final VoidCallback onPressed;
+  final bool enabled;
 
   @override
   Widget build(BuildContext context) {
-    return NinjaChip(label: label, selected: selected, onTap: onPressed);
+    return AppChip.filter(
+      label: label,
+      selected: selected,
+      enabled: enabled,
+      onTap: enabled ? onPressed : null,
+    );
   }
 }

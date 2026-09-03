@@ -1,9 +1,7 @@
 import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:rtu_mirea_app/free_rooms/cubit/room_booking_cubit.dart';
 import 'package:rtu_mirea_app/free_rooms/widgets/free_room_view_model.dart';
-import 'package:rtu_mirea_app/free_rooms/widgets/room_photo_placeholder.dart';
+import 'package:rtu_mirea_app/free_rooms/widgets/room_photo_gallery.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 
 Future<void> showFreeRoomSheet(
@@ -12,65 +10,20 @@ Future<void> showFreeRoomSheet(
   VoidCallback? onRoute,
 }) => showAppSheet<void>(
   context,
-  child: BlocProvider.value(
-    value: context.read<RoomBookingCubit>(),
-    child: FreeRoomSheet(room: room, onRoute: onRoute),
-  ),
+  child: FreeRoomSheet(room: room, onRoute: onRoute),
 );
 
-class FreeRoomSheet extends StatefulWidget {
+class FreeRoomSheet extends StatelessWidget {
   const FreeRoomSheet({required this.room, this.onRoute, super.key});
 
   final FreeRoomViewModel room;
   final VoidCallback? onRoute;
 
   @override
-  State<FreeRoomSheet> createState() => _FreeRoomSheetState();
-}
-
-class _FreeRoomSheetState extends State<FreeRoomSheet> {
-  bool _saving = false;
-  bool _failed = false;
-
-  Future<void> _save({required bool booked, required DateTime until}) async {
-    if (_saving) return;
-    setState(() {
-      _saving = true;
-      _failed = false;
-    });
-    final cubit = context.read<RoomBookingCubit>();
-    final saved = booked
-        ? await cubit.release()
-        : await cubit.book(
-            RoomBooking(
-              room: widget.room.name,
-              campus: widget.room.room.campus,
-              until: until,
-            ),
-          );
-    if (mounted) {
-      setState(() {
-        _saving = false;
-        _failed = !saved;
-      });
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final room = widget.room;
-    final onRoute = widget.onRoute;
     final l10n = context.l10n;
-    final colors = context.colors;
     final largeText = MediaQuery.textScalerOf(context).scale(14) > 19;
     final now = DateTime.now();
-    final booked = context.watch<RoomBookingCubit>().state.isBooked(
-      room.name,
-      now,
-      campus: room.room.campus,
-    );
-    final until =
-        room.room.freeUntil ?? DateTime(now.year, now.month, now.day + 1);
     final current = FreeRoomViewModel(
       room: room.room,
       now: now,
@@ -81,7 +34,7 @@ class _FreeRoomSheetState extends State<FreeRoomSheet> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       mainAxisSize: MainAxisSize.min,
       children: [
-        const RoomPhotoPlaceholder(),
+        RoomPhotoGallery(campus: current.campus, roomName: current.name),
         const SizedBox(height: AppSpacing.lg),
         _RoomHeading(room: current, largeText: largeText),
         const SizedBox(height: AppSpacing.sectionGap),
@@ -113,56 +66,18 @@ class _FreeRoomSheetState extends State<FreeRoomSheet> {
             compact: true,
           ),
         ],
-        if (_failed) ...[
-          const SizedBox(height: AppSpacing.md),
-          AppBanner(message: l10n.coworkSaveError, tone: AppBannerTone.danger),
+        if (onRoute != null) ...[
+          const SizedBox(height: AppSpacing.sectionGap),
+          AppButton.primary(
+            label: l10n.roomRoute,
+            expanded: true,
+            size: AppButtonSize.large,
+            onPressed: () {
+              Navigator.of(context).pop();
+              onRoute!();
+            },
+          ),
         ],
-        const SizedBox(height: AppSpacing.sectionGap),
-        Row(
-          children: [
-            if (onRoute != null) ...[
-              Tooltip(
-                message: l10n.roomRoute,
-                child: AppPressable(
-                  semanticsLabel: l10n.roomRoute,
-                  semanticsButton: true,
-                  onTap: () {
-                    Navigator.of(context).pop();
-                    onRoute();
-                  },
-                  child: Container(
-                    width: AppControlSize.buttonLarge,
-                    height: AppControlSize.buttonLarge,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: colors.surface,
-                      shape: BoxShape.circle,
-                    ),
-                    child: AppLineIconWidget(
-                      AppLineIcon.pin,
-                      size: AppIconSize.md,
-                      color: colors.ink,
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(width: AppSpacing.cardGap),
-            ],
-            Expanded(
-              child: AppButton.primary(
-                label: booked ? l10n.roomRemoveSaved : l10n.roomBook,
-                expanded: true,
-                size: AppButtonSize.large,
-                loading: _saving,
-                onPressed: _saving || (!booked && !until.isAfter(now))
-                    ? null
-                    : () => _save(booked: booked, until: until),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: AppSpacing.sectionGap),
-        AppBanner(message: l10n.roomLocalPlanHint),
       ],
     );
   }

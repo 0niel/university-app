@@ -9,14 +9,12 @@ class FreeRoomViewModel {
     required this.room,
     required this.now,
     this.floor,
-    this.booked = false,
     this.locale = 'ru',
   });
 
   final FreeRoom room;
   final DateTime now;
   final int? floor;
-  final bool booked;
   final String locale;
 
   String get name => room.room;

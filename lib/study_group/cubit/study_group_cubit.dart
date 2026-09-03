@@ -77,6 +77,21 @@ class StudyGroupCubit extends Cubit<StudyGroupState> {
   Future<bool> inviteByUserId(String userId) =>
       _runVoid(() => _repository.inviteByUserId(userId));
 
+  Future<bool> transferOwnership(String userId) async {
+    if (isClosed || state.pendingMemberIds.contains(userId)) return false;
+    emit(
+      state.copyWith(pendingMemberIds: {...state.pendingMemberIds, userId}),
+    );
+    final ok = await _run(() => _repository.transferOwnership(userId));
+    if (isClosed) return false;
+    emit(
+      state.copyWith(
+        pendingMemberIds: {...state.pendingMemberIds}..remove(userId),
+      ),
+    );
+    return ok;
+  }
+
   Future<bool> _run(Future<MyStudyGroup> Function() action) async {
     if (isClosed) return false;
     _loadRevision++;

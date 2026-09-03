@@ -13,6 +13,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:friends_repository/friends_repository.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:rtu_mirea_app/common/media_viewer/media_viewer.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:rtu_mirea_app/navigation/routes/routes.dart';
 import 'package:rtu_mirea_app/profile/widgets/widgets.dart'

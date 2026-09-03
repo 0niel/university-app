@@ -22,12 +22,14 @@ class OnboardingSettingsStep extends StatefulWidget {
     required this.onBack,
     required this.onFinish,
     super.key,
+    this.finishing = false,
   });
   final int step;
   final int totalSteps;
   final PermissionClient permissionClient;
   final VoidCallback onBack;
   final VoidCallback onFinish;
+  final bool finishing;
 
   @override
   State<OnboardingSettingsStep> createState() => _OnboardingSettingsStepState();
@@ -219,7 +221,7 @@ class _OnboardingSettingsStepState extends State<OnboardingSettingsStep>
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final sharing = context.watch<GeoSharingCubit>().state;
-    final busy = _busy || _settingsLoading || sharing.busy;
+    final busy = _busy || _settingsLoading || sharing.busy || widget.finishing;
     return AuthPageLayout(
       step: widget.step,
       totalSteps: widget.totalSteps,
@@ -231,6 +233,7 @@ class _OnboardingSettingsStepState extends State<OnboardingSettingsStep>
         label: l10n.done,
         size: AppButtonSize.hero,
         expanded: true,
+        loading: widget.finishing,
         onPressed: busy ? null : widget.onFinish,
       ),
       child: Column(

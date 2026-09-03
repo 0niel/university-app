@@ -83,7 +83,9 @@ class _FriendsListViewState extends State<FriendsListView> {
             color: colors.accent,
             child: ListView(
               physics: const AlwaysScrollableScrollPhysics(),
-              padding: const EdgeInsets.only(bottom: 40),
+              padding: EdgeInsets.only(
+                bottom: ninjaBottomInset(context) + AppSpacing.lg,
+              ),
               children: [
                 AppInnerHeader(
                   title: l10n.friendsTitle,
@@ -214,42 +216,42 @@ class _FriendsListViewState extends State<FriendsListView> {
                     AppSpacing.screen,
                     0,
                   ),
-                  child: switch (state.status) {
-                    FriendsListStatus.initial ||
-                    FriendsListStatus.loading => const NinjaSkeleton(
-                      height: 220,
-                      radius: AppRadius.card,
-                    ),
-                    FriendsListStatus.failure => AppErrorState(
-                      title: l10n.friendsLoadError,
-                      message: null,
-                      footnote: null,
-                      primaryLabel: l10n.retry,
-                      onPrimary: cubit.load,
-                    ),
-                    FriendsListStatus.loaded when friends.isEmpty =>
-                      AppEmptyState(
-                        title: state.filter == FriendsFilter.onCampus
-                            ? l10n.friendsCampusEmpty
-                            : l10n.friendsEmptyTitle,
-                        subtitle: state.filter == FriendsFilter.all
-                            ? l10n.friendsEmptySub
-                            : null,
-                        actionLabel: l10n.friendsAddFriend,
-                        onAction: _addFriend,
-                        lineIcon: AppLineIcon.people,
-                      ),
-                    FriendsListStatus.loaded => AppListGroup(
-                      children: [
-                        for (final friend in friends)
-                          FriendsListRow(
-                            friend: friend,
-                            now: now,
-                            onTap: () => _showFriend(friend),
+                  child: friends.isNotEmpty
+                      ? AppListGroup(
+                          children: [
+                            for (final friend in friends)
+                              FriendsListRow(
+                                friend: friend,
+                                now: now,
+                                onTap: () => _showFriend(friend),
+                              ),
+                          ],
+                        )
+                      : switch (state.status) {
+                          FriendsListStatus.initial ||
+                          FriendsListStatus.loading => const NinjaSkeleton(
+                            height: 220,
+                            radius: AppRadius.card,
                           ),
-                      ],
-                    ),
-                  },
+                          FriendsListStatus.failure => AppErrorState(
+                            title: l10n.friendsLoadError,
+                            message: null,
+                            footnote: null,
+                            primaryLabel: l10n.retry,
+                            onPrimary: cubit.load,
+                          ),
+                          FriendsListStatus.loaded => AppEmptyState(
+                            title: state.filter == FriendsFilter.onCampus
+                                ? l10n.friendsCampusEmpty
+                                : l10n.friendsEmptyTitle,
+                            subtitle: state.filter == FriendsFilter.all
+                                ? l10n.friendsEmptySub
+                                : null,
+                            actionLabel: l10n.friendsAddFriend,
+                            onAction: _addFriend,
+                            lineIcon: AppLineIcon.people,
+                          ),
+                        },
                 ),
                 Padding(
                   padding: const EdgeInsets.fromLTRB(

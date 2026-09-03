@@ -10,51 +10,58 @@ import 'package:rtu_mirea_app/polls/cubit/polls_cubit.dart';
 import 'package:rtu_mirea_app/polls/view/polls_body.dart';
 import 'package:rtu_mirea_app/polls/widgets/widgets.dart';
 
-class PollsView extends StatelessWidget {
+class PollsView extends StatefulWidget {
   const PollsView({super.key});
+
+  @override
+  State<PollsView> createState() => _PollsViewState();
+}
+
+class _PollsViewState extends State<PollsView> {
+  final _search = TextEditingController();
+
+  @override
+  void dispose() {
+    _search.dispose();
+    super.dispose();
+  }
+
+  String _filterLabel(AppLocalizations l10n, PollFilter filter) =>
+      switch (filter) {
+        PollFilter.all => l10n.pollsFilterAll,
+        PollFilter.active => l10n.pollsFilterActive,
+        PollFilter.closed => l10n.pollsFilterClosed,
+        PollFilter.mine => l10n.pollsFilterMine,
+        PollFilter.participated => l10n.pollsFilterVoted,
+      };
 
   Future<void> _create(BuildContext context) async {
     final cubit = context.read<PollsCubit>();
-    await showAppSheet<bool>(
-      context,
-      title: context.l10n.pollsCreateTitle,
-      child: PollCreatorSheet(cubit: cubit),
-    );
+    await showPollCreatorSheet(context, cubit: cubit);
   }
 
-  Future<void> _vote(
-    BuildContext context,
-    Poll poll,
-    List<String> optionIds,
-  ) async {
-    final l10n = context.l10n;
-    final succeeded = await context.read<PollsCubit>().submitVote(
-      poll,
-      optionIds,
-    );
-    if (!context.mounted) return;
-    if (succeeded) {
-      showNinjaToast(context, message: l10n.pollsVoteCounted);
+  Future<void> _open(BuildContext context, Poll poll) async {
+    final cubit = context.read<PollsCubit>();
+    final canTake = !poll.iParticipated && !poll.isEnded;
+    if (canTake) {
+      await showPollRunnerSheet(context, poll: poll, cubit: cubit);
     } else {
-      showNinjaToast(context, showCheck: false, message: l10n.error);
+      await showPollResultsSheet(context, poll: poll);
     }
   }
 
-  Future<void> _delete(BuildContext context, Poll poll) async {
-    final l10n = context.l10n;
-    final confirmed = await showAppConfirmDialog(
+  Future<void> _ownerActions(BuildContext context, Poll poll) async {
+    final cubit = context.read<PollsCubit>();
+    await showPollOwnerActionsSheet(context, poll: poll, cubit: cubit);
+  }
+
+  Future<void> _changeAnswers(BuildContext context, Poll poll) async {
+    if (poll.isEnded || !poll.allowChange) return;
+    await showPollRunnerSheet(
       context,
-      title: l10n.pollsDeleteConfirmTitle,
-      message: l10n.pollsDeleteConfirmBody,
-      confirmLabel: l10n.pollsDelete,
-      cancelLabel: l10n.pollsDeleteCancel,
-      destructive: true,
+      poll: poll,
+      cubit: context.read<PollsCubit>(),
     );
-    if (!confirmed || !context.mounted) return;
-    final succeeded = await context.read<PollsCubit>().deletePoll(poll);
-    if (!succeeded && context.mounted) {
-      showNinjaToast(context, showCheck: false, message: context.l10n.error);
-    }
   }
 
   @override
@@ -63,11 +70,10 @@ class PollsView extends StatelessWidget {
     final l10n = context.l10n;
     final state = context.watch<PollsCubit>().state;
     final cubit = context.read<PollsCubit>();
-    final isLoading = state.status == .loading && state.polls.isEmpty;
-    final isFailure = state.status == .failure && state.polls.isEmpty;
-    final openCount = state.polls
-        .where((poll) => !poll.hasVoted && !poll.hasEnded)
-        .length;
+    final isLoading =
+        state.status == PollsStatus.loading && state.polls.isEmpty;
+    final isFailure =
+        state.status == PollsStatus.failure && state.polls.isEmpty;
     return Scaffold(
       backgroundColor: colors.canvas,
       body: RefreshIndicator(
@@ -84,7 +90,7 @@ class PollsView extends StatelessWidget {
                 backSemanticsLabel: l10n.back,
                 trailingLabel: isLoading || isFailure
                     ? null
-                    : l10n.pollsOpenCount(openCount),
+                    : l10n.pollsOpenCount(state.openCount),
                 actions: [
                   accentHeaderAction(
                     onTap: () => unawaited(_create(context)),
@@ -94,27 +100,122 @@ class PollsView extends StatelessWidget {
               ),
             ),
             SliverPadding(
-              padding: const EdgeInsets.fromLTRB(
-                AppSpacing.screen,
-                AppSpacing.screen,
-                AppSpacing.screen,
-                AppSpacing.xxlg,
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.screen,
               ),
               sliver: SliverToBoxAdapter(
-                child: PollsBody(
-                  isLoading: isLoading,
-                  isFailure: isFailure,
-                  polls: state.polls,
-                  pendingPollIds: state.pendingPollIds,
-                  deletingPollIds: state.deletingPollIds,
-                  onRetry: () => unawaited(cubit.load()),
-                  onCreate: () => unawaited(_create(context)),
-                  onVote: (poll, optionIds) =>
-                      unawaited(_vote(context, poll, optionIds)),
-                  onDelete: (poll) => unawaited(_delete(context, poll)),
+                child: AppSearchField(
+                  controller: _search,
+                  hintText: l10n.pollsSearchHint,
+                  onChanged: cubit.setQuery,
+                  onClear: () => cubit.setQuery(''),
                 ),
               ),
             ),
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.only(top: AppSpacing.sm),
+                child: AppChipRow<PollFilter>(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.screen,
+                  ),
+                  value: state.filter,
+                  onChanged: cubit.setFilter,
+                  items: [
+                    for (final filter in PollFilter.values)
+                      AppChipRowItem(
+                        value: filter,
+                        label: _filterLabel(l10n, filter),
+                      ),
+                  ],
+                ),
+              ),
+            ),
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.only(top: AppSpacing.sm),
+                child: AppChipRow<PollCategory?>(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.screen,
+                  ),
+                  value: state.category,
+                  onChanged: cubit.setCategory,
+                  items: [
+                    AppChipRowItem(value: null, label: l10n.pollsCategoryAll),
+                    for (final category in PollCategory.values)
+                      AppChipRowItem(
+                        value: category,
+                        label: pollCategoryLabel(l10n, category),
+                      ),
+                  ],
+                ),
+              ),
+            ),
+            SliverPadding(
+              padding: EdgeInsets.fromLTRB(
+                AppSpacing.screen,
+                AppSpacing.screen,
+                AppSpacing.screen,
+                cubit.hasMore
+                    ? AppSpacing.lg
+                    : ninjaBottomInset(context) + AppSpacing.lg,
+              ),
+              sliver: SliverToBoxAdapter(
+                child: Column(
+                  children: [
+                    if (state.status == .failure && state.polls.isNotEmpty) ...[
+                      AppBanner(
+                        message: l10n.loadingError,
+                        tone: AppBannerTone.danger,
+                      ),
+                      const SizedBox(height: AppSpacing.sm),
+                      AppButton.secondary(
+                        label: l10n.retry,
+                        onPressed: () => unawaited(cubit.load()),
+                      ),
+                      const SizedBox(height: AppSpacing.md),
+                    ],
+                    PollsBody(
+                      isLoading: isLoading,
+                      isFailure: isFailure,
+                      polls: state.polls,
+                      filter: state.filter,
+                      category: state.category,
+                      query: state.query,
+                      onRetry: () => unawaited(cubit.load()),
+                      onCreate: () => unawaited(_create(context)),
+                      onOpen: (poll) => unawaited(_open(context, poll)),
+                      onOwnerActions: (poll) =>
+                          unawaited(_ownerActions(context, poll)),
+                      onChangeAnswers: (poll) =>
+                          unawaited(_changeAnswers(context, poll)),
+                      onResults: (poll) => unawaited(
+                        showPollResultsSheet(context, poll: poll),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            if (cubit.hasMore && state.polls.isNotEmpty)
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: EdgeInsets.fromLTRB(
+                    AppSpacing.screen,
+                    0,
+                    AppSpacing.screen,
+                    ninjaBottomInset(context) + AppSpacing.lg,
+                  ),
+                  child: AppButton.secondary(
+                    label: l10n.pollsLoadMore,
+                    expanded: true,
+                    loading: state.status == .loading,
+                    onPressed: state.status == .loading
+                        ? null
+                        : () => unawaited(cubit.load(more: true)),
+                  ),
+                ),
+              ),
           ],
         ),
       ),

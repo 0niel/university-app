@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$MentorProfileDraft {
 
- List<String> get topics; String get bio; String get level; List<String> get formats; int get price;
+ List<String> get topics; String get telegramHandle; String get bio; String get level; List<String> get formats; int get price;
 /// Create a copy of MentorProfileDraft
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +25,16 @@ $MentorProfileDraftCopyWith<MentorProfileDraft> get copyWith => _$MentorProfileD
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is MentorProfileDraft&&const DeepCollectionEquality().equals(other.topics, topics)&&(identical(other.bio, bio) || other.bio == bio)&&(identical(other.level, level) || other.level == level)&&const DeepCollectionEquality().equals(other.formats, formats)&&(identical(other.price, price) || other.price == price));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is MentorProfileDraft&&const DeepCollectionEquality().equals(other.topics, topics)&&(identical(other.telegramHandle, telegramHandle) || other.telegramHandle == telegramHandle)&&(identical(other.bio, bio) || other.bio == bio)&&(identical(other.level, level) || other.level == level)&&const DeepCollectionEquality().equals(other.formats, formats)&&(identical(other.price, price) || other.price == price));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(topics),bio,level,const DeepCollectionEquality().hash(formats),price);
+int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(topics),telegramHandle,bio,level,const DeepCollectionEquality().hash(formats),price);
 
 @override
 String toString() {
-  return 'MentorProfileDraft(topics: $topics, bio: $bio, level: $level, formats: $formats, price: $price)';
+  return 'MentorProfileDraft(topics: $topics, telegramHandle: $telegramHandle, bio: $bio, level: $level, formats: $formats, price: $price)';
 }
 
 
@@ -45,7 +45,7 @@ abstract mixin class $MentorProfileDraftCopyWith<$Res>  {
   factory $MentorProfileDraftCopyWith(MentorProfileDraft value, $Res Function(MentorProfileDraft) _then) = _$MentorProfileDraftCopyWithImpl;
 @useResult
 $Res call({
- List<String> topics, String bio, String level, List<String> formats, int price
+ List<String> topics, String telegramHandle, String bio, String level, List<String> formats, int price
 });
 
 
@@ -62,10 +62,11 @@ class _$MentorProfileDraftCopyWithImpl<$Res>
 
 /// Create a copy of MentorProfileDraft
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? topics = null,Object? bio = null,Object? level = null,Object? formats = null,Object? price = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? topics = null,Object? telegramHandle = null,Object? bio = null,Object? level = null,Object? formats = null,Object? price = null,}) {
   return _then(_self.copyWith(
 topics: null == topics ? _self.topics : topics // ignore: cast_nullable_to_non_nullable
-as List<String>,bio: null == bio ? _self.bio : bio // ignore: cast_nullable_to_non_nullable
+as List<String>,telegramHandle: null == telegramHandle ? _self.telegramHandle : telegramHandle // ignore: cast_nullable_to_non_nullable
+as String,bio: null == bio ? _self.bio : bio // ignore: cast_nullable_to_non_nullable
 as String,level: null == level ? _self.level : level // ignore: cast_nullable_to_non_nullable
 as String,formats: null == formats ? _self.formats : formats // ignore: cast_nullable_to_non_nullable
 as List<String>,price: null == price ? _self.price : price // ignore: cast_nullable_to_non_nullable
@@ -154,10 +155,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( List<String> topics,  String bio,  String level,  List<String> formats,  int price)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( List<String> topics,  String telegramHandle,  String bio,  String level,  List<String> formats,  int price)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _MentorProfileDraft() when $default != null:
-return $default(_that.topics,_that.bio,_that.level,_that.formats,_that.price);case _:
+return $default(_that.topics,_that.telegramHandle,_that.bio,_that.level,_that.formats,_that.price);case _:
   return orElse();
 
 }
@@ -175,10 +176,10 @@ return $default(_that.topics,_that.bio,_that.level,_that.formats,_that.price);ca
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( List<String> topics,  String bio,  String level,  List<String> formats,  int price)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( List<String> topics,  String telegramHandle,  String bio,  String level,  List<String> formats,  int price)  $default,) {final _that = this;
 switch (_that) {
 case _MentorProfileDraft():
-return $default(_that.topics,_that.bio,_that.level,_that.formats,_that.price);case _:
+return $default(_that.topics,_that.telegramHandle,_that.bio,_that.level,_that.formats,_that.price);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -195,10 +196,10 @@ return $default(_that.topics,_that.bio,_that.level,_that.formats,_that.price);ca
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( List<String> topics,  String bio,  String level,  List<String> formats,  int price)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( List<String> topics,  String telegramHandle,  String bio,  String level,  List<String> formats,  int price)?  $default,) {final _that = this;
 switch (_that) {
 case _MentorProfileDraft() when $default != null:
-return $default(_that.topics,_that.bio,_that.level,_that.formats,_that.price);case _:
+return $default(_that.topics,_that.telegramHandle,_that.bio,_that.level,_that.formats,_that.price);case _:
   return null;
 
 }
@@ -210,7 +211,7 @@ return $default(_that.topics,_that.bio,_that.level,_that.formats,_that.price);ca
 
 
 class _MentorProfileDraft implements MentorProfileDraft {
-  const _MentorProfileDraft({final  List<String> topics = const <String>[], this.bio = '', this.level = '', final  List<String> formats = const <String>[], this.price = 0}): _topics = topics,_formats = formats;
+  const _MentorProfileDraft({final  List<String> topics = const <String>[], this.telegramHandle = '', this.bio = '', this.level = '', final  List<String> formats = const <String>[], this.price = 0}): _topics = topics,_formats = formats;
 
 
  final  List<String> _topics;
@@ -220,6 +221,7 @@ class _MentorProfileDraft implements MentorProfileDraft {
   return EqualUnmodifiableListView(_topics);
 }
 
+@override@JsonKey() final  String telegramHandle;
 @override@JsonKey() final  String bio;
 @override@JsonKey() final  String level;
  final  List<String> _formats;
@@ -241,16 +243,16 @@ _$MentorProfileDraftCopyWith<_MentorProfileDraft> get copyWith => __$MentorProfi
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _MentorProfileDraft&&const DeepCollectionEquality().equals(other._topics, _topics)&&(identical(other.bio, bio) || other.bio == bio)&&(identical(other.level, level) || other.level == level)&&const DeepCollectionEquality().equals(other._formats, _formats)&&(identical(other.price, price) || other.price == price));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _MentorProfileDraft&&const DeepCollectionEquality().equals(other._topics, _topics)&&(identical(other.telegramHandle, telegramHandle) || other.telegramHandle == telegramHandle)&&(identical(other.bio, bio) || other.bio == bio)&&(identical(other.level, level) || other.level == level)&&const DeepCollectionEquality().equals(other._formats, _formats)&&(identical(other.price, price) || other.price == price));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_topics),bio,level,const DeepCollectionEquality().hash(_formats),price);
+int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_topics),telegramHandle,bio,level,const DeepCollectionEquality().hash(_formats),price);
 
 @override
 String toString() {
-  return 'MentorProfileDraft(topics: $topics, bio: $bio, level: $level, formats: $formats, price: $price)';
+  return 'MentorProfileDraft(topics: $topics, telegramHandle: $telegramHandle, bio: $bio, level: $level, formats: $formats, price: $price)';
 }
 
 
@@ -261,7 +263,7 @@ abstract mixin class _$MentorProfileDraftCopyWith<$Res> implements $MentorProfil
   factory _$MentorProfileDraftCopyWith(_MentorProfileDraft value, $Res Function(_MentorProfileDraft) _then) = __$MentorProfileDraftCopyWithImpl;
 @override @useResult
 $Res call({
- List<String> topics, String bio, String level, List<String> formats, int price
+ List<String> topics, String telegramHandle, String bio, String level, List<String> formats, int price
 });
 
 
@@ -278,10 +280,11 @@ class __$MentorProfileDraftCopyWithImpl<$Res>
 
 /// Create a copy of MentorProfileDraft
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? topics = null,Object? bio = null,Object? level = null,Object? formats = null,Object? price = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? topics = null,Object? telegramHandle = null,Object? bio = null,Object? level = null,Object? formats = null,Object? price = null,}) {
   return _then(_MentorProfileDraft(
 topics: null == topics ? _self._topics : topics // ignore: cast_nullable_to_non_nullable
-as List<String>,bio: null == bio ? _self.bio : bio // ignore: cast_nullable_to_non_nullable
+as List<String>,telegramHandle: null == telegramHandle ? _self.telegramHandle : telegramHandle // ignore: cast_nullable_to_non_nullable
+as String,bio: null == bio ? _self.bio : bio // ignore: cast_nullable_to_non_nullable
 as String,level: null == level ? _self.level : level // ignore: cast_nullable_to_non_nullable
 as String,formats: null == formats ? _self._formats : formats // ignore: cast_nullable_to_non_nullable
 as List<String>,price: null == price ? _self.price : price // ignore: cast_nullable_to_non_nullable

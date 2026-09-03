@@ -11,13 +11,13 @@ import 'package:study_groups_repository/study_groups_repository.dart';
 
 class MockStudyGroupsRepository extends Mock implements StudyGroupsRepository {}
 
-int _pastelCardCount(WidgetTester tester, Color accentSoft) {
+int _pastelCardCount(WidgetTester tester, Color tint2) {
   var count = 0;
   for (final box in tester.widgetList<DecoratedBox>(
     find.byType(DecoratedBox),
   )) {
     final decoration = box.decoration;
-    if (decoration is BoxDecoration && decoration.color == accentSoft) {
+    if (decoration is BoxDecoration && decoration.color == tint2) {
       count++;
     }
   }
@@ -69,8 +69,8 @@ void main() {
     );
   }
 
-  NinjaColors colorsOf(WidgetTester tester) =>
-      tester.element(find.byType(StudyGroupView)).ninja;
+  AppColors colorsOf(WidgetTester tester) =>
+      tester.element(find.byType(StudyGroupView)).colors;
 
   testWidgets('the group card is the only pastel feature card', (tester) async {
     when(repository.getMyGroup).thenAnswer((_) async => owned);
@@ -80,7 +80,7 @@ void main() {
 
     final colors = colorsOf(tester);
     expect(find.byType(NinjaStudyGroupHeroCard), findsOneWidget);
-    expect(_pastelCardCount(tester, colors.accentSoft), 1);
+    expect(_pastelCardCount(tester, colors.tint2), 1);
 
     final hero = tester.widget<DecoratedBox>(
       find
@@ -90,7 +90,7 @@ void main() {
           )
           .first,
     );
-    expect((hero.decoration as BoxDecoration).color, colors.accentSoft);
+    expect((hero.decoration as BoxDecoration).color, colors.tint2);
     expect(find.text('ИКБО-09-22'), findsOneWidget);
     expect(find.text('Пётр Петров'), findsOneWidget);
   });
@@ -104,7 +104,7 @@ void main() {
 
     expect(find.byType(NinjaStudyGroupSkeleton), findsOneWidget);
     expect(find.byType(NinjaSkeletonGroup), findsOneWidget);
-    expect(_pastelCardCount(tester, colorsOf(tester).accentSoft), 0);
+    expect(_pastelCardCount(tester, colorsOf(tester).tint2), 0);
 
     pending.complete(MyStudyGroup.empty);
     await tester.pumpAndSettle();
@@ -158,5 +158,52 @@ void main() {
       ),
       findsNWidgets(2),
     );
+  });
+
+  testWidgets('owner can transfer ownership to another member', (
+    tester,
+  ) async {
+    when(repository.getMyGroup).thenAnswer((_) async => owned);
+    when(
+      () => repository.transferOwnership('u2'),
+    ).thenAnswer((_) async => owned);
+
+    await tester.pumpWidget(buildSubject());
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.bySemanticsLabel('Управление участником'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Сделать организатором'), findsOneWidget);
+    await tester.tap(find.text('Сделать организатором'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Сделать организатором?'), findsOneWidget);
+    await tester.tap(find.text('Сделать организатором').last);
+    await tester.pumpAndSettle();
+
+    verify(() => repository.transferOwnership('u2')).called(1);
+  });
+
+  testWidgets('owner can still remove a member through the tools sheet', (
+    tester,
+  ) async {
+    when(repository.getMyGroup).thenAnswer((_) async => owned);
+    when(() => repository.removeMember('u2')).thenAnswer((_) async {});
+
+    await tester.pumpWidget(buildSubject());
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.bySemanticsLabel('Управление участником'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Удалить'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Удалить участника?'), findsOneWidget);
+    await tester.tap(find.text('Удалить').last);
+    await tester.pumpAndSettle();
+
+    verify(() => repository.removeMember('u2')).called(1);
   });
 }

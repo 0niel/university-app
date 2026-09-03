@@ -17,11 +17,11 @@ class MarketplaceGridSkeleton extends StatelessWidget {
     return NinjaSkeletonGroup(
       semanticsLabel: context.l10n.loadingContent,
       child: GridView.builder(
-        padding: const EdgeInsets.fromLTRB(
+        padding: EdgeInsets.fromLTRB(
           AppSpacing.screen,
           AppSpacing.zero,
           AppSpacing.screen,
-          AppSpacing.xxlg,
+          ninjaBottomInset(context) + AppSpacing.lg,
         ),
         itemCount: 6,
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(

@@ -10,11 +10,13 @@ class MentorCard extends StatelessWidget {
     super.key,
     this.onRequest,
     this.onEdit,
+    this.onTelegram,
   });
 
   final Mentor mentor;
   final VoidCallback? onRequest;
   final VoidCallback? onEdit;
+  final VoidCallback? onTelegram;
 
   @override
   Widget build(BuildContext context) {
@@ -121,6 +123,12 @@ class MentorCard extends StatelessWidget {
                   label: context.l10n.mentorshipSendRequest,
                   expanded: true,
                   onPressed: onRequest,
+                ),
+              if (onTelegram != null)
+                NinjaButton.tonal(
+                  label: context.l10n.mentorshipTelegramButton,
+                  expanded: true,
+                  onPressed: onTelegram,
                 ),
             ],
           ),

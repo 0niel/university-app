@@ -7,6 +7,7 @@ part 'mentor_profile_draft.freezed.dart';
 abstract class MentorProfileDraft with _$MentorProfileDraft {
   const factory MentorProfileDraft({
     @Default(<String>[]) List<String> topics,
+    @Default('') String telegramHandle,
     @Default('') String bio,
     @Default('') String level,
     @Default(<String>[]) List<String> formats,
@@ -15,6 +16,7 @@ abstract class MentorProfileDraft with _$MentorProfileDraft {
 
   factory MentorProfileDraft.fromMentor(Mentor? mentor) => MentorProfileDraft(
     topics: mentor?.topics ?? const [],
+    telegramHandle: mentor?.telegramHandle ?? '',
     bio: mentor?.bio ?? '',
     level: mentor?.level ?? '',
     formats: mentor?.formats ?? const [],

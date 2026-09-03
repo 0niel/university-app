@@ -51,7 +51,9 @@ class _ModerationBody extends StatelessWidget {
       backgroundColor: colors.surface,
       onRefresh: () => context.read<MiniAppsModerationCubit>().load(),
       child: ListView(
-        padding: const .only(bottom: 60),
+        padding: EdgeInsets.only(
+          bottom: ninjaBottomInset(context) + AppSpacing.lg,
+        ),
         children: [
           if (queue.pending.isNotEmpty) ...[
             _ModerationSectionLabel(

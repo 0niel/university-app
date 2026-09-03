@@ -69,13 +69,48 @@ void main() {
 
       await tester.tap(
         find.descendant(
-          of: find.byType(NinjaDialog),
+          of: find.byType(AppDialog),
           matching: find.text('Отозвать отклик'),
         ),
       );
       await tester.pumpAndSettle();
 
       verify(() => cubit.withdraw(team)).called(1);
+    });
+
+    testWidgets('owner sees edit, close and delete actions', (tester) async {
+      const team = Team(id: 'team-1', title: 'Campus Crew', isMine: true);
+      await tester.pumpWidget(
+        buildSubject(const TeamFinderState(status: .ready, teams: [team])),
+      );
+
+      expect(find.text('Изменить'), findsOneWidget);
+      expect(find.text('Закрыть набор'), findsOneWidget);
+      expect(find.text('Удалить команду'), findsOneWidget);
+    });
+
+    testWidgets('closing a team asks for confirmation first', (tester) async {
+      const team = Team(id: 'team-1', title: 'Campus Crew', isMine: true);
+      when(() => cubit.closeTeam(team)).thenAnswer((_) async => true);
+      await tester.pumpWidget(
+        buildSubject(const TeamFinderState(status: .ready, teams: [team])),
+      );
+
+      await tester.tap(find.text('Закрыть набор'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Закрыть набор в команду?'), findsOneWidget);
+      verifyNever(() => cubit.closeTeam(team));
+
+      await tester.tap(
+        find.descendant(
+          of: find.byType(AppDialog),
+          matching: find.text('Закрыть набор'),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      verify(() => cubit.closeTeam(team)).called(1);
     });
   });
 
@@ -170,6 +205,70 @@ void main() {
 
       expect(tester.takeException(), isNull);
     }
+  });
+
+  testWidgets('create sheet reveals a free-text role field for Другое', (
+    tester,
+  ) async {
+    final cubit = MockTeamFinderCubit();
+    when(() => cubit.state).thenReturn(const TeamFinderState());
+    await tester.pumpWidget(
+      _app(
+        BlocProvider<TeamFinderCubit>.value(
+          value: cubit,
+          child: const Scaffold(body: CreateTeamSheet()),
+        ),
+      ),
+    );
+
+    expect(find.text('Другое'), findsOneWidget);
+    expect(find.text('СВОЯ РОЛЬ'), findsNothing);
+
+    await tester.tap(find.text('Другое'));
+    await tester.pump();
+
+    expect(find.text('СВОЯ РОЛЬ'), findsOneWidget);
+    expect(find.text('Через запятую — добавится несколько'), findsOneWidget);
+  });
+
+  testWidgets('team size stepper is clamped between 2 and 10', (
+    tester,
+  ) async {
+    final cubit = MockTeamFinderCubit();
+    when(() => cubit.state).thenReturn(const TeamFinderState());
+    await tester.pumpWidget(
+      _app(
+        BlocProvider<TeamFinderCubit>.value(
+          value: cubit,
+          child: const Scaffold(body: CreateTeamSheet()),
+        ),
+      ),
+    );
+
+    final decrement = find.byWidgetPredicate(
+      (widget) =>
+          widget is AppLineIconWidget && widget.icon == AppLineIcon.minus,
+    );
+    final increment = find.byWidgetPredicate(
+      (widget) =>
+          widget is AppLineIconWidget && widget.icon == AppLineIcon.plus,
+    );
+
+    expect(find.text('5'), findsOneWidget);
+
+    for (var i = 0; i < 5; i++) {
+      await tester.tap(decrement);
+      await tester.pump();
+    }
+    expect(find.text('2'), findsOneWidget);
+    expect(find.text('1'), findsNothing);
+
+    for (var i = 0; i < 10; i++) {
+      await tester.tap(increment);
+      await tester.pump();
+    }
+    expect(find.text('10'), findsOneWidget);
+    expect(find.text('11'), findsNothing);
   });
 }
 

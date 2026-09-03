@@ -44,7 +44,6 @@ Future<DateTime?> showAppDatePicker(
   return showAppSheet<DateTime>(
     context,
     title: title ?? context.l10n.pickerDateTitle,
-    scrollable: false,
     contentPadding: EdgeInsets.zero,
     child: AppDatePickerSheet(
       initial: _dayOnly(initial),
@@ -68,7 +67,6 @@ Future<List<DateTime>?> showAppMultiDatePicker(
   return showAppSheet<List<DateTime>>(
     context,
     title: title ?? context.l10n.pickerDatesTitle,
-    scrollable: false,
     child: AppMultiDatePickerSheet(
       selected: selected.map(_dayOnly).toList(),
       firstDate:

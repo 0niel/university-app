@@ -11,20 +11,13 @@ import 'package:rtu_mirea_app/l10n/l10n.dart';
 class MockFreeRoomsCubit extends MockCubit<FreeRoomsState>
     implements FreeRoomsCubit {}
 
-class MockRoomBookingCubit extends MockCubit<RoomBookingState>
-    implements RoomBookingCubit {}
-
 void main() {
   group('FreeRoomsView', () {
     late FreeRoomsCubit cubit;
-    late RoomBookingCubit saved;
 
     setUp(() {
       cubit = MockFreeRoomsCubit();
-      saved = MockRoomBookingCubit();
-      when(() => saved.state).thenReturn(const RoomBookingState());
       addTearDown(cubit.close);
-      addTearDown(saved.close);
     });
 
     Widget buildSubject({double textScale = 1, bool reduceMotion = false}) {
@@ -41,11 +34,8 @@ void main() {
           ),
           child: child!,
         ),
-        home: MultiBlocProvider(
-          providers: [
-            BlocProvider<FreeRoomsCubit>.value(value: cubit),
-            BlocProvider<RoomBookingCubit>.value(value: saved),
-          ],
+        home: BlocProvider<FreeRoomsCubit>.value(
+          value: cubit,
           child: const FreeRoomsView(),
         ),
       );

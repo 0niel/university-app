@@ -1,7 +1,3 @@
-/// Stac (BDUI) runtime bridge for mini apps: app_ui widget parsers,
-/// custom deep-link/host actions and the secure proxy network layer.
-library;
-
 export 'package:stac/stac.dart' show Stac;
 
 export 'src/actions/storage_actions.dart'

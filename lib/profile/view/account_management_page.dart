@@ -56,7 +56,7 @@ class _AccountManagementPageState extends State<AccountManagementPage> {
               Expanded(
                 child: ListView(
                   padding: EdgeInsets.only(
-                    bottom: MediaQuery.paddingOf(context).bottom + 32,
+                    bottom: ninjaBottomInset(context) + AppSpacing.lg,
                   ),
                   children: [
                     if (_error case final message?)

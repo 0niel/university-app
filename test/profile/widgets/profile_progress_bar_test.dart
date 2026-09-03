@@ -13,9 +13,7 @@ void main() {
           builder: (context) => Scaffold(
             body: Center(
               child: ColoredBox(
-                color: pastel
-                    ? context.ninja.accentSoft
-                    : context.ninja.surface,
+                color: pastel ? context.colors.tint : context.colors.surface,
                 child: SizedBox(width: 240, child: child),
               ),
             ),
@@ -41,7 +39,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    final colors = tester.element(find.byType(ProfileProgressBar)).ninja;
+    final colors = tester.element(find.byType(ProfileProgressBar)).colors;
     final track = tester.widget<SizedBox>(
       find
           .descendant(
@@ -58,8 +56,8 @@ void main() {
     );
 
     expect(track.height, 8);
-    expect(clip.borderRadius, BorderRadius.circular(NinjaRadius.pill));
-    expect(fillsOf(tester), [colors.surfaceAlt, colors.brand]);
+    expect(clip.borderRadius, BorderRadius.circular(AppRadius.full));
+    expect(fillsOf(tester), [colors.surface2, colors.accent]);
   });
 
   testWidgets('inverts the palette on the pastel feature card', (tester) async {
@@ -71,15 +69,9 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    final colors = tester.element(find.byType(ProfileProgressBar)).ninja;
-    expect(fillsOf(tester), [
-      const Color(0x8CFFFFFF),
-      colors.onAccentSoft,
-    ]);
-    expect(
-      tester.widget<Text>(find.text('25%')).style?.color,
-      colors.onAccentSoft,
-    );
+    final colors = tester.element(find.byType(ProfileProgressBar)).colors;
+    expect(fillsOf(tester), [colors.white.withAlpha(140), colors.ink]);
+    expect(tester.widget<Text>(find.text('25%')).style?.color, colors.ink);
   });
 
   testWidgets('keeps the percent in tabular figures', (tester) async {

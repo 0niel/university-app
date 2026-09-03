@@ -7,11 +7,13 @@ class _EventPreview extends StatelessWidget {
     required this.startsAt,
     required this.category,
     required this.emoji,
+    this.endsAt,
   });
 
   final String title;
   final String place;
   final DateTime startsAt;
+  final DateTime? endsAt;
   final EventCategory category;
   final String emoji;
 
@@ -20,6 +22,11 @@ class _EventPreview extends StatelessWidget {
     final colors = context.colors;
     final l10n = context.l10n;
     final locale = Localizations.localeOf(context).languageCode;
+    final end = endsAt;
+    final when = end == null
+        ? DateFormat('d MMMM · HH:mm', locale).format(startsAt)
+        : '${DateFormat('d MMMM · HH:mm', locale).format(startsAt)}–'
+              '${DateFormat.Hm(locale).format(end)}';
     return DecoratedBox(
       decoration: BoxDecoration(
         color: colors.surface,
@@ -30,16 +37,7 @@ class _EventPreview extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              width: 44,
-              height: 44,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: colors.tint,
-                borderRadius: BorderRadius.circular(AppRadius.field),
-              ),
-              child: Text(emoji, style: const TextStyle(fontSize: 22)),
-            ),
+            EmojiTile(emoji: emoji, emojiSize: 22),
             const SizedBox(width: AppSpacing.md),
             Expanded(
               child: Column(
@@ -56,7 +54,7 @@ class _EventPreview extends StatelessWidget {
                   Text(
                     [
                       eventCategoryLabel(l10n, category),
-                      DateFormat('d MMMM · HH:mm', locale).format(startsAt),
+                      when,
                       if (place.isNotEmpty) place,
                     ].join(' · '),
                     maxLines: 2,

@@ -98,9 +98,9 @@ void main() {
         .toList();
     expect(fills, hasLength(5));
     expect(fills.every((fill) => fill.shape == BoxShape.circle), isTrue);
-    expect(fills[2].color, NinjaColors.light().brand);
+    expect(fills[2].color, AppColors.light.accent);
     expect(
-      fills.where((fill) => fill.color == NinjaColors.light().brand),
+      fills.where((fill) => fill.color == AppColors.light.accent),
       hasLength(1),
     );
   });

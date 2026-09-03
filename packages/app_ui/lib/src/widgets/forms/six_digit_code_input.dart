@@ -10,6 +10,7 @@ class AppCodeInput extends StatefulWidget {
     this.controller,
     this.focusNode,
     this.enabled = true,
+    this.readOnly = false,
     this.autofocus = false,
     this.onChanged,
     this.onCompleted,
@@ -22,6 +23,8 @@ class AppCodeInput extends StatefulWidget {
   final TextEditingController? controller;
   final FocusNode? focusNode;
   final bool enabled;
+
+  final bool readOnly;
   final bool autofocus;
   final ValueChanged<String>? onChanged;
   final ValueChanged<String>? onCompleted;
@@ -98,7 +101,7 @@ class _AppCodeInputState extends State<AppCodeInput> {
   }
 
   void _append(String digit) {
-    if (!widget.enabled) return;
+    if (!widget.enabled || widget.readOnly) return;
     final next = _code + digit;
     if (next.length > widget.length) return;
     _controller.text = next;
@@ -106,7 +109,7 @@ class _AppCodeInputState extends State<AppCodeInput> {
   }
 
   void _backspace() {
-    if (!widget.enabled || _code.isEmpty) return;
+    if (!widget.enabled || widget.readOnly || _code.isEmpty) return;
     final next = _code.substring(0, _code.length - 1);
     _controller.text = next;
     _emit(next);
@@ -147,6 +150,7 @@ class _AppCodeInputState extends State<AppCodeInput> {
                     controller: _controller,
                     focusNode: _focusNode,
                     enabled: widget.enabled,
+                    readOnly: widget.readOnly,
                     autofocus: widget.autofocus,
                     keyboardType: TextInputType.number,
                     maxLength: widget.length,
@@ -175,7 +179,7 @@ class _AppCodeInputState extends State<AppCodeInput> {
         AppCodeKeypad(
           onKey: _append,
           onBackspace: _backspace,
-          enabled: widget.enabled,
+          enabled: widget.enabled && !widget.readOnly,
         ),
       ],
     );
@@ -192,6 +196,7 @@ class SixDigitCodeInput extends StatelessWidget {
     this.fillColor,
     this.autofocus = true,
     this.enabled = true,
+    this.readOnly = false,
     this.showKeypad = false,
   });
 
@@ -202,6 +207,7 @@ class SixDigitCodeInput extends StatelessWidget {
   final Color? fillColor;
   final bool autofocus;
   final bool enabled;
+  final bool readOnly;
   final bool showKeypad;
 
   @override
@@ -214,6 +220,7 @@ class SixDigitCodeInput extends StatelessWidget {
       fillColor: fillColor,
       autofocus: autofocus,
       enabled: enabled,
+      readOnly: readOnly,
       showKeypad: showKeypad,
     );
   }

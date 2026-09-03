@@ -16,6 +16,7 @@ void main() {
       const RequestToJoinFailure(error),
       const RespondJoinRequestFailure(error),
       const RemoveMemberFailure(error),
+      const TransferOwnershipFailure(error),
       const GetInvitesFailure(error),
       const SearchGroupsFailure(error),
     ];

@@ -195,6 +195,7 @@ class _LessonMaterialUploadSheetState extends State<LessonMaterialUploadSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final picked = _picked;
     return ExcludeFocus(
       excluding: _busy,
       child: AbsorbPointer(
@@ -203,17 +204,22 @@ class _LessonMaterialUploadSheetState extends State<LessonMaterialUploadSheet> {
           crossAxisAlignment: .start,
           mainAxisSize: .min,
           children: [
-            _DropZone(picked: _picked, onTap: () => unawaited(_pickFile())),
-            if (_picking)
-              const Padding(
-                padding: EdgeInsets.only(top: AppSpacing.gap),
-                child: Center(child: AppSpinner()),
+            if (_picking && picked == null)
+              const _DropZoneSkeleton()
+            else if (picked == null)
+              _DropZone(onTap: () => unawaited(_pickFile()))
+            else
+              _PickedPreview(
+                picked: picked,
+                onRemove: () => setState(() {
+                  _picked = null;
+                  _error = null;
+                }),
               ),
-            if (_error != null)
-              Padding(
-                padding: const EdgeInsets.only(top: AppSpacing.gap),
-                child: AppBanner(message: _error!, tone: AppBannerTone.danger),
-              ),
+            if (_error != null) ...[
+              const SizedBox(height: AppSpacing.gap),
+              AppBanner(message: _error!, tone: AppBannerTone.danger),
+            ],
             const SizedBox(height: AppSpacing.sectionGap),
             Row(
               spacing: AppSpacing.sm,
@@ -279,34 +285,10 @@ class _LessonMaterialUploadSheetState extends State<LessonMaterialUploadSheet> {
               onChanged: (value) => setState(() => _anonymous = value),
             ),
             const SizedBox(height: AppSpacing.sectionGap),
-            Container(
-              padding: const .all(AppSpacing.sectionGap),
-              decoration: BoxDecoration(
-                color: context.colors.surface2,
-                borderRadius: .circular(AppRadius.card),
-              ),
-              child: Row(
-                spacing: AppSpacing.gap,
-                children: [
-                  AppNinjaMark(size: 16, color: context.colors.accent),
-                  Expanded(
-                    child: Text.rich(
-                      TextSpan(
-                        children: [
-                          TextSpan(text: context.l10n.lessonDetailsRewardPre),
-                          TextSpan(
-                            text: context.l10n.lessonDetailsShurikensReward,
-                            style: TextStyle(color: context.colors.accent),
-                          ),
-                        ],
-                      ),
-                      style: AppText.subtext.copyWith(
-                        color: context.colors.muted,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+            AppContextBanner(
+              icon: AppLineIcon.spark,
+              title: context.l10n.lessonDetailsShurikensReward,
+              subtitle: context.l10n.lessonDetailsRewardPre,
             ),
             const SizedBox(height: AppSpacing.lg),
             if (_uploadError != null) ...[

@@ -8,6 +8,30 @@ import 'package:rtu_mirea_app/people/people.dart';
 
 class GroupSpaceCubitTest extends Mock implements CampusRepository {}
 
+class _FakeRealtimeSession implements GroupSpaceRealtimeSession {
+  final _controller = StreamController<void>.broadcast();
+
+  @override
+  Stream<void> get changes => _controller.stream;
+
+  void emitChange() => _controller.add(null);
+
+  @override
+  Future<void> close() async => _controller.close();
+}
+
+class _FakePresenceSession implements GroupSpacePresenceSession {
+  final _controller = StreamController<int>.broadcast();
+
+  @override
+  Stream<int> get onlineCount => _controller.stream;
+
+  void emitCount(int count) => _controller.add(count);
+
+  @override
+  Future<void> close() async => _controller.close();
+}
+
 void main() {
   late CampusRepository repository;
 
@@ -258,5 +282,155 @@ void main() {
 
     expect(saved, isFalse);
     expect(cubit.state.mutationFailure, GroupSpaceMutationFailure.post);
+  });
+
+  group('comments', () {
+    test('loadComments populates the thread for a post', () async {
+      when(repository.getGroupSpace).thenAnswer((_) async => space);
+      when(
+        () => repository.getGroupPostComments('note-1'),
+      ).thenAnswer(
+        (_) async => const [
+          GroupPostComment(
+            id: 'c1',
+            postId: 'note-1',
+            body: 'Nice',
+            authorName: 'Student',
+          ),
+        ],
+      );
+      final cubit = createCubit();
+      addTearDown(cubit.close);
+      await cubit.load();
+
+      await cubit.loadComments('note-1');
+
+      expect(cubit.state.comments['note-1'], hasLength(1));
+      expect(cubit.state.loadingCommentPostIds, isEmpty);
+    });
+
+    test('addComment appends the comment and bumps the post count', () async {
+      when(repository.getGroupSpace).thenAnswer((_) async => space);
+      when(
+        () => repository.addGroupPostComment(postId: 'note-1', body: 'Nice'),
+      ).thenAnswer(
+        (_) async => const GroupPostComment(
+          id: 'c1',
+          postId: 'note-1',
+          body: 'Nice',
+          authorName: 'Student',
+        ),
+      );
+      final cubit = createCubit();
+      addTearDown(cubit.close);
+      await cubit.load();
+
+      final ok = await cubit.addComment(postId: 'note-1', body: 'Nice');
+
+      expect(ok, isTrue);
+      expect(cubit.state.comments['note-1'], hasLength(1));
+      expect(cubit.state.space.notes.single.commentsCount, 1);
+      expect(cubit.state.isSubmittingComment, isFalse);
+    });
+
+    test('deleteComment removes it and decrements the post count', () async {
+      final withCounted = space.copyWith(
+        notes: [note.copyWith(commentsCount: 1)],
+      );
+      when(repository.getGroupSpace).thenAnswer((_) async => withCounted);
+      when(
+        () => repository.getGroupPostComments('note-1'),
+      ).thenAnswer(
+        (_) async => const [
+          GroupPostComment(
+            id: 'c1',
+            postId: 'note-1',
+            body: 'Nice',
+            authorName: 'Student',
+          ),
+        ],
+      );
+      when(
+        () => repository.deleteGroupPostComment('c1'),
+      ).thenAnswer((_) async {});
+      final cubit = createCubit();
+      addTearDown(cubit.close);
+      await cubit.load();
+      await cubit.loadComments('note-1');
+
+      final ok = await cubit.deleteComment(id: 'c1', postId: 'note-1');
+
+      expect(ok, isTrue);
+      expect(cubit.state.comments['note-1'], isEmpty);
+      expect(cubit.state.space.notes.single.commentsCount, 0);
+    });
+
+    test('failed addComment exposes a typed failure', () async {
+      when(repository.getGroupSpace).thenAnswer((_) async => space);
+      when(
+        () => repository.addGroupPostComment(postId: 'note-1', body: 'Nice'),
+      ).thenThrow(StateError('offline'));
+      final cubit = createCubit();
+      addTearDown(cubit.close);
+      await cubit.load();
+
+      final ok = await cubit.addComment(postId: 'note-1', body: 'Nice');
+
+      expect(ok, isFalse);
+      expect(cubit.state.mutationFailure, GroupSpaceMutationFailure.comment);
+    });
+  });
+
+  group('realtime', () {
+    test('a fake realtime stream event triggers a live reload', () async {
+      final realtimeSession = _FakeRealtimeSession();
+      final presenceSession = _FakePresenceSession();
+      addTearDown(realtimeSession.close);
+      addTearDown(presenceSession.close);
+      final liveSpace = space.copyWith(groupId: 'group-1');
+      var loads = 0;
+      when(repository.getGroupSpace).thenAnswer((_) async {
+        loads++;
+        return liveSpace;
+      });
+      when(
+        () => repository.openGroupSpaceRealtime('group-1'),
+      ).thenAnswer((_) => realtimeSession);
+      when(
+        () => repository.openGroupSpacePresence('group-1'),
+      ).thenAnswer((_) => presenceSession);
+      final cubit = createCubit();
+      addTearDown(cubit.close);
+      await cubit.load();
+      expect(loads, 1);
+
+      realtimeSession.emitChange();
+      await pumpEventQueue();
+
+      expect(loads, 2);
+    });
+
+    test('presence updates surface the online member count', () async {
+      final realtimeSession = _FakeRealtimeSession();
+      final presenceSession = _FakePresenceSession();
+      addTearDown(realtimeSession.close);
+      addTearDown(presenceSession.close);
+      final liveSpace = space.copyWith(groupId: 'group-1');
+      when(repository.getGroupSpace).thenAnswer((_) async => liveSpace);
+      when(
+        () => repository.openGroupSpaceRealtime('group-1'),
+      ).thenAnswer((_) => realtimeSession);
+      when(
+        () => repository.openGroupSpacePresence('group-1'),
+      ).thenAnswer((_) => presenceSession);
+      final cubit = createCubit();
+      addTearDown(cubit.close);
+      await cubit.load();
+
+      presenceSession.emitCount(3);
+      await pumpEventQueue();
+
+      expect(cubit.state.onlineCount, 3);
+    });
   });
 }

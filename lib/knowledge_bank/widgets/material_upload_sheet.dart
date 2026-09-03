@@ -8,6 +8,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:mime/mime.dart';
 import 'package:rtu_mirea_app/knowledge_bank/config/knowledge_material_types.dart';
+import 'package:rtu_mirea_app/knowledge_bank/utils/image_preview.dart';
 import 'package:rtu_mirea_app/knowledge_bank/widgets/material_subject_picker.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 
@@ -50,6 +51,9 @@ class _MaterialUploadSheetState extends State<MaterialUploadSheet> {
   String? _fileName;
   Uint8List? _fileBytes;
   String? _mimeType;
+  Uint8List? _previewBytes;
+  int? _previewWidth;
+  int? _previewHeight;
 
   @override
   void dispose() {
@@ -76,10 +80,18 @@ class _MaterialUploadSheetState extends State<MaterialUploadSheet> {
         setState(() => _fileFailed = true);
         return;
       }
+      final mimeType = lookupMimeType(file.name, headerBytes: bytes);
+      final preview = mimeType != null && mimeType.startsWith('image/')
+          ? await generateImagePreview(bytes)
+          : null;
+      if (!mounted) return;
       setState(() {
         _fileName = file.name;
         _fileBytes = bytes;
-        _mimeType = lookupMimeType(file.name, headerBytes: bytes);
+        _mimeType = mimeType;
+        _previewBytes = preview?.bytes;
+        _previewWidth = preview?.width;
+        _previewHeight = preview?.height;
         if (_title.text.trim().isEmpty) {
           final extensionIndex = file.name.lastIndexOf('.');
           _title.text = extensionIndex > 0
@@ -128,6 +140,10 @@ class _MaterialUploadSheetState extends State<MaterialUploadSheet> {
         fileName: fileName,
         fileBytes: fileBytes,
         mimeType: _mimeType,
+        previewBytes: _previewBytes,
+        previewMimeType: _previewBytes == null ? null : 'image/png',
+        width: _previewWidth,
+        height: _previewHeight,
       );
       if (mounted) Navigator.of(context).pop(true);
     } on Object catch (error, stackTrace) {
@@ -185,6 +201,16 @@ class _MaterialUploadSheetState extends State<MaterialUploadSheet> {
               children: [
                 if (_picking)
                   const NinjaSpinner(size: 24)
+                else if (_previewBytes != null)
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(AppRadius.iconTile),
+                    child: Image.memory(
+                      _previewBytes!,
+                      width: 56,
+                      height: 56,
+                      fit: BoxFit.cover,
+                    ),
+                  )
                 else
                   AppLineIconWidget(
                     AppLineIcon.folder,

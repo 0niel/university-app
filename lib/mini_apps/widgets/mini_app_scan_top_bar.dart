@@ -13,6 +13,7 @@ class MiniAppScanTopBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Padding(
       padding: const .all(12),
       child: Row(
@@ -25,7 +26,7 @@ class MiniAppScanTopBar extends StatelessWidget {
           const Spacer(),
           Text(
             context.l10n.miniAppsScanTitle,
-            style: AppText.body.copyWith(color: Colors.white),
+            style: AppText.body.copyWith(color: colors.white),
           ),
           const Spacer(),
           ValueListenableBuilder<MobileScannerState>(

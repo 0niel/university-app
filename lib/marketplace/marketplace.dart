@@ -1,3 +1,4 @@
+export 'cubit/market_contact_prefs_cubit.dart';
 export 'cubit/marketplace_cubit.dart';
 export 'cubit/marketplace_status.dart';
 export 'models/models.dart';

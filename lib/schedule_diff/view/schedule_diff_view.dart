@@ -87,7 +87,11 @@ class ScheduleDiffView extends StatelessWidget {
               icon: AppLineIcon.trash,
               items: diff.removed,
             ),
-          SliverToBoxAdapter(child: SizedBox(height: scale.space(40))),
+          SliverToBoxAdapter(
+            child: SizedBox(
+              height: ninjaBottomInset(context) + AppSpacing.lg,
+            ),
+          ),
         ],
       ),
     );

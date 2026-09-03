@@ -14,7 +14,6 @@ import 'package:rtu_mirea_app/article/view/interstitial_ad_behavior.dart';
 import 'package:rtu_mirea_app/communities/communities.dart';
 import 'package:rtu_mirea_app/community/community.dart';
 import 'package:rtu_mirea_app/config/config.dart';
-import 'package:rtu_mirea_app/cowork/cowork.dart';
 import 'package:rtu_mirea_app/discourse_post_overview/discourse_post_overview.dart';
 import 'package:rtu_mirea_app/feed/feed.dart';
 import 'package:rtu_mirea_app/feed/view/news_feed_page.dart';
@@ -199,7 +198,6 @@ class GlobalSearchRoute extends GoRouteData with $GlobalSearchRoute {
             TypedGoRoute<CommunitiesRoute>(path: 'communities'),
             TypedGoRoute<FriendsMapRoute>(path: 'friends-map'),
             TypedGoRoute<FriendsRoute>(path: 'friends'),
-            TypedGoRoute<CoworkRoute>(path: 'cowork'),
             TypedGoRoute<PeopleRoute>(
               path: 'people',
               routes: [
@@ -730,16 +728,6 @@ class FriendsRoute extends GoRouteData with $FriendsRoute {
   @override
   Widget build(BuildContext context, GoRouterState state) {
     return const FriendsPage();
-  }
-}
-
-@immutable
-class CoworkRoute extends GoRouteData with $CoworkRoute {
-  const CoworkRoute();
-
-  @override
-  Widget build(BuildContext context, GoRouterState state) {
-    return const CoworkPage();
   }
 }
 

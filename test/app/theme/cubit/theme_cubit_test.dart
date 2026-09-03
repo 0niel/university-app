@@ -132,14 +132,11 @@ void main() {
       final cubit = ThemeCubit()..setColorScheme(AppColorScheme.violet);
       final theme = cubit.getLightTheme();
       final appColors = theme.extension<AppColors>()!;
-      final ninjaColors = theme.extension<NinjaColors>()!;
 
       expect(
         appColors.primary,
         AppColorSchemes.getLightColors(.violet).primary,
       );
-      expect(ninjaColors.brand, appColors.primary);
-      expect(ninjaColors.lime, appColors.primary);
       expect(appColors.success, isNot(appColors.primary));
       expect(appColors.error, isNot(appColors.primary));
       expect(appColors.warning, isNot(appColors.primary));
@@ -149,16 +146,15 @@ void main() {
       final cubit = ThemeCubit()..setAmoled(enabled: true);
       final theme = cubit.getDarkTheme();
       final appColors = theme.extension<AppColors>()!;
-      final ninjaColors = theme.extension<NinjaColors>()!;
 
       expect(theme.scaffoldBackgroundColor, Colors.black);
       expect(appColors.background01, Colors.black);
-      expect(ninjaColors.canvas, Colors.black);
+      expect(appColors.canvas, Colors.black);
       expect(appColors.cardShadowDark, Colors.transparent);
     });
 
     test(
-      'bridge tokens preserve the selected design palette in every theme',
+      'theme tokens preserve the selected design palette in every theme',
       () {
         for (final scheme in AppColorScheme.values) {
           final cubit = ThemeCubit()..setColorScheme(scheme);
@@ -166,62 +162,19 @@ void main() {
             cubit.setAmoled(enabled: amoled);
             final themes = [cubit.getLightTheme(), cubit.getDarkTheme()];
             for (final theme in themes) {
-              final colors = theme.extension<NinjaColors>()!;
               final appColors = theme.extension<AppColors>()!;
               final expected = theme.brightness == Brightness.dark
                   ? AppColorSchemes.getDarkColors(scheme)
                   : AppColorSchemes.getLightColors(scheme);
               expect(appColors.accent, expected.accent);
               expect(appColors.onAccent, expected.onAccent);
-              expect(colors.mutedDark, expected.muted);
-              expect(colors.amberInk, expected.warn);
-              expect(colors.warnTint, appColors.warnTint);
-              expect(colors.brandInk, expected.accent);
-              expect(colors.brandTint, appColors.tint);
+              expect(appColors.muted, expected.muted);
+              expect(appColors.warn, expected.warn);
               expect(theme.badgeTheme.backgroundColor, expected.exam);
               expect(theme.badgeTheme.textColor, expected.white);
               expect(
-                _contrast(colors.ink, colors.canvas),
+                _contrast(appColors.ink, appColors.canvas),
                 greaterThanOrEqualTo(7),
-              );
-            }
-          }
-        }
-      },
-    );
-
-    test(
-      'contrast helpers choose readable foregrounds independently of tokens',
-      () {
-        for (final palette in [NinjaColors.light(), NinjaColors.dark()]) {
-          expect(
-            _contrast(palette.onScarlet, palette.scarlet),
-            greaterThanOrEqualTo(4.5),
-          );
-          for (final swatch in const [
-            Color(0xFF087F5B),
-            Color(0xFF2F7AFF),
-            Color(0xFF8B5CF6),
-            Color(0xFFDB8B00),
-            Color(0xFFE5484D),
-            Color(0xFF74747D),
-          ]) {
-            expect(
-              _contrast(palette.contrastForeground(swatch), swatch),
-              greaterThanOrEqualTo(3),
-            );
-            for (final surface in [
-              palette.canvas,
-              palette.surface,
-              palette.surfaceAlt,
-            ]) {
-              expect(
-                _contrast(palette.accentOn(swatch, surface), surface),
-                greaterThanOrEqualTo(4.5),
-              );
-              expect(
-                _contrast(palette.accentInk(swatch), surface),
-                greaterThanOrEqualTo(4.5),
               );
             }
           }

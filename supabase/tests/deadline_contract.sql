@@ -6,14 +6,14 @@ declare
   v_policy text;
 begin
   if to_regprocedure(
-    'public.create_deadline(text,text,text,timestamptz,text,text,boolean)'
+    'public.create_deadline(text,text,text,timestamptz,text,text,boolean,integer)'
   ) is null then
     raise exception 'Public deadline creation RPC is missing';
   end if;
 
   if has_function_privilege(
     'anon',
-    'public.create_deadline(text,text,text,timestamptz,text,text,boolean)',
+    'public.create_deadline(text,text,text,timestamptz,text,text,boolean,integer)',
     'EXECUTE'
   ) then
     raise exception 'Anonymous role can create deadlines';
@@ -21,14 +21,14 @@ begin
 
   if not has_function_privilege(
     'authenticated',
-    'public.create_deadline(text,text,text,timestamptz,text,text,boolean)',
+    'public.create_deadline(text,text,text,timestamptz,text,text,boolean,integer)',
     'EXECUTE'
   ) then
     raise exception 'Authenticated deadline creation contract is missing';
   end if;
 
   v_definition := pg_get_functiondef(
-    'app_api_v1.create_deadline(text,text,text,timestamptz,text,text,boolean)'
+    'app_api_v1.create_deadline(text,text,text,timestamptz,text,text,boolean,integer)'
       ::regprocedure
   );
 

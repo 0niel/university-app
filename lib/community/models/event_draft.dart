@@ -10,6 +10,7 @@ abstract class EventDraft with _$EventDraft {
     required DateTime startsAt,
     required String emoji,
     required EventCategory category,
+    DateTime? endsAt,
     @Default('') String place,
     @Default('') String description,
   }) = _EventDraft;

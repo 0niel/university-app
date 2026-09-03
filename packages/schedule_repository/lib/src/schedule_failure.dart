@@ -1,17 +1,8 @@
 import 'package:equatable/equatable.dart';
 
-/// {@template schedule_failure}
-/// Base failure for every operation exposed by the schedule repository.
-///
-/// Each public repository method wraps low-level errors into a dedicated
-/// subtype so callers can react to the specific operation that failed instead
-/// of branching on raw [Object] errors.
-/// {@endtemplate}
 abstract class ScheduleFailure with EquatableMixin implements Exception {
-  /// {@macro schedule_failure}
   const ScheduleFailure(this.error);
 
-  /// The underlying error that was caught.
   final Object error;
 
   @override
@@ -108,4 +99,12 @@ class SetDeadlineStateFailure extends ScheduleFailure {
 
 class DeleteDeadlineFailure extends ScheduleFailure {
   const DeleteDeadlineFailure(super.error);
+}
+
+class UpdateDeadlineFailure extends ScheduleFailure {
+  const UpdateDeadlineFailure(super.error);
+}
+
+class PostponeDeadlinesFailure extends ScheduleFailure {
+  const PostponeDeadlinesFailure(super.error);
 }

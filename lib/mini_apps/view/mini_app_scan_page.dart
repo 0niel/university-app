@@ -44,7 +44,7 @@ class _MiniAppScanPageState extends State<MiniAppScanPage> {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: AppColors.dark.canvas,
       body: Stack(
         fit: .expand,
         children: [
@@ -65,7 +65,7 @@ class _MiniAppScanPageState extends State<MiniAppScanPage> {
                   child: Text(
                     l10n.miniAppsScanInstruction,
                     textAlign: .center,
-                    style: AppText.body.copyWith(color: Colors.white),
+                    style: AppText.body.copyWith(color: context.colors.white),
                   ),
                 ),
               ],

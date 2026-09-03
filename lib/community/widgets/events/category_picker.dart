@@ -8,16 +8,17 @@ class _CategoryPicker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return NinjaChipRow(
-      padding: EdgeInsets.zero,
-      children: [
-        for (final option in EventCategory.values.where(
+    final l10n = context.l10n;
+    return AppChipRow<EventCategory>(
+      value: selected,
+      onChanged: onSelected,
+      items: [
+        for (final category in EventCategory.values.where(
           (candidate) => candidate != .all,
         ))
-          _CategoryChoice(
-            category: option,
-            isSelected: option == selected,
-            onSelected: onSelected,
+          AppChipRowItem(
+            value: category,
+            label: eventCategoryLabel(l10n, category),
           ),
       ],
     );

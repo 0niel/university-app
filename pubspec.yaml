@@ -92,6 +92,7 @@ dependencies:
   campus_repository:
     path: packages/campus_repository
   carousel_slider: ^5.0.0
+  chewie: ^1.16.2
   clock: ^1.1.2
   collection: ^1.18.0
   community_catalog_repository:
@@ -141,6 +142,8 @@ dependencies:
   flutter_material_design_icons: ^3.1.0+7447
   flutter_native_splash: ^2.4.3
   flutter_nfc_kit: ^3.3.1
+  flutter_quill: ^11.5.1
+  flutter_quill_extensions: ^11.0.0
   flutter_screenutil: ^5.9.3
   flutter_secure_storage: ^10.0.0
   flutter_staggered_animations: ^1.1.0
@@ -205,6 +208,8 @@ dependencies:
   path: ^1.0.0
   path_drawing: ^1.0.1
   path_provider: ^2.1.1
+  pdfx: ^2.11.0
+  perfect_freehand: ^2.5.2+1
   permission_client:
     path: packages/permission_client
   persistent_storage:
@@ -237,6 +242,7 @@ dependencies:
   shared_preferences: ^2.0.11
   sliver_tools: ^0.2.12
   smooth_sheets: ^1.0.2
+  speech_to_text: ^7.4.0
   stac_bridge:
     path: packages/stac_bridge
   story: ^1.1.0

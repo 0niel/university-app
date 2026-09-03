@@ -92,11 +92,11 @@ class PostOverviewBody extends StatelessWidget {
                   ),
                 ),
                 SliverPadding(
-                  padding: const EdgeInsets.fromLTRB(
+                  padding: EdgeInsets.fromLTRB(
                     AppSpacing.screen,
                     AppSpacing.section,
                     AppSpacing.screen,
-                    AppSpacing.xxlg,
+                    ninjaBottomInset(context) + AppSpacing.lg,
                   ),
                   sliver: SliverToBoxAdapter(
                     child: PostOverviewCommentsSection(

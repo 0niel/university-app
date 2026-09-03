@@ -14,6 +14,11 @@ abstract class CollabNote with _$CollabNote {
     @Default(false) bool isMine,
     @Default(false) bool isPersonal,
     @Default(0) int revision,
+    @Default(0) int documentRevision,
+    List<Object?>? document,
+    @JsonKey(fromJson: stringListFromJson, toJson: stringListToJson)
+    @Default(<String>[])
+    List<String> collaboratorNames,
     @JsonKey(fromJson: dateTimeFromJson, toJson: dateTimeToJson)
     DateTime? createdAt,
     @JsonKey(fromJson: dateTimeFromJson, toJson: dateTimeToJson)

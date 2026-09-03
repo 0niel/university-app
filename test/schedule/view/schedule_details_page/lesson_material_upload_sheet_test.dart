@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:app_ui/app_ui.dart';
 import 'package:file_picker/file_picker.dart';
@@ -37,6 +38,10 @@ class _StreamFile extends PlatformFile {
   Future<Uint8List> readAsBytes() =>
       throw StateError('Native file bytes were not preloaded');
 }
+
+const _kTransparentPng =
+    'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY'
+    '42YAAAAASUVORK5CYII=';
 
 void main() {
   final day = DateTime(2026, 9, 2);
@@ -180,7 +185,8 @@ void main() {
     final file = _StreamFile();
     await pumpSheet(tester, pickFile: () => pending.future);
     await pick(tester);
-    expect(find.byType(AppSpinner), findsOneWidget);
+    expect(find.byType(AppSkeletonMedia), findsOneWidget);
+    expect(find.text('Выбрать файл или фото'), findsNothing);
     await tester.pumpWidget(const SizedBox());
     pending.complete(file);
     await tester.pump();
@@ -238,6 +244,57 @@ void main() {
     await upload(tester);
     expect(find.text('Войдите и попробуйте загрузить ещё раз'), findsOneWidget);
     verifyNever(() => repository.uploadLessonMaterial(any()));
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('picked image renders a thumbnail preview with a remove button', (
+    tester,
+  ) async {
+    await pumpSheet(
+      tester,
+      pickFile: () async => null,
+      pickImage: (_) async => XFile.fromData(
+        base64Decode(_kTransparentPng),
+        name: 'board.jpg',
+        mimeType: 'image/jpeg',
+      ),
+    );
+    await tester.tap(find.text('Камера'));
+    await tester.pump();
+
+    expect(find.text('Выбрать файл или фото'), findsNothing);
+    expect(find.byType(Image), findsOneWidget);
+    expect(tester.takeException(), isNull);
+
+    await tester.tap(find.byType(AppIconButton));
+    await tester.pump();
+    expect(find.text('Выбрать файл или фото'), findsOneWidget);
+    expect(find.byType(Image), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('non-image picks show a file badge instead of a thumbnail', (
+    tester,
+  ) async {
+    await pumpSheet(tester, pickFile: () async => _StreamFile());
+    await pick(tester);
+
+    expect(find.text('lecture.notes.pdf'), findsOneWidget);
+    expect(find.byType(Image), findsNothing);
+    expect(find.text('PDF'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('source row uses kit tonal buttons and the reward is a banner', (
+    tester,
+  ) async {
+    await pumpSheet(tester, pickFile: () async => null);
+
+    for (final label in ['Камера', 'Галерея', 'Файлы']) {
+      expect(find.widgetWithText(AppButton, label), findsOneWidget);
+    }
+    expect(find.byType(AppContextBanner), findsOneWidget);
+    expect(find.text('+30 сюрикенов'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 }

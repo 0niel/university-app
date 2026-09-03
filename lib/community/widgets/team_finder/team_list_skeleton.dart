@@ -6,9 +6,9 @@ class TeamListSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return NinjaSkeletonGroup(
+    return AppSkeletonGroup(
       child: ListView.builder(
-        padding: const .fromLTRB(0, 8, 0, 100),
+        padding: const EdgeInsets.fromLTRB(0, 8, 0, 100),
         itemCount: 3,
         itemBuilder: (itemContext, _) => Padding(
           padding: const EdgeInsets.fromLTRB(
@@ -19,7 +19,7 @@ class TeamListSkeleton extends StatelessWidget {
           ),
           child: DecoratedBox(
             decoration: BoxDecoration(
-              color: itemContext.ninja.surface,
+              color: itemContext.colors.surface,
               borderRadius: BorderRadius.circular(AppRadius.card),
             ),
             child: const Padding(
@@ -28,11 +28,12 @@ class TeamListSkeleton extends StatelessWidget {
                 spacing: 10,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  NinjaSkeleton.bar(height: 11, widthFactor: 0.4),
-                  NinjaSkeleton.bar(height: 20, widthFactor: 0.75),
-                  NinjaSkeleton.bar(height: 11),
-                  NinjaSkeleton.bar(height: 11, widthFactor: 0.6),
-                  NinjaSkeleton(height: 48, radius: AppRadius.field),
+                  AppSkeleton.bar(height: 11, widthFactor: 0.4),
+                  AppSkeleton.bar(height: 20, widthFactor: 0.75),
+                  AppSkeleton.bar(height: 11),
+                  AppSkeleton.bar(height: 11, widthFactor: 0.6),
+                  AppSkeletonRow(),
+                  AppSkeleton(height: 44, radius: AppRadius.field),
                 ],
               ),
             ),

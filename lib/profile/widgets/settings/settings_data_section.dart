@@ -7,8 +7,6 @@ import 'package:rtu_mirea_app/profile/cubit/sync_preferences_cubit.dart';
 import 'package:rtu_mirea_app/profile/widgets/settings_row.dart';
 import 'package:rtu_mirea_app/profile/widgets/settings_section.dart';
 import 'package:rtu_mirea_app/profile/widgets/settings_sheets.dart';
-import 'package:rtu_mirea_app/schedule/view/schedule_page/sheets.dart'
-    show showScheduleExportSheet;
 
 class SettingsDataSection extends StatelessWidget {
   const SettingsDataSection({
@@ -22,7 +20,6 @@ class SettingsDataSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.colors;
     final l10n = context.l10n;
     final language = context.watch<LocaleCubit>().state;
     final syncPolicy = context.watch<SyncPreferencesCubit>().state;
@@ -56,13 +53,6 @@ class SettingsDataSection extends StatelessWidget {
           lineIcon: AppLineIcon.database,
           value: cacheLabel ?? '…',
           onTap: onClearCache,
-        ),
-        SettingsRow(
-          title: l10n.settingsExportSchedule,
-          lineIcon: AppLineIcon.share,
-          value: l10n.settingsExportScheduleValue,
-          valueColor: colors.accent,
-          onTap: () => showScheduleExportSheet(context),
         ),
       ],
     );

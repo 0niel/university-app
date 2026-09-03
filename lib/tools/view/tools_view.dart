@@ -7,22 +7,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:rtu_mirea_app/config/config.dart';
 import 'package:rtu_mirea_app/contributors/bloc/contributors_bloc.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
-import 'package:rtu_mirea_app/schedule/bloc/schedule_bloc.dart';
-import 'package:rtu_mirea_app/search/view/search_subjects.dart';
 import 'package:rtu_mirea_app/tools/view/widgets/app_community_grid.dart';
 import 'package:rtu_mirea_app/tools/view/widgets/contributors_card.dart';
-import 'package:rtu_mirea_app/tools/view/widgets/tools_calculators.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class ToolsView extends StatefulWidget {
+class ToolsView extends StatelessWidget {
   const ToolsView({super.key});
-
-  @override
-  State<ToolsView> createState() => _ToolsViewState();
-}
-
-class _ToolsViewState extends State<ToolsView> {
-  int _tab = 0;
 
   Future<void> _open(String url) async {
     final uri = Uri.tryParse(url);
@@ -33,22 +23,19 @@ class _ToolsViewState extends State<ToolsView> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final subjects = context.select<ScheduleBloc, List<String>>(
-      (bloc) => scheduleSubjects(bloc.state.selectedSchedule),
-    );
-    final labels = [l10n.toolsTabGrant, l10n.toolsTabEcts];
     return ColoredBox(
       color: context.colors.canvas,
       child: ListView(
-        padding: const EdgeInsets.fromLTRB(
+        padding: EdgeInsets.fromLTRB(
           AppSpacing.screen,
           0,
           AppSpacing.screen,
-          AppSpacing.xxlg,
+          ninjaBottomInset(context) + AppSpacing.lg,
         ),
         children: [
           AppInnerHeader(
-            title: l10n.toolsPageTitle,
+            title: l10n.toolsCommunitySection,
+            subtitle: l10n.toolsCommunitySectionSubtitle,
             padding: EdgeInsets.only(
               top: math.max(
                 AppSpacing.screenTop,
@@ -58,25 +45,7 @@ class _ToolsViewState extends State<ToolsView> {
             backSemanticsLabel: l10n.back,
             onBack: () => Navigator.of(context).maybePop(),
           ),
-          const SizedBox(height: AppSpacing.screen),
-          AppSegmentedControl<int>(
-            options: [
-              for (final (index, label) in labels.indexed)
-                AppSegmentedOption(value: index, label: label),
-            ],
-            value: _tab,
-            onCanvas: true,
-            onChanged: (value) => setState(() => _tab = value),
-          ),
           const SizedBox(height: AppSpacing.sectionGap),
-          if (_tab == 0)
-            const ToolsGrantPanel()
-          else
-            ToolsCreditsPanel(subjects: subjects),
-          AppSectionTitle(
-            title: l10n.toolsCommunitySection,
-            subtitle: l10n.toolsCommunitySectionSubtitle,
-          ),
           AppCommunityGrid(
             chatUrl: context.read<UniversityConfig>().communityChatUrl,
             onOpen: (url) => unawaited(_open(url)),

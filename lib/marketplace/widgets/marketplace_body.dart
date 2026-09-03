@@ -15,8 +15,6 @@ import 'package:rtu_mirea_app/marketplace/widgets/marketplace_grid_skeleton.dart
 class MarketplaceBody extends StatefulWidget {
   const MarketplaceBody({
     required this.onOpen,
-    required this.onToggleSold,
-    required this.onDelete,
     required this.onSell,
     super.key,
     this.onContact,
@@ -25,8 +23,6 @@ class MarketplaceBody extends StatefulWidget {
   });
 
   final ValueChanged<MarketListing> onOpen;
-  final ValueChanged<MarketListing> onToggleSold;
-  final ValueChanged<MarketListing> onDelete;
   final VoidCallback? onSell;
   final ValueChanged<MarketListing>? onContact;
   final Set<String> favoriteIds;
@@ -39,6 +35,8 @@ class MarketplaceBody extends StatefulWidget {
 class _MarketplaceBodyState extends State<MarketplaceBody> {
   final _searchController = TextEditingController();
   var _query = '';
+  var _freeOnly = false;
+  var _sortKey = 'new';
 
   @override
   void dispose() {
@@ -51,42 +49,49 @@ class _MarketplaceBodyState extends State<MarketplaceBody> {
     setState(() => _query = '');
   }
 
-  Future<void> _search() => showAppSheet<void>(
-    context,
-    title: context.l10n.search,
-    child: AppSearchBar(
-      controller: _searchController,
-      hintText: context.l10n.searchPlaceholder,
-      autofocus: true,
-      onChanged: (value) => setState(() => _query = value.trim()),
-      onSubmitted: (_) => Navigator.of(context, rootNavigator: true).pop(),
-    ),
-  );
+  List<MarketListing> _sorted(List<MarketListing> items) {
+    final unsold = items.where((item) => !item.isSold).toList();
+    final sold = items.where((item) => item.isSold).toList();
+    if (_sortKey == 'cheap') {
+      unsold.sort((a, b) => a.price.compareTo(b.price));
+      sold.sort((a, b) => a.price.compareTo(b.price));
+    }
+    return [...unsold, ...sold];
+  }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final state = context.watch<MarketplaceCubit>().state;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         AppInnerHeader(
-          title: context.l10n.marketTitle,
+          title: l10n.marketTitle,
           onBack: () => Navigator.of(context).maybePop(),
-          backSemanticsLabel: context.l10n.back,
+          backSemanticsLabel: l10n.back,
           actions: [
             accentHeaderAction(
-              semanticsLabel: context.l10n.marketSell,
+              semanticsLabel: l10n.marketSell,
               onTap: widget.onSell,
             ),
           ],
         ),
         const SizedBox(height: AppSpacing.screen),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screen),
+          child: AppSearchField(
+            controller: _searchController,
+            hintText: l10n.searchPlaceholder,
+            onChanged: (value) => setState(() => _query = value.trim()),
+          ),
+        ),
+        const SizedBox(height: AppSpacing.sectionGap),
         AppChipRow<String>(
           value: state.filterKey,
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screen),
-          onChanged: (value) => value == '__search'
-              ? unawaited(_search())
-              : context.read<MarketplaceCubit>().filterChanged(value),
+          onChanged: (value) =>
+              context.read<MarketplaceCubit>().filterChanged(value),
           items: [
             for (final key in [
               'all',
@@ -94,17 +99,44 @@ class _MarketplaceBodyState extends State<MarketplaceBody> {
             ])
               AppChipRowItem(
                 value: key,
-                label: MarketplaceCategories.label(context.l10n, key),
+                label: MarketplaceCategories.label(l10n, key),
               ),
-            AppChipRowItem(
-              value: '__search',
-              label: context.l10n.search,
-            ),
           ],
         ),
         const SizedBox(height: AppSpacing.sectionGap),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screen),
+          child: Wrap(
+            spacing: AppSpacing.gap,
+            runSpacing: AppSpacing.gap,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              AppFilterChip(
+                label: l10n.marketFree,
+                isSelected: _freeOnly,
+                onTap: () => setState(() => _freeOnly = !_freeOnly),
+              ),
+              AppSegmentedControl<String>(
+                value: _sortKey,
+                expanded: false,
+                onChanged: (value) => setState(() => _sortKey = value),
+                options: [
+                  AppSegmentedOption(value: 'new', label: l10n.marketSortNew),
+                  AppSegmentedOption(
+                    value: 'cheap',
+                    label: l10n.marketSortCheap,
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: AppSpacing.sectionGap),
         Expanded(
-          child: NinjaStateSwitcher(child: _content(context, state)),
+          child: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 160),
+            child: _content(context, state),
+          ),
         ),
       ],
     );
@@ -124,68 +156,68 @@ class _MarketplaceBodyState extends State<MarketplaceBody> {
   }
 
   Widget _result(BuildContext context, MarketplaceState state) {
+    final l10n = context.l10n;
     if (state.status == .failure && state.items.isEmpty) {
       return ListView(
         physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.screen,
-        ),
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screen),
         children: [
-          NinjaErrorState(
-            title: context.l10n.marketLoadError,
-            message: context.l10n.marketLoadErrorSubtitle,
-            retryLabel: context.l10n.retry,
-            onRetry: () => unawaited(context.read<MarketplaceCubit>().load()),
+          AppErrorState(
+            title: l10n.marketLoadError,
+            message: l10n.marketLoadErrorSubtitle,
+            primaryLabel: l10n.retry,
+            onPrimary: () => unawaited(context.read<MarketplaceCubit>().load()),
           ).animateEmptyState(),
         ],
       );
     }
     final normalizedQuery = _query.toLowerCase();
-    final items = [
+    final items = _sorted([
       for (final item in state.filteredItems)
-        if (normalizedQuery.isEmpty ||
-            item.title.toLowerCase().contains(normalizedQuery) ||
-            item.description.toLowerCase().contains(normalizedQuery) ||
-            item.sellerName.toLowerCase().contains(normalizedQuery))
+        if ((!_freeOnly || item.isFree) &&
+            (normalizedQuery.isEmpty ||
+                item.title.toLowerCase().contains(normalizedQuery) ||
+                item.description.toLowerCase().contains(normalizedQuery) ||
+                item.sellerName.toLowerCase().contains(normalizedQuery)))
           item,
-    ];
+    ]);
     if (items.isEmpty) {
       final searching = normalizedQuery.isNotEmpty;
-      final filtered = state.filterKey != 'all';
+      final filtered = state.filterKey != 'all' || _freeOnly;
       return ListView(
         physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.fromLTRB(
+        padding: EdgeInsets.fromLTRB(
           AppSpacing.screen,
           AppSpacing.xxl,
           AppSpacing.screen,
-          AppSpacing.xlg,
+          ninjaBottomInset(context) + AppSpacing.lg,
         ),
         children: [
           if (searching)
-            NinjaEmptyState(
-              icon: const AppLineIconWidget(AppLineIcon.search),
-              title: context.l10n.searchNoResults,
-              message: context.l10n.searchNoResultsHint,
-              actionLabel: context.l10n.clear,
+            AppEmptyState(
+              lineIcon: AppLineIcon.search,
+              title: l10n.searchNoResults,
+              subtitle: l10n.searchNoResultsHint,
+              actionLabel: l10n.clear,
               onAction: _clearSearch,
-              outlinedAction: true,
             ).animateEmptyState()
           else if (filtered)
-            NinjaEmptyState(
-              icon: const AppLineIconWidget(AppLineIcon.filter),
-              title: context.l10n.searchNoResults,
-              message: context.l10n.searchNoResultsHint,
-              actionLabel: context.l10n.resetFilter,
-              onAction: () =>
-                  context.read<MarketplaceCubit>().filterChanged('all'),
-              outlinedAction: true,
+            AppEmptyState(
+              lineIcon: AppLineIcon.filter,
+              title: l10n.searchNoResults,
+              subtitle: l10n.searchNoResultsHint,
+              actionLabel: l10n.resetFilter,
+              onAction: () {
+                setState(() => _freeOnly = false);
+                context.read<MarketplaceCubit>().filterChanged('all');
+              },
             ).animateEmptyState()
           else
-            NinjaEmptyState(
-              icon: const AppLineIconWidget(AppLineIcon.tag),
-              title: context.l10n.marketEmptyTitle,
-              message: context.l10n.marketEmptySub,
-              actionLabel: context.l10n.marketSell,
+            AppEmptyState(
+              lineIcon: AppLineIcon.tag,
+              title: l10n.marketEmptyTitle,
+              subtitle: l10n.marketEmptySub,
+              actionLabel: l10n.marketSell,
               onAction: widget.onSell,
             ).animateEmptyState(),
         ],
@@ -195,8 +227,6 @@ class _MarketplaceBodyState extends State<MarketplaceBody> {
       items: items,
       pendingIds: {...state.pendingSoldIds, ...state.pendingDeleteIds},
       onOpen: widget.onOpen,
-      onToggleSold: widget.onToggleSold,
-      onDelete: widget.onDelete,
       onContact: widget.onContact,
       favoriteIds: widget.favoriteIds,
       onToggleFavorite: widget.onToggleFavorite,

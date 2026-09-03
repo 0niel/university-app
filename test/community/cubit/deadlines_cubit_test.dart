@@ -305,5 +305,191 @@ void main() {
       ],
       errors: () => [isA<Exception>()],
     );
+
+    DeadlinesCubit buildDeleteCubit() => DeadlinesCubit(
+      repository: repository,
+      deleteUndoWindow: const Duration(milliseconds: 10),
+    );
+
+    test('deleteDeadline hides then commits after the undo window', () async {
+      when(
+        () => repository.getDeadlines(),
+      ).thenAnswer((_) async => [personalDeadline]);
+      when(
+        () => repository.deleteDeadline('personal-1'),
+      ).thenAnswer((_) async {});
+      final cubit = buildDeleteCubit();
+      await cubit.load();
+
+      cubit.deleteDeadline('personal-1');
+      expect(cubit.state.pendingDeleteIds, {'personal-1'});
+      expect(cubit.state.displayDeadlines, isEmpty);
+      verifyNever(() => repository.deleteDeadline('personal-1'));
+
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+      expect(cubit.state.pendingDeleteIds, isEmpty);
+      expect(cubit.state.deadlines, isEmpty);
+      verify(() => repository.deleteDeadline('personal-1')).called(1);
+      await cubit.close();
+    });
+
+    test('undoDeleteDeadline cancels the pending delete', () async {
+      when(
+        () => repository.getDeadlines(),
+      ).thenAnswer((_) async => [personalDeadline]);
+      final cubit = buildDeleteCubit();
+      await cubit.load();
+
+      cubit
+        ..deleteDeadline('personal-1')
+        ..undoDeleteDeadline('personal-1');
+      expect(cubit.state.pendingDeleteIds, isEmpty);
+      expect(cubit.state.displayDeadlines, [personalDeadline]);
+
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+      verifyNever(() => repository.deleteDeadline(any()));
+      expect(cubit.state.deadlines, [personalDeadline]);
+      await cubit.close();
+    });
+
+    test('closing the cubit flushes any pending deletes immediately', () async {
+      when(
+        () => repository.getDeadlines(),
+      ).thenAnswer((_) async => [personalDeadline]);
+      when(
+        () => repository.deleteDeadline('personal-1'),
+      ).thenAnswer((_) async {});
+      final cubit = DeadlinesCubit(
+        repository: repository,
+        deleteUndoWindow: const Duration(seconds: 30),
+      );
+      await cubit.load();
+
+      cubit.deleteDeadline('personal-1');
+      await cubit.close();
+      verify(() => repository.deleteDeadline('personal-1')).called(1);
+    });
+
+    test('deleteDeadline ignores a shared deadline it does not own', () async {
+      when(
+        () => repository.getDeadlines(),
+      ).thenAnswer((_) async => [groupDeadline]);
+      final cubit = buildDeleteCubit();
+      await cubit.load();
+
+      cubit.deleteDeadline('group-1');
+      expect(cubit.state.pendingDeleteIds, isEmpty);
+      verifyNever(() => repository.deleteDeadline(any()));
+      await cubit.close();
+    });
+
+    test('updateDeadline forwards changed fields and reloads', () async {
+      when(
+        () => repository.updateDeadline(
+          id: 'personal-1',
+          title: 'Renamed',
+          subjectName: any(named: 'subjectName'),
+          dueAt: any(named: 'dueAt'),
+          priority: any(named: 'priority'),
+          progress: 50,
+          remind: any(named: 'remind'),
+          remindMinutes: any(named: 'remindMinutes'),
+        ),
+      ).thenAnswer((_) async {});
+      when(
+        () => repository.getDeadlines(),
+      ).thenAnswer((_) async => [personalDeadline]);
+      final cubit = buildCubit();
+
+      final ok = await cubit.updateDeadline(
+        personalDeadline,
+        title: 'Renamed',
+        progress: 50,
+      );
+
+      expect(ok, isTrue);
+      verify(
+        () => repository.updateDeadline(
+          id: 'personal-1',
+          title: 'Renamed',
+          subjectName: any(named: 'subjectName'),
+          dueAt: any(named: 'dueAt'),
+          priority: any(named: 'priority'),
+          progress: 50,
+          remind: any(named: 'remind'),
+          remindMinutes: any(named: 'remindMinutes'),
+        ),
+      ).called(1);
+      await cubit.close();
+    });
+
+    test('updateDeadline refuses a deadline it does not own', () async {
+      final cubit = buildCubit();
+      final ok = await cubit.updateDeadline(groupDeadline, title: 'Nope');
+      expect(ok, isFalse);
+      verifyNever(
+        () => repository.updateDeadline(
+          id: any(named: 'id'),
+          title: any(named: 'title'),
+        ),
+      );
+      await cubit.close();
+    });
+
+    test('postponeOverdueToTomorrow moves only owned overdue items', () async {
+      final overdue = personalDeadline.copyWith(dueAt: DateTime(2020));
+      when(
+        () => repository.getDeadlines(),
+      ).thenAnswer((_) async => [overdue, groupDeadline]);
+      when(
+        () => repository.postponeDeadlines(
+          ids: ['personal-1'],
+          until: any(named: 'until'),
+        ),
+      ).thenAnswer((_) async => 1);
+      final cubit = buildCubit();
+      await cubit.load();
+
+      final moved = await cubit.postponeOverdueToTomorrow(
+        now: DateTime(2026, 1, 10),
+      );
+
+      expect(moved, isTrue);
+      verify(
+        () => repository.postponeDeadlines(
+          ids: ['personal-1'],
+          until: any(named: 'until'),
+        ),
+      ).called(1);
+      await cubit.close();
+    });
+
+    test('postponeOverdueToTomorrow is a no-op with nothing overdue', () async {
+      when(
+        () => repository.getDeadlines(),
+      ).thenAnswer((_) async => [personalDeadline]);
+      final cubit = buildCubit();
+      await cubit.load();
+
+      final moved = await cubit.postponeOverdueToTomorrow(
+        now: DateTime(2026, 1, 10),
+      );
+
+      expect(moved, isFalse);
+      verifyNever(
+        () => repository.postponeDeadlines(
+          ids: any(named: 'ids'),
+          until: any(named: 'until'),
+        ),
+      );
+      await cubit.close();
+    });
+
+    blocTest<DeadlinesCubit, DeadlinesState>(
+      'toggleDoneGroupExpanded flips the flag',
+      build: buildCubit,
+      act: (cubit) => cubit.toggleDoneGroupExpanded(),
+      expect: () => [const DeadlinesState(doneGroupExpanded: true)],
+    );
   });
 }

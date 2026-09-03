@@ -14,6 +14,7 @@ abstract class GroupAnnouncement with _$GroupAnnouncement {
     @JsonKey(fromJson: dateTimeFromJson, toJson: dateTimeToJson)
     DateTime? createdAt,
     @Default(false) bool isMine,
+    @Default(0) int commentsCount,
   }) = _GroupAnnouncement;
 
   factory GroupAnnouncement.fromJson(Map<String, Object?> json) =>

@@ -18,7 +18,6 @@ import 'package:rtu_mirea_app/schedule/cubit/exam_readiness/exam_readiness_cubit
 import 'package:rtu_mirea_app/schedule/models/selected_schedule.dart';
 import 'package:rtu_mirea_app/schedule/view/session/session_page.dart';
 import 'package:rtu_mirea_app/schedule/view/session/widgets/exam_topics.dart';
-import 'package:rtu_mirea_app/tools/cubit/tools_cubit.dart';
 import 'package:rtu_mirea_app/tools/view/tools_view.dart';
 import 'package:schedule_repository/schedule_repository.dart';
 
@@ -36,9 +35,9 @@ class _Deadlines extends MockCubit<DeadlinesState> implements DeadlinesCubit {}
 class _Contributors extends MockBloc<ContributorsEvent, ContributorsState>
     implements ContributorsBloc {}
 
-class _Storage extends Mock implements Storage {}
-
 class _Repository extends Mock implements ScheduleRepository {}
+
+class _Storage extends Mock implements Storage {}
 
 const _config = UniversityConfig(
   organizationId: 'test',
@@ -53,7 +52,15 @@ const _config = UniversityConfig(
 );
 
 void main() {
-  setUpAll(loadGalleryFonts);
+  setUpAll(() async {
+    await loadGalleryFonts();
+    final storage = _Storage();
+    when(() => storage.read(any())).thenReturn(null);
+    when(() => storage.write(any(), any<dynamic>())).thenAnswer((_) async {});
+    when(() => storage.delete(any())).thenAnswer((_) async {});
+    when(storage.clear).thenAnswer((_) async {});
+    HydratedBloc.storage = storage;
+  });
   for (final dark in [false, true]) {
     for (final screen in ['deadlines', 'exams', 'tools']) {
       testWidgets('actual $screen at 390x844 ${dark ? 'dark' : 'light'}', (
@@ -63,17 +70,9 @@ void main() {
           ..physicalSize = const Size(390, 844)
           ..devicePixelRatio = 1;
         addTearDown(tester.view.reset);
-        final now = screen == 'deadlines'
-            ? DateTime(2026, 9, 3, 10, 19)
-            : DateTime.now();
+        final now = DateTime(2026, 9, 3, 10, 19);
         final date = DateTime(now.year, now.month, now.day);
         final examDate = date.add(const Duration(days: 12, hours: 9));
-        final storage = _Storage();
-        when(() => storage.read(any())).thenReturn(null);
-        when(
-          () => storage.write(any(), any<dynamic>()),
-        ).thenAnswer((_) async {});
-        HydratedBloc.storage = storage;
         final schedule = _Schedule();
         const subjects = [
           'Математика',
@@ -152,28 +151,6 @@ void main() {
         when(() => contributors.state).thenReturn(
           const ContributorsState(status: .loaded),
         );
-        final tools = ToolsCubit();
-        addTearDown(tools.close);
-        for (final (index, subject) in subjects.indexed) {
-          for (
-            var step = 0;
-            step <
-                (index == 2
-                    ? 1
-                    : index == 1
-                    ? 2
-                    : 3);
-            step++
-          ) {
-            tools.cycleMark(subject);
-          }
-          tools.setCredits(subject, index == 2 ? 8 : 6);
-        }
-        tools
-          ..setGrant('base', 3200)
-          ..setGrant('study', 6000)
-          ..setGrant('science', 2000)
-          ..setGrant('social', 0);
         await tester.pumpWidget(
           MaterialApp(
             debugShowCheckedModeBanner: false,
@@ -192,12 +169,11 @@ void main() {
                   BlocProvider<ExamReadinessCubit>.value(value: readiness),
                   BlocProvider<DeadlinesCubit>.value(value: deadlines),
                   BlocProvider<ContributorsBloc>.value(value: contributors),
-                  BlocProvider<ToolsCubit>.value(value: tools),
                 ],
                 child: Scaffold(
                   body: switch (screen) {
                     'deadlines' => DeadlinesView(now: now),
-                    'exams' => const SessionPage(),
+                    'exams' => SessionPage(now: now),
                     _ => const ToolsView(),
                   },
                 ),
@@ -231,22 +207,6 @@ void main() {
           find.byType(MaterialApp),
           matchesGoldenFile('goldens/${screen}_${dark ? 'dark' : 'light'}.png'),
         );
-        if (screen == 'tools') {
-          for (final (label, name) in [
-            ('Стипендия', 'grants'),
-            ('Зачётные ед.', 'credits'),
-          ]) {
-            await tester.tap(find.text(label));
-            await tester.pumpAndSettle();
-            expect(tester.takeException(), isNull);
-            await expectLater(
-              find.byType(MaterialApp),
-              matchesGoldenFile(
-                'goldens/tools_${name}_${dark ? 'dark' : 'light'}.png',
-              ),
-            );
-          }
-        }
       });
     }
   }

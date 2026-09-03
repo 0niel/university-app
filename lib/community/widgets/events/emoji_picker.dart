@@ -15,8 +15,8 @@ class _EmojiPicker extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
     return Wrap(
-      spacing: 8,
-      runSpacing: 8,
+      spacing: AppSpacing.sm,
+      runSpacing: AppSpacing.sm,
       children: [
         for (final emoji in emojis)
           Semantics(
@@ -26,14 +26,14 @@ class _EmojiPicker extends StatelessWidget {
             child: AppPressable(
               onTap: () => onSelected(emoji),
               child: Container(
-                width: 44,
-                height: 44,
-                alignment: Alignment.center,
                 decoration: BoxDecoration(
-                  color: selected == emoji ? colors.tint : colors.surface,
-                  borderRadius: BorderRadius.circular(AppRadius.field),
+                  borderRadius: BorderRadius.circular(AppRadius.field + 3),
+                  border: selected == emoji
+                      ? Border.all(color: colors.accent, width: 2)
+                      : null,
                 ),
-                child: Text(emoji, style: const TextStyle(fontSize: 20)),
+                padding: const EdgeInsets.all(2),
+                child: EmojiTile(emoji: emoji),
               ),
             ),
           ),

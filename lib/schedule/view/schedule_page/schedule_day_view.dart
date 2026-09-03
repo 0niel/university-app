@@ -483,7 +483,8 @@ class ScheduleTimelineLesson extends StatelessWidget {
       ),
       onTap: () =>
           ScheduleDetailsRoute($extra: (lesson, day)).push<void>(context),
-      onMore: () => showLessonActionsSheet(context, lesson: lesson, day: day),
+      onLongPress: () =>
+          showLessonActionsSheet(context, lesson: lesson, day: day),
     );
   }
 }

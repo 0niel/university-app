@@ -12,6 +12,8 @@ class _MiniAppRunnerView extends StatefulWidget {
 class _MiniAppRunnerViewState extends State<_MiniAppRunnerView> {
   MiniAppSession? _session;
   bool _initialPageOpened = false;
+  bool _offline = false;
+  int _probeId = 0;
 
   @override
   void initState() {
@@ -29,12 +31,16 @@ class _MiniAppRunnerViewState extends State<_MiniAppRunnerView> {
 
   Future<void> _openInnerPage(String path, String? title) async {
     final cubit = context.read<MiniAppRunnerCubit>();
-    final appName = cubit.state.app?.name ?? '';
+    final app = cubit.state.app;
     await Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (_) => BlocProvider.value(
           value: cubit,
-          child: MiniAppInnerScreen(path: path, title: title ?? appName),
+          child: MiniAppInnerScreen(
+            path: path,
+            title: title ?? app?.name ?? '',
+            accentColor: app?.accentColor,
+          ),
         ),
       ),
     );
@@ -96,12 +102,41 @@ class _MiniAppRunnerViewState extends State<_MiniAppRunnerView> {
     }
   }
 
+  Future<void> _probeConnection() async {
+    final probeId = ++_probeId;
+    var offline = false;
+    try {
+      await context.read<MiniAppsRepository>().fetchScreen(slug: widget.slug);
+    } on Exception {
+      offline = true;
+    }
+    if (!mounted || probeId != _probeId || _offline == offline) return;
+    setState(() => _offline = offline);
+  }
+
+  void _setOffline({required bool offline}) {
+    _probeId += 1;
+    if (_offline == offline) return;
+    setState(() => _offline = offline);
+  }
+
   void _onStatus(BuildContext _, MiniAppRunnerState state) {
-    if (state.status == .ready) {
-      _onReady();
-    } else if (state.status == .consentRequired) {
-      final app = state.app;
-      if (app != null) unawaited(_askConsent(app));
+    switch (state.status) {
+      case .ready:
+        _onReady();
+        if (state.fromCache) {
+          unawaited(_probeConnection());
+        } else {
+          _setOffline(offline: false);
+        }
+      case .consentRequired:
+        final app = state.app;
+        if (app != null) unawaited(_askConsent(app));
+      case .initial:
+      case .loading:
+      case .notFound:
+      case .failure:
+        _setOffline(offline: false);
     }
   }
 
@@ -109,8 +144,8 @@ class _MiniAppRunnerViewState extends State<_MiniAppRunnerView> {
   Widget build(BuildContext context) {
     return BlocConsumer<MiniAppRunnerCubit, MiniAppRunnerState>(
       listenWhen: (previous, current) =>
-          previous.status != current.status &&
-          (current.status == .ready || current.status == .consentRequired),
+          previous.status != current.status ||
+          previous.fromCache != current.fromCache,
       listener: _onStatus,
       builder: (context, state) {
         final app = state.app;
@@ -125,7 +160,7 @@ class _MiniAppRunnerViewState extends State<_MiniAppRunnerView> {
                 onTap: () => unawaited(_openMenu(app)),
               ),
           ],
-          body: MiniAppRunnerBody(state: state),
+          body: MiniAppRunnerBody(state: state, offline: _offline),
         );
       },
     );
@@ -402,8 +437,8 @@ class _RunnerHost extends MiniAppHost {
     final app = cubit.state.app;
     if (app == null) return false;
     final granted = app.grantedPermissions ?? const <MiniAppPermission>[];
-    if (_containsScope(scope, granted)) return true;
-    if (!_containsScope(scope, app.requestedPermissions)) return false;
+    if (granted.contains(scope)) return true;
+    if (!app.requestedPermissions.contains(scope)) return false;
 
     final allow = await showNinjaDialog<bool>(
       _state.context,
@@ -413,19 +448,4 @@ class _RunnerHost extends MiniAppHost {
     await cubit.updateConsents([...granted, scope]);
     return true;
   }
-
-  bool _containsScope(
-    MiniAppPermission scope,
-    List<MiniAppPermission> permissions,
-  ) => switch (scope) {
-    .identity => permissions.contains(MiniAppPermission.identity),
-    .email => permissions.contains(MiniAppPermission.email),
-    .profile => permissions.contains(MiniAppPermission.profile),
-    .group => permissions.contains(MiniAppPermission.group),
-    .notifications => permissions.contains(MiniAppPermission.notifications),
-    .location => permissions.contains(MiniAppPermission.location),
-    .camera => permissions.contains(MiniAppPermission.camera),
-    .files => permissions.contains(MiniAppPermission.files),
-    .calendar => permissions.contains(MiniAppPermission.calendar),
-  };
 }

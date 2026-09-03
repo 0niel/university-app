@@ -25,6 +25,12 @@ abstract class StudyMaterial with _$StudyMaterial {
     @Default(false) bool isMine,
     @JsonKey(fromJson: dateTimeFromJson, toJson: dateTimeToJson)
     DateTime? createdAt,
+    String? previewPath,
+    String? batchId,
+    int? width,
+    int? height,
+    int? durationSeconds,
+    @Default(false) bool isLiked,
   }) = _StudyMaterial;
 
   const StudyMaterial._();

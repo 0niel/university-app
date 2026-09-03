@@ -27,6 +27,7 @@ _Mentor _$MentorFromJson(Map<String, dynamic> json) =>
         course: $checkedConvert('course', (v) => (v as num?)?.toInt()),
         group: $checkedConvert('group', (v) => v as String?),
         handle: $checkedConvert('handle', (v) => v as String?),
+        telegramHandle: $checkedConvert('telegramHandle', (v) => v as String?),
       );
       return val;
     });
@@ -44,6 +45,7 @@ Map<String, dynamic> _$MentorToJson(_Mentor instance) => <String, dynamic>{
   'course': instance.course,
   'group': instance.group,
   'handle': instance.handle,
+  'telegramHandle': instance.telegramHandle,
 };
 
 _MentorRequest _$MentorRequestFromJson(
@@ -66,6 +68,10 @@ _MentorRequest _$MentorRequestFromJson(
     mentorName: $checkedConvert('mentorName', (v) => v as String? ?? ''),
     requesterHandle: $checkedConvert('requesterHandle', (v) => v as String?),
     mentorHandle: $checkedConvert('mentorHandle', (v) => v as String?),
+    mentorTelegramHandle: $checkedConvert(
+      'mentorTelegramHandle',
+      (v) => v as String?,
+    ),
     isIncoming: $checkedConvert('isIncoming', (v) => v as bool? ?? true),
     status: $checkedConvert(
       'status',
@@ -99,6 +105,7 @@ Map<String, dynamic> _$MentorRequestToJson(_MentorRequest instance) =>
       'mentorName': instance.mentorName,
       'requesterHandle': instance.requesterHandle,
       'mentorHandle': instance.mentorHandle,
+      'mentorTelegramHandle': instance.mentorTelegramHandle,
       'isIncoming': instance.isIncoming,
       'status': _$MentorRequestStatusEnumMap[instance.status]!,
       'mentorConfirmed': instance.mentorConfirmed,

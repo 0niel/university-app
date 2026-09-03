@@ -14,6 +14,7 @@ class CollabNotesPage extends StatelessWidget {
       create: (context) {
         final cubit = CollabNotesCubit(repository: context.read());
         unawaited(cubit.load());
+        cubit.startWatching();
         return cubit;
       },
       child: const CollabNotesView(),

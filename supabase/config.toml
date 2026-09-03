@@ -165,3 +165,4 @@ verify_jwt = false
 
 [functions.miniapp-notify]
 verify_jwt = false
+import_map = "./functions/deno.json"

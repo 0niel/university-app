@@ -108,6 +108,7 @@ void main() {
         'authorName': 'Староста',
         'createdAt': '2026-01-02T03:04:05Z',
         'isMine': true,
+        'commentsCount': 4,
       });
 
       expect(a.id, 'a1');
@@ -116,6 +117,7 @@ void main() {
       expect(a.authorName, 'Староста');
       expect(a.createdAt, isNotNull);
       expect(a.isMine, isTrue);
+      expect(a.commentsCount, 4);
     });
 
     test('fromJson defaults; createdAt null when absent', () {
@@ -142,6 +144,7 @@ void main() {
         'isMine': true,
         'likes': 7,
         'likedByMe': true,
+        'commentsCount': 2,
       });
 
       expect(n.id, 'n1');
@@ -153,6 +156,7 @@ void main() {
       expect(n.isMine, isTrue);
       expect(n.likes, 7);
       expect(n.likedByMe, isTrue);
+      expect(n.commentsCount, 2);
     });
 
     test('fromJson defaults', () {
@@ -221,8 +225,15 @@ void main() {
     test('fromJson maps nested lists and objects', () {
       final space = GroupSpace.fromJson(const <String, dynamic>{
         'group': 'БСБО-01-22',
+        'groupId': 'group-1',
+        'joinCode': 'MN12AB',
         'memberCount': 3,
         'memberNames': ['A', 'B', 'C'],
+        'myBirthdaySet': true,
+        'members': [
+          {'userId': 'u1', 'fullName': 'A', 'role': 'owner', 'isOwner': true},
+          {'userId': 'u2', 'fullName': 'B'},
+        ],
         'links': [
           {
             'id': 'l1',
@@ -247,8 +258,13 @@ void main() {
       });
 
       expect(space.group, 'БСБО-01-22');
+      expect(space.groupId, 'group-1');
+      expect(space.joinCode, 'MN12AB');
       expect(space.memberCount, 3);
       expect(space.memberNames, ['A', 'B', 'C']);
+      expect(space.myBirthdaySet, isTrue);
+      expect(space.members, hasLength(2));
+      expect(space.members.first.isOwner, isTrue);
       expect(space.links, hasLength(2));
       expect(space.announcement?.id, 'a1');
       expect(space.notes, hasLength(1));
@@ -259,8 +275,12 @@ void main() {
       final space = GroupSpace.fromJson(const <String, dynamic>{});
 
       expect(space.group, isNull);
+      expect(space.groupId, isNull);
+      expect(space.joinCode, isNull);
       expect(space.memberCount, 0);
       expect(space.memberNames, isEmpty);
+      expect(space.myBirthdaySet, isFalse);
+      expect(space.members, isEmpty);
       expect(space.links, isEmpty);
       expect(space.announcement, isNull);
       expect(space.notes, isEmpty);
@@ -339,6 +359,82 @@ void main() {
     });
   });
 
+  group('GroupSpaceMember', () {
+    test('fromJson maps all fields', () {
+      final m = GroupSpaceMember.fromJson(const <String, dynamic>{
+        'userId': 'u1',
+        'fullName': 'Анна',
+        'handle': 'anna',
+        'role': 'owner',
+        'isOwner': true,
+        'isMe': true,
+      });
+
+      expect(m.userId, 'u1');
+      expect(m.fullName, 'Анна');
+      expect(m.handle, 'anna');
+      expect(m.role, 'owner');
+      expect(m.isOwner, isTrue);
+      expect(m.isMe, isTrue);
+    });
+
+    test('fromJson defaults', () {
+      final m = GroupSpaceMember.fromJson(const <String, dynamic>{});
+      expect(m.userId, '');
+      expect(m.fullName, '');
+      expect(m.handle, isNull);
+      expect(m.role, 'member');
+      expect(m.isOwner, isFalse);
+      expect(m.isMe, isFalse);
+    });
+  });
+
+  group('GroupPostComment', () {
+    test('fromJson maps all fields', () {
+      final c = GroupPostComment.fromJson(const <String, dynamic>{
+        'id': 'c1',
+        'postId': 'post-1',
+        'body': 'Отлично!',
+        'authorName': 'Иван',
+        'createdAt': '2026-01-02T03:04:05Z',
+        'isMine': true,
+        'canDelete': true,
+      });
+
+      expect(c.id, 'c1');
+      expect(c.postId, 'post-1');
+      expect(c.body, 'Отлично!');
+      expect(c.authorName, 'Иван');
+      expect(c.createdAt, isNotNull);
+      expect(c.isMine, isTrue);
+      expect(c.canDelete, isTrue);
+    });
+
+    test('fromJson defaults', () {
+      final c = GroupPostComment.fromJson(const <String, dynamic>{});
+      expect(c.id, '');
+      expect(c.postId, '');
+      expect(c.body, '');
+      expect(c.authorName, '');
+      expect(c.createdAt, isNull);
+      expect(c.isMine, isFalse);
+      expect(c.canDelete, isFalse);
+    });
+
+    test('round-trips through toJson/fromJson', () {
+      final comment = GroupPostComment(
+        id: 'c1',
+        postId: 'post-1',
+        body: 'Текст',
+        authorName: 'Анна',
+        createdAt: DateTime(2026, 1, 2, 3, 4, 5),
+        isMine: true,
+        canDelete: true,
+      );
+      expect(GroupPostComment.fromJson(comment.toJson()), comment);
+    });
+  });
+
   group('CampusEvent', () {
     test('fromJson maps all fields', () {
       final e = CampusEvent.fromJson(const <String, dynamic>{
@@ -407,77 +503,6 @@ void main() {
       expect(updated.goingCount, 5);
       expect(updated.isGoing, isTrue);
       expect(updated.isMine, isTrue);
-    });
-  });
-
-  group('MarketListing', () {
-    test('fromJson maps all fields', () {
-      final m = MarketListing.fromJson(const <String, dynamic>{
-        'id': 'm1',
-        'title': 'Laptop',
-        'price': 5000,
-        'description': 'desc',
-        'category': 'electronics',
-        'emoji': '💻',
-        'isSold': true,
-        'createdAt': '2026-01-02T03:04:05Z',
-        'isMine': true,
-        'sellerName': 'Ivan',
-        'showContact': true,
-        'sellerHandle': 'ivan_dev',
-      });
-
-      expect(m.id, 'm1');
-      expect(m.title, 'Laptop');
-      expect(m.price, 5000);
-      expect(m.description, 'desc');
-      expect(m.category, 'electronics');
-      expect(m.emoji, '💻');
-      expect(m.isSold, isTrue);
-      expect(m.createdAt, isNotNull);
-      expect(m.isMine, isTrue);
-      expect(m.sellerName, 'Ivan');
-      expect(m.showContact, isTrue);
-      expect(m.sellerHandle, 'ivan_dev');
-    });
-
-    test('fromJson defaults optional fields', () {
-      final m = MarketListing.fromJson(const <String, dynamic>{
-        'id': 'm1',
-        'title': 'Laptop',
-        'price': 5000,
-      });
-      expect(m.description, '');
-      expect(m.category, 'other');
-      expect(m.emoji, '📦');
-      expect(m.isSold, isFalse);
-      expect(m.createdAt, isNull);
-      expect(m.isMine, isFalse);
-      expect(m.sellerName, '');
-      expect(m.showContact, isFalse);
-      expect(m.sellerHandle, isNull);
-    });
-
-    test('fromJson rejects missing identity and price fields', () {
-      expect(
-        () => MarketListing.fromJson(const <String, dynamic>{}),
-        throwsA(isA<CheckedFromJsonException>()),
-      );
-    });
-
-    test('isFree is true only when price is 0', () {
-      expect(
-        MarketListing.fromJson(
-          const {'id': 'm1', 'title': 'Gift', 'price': 0},
-        ).isFree,
-        isTrue,
-      );
-      expect(
-        MarketListing.fromJson(
-          const {'id': 'm2', 'title': 'Book', 'price': 100},
-        ).isFree,
-        isFalse,
-      );
     });
   });
 
@@ -767,6 +792,54 @@ void main() {
         expect(const FreeRoom(room: '318').building, '');
         expect(const FreeRoom(room: '').building, '');
       });
+    });
+  });
+
+  group('RoomPhoto', () {
+    test('fromJson maps all fields', () {
+      final p = RoomPhoto.fromJson(const <String, dynamic>{
+        'id': 'photo-1',
+        'path': 'user-1/abc.jpg',
+        'width': 1600,
+        'height': 1200,
+        'createdBy': 'user-1',
+        'authorName': 'Анна К.',
+        'createdAt': '2026-01-02T03:04:05Z',
+        'isMine': true,
+      });
+
+      expect(p.id, 'photo-1');
+      expect(p.path, 'user-1/abc.jpg');
+      expect(p.width, 1600);
+      expect(p.height, 1200);
+      expect(p.createdBy, 'user-1');
+      expect(p.authorName, 'Анна К.');
+      expect(p.createdAt, isNotNull);
+      expect(p.isMine, isTrue);
+      expect(p.url, '');
+    });
+
+    test('fromJson defaults', () {
+      final p = RoomPhoto.fromJson(const <String, dynamic>{});
+      expect(p.id, '');
+      expect(p.path, '');
+      expect(p.width, isNull);
+      expect(p.height, isNull);
+      expect(p.createdBy, '');
+      expect(p.authorName, '');
+      expect(p.isMine, isFalse);
+    });
+
+    test('round-trips through toJson/fromJson', () {
+      final date = DateTime(2026, 1, 2, 3, 4, 5);
+      final photo = RoomPhoto(
+        id: 'photo-1',
+        path: 'user-1/abc.jpg',
+        createdBy: 'user-1',
+        authorName: 'Анна',
+        createdAt: date,
+      );
+      expect(RoomPhoto.fromJson(photo.toJson()), photo);
     });
   });
 

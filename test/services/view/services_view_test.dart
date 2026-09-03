@@ -168,15 +168,51 @@ void main() {
     final context = tester.element(find.byType(ServicesView));
     final sections = ServicesDirectory.sections(context, config: config);
     expect(sections.first.key, ServicesDirectory.sectionFirstParty);
+    final pinnedRoutes = sections.first.entries
+        .map((entry) => entry.model.routePath)
+        .toList();
     expect(
-      sections.first.entries.map((entry) => entry.model.routePath),
+      pinnedRoutes.take(4),
       [
         '/services/apps',
         '/services/deadlines',
         '/services/events',
-        '/services/mentorship',
         '/services/team-finder',
       ],
+    );
+    expect(
+      pinnedRoutes,
+      containsAll([
+        '/services/knowledge-bank',
+        '/services/marketplace',
+        '/services/wallet',
+        '/services/friends',
+      ]),
+    );
+    expect(
+      pinnedRoutes,
+      isNot(
+        anyElement(
+          isIn([
+            '/services/free-rooms',
+            '/services/nfc',
+            '/services/people',
+            '/services/polls',
+            '/services/communities',
+            '/feed/news',
+            '/services/collab-notes',
+            '/schedule/session',
+            '/services/mentorship',
+          ]),
+        ),
+      ),
+    );
+    expect(
+      sections
+          .skip(1)
+          .expand((section) => section.entries)
+          .map((entry) => entry.model.routePath),
+      containsAll(['/services/mentorship', '/services/polls']),
     );
     final ids = sections.expand((section) => section.entries).map((e) => e.id);
     expect(ids.toSet().length, ids.length);

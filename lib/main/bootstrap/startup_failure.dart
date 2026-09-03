@@ -10,31 +10,23 @@ class _StartupFailure extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Scaffold(
-        backgroundColor: const Color(0xFFFFFFFF),
+        backgroundColor: AppColors.light.canvas,
         body: Center(
           child: Padding(
             padding: const EdgeInsets.all(24),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Text(
+                Text(
                   'Приложение не смогло запуститься',
                   textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 17,
-                    fontWeight: FontWeight.w800,
-                    color: Color(0xFF101014),
-                  ),
+                  style: AppText.title.copyWith(color: AppColors.light.ink),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   '$error',
                   textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    fontSize: 12.5,
-                    height: 1.5,
-                    color: Color(0xFF8A8A93),
-                  ),
+                  style: AppText.subtext.copyWith(color: AppColors.light.muted),
                 ),
               ],
             ),

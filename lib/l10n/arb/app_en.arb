@@ -4196,7 +4196,7 @@
   "@deadlinePriorityUrgent": {},
   "deadlineRemindTitle": "Remind in advance",
   "@deadlineRemindTitle": {},
-  "deadlineRemindSubtitle": "a day before and 2 hours before",
+  "deadlineRemindSubtitle": "at the chosen lead time before the deadline",
   "@deadlineRemindSubtitle": {},
   "deadlineShareTitle": "Share with group",
   "@deadlineShareTitle": {},
@@ -11001,12 +11001,784 @@
   "exportUnscheduledEventsHint": "Events without a time remain in images and text. Calendars include only timed or explicitly all-day events.",
   "exportAllDay": "All day",
   "exportEntriesCount": "Events: {count}",
-  "@exportEntriesCount": {"placeholders": {"count": {"type": "int"}}},
+  "@exportEntriesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "knowledgePurchaseTitle": "Unlock material?",
   "knowledgePurchaseBody": "Unlock “{title}” for {price}. Shurikens are charged once; reopening is free.",
-  "@knowledgePurchaseBody": {"placeholders": {"title": {"type": "String"}, "price": {"type": "String"}}},
+  "@knowledgePurchaseBody": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "price": {
+        "type": "String"
+      }
+    }
+  },
   "knowledgePurchaseConfirm": "Unlock and open",
   "knowledgePurchaseFailed": "Could not unlock the material. Check your balance and try again.",
   "knowledgePurchasePriceChanged": "The price changed. Open the material again to confirm the new price.",
-  "knowledgePurchaseInsufficient": "Not enough shurikens"
+  "knowledgePurchaseInsufficient": "Not enough shurikens",
+  "mediaViewerIndex": "{index} / {total}",
+  "@mediaViewerIndex": {
+    "description": "Media viewer page counter",
+    "placeholders": {
+      "index": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "mediaViewerDownloading": "Downloading",
+  "mediaViewerOpenExternally": "Open externally",
+  "mediaViewerDownloadFailed": "Couldn't download the file",
+  "mediaViewerSaved": "Saved",
+  "homeLikesCount": "{count, plural, =1{{count} like} other{{count} likes}}",
+  "@homeLikesCount": {
+    "description": "Home trending row meta",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "teamFinderCreateOtherRole": "Other",
+  "teamFinderCreateCustomRoleLabel": "CUSTOM ROLE",
+  "teamFinderCreateCustomRoleHint": "e.g. DevOps, Analyst",
+  "teamFinderCreateCustomRoleHelper": "Comma-separated adds several roles",
+  "teamFinderCreateTitleError": "Enter a team name",
+  "teamFinderCreateRolesError": "Pick at least one role",
+  "teamFinderCreateDeadlinePlaceholder": "Pick a date",
+  "teamFinderRemoveDeadline": "Remove",
+  "teamFinderCreateBoostInsufficient": "Need 50 shurikens, you have {balance}",
+  "@teamFinderCreateBoostInsufficient": {
+    "placeholders": {
+      "balance": {
+        "type": "int"
+      }
+    }
+  },
+  "teamFinderEditSheetTitle": "Edit team",
+  "teamFinderSaveChanges": "Save",
+  "teamFinderSaving": "Saving…",
+  "teamFinderUpdateError": "Couldn't save changes",
+  "teamFinderTeamUpdated": "Changes saved",
+  "teamFinderEditTeam": "Edit",
+  "teamFinderCloseTeam": "Close recruiting",
+  "teamFinderReopenTeam": "Reopen recruiting",
+  "teamFinderCloseConfirmTitle": "Close recruiting for this team?",
+  "teamFinderCloseConfirmBody": "The team will disappear from search. Reopen it anytime from «Mine».",
+  "teamFinderCloseError": "Couldn't close recruiting",
+  "teamFinderClosedStatus": "Recruiting closed",
+  "teamFinderSearchHint": "Team, role, event…",
+  "teamFinderSearchEmptyTitle": "Nothing found",
+  "teamFinderSearchEmptySubtitle": "Try another query or filter",
+  "teamFinderRolesFilterLabel": "ROLES",
+  "collabNotesSearchHint": "Search notes",
+  "collabNotesActionRename": "Rename",
+  "collabNotesActionVisibility": "Change visibility",
+  "collabNotesRenameTitle": "Rename note",
+  "collabNotesRenameHint": "Note title",
+  "collabNotesRenameError": "Could not rename the note",
+  "collabNotesVisibilityTitle": "Note visibility",
+  "collabNotesVisibilityError": "Could not change visibility",
+  "collabNotesReadOnlyBanner": "View only — you can't edit this note",
+  "collabNotesOfflineStatus": "No connection — will save later",
+  "collabNotesConflictResolved": "Merged changes from another editor",
+  "collabNotesCollaboratorsTooltip": "Note collaborators",
+  "noteToolbarBold": "Bold",
+  "noteToolbarItalic": "Italic",
+  "noteToolbarUnderline": "Underline",
+  "noteToolbarStrike": "Strikethrough",
+  "noteToolbarHeading1": "Heading 1",
+  "noteToolbarHeading2": "Heading 2",
+  "noteToolbarHeading3": "Heading 3",
+  "noteToolbarBulletList": "Bulleted list",
+  "noteToolbarNumberedList": "Numbered list",
+  "noteToolbarChecklist": "Checklist",
+  "noteToolbarQuote": "Quote",
+  "noteToolbarCodeBlock": "Code block",
+  "noteToolbarLink": "Link",
+  "noteToolbarDivider": "Divider",
+  "noteToolbarColor": "Text colour",
+  "noteToolbarHighlight": "Highlight",
+  "noteToolbarImage": "Image",
+  "noteToolbarDrawing": "Drawing",
+  "noteToolbarMic": "Voice input",
+  "noteToolbarUndo": "Undo",
+  "noteToolbarRedo": "Redo",
+  "noteColorDefault": "Default",
+  "noteVoicePermissionTitle": "Allow microphone access",
+  "noteVoicePermissionBody": "We use speech recognition to type your note by voice. Audio is processed on-device or by the system service and isn't stored.",
+  "noteVoicePermissionAllow": "Allow",
+  "noteVoiceListening": "Listening…",
+  "noteVoiceUnavailable": "Voice input isn't available on this device",
+  "noteVoiceError": "Couldn't recognise speech",
+  "noteVoicePermissionDenied": "Microphone access is denied. Enable it in system settings.",
+  "noteDrawingTitle": "Drawing",
+  "noteDrawingPen": "Pen",
+  "noteDrawingMarker": "Marker",
+  "noteDrawingEraser": "Eraser",
+  "noteDrawingUndo": "Undo stroke",
+  "noteDrawingRedo": "Redo stroke",
+  "noteDrawingClear": "Clear canvas",
+  "noteDrawingClearConfirmTitle": "Clear the drawing?",
+  "noteDrawingClearConfirmBody": "This can't be undone.",
+  "noteDrawingInsert": "Insert",
+  "noteDrawingWidthThin": "Thin stroke",
+  "noteDrawingWidthMedium": "Medium stroke",
+  "noteDrawingWidthThick": "Thick stroke",
+  "noteDrawingEmpty": "Draw something first",
+  "noteLinkTitle": "Add link",
+  "noteLinkUrlLabel": "URL",
+  "noteLinkUrlHint": "https://example.com",
+  "noteLinkTextLabel": "Link text",
+  "noteLinkTextHint": "Link",
+  "noteLinkInsert": "Add link",
+  "noteImageSourceTitle": "Add image",
+  "noteImageSourceCamera": "Camera",
+  "noteImageSourceGallery": "Gallery",
+  "noteImageUploadError": "Couldn't upload the image",
+  "noteImageUploading": "Uploading image…",
+  "serviceWalletShurikensSub": "Balance and shuriken history",
+  "mentorshipSearchHint": "Name, group, topic, bio",
+  "mentorshipSearchEmptyTitle": "No one found",
+  "mentorshipSearchEmptySubtitle": "Try a different name or topic",
+  "mentorshipTopicFilterAll": "All",
+  "mentorshipTelegramLabel": "TELEGRAM",
+  "mentorshipTelegramPlaceholder": "username",
+  "mentorshipTelegramError": "Enter a valid Telegram username (5-32 chars: letters, digits, _)",
+  "mentorshipTelegramButton": "Telegram",
+  "profileActivityTooltip": "{date} · {count, plural, one{{count} action} other{{count} actions}}",
+  "@profileActivityTooltip": {
+    "description": "Long-press tooltip on an activity heatmap cell",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "profileActivityLegendLess": "less",
+  "@profileActivityLegendLess": {
+    "description": "Activity heatmap legend, low-intensity side"
+  },
+  "profileActivityLegendMore": "more",
+  "@profileActivityLegendMore": {
+    "description": "Activity heatmap legend, high-intensity side"
+  },
+  "scheduleLessonLongPressHint": "Long-press a class to open actions",
+  "settingsColorHexInvalid": "Invalid hex code",
+  "deadlinesViewList": "List",
+  "deadlinesViewCalendar": "Calendar",
+  "deadlinesGroupOverdue": "Overdue",
+  "deadlinesGroupTomorrow": "Tomorrow",
+  "deadlinesGroupDone": "Done",
+  "deadlinesOverdueBanner": "{count, plural, one{{count} deadline is overdue} other{{count} deadlines are overdue}}",
+  "@deadlinesOverdueBanner": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "deadlinesPostponeAction": "Move to tomorrow",
+  "deadlinesPostponedToast": "Moved to tomorrow",
+  "deadlinesPostponeError": "Failed to move deadlines. Try again.",
+  "deadlineDeleteSemantics": "Delete deadline",
+  "deadlineDeletedToast": "Deadline deleted",
+  "deadlineDeleteError": "Failed to delete the deadline. Try again.",
+  "deadlineActionDuplicate": "Duplicate",
+  "deadlineEditTitle": "Edit deadline",
+  "deadlineUpdatedToast": "Deadline updated",
+  "deadlineDuplicatedToast": "Deadline duplicated",
+  "deadlineProgressLabel": "PROGRESS",
+  "deadlineRemindLeadHour": "1 hour before",
+  "deadlineRemindLeadDay": "1 day before",
+  "deadlinesCalendarDayEmpty": "No deadlines on this day",
+  "deadlineShareMessage": "{title} — due {when}",
+  "@deadlineShareMessage": {
+    "placeholders": {
+      "title": {},
+      "when": {}
+    }
+  },
+  "deadlineActionsTitle": "Deadline",
+  "roomPhotoAdd": "Add photo",
+  "roomPhotoUploadFailed": "Couldn't upload the photo",
+  "roomPhotoUploaded": "Photo added",
+  "roomPhotoDeleteConfirmTitle": "Delete this photo?",
+  "roomPhotoDeleteConfirmMessage": "This can't be undone.",
+  "roomPhotoDeleted": "Photo deleted",
+  "roomPhotoDeleteFailed": "Couldn't delete the photo",
+  "roomPhotosOfflineMessage": "Check your connection to see room photos.",
+  "roomPhotoCaption": "{author} · {date}",
+  "@roomPhotoCaption": {
+    "description": "Room photo caption: author name and relative upload time"
+  },
+  "marketMediaLabel": "Photos and video",
+  "marketMediaHint": "Up to 6 photos and 1 video. The first photo is the cover.",
+  "marketAddPhotoAction": "Add photo",
+  "marketAddVideoAction": "Add video",
+  "marketRemoveMediaItem": "Remove",
+  "marketCoverBadge": "Cover",
+  "marketMediaLimitError": "Up to 6 photos and 1 video are allowed",
+  "marketMediaTypeError": "Couldn't add this file",
+  "marketVideoTooLong": "The video is longer than 60 seconds",
+  "marketVideoTooLarge": "The video is larger than 50 MB",
+  "marketUploadingMedia": "Uploading media…",
+  "marketTelegramLabel": "Telegram",
+  "marketTelegramHint": "username",
+  "marketTelegramRequired": "Add your Telegram so buyers can reach you",
+  "marketTelegramInvalid": "5 to 32 characters: latin letters, digits, _",
+  "marketSortNew": "Newest",
+  "marketSortCheap": "Cheapest",
+  "marketEditTitle": "Edit listing",
+  "marketSave": "Save",
+  "marketSaving": "Saving…",
+  "marketEdit": "Edit",
+  "marketArchive": "Archive",
+  "marketArchiveConfirmTitle": "Archive this listing?",
+  "marketArchiveConfirmBody": "It will disappear from the marketplace, its photos and video will be removed.",
+  "marketArchiveError": "Couldn't archive the listing",
+  "marketCreateSuccess": "Listing published",
+  "marketUpdateSuccess": "Changes saved",
+  "marketArchiveSuccess": "Listing archived",
+  "marketDeleteSuccess": "Listing deleted",
+  "marketShare": "Share",
+  "marketShareText": "Check out “{title}” on the marketplace",
+  "marketFreeToggleLabel": "Give away for free",
+  "teamFinderTeamCreated": "Team published",
+  "deadlineDueInHours": "{count, plural, one{in {count}h} other{in {count}h}}",
+  "@deadlineDueInHours": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "deadlineDueInDays": "{count, plural, one{in {count} day} other{in {count} days}}",
+  "@deadlineDueInDays": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "deadlineDueInWeeks": "{count, plural, one{in {count} week} other{in {count} weeks}}",
+  "@deadlineDueInWeeks": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "deadlineOverdueByHours": "{count, plural, one{overdue by {count}h} other{overdue by {count}h}}",
+  "@deadlineOverdueByHours": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "deadlineOverdueByDays": "{count, plural, one{overdue by {count}d} other{overdue by {count}d}}",
+  "@deadlineOverdueByDays": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "eventsFilterPast": "Past",
+  "eventsViewList": "List",
+  "eventsViewCalendar": "Calendar",
+  "eventsDayYesterday": "Yesterday",
+  "eventsEmptyPastSub": "No past events yet",
+  "eventsCalendarEmptyTitle": "Nothing on this day",
+  "eventsMineBadge": "Yours",
+  "eventsCreateEndLabel": "UNTIL",
+  "eventsCreateEndPlaceholder": "No end time",
+  "eventsCreateTitleError": "Enter a title",
+  "eventsCreateEndBeforeStartError": "The event can't end before it starts",
+  "eventsEditSheetTitle": "Edit event",
+  "eventsSave": "Save",
+  "eventsCreateSuccess": "Event created",
+  "eventsUpdateSuccess": "Changes saved",
+  "eventsUpdateError": "Couldn't save changes. Try again",
+  "eventsDeleteConfirmTitle": "Delete event?",
+  "eventsDeleteConfirmMessage": "It will disappear from the board for everyone",
+  "eventsDeleteSuccess": "Event deleted",
+  "eventsDeleteError": "Couldn't delete the event. Try again",
+  "eventsEdit": "Edit",
+  "eventsDetailMap": "On the map",
+  "eventsDetailDescriptionEmpty": "No description",
+  "groupSpaceSearchHint": "Search posts",
+  "@groupSpaceSearchHint": {
+    "description": "Group space search field hint"
+  },
+  "groupSpaceSearchEmpty": "Nothing found",
+  "@groupSpaceSearchEmpty": {
+    "description": "Group space search empty state title"
+  },
+  "groupSpaceCommentsTitle": "Comments",
+  "@groupSpaceCommentsTitle": {
+    "description": "Group post comments sheet title"
+  },
+  "groupSpaceCommentsEmpty": "No comments yet",
+  "@groupSpaceCommentsEmpty": {
+    "description": "Group post comments empty state"
+  },
+  "groupSpaceCommentHint": "Write a comment…",
+  "@groupSpaceCommentHint": {
+    "description": "Group post comment input hint"
+  },
+  "groupSpaceCommentSend": "Send",
+  "@groupSpaceCommentSend": {
+    "description": "Send comment button semantics label"
+  },
+  "groupSpaceCommentsCount": "{count, plural, one{{count} comment} other{{count} comments}}",
+  "@groupSpaceCommentsCount": {
+    "description": "Comments count on a group post card",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "groupSpaceOnlineCount": "{count, plural, one{{count} online} other{{count} online}}",
+  "@groupSpaceOnlineCount": {
+    "description": "Online member count in the group space hero",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "groupSpaceQuickAnnouncement": "Announcement",
+  "@groupSpaceQuickAnnouncement": {
+    "description": "Group space quick action: create announcement"
+  },
+  "groupSpaceQuickNote": "Note",
+  "@groupSpaceQuickNote": {
+    "description": "Group space quick action: open shared notes"
+  },
+  "groupSpaceQuickLink": "Link",
+  "@groupSpaceQuickLink": {
+    "description": "Group space quick action: add a link"
+  },
+  "groupSpaceShowFull": "Show more",
+  "@groupSpaceShowFull": {
+    "description": "Expand truncated group post text"
+  },
+  "groupSpaceCollapse": "Collapse",
+  "@groupSpaceCollapse": {
+    "description": "Collapse expanded group post text"
+  },
+  "groupSpaceNotesPreviewEmpty": "No shared notes yet",
+  "@groupSpaceNotesPreviewEmpty": {
+    "description": "Group space collab-notes preview empty state"
+  },
+  "groupSpaceSetBirthdayCta": "Add your birthday",
+  "@groupSpaceSetBirthdayCta": {
+    "description": "Group space set-my-birthday CTA title"
+  },
+  "groupSpaceSetBirthdaySubtitle": "Groupmates will see a reminder before it",
+  "@groupSpaceSetBirthdaySubtitle": {
+    "description": "Group space set-my-birthday CTA subtitle"
+  },
+  "groupSpaceSetBirthdayTitle": "Your birthday",
+  "@groupSpaceSetBirthdayTitle": {
+    "description": "Group space set-my-birthday date picker title"
+  },
+  "groupSpacePostEmptyError": "Add a title or a body",
+  "@groupSpacePostEmptyError": {
+    "description": "Group post composer validation error"
+  },
+  "groupSpacePostPinToggle": "Pin to the top",
+  "@groupSpacePostPinToggle": {
+    "description": "Group post composer pin toggle (owner only)"
+  },
+  "studyGroupTransferOwnership": "Make an owner",
+  "@studyGroupTransferOwnership": {
+    "description": "Transfer study group ownership action"
+  },
+  "studyGroupTransferOwnershipTitle": "Make an owner?",
+  "@studyGroupTransferOwnershipTitle": {
+    "description": "Transfer ownership confirm dialog title"
+  },
+  "studyGroupTransferOwnershipBody": "{name} will manage the group instead of you.",
+  "@studyGroupTransferOwnershipBody": {
+    "description": "Transfer ownership confirm dialog body",
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "studyGroupMemberTools": "Member tools",
+  "@studyGroupMemberTools": {
+    "description": "Study group member row more-actions tooltip"
+  },
+  "knowledgeChipBoard": "Board photos",
+  "knowledgeChipExtra": "Extra",
+  "knowledgeTypeBoard": "Board photo",
+  "knowledgeTypeExtra": "Extra material",
+  "knowledgeLike": "Like",
+  "knowledgeSortNew": "Newest",
+  "knowledgeSortPopular": "Popular",
+  "knowledgeSubjectsFilterCount": "Subjects ({count})",
+  "@knowledgeSubjectsFilterCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "collabNotesKindLabel": "Type",
+  "collabNotesKindLectureFull": "Lecture",
+  "collabNotesKindPracticeFull": "Practice",
+  "collabNotesKindLabFull": "Lab work",
+  "collabNotesKindDocFull": "Document",
+  "knowledgeBatchAddImages": "Photos",
+  "knowledgeBatchAddFiles": "Files",
+  "knowledgeBatchAddCamera": "Camera",
+  "knowledgeBatchEmpty": "Add photos or files to publish them together",
+  "knowledgeBatchStatus": "Uploaded {done} of {total}",
+  "@knowledgeBatchStatus": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "knowledgeMaterialDetailTitle": "Material",
+  "knowledgeMaterialShareLink": "Share link",
+  "knowledgeMaterialDelete": "Delete",
+  "knowledgeMaterialDeleteConfirm": "Delete this material? This can't be undone.",
+  "knowledgeMaterialDeleted": "Material deleted",
+  "knowledgeMaterialDeleteFailed": "Couldn't delete the material",
+  "knowledgeMaterialAuthor": "Author",
+  "knowledgeViewGrid": "Grid view",
+  "knowledgeViewList": "List view",
+  "knowledgeMaterialDate": "Date",
+  "knowledgeMaterialSize": "Size",
+  "pollsFilterAll": "All",
+  "@pollsFilterAll": {
+    "description": "Polls filter: all"
+  },
+  "pollsFilterActive": "Active",
+  "@pollsFilterActive": {
+    "description": "Polls filter: active"
+  },
+  "pollsFilterClosed": "Closed",
+  "@pollsFilterClosed": {
+    "description": "Polls filter: closed"
+  },
+  "pollsFilterMine": "Mine",
+  "@pollsFilterMine": {
+    "description": "Polls filter: mine"
+  },
+  "pollsFilterVoted": "Completed",
+  "@pollsFilterVoted": {
+    "description": "Polls filter: completed by me"
+  },
+  "pollsCategoryAll": "All topics",
+  "@pollsCategoryAll": {
+    "description": "Poll category filter: all"
+  },
+  "pollsCategoryGeneral": "General",
+  "@pollsCategoryGeneral": {
+    "description": "Poll category"
+  },
+  "pollsCategoryAcademic": "Academic",
+  "@pollsCategoryAcademic": {
+    "description": "Poll category"
+  },
+  "pollsCategoryEvents": "Events",
+  "@pollsCategoryEvents": {
+    "description": "Poll category"
+  },
+  "pollsCategoryFeedback": "Feedback",
+  "@pollsCategoryFeedback": {
+    "description": "Poll category"
+  },
+  "pollsCategoryOther": "Other",
+  "@pollsCategoryOther": {
+    "description": "Poll category"
+  },
+  "pollsSearchHint": "Search polls",
+  "@pollsSearchHint": {
+    "description": "Polls search field hint"
+  },
+  "pollsAuthorAnonymous": "Anonymous",
+  "@pollsAuthorAnonymous": {
+    "description": "Poll card author fallback"
+  },
+  "pollsParticipantsCount": "{count, plural, one{{count} participant} other{{count} participants}}",
+  "@pollsParticipantsCount": {
+    "description": "Poll card participants count",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "pollsTakeAction": "Take",
+  "@pollsTakeAction": {
+    "description": "Poll card action to take the poll"
+  },
+  "pollsResultsAction": "Results",
+  "@pollsResultsAction": {
+    "description": "Poll card/results action label"
+  },
+  "pollsOwnerActions": "Manage poll",
+  "@pollsOwnerActions": {
+    "description": "Owner actions sheet title"
+  },
+  "pollsCloseAction": "Close poll",
+  "@pollsCloseAction": {
+    "description": "Owner action to close a poll"
+  },
+  "pollsCloseConfirmTitle": "Close this poll?",
+  "@pollsCloseConfirmTitle": {
+    "description": "Close poll confirm dialog title"
+  },
+  "pollsCloseConfirmBody": "No one will be able to answer after this. This cannot be undone.",
+  "@pollsCloseConfirmBody": {
+    "description": "Close poll confirm dialog body"
+  },
+  "pollsCloseSuccess": "Poll closed",
+  "@pollsCloseSuccess": {
+    "description": "Toast after closing a poll"
+  },
+  "pollsCloseError": "Failed to close the poll",
+  "@pollsCloseError": {
+    "description": "Toast after failing to close a poll"
+  },
+  "pollsDeleteSuccess": "Poll deleted",
+  "@pollsDeleteSuccess": {
+    "description": "Toast after deleting a poll"
+  },
+  "pollsMyChoice": "Your choice",
+  "@pollsMyChoice": {
+    "description": "Marks the option the user picked in results"
+  },
+  "pollsResultsNoAnswers": "No answers yet",
+  "@pollsResultsNoAnswers": {
+    "description": "Results empty state for a question"
+  },
+  "pollsRatingAverage": "Average rating {value}",
+  "@pollsRatingAverage": {
+    "description": "Rating question results average",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "pollsRatingResponses": "{count, plural, one{{count} response} other{{count} responses}}",
+  "@pollsRatingResponses": {
+    "description": "Rating question responses count",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "pollsTextAnswers": "Answers",
+  "@pollsTextAnswers": {
+    "description": "Text question answers list title"
+  },
+  "pollsStepCounter": "{current} of {total}",
+  "@pollsStepCounter": {
+    "description": "Runner/creator step counter",
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "pollsRequiredError": "This question is required",
+  "@pollsRequiredError": {
+    "description": "Runner inline validation error"
+  },
+  "pollsNext": "Next",
+  "@pollsNext": {
+    "description": "Runner/creator next step button"
+  },
+  "pollsSubmit": "Submit",
+  "@pollsSubmit": {
+    "description": "Runner submit answers button"
+  },
+  "pollsRunnerSuccess": "Your answers were saved",
+  "@pollsRunnerSuccess": {
+    "description": "Toast after submitting poll answers"
+  },
+  "pollsTextAnswerHint": "Type your answer…",
+  "@pollsTextAnswerHint": {
+    "description": "Runner text question input hint"
+  },
+  "pollsRatingOption": "Rating {value}",
+  "@pollsRatingOption": {
+    "description": "Runner rating chip semantics label",
+    "placeholders": {
+      "value": {
+        "type": "int"
+      }
+    }
+  },
+  "pollsStepBasics": "Basics",
+  "@pollsStepBasics": {
+    "description": "Creator wizard step: basics"
+  },
+  "pollsStepQuestions": "Questions",
+  "@pollsStepQuestions": {
+    "description": "Creator wizard step: questions"
+  },
+  "pollsStepPreview": "Preview",
+  "@pollsStepPreview": {
+    "description": "Creator wizard step: preview"
+  },
+  "pollsTitleHint": "Poll title",
+  "@pollsTitleHint": {
+    "description": "Creator wizard title field hint"
+  },
+  "pollsDescriptionHint": "Description (optional)",
+  "@pollsDescriptionHint": {
+    "description": "Creator wizard description field hint"
+  },
+  "pollsCategoryLabel": "Topic",
+  "@pollsCategoryLabel": {
+    "description": "Creator wizard category field label"
+  },
+  "pollsAddQuestion": "Add question",
+  "@pollsAddQuestion": {
+    "description": "Creator wizard add question button"
+  },
+  "pollsRemoveQuestion": "Remove question",
+  "@pollsRemoveQuestion": {
+    "description": "Creator wizard remove question action"
+  },
+  "pollsQuestionNumber": "Question {number}",
+  "@pollsQuestionNumber": {
+    "description": "Creator wizard question index label",
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "pollsQuestionKindSingle": "Single choice",
+  "@pollsQuestionKindSingle": {
+    "description": "Poll question kind"
+  },
+  "pollsQuestionKindMultiple": "Multiple choice",
+  "@pollsQuestionKindMultiple": {
+    "description": "Poll question kind"
+  },
+  "pollsQuestionKindText": "Text",
+  "@pollsQuestionKindText": {
+    "description": "Poll question kind"
+  },
+  "pollsQuestionKindRating": "Rating",
+  "@pollsQuestionKindRating": {
+    "description": "Poll question kind"
+  },
+  "pollsQuestionRequired": "Required question",
+  "@pollsQuestionRequired": {
+    "description": "Creator wizard required toggle"
+  },
+  "pollsMoveUp": "Move up",
+  "@pollsMoveUp": {
+    "description": "Creator wizard reorder question up"
+  },
+  "pollsMoveDown": "Move down",
+  "@pollsMoveDown": {
+    "description": "Creator wizard reorder question down"
+  },
+  "pollsResultsVisibility": "Who can see results",
+  "@pollsResultsVisibility": {
+    "description": "Creator wizard results visibility setting"
+  },
+  "pollsResultsVisibilityAlways": "Everyone, right away",
+  "@pollsResultsVisibilityAlways": {
+    "description": "Results visibility: always"
+  },
+  "pollsResultsVisibilityAfterVote": "After answering",
+  "@pollsResultsVisibilityAfterVote": {
+    "description": "Results visibility: after vote"
+  },
+  "pollsResultsVisibilityAfterClose": "After the poll closes",
+  "@pollsResultsVisibilityAfterClose": {
+    "description": "Results visibility: after close"
+  },
+  "pollsAllowChange": "Allow changing the answer",
+  "@pollsAllowChange": {
+    "description": "Creator wizard allow change toggle"
+  },
+  "pollsClosesAt": "Closing date",
+  "@pollsClosesAt": {
+    "description": "Creator wizard closing date setting"
+  },
+  "pollsClosesAtNone": "No deadline",
+  "@pollsClosesAtNone": {
+    "description": "Creator wizard closing date: none"
+  },
+  "pollsClosesAtPick": "Pick a date",
+  "@pollsClosesAtPick": {
+    "description": "Creator wizard closing date: pick"
+  },
+  "pollsPreviewEmptyQuestions": "Add at least one question",
+  "@pollsPreviewEmptyQuestions": {
+    "description": "Creator wizard preview validation"
+  },
+  "pollsTitleRequired": "Enter a poll title",
+  "@pollsTitleRequired": {
+    "description": "Creator wizard title validation"
+  },
+  "pollsQuestionTextRequired": "Enter the question text",
+  "@pollsQuestionTextRequired": {
+    "description": "Creator wizard question validation"
+  },
+  "pollsQuestionOptionsRequired": "Add at least two options",
+  "@pollsQuestionOptionsRequired": {
+    "description": "Creator wizard options validation"
+  },
+  "pollsEmptyFiltered": "No polls match this filter",
+  "@pollsEmptyFiltered": {
+    "description": "Polls empty state for a non-default filter"
+  },
+  "pollsEmptySearch": "Nothing found for “{query}”",
+  "@pollsEmptySearch": {
+    "description": "Polls empty state for a search query",
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
+  },
+  "pollsLoadMore": "Load more",
+  "pollsChangeAnswers": "Change answers",
+  "pollsResultsHidden": "Results are not available yet",
+  "pollsEmptyQuestions": "This poll has no questions",
+  "pollsClosesFuture": "Choose a future closing time",
+  "pollsDistinctOptionsRequired": "Add at least two distinct options and choose a non-empty correct answer for a quiz",
+  "pollsCorrectAnswer": "Correct answer",
+  "pollsQuestionTextHint": "Question text",
+  "@pollsQuestionTextHint": {
+    "description": "Creator wizard question text field hint"
+  }
 }

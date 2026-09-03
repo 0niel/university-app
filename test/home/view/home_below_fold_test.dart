@@ -19,7 +19,7 @@ void main() {
     for (final (path, title) in [
       ('/services/map', 'Карта кампуса'),
       ('/services/free-rooms', 'Свободные аудитории'),
-      ('/services/cowork', 'Коворкинг'),
+      ('/services/deadlines', 'Дедлайны'),
       ('/services/nfc', 'Электронный пропуск'),
       ('/schedule/session', 'Расписание экзаменов'),
     ])
@@ -116,7 +116,7 @@ void main() {
     for (final label in [
       'Карта',
       'Аудитории',
-      'Коворкинг',
+      'Дедлайны',
       'Пропуск',
       'Экзамены',
     ]) {
@@ -156,6 +156,26 @@ void main() {
     );
   });
 
+  testWidgets('quick actions show a skeleton instead of an empty state', (
+    tester,
+  ) async {
+    await pump(
+      tester,
+      HomeQuickActions(services: const [], onAll: () {}, loading: true),
+    );
+    expect(find.byType(AppSkeleton), findsWidgets);
+    expect(find.byType(AppEmptyState), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('quick actions show the empty state once loaded with none', (
+    tester,
+  ) async {
+    await pump(tester, HomeQuickActions(services: const [], onAll: () {}));
+    expect(find.byType(AppEmptyState), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
   for (final (width, scale) in [(390.0, 1.0), (320.0, 2.0)]) {
     testWidgets(
       'trending wraps full topic at $width and ${scale * 100}% text',
@@ -182,7 +202,7 @@ void main() {
         expect(title.style?.fontSize, 14.5);
         expect(title.style?.height, 1.3);
         expect(title.style?.fontWeight, FontWeight.w600);
-        final meta = tester.widget<Text>(find.text('24 ответа'));
+        final meta = tester.widget<Text>(find.text('24 ответа · 7 лайков'));
         expect(meta.style?.fontSize, 12.5);
         expect(meta.style?.fontWeight, FontWeight.w400);
         final paragraph = tester.renderObject<RenderParagraph>(

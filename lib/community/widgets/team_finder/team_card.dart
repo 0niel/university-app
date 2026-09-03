@@ -1,9 +1,8 @@
 import 'package:app_ui/app_ui.dart';
 import 'package:campus_repository/campus_repository.dart';
-import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
-import 'package:rtu_mirea_app/common/utils/ninja_initials.dart';
 import 'package:rtu_mirea_app/community/view/team_finder_labels.dart';
+import 'package:rtu_mirea_app/community/widgets/team_avatar_stack.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 
 class TeamCard extends StatelessWidget {
@@ -15,6 +14,8 @@ class TeamCard extends StatelessWidget {
     required this.onLeave,
     required this.onApplications,
     required this.onDelete,
+    required this.onEdit,
+    required this.onCloseToggle,
     super.key,
     this.isBusy = false,
   });
@@ -26,162 +27,158 @@ class TeamCard extends StatelessWidget {
   final VoidCallback onLeave;
   final VoidCallback onApplications;
   final VoidCallback onDelete;
+  final VoidCallback onEdit;
+  final VoidCallback onCloseToggle;
   final bool isBusy;
 
   bool get _isExpired => team.deadlineAt?.isBefore(now) ?? false;
+  bool get _isClosed => team.status == TeamStatus.closed;
 
-  bool get _isBurning {
+  bool get _isUrgent {
     final deadline = team.deadlineAt;
     if (deadline == null || _isExpired) return false;
-    return deadline.difference(now) < const Duration(hours: 48);
+    return deadline.difference(now) < const Duration(days: 3);
   }
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(
+    return AppCard(
+      margin: const EdgeInsets.fromLTRB(
         AppSpacing.screen,
         0,
         AppSpacing.screen,
         10,
       ),
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: colors.surface,
-          borderRadius: BorderRadius.circular(AppRadius.card),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            spacing: 9,
-            crossAxisAlignment: CrossAxisAlignment.start,
+      child: Column(
+        spacing: 9,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _metadata(context),
+          Text(team.title, style: AppText.title.copyWith(color: colors.ink)),
+          if (team.description.isNotEmpty)
+            Text(
+              team.description,
+              maxLines: 4,
+              overflow: TextOverflow.ellipsis,
+              style: AppText.subtext.copyWith(color: colors.muted, height: 1.4),
+            ),
+          if (team.neededRoles.isNotEmpty)
+            Wrap(
+              spacing: 6,
+              runSpacing: 6,
+              children: [
+                for (final role in team.neededRoles)
+                  AppHashTag(label: teamRoleLabel(context.l10n, role)),
+              ],
+            ),
+          Row(
             children: [
-              _metadata(context),
-              Text(
-                team.title,
-                style: AppText.title.copyWith(color: colors.ink),
+              TeamAvatarStack(
+                names: team.memberNames,
+                emptySlots: (team.capacity - team.memberCount).clamp(0, 4),
               ),
-              Text(
-                teamKindLabel(context.l10n, team.kind),
-                style: AppText.captionSmall.copyWith(color: colors.muted),
-              ),
-              if (team.description.isNotEmpty)
-                Text(
-                  team.description,
-                  maxLines: 4,
-                  overflow: TextOverflow.ellipsis,
-                  style: AppText.subtext.copyWith(
-                    color: colors.muted,
-                    height: 1.4,
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  context.l10n.teamFinderMembersOf(
+                    team.memberCount,
+                    team.capacity,
                   ),
+                  style: AppText.captionSmall.copyWith(color: colors.muted),
                 ),
-              if (team.neededRoles.isNotEmpty)
-                Text(
-                  team.neededRoles
-                      .map(
-                        (role) => context.l10n.teamFinderLookingForRole(
-                          teamRoleLabel(context.l10n, role),
-                        ),
-                      )
-                      .join(' · '),
-                  style: AppText.captionSmall.copyWith(
-                    color: colors.accent,
-                    height: 1.35,
-                  ),
-                ),
-              Row(
-                children: [
-                  NinjaAvatar(
-                    initials: ninjaInitials(
-                      team.memberNames.firstOrNull ?? team.title,
-                    ),
-                    size: 34,
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Text(
-                      context.l10n.teamFinderMembersOf(
-                        team.memberCount,
-                        team.capacity,
-                      ),
-                      style: AppText.captionSmall.copyWith(
-                        color: colors.muted,
-                      ),
-                    ),
-                  ),
-                ],
               ),
-              ..._actions(context),
             ],
           ),
-        ),
+          ..._actions(context),
+        ],
       ),
     );
   }
 
   Widget _metadata(BuildContext context) {
+    final l10n = context.l10n;
     final deadline = team.deadlineAt;
     return Wrap(
       spacing: 8,
       runSpacing: 6,
-      crossAxisAlignment: .center,
+      crossAxisAlignment: WrapCrossAlignment.center,
       children: [
-        if (_isBurning)
-          NinjaBadge(
-            context.l10n.teamFinderTagBurning,
-            tone: .warnTint,
-          )
-        else if (team.isBoosted)
-          NinjaBadge(context.l10n.teamFinderTagTop, tone: .ink),
+        AppTag(label: teamKindLabel(l10n, team.kind)),
+        if (_isClosed) AppBadge(label: l10n.teamFinderClosedStatus),
+        if (team.isBoosted)
+          AppBadge(
+            label: l10n.teamFinderTagTop,
+            tone: AppBadgeTone.ink,
+            icon: AppLineIcon.star,
+          ),
         if (deadline != null)
           Text(
             _isExpired
-                ? context.l10n.teamFinderExpired
-                : context.l10n.teamFinderDeadlineUntil(
+                ? l10n.teamFinderExpired
+                : l10n.teamFinderDeadlineUntil(
                     formatTeamDate(context, deadline),
                   ),
             style: AppText.captionSmall.copyWith(
-              color: _isBurning ? context.colors.exam : context.colors.muted,
+              color: _isUrgent ? context.colors.danger : context.colors.muted,
             ),
           ),
         Text(
-          teamRelativeTime(context.l10n, team.createdAt),
-          style: AppText.captionSmall.copyWith(
-            color: context.colors.muted,
-          ),
+          teamRelativeTime(l10n, team.createdAt),
+          style: AppText.captionSmall.copyWith(color: context.colors.muted),
         ),
       ],
     );
   }
 
   List<Widget> _actions(BuildContext context) {
+    final l10n = context.l10n;
     if (team.isMine) {
       return [
         if (team.applicationsCount == 0)
           Padding(
-            padding: const .symmetric(vertical: 12),
+            padding: const EdgeInsets.symmetric(vertical: 12),
             child: SizedBox(
               width: double.infinity,
               child: Text(
-                context.l10n.teamFinderNoApplications,
-                textAlign: .center,
-                style: AppText.subtext.copyWith(
-                  color: context.colors.muted,
-                ),
+                l10n.teamFinderNoApplications,
+                textAlign: TextAlign.center,
+                style: AppText.subtext.copyWith(color: context.colors.muted),
               ),
             ),
           )
         else
-          NinjaButton.secondary(
-            label: context.l10n.teamFinderApplicationsCount(
-              team.applicationsCount,
-            ),
+          AppButton.secondary(
+            label: l10n.teamFinderApplicationsCount(team.applicationsCount),
             expanded: true,
             onPressed: isBusy ? null : onApplications,
           ),
-        NinjaButton.destructive(
-          label: context.l10n.teamFinderDeleteTeam,
+        Row(
+          spacing: 8,
+          children: [
+            Expanded(
+              child: AppButton.secondary(
+                label: l10n.teamFinderEditTeam,
+                icon: const AppLineIconWidget(AppLineIcon.pencil),
+                onPressed: isBusy ? null : onEdit,
+              ),
+            ),
+            Expanded(
+              child: AppButton.secondary(
+                label: _isClosed
+                    ? l10n.teamFinderReopenTeam
+                    : l10n.teamFinderCloseTeam,
+                icon: AppLineIconWidget(
+                  _isClosed ? AppLineIcon.refresh : AppLineIcon.lock,
+                ),
+                onPressed: isBusy ? null : onCloseToggle,
+              ),
+            ),
+          ],
+        ),
+        AppButton.destructiveOutline(
+          label: l10n.teamFinderDeleteTeam,
+          icon: const AppLineIconWidget(AppLineIcon.trash),
           expanded: true,
           onPressed: isBusy ? null : onDelete,
         ),
@@ -189,8 +186,8 @@ class TeamCard extends StatelessWidget {
     }
     if (team.isMember) {
       return [
-        NinjaButton.destructive(
-          label: context.l10n.teamFinderLeaveTeam,
+        AppButton.destructiveOutline(
+          label: l10n.teamFinderLeaveTeam,
           expanded: true,
           onPressed: isBusy ? null : onLeave,
         ),
@@ -198,20 +195,20 @@ class TeamCard extends StatelessWidget {
     }
     if (team.hasApplied) {
       return [
-        NinjaButton.destructive(
-          label: context.l10n.teamFinderWithdrawApplication,
+        AppButton.destructiveOutline(
+          label: l10n.teamFinderWithdrawApplication,
           expanded: true,
           onPressed: isBusy ? null : onWithdraw,
         ),
       ];
     }
     return [
-      NinjaButton.primary(
+      AppButton.primary(
         label: _isExpired
-            ? context.l10n.teamFinderExpired
+            ? l10n.teamFinderExpired
             : team.isFull
-            ? context.l10n.teamFinderFull
-            : context.l10n.teamFinderApply,
+            ? l10n.teamFinderFull
+            : l10n.teamFinderApply,
         expanded: true,
         onPressed: isBusy || team.isFull || _isExpired ? null : onApply,
       ),

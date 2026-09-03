@@ -9,11 +9,11 @@ class _HubError extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     return ListView(
-      padding: const EdgeInsets.fromLTRB(
+      padding: EdgeInsets.fromLTRB(
         AppSpacing.screen,
         24,
         AppSpacing.screen,
-        24,
+        ninjaBottomInset(context) + AppSpacing.lg,
       ),
       children: [
         NinjaErrorState(

@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$LessonMaterial {
 
- String get id; LessonMaterialType get type; String get title; String get fileName; String get filePath; int get fileSize; bool get isPublic; bool get isAnonymous; int get downloadCount; int get likeCount; String get authorName; DateTime get createdAt; String? get mimeType;
+ String get id; LessonMaterialType get type; String get title; String get fileName; String get filePath; int get fileSize; bool get isPublic; bool get isAnonymous; int get downloadCount; int get likeCount; String get authorName; DateTime get createdAt; String? get mimeType; String? get previewPath; String? get batchId; int? get width; int? get height; int? get durationSeconds; bool get isLiked;
 /// Create a copy of LessonMaterial
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +28,16 @@ $LessonMaterialCopyWith<LessonMaterial> get copyWith => _$LessonMaterialCopyWith
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is LessonMaterial&&(identical(other.id, id) || other.id == id)&&(identical(other.type, type) || other.type == type)&&(identical(other.title, title) || other.title == title)&&(identical(other.fileName, fileName) || other.fileName == fileName)&&(identical(other.filePath, filePath) || other.filePath == filePath)&&(identical(other.fileSize, fileSize) || other.fileSize == fileSize)&&(identical(other.isPublic, isPublic) || other.isPublic == isPublic)&&(identical(other.isAnonymous, isAnonymous) || other.isAnonymous == isAnonymous)&&(identical(other.downloadCount, downloadCount) || other.downloadCount == downloadCount)&&(identical(other.likeCount, likeCount) || other.likeCount == likeCount)&&(identical(other.authorName, authorName) || other.authorName == authorName)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.mimeType, mimeType) || other.mimeType == mimeType));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is LessonMaterial&&(identical(other.id, id) || other.id == id)&&(identical(other.type, type) || other.type == type)&&(identical(other.title, title) || other.title == title)&&(identical(other.fileName, fileName) || other.fileName == fileName)&&(identical(other.filePath, filePath) || other.filePath == filePath)&&(identical(other.fileSize, fileSize) || other.fileSize == fileSize)&&(identical(other.isPublic, isPublic) || other.isPublic == isPublic)&&(identical(other.isAnonymous, isAnonymous) || other.isAnonymous == isAnonymous)&&(identical(other.downloadCount, downloadCount) || other.downloadCount == downloadCount)&&(identical(other.likeCount, likeCount) || other.likeCount == likeCount)&&(identical(other.authorName, authorName) || other.authorName == authorName)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.mimeType, mimeType) || other.mimeType == mimeType)&&(identical(other.previewPath, previewPath) || other.previewPath == previewPath)&&(identical(other.batchId, batchId) || other.batchId == batchId)&&(identical(other.width, width) || other.width == width)&&(identical(other.height, height) || other.height == height)&&(identical(other.durationSeconds, durationSeconds) || other.durationSeconds == durationSeconds)&&(identical(other.isLiked, isLiked) || other.isLiked == isLiked));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,type,title,fileName,filePath,fileSize,isPublic,isAnonymous,downloadCount,likeCount,authorName,createdAt,mimeType);
+int get hashCode => Object.hash(runtimeType,id,type,title,fileName,filePath,fileSize,isPublic,isAnonymous,downloadCount,likeCount,authorName,createdAt,mimeType,previewPath,batchId,width,height,durationSeconds,isLiked);
 
 @override
 String toString() {
-  return 'LessonMaterial(id: $id, type: $type, title: $title, fileName: $fileName, filePath: $filePath, fileSize: $fileSize, isPublic: $isPublic, isAnonymous: $isAnonymous, downloadCount: $downloadCount, likeCount: $likeCount, authorName: $authorName, createdAt: $createdAt, mimeType: $mimeType)';
+  return 'LessonMaterial(id: $id, type: $type, title: $title, fileName: $fileName, filePath: $filePath, fileSize: $fileSize, isPublic: $isPublic, isAnonymous: $isAnonymous, downloadCount: $downloadCount, likeCount: $likeCount, authorName: $authorName, createdAt: $createdAt, mimeType: $mimeType, previewPath: $previewPath, batchId: $batchId, width: $width, height: $height, durationSeconds: $durationSeconds, isLiked: $isLiked)';
 }
 
 
@@ -48,7 +48,7 @@ abstract mixin class $LessonMaterialCopyWith<$Res>  {
   factory $LessonMaterialCopyWith(LessonMaterial value, $Res Function(LessonMaterial) _then) = _$LessonMaterialCopyWithImpl;
 @useResult
 $Res call({
- String id, LessonMaterialType type, String title, String fileName, String filePath, int fileSize, bool isPublic, bool isAnonymous, int downloadCount, int likeCount, String authorName, DateTime createdAt, String? mimeType
+ String id, LessonMaterialType type, String title, String fileName, String filePath, int fileSize, bool isPublic, bool isAnonymous, int downloadCount, int likeCount, String authorName, DateTime createdAt, String? mimeType, String? previewPath, String? batchId, int? width, int? height, int? durationSeconds, bool isLiked
 });
 
 
@@ -65,7 +65,7 @@ class _$LessonMaterialCopyWithImpl<$Res>
 
 /// Create a copy of LessonMaterial
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? type = null,Object? title = null,Object? fileName = null,Object? filePath = null,Object? fileSize = null,Object? isPublic = null,Object? isAnonymous = null,Object? downloadCount = null,Object? likeCount = null,Object? authorName = null,Object? createdAt = null,Object? mimeType = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? type = null,Object? title = null,Object? fileName = null,Object? filePath = null,Object? fileSize = null,Object? isPublic = null,Object? isAnonymous = null,Object? downloadCount = null,Object? likeCount = null,Object? authorName = null,Object? createdAt = null,Object? mimeType = freezed,Object? previewPath = freezed,Object? batchId = freezed,Object? width = freezed,Object? height = freezed,Object? durationSeconds = freezed,Object? isLiked = null,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,type: null == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
@@ -80,7 +80,13 @@ as int,likeCount: null == likeCount ? _self.likeCount : likeCount // ignore: cas
 as int,authorName: null == authorName ? _self.authorName : authorName // ignore: cast_nullable_to_non_nullable
 as String,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime,mimeType: freezed == mimeType ? _self.mimeType : mimeType // ignore: cast_nullable_to_non_nullable
-as String?,
+as String?,previewPath: freezed == previewPath ? _self.previewPath : previewPath // ignore: cast_nullable_to_non_nullable
+as String?,batchId: freezed == batchId ? _self.batchId : batchId // ignore: cast_nullable_to_non_nullable
+as String?,width: freezed == width ? _self.width : width // ignore: cast_nullable_to_non_nullable
+as int?,height: freezed == height ? _self.height : height // ignore: cast_nullable_to_non_nullable
+as int?,durationSeconds: freezed == durationSeconds ? _self.durationSeconds : durationSeconds // ignore: cast_nullable_to_non_nullable
+as int?,isLiked: null == isLiked ? _self.isLiked : isLiked // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 
@@ -165,10 +171,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  LessonMaterialType type,  String title,  String fileName,  String filePath,  int fileSize,  bool isPublic,  bool isAnonymous,  int downloadCount,  int likeCount,  String authorName,  DateTime createdAt,  String? mimeType)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  LessonMaterialType type,  String title,  String fileName,  String filePath,  int fileSize,  bool isPublic,  bool isAnonymous,  int downloadCount,  int likeCount,  String authorName,  DateTime createdAt,  String? mimeType,  String? previewPath,  String? batchId,  int? width,  int? height,  int? durationSeconds,  bool isLiked)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _LessonMaterial() when $default != null:
-return $default(_that.id,_that.type,_that.title,_that.fileName,_that.filePath,_that.fileSize,_that.isPublic,_that.isAnonymous,_that.downloadCount,_that.likeCount,_that.authorName,_that.createdAt,_that.mimeType);case _:
+return $default(_that.id,_that.type,_that.title,_that.fileName,_that.filePath,_that.fileSize,_that.isPublic,_that.isAnonymous,_that.downloadCount,_that.likeCount,_that.authorName,_that.createdAt,_that.mimeType,_that.previewPath,_that.batchId,_that.width,_that.height,_that.durationSeconds,_that.isLiked);case _:
   return orElse();
 
 }
@@ -186,10 +192,10 @@ return $default(_that.id,_that.type,_that.title,_that.fileName,_that.filePath,_t
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  LessonMaterialType type,  String title,  String fileName,  String filePath,  int fileSize,  bool isPublic,  bool isAnonymous,  int downloadCount,  int likeCount,  String authorName,  DateTime createdAt,  String? mimeType)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  LessonMaterialType type,  String title,  String fileName,  String filePath,  int fileSize,  bool isPublic,  bool isAnonymous,  int downloadCount,  int likeCount,  String authorName,  DateTime createdAt,  String? mimeType,  String? previewPath,  String? batchId,  int? width,  int? height,  int? durationSeconds,  bool isLiked)  $default,) {final _that = this;
 switch (_that) {
 case _LessonMaterial():
-return $default(_that.id,_that.type,_that.title,_that.fileName,_that.filePath,_that.fileSize,_that.isPublic,_that.isAnonymous,_that.downloadCount,_that.likeCount,_that.authorName,_that.createdAt,_that.mimeType);case _:
+return $default(_that.id,_that.type,_that.title,_that.fileName,_that.filePath,_that.fileSize,_that.isPublic,_that.isAnonymous,_that.downloadCount,_that.likeCount,_that.authorName,_that.createdAt,_that.mimeType,_that.previewPath,_that.batchId,_that.width,_that.height,_that.durationSeconds,_that.isLiked);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -206,10 +212,10 @@ return $default(_that.id,_that.type,_that.title,_that.fileName,_that.filePath,_t
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  LessonMaterialType type,  String title,  String fileName,  String filePath,  int fileSize,  bool isPublic,  bool isAnonymous,  int downloadCount,  int likeCount,  String authorName,  DateTime createdAt,  String? mimeType)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  LessonMaterialType type,  String title,  String fileName,  String filePath,  int fileSize,  bool isPublic,  bool isAnonymous,  int downloadCount,  int likeCount,  String authorName,  DateTime createdAt,  String? mimeType,  String? previewPath,  String? batchId,  int? width,  int? height,  int? durationSeconds,  bool isLiked)?  $default,) {final _that = this;
 switch (_that) {
 case _LessonMaterial() when $default != null:
-return $default(_that.id,_that.type,_that.title,_that.fileName,_that.filePath,_that.fileSize,_that.isPublic,_that.isAnonymous,_that.downloadCount,_that.likeCount,_that.authorName,_that.createdAt,_that.mimeType);case _:
+return $default(_that.id,_that.type,_that.title,_that.fileName,_that.filePath,_that.fileSize,_that.isPublic,_that.isAnonymous,_that.downloadCount,_that.likeCount,_that.authorName,_that.createdAt,_that.mimeType,_that.previewPath,_that.batchId,_that.width,_that.height,_that.durationSeconds,_that.isLiked);case _:
   return null;
 
 }
@@ -221,7 +227,7 @@ return $default(_that.id,_that.type,_that.title,_that.fileName,_that.filePath,_t
 @JsonSerializable()
 
 class _LessonMaterial implements LessonMaterial {
-  const _LessonMaterial({required this.id, required this.type, required this.title, required this.fileName, required this.filePath, required this.fileSize, required this.isPublic, required this.isAnonymous, required this.downloadCount, required this.likeCount, required this.authorName, required this.createdAt, this.mimeType});
+  const _LessonMaterial({required this.id, required this.type, required this.title, required this.fileName, required this.filePath, required this.fileSize, required this.isPublic, required this.isAnonymous, required this.downloadCount, required this.likeCount, required this.authorName, required this.createdAt, this.mimeType, this.previewPath, this.batchId, this.width, this.height, this.durationSeconds, this.isLiked = false});
   factory _LessonMaterial.fromJson(Map<String, dynamic> json) => _$LessonMaterialFromJson(json);
 
 @override final  String id;
@@ -237,6 +243,12 @@ class _LessonMaterial implements LessonMaterial {
 @override final  String authorName;
 @override final  DateTime createdAt;
 @override final  String? mimeType;
+@override final  String? previewPath;
+@override final  String? batchId;
+@override final  int? width;
+@override final  int? height;
+@override final  int? durationSeconds;
+@override@JsonKey() final  bool isLiked;
 
 /// Create a copy of LessonMaterial
 /// with the given fields replaced by the non-null parameter values.
@@ -251,16 +263,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _LessonMaterial&&(identical(other.id, id) || other.id == id)&&(identical(other.type, type) || other.type == type)&&(identical(other.title, title) || other.title == title)&&(identical(other.fileName, fileName) || other.fileName == fileName)&&(identical(other.filePath, filePath) || other.filePath == filePath)&&(identical(other.fileSize, fileSize) || other.fileSize == fileSize)&&(identical(other.isPublic, isPublic) || other.isPublic == isPublic)&&(identical(other.isAnonymous, isAnonymous) || other.isAnonymous == isAnonymous)&&(identical(other.downloadCount, downloadCount) || other.downloadCount == downloadCount)&&(identical(other.likeCount, likeCount) || other.likeCount == likeCount)&&(identical(other.authorName, authorName) || other.authorName == authorName)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.mimeType, mimeType) || other.mimeType == mimeType));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _LessonMaterial&&(identical(other.id, id) || other.id == id)&&(identical(other.type, type) || other.type == type)&&(identical(other.title, title) || other.title == title)&&(identical(other.fileName, fileName) || other.fileName == fileName)&&(identical(other.filePath, filePath) || other.filePath == filePath)&&(identical(other.fileSize, fileSize) || other.fileSize == fileSize)&&(identical(other.isPublic, isPublic) || other.isPublic == isPublic)&&(identical(other.isAnonymous, isAnonymous) || other.isAnonymous == isAnonymous)&&(identical(other.downloadCount, downloadCount) || other.downloadCount == downloadCount)&&(identical(other.likeCount, likeCount) || other.likeCount == likeCount)&&(identical(other.authorName, authorName) || other.authorName == authorName)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.mimeType, mimeType) || other.mimeType == mimeType)&&(identical(other.previewPath, previewPath) || other.previewPath == previewPath)&&(identical(other.batchId, batchId) || other.batchId == batchId)&&(identical(other.width, width) || other.width == width)&&(identical(other.height, height) || other.height == height)&&(identical(other.durationSeconds, durationSeconds) || other.durationSeconds == durationSeconds)&&(identical(other.isLiked, isLiked) || other.isLiked == isLiked));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,type,title,fileName,filePath,fileSize,isPublic,isAnonymous,downloadCount,likeCount,authorName,createdAt,mimeType);
+int get hashCode => Object.hash(runtimeType,id,type,title,fileName,filePath,fileSize,isPublic,isAnonymous,downloadCount,likeCount,authorName,createdAt,mimeType,previewPath,batchId,width,height,durationSeconds,isLiked);
 
 @override
 String toString() {
-  return 'LessonMaterial(id: $id, type: $type, title: $title, fileName: $fileName, filePath: $filePath, fileSize: $fileSize, isPublic: $isPublic, isAnonymous: $isAnonymous, downloadCount: $downloadCount, likeCount: $likeCount, authorName: $authorName, createdAt: $createdAt, mimeType: $mimeType)';
+  return 'LessonMaterial(id: $id, type: $type, title: $title, fileName: $fileName, filePath: $filePath, fileSize: $fileSize, isPublic: $isPublic, isAnonymous: $isAnonymous, downloadCount: $downloadCount, likeCount: $likeCount, authorName: $authorName, createdAt: $createdAt, mimeType: $mimeType, previewPath: $previewPath, batchId: $batchId, width: $width, height: $height, durationSeconds: $durationSeconds, isLiked: $isLiked)';
 }
 
 
@@ -271,7 +283,7 @@ abstract mixin class _$LessonMaterialCopyWith<$Res> implements $LessonMaterialCo
   factory _$LessonMaterialCopyWith(_LessonMaterial value, $Res Function(_LessonMaterial) _then) = __$LessonMaterialCopyWithImpl;
 @override @useResult
 $Res call({
- String id, LessonMaterialType type, String title, String fileName, String filePath, int fileSize, bool isPublic, bool isAnonymous, int downloadCount, int likeCount, String authorName, DateTime createdAt, String? mimeType
+ String id, LessonMaterialType type, String title, String fileName, String filePath, int fileSize, bool isPublic, bool isAnonymous, int downloadCount, int likeCount, String authorName, DateTime createdAt, String? mimeType, String? previewPath, String? batchId, int? width, int? height, int? durationSeconds, bool isLiked
 });
 
 
@@ -288,7 +300,7 @@ class __$LessonMaterialCopyWithImpl<$Res>
 
 /// Create a copy of LessonMaterial
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? type = null,Object? title = null,Object? fileName = null,Object? filePath = null,Object? fileSize = null,Object? isPublic = null,Object? isAnonymous = null,Object? downloadCount = null,Object? likeCount = null,Object? authorName = null,Object? createdAt = null,Object? mimeType = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? type = null,Object? title = null,Object? fileName = null,Object? filePath = null,Object? fileSize = null,Object? isPublic = null,Object? isAnonymous = null,Object? downloadCount = null,Object? likeCount = null,Object? authorName = null,Object? createdAt = null,Object? mimeType = freezed,Object? previewPath = freezed,Object? batchId = freezed,Object? width = freezed,Object? height = freezed,Object? durationSeconds = freezed,Object? isLiked = null,}) {
   return _then(_LessonMaterial(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,type: null == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
@@ -303,7 +315,13 @@ as int,likeCount: null == likeCount ? _self.likeCount : likeCount // ignore: cas
 as int,authorName: null == authorName ? _self.authorName : authorName // ignore: cast_nullable_to_non_nullable
 as String,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime,mimeType: freezed == mimeType ? _self.mimeType : mimeType // ignore: cast_nullable_to_non_nullable
-as String?,
+as String?,previewPath: freezed == previewPath ? _self.previewPath : previewPath // ignore: cast_nullable_to_non_nullable
+as String?,batchId: freezed == batchId ? _self.batchId : batchId // ignore: cast_nullable_to_non_nullable
+as String?,width: freezed == width ? _self.width : width // ignore: cast_nullable_to_non_nullable
+as int?,height: freezed == height ? _self.height : height // ignore: cast_nullable_to_non_nullable
+as int?,durationSeconds: freezed == durationSeconds ? _self.durationSeconds : durationSeconds // ignore: cast_nullable_to_non_nullable
+as int?,isLiked: null == isLiked ? _self.isLiked : isLiked // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 

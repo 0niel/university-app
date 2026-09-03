@@ -1,6 +1,12 @@
 export 'group_link_sheet.dart';
+export 'group_post_comments_sheet.dart';
 export 'group_post_sheet.dart';
 export 'group_space_birthday_card.dart';
+export 'group_space_members_section.dart';
+export 'group_space_notes_preview_section.dart';
+export 'group_space_quick_actions.dart';
+export 'group_space_relative_time.dart';
+export 'group_space_set_birthday_card.dart';
 export 'ninja_group_add_telegram_card.dart';
 export 'ninja_group_announcement_card.dart';
 export 'ninja_group_create_note_card.dart';

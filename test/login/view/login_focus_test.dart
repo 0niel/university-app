@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -10,14 +12,18 @@ import 'package:user_repository/user_repository.dart';
 class _UserRepository extends Mock implements UserRepository {}
 
 void main() {
-  Future<void> pumpPage(WidgetTester tester, Widget page) async {
+  Future<void> pumpPage(
+    WidgetTester tester,
+    Widget page, {
+    UserRepository? repository,
+  }) async {
     tester.view
       ..devicePixelRatio = 1
       ..physicalSize = const Size(390, 844);
     addTearDown(tester.view.reset);
     await tester.pumpWidget(
       RepositoryProvider<UserRepository>.value(
-        value: _UserRepository(),
+        value: repository ?? _UserRepository(),
         child: MaterialApp(
           theme: AppTheme.darkTheme.copyWith(platform: TargetPlatform.android),
           locale: const Locale('ru'),
@@ -133,6 +139,71 @@ void main() {
       }
     });
   }
+
+  testWidgets('field errors wait for the first blur', (tester) async {
+    await pumpPage(tester, const LoginPage());
+    await tester.enterText(input('loginPage_emailInput'), 'stu');
+    await tester.pump();
+    expect(find.text('Введите корректный email'), findsNothing);
+
+    await tester.enterText(input('loginPage_passwordInput'), 'short');
+    await tester.pump();
+    expect(find.text('Введите корректный email'), findsOneWidget);
+    expect(find.textContaining('8'), findsNothing);
+
+    FocusManager.instance.primaryFocus?.unfocus();
+    await tester.pump();
+    expect(find.textContaining('8'), findsOneWidget);
+  });
+
+  testWidgets('fields stay focused while the request is in flight', (
+    tester,
+  ) async {
+    final request = Completer<void>();
+    addTearDown(() {
+      if (!request.isCompleted) request.complete();
+    });
+    final repository = _UserRepository();
+    when(
+      () => repository.logInWithPassword(
+        email: any(named: 'email'),
+        password: any(named: 'password'),
+      ),
+    ).thenAnswer((_) => request.future);
+    await pumpPage(tester, const LoginPage(), repository: repository);
+    await tester.enterText(
+      input('loginPage_emailInput'),
+      'student@example.com',
+    );
+    await tester.enterText(input('loginPage_passwordInput'), 'password123');
+    await tester.pump();
+    final focus = tester.widget<EditableText>(
+      input('loginPage_passwordInput'),
+    ).focusNode;
+    await tester.tap(find.byKey(const Key('loginPage_submitButton')));
+    await tester.pump();
+
+    for (final field in tester.widgetList<AppInputField>(
+      find.byType(AppInputField),
+    )) {
+      expect(field.readOnly, isTrue);
+      expect(field.enabled, isTrue);
+    }
+    expect(focus.hasFocus, isTrue);
+
+    request.complete();
+    await tester.pump();
+    await tester.pump();
+    expect(focus.hasFocus, isTrue);
+    expect(tester.testTextInput.isVisible, isTrue);
+    expect(
+      tester
+          .widget<EditableText>(input('loginPage_passwordInput'))
+          .controller
+          .text,
+      'password123',
+    );
+  });
 
   testWidgets('password visibility preserves focus, text and the keyboard', (
     tester,

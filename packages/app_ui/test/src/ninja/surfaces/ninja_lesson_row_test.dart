@@ -1,5 +1,6 @@
 import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../kit_harness.dart';
@@ -192,6 +193,48 @@ void main() {
       expect((circle.decoration! as BoxDecoration).color, kitColors.surface2);
       await tester.tap(find.byType(AppLineIconWidget));
       expect(more, 1);
+    });
+
+    testWidgets('long press triggers a medium haptic and the callback', (
+      tester,
+    ) async {
+      final calls = <MethodCall>[];
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.platform,
+        (call) async {
+          calls.add(call);
+          return null;
+        },
+      );
+      addTearDown(
+        () => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+          SystemChannels.platform,
+          null,
+        ),
+      );
+      var longPresses = 0;
+      await tester.pumpWidget(
+        host(
+          NinjaLessonRow(
+            title: 'Физика',
+            time: '12:40',
+            onLongPress: () => longPresses++,
+          ),
+        ),
+      );
+
+      await tester.longPress(find.text('Физика'));
+      await tester.pump();
+
+      expect(longPresses, 1);
+      expect(
+        calls.any(
+          (call) =>
+              call.method == 'HapticFeedback.vibrate' &&
+              call.arguments == 'HapticFeedbackType.mediumImpact',
+        ),
+        isTrue,
+      );
     });
 
     testWidgets('legacy past/current flags and onTap still work', (

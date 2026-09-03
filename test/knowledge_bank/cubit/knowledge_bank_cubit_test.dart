@@ -65,6 +65,9 @@ void main() {
       ).thenAnswer(
         (_) async => 'https://project.supabase.co/storage/material.pdf',
       );
+      when(
+        () => campusRepository.createMaterialPreviewUrls(any()),
+      ).thenAnswer((_) async => const {});
     });
 
     KnowledgeBankCubit buildCubit() => KnowledgeBankCubit(
@@ -308,6 +311,62 @@ void main() {
         verifyNever(() => gamificationRepository.getProfile());
       },
     );
+
+    blocTest<KnowledgeBankCubit, KnowledgeBankState>(
+      'toggleLike updates only the matched material with the server result',
+      setUp: () => when(
+        () => campusRepository.toggleMaterialLike(note.id),
+      ).thenAnswer((_) async => (liked: true, likes: note.likes + 1)),
+      build: buildCubit,
+      seed: () => const KnowledgeBankState(materials: [note, cheatsheet]),
+      act: (cubit) => cubit.toggleLike(note),
+      verify: (cubit) {
+        final updated = cubit.state.materials.firstWhere(
+          (m) => m.id == note.id,
+        );
+        expect(updated.isLiked, isTrue);
+        expect(updated.likes, note.likes + 1);
+        expect(
+          cubit.state.materials.firstWhere((m) => m.id == cheatsheet.id),
+          cheatsheet,
+        );
+      },
+    );
+
+    blocTest<KnowledgeBankCubit, KnowledgeBankState>(
+      'deleteMaterial removes only the deleted material from state',
+      setUp: () => when(
+        () => campusRepository.deleteOwnMaterial(note.id),
+      ).thenAnswer((_) async {}),
+      build: buildCubit,
+      seed: () => const KnowledgeBankState(materials: [note, cheatsheet]),
+      act: (cubit) => cubit.deleteMaterial(note),
+      verify: (cubit) {
+        expect(cubit.state.materials, [cheatsheet]);
+      },
+    );
+
+    test('load resolves preview urls for materials that expose one', () async {
+      final withPreview = note.copyWith(
+        previewPath: 'user/bank/previews/a.jpg',
+      );
+      when(
+        () => campusRepository.getPublicMaterials(),
+      ).thenAnswer((_) async => [withPreview]);
+      when(
+        () => campusRepository.createMaterialPreviewUrls(any()),
+      ).thenAnswer(
+        (_) async => {'user/bank/previews/a.jpg': 'https://signed/a.jpg'},
+      );
+      final cubit = buildCubit();
+      addTearDown(cubit.close);
+      await cubit.load();
+      await pumpEventQueue();
+      expect(
+        cubit.state.previewUrls['user/bank/previews/a.jpg'],
+        'https://signed/a.jpg',
+      );
+    });
 
     group('filteredMaterials', () {
       test('returns all materials when type is "all"', () {

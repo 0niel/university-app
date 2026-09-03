@@ -1,9 +1,7 @@
-import 'dart:async';
-
 import 'package:app_ui/app_ui.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:campus_repository/campus_repository.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:rtu_mirea_app/config/config.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:rtu_mirea_app/marketplace/utils/utils.dart';
@@ -17,8 +15,6 @@ class MarketListingCard extends StatelessWidget {
     required this.item,
     required this.now,
     required this.onOpen,
-    required this.onToggleSold,
-    required this.onDelete,
     super.key,
     this.isBusy = false,
     this.isFavorite = false,
@@ -29,8 +25,6 @@ class MarketListingCard extends StatelessWidget {
   final MarketListing item;
   final DateTime now;
   final VoidCallback onOpen;
-  final VoidCallback onToggleSold;
-  final VoidCallback onDelete;
   final bool isBusy;
   final bool isFavorite;
   final VoidCallback? onToggleFavorite;
@@ -63,21 +57,16 @@ class MarketListingCard extends StatelessWidget {
                   fit: StackFit.expand,
                   children: [
                     AppPressable(
-                      onTap: onOpen,
+                      onTap: isBusy ? null : onOpen,
                       semanticsLabel: item.title,
-                      child: _ListingMedia(
-                        item: item,
-                        isBusy: isBusy,
-                        onOwnerActions: () =>
-                            unawaited(_showOwnerActions(context)),
-                      ),
+                      child: _ListingMedia(item: item),
                     ),
                     if (onToggleFavorite != null)
                       Positioned(
                         right: 2,
                         top: 2,
                         child: AppPressState(
-                          onTap: onToggleFavorite,
+                          onTap: isBusy ? null : onToggleFavorite,
                           semanticsLabel: isFavorite
                               ? l10n.marketFavoriteRemove
                               : l10n.marketFavoriteAdd,
@@ -110,6 +99,15 @@ class MarketListingCard extends StatelessWidget {
                               ),
                         ),
                       ),
+                    if (isBusy)
+                      Positioned.fill(
+                        child: ColoredBox(
+                          color: colors.canvas.withValues(alpha: .55),
+                          child: Center(
+                            child: AppSpinner(color: colors.accent),
+                          ),
+                        ),
+                      ),
                   ],
                 ),
               ),
@@ -121,13 +119,13 @@ class MarketListingCard extends StatelessWidget {
                     children: [
                       Expanded(
                         child: AppPressable(
-                          onTap: onOpen,
+                          onTap: isBusy ? null : onOpen,
                           semanticsLabel: item.title,
                           child: _ListingContent(item: item, sellerMeta: meta),
                         ),
                       ),
                       AppPressState(
-                        onTap: onContact ?? onOpen,
+                        onTap: isBusy ? null : (onContact ?? onOpen),
                         semanticsLabel: l10n.marketWrite,
                         semanticsButton: true,
                         builder: (context, {required pressed}) => SizedBox(
@@ -163,45 +161,6 @@ class MarketListingCard extends StatelessWidget {
             ],
           ),
         ),
-      ),
-    );
-  }
-
-  Future<void> _showOwnerActions(BuildContext context) async {
-    if (isBusy) return;
-    unawaited(HapticFeedback.mediumImpact());
-    await showAppSheet<void>(
-      context,
-      title: item.title,
-      backgroundColor: context.colors.canvas,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          NinjaButton.secondary(
-            label: item.isSold
-                ? context.l10n.marketMarkAvailable
-                : context.l10n.marketMarkSold,
-            icon: const AppLineIconWidget(AppLineIcon.check),
-            size: NinjaButtonSize.large,
-            expanded: true,
-            onPressed: () {
-              Navigator.of(context, rootNavigator: true).pop();
-              onToggleSold();
-            },
-          ),
-          const SizedBox(height: AppSpacing.gap),
-          NinjaButton.destructive(
-            label: context.l10n.marketDelete,
-            icon: const AppLineIconWidget(AppLineIcon.trash),
-            size: NinjaButtonSize.large,
-            expanded: true,
-            onPressed: () {
-              Navigator.of(context, rootNavigator: true).pop();
-              onDelete();
-            },
-          ),
-        ],
       ),
     );
   }

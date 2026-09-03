@@ -48,7 +48,7 @@ class _HubBody extends StatelessWidget {
         physics: const AlwaysScrollableScrollPhysics(),
         padding: EdgeInsets.only(
           top: state.selectedSchedule == null ? AppSpacing.gap : AppSpacing.xl,
-          bottom: 96,
+          bottom: ninjaBottomInset(context) + AppSpacing.lg,
         ),
         children: [
           if (state.selectedSchedule case final selected?) ...[

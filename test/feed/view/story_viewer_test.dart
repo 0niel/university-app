@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:app_ui/app_ui.dart';
 import 'package:bloc_test/bloc_test.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -77,8 +78,9 @@ void main() {
     await tester.tap(find.text('Open'));
     await tester.pump(const Duration(milliseconds: 400));
     expect(find.byKey(const Key('storyViewer_pending')), findsOneWidget);
+    expect(find.byType(NinjaSpinner), findsNothing);
     verify(() => feed.add(any(that: isA<FeedRequested>()))).called(1);
-    await tester.tap(find.text('Закрыть'));
+    await tester.tap(find.byKey(const Key('storyViewer_close')));
     await tester.pump(const Duration(milliseconds: 400));
     await tester.pump(const Duration(milliseconds: 400));
     expect(find.text('Open'), findsOneWidget);
@@ -96,9 +98,14 @@ void main() {
     await tester.pump(const Duration(milliseconds: 400));
     expect(find.byKey(const Key('storyViewer_failure')), findsOneWidget);
     expect(find.byKey(const Key('storyViewer_empty')), findsNothing);
+    expect(find.byType(AppErrorState), findsOneWidget);
+    expect(find.byKey(const Key('storyViewer_close')), findsOneWidget);
     await tester.tap(find.text('Повторить'));
     verify(() => feed.add(any(that: isA<FeedRequested>()))).called(1);
     expect(tester.takeException(), isNull);
+    await tester.tap(find.byKey(const Key('storyViewer_close')));
+    await tester.pumpAndSettle();
+    expect(find.text('Open'), findsOneWidget);
   });
 
   testWidgets('reduced motion keeps stories manual at 320px and 200 percent', (
@@ -323,6 +330,99 @@ void main() {
       find.byKey(const ValueKey('storyViewer_slide_next')),
       findsOneWidget,
     );
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('story header shows the source name next to a relative time', (
+    tester,
+  ) async {
+    when(() => feed.state).thenReturn(
+      FeedState(
+        status: .populated,
+        feed: {
+          'science': [
+            PostMediumBlock(
+              id: 'meta',
+              categoryId: 'science',
+              author: 'Наука',
+              publishedAt: DateTime(2026),
+              imageUrl: '',
+              title: 'Событие',
+            ),
+          ],
+        },
+      ),
+    );
+    await tester.pumpApp(subject(reducedMotion: true));
+    await tester.tap(find.text('Open'));
+    await tester.pump(const Duration(milliseconds: 400));
+    final header = tester.widget<Text>(
+      find.byKey(const Key('storyViewer_headerName')),
+    );
+    final span = header.textSpan! as TextSpan;
+    expect(span.children, hasLength(2));
+    expect((span.children!.first as TextSpan).text, 'Наука');
+    expect((span.children!.last as TextSpan).text, contains('·'));
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('a story without an image renders only the striped backdrop', (
+    tester,
+  ) async {
+    when(() => feed.state).thenReturn(
+      FeedState(
+        status: .populated,
+        feed: {
+          'science': [
+            PostMediumBlock(
+              id: 'no-image',
+              categoryId: 'science',
+              author: 'Наука',
+              publishedAt: DateTime(2026),
+              imageUrl: '',
+              title: 'Story',
+            ),
+          ],
+        },
+      ),
+    );
+    await tester.pumpApp(subject(reducedMotion: true));
+    await tester.tap(find.text('Open'));
+    await tester.pump(const Duration(milliseconds: 400));
+    expect(find.byType(ImageFiltered), findsNothing);
+    expect(find.byType(CachedNetworkImage), findsNothing);
+    expect(find.byType(AppStripePlaceholder), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('wide viewports show a centered nine by sixteen column', (
+    tester,
+  ) async {
+    when(() => feed.state).thenReturn(
+      FeedState(
+        status: .populated,
+        feed: {
+          'science': [
+            PostMediumBlock(
+              id: 'desktop',
+              categoryId: 'science',
+              author: 'Наука',
+              publishedAt: DateTime(2026),
+              imageUrl: '',
+              title: 'Desktop story',
+            ),
+          ],
+        },
+      ),
+    );
+    await tester.pumpApp(
+      subject(reducedMotion: true),
+      size: const Size(900, 700),
+    );
+    await tester.tap(find.text('Open'));
+    await tester.pump(const Duration(milliseconds: 400));
+    final aspectRatio = tester.widget<AspectRatio>(find.byType(AspectRatio));
+    expect(aspectRatio.aspectRatio, 9 / 16);
     expect(tester.takeException(), isNull);
   });
 }

@@ -10,7 +10,7 @@ class _ScanReticleCorner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const bar = ColoredBox(color: Colors.white);
+    final bar = ColoredBox(color: context.colors.white);
     return Positioned(
       top: top,
       bottom: bottom,

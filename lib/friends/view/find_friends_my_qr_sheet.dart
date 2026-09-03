@@ -29,7 +29,7 @@ class FindFriendsMyQrSheet extends StatelessWidget {
           child: Container(
             padding: const .all(AppSpacing.screen),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: colors.white,
               borderRadius: .circular(AppRadius.card),
             ),
             child: LayoutBuilder(

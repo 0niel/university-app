@@ -12,13 +12,19 @@ import 'package:url_launcher/url_launcher.dart';
 class TeamFinderView extends StatelessWidget {
   const TeamFinderView({super.key});
 
-  Future<void> _create(BuildContext context) async {
+  Future<void> _create(BuildContext context, {Team? editing}) async {
     final cubit = context.read<TeamFinderCubit>();
+    final l10n = context.l10n;
     await showAppSheet<void>(
       context,
-      title: context.l10n.teamFinderCreateSheetTitle,
-      subtitle: context.l10n.teamFinderCreateSheetSubtitle,
-      child: BlocProvider.value(value: cubit, child: const CreateTeamSheet()),
+      title: editing == null
+          ? l10n.teamFinderCreateSheetTitle
+          : l10n.teamFinderEditSheetTitle,
+      subtitle: editing == null ? l10n.teamFinderCreateSheetSubtitle : null,
+      child: BlocProvider.value(
+        value: cubit,
+        child: CreateTeamSheet(editing: editing),
+      ),
     );
   }
 
@@ -34,7 +40,7 @@ class TeamFinderView extends StatelessWidget {
       ),
     );
     if (sent == true && context.mounted) {
-      showNinjaToast(
+      ToastManager.showSuccess(
         context,
         message: context.l10n.teamFinderApplicationSent,
       );
@@ -75,7 +81,7 @@ class TeamFinderView extends StatelessWidget {
   }
 
   Future<void> _withdraw(BuildContext context, Team team) async {
-    final confirmed = await showNinjaConfirmDialog(
+    final confirmed = await showAppConfirmDialog(
       context,
       title: context.l10n.teamFinderWithdrawConfirmTitle,
       message: context.l10n.teamFinderWithdrawConfirmBody,
@@ -91,7 +97,7 @@ class TeamFinderView extends StatelessWidget {
   }
 
   Future<void> _leave(BuildContext context, Team team) async {
-    final confirmed = await showNinjaConfirmDialog(
+    final confirmed = await showAppConfirmDialog(
       context,
       title: context.l10n.teamFinderLeaveConfirmTitle,
       message: context.l10n.teamFinderLeaveConfirmBody,
@@ -107,7 +113,7 @@ class TeamFinderView extends StatelessWidget {
   }
 
   Future<void> _delete(BuildContext context, Team team) async {
-    final confirmed = await showNinjaConfirmDialog(
+    final confirmed = await showAppConfirmDialog(
       context,
       title: context.l10n.teamFinderDeleteConfirmTitle,
       message: context.l10n.teamFinderDeleteConfirmBody,
@@ -122,8 +128,33 @@ class TeamFinderView extends StatelessWidget {
     }
   }
 
+  Future<void> _closeToggle(BuildContext context, Team team) async {
+    final l10n = context.l10n;
+    final cubit = context.read<TeamFinderCubit>();
+    if (team.status != TeamStatus.closed) {
+      final confirmed = await showAppConfirmDialog(
+        context,
+        title: l10n.teamFinderCloseConfirmTitle,
+        message: l10n.teamFinderCloseConfirmBody,
+        confirmLabel: l10n.teamFinderCloseTeam,
+        cancelLabel: l10n.collabNotesCancel,
+        destructive: true,
+      );
+      if (!confirmed || !context.mounted) return;
+      final closed = await cubit.closeTeam(team);
+      if (!closed && context.mounted) {
+        _showError(context, l10n.teamFinderCloseError);
+      }
+      return;
+    }
+    final reopened = await cubit.reopenTeam(team);
+    if (!reopened && context.mounted) {
+      _showError(context, l10n.teamFinderUpdateError);
+    }
+  }
+
   void _showError(BuildContext context, String message) {
-    showNinjaToast(context, showCheck: false, message: message);
+    ToastManager.showError(context, message: message);
   }
 
   @override
@@ -137,13 +168,14 @@ class TeamFinderView extends StatelessWidget {
           _showError(context, context.l10n.teamFinderRefreshError),
       builder: (context, _) => Scaffold(
         backgroundColor: context.colors.canvas,
-        floatingActionButton: NinjaCommunityFab(
+        floatingActionButton: AppFab.extended(
+          icon: AppLineIcon.plus,
           label: context.l10n.teamFinderCreateCta,
           onPressed: () => unawaited(_create(context)),
         ),
         body: Column(
           children: [
-            NinjaCommunityHeader(
+            AppScreenHeader(
               title: context.l10n.teamFinderTitle,
               subtitle: context.l10n.teamFinderSubtitle,
             ),
@@ -156,6 +188,8 @@ class TeamFinderView extends StatelessWidget {
                 onApplications: (team) =>
                     unawaited(_applications(context, team)),
                 onDelete: (team) => unawaited(_delete(context, team)),
+                onEdit: (team) => unawaited(_create(context, editing: team)),
+                onCloseToggle: (team) => unawaited(_closeToggle(context, team)),
               ),
             ),
           ],

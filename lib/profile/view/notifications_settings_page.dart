@@ -137,7 +137,7 @@ class NotificationsSettingsPage extends StatelessWidget {
                   ),
                 ],
               ),
-              SizedBox(height: MediaQuery.paddingOf(context).bottom + 32),
+              SizedBox(height: ninjaBottomInset(context) + AppSpacing.lg),
             ],
           ),
         ],

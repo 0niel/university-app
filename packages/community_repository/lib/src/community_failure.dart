@@ -3,45 +3,32 @@ import 'package:discourse_api_client/discourse_api_client.dart' as discourse;
 import 'package:equatable/equatable.dart';
 import 'package:github/github.dart';
 
-/// Base exception for community data operations.
 abstract class CommunityFailure with EquatableMixin implements Exception {
-  /// Creates a failure that wraps [error].
   const CommunityFailure(this.error);
 
-  /// The error raised by the underlying client.
   final Object error;
 
   @override
   List<Object?> get props => [error];
 }
 
-/// Thrown when contributor retrieval fails.
 class GetContributorsFailure extends CommunityFailure {
-  /// Creates a contributor retrieval failure.
   const GetContributorsFailure(super.error);
 }
 
-/// Thrown when top-topic retrieval fails.
 class GetTopTopicsFailure extends CommunityFailure {
-  /// Creates a top-topic retrieval failure.
   const GetTopTopicsFailure(super.error);
 }
 
-/// Thrown when a post cannot be retrieved.
 class GetPostFailure extends CommunityFailure {
-  /// Creates a post retrieval failure.
   const GetPostFailure(super.error);
 }
 
-/// Thrown when a post's replies cannot be retrieved.
 class GetPostCommentsFailure extends CommunityFailure {
-  /// Creates a reply retrieval failure.
   const GetPostCommentsFailure(super.error);
 }
 
-/// Loads community content from GitHub and Discourse.
 class CommunityRepository {
-  /// Creates a repository using injected clients or a Discourse base URL.
   CommunityRepository({
     discourse.DiscourseApiClient? discourseClient,
     GithubClient? githubClient,
@@ -65,7 +52,6 @@ class CommunityRepository {
     return value;
   }
 
-  /// Loads contributors from GitHub.
   Future<ContributorsResponse> getContributors() async {
     try {
       final contributors = await _github.getContributors();
@@ -75,7 +61,6 @@ class CommunityRepository {
     }
   }
 
-  /// Loads the current top-topic feed from Discourse.
   Future<TopTopicsResponse> getTopTopics({int page = 0}) async {
     try {
       final top = await _discourse.getTop(page: page);
@@ -122,7 +107,6 @@ class CommunityRepository {
     }
   }
 
-  /// Loads one rendered Discourse post.
   Future<DiscoursePost> getPost(int id) async {
     try {
       final post = await _discourse.getPost(id);
@@ -139,7 +123,26 @@ class CommunityRepository {
     }
   }
 
-  /// Loads replies for a Discourse topic, excluding its original post.
+  Future<DiscoursePost> getTopicFirstPost(int topicId) async {
+    try {
+      final posts = await _discourse.getTopicPosts(topicId);
+      final first = posts.firstWhere(
+        (p) => p.postNumber == 1,
+        orElse: () => posts.first,
+      );
+      return DiscoursePost(
+        id: first.id,
+        topicId: topicId,
+        username: first.username,
+        avatarTemplate: first.avatarTemplate,
+        cooked: first.cooked,
+        createdAt: DateTime.tryParse(first.createdAt) ?? DateTime.now(),
+      );
+    } catch (error, stackTrace) {
+      Error.throwWithStackTrace(GetPostFailure(error), stackTrace);
+    }
+  }
+
   Future<List<DiscoursePostComment>> getPostComments({
     required int topicId,
   }) async {

@@ -73,9 +73,6 @@ class GamificationRepository {
     );
   }
 
-  /// Sets the caller's display name and unique `@handle`, returning the
-  /// refreshed overview. Throws [HandleTakenException] when the handle is
-  /// already used by someone else.
   Future<ProfileOverview> setUserIdentity({
     required String organizationId,
     required String fullName,
@@ -105,8 +102,6 @@ class GamificationRepository {
     }
   }
 
-  /// Whether [handle] is free for the caller to take (false for taken or
-  /// malformed handles; the client validates format separately).
   Future<bool> isHandleAvailable(String handle) async {
     final response = await _supabase.rpc<Object?>(
       'is_handle_available',
@@ -115,15 +110,10 @@ class GamificationRepository {
     return response == true;
   }
 
-  /// Records that the current user was active today (feeds the streak
-  /// fire-calendar). Idempotent for the same day.
   Future<void> recordActiveDay() async {
     await _supabase.rpc<Object?>('record_active_day');
   }
 
-  /// Recomputes the caller's quest progress and achievements server-side and
-  /// returns badges earned by this call (for celebration UI). The server owns
-  /// all progress and rewards; this only triggers a re-evaluation.
   Future<List<GamificationBadge>> syncGamification() async {
     final response = await _supabase.rpc<Object?>('sync_gamification');
     final data = _decodeObject(response, operation: 'sync gamification');
@@ -144,6 +134,18 @@ class GamificationRepository {
       response,
       operation: 'get badges',
       factory: GamificationBadge.fromJson,
+    );
+  }
+
+  Future<List<ActivityDay>> getActivityCalendar({int days = 140}) async {
+    final response = await _supabase.rpc<Object?>(
+      'get_activity_calendar',
+      params: {'p_days': days},
+    );
+    return _decodeModels(
+      response,
+      operation: 'get activity calendar',
+      factory: ActivityDay.fromJson,
     );
   }
 
@@ -220,7 +222,6 @@ class GamificationRepository {
     );
   }
 
-  /// Spends shurikens; throws when the balance is insufficient.
   Future<void> spendShurikens({
     required String title,
     required int amount,
@@ -246,12 +247,6 @@ class GamificationRepository {
     );
   }
 
-  /// Persists [settings] and returns the stored row.
-  ///
-  /// Pass the last known server state as [previous] to send a partial update:
-  /// only the fields that actually changed travel to the RPC, which coalesces
-  /// every omitted parameter to its stored value. Without [previous] the whole
-  /// object is sent.
   Future<UserSettings> updateSettings(
     UserSettings settings, {
     UserSettings? previous,
@@ -361,8 +356,6 @@ class GamificationRepository {
   }
 }
 
-/// Thrown by [GamificationRepository.setUserIdentity] when the requested
-/// `@handle` is already taken by another user.
 class HandleTakenException implements Exception {
   const HandleTakenException();
 }

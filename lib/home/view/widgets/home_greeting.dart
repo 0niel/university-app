@@ -6,12 +6,14 @@ class HomeGreeting extends StatelessWidget {
     required this.greeting,
     required this.name,
     required this.subtitle,
+    this.nameLoading = false,
     super.key,
   });
 
   final String greeting;
   final String name;
   final String subtitle;
+  final bool nameLoading;
 
   @override
   Widget build(BuildContext context) {
@@ -25,25 +27,41 @@ class HomeGreeting extends StatelessWidget {
             top: AppSpacing.contentGap,
             bottom: AppSpacing.xsm,
           ),
-          child: AppBalancedText.rich(
-            TextSpan(
-              children: [
-                TextSpan(
-                  text: greeting,
-                  style: title.copyWith(color: colors.ink),
+          child: nameLoading
+              ? Wrap(
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [
+                    Text(greeting, style: title.copyWith(color: colors.ink)),
+                    const Padding(
+                      padding: EdgeInsets.only(left: 4),
+                      child: AppSkeleton(
+                        key: Key('homeGreeting_nameSkeleton'),
+                        width: 108,
+                        height: 26,
+                        radius: AppRadius.skeletonThin,
+                      ),
+                    ),
+                  ],
+                )
+              : AppBalancedText.rich(
+                  TextSpan(
+                    children: [
+                      TextSpan(
+                        text: greeting,
+                        style: title.copyWith(color: colors.ink),
+                      ),
+                      TextSpan(
+                        text: name,
+                        style: AppText.serif(
+                          32,
+                          height: 1.08,
+                          letterSpacingEm: -0.02,
+                          italic: true,
+                        ).copyWith(color: colors.accent),
+                      ),
+                    ],
+                  ),
                 ),
-                TextSpan(
-                  text: name,
-                  style: AppText.serif(
-                    32,
-                    height: 1.08,
-                    letterSpacingEm: -0.02,
-                    italic: true,
-                  ).copyWith(color: colors.accent),
-                ),
-              ],
-            ),
-          ),
         ),
         Text(
           subtitle,

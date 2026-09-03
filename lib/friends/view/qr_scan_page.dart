@@ -62,7 +62,7 @@ class _QrScanPageState extends State<QrScanPage> {
     final l10n = context.l10n;
     final colors = context.colors;
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: AppColors.dark.canvas,
       body: Stack(
         fit: .expand,
         children: [
@@ -97,7 +97,7 @@ class _QrScanPageState extends State<QrScanPage> {
                     ),
                     alignment: .center,
                     decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.14),
+                      color: colors.white.withValues(alpha: .14),
                       borderRadius: .circular(AppRadius.full),
                     ),
                     child: Text(
@@ -106,7 +106,7 @@ class _QrScanPageState extends State<QrScanPage> {
                           : l10n.friendsScanInstruction,
                       textAlign: .center,
                       style: AppText.body.copyWith(
-                        color: _invalid ? colors.danger : Colors.white,
+                        color: _invalid ? colors.danger : colors.white,
                       ),
                     ),
                   ),

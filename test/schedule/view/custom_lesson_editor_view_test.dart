@@ -47,6 +47,22 @@ void main() {
     ),
   );
 
+  testWidgets('tapping a color swatch updates the editor color', (
+    tester,
+  ) async {
+    await tester.pumpApp(buildSubject());
+    final target = UniversityConfig.defaultLessonColorValues[1];
+    await tester.scrollUntilVisible(
+      find.byKey(ValueKey('app-color-swatch-$target')),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.tap(find.byKey(ValueKey('app-color-swatch-$target')));
+    await tester.pump();
+    expect(editor.state.color, target);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('fits a 320 px viewport at 200 percent text scale', (
     tester,
   ) async {
@@ -83,7 +99,7 @@ void main() {
     final semantics = tester.ensureSemantics();
     try {
       await tester.pumpApp(buildSubject());
-      await tester.enterText(find.byType(TextField), 'Math');
+      await tester.enterText(find.byType(TextField).first, 'Math');
       await tester.tap(find.bySemanticsLabel('Сохранить'));
       await tester.pump();
       expect(find.text('Новая пара'), findsOneWidget);

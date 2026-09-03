@@ -5,6 +5,7 @@ import 'package:campus_repository/campus_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:rtu_mirea_app/community/cubit/mentorship/mentorship.dart';
+import 'package:rtu_mirea_app/community/models/models.dart';
 import 'package:rtu_mirea_app/community/widgets/mentorship/mentor_profile_sheet.dart';
 import 'package:rtu_mirea_app/community/widgets/mentorship/mentor_request_sheet.dart';
 import 'package:rtu_mirea_app/community/widgets/mentorship/mentorship_body.dart';
@@ -48,21 +49,20 @@ class MentorshipView extends StatelessWidget {
     }
   }
 
-  Future<void> _reply(BuildContext context, MentorRequest request) async {
-    final rawHandle = request.requesterHandle ?? '';
-    final handle = rawHandle.trim().replaceFirst(RegExp('^@'), '');
-    if (!RegExp(r'^[A-Za-z0-9_]{5,32}$').hasMatch(handle)) {
+  Future<void> _openTelegram(BuildContext context, String? handle) async {
+    final uri = mentorTelegramUri(handle);
+    if (uri == null) {
       _showError(context, context.l10n.mentorshipInvalidHandle);
       return;
     }
-    final opened = await launchUrl(
-      Uri.https('t.me', '/$handle'),
-      mode: .externalApplication,
-    );
+    final opened = await launchUrl(uri, mode: .externalApplication);
     if (!opened && context.mounted) {
       _showError(context, context.l10n.mentorshipOpenTelegramError);
     }
   }
+
+  Future<void> _reply(BuildContext context, MentorRequest request) =>
+      _openTelegram(context, request.replyTelegramHandle);
 
   Future<void> _act(
     BuildContext context,
@@ -121,6 +121,8 @@ class MentorshipView extends StatelessWidget {
                 onReply: (request) => unawaited(_reply(context, request)),
                 onAction: (request, action) =>
                     unawaited(_act(context, request, action)),
+                onOpenTelegram: (handle) =>
+                    unawaited(_openTelegram(context, handle)),
               ),
             ),
           ],

@@ -10,10 +10,14 @@ class DeadlineOptions extends StatefulWidget {
     required this.subject,
     required this.priority,
     required this.remind,
+    required this.remindMinutes,
+    required this.progress,
     required this.onSubjectChanged,
     required this.onTime,
     required this.onPriorityChanged,
     required this.onRemindChanged,
+    required this.onRemindMinutesChanged,
+    required this.onProgressChanged,
     super.key,
   });
 
@@ -21,10 +25,14 @@ class DeadlineOptions extends StatefulWidget {
   final String subject;
   final DeadlinePriority priority;
   final bool remind;
+  final int remindMinutes;
+  final int progress;
   final ValueChanged<String> onSubjectChanged;
   final VoidCallback onTime;
   final ValueChanged<DeadlinePriority> onPriorityChanged;
   final ValueChanged<bool> onRemindChanged;
+  final ValueChanged<int> onRemindMinutesChanged;
+  final ValueChanged<int> onProgressChanged;
 
   @override
   State<DeadlineOptions> createState() => _DeadlineOptionsState();
@@ -92,6 +100,18 @@ class _DeadlineOptionsState extends State<DeadlineOptions> {
               ),
             ],
           ),
+          AppOverline(l10n.deadlineProgressLabel, topPadding: 16),
+          AppSegmentedControl<int>(
+            value: widget.progress,
+            onChanged: widget.onProgressChanged,
+            options: const [
+              AppSegmentedOption(value: 0, label: '0%'),
+              AppSegmentedOption(value: 25, label: '25%'),
+              AppSegmentedOption(value: 50, label: '50%'),
+              AppSegmentedOption(value: 75, label: '75%'),
+              AppSegmentedOption(value: 100, label: '100%'),
+            ],
+          ),
           const SizedBox(height: AppSpacing.sm),
           AppListRow(
             title: l10n.deadlineRemindTitle,
@@ -102,6 +122,27 @@ class _DeadlineOptionsState extends State<DeadlineOptions> {
               onChanged: widget.onRemindChanged,
             ),
           ),
+          if (widget.remind) ...[
+            const SizedBox(height: AppSpacing.sm),
+            Wrap(
+              spacing: 6,
+              runSpacing: 6,
+              children: [
+                AppChip.filter(
+                  key: const ValueKey('deadline-remind-hour'),
+                  label: l10n.deadlineRemindLeadHour,
+                  selected: widget.remindMinutes == 60,
+                  onTap: () => widget.onRemindMinutesChanged(60),
+                ),
+                AppChip.filter(
+                  key: const ValueKey('deadline-remind-day'),
+                  label: l10n.deadlineRemindLeadDay,
+                  selected: widget.remindMinutes == 1440,
+                  onTap: () => widget.onRemindMinutesChanged(1440),
+                ),
+              ],
+            ),
+          ],
         ],
       ],
     );

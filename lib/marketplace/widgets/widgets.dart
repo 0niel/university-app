@@ -1,5 +1,7 @@
 export 'market_listing_card.dart';
 export 'market_listing_details_sheet.dart';
+export 'market_media_picker.dart';
+export 'market_media_thumbnail.dart';
 export 'market_owner_actions.dart';
 export 'market_sell_sheet.dart';
 export 'marketplace_body.dart';

@@ -209,10 +209,11 @@ class _SvgInteractiveMapState extends State<SvgInteractiveMap>
       onRoomTap(room);
       return;
     }
+    final campus = state.selectedCampus?.displayName ?? '';
     final shouldSearch = await showAppSheet<bool>(
       context,
       backgroundColor: context.colors.canvas,
-      child: MapRoomSheet(room: room),
+      child: MapRoomSheet(room: room, campus: campus),
     );
     if (shouldSearch == true && mounted) {
       final current = context.read<MapBloc>().state;

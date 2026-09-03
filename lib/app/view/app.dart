@@ -25,7 +25,6 @@ import 'package:rtu_mirea_app/categories/categories.dart';
 import 'package:rtu_mirea_app/config/config.dart';
 import 'package:rtu_mirea_app/di/app_scope.dart';
 import 'package:rtu_mirea_app/feed/feed.dart';
-import 'package:rtu_mirea_app/free_rooms/cubit/room_booking_cubit.dart';
 import 'package:rtu_mirea_app/home/cubit/home_cubit.dart';
 import 'package:rtu_mirea_app/nfc_pass/nfc_pass.dart';
 import 'package:rtu_mirea_app/profile/cubit/sync_preferences_cubit.dart';
@@ -91,7 +90,6 @@ class App extends StatelessWidget {
               BlocProvider(create: (_) => HomeCubit()),
               BlocProvider(create: (_) => ThemeCubit()),
               BlocProvider(create: (_) => LocaleCubit()),
-              BlocProvider(create: (_) => RoomBookingCubit()),
               BlocProvider(create: (_) => ScheduleDisplayCubit()),
               BlocProvider(create: (_) => LessonRemindersCubit()),
               BlocProvider(create: (_) => UiPreferencesCubit()),

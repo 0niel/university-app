@@ -47,6 +47,7 @@ class _StoryViewerPageState extends State<StoryViewerPage>
   bool _active = true;
   bool _mediaReady = false;
   String? _mediaPostId;
+  String? _precachedNextId;
 
   @override
   void initState() {
@@ -225,6 +226,24 @@ class _StoryViewerPageState extends State<StoryViewerPage>
     });
   }
 
+  void _precacheNext(BuildContext context, List<PostBlock> posts, int index) {
+    final next = index + 1 < posts.length ? posts[index + 1] : null;
+    final url = next?.imageUrl;
+    if (next == null ||
+        url == null ||
+        url.isEmpty ||
+        _precachedNextId == next.id) {
+      return;
+    }
+    _precachedNextId = next.id;
+    unawaited(
+      precacheImage(
+        CachedNetworkImageProvider(url),
+        context,
+      ).catchError((Object _) {}),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     const dark = AppColors.dark;
@@ -266,44 +285,65 @@ class _StoryViewerPageState extends State<StoryViewerPage>
             );
           },
           child: Scaffold(
-            backgroundColor: dark.canvas,
-            body: BlocBuilder<FeedBloc, FeedState>(
-              buildWhen: (previous, current) =>
-                  previous.status != current.status ||
-                  previous.feed[_category.id] != current.feed[_category.id],
-              builder: (context, state) {
-                final posts = feedPosts(
-                  state.feed[_category.id],
-                ).take(widget.maxStories).toList();
-                if (posts.isEmpty) {
-                  _ensureStarted(0);
-                  final pending =
-                      state.status == FeedStatus.loading ||
-                      (state.status == FeedStatus.initial &&
-                          !state.feed.containsKey(_category.id));
-                  return _EmptyStory(
-                    pending: pending,
-                    failed: state.status == FeedStatus.failure,
-                    onClose: _close,
-                    onRetry: () => context.read<FeedBloc>().add(
-                      FeedRequested(category: _category),
-                    ),
-                  );
+            backgroundColor: context.colors.ink,
+            body: LayoutBuilder(
+              builder: (context, constraints) {
+                final stage = ColoredBox(
+                  color: dark.canvas,
+                  child: BlocBuilder<FeedBloc, FeedState>(
+                    buildWhen: (previous, current) =>
+                        previous.status != current.status ||
+                        previous.feed[_category.id] !=
+                            current.feed[_category.id],
+                    builder: (context, state) {
+                      final posts = feedPosts(
+                        state.feed[_category.id],
+                      ).take(widget.maxStories).toList();
+                      if (posts.isEmpty) {
+                        _ensureStarted(0);
+                        final pending =
+                            state.status == FeedStatus.loading ||
+                            (state.status == FeedStatus.initial &&
+                                !state.feed.containsKey(_category.id));
+                        return _StoryStagePlaceholder(
+                          pending: pending,
+                          failed: state.status == FeedStatus.failure,
+                          sourceName: _sourceName(context),
+                          avatarUrl: _source?.avatarUrl,
+                          onClose: _close,
+                          onRetry: () => context.read<FeedBloc>().add(
+                            FeedRequested(category: _category),
+                          ),
+                        );
+                      }
+                      final index = math.min(_index, posts.length - 1);
+                      _prepareMedia(posts[index]);
+                      _ensureStarted(posts.length);
+                      _precacheNext(context, posts, index);
+                      return _StoryScreen(
+                        posts: posts,
+                        index: index,
+                        timer: _timer,
+                        sourceName: _sourceName(context, posts[index]),
+                        time: feedRelativeTime(
+                          context.l10n,
+                          posts[index].publishedAt,
+                        ),
+                        avatarUrl: _source?.avatarUrl,
+                        onPrev: _prev,
+                        onNext: _next,
+                        onClose: _close,
+                        onRead: () => _read(posts[index]),
+                        onMediaReady: () => _onMediaReady(posts[index].id),
+                      );
+                    },
+                  ),
+                );
+                if (constraints.maxWidth <= StoryLayout.wideBreakpoint) {
+                  return stage;
                 }
-                final index = math.min(_index, posts.length - 1);
-                _prepareMedia(posts[index]);
-                _ensureStarted(posts.length);
-                return _StoryScreen(
-                  posts: posts,
-                  index: index,
-                  timer: _timer,
-                  sourceName: _sourceName(context, posts[index]),
-                  avatarUrl: _source?.avatarUrl,
-                  onPrev: _prev,
-                  onNext: _next,
-                  onClose: _close,
-                  onRead: () => _read(posts[index]),
-                  onMediaReady: () => _onMediaReady(posts[index].id),
+                return Center(
+                  child: AspectRatio(aspectRatio: 9 / 16, child: stage),
                 );
               },
             ),
@@ -313,13 +353,112 @@ class _StoryViewerPageState extends State<StoryViewerPage>
     );
   }
 
-  String _sourceName(BuildContext context, PostBlock post) {
+  String _sourceName(BuildContext context, [PostBlock? post]) {
     final source = _source;
     if (source != null) return feedSourceName(source);
-    return context.read<CategoriesBloc>().state.getCategoryName(
-          post.categoryId,
-        ) ??
-        post.author;
+    final categoryName = context.read<CategoriesBloc>().state.getCategoryName(
+      post?.categoryId ?? _category.id,
+    );
+    if (categoryName != null) return categoryName;
+    return post?.author ?? widget.sourceId;
+  }
+}
+
+class _StoryHeader extends StatelessWidget {
+  const _StoryHeader({
+    required this.sourceName,
+    required this.onClose,
+    this.avatarUrl,
+    this.time,
+  });
+
+  final String sourceName;
+  final String? avatarUrl;
+  final String? time;
+  final VoidCallback onClose;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final colors = context.colors;
+    final white = colors.white;
+    final time = this.time;
+    return Row(
+      children: [
+        ExcludeSemantics(
+          child: Container(
+            width: StoryLayout.avatarSize,
+            height: StoryLayout.avatarSize,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: colors.accent,
+              shape: BoxShape.circle,
+            ),
+            clipBehavior: Clip.antiAlias,
+            child: avatarUrl != null && avatarUrl!.isNotEmpty
+                ? CachedNetworkImage(
+                    imageUrl: avatarUrl!,
+                    fit: BoxFit.cover,
+                    width: StoryLayout.avatarSize,
+                    height: StoryLayout.avatarSize,
+                    errorWidget: (_, _, _) => _StoryInitials(name: sourceName),
+                  )
+                : _StoryInitials(name: sourceName),
+          ),
+        ),
+        const SizedBox(width: AppSpacing.gap),
+        Expanded(
+          child: Text.rich(
+            TextSpan(
+              children: [
+                TextSpan(
+                  text: sourceName,
+                  style: AppText.tab.copyWith(color: white),
+                ),
+                if (time != null && time.isNotEmpty)
+                  TextSpan(
+                    text: '  ·  $time',
+                    style: AppText.caption.copyWith(
+                      color: white.withValues(alpha: .7),
+                    ),
+                  ),
+              ],
+            ),
+            key: const Key('storyViewer_headerName'),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+        AppPressState(
+          key: const Key('storyViewer_close'),
+          onTap: onClose,
+          semanticsLabel: l10n.storyClose,
+          semanticsButton: true,
+          builder: (context, {required pressed}) => SizedBox.square(
+            dimension: AppControlSize.touchTarget,
+            child: Center(
+              child: Container(
+                key: const Key('storyViewer_closeSurface'),
+                width: StoryLayout.closeSize,
+                height: StoryLayout.closeSize,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: white.withValues(alpha: pressed ? .25 : .15),
+                ),
+                child: Center(
+                  child: AppLineIconWidget(
+                    AppLineIcon.close,
+                    size: 18,
+                    strokeWidth: 2.4,
+                    color: white,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
   }
 }
 
@@ -334,6 +473,7 @@ class _StoryScreen extends StatelessWidget {
     required this.onClose,
     required this.onRead,
     required this.onMediaReady,
+    this.time,
     this.avatarUrl,
   });
 
@@ -341,6 +481,7 @@ class _StoryScreen extends StatelessWidget {
   final int index;
   final Animation<double> timer;
   final String sourceName;
+  final String? time;
   final String? avatarUrl;
   final VoidCallback onPrev;
   final VoidCallback onNext;
@@ -351,9 +492,8 @@ class _StoryScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final colors = context.colors;
-    final white = colors.white;
     final post = posts[index];
+    final resolvedTime = time ?? feedRelativeTime(l10n, post.publishedAt);
     final top = math.max<double>(
       StoryLayout.topInset,
       MediaQuery.paddingOf(context).top + AppSpacing.md,
@@ -404,7 +544,7 @@ class _StoryScreen extends StatelessWidget {
           child: StorySlide(
             key: ValueKey('storyViewer_slide_${post.id}'),
             title: post.title,
-            meta: '$sourceName · ${feedRelativeTime(l10n, post.publishedAt)}',
+            meta: '$sourceName · $resolvedTime',
             lead: post.description,
             imageUrl: post.imageUrl,
             readLabel: l10n.storyRead,
@@ -426,69 +566,11 @@ class _StoryScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: AppSpacing.md),
-              Row(
-                children: [
-                  ExcludeSemantics(
-                    child: Container(
-                      width: StoryLayout.avatarSize,
-                      height: StoryLayout.avatarSize,
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        color: colors.accent,
-                        shape: BoxShape.circle,
-                      ),
-                      clipBehavior: Clip.antiAlias,
-                      child: avatarUrl != null && avatarUrl!.isNotEmpty
-                          ? CachedNetworkImage(
-                              imageUrl: avatarUrl!,
-                              fit: BoxFit.cover,
-                              width: StoryLayout.avatarSize,
-                              height: StoryLayout.avatarSize,
-                              errorWidget: (_, _, _) => _StoryInitials(
-                                name: sourceName,
-                              ),
-                            )
-                          : _StoryInitials(name: sourceName),
-                    ),
-                  ),
-                  const SizedBox(width: AppSpacing.gap),
-                  Expanded(
-                    child: Text(
-                      sourceName,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: AppText.tab.copyWith(color: white),
-                    ),
-                  ),
-                  AppPressState(
-                    key: const Key('storyViewer_close'),
-                    onTap: onClose,
-                    semanticsLabel: l10n.storyClose,
-                    semanticsButton: true,
-                    builder: (context, {required pressed}) => SizedBox.square(
-                      dimension: AppControlSize.touchTarget,
-                      child: Center(
-                        child: Container(
-                          key: const Key('storyViewer_closeSurface'),
-                          width: StoryLayout.closeSize,
-                          height: StoryLayout.closeSize,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: white.withValues(alpha: pressed ? .25 : .15),
-                          ),
-                          child: Center(
-                            child: AppLineIconWidget(
-                              AppLineIcon.close,
-                              size: 18,
-                              strokeWidth: 2.4,
-                              color: white,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
+              _StoryHeader(
+                sourceName: sourceName,
+                avatarUrl: avatarUrl,
+                time: time,
+                onClose: onClose,
               ),
             ],
           ),
@@ -514,67 +596,82 @@ class _StoryInitials extends StatelessWidget {
   );
 }
 
-class _EmptyStory extends StatelessWidget {
-  const _EmptyStory({
+class _StoryStagePlaceholder extends StatelessWidget {
+  const _StoryStagePlaceholder({
     required this.pending,
     required this.failed,
+    required this.sourceName,
     required this.onClose,
     required this.onRetry,
+    this.avatarUrl,
   });
 
   final bool pending;
   final bool failed;
+  final String sourceName;
+  final String? avatarUrl;
   final VoidCallback onClose;
   final VoidCallback onRetry;
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final white = context.colors.white;
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screen),
-      child: Center(
-        child: Column(
-          key: Key(
-            pending
-                ? 'storyViewer_pending'
-                : failed
-                ? 'storyViewer_failure'
-                : 'storyViewer_empty',
-          ),
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (pending)
-              NinjaSpinner(
-                key: const Key('storyViewer_loading'),
-                color: white,
-                trackColor: white.withValues(alpha: .3),
-              )
-            else
-              Text(
-                failed ? l10n.loadingError : l10n.storyEmpty,
-                textAlign: TextAlign.center,
-                style: AppText.headline.copyWith(color: white),
+    final top = math.max<double>(
+      StoryLayout.topInset,
+      MediaQuery.paddingOf(context).top + AppSpacing.md,
+    );
+    return Stack(
+      key: Key(
+        pending
+            ? 'storyViewer_pending'
+            : failed
+            ? 'storyViewer_failure'
+            : 'storyViewer_empty',
+      ),
+      fit: StackFit.expand,
+      children: [
+        const StoryBackdrop(),
+        if (!pending)
+          Center(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.screen,
               ),
-            const SizedBox(height: AppSpacing.fieldGap),
-            if (failed && !pending) ...[
-              AppButton.primary(
-                label: l10n.retry,
-                onPressed: onRetry,
-                backgroundColor: white,
-                foregroundColor: AppColors.dark.canvas,
+              child: failed
+                  ? AppErrorState(
+                      lineIcon: AppLineIcon.alert,
+                      title: l10n.loadingError,
+                      message: '',
+                      primaryLabel: l10n.retry,
+                      onPrimary: onRetry,
+                      footnote: null,
+                    )
+                  : AppEmptyState(title: l10n.storyEmpty),
+            ),
+          ),
+        Positioned(
+          left: 16,
+          right: 16,
+          top: top,
+          child: Column(
+            children: [
+              const IgnorePointer(
+                child: StoryProgressBars(
+                  count: 1,
+                  index: 0,
+                  progress: AlwaysStoppedAnimation<double>(0),
+                ),
               ),
               const SizedBox(height: AppSpacing.md),
+              _StoryHeader(
+                sourceName: sourceName,
+                avatarUrl: avatarUrl,
+                onClose: onClose,
+              ),
             ],
-            AppButton.primary(
-              label: l10n.storyClose,
-              onPressed: onClose,
-              backgroundColor: white,
-              foregroundColor: AppColors.dark.canvas,
-            ),
-          ],
+          ),
         ),
-      ),
+      ],
     );
   }
 }

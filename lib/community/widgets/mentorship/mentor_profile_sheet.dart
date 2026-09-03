@@ -22,10 +22,15 @@ class MentorProfileSheet extends StatefulWidget {
 
 class _MentorProfileSheetState extends State<MentorProfileSheet> {
   late final _bio = TextEditingController(text: widget.current?.bio ?? '');
+  late final _telegram = TextEditingController(
+    text: widget.current?.telegramHandle ?? '',
+  );
   late final Set<String> _topics = {...?widget.current?.topics};
   late final Set<String> _formats = {...?widget.current?.formats};
   late String _level = _initialLevel;
   late int _price = widget.current?.price ?? 0;
+  var _telegramTouched = false;
+  var _saveFailed = false;
 
   String get _initialLevel {
     final current = widget.current?.level.trim() ?? '';
@@ -37,13 +42,16 @@ class _MentorProfileSheetState extends State<MentorProfileSheet> {
   @override
   void dispose() {
     _bio.dispose();
+    _telegram.dispose();
     super.dispose();
   }
 
   Future<void> _save() async {
+    setState(() => _saveFailed = false);
     final saved = await context.read<MentorshipCubit>().saveProfile(
       MentorProfileDraft(
         topics: _topics.toList(growable: false),
+        telegramHandle: _telegram.text,
         bio: _bio.text,
         level: _level,
         formats: _formats.toList(growable: false),
@@ -54,7 +62,7 @@ class _MentorProfileSheetState extends State<MentorProfileSheet> {
     if (saved) {
       Navigator.of(context).pop();
     } else {
-      _showError(context.l10n.mentorshipProfileSaveError);
+      setState(() => _saveFailed = true);
     }
   }
 
@@ -95,7 +103,25 @@ class _MentorProfileSheetState extends State<MentorProfileSheet> {
         spacing: 16,
         crossAxisAlignment: .start,
         children: [
+          if (_saveFailed)
+            AppBanner(
+              message: context.l10n.mentorshipProfileSaveError,
+              tone: .danger,
+            ),
           _reward(context),
+          AppInputField(
+            controller: _telegram,
+            enabled: !saving,
+            label: context.l10n.mentorshipTelegramLabel,
+            placeholder: context.l10n.mentorshipTelegramPlaceholder,
+            leadingIcon: AppLineIcon.at,
+            textInputAction: .next,
+            errorText:
+                _telegramTouched && !isValidMentorTelegramHandle(_telegram.text)
+                ? context.l10n.mentorshipTelegramError
+                : null,
+            onChanged: (_) => setState(() => _telegramTouched = true),
+          ),
           _label(context, context.l10n.mentorshipTopicsLabel),
           Wrap(
             spacing: 8,
@@ -164,7 +190,11 @@ class _MentorProfileSheetState extends State<MentorProfileSheet> {
                 : context.l10n.mentorshipSave,
             expanded: true,
             size: NinjaButtonSize.large,
-            onPressed: saving || _topics.isEmpty
+            loading: saving,
+            onPressed:
+                saving ||
+                    _topics.isEmpty ||
+                    !isValidMentorTelegramHandle(_telegram.text)
                 ? null
                 : () => unawaited(_save()),
           ),
