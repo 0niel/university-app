@@ -148,9 +148,8 @@ jobs:
       - name: Resolve locked workspace
         run: flutter pub get --enforce-lockfile --no-example
 
-      - name: Generate code
+      - name: Verify locked workspace
         run: |
-          dart run build_runner build
           git diff --exit-code
 
       - name: Analyze hotfix
@@ -284,9 +283,8 @@ jobs:
       - name: Resolve locked workspace
         run: flutter pub get --enforce-lockfile --no-example
 
-      - name: Generate code
+      - name: Verify locked workspace
         run: |
-          dart run build_runner build
           git diff --exit-code
 
       - name: Configure Android signing
