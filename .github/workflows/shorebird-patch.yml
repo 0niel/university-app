@@ -22,6 +22,9 @@ on:
           - 5.2.0+1002401
           - 5.2.0+1002601
           - 5.2.0+2435.13.10
+          - 5.2.0+1001301
+          - 5.2.0+1001601
+          - 5.1.0+1000201
       target_track:
         description: Patch destination
         required: true
@@ -49,6 +52,7 @@ jobs:
       platform: ${{ steps.inputs.outputs.platform }}
       release_version: ${{ steps.inputs.outputs.release_version }}
       app_id: ${{ steps.inputs.outputs.app_id }}
+      baseline_sha: ${{ steps.inputs.outputs.baseline_sha }}
     steps:
       - name: Validate requested target
         id: inputs
@@ -65,9 +69,19 @@ jobs:
           case "$PLATFORM:$RELEASE_VERSION" in
             android:5.2.0+1002401|android:5.2.0+1002601)
               app_id=c55a7a80-2fcb-4565-833e-fb442dbe4e34
+              baseline_sha=4aa0e01a5a9fc58cfc83288610b3c4f88943ef72
+              ;;
+            android:5.2.0+1001301|android:5.2.0+1001601)
+              app_id=c55a7a80-2fcb-4565-833e-fb442dbe4e34
+              baseline_sha=fb553b61a88a8436426c90ed23b363e913c49e29
+              ;;
+            android:5.1.0+1000201)
+              app_id=c55a7a80-2fcb-4565-833e-fb442dbe4e34
+              baseline_sha=ede172361da6c4bdc6d6afc3ba508aadd44d5e8e
               ;;
             ios:5.2.0+2435.13.10)
               app_id=21c47e68-a64f-49c1-af6e-4a406dfe266f
+              baseline_sha=4aa0e01a5a9fc58cfc83288610b3c4f88943ef72
               ;;
             *)
               printf 'Unsupported platform and release combination\n' >&2
@@ -79,6 +93,7 @@ jobs:
             printf 'platform=%s\n' "$PLATFORM"
             printf 'release_version=%s\n' "$RELEASE_VERSION"
             printf 'app_id=%s\n' "$app_id"
+            printf 'baseline_sha=%s\n' "$baseline_sha"
           } >> "$GITHUB_OUTPUT"
 
       - name: Check out hotfix
@@ -91,12 +106,13 @@ jobs:
       - name: Verify hotfix boundary
         env:
           SOURCE_SHA: ${{ steps.inputs.outputs.source_sha }}
+          BASELINE_SHA: ${{ steps.inputs.outputs.baseline_sha }}
         run: |
           python3 - <<'PY'
           import os
           import subprocess
 
-          baseline = "4aa0e01a5a9fc58cfc83288610b3c4f88943ef72"
+          baseline = os.environ["BASELINE_SHA"]
           source = os.environ["SOURCE_SHA"]
           allowed = {
               "lib/di/app_scope.dart",
