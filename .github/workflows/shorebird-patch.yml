@@ -418,6 +418,7 @@ jobs:
             --json < /dev/null > "$RUNNER_TEMP/patches-before.json"
 
       - name: Publish staging patch
+        id: staging_patch
         env:
           SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
           SUPABASE_URL: ${{ vars.SUPABASE_URL }}
@@ -442,6 +443,146 @@ jobs:
             --dart-define-from-file="$RUNNER_TEMP/firebase.json" \
             --dart-define="SUPABASE_URL=$SUPABASE_URL" \
             --dart-define="SUPABASE_PUBLISHABLE_KEY=$SUPABASE_PUBLISHABLE_KEY" < /dev/null
+
+      - name: Collect iOS Runner diagnostics
+        id: runner_diagnostics
+        if: ${{ failure() && needs.validate.outputs.platform == 'ios' && steps.staging_patch.outcome == 'failure' }}
+        run: |
+          python3 - <<'PY'
+          import hashlib
+          import json
+          import os
+          import stat
+          import subprocess
+          from pathlib import Path
+
+          MAX_RUNNER_BYTES = 64 * 1024 * 1024
+          MAX_TOTAL_BYTES = 256 * 1024 * 1024
+          MAX_TOOL_BYTES = 32 * 1024 * 1024
+          RUNNER_SUFFIX = Path("Products/Applications/Runner.app/Runner")
+
+          def validate_runner(root, candidate):
+              relative = candidate.relative_to(root)
+              if not relative.parts or any(part in (".", "..") for part in relative.parts):
+                  raise ValueError("Runner path is outside its allowed root")
+              current = root
+              for part in relative.parts:
+                  current /= part
+                  if current.is_symlink():
+                      raise ValueError("Runner paths must not contain symlinks")
+              if candidate.resolve(strict=True) != candidate:
+                  raise ValueError("Runner path is not canonical")
+              metadata = candidate.stat()
+              if not stat.S_ISREG(metadata.st_mode) or not 0 < metadata.st_size <= MAX_RUNNER_BYTES:
+                  raise ValueError("Runner is not a bounded regular file")
+              return metadata.st_size
+
+          def find_runners(temp_root, workspace):
+              temporary = sorted(temp_root.glob(f"*/{RUNNER_SUFFIX.as_posix()}"))
+              if len(temporary) > 3:
+                  raise ValueError("Too many temporary Runner candidates")
+              candidates = [
+                  (f"temporary-{index:02}", temp_root, path)
+                  for index, path in enumerate(temporary, 1)
+              ]
+              candidates.append((
+                  "workspace-archive",
+                  workspace,
+                  workspace / "build/ios/archive/Runner.xcarchive" / RUNNER_SUFFIX,
+              ))
+              sizes = [validate_runner(root, path) for _, root, path in candidates]
+              if sum(sizes) > MAX_TOTAL_BYTES:
+                  raise ValueError("Runner diagnostics exceed the total size limit")
+              return candidates
+
+          def limit_tool_output():
+              import resource
+              resource.setrlimit(resource.RLIMIT_FSIZE, (MAX_TOOL_BYTES, MAX_TOOL_BYTES))
+
+          def inspect_runner(runner):
+              results = {}
+              commands = {
+                  "load-commands": ["/usr/bin/otool", "-l"],
+                  "disassembly": ["/usr/bin/otool", "-tV"],
+                  "symbols": ["/usr/bin/nm", "-n"],
+              }
+              for name, command in commands.items():
+                  output = runner.parent / f"{name}.txt"
+                  result = {"timed_out": False, "exit_code": None}
+                  with output.open("xb") as stream:
+                      try:
+                          process = subprocess.run(
+                              [*command, str(runner)],
+                              stdout=stream,
+                              stderr=subprocess.STDOUT,
+                              timeout=30,
+                              check=False,
+                              preexec_fn=limit_tool_output,
+                          )
+                          result["exit_code"] = process.returncode
+                      except subprocess.TimeoutExpired:
+                          result["timed_out"] = True
+                  result["bytes"] = output.stat().st_size
+                  result["size_limit_reached"] = result["bytes"] >= MAX_TOOL_BYTES
+                  if result["bytes"] > MAX_TOOL_BYTES:
+                      raise ValueError("Diagnostic tool exceeded the output size limit")
+                  results[name] = result
+              return results
+
+          def collect_runners(temp_root, workspace, output):
+              candidates = find_runners(temp_root, workspace)
+              output.mkdir()
+              records = []
+              for label, root, source in candidates:
+                  expected_size = validate_runner(root, source)
+                  descriptor = os.open(source, os.O_RDONLY | os.O_NOFOLLOW)
+                  with os.fdopen(descriptor, "rb") as stream:
+                      metadata = os.fstat(stream.fileno())
+                      if not stat.S_ISREG(metadata.st_mode) or metadata.st_size != expected_size:
+                          raise ValueError("Runner changed before capture")
+                      content = stream.read(MAX_RUNNER_BYTES + 1)
+                  if len(content) != expected_size:
+                      raise ValueError("Runner changed during capture")
+                  if content[:4] not in (
+                      b"\xcf\xfa\xed\xfe", b"\xfe\xed\xfa\xcf",
+                      b"\xca\xfe\xba\xbe", b"\xbe\xba\xfe\xca",
+                      b"\xca\xfe\xba\xbf", b"\xbf\xba\xfe\xca",
+                  ):
+                      raise ValueError("Runner is not a Mach-O executable")
+                  destination = output / label / "Runner"
+                  destination.parent.mkdir()
+                  with destination.open("xb") as stream:
+                      stream.write(content)
+                  records.append({
+                      "label": label,
+                      "source_relative": source.relative_to(root).as_posix(),
+                      "bytes": len(content),
+                      "sha256": hashlib.sha256(content).hexdigest(),
+                      "inspection": inspect_runner(destination),
+                  })
+              (output / "manifest.json").write_text(
+                  json.dumps({"runners": records}, indent=2, sort_keys=True) + "\n",
+                  encoding="utf-8",
+              )
+
+          def main():
+              temp_root = Path(os.environ.get("TMPDIR", "/tmp")).resolve(strict=True)
+              workspace = Path(os.environ["GITHUB_WORKSPACE"]).resolve(strict=True)
+              output_root = Path(os.environ["RUNNER_TEMP"]).resolve(strict=True)
+              collect_runners(temp_root, workspace, output_root / "ios-runner-diagnostics")
+
+          if __name__ == "__main__":
+              main()
+          PY
+
+      - name: Save iOS Runner diagnostics
+        if: ${{ failure() && needs.validate.outputs.platform == 'ios' && steps.staging_patch.outcome == 'failure' && steps.runner_diagnostics.outcome == 'success' }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: ios-runner-diagnostics-${{ github.run_id }}
+          path: ${{ runner.temp }}/ios-runner-diagnostics
+          if-no-files-found: error
+          retention-days: 1
 
       - name: Verify staging metadata
         env:
