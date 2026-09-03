@@ -91,7 +91,6 @@ class GooglePlayReleaseClient(GooglePlayClient):
         query = urllib.parse.urlencode(
             {
                 "changesInReviewBehavior": "ERROR_IF_IN_REVIEW",
-                "changesNotSentForReview": "true",
             }
         )
         self.request(
