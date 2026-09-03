@@ -67,6 +67,187 @@ void main() {
     });
 
     group('user', () {
+      UserRepository initializingRepository(
+        Future<void> Function(String) initialize, {
+        Duration timeout = const Duration(seconds: 8),
+        void Function(Object, StackTrace)? onError,
+      }) => UserRepository(
+        authenticationClient: authenticationClient,
+        packageInfoClient: packageInfoClient,
+        deepLinkService: deepLinkService,
+        storage: storage,
+        initializeUser: initialize,
+        initializationTimeout: timeout,
+        onInitializationError: onError,
+      );
+
+      for (final email in <String?>[null, 'student@example.org']) {
+        test(
+          'waits for profile initialization before emitting email=$email',
+          () async {
+            final pending = Completer<void>();
+            final initialized = <String>[];
+            final emitted = <User>[];
+            when(() => authenticationClient.user).thenAnswer(
+              (_) => Stream.value(
+                AuthenticationUser(id: 'current', email: email),
+              ),
+            );
+            final repository = initializingRepository((id) {
+              initialized.add(id);
+              return pending.future;
+            });
+            final subscription = repository.user.listen(emitted.add);
+            await Future<void>.delayed(Duration.zero);
+            expect(initialized, ['current']);
+            expect(emitted, isEmpty);
+            pending.complete();
+            await Future<void>.delayed(Duration.zero);
+            expect(emitted.single, User(id: 'current', email: email));
+            await subscription.cancel();
+          },
+        );
+      }
+
+      for (final replacement in [
+        AuthenticationUser.anonymous,
+        const AuthenticationUser(id: 'replacement'),
+        const AuthenticationUser(id: 'old', email: 'linked@example.org'),
+      ]) {
+        test(
+          'ignores obsolete bootstrap after auth changes to $replacement',
+          () async {
+            final authentication = StreamController<AuthenticationUser>(
+              sync: true,
+            );
+            final pending = Completer<void>();
+            final emitted = <User>[];
+            final initialized = <String>[];
+            when(
+              () => authenticationClient.user,
+            ).thenAnswer((_) => authentication.stream);
+            final repository = initializingRepository((id) {
+              initialized.add(id);
+              return initialized.length == 1 ? pending.future : Future.value();
+            });
+            final subscription = repository.user.listen(emitted.add);
+            authentication.add(
+              const AuthenticationUser(id: 'old'),
+            );
+            await Future<void>.delayed(Duration.zero);
+            authentication.add(replacement);
+            await Future<void>.delayed(Duration.zero);
+            final expected = replacement.isAnonymous
+                ? User.anonymous
+                : User.fromAuthenticationUser(authenticationUser: replacement);
+            expect(emitted, [expected]);
+            if (replacement.isAnonymous) {
+              pending.completeError(StateError('late initialization failure'));
+            } else {
+              pending.complete();
+            }
+            await Future<void>.delayed(Duration.zero);
+            expect(emitted, [expected]);
+            expect(
+              initialized,
+              replacement.isAnonymous ? ['old'] : ['old', replacement.id],
+            );
+            await subscription.cancel();
+            await authentication.close();
+          },
+        );
+      }
+
+      test('profile initialization failures preserve authentication', () async {
+        final errors = <Object>[];
+        final failure = StateError('offline');
+        when(() => authenticationClient.user).thenAnswer(
+          (_) => Stream.value(
+            const AuthenticationUser(id: 'guest'),
+          ),
+        );
+        final repository = initializingRepository(
+          (_) => Future.error(failure),
+          onError: (error, _) => errors.add(error),
+        );
+        expect(
+          await repository.user.first,
+          const User(id: 'guest'),
+        );
+        expect(errors, [failure]);
+      });
+
+      test(
+        'stalled initialization has a bounded authenticated fallback',
+        () async {
+          final pending = Completer<void>();
+          final errors = <Object>[];
+          when(() => authenticationClient.user).thenAnswer(
+            (_) => Stream.value(const AuthenticationUser(id: 'normal')),
+          );
+          final repository = initializingRepository(
+            (_) => pending.future,
+            timeout: const Duration(milliseconds: 1),
+            onError: (error, _) => errors.add(error),
+          );
+          expect(await repository.user.first, const User(id: 'normal'));
+          expect(errors.single, isA<TimeoutException>());
+          pending.complete();
+        },
+      );
+
+      test('signed out users do not initialize a profile', () async {
+        final initialized = <String>[];
+        when(
+          () => authenticationClient.user,
+        ).thenAnswer((_) => Stream.value(AuthenticationUser.anonymous));
+        final repository = initializingRepository((id) async {
+          initialized.add(id);
+        });
+        expect(await repository.user.first, User.anonymous);
+        expect(initialized, isEmpty);
+      });
+
+      test('cancelled subscription ignores late initializer failure', () async {
+        final pending = Completer<void>();
+        final emitted = <User>[];
+        final errors = <Object>[];
+        when(() => authenticationClient.user).thenAnswer(
+          (_) => Stream.value(const AuthenticationUser(id: 'current')),
+        );
+        final repository = initializingRepository((_) => pending.future);
+        final subscription = repository.user.listen(
+          emitted.add,
+          onError: errors.add,
+        );
+        await Future<void>.delayed(Duration.zero);
+        await subscription.cancel();
+        pending.completeError(StateError('late initialization failure'));
+        await Future<void>.delayed(Duration.zero);
+        expect(emitted, isEmpty);
+        expect(errors, isEmpty);
+      });
+
+      test(
+        'without initializer preserves authenticated user metadata',
+        () async {
+          const authenticationUser = AuthenticationUser(
+            id: 'current',
+            email: 'student@example.org',
+            name: 'Student',
+            photo: 'https://example.org/photo.png',
+            isNewUser: false,
+          );
+          when(() => authenticationClient.user).thenAnswer(
+            (_) => Stream.value(authenticationUser),
+          );
+          expect(
+            await userRepository.user.first,
+            User.fromAuthenticationUser(authenticationUser: authenticationUser),
+          );
+        },
+      );
+
       test('calls user on AuthenticationClient', () async {
         when(
           () => authenticationClient.user,
