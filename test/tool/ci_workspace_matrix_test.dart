@@ -65,6 +65,18 @@ void main() {
     }
   });
 
+  test('notification deployment resolves its pinned imports', () {
+    final config = File('supabase/config.toml').readAsStringSync();
+    final section = config
+        .split('[functions.miniapp-notify]')
+        .last
+        .split('[')
+        .first;
+    expect(section, contains('import_map = "./functions/deno.json"'));
+    final imports = File('supabase/functions/deno.json').readAsStringSync();
+    expect(imports, contains('npm:@supabase/supabase-js@2.110.2'));
+  });
+
   group('package test runtime', () {
     Map<String, Object?> graph(List<Map<String, Object?>> packages) => {
       'packages': packages,
