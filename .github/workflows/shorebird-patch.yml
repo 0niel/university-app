@@ -435,6 +435,7 @@ jobs:
             args+=(--flavor production)
           else
             args+=(--export-options-plist "$RUNNER_TEMP/PatchExportOptions.plist")
+            args+=(--build-number "${RELEASE_VERSION#*+}")
           fi
           shorebird "${args[@]}" -- \
             --dart-define-from-file="$RUNNER_TEMP/university.json" \
