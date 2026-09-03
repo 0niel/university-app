@@ -111,5 +111,99 @@ void main() {
       expect(cubit.state.isCreating, isFalse);
       await cubit.close();
     });
+
+    test('renames a note optimistically', () async {
+      when(
+        () => repository.getGroupNotes(),
+      ).thenAnswer((_) async => [note]);
+      when(
+        () => repository.renameGroupNote('note-1', 'New title'),
+      ).thenAnswer((_) async {});
+      final cubit = buildCubit();
+      await cubit.load();
+
+      final ok = await cubit.rename('note-1', 'New title');
+
+      expect(ok, isTrue);
+      expect(cubit.state.notes.single.title, 'New title');
+      await cubit.close();
+    });
+
+    test('rolls back a rename that fails on the server', () async {
+      when(
+        () => repository.getGroupNotes(),
+      ).thenAnswer((_) async => [note]);
+      when(
+        () => repository.renameGroupNote('note-1', 'New title'),
+      ).thenThrow(Exception('offline'));
+      final cubit = buildCubit();
+      await cubit.load();
+
+      final ok = await cubit.rename('note-1', 'New title');
+
+      expect(ok, isFalse);
+      expect(cubit.state.notes.single.title, 'Algorithms');
+      await cubit.close();
+    });
+
+    test('changes visibility optimistically', () async {
+      when(
+        () => repository.getGroupNotes(),
+      ).thenAnswer((_) async => [note]);
+      when(
+        () => repository.setGroupNoteVisibility(
+          'note-1',
+          CollabNoteVisibility.personal,
+        ),
+      ).thenAnswer((_) async {});
+      final cubit = buildCubit();
+      await cubit.load();
+
+      final ok = await cubit.setVisibility(
+        'note-1',
+        CollabNoteVisibility.personal,
+      );
+
+      expect(ok, isTrue);
+      expect(cubit.state.notes.single.isPersonal, isTrue);
+      await cubit.close();
+    });
+
+    test('removes a note optimistically and rolls back on failure', () async {
+      when(
+        () => repository.getGroupNotes(),
+      ).thenAnswer((_) async => [note]);
+      when(
+        () => repository.deleteGroupNote('note-1'),
+      ).thenThrow(Exception('offline'));
+      final cubit = buildCubit();
+      await cubit.load();
+
+      final ok = await cubit.delete('note-1');
+
+      expect(ok, isFalse);
+      expect(cubit.state.notes, [note]);
+      await cubit.close();
+    });
+
+    test('refreshes when the realtime list stream fires', () async {
+      final controller = StreamController<void>();
+      when(
+        () => repository.watchGroupNotesList(),
+      ).thenAnswer((_) => controller.stream);
+      when(
+        () => repository.getGroupNotes(),
+      ).thenAnswer((_) async => [note]);
+      final cubit = buildCubit();
+      await cubit.load();
+      cubit.startWatching();
+
+      controller.add(null);
+      await Future<void>.delayed(const Duration(milliseconds: 700));
+
+      verify(() => repository.getGroupNotes()).called(2);
+      await cubit.close();
+      await controller.close();
+    });
   });
 }

@@ -1,11 +1,12 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:app_ui/app_ui.dart';
 import 'package:campus_repository/campus_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:intl/intl.dart';
 import 'package:rtu_mirea_app/community/models/event_category.dart';
+import 'package:rtu_mirea_app/community/widgets/emoji_tile.dart';
 import 'package:rtu_mirea_app/community/widgets/event_category_style.dart';
 import 'package:rtu_mirea_app/community/widgets/events/event_layout.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
@@ -14,106 +15,107 @@ class EventCard extends StatelessWidget {
   const EventCard({
     required this.event,
     required this.onToggleRsvp,
+    required this.onTap,
     super.key,
     this.isPending = false,
+    this.isPast = false,
   });
 
   final CampusEvent event;
   final VoidCallback onToggleRsvp;
+  final VoidCallback onTap;
   final bool isPending;
-
-  static String formatWhen(BuildContext context, DateTime date) {
-    final locale = Localizations.localeOf(context).toString();
-    final local = date.toLocal();
-    final day = DateFormat('EEE d MMM', locale).format(local);
-    final time = DateFormat.Hm(locale).format(local);
-    final capitalized = day.isEmpty
-        ? day
-        : '${day[0].toUpperCase()}${day.substring(1)}';
-    return '$capitalized · $time';
-  }
+  final bool isPast;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
     final l10n = context.l10n;
     final category = EventCategory.fromWireName(event.category);
-    final color = eventCategoryColor(colors, category);
     final meta = [
-      formatWhen(context, event.startsAt),
+      eventTimeRange(context, event),
       if (event.place.isNotEmpty) event.place,
     ].join(' · ');
+    final extraGoing = math.max(0, event.goingCount - event.goingNames.length);
+
     return AppCard(
       radius: AppRadius.row,
-      padding: EdgeInsets.zero,
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(AppRadius.row),
+      onTap: onTap,
+      semanticsLabel: event.title,
+      child: Opacity(
+        opacity: isPast ? .6 : 1,
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SizedBox(
-              height: EventLayout.coverHeight,
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  const AppStripePlaceholder(),
-                  Positioned(
-                    left: 12,
-                    top: 12,
-                    child: _Pill(
-                      label: eventCategoryLabel(l10n, category),
-                      background: colors.tintOf(color),
-                      foreground: color,
-                      style: AppText.microBold,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(
-                AppSpacing.lg,
-                AppSpacing.sectionGap,
-                AppSpacing.lg,
-                AppSpacing.md,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    event.title,
-                    style: AppText.sans(
-                      16,
-                      FontWeight.w700,
-                      height: 1.25,
-                    ).copyWith(color: colors.ink),
-                  ),
-                  const SizedBox(height: AppSpacing.xs),
-                  Text(
-                    meta,
-                    style: AppText.subtext.copyWith(color: colors.muted),
-                  ),
-                  const SizedBox(height: AppSpacing.sm),
-                  Row(
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                EmojiTile(
+                  emoji: event.emoji,
+                  size: EventLayout.emojiTileSize,
+                  emojiSize: 22,
+                ),
+                const SizedBox(width: AppSpacing.md),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Expanded(
-                        child: Text(
-                          l10n.eventsGoingCount(event.goingCount),
-                          style: AppText.subtextStrong.copyWith(
-                            color: colors.muted,
+                      Wrap(
+                        spacing: AppSpacing.xsm,
+                        runSpacing: AppSpacing.xsm,
+                        children: [
+                          AppTag(
+                            label: eventCategoryLabel(l10n, category),
+                            tone: eventCategoryTagTone(category),
                           ),
-                        ),
+                          if (event.isMine) AppTag(label: l10n.eventsMineBadge),
+                        ],
                       ),
-                      const SizedBox(width: AppSpacing.gap),
-                      _RsvpPill(
-                        isGoing: event.isGoing,
-                        isPending: isPending,
-                        onPressed: onToggleRsvp,
+                      const SizedBox(height: AppSpacing.xs),
+                      Text(
+                        event.title,
+                        style: AppText.sans(
+                          16,
+                          FontWeight.w700,
+                          height: 1.25,
+                        ).copyWith(color: colors.ink),
+                      ),
+                      const SizedBox(height: AppSpacing.xxs),
+                      Text(
+                        meta,
+                        style: AppText.subtext.copyWith(color: colors.muted),
                       ),
                     ],
                   ),
+                ),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            Row(
+              children: [
+                if (event.goingNames.isNotEmpty) ...[
+                  AppAvatarStack(
+                    names: event.goingNames,
+                    size: 26,
+                    maxVisible: 3,
+                    extra: extraGoing,
+                  ),
+                  const SizedBox(width: AppSpacing.sm),
                 ],
-              ),
+                Expanded(
+                  child: Text(
+                    l10n.eventsGoingCount(event.goingCount),
+                    style: AppText.subtextStrong.copyWith(color: colors.muted),
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.gap),
+                _RsvpPill(
+                  isGoing: event.isGoing,
+                  isPending: isPending,
+                  enabled: !isPast,
+                  onPressed: onToggleRsvp,
+                ),
+              ],
             ),
           ],
         ),
@@ -122,44 +124,17 @@ class EventCard extends StatelessWidget {
   }
 }
 
-class _Pill extends StatelessWidget {
-  const _Pill({
-    required this.label,
-    required this.background,
-    required this.foreground,
-    required this.style,
-  });
-
-  final String label;
-  final Color background;
-  final Color foreground;
-  final TextStyle style;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.gap,
-        vertical: 5,
-      ),
-      decoration: BoxDecoration(
-        color: background,
-        borderRadius: BorderRadius.circular(AppRadius.full),
-      ),
-      child: Text(label, style: style.copyWith(color: foreground)),
-    );
-  }
-}
-
 class _RsvpPill extends StatelessWidget {
   const _RsvpPill({
     required this.isGoing,
     required this.isPending,
+    required this.enabled,
     required this.onPressed,
   });
 
   final bool isGoing;
   final bool isPending;
+  final bool enabled;
   final VoidCallback onPressed;
 
   @override
@@ -167,10 +142,14 @@ class _RsvpPill extends StatelessWidget {
     final colors = context.colors;
     final l10n = context.l10n;
     final label = isGoing ? l10n.eventsGoingChecked : l10n.eventsRsvp;
-    final background = isGoing ? colors.lecture : colors.accent;
-    final foreground = colors.white;
+    final background = !enabled
+        ? colors.surface2
+        : isGoing
+        ? colors.lecture
+        : colors.accent;
+    final foreground = !enabled ? colors.muted2 : colors.white;
     return AppPressState(
-      enabled: !isPending,
+      enabled: enabled && !isPending,
       onTap: () {
         unawaited(HapticFeedback.lightImpact());
         onPressed();

@@ -49,13 +49,3 @@ class SettingsAppearance extends StatelessWidget {
     );
   }
 }
-
-class SettingsAdvancedAppearance extends StatelessWidget {
-  const SettingsAdvancedAppearance({super.key});
-
-  @override
-  Widget build(BuildContext context) => const Column(
-    crossAxisAlignment: CrossAxisAlignment.stretch,
-    children: [SettingsThemeRow()],
-  );
-}

@@ -125,11 +125,11 @@ class _AllCommunitiesViewState extends State<AllCommunitiesView> {
                 ),
               ),
             SliverPadding(
-              padding: const EdgeInsets.fromLTRB(
+              padding: EdgeInsets.fromLTRB(
                 AppSpacing.screen,
                 AppSpacing.zero,
                 AppSpacing.screen,
-                AppSpacing.xxlg,
+                ninjaBottomInset(context) + AppSpacing.lg,
               ),
               sliver: SliverToBoxAdapter(
                 child: CommunityCatalogContent(

@@ -197,9 +197,10 @@ class _MapViewState extends State<MapView> {
   }
 
   Future<void> _showMappedRoom(RoomModel room) async {
+    final campus = context.read<MapBloc>().state.selectedCampus?.displayName;
     final search = await showAppSheet<bool>(
       context,
-      child: MapRoomSheet(room: room),
+      child: MapRoomSheet(room: room, campus: campus ?? ''),
     );
     if (search != true || !mounted) return;
     unawaited(

@@ -40,6 +40,15 @@ _StudyMaterial _$StudyMaterialFromJson(Map<String, dynamic> json) =>
         ),
         isMine: $checkedConvert('isMine', (v) => v as bool? ?? false),
         createdAt: $checkedConvert('createdAt', (v) => dateTimeFromJson(v)),
+        previewPath: $checkedConvert('previewPath', (v) => v as String?),
+        batchId: $checkedConvert('batchId', (v) => v as String?),
+        width: $checkedConvert('width', (v) => (v as num?)?.toInt()),
+        height: $checkedConvert('height', (v) => (v as num?)?.toInt()),
+        durationSeconds: $checkedConvert(
+          'durationSeconds',
+          (v) => (v as num?)?.toInt(),
+        ),
+        isLiked: $checkedConvert('isLiked', (v) => v as bool? ?? false),
       );
       return val;
     });
@@ -63,6 +72,12 @@ Map<String, dynamic> _$StudyMaterialToJson(_StudyMaterial instance) =>
       'requiresRepublish': instance.requiresRepublish,
       'isMine': instance.isMine,
       'createdAt': dateTimeToJson(instance.createdAt),
+      'previewPath': instance.previewPath,
+      'batchId': instance.batchId,
+      'width': instance.width,
+      'height': instance.height,
+      'durationSeconds': instance.durationSeconds,
+      'isLiked': instance.isLiked,
     };
 
 _MaterialAuthor _$MaterialAuthorFromJson(

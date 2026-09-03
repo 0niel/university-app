@@ -8,7 +8,9 @@ class _ModerationSkeleton extends StatelessWidget {
     return NinjaSkeletonGroup(
       semanticsLabel: context.l10n.loadingContent,
       child: ListView(
-        padding: const .only(bottom: 60),
+        padding: EdgeInsets.only(
+          bottom: ninjaBottomInset(context) + AppSpacing.lg,
+        ),
         physics: const NeverScrollableScrollPhysics(),
         children: [
           const Padding(

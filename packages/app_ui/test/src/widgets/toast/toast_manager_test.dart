@@ -3,9 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  // ToastManager's queues are static. flutter_test asserts no Timer is left
-  // pending *before* `tearDown` runs, so every test must drain (or reset)
-  // its own toasts as its last step rather than relying on tearDown alone.
   tearDown(ToastManager.debugReset);
 
   Widget host(
@@ -30,6 +27,71 @@ void main() {
   }
 
   group('ToastManager queue', () {
+    testWidgets('disposing before the first toast frame cancels its timer', (
+      tester,
+    ) async {
+      late BuildContext context;
+      await tester.pumpWidget(host((value) => context = value));
+      ToastManager.showLoading(context, message: 'Never painted');
+      ToastManager.showSuccess(context, message: 'Never queued');
+      await tester.pumpWidget(const SizedBox.shrink());
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('disposing the overlay cancels visible and queued toasts', (
+      tester,
+    ) async {
+      late BuildContext context;
+      await tester.pumpWidget(host((value) => context = value));
+      final loading = ToastManager.showLoading(context, message: 'Old loading');
+      ToastManager.showSuccess(context, message: 'Old queued');
+      ToastManager.showBanner(
+        context,
+        title: 'Old banner',
+        message: 'Old notification',
+      );
+      await tester.pump();
+      expect(find.text('Old loading'), findsOneWidget);
+      expect(find.text('Old banner'), findsOneWidget);
+      expect(find.text('Old queued'), findsNothing);
+
+      await tester.pumpWidget(const SizedBox.shrink());
+      expect(tester.takeException(), isNull);
+      loading.dismiss();
+
+      await tester.pumpWidget(host((value) => context = value));
+      ToastManager.showSuccess(context, message: 'Fresh toast');
+      await tester.pump();
+      expect(find.text('Fresh toast'), findsOneWidget);
+      expect(find.text('Old queued'), findsNothing);
+      expect(find.text('Old banner'), findsNothing);
+      await tester.pumpWidget(const SizedBox.shrink());
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('disposing during dismissal does not affect the next overlay', (
+      tester,
+    ) async {
+      late BuildContext context;
+      await tester.pumpWidget(host((value) => context = value));
+      final loading = ToastManager.showLoading(context, message: 'Leaving');
+      await tester.pumpAndSettle();
+      loading.dismiss();
+      await tester.pump(const Duration(milliseconds: 80));
+      await tester.pumpWidget(const SizedBox.shrink());
+      expect(tester.takeException(), isNull);
+
+      await tester.pumpWidget(host((value) => context = value));
+      ToastManager.showInfo(context, message: 'Next overlay');
+      await tester.pump();
+      expect(find.text('Next overlay'), findsOneWidget);
+      loading.dismiss();
+      await tester.pump();
+      expect(find.text('Next overlay'), findsOneWidget);
+      await tester.pumpWidget(const SizedBox.shrink());
+      expect(tester.takeException(), isNull);
+    });
+
     testWidgets('root overlay retains the calling navigation clearance', (
       tester,
     ) async {

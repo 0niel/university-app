@@ -3,6 +3,7 @@ import 'package:campus_repository/src/models/group_announcement.dart';
 import 'package:campus_repository/src/models/group_birthday.dart';
 import 'package:campus_repository/src/models/group_link.dart';
 import 'package:campus_repository/src/models/group_note.dart';
+import 'package:campus_repository/src/models/group_space_member.dart';
 import 'package:campus_repository/src/models/json_converters.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
@@ -13,13 +14,19 @@ part 'group_space.g.dart';
 abstract class GroupSpace with _$GroupSpace {
   const factory GroupSpace({
     String? group,
+    String? groupId,
+    String? joinCode,
     @Default('🎓') String emoji,
     @JsonKey(readValue: _readHasGroup) @Default(false) bool hasGroup,
     @Default(false) bool isOwner,
     @Default(0) int memberCount,
+    @Default(false) bool myBirthdaySet,
     @JsonKey(fromJson: stringListFromJson, toJson: stringListToJson)
     @Default(<String>[])
     List<String> memberNames,
+    @JsonKey(fromJson: _membersFromJson, toJson: _membersToJson)
+    @Default(<GroupSpaceMember>[])
+    List<GroupSpaceMember> members,
     @JsonKey(fromJson: _linksFromJson, toJson: _linksToJson)
     @Default(<GroupLink>[])
     List<GroupLink> links,
@@ -65,6 +72,7 @@ Map<String, Object?> _validatedGroupSpaceJson(Map<String, Object?> json) {
   _validateNestedRows(json, 'links', context: 'GroupSpace links');
   _validateNestedRows(json, 'notes', context: 'GroupSpace notes');
   _validateNestedRows(json, 'birthdays', context: 'GroupSpace birthdays');
+  _validateNestedRows(json, 'members', context: 'GroupSpace members');
   if (json.containsKey('announcement')) {
     final announcement = json['announcement'];
     if (announcement != null && announcement is! Map<Object?, Object?>) {
@@ -75,6 +83,16 @@ Map<String, Object?> _validatedGroupSpaceJson(Map<String, Object?> json) {
   }
   return json;
 }
+
+List<GroupSpaceMember> _membersFromJson(Object? value) => value is List<Object?>
+    ? decodeJsonRows(
+        value,
+        context: 'GroupSpace members',
+      ).map(GroupSpaceMember.fromJson).toList()
+    : const [];
+
+List<Map<String, Object?>> _membersToJson(List<GroupSpaceMember> value) =>
+    value.map((member) => member.toJson()).toList();
 
 List<GroupLink> _linksFromJson(Object? value) => value is List<Object?>
     ? decodeJsonRows(

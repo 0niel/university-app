@@ -7,15 +7,15 @@ class CollabNotesSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return NinjaSkeletonGroup(
+    return AppSkeletonGroup(
       semanticsLabel: context.l10n.loadingContent,
       child: ListView(
         physics: const AlwaysScrollableScrollPhysics(),
-        padding: const .fromLTRB(
+        padding: EdgeInsets.fromLTRB(
           AppSpacing.screen,
           AppSpacing.zero,
           AppSpacing.screen,
-          96,
+          ninjaBottomInset(context) + AppSpacing.lg,
         ),
         children: [
           AppListGroup(
@@ -28,7 +28,7 @@ class CollabNotesSkeleton extends StatelessWidget {
                   ),
                   child: Row(
                     children: [
-                      NinjaSkeleton(
+                      AppSkeleton(
                         width: 44,
                         height: 44,
                         radius: AppRadius.tile,
@@ -39,8 +39,8 @@ class CollabNotesSkeleton extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           spacing: 3,
                           children: [
-                            NinjaSkeleton.bar(height: 14.5, widthFactor: 0.75),
-                            NinjaSkeleton.bar(widthFactor: 0.5),
+                            AppSkeleton.bar(height: 14.5, widthFactor: 0.75),
+                            AppSkeleton.bar(widthFactor: 0.5),
                           ],
                         ),
                       ),

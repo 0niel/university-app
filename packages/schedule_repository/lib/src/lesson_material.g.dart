@@ -26,6 +26,15 @@ _LessonMaterial _$LessonMaterialFromJson(
     authorName: $checkedConvert('authorName', (v) => v as String),
     createdAt: $checkedConvert('createdAt', (v) => DateTime.parse(v as String)),
     mimeType: $checkedConvert('mimeType', (v) => v as String?),
+    previewPath: $checkedConvert('previewPath', (v) => v as String?),
+    batchId: $checkedConvert('batchId', (v) => v as String?),
+    width: $checkedConvert('width', (v) => (v as num?)?.toInt()),
+    height: $checkedConvert('height', (v) => (v as num?)?.toInt()),
+    durationSeconds: $checkedConvert(
+      'durationSeconds',
+      (v) => (v as num?)?.toInt(),
+    ),
+    isLiked: $checkedConvert('isLiked', (v) => v as bool? ?? false),
   );
   return val;
 });
@@ -45,6 +54,12 @@ Map<String, dynamic> _$LessonMaterialToJson(_LessonMaterial instance) =>
       'authorName': instance.authorName,
       'createdAt': instance.createdAt.toIso8601String(),
       'mimeType': instance.mimeType,
+      'previewPath': instance.previewPath,
+      'batchId': instance.batchId,
+      'width': instance.width,
+      'height': instance.height,
+      'durationSeconds': instance.durationSeconds,
+      'isLiked': instance.isLiked,
     };
 
 const _$LessonMaterialTypeEnumMap = {

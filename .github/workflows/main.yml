@@ -15,6 +15,24 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  release-tools:
+    name: Release tools
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: Set up Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+        with:
+          python-version: '3.13'
+      - name: Test release tools
+        run: python -m unittest discover -s test/tool -p '*_test.py'
+      - name: Test showcase seed
+        run: node --test scripts/build_showcase_seed.test.mjs
+
   flutter:
     name: Flutter
     runs-on: ubuntu-latest

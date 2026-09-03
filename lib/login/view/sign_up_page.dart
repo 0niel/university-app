@@ -79,7 +79,7 @@ class _SignUpViewState extends State<_SignUpView> {
                   return AppInputField(
                     key: const Key('signUpPage_emailInput'),
                     controller: _emailController,
-                    enabled: !state.status.isInProgress,
+                    readOnly: state.status.isInProgress,
                     label: l10n.authYourEmail,
                     leadingIcon: AppLineIcon.at,
                     placeholder: l10n.loginEmailPlaceholder,
@@ -88,6 +88,7 @@ class _SignUpViewState extends State<_SignUpView> {
                     autofillHints: const [AutofillHints.email],
                     onChanged: (value) => bloc.add(SignUpEmailChanged(value)),
                     onSubmitted: (_) => _passwordFocusNode.requestFocus(),
+                    validateOnBlur: true,
                     errorText: showError ? l10n.authInvalidEmail : null,
                   );
                 },
@@ -104,7 +105,7 @@ class _SignUpViewState extends State<_SignUpView> {
                     key: const Key('signUpPage_passwordInput'),
                     controller: _passwordController,
                     focusNode: _passwordFocusNode,
-                    enabled: !state.status.isInProgress,
+                    readOnly: state.status.isInProgress,
                     label: l10n.authPasswordLabel,
                     leadingIcon: AppLineIcon.lock,
                     placeholder: '••••••••',
@@ -116,6 +117,7 @@ class _SignUpViewState extends State<_SignUpView> {
                     onChanged: (value) =>
                         bloc.add(SignUpPasswordChanged(value)),
                     onSubmitted: (_) => _confirmFocusNode.requestFocus(),
+                    validateOnBlur: true,
                     errorText: showError
                         ? l10n.authPasswordMinLength(Password.minLength)
                         : null,
@@ -135,7 +137,7 @@ class _SignUpViewState extends State<_SignUpView> {
                     key: const Key('signUpPage_confirmPasswordInput'),
                     controller: _confirmController,
                     focusNode: _confirmFocusNode,
-                    enabled: !state.status.isInProgress,
+                    readOnly: state.status.isInProgress,
                     label: l10n.authConfirmPasswordLabel,
                     leadingIcon: AppLineIcon.lock,
                     placeholder: '••••••••',
@@ -152,6 +154,7 @@ class _SignUpViewState extends State<_SignUpView> {
                         bloc.add(SignUpSubmitted());
                       }
                     },
+                    validateOnBlur: true,
                     errorText: showError ? l10n.authPasswordsDontMatch : null,
                   );
                 },

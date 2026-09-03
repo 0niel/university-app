@@ -24,7 +24,9 @@ class _EditBody extends StatelessWidget {
     ];
 
     return ListView(
-      padding: const EdgeInsets.only(bottom: 32),
+      padding: EdgeInsets.only(
+        bottom: ninjaBottomInset(context) + AppSpacing.lg,
+      ),
       children: [
         Padding(
           padding: const EdgeInsets.fromLTRB(

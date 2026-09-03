@@ -25,6 +25,7 @@ void main() {
               startsAt: DateTime(2026, 9, 3),
             ),
             onToggleRsvp: () => calls++,
+            onTap: () {},
           ),
         ),
       ),
@@ -33,7 +34,9 @@ void main() {
     final surface = find.byKey(const Key('eventCard_rsvpSurface'));
     final button = find.ancestor(
       of: surface,
-      matching: find.byType(AppPressState),
+      matching: find.byWidgetPredicate(
+        (widget) => widget is AppPressState && widget.semanticsButton == true,
+      ),
     );
     expect(tester.getSize(surface).height, 40);
     expect(tester.getSize(button).height, 44);

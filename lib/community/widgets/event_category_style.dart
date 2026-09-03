@@ -33,3 +33,11 @@ String eventCategoryLabel(AppLocalizations l10n, EventCategory category) =>
       .science => l10n.eventsCategorySci,
       .other => l10n.eventsCategoryOther,
     };
+
+AppTagTone eventCategoryTagTone(EventCategory category) => switch (category) {
+  .career => AppTagTone.info,
+  .sport => AppTagTone.live,
+  .art => AppTagTone.danger,
+  .science => AppTagTone.pink,
+  .all || .other => AppTagTone.accent,
+};

@@ -48,36 +48,12 @@ class _ContributorsShell extends StatelessWidget {
               ),
             ],
           ),
-          LayoutBuilder(
-            builder: (context, constraints) {
-              final compact =
-                  constraints.maxWidth < 360 ||
-                  MediaQuery.textScalerOf(context).scale(14) > 19;
-              final avatars = loading
-                  ? const AvatarStackSkeleton()
-                  : AvatarStack(contributors: contributors);
-              final button = BecomeContributorButton(
-                onTap: () =>
-                    onBecomeContributor?.call(ToolsLinksConfig.repoUrl),
-              );
-              if (compact) {
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  spacing: 14,
-                  children: [
-                    avatars,
-                    Align(child: button),
-                  ],
-                );
-              }
-              return Row(
-                spacing: 12,
-                children: [
-                  Expanded(child: avatars),
-                  button,
-                ],
-              );
-            },
+          if (loading)
+            const AvatarStackSkeleton()
+          else
+            AvatarStack(contributors: contributors),
+          BecomeContributorButton(
+            onTap: () => onBecomeContributor?.call(ToolsLinksConfig.repoUrl),
           ),
         ],
       ),

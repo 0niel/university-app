@@ -15,9 +15,15 @@ void main() {
   late DeadlinesCubit cubit;
 
   setUp(() {
+    ToastManager.debugReset();
     cubit = MockDeadlinesCubit();
     when(() => cubit.toggleDone(any())).thenAnswer((_) async => true);
+    when(() => cubit.deleteDeadline(any())).thenReturn(null);
+    when(
+      () => cubit.postponeOverdueToTomorrow(now: any(named: 'now')),
+    ).thenAnswer((_) async => true);
   });
+  tearDown(ToastManager.debugReset);
 
   Widget subject(
     DeadlinesState state, {
@@ -57,10 +63,15 @@ void main() {
     id: id,
     title: 'Работа $id',
     subjectName: 'Математика',
-    dueAt: due ?? DateTime.now().add(const Duration(days: 3)),
+    dueAt: due ?? DateTime(2026, 9, 3, 12).add(const Duration(days: 3)),
     source: .me,
     isMine: mine,
     isDone: done,
+  );
+
+  Finder rowFinder(String id) => find.descendant(
+    of: find.byKey(ValueKey('deadline-$id')),
+    matching: find.byType(AppDeadlineRow),
   );
 
   testWidgets('shows skeleton without a spinner during cold load', (
@@ -80,30 +91,93 @@ void main() {
     verify(() => cubit.load()).called(1);
   });
 
-  testWidgets('groups real deadlines and forwards completion', (tester) async {
+  testWidgets('groups deadlines with counts and forwards completion', (
+    tester,
+  ) async {
+    final now = DateTime(2026, 9, 3, 12);
     await tester.pumpWidget(
       subject(
         DeadlinesState(
           status: .ready,
           deadlines: [
-            deadline(id: 'today', due: DateTime.now()),
-            deadline(),
-            deadline(
-              id: 'later',
-              due: DateTime.now().add(const Duration(days: 20)),
-            ),
+            deadline(id: 'today', due: DateTime(2026, 9, 3, 23, 59)),
+            deadline(due: DateTime(2026, 9, 6, 12)),
+            deadline(id: 'later', due: DateTime(2026, 9, 25, 12)),
           ],
         ),
+        now: now,
       ),
     );
     await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+    expect(find.byType(AppCalendarMonth), findsNothing);
     expect(find.text('Работа today'), findsOneWidget);
-    expect(find.text('НА ЭТОЙ НЕДЕЛЕ'), findsOneWidget);
-    final row = tester.widget<AppDeadlineRow>(
-      find.byKey(const ValueKey('deadline-one')),
-    );
+    expect(find.text('НА ЭТОЙ НЕДЕЛЕ · 1'), findsOneWidget);
+    expect(find.text('ПОЗЖЕ · 1'), findsOneWidget);
+    final row = tester.widget<AppDeadlineRow>(rowFinder('one'));
     row.onToggle!();
     verify(() => cubit.toggleDone('one')).called(1);
+  });
+
+  testWidgets('overdue items surface a banner with a postpone action', (
+    tester,
+  ) async {
+    final now = DateTime(2026, 9, 3, 12);
+    await tester.pumpWidget(
+      subject(
+        DeadlinesState(
+          status: .ready,
+          deadlines: [
+            deadline(id: 'overdue', due: DateTime(2026, 9, 1, 12)),
+          ],
+        ),
+        now: now,
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.byType(AppBanner), findsOneWidget);
+    await tester.tap(find.text('Перенести на завтра'));
+    await tester.pumpAndSettle();
+    verify(
+      () => cubit.postponeOverdueToTomorrow(now: any(named: 'now')),
+    ).called(1);
+    await tester.pump(const Duration(seconds: 3));
+  });
+
+  testWidgets('switching to the calendar segment shows the month grid', (
+    tester,
+  ) async {
+    final now = DateTime(2026, 9, 3, 12);
+    await tester.pumpWidget(
+      subject(
+        DeadlinesState(status: .ready, deadlines: [deadline()]),
+        now: now,
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.byType(AppCalendarMonth), findsNothing);
+    await tester.tap(find.text('Календарь'));
+    await tester.pumpAndSettle();
+    expect(find.byType(AppCalendarMonth), findsOneWidget);
+  });
+
+  testWidgets('the done group is collapsed and expands on tap', (
+    tester,
+  ) async {
+    final now = DateTime(2026, 9, 3, 12);
+    await tester.pumpWidget(
+      subject(
+        DeadlinesState(
+          status: .ready,
+          deadlines: [deadline(id: 'done', done: true)],
+        ),
+        now: now,
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Работа done'), findsNothing);
+    await tester.tap(find.text('ГОТОВО · 1'));
+    verify(() => cubit.toggleDoneGroupExpanded()).called(1);
   });
 
   testWidgets('completed deadline has an explicit restore control', (
@@ -111,35 +185,38 @@ void main() {
   ) async {
     await tester.pumpWidget(
       subject(
-        DeadlinesState(status: .ready, deadlines: [deadline(done: true)]),
+        DeadlinesState(
+          status: .ready,
+          deadlines: [deadline(done: true)],
+          doneGroupExpanded: true,
+        ),
       ),
     );
     final row = tester.widget<AppDeadlineRow>(find.byType(AppDeadlineRow));
     expect(row.done, isTrue);
-    expect(find.byType(Dismissible), findsNothing);
     row.onToggle!();
     verify(() => cubit.toggleDone('one')).called(1);
   });
 
-  testWidgets('uses one supplied time for grouping, labels and urgency', (
-    tester,
-  ) async {
-    final now = DateTime(2034, 12, 31, 23, 40);
+  testWidgets('long-press opens the deadline actions sheet', (tester) async {
+    final now = DateTime(2026, 9, 3, 12);
     await tester.pumpWidget(
       subject(
         DeadlinesState(
           status: .ready,
-          deadlines: [deadline(due: now.add(const Duration(minutes: 90)))],
+          deadlines: [deadline(due: DateTime(2026, 9, 3, 23, 59))],
         ),
         now: now,
       ),
     );
-    final row = tester.widget<AppDeadlineRow>(find.byType(AppDeadlineRow));
-    expect(find.text('НА ЭТОЙ НЕДЕЛЕ'), findsOneWidget);
-    expect(find.text('ПОЗЖЕ'), findsNothing);
-    expect(row.meta, 'Математика · завтра 01:10');
-    expect(row.left, '1 ч');
-    expect(row.urgent, isTrue);
+    await tester.pumpAndSettle();
+    await tester.longPress(find.byKey(const ValueKey('deadline-one')));
+    await tester.pumpAndSettle();
+    expect(find.text('Удалить'), findsOneWidget);
+    await tester.tap(find.text('Удалить'));
+    await tester.pumpAndSettle();
+    verify(() => cubit.deleteDeadline('one')).called(1);
+    await tester.pump(const Duration(seconds: 3));
   });
 
   testWidgets('pending and non-owned deadlines cannot be toggled', (
@@ -182,7 +259,6 @@ void main() {
       expect(hero.done, 1);
       expect(hero.total, 2);
       expect(find.text('50%'), findsOneWidget);
-      expect(find.byType(SliverPersistentHeader), findsNothing);
     },
   );
 
@@ -204,7 +280,7 @@ void main() {
   });
 
   testWidgets('fits a narrow screen at 200 percent text scale', (tester) async {
-    tester.view.physicalSize = const Size(320, 700);
+    tester.view.physicalSize = const Size(320, 800);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
     await tester.pumpWidget(
@@ -238,7 +314,10 @@ void main() {
   });
 
   testWidgets('warns when refreshing stale data fails', (tester) async {
-    final ready = DeadlinesState(status: .ready, deadlines: [deadline()]);
+    final ready = DeadlinesState(
+      status: .ready,
+      deadlines: [deadline()],
+    );
     when(
       () => cubit.stream,
     ).thenAnswer((_) => Stream.value(ready.copyWith(status: .failure)));

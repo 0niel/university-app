@@ -64,11 +64,6 @@ class GradesContent extends StatelessWidget {
           l10n.personalRecordsNotice,
           style: AppText.subtext.copyWith(color: context.colors.muted),
         ),
-        const SizedBox(height: AppSpacing.xsm),
-        Text(
-          l10n.gradesScholarshipDisclaimer,
-          style: AppText.caption.copyWith(color: context.colors.muted),
-        ),
       ],
     );
   }

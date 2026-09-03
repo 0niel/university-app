@@ -2,7 +2,6 @@ import 'package:app_ui/app_ui.dart';
 import 'package:campus_repository/campus_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:rtu_mirea_app/free_rooms/cubit/free_rooms_cubit.dart';
-import 'package:rtu_mirea_app/free_rooms/cubit/free_rooms_filter.dart';
 import 'package:rtu_mirea_app/free_rooms/widgets/free_room_row.dart';
 import 'package:rtu_mirea_app/free_rooms/widgets/free_room_view_model.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
@@ -14,8 +13,6 @@ class FreeRoomsList extends StatelessWidget {
     required this.onRetry,
     required this.onRoomTap,
     this.roomFloors = const {},
-    this.bookedRoom,
-    this.bookedCampus,
     this.now,
     super.key,
   });
@@ -24,8 +21,6 @@ class FreeRoomsList extends StatelessWidget {
   final VoidCallback onRetry;
   final ValueChanged<FreeRoomViewModel> onRoomTap;
   final Map<String, int> roomFloors;
-  final String? bookedRoom;
-  final String? bookedCampus;
   final DateTime? now;
 
   @override
@@ -104,10 +99,6 @@ class FreeRoomsList extends StatelessWidget {
       room: room,
       now: current,
       floor: roomFloors[roomKey(room.room)],
-      booked:
-          bookedRoom != null &&
-          roomKey(bookedRoom!) == roomKey(room.room) &&
-          campusKey(bookedCampus ?? '') == campusKey(room.campus ?? ''),
       locale: context.l10n.localeName,
     );
     return FreeRoomRow(room: model, onTap: () => onRoomTap(model));

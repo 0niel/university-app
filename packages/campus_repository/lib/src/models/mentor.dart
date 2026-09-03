@@ -23,6 +23,7 @@ abstract class Mentor with _$Mentor {
     int? course,
     String? group,
     String? handle,
+    String? telegramHandle,
   }) = _Mentor;
 
   factory Mentor.fromJson(Map<String, Object?> json) => _$MentorFromJson(json);
@@ -76,6 +77,7 @@ abstract class MentorRequest with _$MentorRequest {
     @Default('') String mentorName,
     String? requesterHandle,
     String? mentorHandle,
+    String? mentorTelegramHandle,
     @Default(true) bool isIncoming,
     @Default(MentorRequestStatus.pending) MentorRequestStatus status,
     @Default(false) bool mentorConfirmed,
@@ -92,6 +94,8 @@ abstract class MentorRequest with _$MentorRequest {
   String get counterpartName => isIncoming ? requesterName : mentorName;
 
   String? get counterpartHandle => isIncoming ? requesterHandle : mentorHandle;
+
+  String? get replyTelegramHandle => isIncoming ? null : mentorTelegramHandle;
 
   bool get hasConfirmed => isIncoming ? mentorConfirmed : requesterConfirmed;
 }

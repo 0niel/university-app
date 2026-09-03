@@ -17,6 +17,7 @@ class NinjaQrGlassButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return AppPressable(
       onTap: onTap,
       pressedScale: 0.92,
@@ -28,13 +29,13 @@ class NinjaQrGlassButton extends StatelessWidget {
         height: AppControlSize.iconButton,
         alignment: .center,
         decoration: BoxDecoration(
-          color: active ? Colors.white : Colors.white.withValues(alpha: 0.14),
+          color: active ? colors.white : colors.white.withValues(alpha: .14),
           shape: .circle,
         ),
         child: AppLineIconWidget(
           icon,
           size: 20,
-          color: active ? Colors.black : Colors.white,
+          color: active ? AppColors.dark.canvas : colors.white,
         ),
       ),
     );

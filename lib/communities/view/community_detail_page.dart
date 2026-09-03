@@ -68,11 +68,11 @@ class CommunityDetailPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: colors.canvas,
       body: ListView(
-        padding: const EdgeInsets.fromLTRB(
+        padding: EdgeInsets.fromLTRB(
           AppSpacing.screen,
           AppSpacing.zero,
           AppSpacing.screen,
-          AppSpacing.xxlg,
+          ninjaBottomInset(context) + AppSpacing.lg,
         ),
         children: [
           PageActionBar(

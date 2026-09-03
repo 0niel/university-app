@@ -27,6 +27,22 @@ class NinjaGroupSpaceSkeleton extends StatelessWidget {
               height: 88 + grow * 44,
               radius: AppRadius.card,
             ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                for (var i = 0; i < 4; i++) ...[
+                  if (i > 0) const SizedBox(width: 8),
+                  const Expanded(
+                    child: NinjaSkeleton(
+                      height: 48,
+                      radius: AppRadius.banner,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+            const SizedBox(height: 16),
+            const NinjaSkeleton(height: 44, radius: AppRadius.full),
             const SizedBox(height: 18),
             NinjaSkeleton(height: 64 + grow * 32, radius: AppRadius.card),
             const _SectionHeaderSkeleton(),
@@ -35,6 +51,8 @@ class NinjaGroupSpaceSkeleton extends StatelessWidget {
             NinjaSkeleton(height: 64 + grow * 32, radius: AppRadius.card),
             const _SectionHeaderSkeleton(),
             NinjaSkeleton(height: 52 + grow * 26, radius: AppRadius.card),
+            const _SectionHeaderSkeleton(),
+            NinjaSkeleton(height: 64 + grow * 32, radius: AppRadius.card),
             const SizedBox(height: 10),
             NinjaSkeleton(height: 132 + grow * 60, radius: AppRadius.card),
           ],

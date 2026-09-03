@@ -22,7 +22,7 @@ Future<void> showStoryViewer(
     PageRouteBuilder<void>(
       fullscreenDialog: true,
       opaque: false,
-      barrierColor: const Color(0x00000000),
+      barrierColor: AppColors.dark.canvas.withValues(alpha: 0),
       transitionDuration:
           MediaQuery.disableAnimationsOf(context) ||
               MediaQuery.accessibleNavigationOf(context)

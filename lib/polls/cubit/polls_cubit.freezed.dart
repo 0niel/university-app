@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$PollsState {
 
- PollsStatus get status; List<Poll> get polls; Set<String> get pendingPollIds; Set<String> get deletingPollIds;
+ PollsStatus get status; List<Poll> get polls; PollFilter get filter; PollCategory? get category; String get query;
 /// Create a copy of PollsState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +25,16 @@ $PollsStateCopyWith<PollsState> get copyWith => _$PollsStateCopyWithImpl<PollsSt
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is PollsState&&(identical(other.status, status) || other.status == status)&&const DeepCollectionEquality().equals(other.polls, polls)&&const DeepCollectionEquality().equals(other.pendingPollIds, pendingPollIds)&&const DeepCollectionEquality().equals(other.deletingPollIds, deletingPollIds));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is PollsState&&(identical(other.status, status) || other.status == status)&&const DeepCollectionEquality().equals(other.polls, polls)&&(identical(other.filter, filter) || other.filter == filter)&&(identical(other.category, category) || other.category == category)&&(identical(other.query, query) || other.query == query));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,status,const DeepCollectionEquality().hash(polls),const DeepCollectionEquality().hash(pendingPollIds),const DeepCollectionEquality().hash(deletingPollIds));
+int get hashCode => Object.hash(runtimeType,status,const DeepCollectionEquality().hash(polls),filter,category,query);
 
 @override
 String toString() {
-  return 'PollsState(status: $status, polls: $polls, pendingPollIds: $pendingPollIds, deletingPollIds: $deletingPollIds)';
+  return 'PollsState(status: $status, polls: $polls, filter: $filter, category: $category, query: $query)';
 }
 
 
@@ -45,7 +45,7 @@ abstract mixin class $PollsStateCopyWith<$Res>  {
   factory $PollsStateCopyWith(PollsState value, $Res Function(PollsState) _then) = _$PollsStateCopyWithImpl;
 @useResult
 $Res call({
- PollsStatus status, List<Poll> polls, Set<String> pendingPollIds, Set<String> deletingPollIds
+ PollsStatus status, List<Poll> polls, PollFilter filter, PollCategory? category, String query
 });
 
 
@@ -62,13 +62,14 @@ class _$PollsStateCopyWithImpl<$Res>
 
 /// Create a copy of PollsState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? status = null,Object? polls = null,Object? pendingPollIds = null,Object? deletingPollIds = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? status = null,Object? polls = null,Object? filter = null,Object? category = freezed,Object? query = null,}) {
   return _then(_self.copyWith(
 status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as PollsStatus,polls: null == polls ? _self.polls : polls // ignore: cast_nullable_to_non_nullable
-as List<Poll>,pendingPollIds: null == pendingPollIds ? _self.pendingPollIds : pendingPollIds // ignore: cast_nullable_to_non_nullable
-as Set<String>,deletingPollIds: null == deletingPollIds ? _self.deletingPollIds : deletingPollIds // ignore: cast_nullable_to_non_nullable
-as Set<String>,
+as List<Poll>,filter: null == filter ? _self.filter : filter // ignore: cast_nullable_to_non_nullable
+as PollFilter,category: freezed == category ? _self.category : category // ignore: cast_nullable_to_non_nullable
+as PollCategory?,query: null == query ? _self.query : query // ignore: cast_nullable_to_non_nullable
+as String,
   ));
 }
 
@@ -153,10 +154,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( PollsStatus status,  List<Poll> polls,  Set<String> pendingPollIds,  Set<String> deletingPollIds)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( PollsStatus status,  List<Poll> polls,  PollFilter filter,  PollCategory? category,  String query)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _PollsState() when $default != null:
-return $default(_that.status,_that.polls,_that.pendingPollIds,_that.deletingPollIds);case _:
+return $default(_that.status,_that.polls,_that.filter,_that.category,_that.query);case _:
   return orElse();
 
 }
@@ -174,10 +175,10 @@ return $default(_that.status,_that.polls,_that.pendingPollIds,_that.deletingPoll
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( PollsStatus status,  List<Poll> polls,  Set<String> pendingPollIds,  Set<String> deletingPollIds)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( PollsStatus status,  List<Poll> polls,  PollFilter filter,  PollCategory? category,  String query)  $default,) {final _that = this;
 switch (_that) {
 case _PollsState():
-return $default(_that.status,_that.polls,_that.pendingPollIds,_that.deletingPollIds);case _:
+return $default(_that.status,_that.polls,_that.filter,_that.category,_that.query);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -194,10 +195,10 @@ return $default(_that.status,_that.polls,_that.pendingPollIds,_that.deletingPoll
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( PollsStatus status,  List<Poll> polls,  Set<String> pendingPollIds,  Set<String> deletingPollIds)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( PollsStatus status,  List<Poll> polls,  PollFilter filter,  PollCategory? category,  String query)?  $default,) {final _that = this;
 switch (_that) {
 case _PollsState() when $default != null:
-return $default(_that.status,_that.polls,_that.pendingPollIds,_that.deletingPollIds);case _:
+return $default(_that.status,_that.polls,_that.filter,_that.category,_that.query);case _:
   return null;
 
 }
@@ -209,7 +210,7 @@ return $default(_that.status,_that.polls,_that.pendingPollIds,_that.deletingPoll
 
 
 class _PollsState extends PollsState {
-  const _PollsState({this.status = PollsStatus.initial, final  List<Poll> polls = const <Poll>[], final  Set<String> pendingPollIds = const <String>{}, final  Set<String> deletingPollIds = const <String>{}}): _polls = polls,_pendingPollIds = pendingPollIds,_deletingPollIds = deletingPollIds,super._();
+  const _PollsState({this.status = PollsStatus.initial, final  List<Poll> polls = const <Poll>[], this.filter = PollFilter.all, this.category, this.query = ''}): _polls = polls,super._();
 
 
 @override@JsonKey() final  PollsStatus status;
@@ -220,20 +221,9 @@ class _PollsState extends PollsState {
   return EqualUnmodifiableListView(_polls);
 }
 
- final  Set<String> _pendingPollIds;
-@override@JsonKey() Set<String> get pendingPollIds {
-  if (_pendingPollIds is EqualUnmodifiableSetView) return _pendingPollIds;
-  // ignore: implicit_dynamic_type
-  return EqualUnmodifiableSetView(_pendingPollIds);
-}
-
- final  Set<String> _deletingPollIds;
-@override@JsonKey() Set<String> get deletingPollIds {
-  if (_deletingPollIds is EqualUnmodifiableSetView) return _deletingPollIds;
-  // ignore: implicit_dynamic_type
-  return EqualUnmodifiableSetView(_deletingPollIds);
-}
-
+@override@JsonKey() final  PollFilter filter;
+@override final  PollCategory? category;
+@override@JsonKey() final  String query;
 
 /// Create a copy of PollsState
 /// with the given fields replaced by the non-null parameter values.
@@ -245,16 +235,16 @@ _$PollsStateCopyWith<_PollsState> get copyWith => __$PollsStateCopyWithImpl<_Pol
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _PollsState&&(identical(other.status, status) || other.status == status)&&const DeepCollectionEquality().equals(other._polls, _polls)&&const DeepCollectionEquality().equals(other._pendingPollIds, _pendingPollIds)&&const DeepCollectionEquality().equals(other._deletingPollIds, _deletingPollIds));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _PollsState&&(identical(other.status, status) || other.status == status)&&const DeepCollectionEquality().equals(other._polls, _polls)&&(identical(other.filter, filter) || other.filter == filter)&&(identical(other.category, category) || other.category == category)&&(identical(other.query, query) || other.query == query));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,status,const DeepCollectionEquality().hash(_polls),const DeepCollectionEquality().hash(_pendingPollIds),const DeepCollectionEquality().hash(_deletingPollIds));
+int get hashCode => Object.hash(runtimeType,status,const DeepCollectionEquality().hash(_polls),filter,category,query);
 
 @override
 String toString() {
-  return 'PollsState(status: $status, polls: $polls, pendingPollIds: $pendingPollIds, deletingPollIds: $deletingPollIds)';
+  return 'PollsState(status: $status, polls: $polls, filter: $filter, category: $category, query: $query)';
 }
 
 
@@ -265,7 +255,7 @@ abstract mixin class _$PollsStateCopyWith<$Res> implements $PollsStateCopyWith<$
   factory _$PollsStateCopyWith(_PollsState value, $Res Function(_PollsState) _then) = __$PollsStateCopyWithImpl;
 @override @useResult
 $Res call({
- PollsStatus status, List<Poll> polls, Set<String> pendingPollIds, Set<String> deletingPollIds
+ PollsStatus status, List<Poll> polls, PollFilter filter, PollCategory? category, String query
 });
 
 
@@ -282,13 +272,14 @@ class __$PollsStateCopyWithImpl<$Res>
 
 /// Create a copy of PollsState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? status = null,Object? polls = null,Object? pendingPollIds = null,Object? deletingPollIds = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? status = null,Object? polls = null,Object? filter = null,Object? category = freezed,Object? query = null,}) {
   return _then(_PollsState(
 status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as PollsStatus,polls: null == polls ? _self._polls : polls // ignore: cast_nullable_to_non_nullable
-as List<Poll>,pendingPollIds: null == pendingPollIds ? _self._pendingPollIds : pendingPollIds // ignore: cast_nullable_to_non_nullable
-as Set<String>,deletingPollIds: null == deletingPollIds ? _self._deletingPollIds : deletingPollIds // ignore: cast_nullable_to_non_nullable
-as Set<String>,
+as List<Poll>,filter: null == filter ? _self.filter : filter // ignore: cast_nullable_to_non_nullable
+as PollFilter,category: freezed == category ? _self.category : category // ignore: cast_nullable_to_non_nullable
+as PollCategory?,query: null == query ? _self.query : query // ignore: cast_nullable_to_non_nullable
+as String,
   ));
 }
 

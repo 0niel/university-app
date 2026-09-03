@@ -169,8 +169,7 @@ class _TeacherProfilePageState extends State<TeacherProfilePage> {
           child: Column(
             children: [
               for (final (index, review) in _profile.reviews.indexed) ...[
-                if (index > 0)
-                  Divider(height: AppSpacing.xxxs, color: context.colors.line),
+                if (index > 0) const AppDivider(),
                 _ReviewCard(review: review, compact: true),
               ],
             ],

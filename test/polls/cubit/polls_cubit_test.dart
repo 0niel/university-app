@@ -8,7 +8,11 @@ class MockCampusRepository extends Mock implements CampusRepository {}
 
 void main() {
   setUpAll(() {
-    registerFallbackValue(PollType.single);
+    registerFallbackValue(PollFilter.all);
+    registerFallbackValue(PollCategory.academic);
+    registerFallbackValue(PollResultsVisibility.always);
+    registerFallbackValue(const <PollAnswer>[]);
+    registerFallbackValue(const <PollQuestionDraft>[]);
   });
 
   group('PollsCubit', () {
@@ -16,44 +20,49 @@ void main() {
 
     const option1 = PollOption(id: 'o-1', text: 'Go', votes: 3);
     const option2 = PollOption(id: 'o-2', text: 'Rust', votes: 1);
+    const question = PollQuestion(
+      id: 'q-1',
+      text: 'Какой стек учить летом?',
+      kind: PollQuestionKind.single,
+      options: [option1, option2],
+    );
     const poll = Poll(
       id: 'p-1',
-      question: 'Какой стек учить летом?',
-      pollType: PollType.single,
-      options: [option1, option2],
-      totalVotes: 4,
+      title: 'Стек',
+      isMine: true,
+      questions: [question],
+      participantsCount: 4,
     );
     const otherPoll = Poll(
       id: 'p-2',
-      question: 'Сложность экзамена?',
-      pollType: PollType.multi,
-      options: [option1, option2],
+      title: 'Сложность экзамена?',
       isMine: true,
+      questions: [question],
     );
     late List<Poll> polls;
 
     setUp(() {
       campusRepository = MockCampusRepository();
       polls = const [poll, otherPoll];
-      when(() => campusRepository.getPolls()).thenAnswer((_) async => polls);
       when(
-        () => campusRepository.votePoll(
+        () => campusRepository.getPolls(
+          filter: any(named: 'filter'),
+          category: any(named: 'category'),
+          query: any(named: 'query'),
+        ),
+      ).thenAnswer((_) async => polls);
+      when(
+        () => campusRepository.closePoll(any()),
+      ).thenAnswer((_) async => poll.copyWith(isClosed: true));
+      when(
+        () => campusRepository.deletePoll(any()),
+      ).thenAnswer((_) async {});
+      when(
+        () => campusRepository.submitPollAnswers(
           pollId: any(named: 'pollId'),
-          optionIds: any(named: 'optionIds'),
+          answers: any(named: 'answers'),
         ),
-      ).thenAnswer((_) async {});
-      when(
-        () => campusRepository.createPoll(
-          question: any(named: 'question'),
-          options: any(named: 'options'),
-          type: any(named: 'type'),
-          isAnonymous: any(named: 'isAnonymous'),
-          showResults: any(named: 'showResults'),
-          expiresAt: any(named: 'expiresAt'),
-          correctIndex: any(named: 'correctIndex'),
-        ),
-      ).thenAnswer((_) async {});
-      when(() => campusRepository.deletePoll(any())).thenAnswer((_) async {});
+      ).thenAnswer((_) async => poll.copyWith(iParticipated: true));
     });
 
     PollsCubit buildCubit() => PollsCubit(campusRepository: campusRepository);
@@ -69,10 +78,7 @@ void main() {
         act: (cubit) => cubit.load(),
         expect: () => const <PollsState>[
           PollsState(status: PollsStatus.loading),
-          PollsState(
-            status: PollsStatus.populated,
-            polls: [poll, otherPoll],
-          ),
+          PollsState(status: PollsStatus.populated, polls: [poll, otherPoll]),
         ],
         verify: (_) {
           verify(() => campusRepository.getPolls()).called(1);
@@ -80,9 +86,14 @@ void main() {
       );
 
       blocTest<PollsCubit, PollsState>(
-        'emits [loading, failure] and keeps cached polls when getPolls throws',
+        'emits [loading, failure] and keeps cached polls when getPolls '
+        'throws',
         setUp: () => when(
-          () => campusRepository.getPolls(),
+          () => campusRepository.getPolls(
+            filter: any(named: 'filter'),
+            category: any(named: 'category'),
+            query: any(named: 'query'),
+          ),
         ).thenThrow(Exception('network')),
         build: buildCubit,
         seed: () => const PollsState(polls: [poll]),
@@ -95,239 +106,236 @@ void main() {
       );
     });
 
-    group('vote', () {
+    group('filters', () {
       blocTest<PollsCubit, PollsState>(
-        'marks the poll pending, calls votePoll, reloads, then clears '
-        'pending',
+        'setFilter updates the filter and reloads with it',
         build: buildCubit,
-        act: (cubit) async => expect(
-          await cubit.submitVote(poll, [option1.id]),
-          isTrue,
-        ),
+        act: (cubit) => cubit.setFilter(PollFilter.mine),
         verify: (_) {
           verify(
-            () => campusRepository.votePoll(
-              pollId: 'p-1',
-              optionIds: ['o-1'],
-            ),
+            () => campusRepository.getPolls(filter: PollFilter.mine),
           ).called(1);
-          verify(() => campusRepository.getPolls()).called(1);
         },
         expect: () => const <PollsState>[
-          PollsState(pendingPollIds: {'p-1'}),
-          PollsState(status: PollsStatus.loading, pendingPollIds: {'p-1'}),
+          PollsState(filter: PollFilter.mine),
+          PollsState(filter: PollFilter.mine, status: PollsStatus.loading),
           PollsState(
+            filter: PollFilter.mine,
             status: PollsStatus.populated,
             polls: [poll, otherPoll],
-            pendingPollIds: {'p-1'},
           ),
-          PollsState(status: PollsStatus.populated, polls: [poll, otherPoll]),
         ],
       );
 
       blocTest<PollsCubit, PollsState>(
-        'submits multiple option ids for multi-choice polls, then reloads',
+        'setFilter is a no-op when the filter is unchanged',
         build: buildCubit,
-        act: (cubit) => cubit.submitVote(otherPoll, ['o-1', 'o-2']),
+        act: (cubit) => cubit.setFilter(PollFilter.all),
+        expect: () => const <PollsState>[],
+      );
+
+      blocTest<PollsCubit, PollsState>(
+        'setCategory updates the category and reloads with it',
+        build: buildCubit,
+        act: (cubit) => cubit.setCategory(PollCategory.academic),
         verify: (_) {
           verify(
-            () => campusRepository.votePoll(
-              pollId: 'p-2',
-              optionIds: ['o-1', 'o-2'],
-            ),
+            () => campusRepository.getPolls(category: PollCategory.academic),
           ).called(1);
-          verify(() => campusRepository.getPolls()).called(1);
         },
       );
 
       blocTest<PollsCubit, PollsState>(
-        'does nothing when the selection is empty',
-        build: buildCubit,
-        act: (cubit) async => expect(
-          await cubit.submitVote(poll, const []),
-          isFalse,
-        ),
-        expect: () => <PollsState>[],
-        verify: (_) {
-          verifyNever(
-            () => campusRepository.votePoll(
-              pollId: any(named: 'pollId'),
-              optionIds: any(named: 'optionIds'),
-            ),
-          );
-        },
-      );
-
-      blocTest<PollsCubit, PollsState>(
-        'ignores a second vote for the same poll while the first is still '
-        'pending',
+        'setQuery debounces before reloading with the trimmed query',
         build: buildCubit,
         act: (cubit) async {
-          final first = cubit.submitVote(poll, [option1.id]);
-          expect(await cubit.submitVote(poll, [option2.id]), isFalse);
-          await first;
+          cubit
+            ..setQuery('s')
+            ..setQuery('st')
+            ..setQuery(' stack ');
+          await Future<void>.delayed(const Duration(milliseconds: 500));
         },
         verify: (_) {
           verify(
-            () => campusRepository.votePoll(
-              pollId: 'p-1',
-              optionIds: ['o-1'],
-            ),
+            () => campusRepository.getPolls(query: 'stack'),
           ).called(1);
-          verifyNever(
-            () => campusRepository.votePoll(
-              pollId: 'p-1',
-              optionIds: ['o-2'],
-            ),
-          );
-        },
-      );
-
-      blocTest<PollsCubit, PollsState>(
-        'reports the error, clears pending and does not reload when '
-        'votePoll throws',
-        setUp: () => when(
-          () => campusRepository.votePoll(
-            pollId: any(named: 'pollId'),
-            optionIds: any(named: 'optionIds'),
-          ),
-        ).thenThrow(Exception('rls')),
-        build: buildCubit,
-        act: (cubit) async => expect(
-          await cubit.submitVote(poll, [option1.id]),
-          isFalse,
-        ),
-        expect: () => const <PollsState>[
-          PollsState(pendingPollIds: {'p-1'}),
-          PollsState(),
-        ],
-        errors: () => [isA<Exception>()],
-        verify: (_) {
-          verifyNever(() => campusRepository.getPolls());
         },
       );
     });
 
     group('createPoll', () {
       blocTest<PollsCubit, PollsState>(
-        'returns true and reloads when createPoll succeeds',
+        'prepends the created poll on success',
+        setUp: () => when(
+          () => campusRepository.createPoll(
+            title: any(named: 'title'),
+            questions: any(named: 'questions'),
+            description: any(named: 'description'),
+            category: any(named: 'category'),
+            isAnonymous: any(named: 'isAnonymous'),
+            resultsVisibility: any(named: 'resultsVisibility'),
+            expiresAt: any(named: 'expiresAt'),
+            allowChange: any(named: 'allowChange'),
+          ),
+        ).thenAnswer((_) async => poll),
         build: buildCubit,
-        act: (cubit) async => expect(
-          await cubit.createPoll(
-            question: 'Любимый язык?',
-            options: const ['Dart', 'Kotlin'],
-            type: PollType.quiz,
-            correctIndex: 0,
-          ),
-          isTrue,
-        ),
-        expect: () => const <PollsState>[
-          PollsState(status: PollsStatus.loading),
-          PollsState(
-            status: PollsStatus.populated,
-            polls: [poll, otherPoll],
-          ),
-        ],
-        verify: (_) {
-          verify(
-            () => campusRepository.createPoll(
-              question: 'Любимый язык?',
-              options: const ['Dart', 'Kotlin'],
-              type: PollType.quiz,
-              correctIndex: 0,
-            ),
-          ).called(1);
-          verify(() => campusRepository.getPolls()).called(1);
+        act: (cubit) async {
+          final created = await cubit.createPoll(
+            title: 'Стек',
+            questions: const [
+              PollQuestionDraft(
+                text: 'Какой стек?',
+                kind: PollQuestionKind.single,
+                options: ['Go', 'Rust'],
+              ),
+            ],
+          );
+          expect(created, isNotNull);
         },
+        expect: () => const <PollsState>[
+          PollsState(status: PollsStatus.populated, polls: [poll]),
+        ],
       );
 
       blocTest<PollsCubit, PollsState>(
-        'returns false and reports the error when createPoll throws',
+        'returns null and reports the error when createPoll throws',
         setUp: () => when(
           () => campusRepository.createPoll(
-            question: any(named: 'question'),
-            options: any(named: 'options'),
-            type: any(named: 'type'),
+            title: any(named: 'title'),
+            questions: any(named: 'questions'),
+            description: any(named: 'description'),
+            category: any(named: 'category'),
             isAnonymous: any(named: 'isAnonymous'),
-            showResults: any(named: 'showResults'),
+            resultsVisibility: any(named: 'resultsVisibility'),
             expiresAt: any(named: 'expiresAt'),
-            correctIndex: any(named: 'correctIndex'),
+            allowChange: any(named: 'allowChange'),
           ),
         ).thenThrow(Exception('rls')),
         build: buildCubit,
-        act: (cubit) async => expect(
-          await cubit.createPoll(
-            question: 'Любимый язык?',
-            options: const ['Dart', 'Kotlin'],
+        act: (cubit) async {
+          final created = await cubit.createPoll(
+            title: 'Стек',
+            questions: const [
+              PollQuestionDraft(text: 'Стек?', kind: PollQuestionKind.text),
+            ],
+          );
+          expect(created, isNull);
+        },
+        expect: () => <PollsState>[],
+        errors: () => [isA<Exception>()],
+      );
+    });
+
+    group('submitAnswers', () {
+      blocTest<PollsCubit, PollsState>(
+        'applies confirmed participation',
+        build: buildCubit,
+        seed: () => const PollsState(
+          status: PollsStatus.populated,
+          polls: [poll, otherPoll],
+        ),
+        act: (cubit) => cubit.submitAnswers(
+          poll: poll,
+          answers: const [
+            PollAnswer(questionId: 'q-1', optionIds: ['o-1']),
+          ],
+        ),
+        expect: () => <PollsState>[
+          PollsState(
+            status: PollsStatus.populated,
+            polls: [poll.copyWith(iParticipated: true), otherPoll],
           ),
-          isFalse,
+        ],
+      );
+
+      blocTest<PollsCubit, PollsState>(
+        'keeps the current list when submitPollAnswers throws',
+        setUp: () => when(
+          () => campusRepository.submitPollAnswers(
+            pollId: any(named: 'pollId'),
+            answers: any(named: 'answers'),
+          ),
+        ).thenThrow(Exception('rls')),
+        build: buildCubit,
+        seed: () => const PollsState(
+          status: PollsStatus.populated,
+          polls: [poll, otherPoll],
+        ),
+        act: (cubit) => cubit.submitAnswers(
+          poll: poll,
+          answers: const [
+            PollAnswer(questionId: 'q-1', optionIds: ['o-1']),
+          ],
         ),
         expect: () => <PollsState>[],
         errors: () => [isA<Exception>()],
-        verify: (_) {
-          verifyNever(() => campusRepository.getPolls());
-        },
+      );
+    });
+
+    group('closePoll', () {
+      blocTest<PollsCubit, PollsState>(
+        'closes the poll after server confirmation',
+        build: buildCubit,
+        seed: () => const PollsState(
+          status: PollsStatus.populated,
+          polls: [poll, otherPoll],
+        ),
+        act: (cubit) async => expect(await cubit.closePoll(poll), isTrue),
+        expect: () => <PollsState>[
+          PollsState(
+            status: PollsStatus.populated,
+            polls: [poll.copyWith(isClosed: true), otherPoll],
+          ),
+        ],
+      );
+
+      blocTest<PollsCubit, PollsState>(
+        'keeps the current list when closePoll throws',
+        setUp: () => when(
+          () => campusRepository.closePoll(any()),
+        ).thenThrow(Exception('rls')),
+        build: buildCubit,
+        seed: () => const PollsState(
+          status: PollsStatus.populated,
+          polls: [poll, otherPoll],
+        ),
+        act: (cubit) async => expect(await cubit.closePoll(poll), isFalse),
+        expect: () => <PollsState>[],
+        errors: () => [isA<Exception>()],
       );
     });
 
     group('deletePoll', () {
       blocTest<PollsCubit, PollsState>(
-        'marks the poll deleting, deletes it, reloads, then clears '
-        'deleting',
+        'removes the poll after server confirmation',
         build: buildCubit,
-        act: (cubit) async => expect(
-          await cubit.deletePoll(otherPoll),
-          isTrue,
+        seed: () => const PollsState(
+          status: PollsStatus.populated,
+          polls: [poll, otherPoll],
         ),
-        verify: (_) {
-          verify(() => campusRepository.deletePoll('p-2')).called(1);
-          verify(() => campusRepository.getPolls()).called(1);
-        },
+        act: (cubit) async => expect(await cubit.deletePoll(otherPoll), isTrue),
         expect: () => const <PollsState>[
-          PollsState(deletingPollIds: {'p-2'}),
-          PollsState(status: PollsStatus.loading, deletingPollIds: {'p-2'}),
-          PollsState(
-            status: PollsStatus.populated,
-            polls: [poll, otherPoll],
-            deletingPollIds: {'p-2'},
-          ),
-          PollsState(status: PollsStatus.populated, polls: [poll, otherPoll]),
+          PollsState(status: PollsStatus.populated, polls: [poll]),
         ],
-      );
-
-      blocTest<PollsCubit, PollsState>(
-        'ignores a second delete for the same poll while the first is '
-        'still in flight',
-        build: buildCubit,
-        act: (cubit) async {
-          final first = cubit.deletePoll(otherPoll);
-          expect(await cubit.deletePoll(otherPoll), isFalse);
-          await first;
-        },
         verify: (_) {
           verify(() => campusRepository.deletePoll('p-2')).called(1);
         },
       );
 
       blocTest<PollsCubit, PollsState>(
-        'reports the error, clears deleting and does not reload when '
-        'deletePoll throws',
+        'keeps the current list when deletePoll throws',
         setUp: () => when(
           () => campusRepository.deletePoll(any()),
         ).thenThrow(Exception('rls')),
         build: buildCubit,
-        act: (cubit) async => expect(
-          await cubit.deletePoll(otherPoll),
-          isFalse,
+        seed: () => const PollsState(
+          status: PollsStatus.populated,
+          polls: [poll, otherPoll],
         ),
-        expect: () => const <PollsState>[
-          PollsState(deletingPollIds: {'p-2'}),
-          PollsState(),
-        ],
+        act: (cubit) async =>
+            expect(await cubit.deletePoll(otherPoll), isFalse),
+        expect: () => const <PollsState>[],
         errors: () => [isA<Exception>()],
-        verify: (_) {
-          verifyNever(() => campusRepository.getPolls());
-        },
       );
     });
   });

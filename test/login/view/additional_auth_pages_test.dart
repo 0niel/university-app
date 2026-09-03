@@ -106,6 +106,13 @@ void main() {
           'different123',
         );
         await tester.pump();
+        expect(
+          find.text('Пароли не совпадают'),
+          findsNothing,
+          reason: 'errors stay hidden while the field is still being typed in',
+        );
+        FocusManager.instance.primaryFocus?.unfocus();
+        await tester.pump();
         expect(find.text('Пароли не совпадают'), findsOneWidget);
         expect(
           find.textContaining('Используйте адрес одного из доменов:'),
@@ -150,7 +157,8 @@ void main() {
       for (final field in tester.widgetList<AppInputField>(
         find.byType(AppInputField),
       )) {
-        expect(field.enabled, isFalse);
+        expect(field.readOnly, isTrue);
+        expect(field.enabled, isTrue);
       }
       verify(
         () => repository.signUp(

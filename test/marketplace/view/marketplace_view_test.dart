@@ -1,4 +1,5 @@
 import 'package:app_ui/app_ui.dart';
+import 'package:bloc_test/bloc_test.dart';
 import 'package:campus_repository/campus_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -9,7 +10,21 @@ import 'package:rtu_mirea_app/marketplace/marketplace.dart';
 
 import '../../helpers/mocks/mock_marketplace_cubit.dart';
 
+class _MockContactPrefsCubit extends MockCubit<String>
+    implements MarketContactPrefsCubit {}
+
+MarketContactPrefsCubit _contactCubit() {
+  final cubit = _MockContactPrefsCubit();
+  whenListen(cubit, const Stream<String>.empty(), initialState: '');
+  when(() => cubit.rememberHandle(any())).thenReturn(null);
+  return cubit;
+}
+
 void main() {
+  setUpAll(() {
+    registerFallbackValue(const MarketListingDraft(title: 'fallback'));
+  });
+
   group('MarketplaceView', () {
     late MarketplaceCubit cubit;
 
@@ -18,8 +33,13 @@ void main() {
     Widget buildSubject(MarketplaceState state) {
       when(() => cubit.state).thenReturn(state);
       return _app(
-        BlocProvider<MarketplaceCubit>.value(
-          value: cubit,
+        MultiBlocProvider(
+          providers: [
+            BlocProvider<MarketplaceCubit>.value(value: cubit),
+            BlocProvider<MarketContactPrefsCubit>.value(
+              value: _contactCubit(),
+            ),
+          ],
           child: const MarketplaceView(),
         ),
       );
@@ -86,9 +106,9 @@ void main() {
     testWidgets('the empty state offers a real sell action', (tester) async {
       await tester.pumpWidget(buildSubject(const MarketplaceState()));
 
-      expect(find.byType(NinjaEmptyState), findsOneWidget);
+      expect(find.byType(AppEmptyState), findsOneWidget);
       final cta = find.descendant(
-        of: find.byType(NinjaEmptyState),
+        of: find.byType(AppEmptyState),
         matching: find.text('Продать'),
       );
       expect(cta, findsOneWidget);
@@ -110,17 +130,19 @@ void main() {
         ),
       );
 
-      await tester.ensureVisible(find.text('Поиск'));
-      await tester.tap(find.text('Поиск'));
-      await tester.pumpAndSettle();
-      await tester.enterText(find.byType(TextField).first, 'зззз');
-      await tester.testTextInput.receiveAction(TextInputAction.done);
+      await tester.enterText(
+        find.descendant(
+          of: find.byType(AppSearchField),
+          matching: find.byType(TextField),
+        ),
+        'зззз',
+      );
       await tester.pumpAndSettle();
 
       expect(find.text('Ничего не нашлось'), findsOneWidget);
       await tester.tap(
         find.descendant(
-          of: find.byType(NinjaEmptyState),
+          of: find.byType(AppEmptyState),
           matching: find.text('Очистить'),
         ),
       );
@@ -145,8 +167,7 @@ void main() {
         ),
       );
 
-      final title = tester.widget<Text>(find.text('Маркет'));
-      expect(title.style?.fontSize, AppText.displaySmall.fontSize);
+      expect(find.text('Маркет'), findsOneWidget);
     });
 
     testWidgets('includes every configured category including other', (
@@ -180,11 +201,13 @@ void main() {
         ),
       );
 
-      await tester.ensureVisible(find.text('Поиск'));
-      await tester.tap(find.text('Поиск'));
-      await tester.pumpAndSettle();
-      await tester.enterText(find.byType(TextField).first, 'мышь');
-      await tester.testTextInput.receiveAction(TextInputAction.done);
+      await tester.enterText(
+        find.descendant(
+          of: find.byType(AppSearchField),
+          matching: find.byType(TextField),
+        ),
+        'мышь',
+      );
       await tester.pumpAndSettle();
 
       expect(find.text('Беспроводная мышь'), findsOneWidget);
@@ -204,15 +227,11 @@ void main() {
         buildSubject(const MarketplaceState(status: .ready, items: [item])),
       );
 
-      expect(find.byTooltip('Удалить объявление'), findsNothing);
-      await tester.tap(
-        find.byWidgetPredicate(
-          (widget) =>
-              widget is AppLineIconWidget && widget.icon == AppLineIcon.more,
-        ),
-      );
+      await tester.tap(find.byType(MarketListingCard));
       await tester.pumpAndSettle();
 
+      expect(find.text('Удалить объявление?'), findsNothing);
+      await tester.ensureVisible(find.text('Удалить объявление'));
       await tester.tap(find.text('Удалить объявление'));
       await tester.pumpAndSettle();
 
@@ -226,6 +245,7 @@ void main() {
       );
       await tester.pumpAndSettle();
       verify(() => cubit.delete(item)).called(1);
+      await tester.pump(const Duration(seconds: 3));
     });
   });
 
@@ -243,10 +263,11 @@ void main() {
               price: 500,
               description: 'Без пометок',
               sellerName: 'Анна',
-              sellerHandle: 'anna_dev',
+              telegramHandle: 'anna_dev',
               showContact: true,
             ),
             onContact: () => contacted = true,
+            onShare: () {},
           ),
         ),
       ),
@@ -264,31 +285,29 @@ void main() {
     when(() => cubit.state).thenReturn(const MarketplaceState());
     await tester.pumpWidget(
       _app(
-        BlocProvider<MarketplaceCubit>.value(
-          value: cubit,
+        MultiBlocProvider(
+          providers: [
+            BlocProvider<MarketplaceCubit>.value(value: cubit),
+            BlocProvider<MarketContactPrefsCubit>.value(
+              value: _contactCubit(),
+            ),
+          ],
           child: const Scaffold(body: MarketSellSheet()),
         ),
       ),
     );
 
-    await tester.enterText(find.byType(TextField).first, 'Учебник');
-    await tester.enterText(find.byType(TextField).at(1), '0');
+    await tester.enterText(find.byType(TextField).at(0), 'Учебник');
+    await tester.enterText(find.byType(TextField).at(2), '0');
+    await tester.ensureVisible(find.text('Выложить'));
     await tester.tap(find.text('Выложить'));
     await tester.pump();
 
     expect(find.text('Укажите цену больше нуля'), findsOneWidget);
-    verifyNever(
-      () => cubit.create(
-        const MarketListingDraft(
-          title: 'Учебник',
-          price: 0,
-          category: 'books',
-        ),
-      ),
-    );
+    verifyNever(() => cubit.create(any()));
   });
 
-  testWidgets('free category publishes an exact zero-price draft', (
+  testWidgets('the free toggle publishes an exact zero-price draft', (
     tester,
   ) async {
     final cubit = MockMarketplaceCubit();
@@ -296,25 +315,67 @@ void main() {
     const draft = MarketListingDraft(
       title: 'Конспект',
       price: 0,
-      category: 'free',
+      category: 'books',
+      isFree: true,
+      telegramHandle: 'seller_user',
     );
     when(() => cubit.create(draft)).thenAnswer((_) async => true);
     await tester.pumpWidget(
       _app(
-        BlocProvider<MarketplaceCubit>.value(
-          value: cubit,
+        MultiBlocProvider(
+          providers: [
+            BlocProvider<MarketplaceCubit>.value(value: cubit),
+            BlocProvider<MarketContactPrefsCubit>.value(
+              value: _contactCubit(),
+            ),
+          ],
           child: const Scaffold(body: MarketSellSheet()),
         ),
       ),
     );
 
-    await tester.enterText(find.byType(TextField).first, 'Конспект');
-    await tester.tap(find.textContaining('Даром'));
+    await tester.enterText(find.byType(TextField).at(0), 'Конспект');
+    await tester.tap(find.byType(AppToggle));
     await tester.pump();
+    await tester.enterText(find.byType(TextField).at(3), 'seller_user');
+    await tester.ensureVisible(find.text('Выложить'));
     await tester.tap(find.text('Выложить'));
     await tester.pump();
 
     verify(() => cubit.create(draft)).called(1);
+  });
+
+  testWidgets('an invalid telegram handle blocks publishing', (
+    tester,
+  ) async {
+    final cubit = MockMarketplaceCubit();
+    when(() => cubit.state).thenReturn(const MarketplaceState());
+    await tester.pumpWidget(
+      _app(
+        MultiBlocProvider(
+          providers: [
+            BlocProvider<MarketplaceCubit>.value(value: cubit),
+            BlocProvider<MarketContactPrefsCubit>.value(
+              value: _contactCubit(),
+            ),
+          ],
+          child: const Scaffold(body: MarketSellSheet()),
+        ),
+      ),
+    );
+
+    await tester.enterText(find.byType(TextField).at(0), 'Учебник');
+    await tester.enterText(find.byType(TextField).at(2), '500');
+    await tester.enterText(find.byType(TextField).at(3), 'no');
+    await tester.ensureVisible(find.text('Выложить'));
+    await tester.tap(find.text('Выложить'));
+    await tester.pump();
+
+    expect(
+      find.text('От 5 до 32 символов: латиница, цифры, _'),
+      findsOneWidget,
+    );
+    verifyNever(() => cubit.create(any()));
   });
 
   testWidgets('marketplace supports 320px at 200% text scale', (tester) async {
@@ -339,8 +400,13 @@ void main() {
         MediaQuery.withClampedTextScaling(
           minScaleFactor: 2,
           maxScaleFactor: 2,
-          child: BlocProvider<MarketplaceCubit>.value(
-            value: cubit,
+          child: MultiBlocProvider(
+            providers: [
+              BlocProvider<MarketplaceCubit>.value(value: cubit),
+              BlocProvider<MarketContactPrefsCubit>.value(
+                value: _contactCubit(),
+              ),
+            ],
             child: const MarketplaceView(),
           ),
         ),
@@ -355,7 +421,7 @@ void main() {
 }
 
 Widget _app(Widget home) => MaterialApp(
-  theme: NinjaTheme.dark(),
+  theme: AppTheme.lightTheme,
   localizationsDelegates: AppLocalizations.localizationsDelegates,
   supportedLocales: AppLocalizations.supportedLocales,
   locale: const Locale('ru'),

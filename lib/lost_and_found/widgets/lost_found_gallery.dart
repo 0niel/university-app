@@ -16,7 +16,7 @@ class LostFoundGallery extends StatelessWidget {
       Navigator.of(context, rootNavigator: true).push(
         PageRouteBuilder<void>(
           opaque: false,
-          barrierColor: Colors.black.withValues(alpha: 0.9),
+          barrierColor: AppColors.dark.canvas.withValues(alpha: .9),
           pageBuilder: (_, _, _) => LostFoundPhotoViewer(url: url),
         ),
       ),

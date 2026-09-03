@@ -150,20 +150,20 @@ void main() {
     );
     await tester.pump();
 
-    final colors = NinjaColors.dark();
+    const colors = AppColors.dark;
     final track = find.byWidgetPredicate((widget) {
       if (widget is! Container) return false;
       final decoration = widget.decoration;
       return decoration is BoxDecoration &&
-          decoration.color == colors.surfaceAlt &&
-          decoration.borderRadius == BorderRadius.circular(NinjaRadius.pill);
+          decoration.color == colors.surface2 &&
+          decoration.borderRadius == BorderRadius.circular(AppRadius.full);
     });
     expect(track, findsOneWidget);
 
     final selected = find.byWidgetPredicate((widget) {
       if (widget is! AnimatedContainer) return false;
       final decoration = widget.decoration;
-      return decoration is BoxDecoration && decoration.color == colors.brand;
+      return decoration is BoxDecoration && decoration.color == colors.accent;
     });
     expect(selected, findsOneWidget);
   });

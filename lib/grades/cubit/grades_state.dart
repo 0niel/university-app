@@ -1,5 +1,3 @@
-import 'dart:math' as math;
-
 import 'package:equatable/equatable.dart';
 import 'package:rtu_mirea_app/grades/models/models.dart';
 
@@ -15,7 +13,6 @@ class GradesState extends Equatable {
     this.now,
   });
 
-  static const scholarshipThreshold = 4.75;
   static const deltaWindow = Duration(days: 30);
 
   final GradesStatus status;
@@ -59,23 +56,6 @@ class GradesState extends Equatable {
       _marks.where((mark) => !mark.date.isAfter(cutoff)).toList(),
     );
     return previous == null ? 0 : gpa - previous;
-  }
-
-  double? get scholarshipGap {
-    final gpa = this.gpa;
-    if (gpa == null) return null;
-    return math.max(0, scholarshipThreshold - gpa);
-  }
-
-  SubjectGrades? get weakestSubject {
-    SubjectGrades? weakest;
-    for (final subject in subjects) {
-      final average = subject.average;
-      if (average == null) continue;
-      final best = weakest?.average;
-      if (best == null || average < best) weakest = subject;
-    }
-    return weakest;
   }
 
   double? _averageOf(List<GradeMark> marks) => marks.isEmpty

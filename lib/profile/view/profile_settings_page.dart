@@ -216,12 +216,6 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
                     ),
                   ],
                 ),
-                if (filter.showAppearance)
-                  SettingsSection(
-                    label: l10n.settingsAppearance,
-                    children: const [SettingsAdvancedAppearance()],
-                  ),
-
                 if (filter.showHome) const SettingsHomeSection(),
 
                 if (filter.showSupport) ...[
@@ -262,7 +256,10 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
                     ),
                   ),
                 ),
-              const SizedBox(height: AppSpacing.xxlg),
+              SizedBox(
+                key: const ValueKey('settings-bottom-inset'),
+                height: ninjaBottomInset(context) + AppSpacing.lg,
+              ),
             ],
           ),
         ],

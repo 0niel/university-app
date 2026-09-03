@@ -8,6 +8,7 @@ abstract class KnowledgeBankState with _$KnowledgeBankState {
     @Default(<StudyMaterial>[]) List<StudyMaterial> materials,
     @Default(<MaterialAuthor>[]) List<MaterialAuthor> authors,
     @Default('all') String type,
+    @Default(<String, String>{}) Map<String, String> previewUrls,
   }) = _KnowledgeBankState;
 
   const KnowledgeBankState._();

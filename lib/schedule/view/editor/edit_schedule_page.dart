@@ -160,11 +160,11 @@ class _EditSchedulePageState extends State<EditSchedulePage> {
                                   ),
                                 ).animateEmptyState()
                               : ReorderableListView.builder(
-                                  padding: const .fromLTRB(
+                                  padding: EdgeInsets.fromLTRB(
                                     AppSpacing.screen,
                                     AppSpacing.zero,
                                     AppSpacing.screen,
-                                    AppSpacing.sm,
+                                    ninjaBottomInset(context) + AppSpacing.sm,
                                   ),
                                   buildDefaultDragHandles: false,
                                   itemCount: lessons.length,
@@ -202,11 +202,11 @@ class _EditSchedulePageState extends State<EditSchedulePage> {
                                 ),
                         ),
                         Padding(
-                          padding: const .fromLTRB(
+                          padding: EdgeInsets.fromLTRB(
                             AppSpacing.screen,
                             AppSpacing.sm,
                             AppSpacing.screen,
-                            AppSpacing.xlg,
+                            ninjaBottomInset(context) + AppSpacing.xlg,
                           ),
                           child: AppButton.primary(
                             label: l10n.addClass,

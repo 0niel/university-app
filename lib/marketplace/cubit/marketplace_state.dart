@@ -8,7 +8,7 @@ abstract class MarketplaceState with _$MarketplaceState {
     @Default('all') String filterKey,
     @Default(<String>{}) Set<String> pendingSoldIds,
     @Default(<String>{}) Set<String> pendingDeleteIds,
-    @Default(false) bool isCreating,
+    @Default(false) bool isSaving,
   }) = _MarketplaceState;
 
   const MarketplaceState._();

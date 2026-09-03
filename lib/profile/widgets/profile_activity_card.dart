@@ -1,6 +1,8 @@
 import 'package:app_ui/app_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:gamification_repository/gamification_repository.dart';
+import 'package:intl/intl.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:rtu_mirea_app/navigation/deep_links.dart';
 
@@ -22,116 +24,84 @@ class ProfileActivityCard extends StatelessWidget {
   const ProfileActivityCard({
     required this.streakDays,
     required this.longestStreak,
-    required this.history,
+    required this.days,
     this.onShare,
     super.key,
   });
 
   final int streakDays;
   final int longestStreak;
-  final List<bool> history;
+  final List<ActivityDay> days;
   final VoidCallback? onShare;
+
+  static String _capitalize(String value) =>
+      value.isEmpty ? value : value[0].toUpperCase() + value.substring(1);
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final colors = context.colors;
-    final record = longestStreak <= 0
+    final locale = Localizations.localeOf(context).toString();
+    final hasRecord = longestStreak > 0;
+    final record = !hasRecord
         ? l10n.profileStreakHint
         : longestStreak > streakDays
         ? l10n.profileStreakRecord(longestStreak, longestStreak - streakDays)
         : l10n.profileStreakRecordBeaten;
-    return AppCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text(
-            '${l10n.profileStreakDays(streakDays).trim()} · '
-            '${l10n.profileStreakWord}',
-            style: AppText.title.copyWith(color: colors.ink),
-          ),
-          const SizedBox(height: AppSpacing.xs),
-          Text(record, style: AppText.subtext.copyWith(color: colors.muted)),
-          if (history.isNotEmpty) ...[
-            const SizedBox(height: AppSpacing.sectionGap),
-            Row(
-              children: [
-                for (final (index, active) in history.indexed) ...[
-                  if (index > 0) const SizedBox(width: AppSpacing.fine),
-                  Expanded(
-                    child: Semantics(
-                      label: index == history.length - 1
-                          ? l10n.profileStreakToday
-                          : l10n.profileStreakDaysAgo(
-                              history.length - index - 1,
-                            ),
-                      selected: active,
-                      child: SizedBox(
-                        height: 56,
-                        child: Align(
-                          alignment: Alignment.bottomCenter,
-                          child: TweenAnimationBuilder<double>(
-                            tween: Tween(begin: 0, end: active ? 1 : 0),
-                            duration:
-                                MediaQuery.disableAnimationsOf(context) ||
-                                    MediaQuery.accessibleNavigationOf(context)
-                                ? Duration.zero
-                                : NinjaMotion.slow,
-                            builder: (context, progress, child) => Container(
-                              key: ValueKey('profile-activity-day-$index'),
-                              width: double.infinity,
-                              height: 8 + 48 * progress,
-                              decoration: BoxDecoration(
-                                color: active ? colors.accent : colors.surface2,
-                                borderRadius: BorderRadius.circular(
-                                  AppRadius.focusOutline,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ],
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            Wrap(
-              alignment: WrapAlignment.spaceBetween,
-              spacing: AppSpacing.sm,
-              runSpacing: AppSpacing.xs,
-              children: [
-                Text(
-                  l10n.profileStreakDaysAgo(history.length - 1),
-                  style: AppText.caption.copyWith(color: colors.muted),
-                ),
-                Text(
-                  l10n.profileStreakToday,
-                  style: AppText.caption.copyWith(color: colors.muted),
-                ),
-              ],
-            ),
-          ],
-          if (longestStreak > 0) ...[
-            const SizedBox(height: AppSpacing.md),
-            Text(
-              l10n.profileStreakHint,
-              style: AppText.caption.copyWith(color: colors.muted),
-            ),
-          ],
-          if (onShare != null) ...[
-            const SizedBox(height: AppSpacing.md),
-            AppButton.text(
-              key: const ValueKey('profile-share'),
-              label: l10n.share,
-              icon: const AppLineIconWidget(AppLineIcon.share),
-              expanded: true,
-              onPressed: onShare,
-            ),
-          ],
-        ],
+    final today = days.isEmpty
+        ? null
+        : days.map((entry) => entry.day).reduce(
+            (a, b) => a.isAfter(b) ? a : b,
+          );
+    final weekdayLabels = List<String?>.generate(7, (index) {
+      if (index != 0 && index != 2 && index != 4) return null;
+      return _capitalize(
+        DateFormat.E(locale).format(DateTime(2024, 1, 1 + index)),
+      );
+    });
+
+    return AppStreakCalendarCard(
+      streakDays: streakDays,
+      days: [
+        for (final entry in days)
+          AppHeatmapDay(date: entry.day, count: entry.count),
+      ],
+      streakDaysLabel: l10n.profileStreakDays(streakDays).trim(),
+      streakWordLabel: ' · ${l10n.profileStreakWord}',
+      hintLabel: l10n.profileStreakHint,
+      recordLabel: record,
+      today: today,
+      weekdayLabels: weekdayLabels,
+      monthLabelBuilder: (date) =>
+          _capitalize(DateFormat.MMM(locale).format(date)),
+      tooltipBuilder: (date, count) => l10n.profileActivityTooltip(
+        DateFormat.MMMd(locale).format(date),
+        count,
       ),
+      legendLessLabel: l10n.profileActivityLegendLess,
+      legendMoreLabel: l10n.profileActivityLegendMore,
+      trailing: onShare == null && !hasRecord
+          ? null
+          : Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                if (hasRecord)
+                  Text(
+                    l10n.profileStreakHint,
+                    style: AppText.caption.copyWith(color: colors.muted),
+                  ),
+                if (hasRecord && onShare != null)
+                  const SizedBox(height: AppSpacing.md),
+                if (onShare != null)
+                  AppButton.text(
+                    key: const ValueKey('profile-share'),
+                    label: l10n.share,
+                    icon: const AppLineIconWidget(AppLineIcon.share),
+                    expanded: true,
+                    onPressed: onShare,
+                  ),
+              ],
+            ),
     );
   }
 }

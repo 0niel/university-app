@@ -24,7 +24,6 @@ import 'package:rtu_mirea_app/app/widgets/adaptive_theme_wrapper.dart';
 import 'package:rtu_mirea_app/app/widgets/app_router.dart';
 import 'package:rtu_mirea_app/app/widgets/user_preferences_scope.dart';
 import 'package:rtu_mirea_app/config/config.dart';
-import 'package:rtu_mirea_app/free_rooms/cubit/room_booking_cubit.dart';
 import 'package:rtu_mirea_app/home/cubit/home_cubit.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:rtu_mirea_app/nfc_pass/nfc_pass.dart';
@@ -93,7 +92,6 @@ void main() {
   late _Watch watch;
   late _Schedule schedule;
   late _Pass pass;
-  late RoomBookingCubit bookings;
   late ScheduleDisplayCubit display;
   late LessonRemindersCubit reminders;
   late ThemeCubit theme;
@@ -138,7 +136,6 @@ void main() {
       userRepository: users,
       user: user,
     );
-    bookings = RoomBookingCubit();
     display = ScheduleDisplayCubit();
     reminders = LessonRemindersCubit();
     theme = ThemeCubit();
@@ -150,7 +147,6 @@ void main() {
   tearDown(() async {
     await Future.wait([
       app.close(),
-      bookings.close(),
       display.close(),
       reminders.close(),
       theme.close(),
@@ -179,7 +175,6 @@ void main() {
     child: MultiBlocProvider(
       providers: [
         BlocProvider<AppBloc>.value(value: app),
-        BlocProvider<RoomBookingCubit>.value(value: bookings),
         BlocProvider<ScheduleDisplayCubit>.value(value: display),
         BlocProvider<LessonRemindersCubit>.value(value: reminders),
         BlocProvider<ThemeCubit>.value(value: theme),
@@ -300,7 +295,6 @@ void main() {
       expect(context.read<NotificationsCubit>(), same(initialNotifications));
       expect(initialNotifications.state.pushes.single.title, 'Keep history');
       expect(context.read<UiPreferencesCubit>(), same(ui));
-      expect(context.read<RoomBookingCubit>(), same(bookings));
       expect(router.routeInformationProvider.value.uri.path, '/');
     }
 
@@ -359,7 +353,6 @@ void main() {
     final firstHistory = firstContext.read<NotificationsCubit>();
     final firstGeo = firstContext.read<GeoSharingCubit>();
     firstHistory.recordPush(title: 'Private A');
-    expect(firstContext.read<RoomBookingCubit>(), same(bookings));
     expect(firstContext.read<ScheduleDisplayCubit>(), same(display));
     expect(firstContext.read<LessonRemindersCubit>(), same(reminders));
     await tester.pumpAndSettle();
@@ -378,7 +371,6 @@ void main() {
     expect(nextHistory.state.userId, otherUser.id);
     expect(nextHistory.state.pushes, isEmpty);
     expect(nextGeo, isNot(same(firstGeo)));
-    expect(nextContext.read<RoomBookingCubit>(), same(bookings));
     expect(nextContext.read<ScheduleDisplayCubit>(), same(display));
     expect(nextContext.read<LessonRemindersCubit>(), same(reminders));
     await tester.pumpAndSettle();

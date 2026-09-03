@@ -1,6 +1,6 @@
 import 'package:app_ui/app_ui.dart';
 import 'package:campus_repository/campus_repository.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 
 class TopAuthorsCard extends StatelessWidget {
@@ -29,11 +29,8 @@ class TopAuthorsCard extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(vertical: AppSpacing.gap),
                 child: Row(
                   children: [
-                    CircleAvatar(
-                      radius: AppRadius.field,
-                      backgroundColor: index == 0
-                          ? colors.tint
-                          : colors.surface2,
+                    SizedBox(
+                      width: 18,
                       child: Text(
                         '${index + 1}',
                         style: AppText.tabular(
@@ -44,6 +41,8 @@ class TopAuthorsCard extends StatelessWidget {
                         ),
                       ),
                     ),
+                    const SizedBox(width: AppSpacing.sm),
+                    AppAvatar(name: author.name),
                     const SizedBox(width: AppSpacing.md),
                     Expanded(
                       child: Text(

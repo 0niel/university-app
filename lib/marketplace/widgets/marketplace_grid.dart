@@ -9,8 +9,6 @@ class MarketplaceGrid extends StatelessWidget {
     required this.items,
     required this.pendingIds,
     required this.onOpen,
-    required this.onToggleSold,
-    required this.onDelete,
     super.key,
     this.onContact,
     this.favoriteIds = const {},
@@ -20,8 +18,6 @@ class MarketplaceGrid extends StatelessWidget {
   final List<MarketListing> items;
   final Set<String> pendingIds;
   final ValueChanged<MarketListing> onOpen;
-  final ValueChanged<MarketListing> onToggleSold;
-  final ValueChanged<MarketListing> onDelete;
   final ValueChanged<MarketListing>? onContact;
   final Set<String> favoriteIds;
   final ValueChanged<String>? onToggleFavorite;
@@ -35,11 +31,11 @@ class MarketplaceGrid extends StatelessWidget {
     );
     return GridView.builder(
       physics: const AlwaysScrollableScrollPhysics(),
-      padding: const EdgeInsets.fromLTRB(
+      padding: EdgeInsets.fromLTRB(
         AppSpacing.screen,
         AppSpacing.zero,
         AppSpacing.screen,
-        AppSpacing.xxlg,
+        ninjaBottomInset(context) + AppSpacing.lg,
       ),
       itemCount: items.length,
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -55,8 +51,6 @@ class MarketplaceGrid extends StatelessWidget {
           now: DateTime.now(),
           isBusy: pendingIds.contains(item.id),
           onOpen: () => onOpen(item),
-          onToggleSold: () => onToggleSold(item),
-          onDelete: () => onDelete(item),
           onContact: () => (onContact ?? onOpen)(item),
           isFavorite: favoriteIds.contains(item.id),
           onToggleFavorite: onToggleFavorite == null

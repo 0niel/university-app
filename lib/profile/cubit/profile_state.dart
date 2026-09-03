@@ -1,7 +1,5 @@
 part of 'profile_cubit.dart';
 
-const kStreakHistoryDays = 14;
-
 const kClosestBadgesCount = 3;
 
 @freezed
@@ -15,6 +13,7 @@ abstract class ProfileState with _$ProfileState {
     @Default(<GamificationQuest>[]) List<GamificationQuest> quests,
     @Default(<LeaderboardEntry>[]) List<LeaderboardEntry> leaderboard,
     @Default(<GamificationBadge>[]) List<GamificationBadge> badges,
+    @Default(<ActivityDay>[]) List<ActivityDay> activityCalendar,
     @Default(UserSettings()) UserSettings settings,
     @Default(<ProfileSection>{}) Set<ProfileSection> failedSections,
     @Default(<GamificationBadge>[]) List<GamificationBadge> newlyEarnedBadges,
@@ -44,9 +43,6 @@ abstract class ProfileState with _$ProfileState {
             ..sort((a, b) => b.progress.compareTo(a.progress)))
           .take(kClosestBadgesCount)
           .toList();
-
-  bool get hasStreakHistory =>
-      overview.streakHistory.length == kStreakHistoryDays;
 }
 
 enum ProfileStatus { initial, loading, loaded, error }

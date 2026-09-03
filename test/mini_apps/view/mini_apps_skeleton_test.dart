@@ -143,7 +143,7 @@ void main() {
       );
       expect(
         (pill.decoration! as BoxDecoration).borderRadius,
-        BorderRadius.circular(NinjaRadius.pill),
+        BorderRadius.circular(AppRadius.full),
       );
 
       await tester.tap(sortAction);

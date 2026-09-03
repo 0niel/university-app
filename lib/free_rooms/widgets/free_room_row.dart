@@ -43,23 +43,14 @@ class FreeRoomRow extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 4,
-                      children: [
-                        Text(
-                          room.name,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: AppText.sans(
-                            15.5,
-                            FontWeight.w700,
-                          ).copyWith(color: colors.ink),
-                        ),
-                        if (room.booked) ...[
-                          _BookedBadge(label: l10n.freeRoomsYourSeat),
-                        ],
-                      ],
+                    Text(
+                      room.name,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppText.sans(
+                        15.5,
+                        FontWeight.w700,
+                      ).copyWith(color: colors.ink),
                     ),
                     const SizedBox(height: 2),
                     Text(
@@ -103,33 +94,6 @@ class FreeRoomRow extends StatelessWidget {
               ),
             ],
           ),
-        ),
-      ),
-    );
-  }
-}
-
-class _BookedBadge extends StatelessWidget {
-  const _BookedBadge({required this.label});
-
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: colors.lectureTint,
-        borderRadius: BorderRadius.circular(AppRadius.full),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
-        child: Text(
-          label,
-          style: AppText.sans(
-            10.5,
-            FontWeight.w800,
-          ).copyWith(color: colors.lecture),
         ),
       ),
     );

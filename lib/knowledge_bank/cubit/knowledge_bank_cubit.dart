@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:bloc/bloc.dart';
 import 'package:campus_repository/campus_repository.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
@@ -45,11 +47,43 @@ class KnowledgeBankCubit extends Cubit<KnowledgeBankState> {
           authors: authorsResult.value,
         ),
       );
+      unawaited(_loadPreviewUrls(materialsResult.value, revision));
     } on Object catch (error, stackTrace) {
       if (isClosed || revision != _loadRevision) return;
       emit(state.copyWith(status: .failure));
       addError(error, stackTrace);
     }
+  }
+
+  Future<void> _loadPreviewUrls(
+    List<StudyMaterial> materials,
+    int revision,
+  ) async {
+    try {
+      final urls = await _campusRepository.createMaterialPreviewUrls(
+        materials,
+      );
+      if (isClosed || revision != _loadRevision || urls.isEmpty) return;
+      emit(state.copyWith(previewUrls: {...state.previewUrls, ...urls}));
+    } on Object catch (error, stackTrace) {
+      if (!isClosed) addError(error, stackTrace);
+    }
+  }
+
+  Future<void> toggleLike(StudyMaterial material) async {
+    final result = await _campusRepository.toggleMaterialLike(material.id);
+    if (isClosed) return;
+    emit(
+      state.copyWith(
+        materials: [
+          for (final m in state.materials)
+            if (m.id == material.id)
+              m.copyWith(isLiked: result.liked, likes: result.likes)
+            else
+              m,
+        ],
+      ),
+    );
   }
 
   void typeChanged(String type) {
@@ -107,6 +141,19 @@ class KnowledgeBankCubit extends Cubit<KnowledgeBankState> {
   }
 
   Future<void> materialUploaded() => load();
+
+  Future<void> deleteMaterial(StudyMaterial material) async {
+    await _campusRepository.deleteOwnMaterial(material.id);
+    if (isClosed) return;
+    emit(
+      state.copyWith(
+        materials: [
+          for (final m in state.materials)
+            if (m.id != material.id) m,
+        ],
+      ),
+    );
+  }
 
   StudyMaterial _incrementDownloads(StudyMaterial material) =>
       material.copyWith(downloads: material.downloads + 1);

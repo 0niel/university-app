@@ -14,21 +14,42 @@ class NoteSaveStatus extends StatelessWidget {
       .dirty => context.l10n.collabNotesUnsaved,
       .saving => context.l10n.collabNotesSaving,
       .failure => context.l10n.collabNotesSaveError,
+      .offline => context.l10n.collabNotesOfflineStatus,
       .conflict => context.l10n.collabNotesConflict,
+      .readOnly => context.l10n.collabNotesReadOnlyBanner,
       .saved => context.l10n.collabNotesSaved,
       .clean || .deleted => context.l10n.collabNotesUpdatedAutosave(
         _relativeTime(context, state.savedAt),
       ),
     };
-    final color = state.status == .failure
-        ? context.colors.exam
-        : context.colors.muted;
+    final colors = context.colors;
+    final color = switch (state.status) {
+      .failure || .readOnly => colors.exam,
+      .offline => colors.warn,
+      _ => colors.muted,
+    };
+    final pulsing = state.status == .dirty || state.status == .saving;
     return Semantics(
       liveRegion: true,
       label: label,
       child: Padding(
-        padding: const .only(top: AppSpacing.xsm),
-        child: Text(label, style: AppText.captionSmall.copyWith(color: color)),
+        padding: const EdgeInsets.only(top: AppSpacing.xsm),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (pulsing) ...[
+              AppPulseDot(size: 6, color: colors.accent),
+              const SizedBox(width: 5),
+            ],
+            Flexible(
+              child: Text(
+                label,
+                overflow: TextOverflow.ellipsis,
+                style: AppText.captionSmall.copyWith(color: color),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

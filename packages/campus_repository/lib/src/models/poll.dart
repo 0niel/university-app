@@ -8,47 +8,146 @@ part 'poll.g.dart';
 abstract class Poll with _$Poll {
   const factory Poll({
     @JsonKey(defaultValue: '') required String id,
-    @JsonKey(defaultValue: '') required String question,
-    @JsonKey(fromJson: _pollTypeFromJson, toJson: _pollTypeToJson)
-    required PollType pollType,
-    @JsonKey(fromJson: _optionsFromJson, toJson: _optionsToJson)
-    required List<PollOption> options,
+    @JsonKey(defaultValue: '') required String title,
+    @Default('') String description,
+    String? category,
     String? authorId,
+    String? authorName,
     @Default(false) bool isAnonymous,
-    @Default(true) bool showResults,
-    @Default(false) bool isMine,
-    @Default(0) int totalVotes,
+    @JsonKey(fromJson: _visibilityFromJson, toJson: _visibilityToJson)
+    @Default(PollResultsVisibility.always)
+    PollResultsVisibility resultsVisibility,
     @JsonKey(fromJson: dateTimeFromJson, toJson: dateTimeToJson)
     DateTime? expiresAt,
     @JsonKey(fromJson: dateTimeFromJson, toJson: dateTimeToJson)
     DateTime? createdAt,
+    @Default(false) bool isClosed,
+    @Default(false) bool allowChange,
+    @Default(false) bool isMine,
+    @Default(0) int participantsCount,
+    @Default(false) bool iParticipated,
+    @Default(false) bool canSeeResults,
+    @JsonKey(fromJson: _questionsFromJson, toJson: _questionsToJson)
+    @Default(<PollQuestion>[])
+    List<PollQuestion> questions,
   }) = _Poll;
 
   const Poll._();
 
   factory Poll.fromJson(Map<String, Object?> json) => _$PollFromJson(json);
 
-  bool get hasEnded {
+  bool get isExpired {
     final deadline = expiresAt;
     return deadline != null && deadline.isBefore(DateTime.now());
   }
 
-  bool get hasVoted => options.any((option) => option.votedByMe);
+  bool get isEnded => isClosed || isExpired;
+
+  int get requiredQuestionCount =>
+      questions.where((question) => question.isRequired).length;
+
+  bool get isFullyAnswered => questions.every(
+    (question) => !question.isRequired || question.hasMyAnswer,
+  );
 }
 
-enum PollType {
-  single('single'),
-  multi('multi'),
-  quiz('quiz');
+enum PollResultsVisibility {
+  always('always'),
+  afterVote('after_vote'),
+  afterClose('after_close');
 
-  const PollType(this.wire);
+  const PollResultsVisibility(this.wire);
 
   final String wire;
 
-  static PollType fromWire(String? wire) => values.firstWhere(
+  static PollResultsVisibility fromWire(String? wire) => values.firstWhere(
     (value) => value.wire == wire,
-    orElse: () => PollType.single,
+    orElse: () => PollResultsVisibility.always,
   );
+}
+
+enum PollCategory {
+  general('general'),
+  academic('academic'),
+  events('events'),
+  feedback('feedback'),
+  other('other');
+
+  const PollCategory(this.wire);
+
+  final String wire;
+
+  static PollCategory? fromWire(String? wire) =>
+      values.cast<PollCategory?>().firstWhere(
+        (value) => value?.wire == wire,
+        orElse: () => null,
+      );
+}
+
+enum PollFilter {
+  all('all'),
+  active('active'),
+  closed('closed'),
+  mine('mine'),
+  participated('participated');
+
+  const PollFilter(this.wire);
+
+  final String wire;
+}
+
+enum PollQuestionKind {
+  single('single'),
+  multiple('multiple'),
+  text('text'),
+  rating('rating'),
+  quiz('quiz');
+
+  const PollQuestionKind(this.wire);
+
+  final String wire;
+
+  static PollQuestionKind fromWire(String? wire) => values.firstWhere(
+    (value) => value.wire == wire,
+    orElse: () => PollQuestionKind.single,
+  );
+}
+
+@Freezed(toJson: true)
+abstract class PollQuestion with _$PollQuestion {
+  const factory PollQuestion({
+    @JsonKey(defaultValue: '') required String id,
+    @JsonKey(defaultValue: '') required String text,
+    @JsonKey(fromJson: _kindFromJson, toJson: _kindToJson)
+    required PollQuestionKind kind,
+    @Default(0) int position,
+    @Default(true) bool isRequired,
+    @JsonKey(fromJson: _optionsFromJson, toJson: _optionsToJson)
+    @Default(<PollOption>[])
+    List<PollOption> options,
+    @JsonKey(fromJson: stringListFromJson, toJson: stringListToJson)
+    @Default(<String>[])
+    List<String> myOptionIds,
+    String? myTextAnswer,
+    int? myRating,
+    double? ratingAverage,
+    @Default(0) int ratingCount,
+    @JsonKey(fromJson: stringListFromJson, toJson: stringListToJson)
+    @Default(<String>[])
+    List<String> textAnswers,
+  }) = _PollQuestion;
+
+  const PollQuestion._();
+
+  factory PollQuestion.fromJson(Map<String, Object?> json) =>
+      _$PollQuestionFromJson(json);
+
+  int get totalVotes => options.fold(0, (sum, option) => sum + option.votes);
+
+  bool get hasMyAnswer =>
+      myOptionIds.isNotEmpty ||
+      (myTextAnswer?.trim().isNotEmpty ?? false) ||
+      myRating != null;
 }
 
 @freezed
@@ -70,10 +169,65 @@ abstract class PollOption with _$PollOption {
   double share(int total) => total <= 0 ? 0 : votes / total;
 }
 
-PollType _pollTypeFromJson(Object? value) =>
-    PollType.fromWire(value is String ? value : null);
+@freezed
+abstract class PollAnswer with _$PollAnswer {
+  const factory PollAnswer({
+    required String questionId,
+    @Default(<String>[]) List<String> optionIds,
+    String? text,
+    int? rating,
+  }) = _PollAnswer;
 
-String _pollTypeToJson(PollType value) => value.wire;
+  const PollAnswer._();
+
+  Map<String, Object?> toJson() => {
+    'questionId': questionId,
+    'optionIds': optionIds,
+    if (text != null) 'text': text,
+    if (rating != null) 'rating': rating,
+  };
+}
+
+@freezed
+abstract class PollQuestionDraft with _$PollQuestionDraft {
+  const factory PollQuestionDraft({
+    required String text,
+    required PollQuestionKind kind,
+    @Default(true) bool isRequired,
+    @Default(<String>[]) List<String> options,
+    int? correctIndex,
+  }) = _PollQuestionDraft;
+
+  const PollQuestionDraft._();
+
+  Map<String, Object?> toJson() => {
+    'text': text,
+    'kind': kind.wire,
+    'isRequired': isRequired,
+    'options': options,
+    if (correctIndex != null) 'correctIndex': correctIndex,
+  };
+}
+
+PollResultsVisibility _visibilityFromJson(Object? value) =>
+    PollResultsVisibility.fromWire(value is String ? value : null);
+
+String _visibilityToJson(PollResultsVisibility value) => value.wire;
+
+PollQuestionKind _kindFromJson(Object? value) =>
+    PollQuestionKind.fromWire(value is String ? value : null);
+
+String _kindToJson(PollQuestionKind value) => value.wire;
+
+List<PollQuestion> _questionsFromJson(Object? value) => value is List
+    ? value
+          .whereType<Map<Object?, Object?>>()
+          .map((question) => PollQuestion.fromJson(question.cast()))
+          .toList()
+    : const [];
+
+List<Map<String, Object?>> _questionsToJson(List<PollQuestion> value) =>
+    value.map((question) => question.toJson()).toList();
 
 List<PollOption> _optionsFromJson(Object? value) => value is List
     ? value

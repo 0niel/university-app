@@ -162,6 +162,19 @@ void main() {
     when(
       () => repository.getSettings(),
     ).thenAnswer((_) async => const UserSettings());
+    final today = DateTime(2026, 9, 4);
+    when(
+      () => repository.getActivityCalendar(days: any(named: 'days')),
+    ).thenAnswer(
+      (_) async => [
+        for (var i = 0; i < 140; i++)
+          if (i % 3 != 1)
+            ActivityDay(
+              day: today.subtract(Duration(days: i)),
+              count: 1 + i % 4,
+            ),
+      ],
+    );
   });
 
   Future<void> shoot(WidgetTester tester, {required bool dark}) async {

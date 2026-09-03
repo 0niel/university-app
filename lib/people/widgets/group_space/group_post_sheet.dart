@@ -22,8 +22,9 @@ class _GroupPostSheetState extends State<GroupPostSheet> {
   String _body = '';
   bool _saving = false;
   bool _submitted = false;
+  bool _pinned = false;
 
-  bool get _valid => _title.trim().isNotEmpty;
+  bool get _valid => _title.trim().isNotEmpty || _body.trim().isNotEmpty;
 
   @override
   void dispose() {
@@ -40,6 +41,7 @@ class _GroupPostSheetState extends State<GroupPostSheet> {
       title: _title.trim(),
       body: _body.trim(),
       announcement: widget.announcement,
+      pinned: widget.announcement || _pinned,
     );
     if (!mounted) return;
     if (saved) {
@@ -50,34 +52,52 @@ class _GroupPostSheetState extends State<GroupPostSheet> {
   }
 
   @override
-  Widget build(BuildContext context) => SingleChildScrollView(
-    child: Column(
-      spacing: 12,
-      mainAxisSize: .min,
-      crossAxisAlignment: .stretch,
-      children: [
-        NinjaInput(
-          controller: _titleController,
-          onChanged: (value) => setState(() => _title = value),
-          autofocus: true,
-          placeholder: widget.announcement
-              ? context.l10n.groupSpacePostTitleHintAnnouncement
-              : context.l10n.groupSpacePostTitleHintNote,
-          errorText: _submitted && !_valid ? context.l10n.error : null,
-        ),
-        NinjaInput.multiline(
-          controller: _bodyController,
-          onChanged: (value) => _body = value,
-          placeholder: context.l10n.groupSpacePostBodyHint,
-        ),
-        NinjaButton.primary(
-          label: _saving
-              ? context.l10n.groupSpacePublishing
-              : context.l10n.groupSpacePublish,
-          expanded: true,
-          onPressed: _saving ? null : () => unawaited(_save()),
-        ),
-      ],
-    ),
-  );
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final isOwner = context.watch<GroupSpaceCubit>().state.space.isOwner;
+    return SingleChildScrollView(
+      child: Column(
+        spacing: 12,
+        mainAxisSize: .min,
+        crossAxisAlignment: .stretch,
+        children: [
+          NinjaInput(
+            controller: _titleController,
+            onChanged: (value) => setState(() => _title = value),
+            autofocus: true,
+            placeholder: widget.announcement
+                ? l10n.groupSpacePostTitleHintAnnouncement
+                : l10n.groupSpacePostTitleHintNote,
+            errorText: _submitted && !_valid
+                ? l10n.groupSpacePostEmptyError
+                : null,
+          ),
+          AppInputField.multiline(
+            controller: _bodyController,
+            onChanged: (value) => setState(() => _body = value),
+            placeholder: l10n.groupSpacePostBodyHint,
+            maxLength: 8000,
+          ),
+          if (!widget.announcement && isOwner)
+            DecoratedBox(
+              decoration: BoxDecoration(
+                color: context.colors.surface2,
+                borderRadius: BorderRadius.circular(AppRadius.card),
+              ),
+              child: AppSettingsToggleRow(
+                isFirst: true,
+                title: l10n.groupSpacePostPinToggle,
+                value: _pinned,
+                onChanged: (value) => setState(() => _pinned = value),
+              ),
+            ),
+          NinjaButton.primary(
+            label: _saving ? l10n.groupSpacePublishing : l10n.groupSpacePublish,
+            expanded: true,
+            onPressed: _saving ? null : () => unawaited(_save()),
+          ),
+        ],
+      ),
+    );
+  }
 }

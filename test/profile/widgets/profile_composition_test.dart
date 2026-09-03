@@ -160,10 +160,7 @@ void main() {
               body: SafeArea(
                 child: SingleChildScrollView(
                   child: Column(
-                    children: [
-                      SettingsAppearance(),
-                      SettingsAdvancedAppearance(),
-                    ],
+                    children: [SettingsAppearance()],
                   ),
                 ),
               ),

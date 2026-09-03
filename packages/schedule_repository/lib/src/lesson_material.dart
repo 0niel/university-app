@@ -21,6 +21,12 @@ abstract class LessonMaterial with _$LessonMaterial {
     required String authorName,
     required DateTime createdAt,
     String? mimeType,
+    String? previewPath,
+    String? batchId,
+    int? width,
+    int? height,
+    int? durationSeconds,
+    @Default(false) bool isLiked,
   }) = _LessonMaterial;
 
   factory LessonMaterial.fromJson(Map<String, dynamic> json) =>
@@ -40,5 +46,11 @@ abstract class LessonMaterial with _$LessonMaterial {
         'likeCount': JsonParser.integer(json['likeCount']),
         'authorName': json['authorName']?.toString() ?? 'Студент',
         'createdAt': JsonParser.localDateTime(json['createdAt']),
+        'previewPath': json['previewPath'] as String?,
+        'batchId': json['batchId'] as String?,
+        'width': JsonParser.nullableInteger(json['width']),
+        'height': JsonParser.nullableInteger(json['height']),
+        'durationSeconds': JsonParser.nullableInteger(json['durationSeconds']),
+        'isLiked': json['isLiked'] as bool? ?? false,
       });
 }

@@ -7,10 +7,16 @@ import 'package:rtu_mirea_app/community/widgets/collab_notes/collab_note_icon.da
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 
 class CollabNoteCard extends StatelessWidget {
-  const CollabNoteCard({required this.note, required this.onTap, super.key});
+  const CollabNoteCard({
+    required this.note,
+    required this.onTap,
+    super.key,
+    this.onLongPress,
+  });
 
   final CollabNote note;
   final VoidCallback? onTap;
+  final VoidCallback? onLongPress;
 
   @override
   Widget build(BuildContext context) {
@@ -19,6 +25,7 @@ class CollabNoteCard extends StatelessWidget {
     final editor = note.updatedByName.isEmpty ? '' : ' · ${note.updatedByName}';
     return AppPressable(
       onTap: onTap,
+      onLongPress: onLongPress,
       semanticsLabel: note.title,
       semanticsButton: onTap != null,
       child: DecoratedBox(
@@ -66,6 +73,16 @@ class CollabNoteCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: AppSpacing.sm),
+              if (note.collaboratorNames.length > 1) ...[
+                Semantics(
+                  label: context.l10n.collabNotesCollaboratorsTooltip,
+                  child: AppAvatarStack(
+                    names: note.collaboratorNames.take(3).toList(),
+                    size: 22,
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.sm),
+              ],
               AppLineIconWidget(.chevronR, size: 16, color: colors.muted2),
             ],
           ),

@@ -2,26 +2,16 @@ import 'package:equatable/equatable.dart';
 import 'package:study_groups_repository/src/models/models.dart';
 import 'package:supabase/supabase.dart';
 
-/// {@template study_groups_repository}
-/// Manages real student study groups on Supabase: creating a group (at most one
-/// per user), inviting people (by handle or shareable code), join requests, and
-/// membership. All group-space mechanics (posts, links, notes, members)
-/// are scoped server-side to actual membership, not a self-declared string.
-/// {@endtemplate}
 class StudyGroupsRepository {
-  /// {@macro study_groups_repository}
   const StudyGroupsRepository({
     required this.supabase,
     required this.organizationId,
   });
 
-  /// Client used for all group RPC calls.
   final SupabaseClient supabase;
 
-  /// Tenant identifier applied to organization-scoped operations.
   final String organizationId;
 
-  /// The caller's group with roster, received invites and (if owner) requests.
   Future<MyStudyGroup> getMyGroup() async {
     try {
       final res = await supabase.rpc<Object?>(
@@ -34,7 +24,6 @@ class StudyGroupsRepository {
     }
   }
 
-  /// Creates the caller's group. Fails if they already belong to one.
   Future<MyStudyGroup> createGroup({
     required String name,
     String emoji = '🎓',
@@ -58,7 +47,6 @@ class StudyGroupsRepository {
     }
   }
 
-  /// Owner-only: updates the group's editable fields (null keeps a field).
   Future<MyStudyGroup> updateGroup({
     String? name,
     String? emoji,
@@ -82,7 +70,6 @@ class StudyGroupsRepository {
     }
   }
 
-  /// Owner-only: deletes the group and all its group-scoped content.
   Future<void> deleteGroup() async {
     try {
       await supabase.rpc<Object?>(
@@ -94,7 +81,6 @@ class StudyGroupsRepository {
     }
   }
 
-  /// Member-only: leaves the current group (owners must delete instead).
   Future<void> leaveGroup() async {
     try {
       await supabase.rpc<Object?>('leave_study_group');
@@ -103,7 +89,6 @@ class StudyGroupsRepository {
     }
   }
 
-  /// Owner-only: invites a user by id to join the group.
   Future<void> inviteByUserId(String userId) async {
     try {
       await supabase.rpc<Object?>(
@@ -115,7 +100,6 @@ class StudyGroupsRepository {
     }
   }
 
-  /// Owner-only: invites a user by their `@handle`.
   Future<void> inviteByHandle(String handle) async {
     try {
       await supabase.rpc<Object?>(
@@ -127,7 +111,6 @@ class StudyGroupsRepository {
     }
   }
 
-  /// Accepts or declines an invite addressed to the caller.
   Future<MyStudyGroup> respondInvite({
     required String inviteId,
     required bool accept,
@@ -143,7 +126,6 @@ class StudyGroupsRepository {
     }
   }
 
-  /// Joins a group immediately using its share code.
   Future<MyStudyGroup> joinByCode(String code) async {
     try {
       final res = await supabase.rpc<Object?>(
@@ -156,7 +138,6 @@ class StudyGroupsRepository {
     }
   }
 
-  /// Sends a request to join a discoverable group (owner approves later).
   Future<void> requestToJoin(String groupId) async {
     try {
       await supabase.rpc<Object?>(
@@ -168,7 +149,6 @@ class StudyGroupsRepository {
     }
   }
 
-  /// Owner-only: accepts or declines a pending join request.
   Future<MyStudyGroup> respondJoinRequest({
     required String inviteId,
     required bool accept,
@@ -184,7 +164,6 @@ class StudyGroupsRepository {
     }
   }
 
-  /// Owner-only: removes a member from the group.
   Future<void> removeMember(String userId) async {
     try {
       await supabase.rpc<Object?>(
@@ -196,7 +175,18 @@ class StudyGroupsRepository {
     }
   }
 
-  /// Pending invites the caller has received (lightweight, for badges/CTA).
+  Future<MyStudyGroup> transferOwnership(String userId) async {
+    try {
+      final res = await supabase.rpc<Object?>(
+        'transfer_study_group_ownership',
+        params: {'p_user_id': userId},
+      );
+      return _toMyGroup(res);
+    } catch (error, stackTrace) {
+      Error.throwWithStackTrace(TransferOwnershipFailure(error), stackTrace);
+    }
+  }
+
   Future<List<StudyGroupInvite>> getMyInvites() async {
     try {
       final res = await supabase.rpc<Object?>('get_my_group_invites');
@@ -206,7 +196,6 @@ class StudyGroupsRepository {
     }
   }
 
-  /// Searches discoverable groups in the org by name or code.
   Future<List<StudyGroupSummary>> searchGroups(String query) async {
     try {
       final res = await supabase.rpc<Object?>(
@@ -240,14 +229,9 @@ class StudyGroupsRepository {
   }
 }
 
-/// {@template study_groups_failure}
-/// Base failure for all [StudyGroupsRepository] operations.
-/// {@endtemplate}
 abstract class StudyGroupsFailure with EquatableMixin implements Exception {
-  /// {@macro study_groups_failure}
   const StudyGroupsFailure(this.error);
 
-  /// The underlying error that triggered this failure.
   final Object error;
 
   @override
@@ -296,6 +280,10 @@ class RespondJoinRequestFailure extends StudyGroupsFailure {
 
 class RemoveMemberFailure extends StudyGroupsFailure {
   const RemoveMemberFailure(super.error);
+}
+
+class TransferOwnershipFailure extends StudyGroupsFailure {
+  const TransferOwnershipFailure(super.error);
 }
 
 class GetInvitesFailure extends StudyGroupsFailure {

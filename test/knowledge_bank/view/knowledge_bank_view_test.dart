@@ -7,11 +7,39 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:rtu_mirea_app/common/media_viewer/media_viewer.dart';
 import 'package:rtu_mirea_app/knowledge_bank/knowledge_bank.dart';
+import 'package:rtu_mirea_app/knowledge_bank/view/knowledge_bank_list.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:shared_preferences_platform_interface/shared_preferences_platform_interface.dart';
 
 class MockKnowledgeBankCubit extends MockCubit<KnowledgeBankState>
     implements KnowledgeBankCubit {}
+
+class _ViewPreferences extends InMemorySharedPreferencesStore {
+  _ViewPreferences({this.failReads = false, this.failWrites = false})
+    : super.empty();
+
+  bool failReads;
+  bool failWrites;
+  int reads = 0;
+  final writes = <(String, Object)>[];
+
+  @override
+  Future<Map<String, Object>> getAll() async {
+    reads++;
+    if (failReads) throw Exception('Preferences read unavailable');
+    return super.getAll();
+  }
+
+  @override
+  Future<bool> setValue(String valueType, String key, Object value) async {
+    writes.add((key, value));
+    if (failWrites) throw Exception('Preferences write unavailable');
+    return super.setValue(valueType, key, value);
+  }
+}
 
 Widget _wrap(
   Widget child, {
@@ -36,6 +64,115 @@ Widget _wrap(
 }
 
 void main() {
+  group('KnowledgeBankView preference failures', () {
+    late KnowledgeBankCubit cubit;
+    late SharedPreferencesStorePlatform previousStore;
+
+    setUp(() {
+      previousStore = SharedPreferencesStorePlatform.instance;
+      SharedPreferences.resetStatic();
+      cubit = MockKnowledgeBankCubit();
+      when(() => cubit.state).thenReturn(
+        const KnowledgeBankState(
+          status: KnowledgeBankStatus.populated,
+          materials: [
+            StudyMaterial(id: 'note-1', title: 'Материал настроек вида'),
+          ],
+        ),
+      );
+    });
+
+    tearDown(() async {
+      SharedPreferences.resetStatic();
+      SharedPreferencesStorePlatform.instance = previousStore;
+      await cubit.close();
+    });
+
+    Future<void> showView(WidgetTester tester) async {
+      await tester.pumpWidget(
+        _wrap(
+          BlocProvider<KnowledgeBankCubit>.value(
+            value: cubit,
+            child: const KnowledgeBankView(),
+          ),
+          reduceMotion: true,
+        ),
+      );
+      await tester.pump();
+    }
+
+    Future<void> selectView(WidgetTester tester, String tooltip) async {
+      await tester.tap(
+        find.byWidgetPredicate(
+          (widget) => widget is AppIconButton && widget.tooltip == tooltip,
+        ),
+      );
+      await tester.pump();
+      await tester.pump();
+    }
+
+    bool gridView(WidgetTester tester) => tester
+        .widget<KnowledgeBankList>(find.byType(KnowledgeBankList))
+        .gridView;
+
+    testWidgets('load exceptions keep materials and both view modes usable', (
+      tester,
+    ) async {
+      final preferences = _ViewPreferences(failReads: true);
+      SharedPreferencesStorePlatform.instance = preferences;
+      await showView(tester);
+
+      expect(preferences.reads, 1);
+      expect(gridView(tester), isFalse);
+      expect(find.text('Материал настроек вида'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+
+      await selectView(tester, 'Сетка');
+      expect(gridView(tester), isTrue);
+      expect(preferences.reads, 2);
+      expect(find.text('Материал настроек вида'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+
+      await selectView(tester, 'Список');
+      expect(gridView(tester), isFalse);
+      expect(preferences.reads, 3);
+      expect(preferences.writes, isEmpty);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('save exceptions preserve selection and allow a later retry', (
+      tester,
+    ) async {
+      final preferences = _ViewPreferences(failWrites: true);
+      SharedPreferencesStorePlatform.instance = preferences;
+      await showView(tester);
+
+      await selectView(tester, 'Сетка');
+      expect(gridView(tester), isTrue);
+      expect(preferences.writes, [('flutter.knowledge_bank_grid_view', true)]);
+      expect(find.text('Материал настроек вида'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+
+      await selectView(tester, 'Список');
+      expect(gridView(tester), isFalse);
+      expect(preferences.writes.last, (
+        'flutter.knowledge_bank_grid_view',
+        false,
+      ));
+      expect(tester.takeException(), isNull);
+
+      preferences.failWrites = false;
+      await selectView(tester, 'Сетка');
+      expect(gridView(tester), isTrue);
+      expect(preferences.writes, hasLength(3));
+      expect(
+        await preferences.getAll(),
+        containsPair('flutter.knowledge_bank_grid_view', true),
+      );
+      expect(tester.takeException(), isNull);
+    });
+  });
+
   group('KnowledgeBankView failure state', () {
     late KnowledgeBankCubit cubit;
 
@@ -229,6 +366,47 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
+    testWidgets('tapping the row opens the shared media viewer', (
+      tester,
+    ) async {
+      const material = StudyMaterial(
+        id: 'material-viewer',
+        title: 'Материал для просмотра',
+        fileName: 'notes.pdf',
+        mimeType: 'application/pdf',
+        hasFile: true,
+      );
+      final uri = Uri.parse('https://project.supabase.co/signed/notes.pdf');
+      when(() => cubit.state).thenReturn(
+        const KnowledgeBankState(
+          status: KnowledgeBankStatus.populated,
+          materials: [material],
+        ),
+      );
+      when(() => cubit.materialUrl(material)).thenAnswer((_) async => uri);
+      when(() => cubit.materialAccess(material)).thenAnswer(
+        (_) async => const MaterialAccess(canDownload: true, price: 0),
+      );
+      when(() => cubit.materialOpened(material)).thenAnswer((_) async {});
+
+      await tester.pumpWidget(
+        _wrap(
+          BlocProvider<KnowledgeBankCubit>.value(
+            value: cubit,
+            child: const KnowledgeBankView(),
+          ),
+          reduceMotion: true,
+        ),
+      );
+      await tester.pump();
+      await tester.tap(find.byType(MaterialRow));
+      await tester.pump();
+      await tester.pump();
+
+      expect(find.byType(MediaViewerPage), findsOneWidget);
+      verify(() => cubit.materialOpened(material)).called(1);
+    });
+
     testWidgets('opens the signed material before incrementing downloads', (
       tester,
     ) async {
@@ -267,7 +445,7 @@ void main() {
         ),
       );
       await tester.pump();
-      await tester.tap(find.text('Открываемый конспект'));
+      await tester.tap(find.bySemanticsLabel('Скачать'));
       await tester.pump();
 
       expect(openedUri, uri);
@@ -352,8 +530,8 @@ void main() {
             reduceMotion: true,
           ),
         );
-        await tester.tap(find.text('Платный конспект'));
-        await tester.tap(find.text('Платный конспект'));
+        await tester.tap(find.bySemanticsLabel('Скачать'));
+        await tester.tap(find.bySemanticsLabel('Скачать'));
         access.complete(const MaterialAccess(canDownload: false, price: 40));
         await tester.pump();
         await tester.pump(const Duration(seconds: 1));
@@ -420,7 +598,7 @@ void main() {
           reduceMotion: true,
         ),
       );
-      await tester.tap(find.text('Купленный'));
+      await tester.tap(find.bySemanticsLabel('Скачать'));
       await tester.pump();
       expect(find.text('Открыть материал?'), findsNothing);
       verifyNever(() => cubit.purchaseMaterial(material, expectedPrice: 40));

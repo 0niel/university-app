@@ -5,6 +5,7 @@ export 'event_draft.dart';
 export 'events_filter.dart';
 export 'mentor_profile_draft.dart';
 export 'mentor_request_draft.dart';
+export 'mentor_telegram.dart';
 export 'note_kind.dart';
 export 'team_application_draft.dart';
 export 'team_draft.dart';

@@ -11,7 +11,10 @@ class _HubSkeleton extends StatelessWidget {
     return NinjaSkeletonGroup(
       child: ListView(
         physics: const NeverScrollableScrollPhysics(),
-        padding: const EdgeInsets.only(top: AppSpacing.xl, bottom: 24),
+        padding: EdgeInsets.only(
+          top: AppSpacing.xl,
+          bottom: ninjaBottomInset(context) + AppSpacing.lg,
+        ),
         children: [
           const Padding(
             padding: EdgeInsets.symmetric(

@@ -18,6 +18,7 @@ enum DeadlineDue { today, tomorrow, week, pick }
 Future<void> showAddDeadlineSheet(
   BuildContext context, {
   DeadlinesCubit? cubit,
+  Deadline? editing,
 }) async {
   final owned = cubit == null
       ? DeadlinesCubit(repository: context.read<ScheduleRepository>())
@@ -27,8 +28,14 @@ Future<void> showAddDeadlineSheet(
   try {
     await showAppSheet<void>(
       context,
-      title: context.l10n.addDeadlineTitle,
-      child: AddDeadlineSheet(cubit: target, subjects: subjects),
+      title: editing == null
+          ? context.l10n.addDeadlineTitle
+          : context.l10n.deadlineEditTitle,
+      child: AddDeadlineSheet(
+        cubit: target,
+        subjects: subjects,
+        editing: editing,
+      ),
     );
   } finally {
     if (owned != null) unawaited(owned.close());
@@ -54,11 +61,13 @@ class AddDeadlineSheet extends StatefulWidget {
     required this.cubit,
     required this.subjects,
     super.key,
+    this.editing,
     this.now,
   });
 
   final DeadlinesCubit cubit;
   final List<String> subjects;
+  final Deadline? editing;
   final DateTime? now;
 
   @override
@@ -70,17 +79,43 @@ class _AddDeadlineSheetState extends State<AddDeadlineSheet> {
   String? _subject;
   DeadlineDue _due = DeadlineDue.tomorrow;
   DateTime? _pickedDate;
+  bool _dueEdited = false;
   bool _shared = false;
   bool _saving = false;
   DeadlinePriority _priority = .medium;
   bool _remind = true;
+  int _remindMinutes = 60;
+  int _progress = 0;
   int _hour = 23;
   int _minute = 59;
+
+  Deadline? get _editing => widget.editing;
 
   @override
   void initState() {
     super.initState();
-    _subject = widget.subjects.isEmpty ? null : widget.subjects.first;
+    final editing = _editing;
+    if (editing != null) {
+      _controller.text = editing.title;
+      _subject = editing.subjectName.trim().isEmpty
+          ? null
+          : editing.subjectName.trim();
+      _priority = editing.priority;
+      _remind = editing.remind;
+      _remindMinutes = editing.remindMinutes;
+      _progress = editing.progress;
+      _shared = editing.source != DeadlineSource.me;
+      _due = DeadlineDue.pick;
+      _pickedDate = DateTime(
+        editing.dueAt.year,
+        editing.dueAt.month,
+        editing.dueAt.day,
+      );
+      _hour = editing.dueAt.hour;
+      _minute = editing.dueAt.minute;
+    } else {
+      _subject = widget.subjects.isEmpty ? null : widget.subjects.first;
+    }
     _controller.addListener(_onTitleChanged);
   }
 
@@ -115,6 +150,8 @@ class _AddDeadlineSheetState extends State<AddDeadlineSheet> {
     };
   }
 
+  bool get _dueRequiresFutureCheck => _editing == null || _dueEdited;
+
   Future<void> _pickDate() async {
     final picked = await showAppDatePicker(
       context,
@@ -126,32 +163,61 @@ class _AddDeadlineSheetState extends State<AddDeadlineSheet> {
     setState(() {
       _pickedDate = picked;
       _due = DeadlineDue.pick;
+      _dueEdited = true;
     });
   }
 
   Future<void> _save() async {
     final title = _controller.text.trim();
-    if (title.isEmpty || _saving || !_dueAt.isAfter(_now)) return;
+    final valid =
+        title.isNotEmpty && (!_dueRequiresFutureCheck || _dueAt.isAfter(_now));
+    if (!valid || _saving) return;
     setState(() => _saving = true);
     final l10n = context.l10n;
     final navigator = Navigator.of(context);
-    final created = await widget.cubit.createDeadline(
-      DeadlineDraft(
+    final editing = _editing;
+    final bool ok;
+    if (editing == null) {
+      ok = await widget.cubit.createDeadline(
+        DeadlineDraft(
+          title: title,
+          dueAt: _dueAt,
+          source: _shared ? DeadlineSource.group : DeadlineSource.me,
+          subjectName: _subject?.trim() ?? '',
+          priority: _priority,
+          remind: _remind,
+          remindMinutes: _remindMinutes,
+        ),
+      );
+    } else {
+      ok = await widget.cubit.updateDeadline(
+        editing,
         title: title,
-        dueAt: _dueAt,
-        source: _shared ? DeadlineSource.group : DeadlineSource.me,
         subjectName: _subject?.trim() ?? '',
+        dueAt: _dueRequiresFutureCheck ? _dueAt : null,
         priority: _priority,
+        progress: _progress,
         remind: _remind,
-      ),
-    );
+        remindMinutes: _remindMinutes,
+      );
+    }
     if (!mounted) return;
     setState(() => _saving = false);
-    if (created) {
-      ToastManager.showSuccess(context, message: l10n.deadlineSaved);
+    if (ok) {
+      ToastManager.showSuccess(
+        context,
+        message: editing == null
+            ? l10n.deadlineSaved
+            : l10n.deadlineUpdatedToast,
+      );
       navigator.pop();
     } else {
-      ToastManager.showError(context, message: l10n.deadlinesCreateError);
+      ToastManager.showError(
+        context,
+        message: editing == null
+            ? l10n.deadlinesCreateError
+            : l10n.deadlinesUpdateError,
+      );
     }
   }
 
@@ -174,7 +240,9 @@ class _AddDeadlineSheetState extends State<AddDeadlineSheet> {
   Widget build(BuildContext context) {
     final colors = context.colors;
     final l10n = context.l10n;
-    final valid = _controller.text.trim().isNotEmpty && _dueAt.isAfter(_now);
+    final valid =
+        _controller.text.trim().isNotEmpty &&
+        (!_dueRequiresFutureCheck || _dueAt.isAfter(_now));
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -182,7 +250,7 @@ class _AddDeadlineSheetState extends State<AddDeadlineSheet> {
           key: const ValueKey('add-deadline-title'),
           controller: _controller,
           placeholder: l10n.addDeadlineWhatHint,
-          autofocus: true,
+          autofocus: _editing == null,
           height: 50,
           fillColor: colors.surface,
           showClear: false,
@@ -222,53 +290,60 @@ class _AddDeadlineSheetState extends State<AddDeadlineSheet> {
                   if (due == DeadlineDue.pick) {
                     unawaited(_pickDate());
                   } else {
-                    setState(() => _due = due);
+                    setState(() {
+                      _due = due;
+                      _dueEdited = true;
+                    });
                   }
                 },
               ),
           ],
         ),
-        const SizedBox(height: AppSpacing.lg),
-        DecoratedBox(
-          decoration: BoxDecoration(
-            color: colors.surface,
-            borderRadius: BorderRadius.circular(AppRadius.banner),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.sectionGap,
-              vertical: AppSpacing.md,
+        if (_editing == null) ...[
+          const SizedBox(height: AppSpacing.lg),
+          DecoratedBox(
+            decoration: BoxDecoration(
+              color: colors.surface,
+              borderRadius: BorderRadius.circular(AppRadius.banner),
             ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        l10n.addDeadlineSharedTitle,
-                        style: AppText.bodyStrong.copyWith(color: colors.ink),
-                      ),
-                      const SizedBox(height: AppSpacing.xxs),
-                      Text(
-                        l10n.addDeadlineSharedSubGeneric,
-                        style: AppText.caption.copyWith(color: colors.muted),
-                      ),
-                    ],
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.sectionGap,
+                vertical: AppSpacing.md,
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          l10n.addDeadlineSharedTitle,
+                          style: AppText.bodyStrong.copyWith(
+                            color: colors.ink,
+                          ),
+                        ),
+                        const SizedBox(height: AppSpacing.xxs),
+                        Text(
+                          l10n.addDeadlineSharedSubGeneric,
+                          style: AppText.caption.copyWith(color: colors.muted),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                const SizedBox(width: AppSpacing.md),
-                AppSwitch(
-                  key: const ValueKey('add-deadline-shared'),
-                  value: _shared,
-                  semanticsLabel: l10n.addDeadlineSharedTitle,
-                  onChanged: (value) => setState(() => _shared = value),
-                ),
-              ],
+                  const SizedBox(width: AppSpacing.md),
+                  AppSwitch(
+                    key: const ValueKey('add-deadline-shared'),
+                    value: _shared,
+                    semanticsLabel: l10n.addDeadlineSharedTitle,
+                    onChanged: (value) => setState(() => _shared = value),
+                  ),
+                ],
+              ),
             ),
           ),
-        ),
-        if (!_dueAt.isAfter(_now))
+        ],
+        if (_dueRequiresFutureCheck && !_dueAt.isAfter(_now))
           Text(
             l10n.deadlinePastError,
             style: AppText.caption.copyWith(color: colors.danger),
@@ -276,7 +351,7 @@ class _AddDeadlineSheetState extends State<AddDeadlineSheet> {
         const SizedBox(height: AppSpacing.sectionGap),
         AppButton.primary(
           key: const ValueKey('add-deadline-submit'),
-          label: l10n.add,
+          label: _editing == null ? l10n.add : l10n.save,
           size: AppButtonSize.large,
           expanded: true,
           loading: _saving,
@@ -288,9 +363,14 @@ class _AddDeadlineSheetState extends State<AddDeadlineSheet> {
           subject: _subject ?? '',
           priority: _priority,
           remind: _remind,
+          remindMinutes: _remindMinutes,
+          progress: _progress,
           onSubjectChanged: (value) => setState(() => _subject = value),
           onPriorityChanged: (value) => setState(() => _priority = value),
           onRemindChanged: (value) => setState(() => _remind = value),
+          onRemindMinutesChanged: (value) =>
+              setState(() => _remindMinutes = value),
+          onProgressChanged: (value) => setState(() => _progress = value),
           onTime: () async {
             final time = await showAppTimePicker(
               context,
@@ -300,6 +380,7 @@ class _AddDeadlineSheetState extends State<AddDeadlineSheet> {
               setState(() {
                 _hour = time.hour;
                 _minute = time.minute;
+                _dueEdited = true;
               });
             }
           },

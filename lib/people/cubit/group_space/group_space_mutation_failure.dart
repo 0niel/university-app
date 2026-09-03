@@ -1,1 +1,10 @@
-enum GroupSpaceMutationFailure { refresh, like, link, post, deleteLink }
+enum GroupSpaceMutationFailure {
+  refresh,
+  like,
+  link,
+  post,
+  deleteLink,
+  comment,
+  deleteComment,
+  birthday,
+}

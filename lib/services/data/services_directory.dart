@@ -68,14 +68,6 @@ abstract final class ServicesDirectory {
         tone: colors.lecture,
         routePath: '/services/free-rooms',
       ),
-      _entry(
-        context,
-        title: l10n.coworkTitle,
-        subtitle: l10n.serviceCoworkSub,
-        icon: AppLineIcon.device,
-        tone: colors.lab,
-        routePath: '/services/cowork',
-      ),
       if (config.isEnabled(.nfcPass))
         _entry(
           context,
@@ -128,9 +120,9 @@ abstract final class ServicesDirectory {
       ),
       _entry(
         context,
-        title: l10n.toolsPageTitle,
-        subtitle: l10n.serviceToolsSub,
-        icon: AppLineIcon.grid,
+        title: l10n.toolsCommunitySection,
+        subtitle: l10n.toolsCommunitySectionSubtitle,
+        icon: AppLineIcon.people,
         routePath: '/services/tools',
       ),
     ];
@@ -237,7 +229,7 @@ abstract final class ServicesDirectory {
       _entry(
         context,
         title: l10n.walletTitle,
-        subtitle: l10n.serviceWalletSub,
+        subtitle: l10n.serviceWalletShurikensSub,
         icon: AppLineIcon.card,
         tone: colors.lab,
         routePath: '/services/wallet',
@@ -301,54 +293,68 @@ abstract final class ServicesDirectory {
       '/services/mentorship',
       '/services/team-finder',
     ];
-    final owned = [
-      ...useful(context, config),
+    final owned = _unique([
+      ...campus(context, config),
       ...study(context, examDays: examDays),
       ...community(context),
       ...studentLife(context),
+      ...useful(context, config),
+    ]);
+    const unpinnedRoutes = {
+      '/services/free-rooms',
+      '/services/nfc',
+      '/services/people',
+      '/services/polls',
+      '/services/communities',
+      '/feed/news',
+      '/services/collab-notes',
+      '/schedule/session',
+      '/services/mentorship',
+    };
+    bool pinned(ServiceEntry entry) {
+      final route = entry.model.routePath;
+      return route != null && !unpinnedRoutes.contains(route);
+    }
+
+    final firstParty = [
+      for (final route in featuredRoutes)
+        for (final entry in owned)
+          if (entry.model.routePath == route && pinned(entry)) entry,
+      for (final entry in owned)
+        if (pinned(entry) && !featuredRoutes.contains(entry.model.routePath))
+          entry,
     ];
+    bool unpinned(ServiceEntry entry) => !pinned(entry);
     final builtIn = [
       ServiceSectionEntries(
         key: sectionFirstParty,
         title: l10n.servicesSectionFirstParty,
-        entries: [
-          for (final route in featuredRoutes)
-            for (final entry in owned)
-              if (entry.model.routePath == route) entry,
-        ],
+        entries: firstParty,
       ),
       ServiceSectionEntries(
         key: sectionCampus,
         title: l10n.servicesSectionCampus,
-        entries: campus(context, config),
+        entries: campus(context, config).where(unpinned).toList(),
       ),
       ServiceSectionEntries(
         key: sectionStudy,
         title: l10n.servicesSectionStudy,
-        entries: study(context, examDays: examDays)
-            .where((entry) => !featuredRoutes.contains(entry.model.routePath))
-            .toList(),
+        entries: study(context, examDays: examDays).where(unpinned).toList(),
       ),
       ServiceSectionEntries(
         key: sectionCommunity,
         title: l10n.servicesSectionCommunity,
-        entries: community(context)
-            .where((entry) => !featuredRoutes.contains(entry.model.routePath))
-            .toList(),
+        entries: community(context).where(unpinned).toList(),
       ),
       ServiceSectionEntries(
         key: sectionStudentLife,
         title: l10n.servicesSectionStudentLife,
-        entries: studentLife(context)
-            .where((entry) => !featuredRoutes.contains(entry.model.routePath))
-            .toList(),
+        entries: studentLife(context).where(unpinned).toList(),
       ),
       ServiceSectionEntries(
         key: sectionUseful,
         title: l10n.servicesSectionUseful,
-        entries: useful(context, config)
-            .where((entry) => !featuredRoutes.contains(entry.model.routePath))
-            .toList(),
+        entries: useful(context, config).where(unpinned).toList(),
       ),
     ];
     final remote = [...?catalog?.sections]

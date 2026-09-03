@@ -5,7 +5,6 @@ import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:rtu_mirea_app/free_rooms/cubit/free_rooms_cubit.dart';
-import 'package:rtu_mirea_app/free_rooms/cubit/room_booking_cubit.dart';
 import 'package:rtu_mirea_app/free_rooms/widgets/widgets.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:rtu_mirea_app/map/bloc/map_bloc.dart';
@@ -83,9 +82,6 @@ class MapFreeRoomsPanel extends StatelessWidget {
     final colors = context.colors;
     final l10n = context.l10n;
     final state = context.watch<FreeRoomsCubit>().state;
-    final saved = context.watch<RoomBookingCubit>().state.activeAt(
-      DateTime.now(),
-    );
     final campus = mapState.selectedCampus;
     final filtered = state.copyWith(campus: campus?.displayName ?? '');
     final mappedRooms = state.query.trim().isEmpty
@@ -240,8 +236,6 @@ class MapFreeRoomsPanel extends StatelessWidget {
         FreeRoomsList(
           state: filtered,
           roomFloors: mapState.roomFloors,
-          bookedRoom: saved?.room,
-          bookedCampus: saved?.campus,
           onRetry: () => unawaited(context.read<FreeRoomsCubit>().load()),
           onRoomTap: onRoomTap,
         ),

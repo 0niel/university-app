@@ -108,12 +108,12 @@ void main() {
       await tester.pumpWidget(buildSubject());
       await tester.pumpAndSettle();
 
-      final colors = NinjaColors.dark();
+      const colors = AppColors.dark;
       final pastel = find.byWidgetPredicate((widget) {
         if (widget is! Container) return false;
         final decoration = widget.decoration;
         return decoration is BoxDecoration &&
-            decoration.color == colors.accentSoft;
+            decoration.color == colors.tint2;
       });
       expect(pastel, findsOneWidget);
       expect(

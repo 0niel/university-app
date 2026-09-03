@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:bloc/bloc.dart';
 import 'package:campus_repository/campus_repository.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
@@ -14,6 +16,8 @@ class CollabNotesCubit extends Cubit<CollabNotesState> {
 
   final CampusRepository _repository;
   var _loadRevision = 0;
+  StreamSubscription<void>? _watchSubscription;
+  Timer? _watchDebounce;
 
   Future<bool> load() async {
     final revision = ++_loadRevision;
@@ -29,6 +33,20 @@ class CollabNotesCubit extends Cubit<CollabNotesState> {
       addError(error, stackTrace);
       return false;
     }
+  }
+
+  void startWatching() {
+    if (_watchSubscription != null) return;
+    _watchSubscription = _repository.watchGroupNotesList().listen(
+      (_) {
+        _watchDebounce?.cancel();
+        _watchDebounce = Timer(
+          const Duration(milliseconds: 600),
+          () => unawaited(load()),
+        );
+      },
+      onError: addError,
+    );
   }
 
   Future<CollabNote?> create({
@@ -64,5 +82,71 @@ class CollabNotesCubit extends Cubit<CollabNotesState> {
     }
   }
 
+  Future<bool> rename(String id, String title) async {
+    final normalized = title.trim();
+    if (normalized.isEmpty) return false;
+    final previous = state.notes;
+    final index = previous.indexWhere((note) => note.id == id);
+    if (index < 0) return false;
+    final updated = List<CollabNote>.of(previous);
+    updated[index] = updated[index].copyWith(title: normalized);
+    emit(state.copyWith(notes: updated));
+    try {
+      await _repository.renameGroupNote(id, normalized);
+      return true;
+    } on Exception catch (error, stackTrace) {
+      if (!isClosed) {
+        emit(state.copyWith(notes: previous));
+        addError(error, stackTrace);
+      }
+      return false;
+    }
+  }
+
+  Future<bool> setVisibility(String id, CollabNoteVisibility visibility) async {
+    final previous = state.notes;
+    final index = previous.indexWhere((note) => note.id == id);
+    if (index < 0) return false;
+    final updated = List<CollabNote>.of(previous);
+    updated[index] = updated[index].copyWith(
+      isPersonal: visibility == .personal,
+    );
+    emit(state.copyWith(notes: updated));
+    try {
+      await _repository.setGroupNoteVisibility(id, visibility);
+      return true;
+    } on Exception catch (error, stackTrace) {
+      if (!isClosed) {
+        emit(state.copyWith(notes: previous));
+        addError(error, stackTrace);
+      }
+      return false;
+    }
+  }
+
+  Future<bool> delete(String id) async {
+    final previous = state.notes;
+    final updated = previous.where((note) => note.id != id).toList();
+    if (updated.length == previous.length) return false;
+    emit(state.copyWith(notes: updated));
+    try {
+      await _repository.deleteGroupNote(id);
+      return true;
+    } on Exception catch (error, stackTrace) {
+      if (!isClosed) {
+        emit(state.copyWith(notes: previous));
+        addError(error, stackTrace);
+      }
+      return false;
+    }
+  }
+
   bool _isCurrent(int revision) => !isClosed && revision == _loadRevision;
+
+  @override
+  Future<void> close() async {
+    _watchDebounce?.cancel();
+    await _watchSubscription?.cancel();
+    return super.close();
+  }
 }

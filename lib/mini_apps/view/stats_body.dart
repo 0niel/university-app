@@ -13,7 +13,12 @@ class _StatsBody extends StatelessWidget {
     final launches = stats.fold(0, (a, s) => a + s.launches);
     final users = stats.fold(0, (a, s) => a + s.uniqueUsers);
     return ListView(
-      padding: const .fromLTRB(20, 20, 20, 24),
+      padding: EdgeInsets.fromLTRB(
+        20,
+        20,
+        20,
+        ninjaBottomInset(context) + AppSpacing.lg,
+      ),
       children: [
         _TotalsStrip(
           children: [

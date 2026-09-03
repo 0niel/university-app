@@ -196,11 +196,11 @@ class _MiniAppSubmitViewState extends State<MiniAppSubmitView> {
         return MiniAppScaffold(
           title: l10n.miniAppsSubmitTitle,
           body: ListView(
-            padding: const .fromLTRB(
+            padding: EdgeInsets.fromLTRB(
               AppSpacing.screen,
               0,
               AppSpacing.screen,
-              40,
+              ninjaBottomInset(context) + AppSpacing.lg,
             ),
             children: [
               Text(

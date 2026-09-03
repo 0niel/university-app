@@ -17,6 +17,7 @@ class MiniAppScanGlassButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Semantics(
       button: true,
       label: tooltip,
@@ -26,14 +27,14 @@ class MiniAppScanGlassButton extends StatelessWidget {
           width: 48,
           height: 48,
           decoration: BoxDecoration(
-            color: active ? Colors.white : Colors.white.withValues(alpha: 0.16),
+            color: active ? colors.white : colors.white.withValues(alpha: .16),
             shape: .circle,
           ),
           child: Center(
             child: AppLineIconWidget(
               icon,
               size: AppIconSize.md,
-              color: active ? Colors.black : Colors.white,
+              color: active ? AppColors.dark.canvas : colors.white,
             ),
           ),
         ),

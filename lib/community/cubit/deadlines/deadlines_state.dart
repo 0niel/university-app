@@ -7,10 +7,16 @@ abstract class DeadlinesState with _$DeadlinesState {
     @Default(<Deadline>[]) List<Deadline> deadlines,
     @Default(DeadlineFilter.all) DeadlineFilter filter,
     @Default(<String>{}) Set<String> pendingDeadlineIds,
+    @Default(<String>{}) Set<String> pendingDeleteIds,
     @Default(false) bool isCreating,
+    @Default(false) bool doneGroupExpanded,
   }) = _DeadlinesState;
 
   const DeadlinesState._();
+
+  List<Deadline> get displayDeadlines => deadlines
+      .where((deadline) => !pendingDeleteIds.contains(deadline.id))
+      .toList(growable: false);
 
   List<Deadline> get activeDeadlines =>
       deadlines.where((deadline) => !deadline.isDone).toList(growable: false);

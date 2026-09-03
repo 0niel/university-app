@@ -3,18 +3,27 @@ import 'package:campus_repository/campus_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:rtu_mirea_app/community/widgets/widgets.dart';
 import 'package:rtu_mirea_app/knowledge_bank/config/knowledge_material_types.dart';
+import 'package:rtu_mirea_app/knowledge_bank/widgets/material_thumbnail.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 
 class MaterialRow extends StatelessWidget {
   const MaterialRow({
     required this.material,
+    required this.onOpen,
     required this.onDownload,
+    this.previewUrl,
+    this.onLike,
+    this.onLongPress,
     this.loading = false,
     super.key,
   });
 
   final StudyMaterial material;
+  final VoidCallback onOpen;
   final VoidCallback onDownload;
+  final String? previewUrl;
+  final VoidCallback? onLike;
+  final VoidCallback? onLongPress;
   final bool loading;
 
   @override
@@ -44,19 +53,20 @@ class MaterialRow extends StatelessWidget {
       (true, _) when material.isFree => const PricePill(free: true),
       _ => PricePill(shurikens: material.price),
     };
+    final enabled = material.hasFile && !loading;
     final action = loading
         ? const NinjaSpinner(size: 24)
-        : material.hasFile && material.isFree
-        ? Tooltip(
-            message: l10n.knowledgeDownload,
-            child: AppLineIconWidget(
-              AppLineIcon.download,
-              size: 16,
-              color: colors.muted2,
-            ),
-          )
-        : price;
-    final enabled = material.hasFile && !loading;
+        : AppPressable(
+            onTap: enabled ? onDownload : null,
+            semanticsLabel: l10n.knowledgeDownload,
+            child: material.hasFile && material.isFree
+                ? AppLineIconWidget(
+                    AppLineIcon.download,
+                    size: 16,
+                    color: colors.muted2,
+                  )
+                : price,
+          );
 
     return Semantics(
       container: true,
@@ -71,7 +81,8 @@ class MaterialRow extends StatelessWidget {
               : l10n.knowledgeMaterialNoAttachment,
       ].join(', '),
       child: AppPressable(
-        onTap: enabled ? onDownload : null,
+        onTap: enabled ? onOpen : null,
+        onLongPress: onLongPress,
         child: Container(
           decoration: BoxDecoration(
             color: colors.surface,
@@ -82,20 +93,13 @@ class MaterialRow extends StatelessWidget {
           ),
           child: Row(
             children: [
-              DecoratedBox(
-                decoration: BoxDecoration(
-                  color: colors.tintOf(accent),
-                  borderRadius: BorderRadius.circular(AppRadius.tile),
-                ),
-                child: SizedBox.square(
-                  dimension: 44,
-                  child: Center(
-                    child: AppLineIconWidget(
-                      AppLineIcon.book,
-                      size: 20,
-                      color: accent,
-                    ),
-                  ),
+              SizedBox(
+                width: 56,
+                height: 56,
+                child: MaterialThumbnail(
+                  previewUrl: previewUrl,
+                  mimeType: material.mimeType,
+                  accent: accent,
                 ),
               ),
               const SizedBox(width: AppSpacing.md),
@@ -124,13 +128,51 @@ class MaterialRow extends StatelessWidget {
                       ).copyWith(color: colors.ink),
                     ),
                     const SizedBox(height: 3),
-                    Text(
-                      meta,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: AppText.sans(12, FontWeight.w400).copyWith(
-                        color: colors.muted,
-                      ),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            meta,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: AppText.sans(12, FontWeight.w400).copyWith(
+                              color: colors.muted,
+                            ),
+                          ),
+                        ),
+                        if (onLike != null) ...[
+                          const SizedBox(width: AppSpacing.sm),
+                          AppPressable(
+                            onTap: onLike,
+                            semanticsLabel: l10n.knowledgeLike,
+                            semanticsSelected: material.isLiked,
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                AppLineIconWidget(
+                                  AppLineIcon.heart,
+                                  size: 14,
+                                  color: material.isLiked
+                                      ? colors.danger
+                                      : colors.muted2,
+                                ),
+                                if (material.likes > 0) ...[
+                                  const SizedBox(width: 3),
+                                  Text(
+                                    '${material.likes}',
+                                    style: AppText.tabular(
+                                      AppText.sans(
+                                        11,
+                                        FontWeight.w600,
+                                      ).copyWith(color: colors.muted),
+                                    ),
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ),
+                        ],
+                      ],
                     ),
                     if (compact) ...[
                       const SizedBox(height: AppSpacing.gap),

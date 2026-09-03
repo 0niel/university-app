@@ -4,17 +4,6 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stac/stac.dart';
 import 'package:stac_bridge/src/actions/storage_actions.dart';
-import 'package:stac_bridge/src/widgets/app_badge_parsers.dart';
-import 'package:stac_bridge/src/widgets/app_button_parser.dart';
-import 'package:stac_bridge/src/widgets/app_card_parser.dart';
-import 'package:stac_bridge/src/widgets/app_chip_parser.dart';
-import 'package:stac_bridge/src/widgets/app_control_parsers.dart';
-import 'package:stac_bridge/src/widgets/app_data_parsers.dart';
-import 'package:stac_bridge/src/widgets/app_empty_state_parser.dart';
-import 'package:stac_bridge/src/widgets/app_icon_parsers.dart';
-import 'package:stac_bridge/src/widgets/app_list_row_parser.dart';
-import 'package:stac_bridge/src/widgets/app_meta_pill_parser.dart';
-import 'package:stac_bridge/src/widgets/app_section_title_parser.dart';
 import 'package:stac_bridge/src/widgets/parse_utils.dart';
 import 'package:stac_bridge/stac_bridge.dart';
 
@@ -77,192 +66,44 @@ void main() {
     });
   });
 
-  group('StacAppButton', () {
-    test('preserves the appButton wire contract and safe defaults', () {
-      final button = StacAppButton.fromJson({
-        'label': 'Enroll',
-        'variant': 'outline',
-        'size': 'large',
-        'expanded': true,
-        'onPressed': {'actionType': 'openUrl'},
-      });
-
-      expect(button.label, 'Enroll');
-      expect(button.variant, 'outline');
-      expect(button.size, 'large');
-      expect(button.expanded, isTrue);
-      expect(button.toJson()['onPressed'], {'actionType': 'openUrl'});
-
-      final malformed = StacAppButton.fromJson({
+  group('scalar readers', () {
+    test('coerce malformed values to safe defaults', () {
+      final json = <String, Object?>{
         'label': 1,
-        'variant': false,
-        'size': 2,
         'expanded': 'true',
-      });
-      expect(malformed, const StacAppButton(label: ''));
-    });
-  });
-
-  group('StacAppCard', () {
-    test('preserves the appCard wire contract and padding coercion', () {
-      final card = StacAppCard.fromJson({
-        'padding': 12,
-        'color': '#123456',
-        'onTap': {'actionType': 'openUrl'},
-        'child': {'type': 'text', 'data': 'Hello'},
-      });
-
-      expect(card.padding, 12);
-      expect(card.color, '#123456');
-      expect(card.toJson()['onTap'], {'actionType': 'openUrl'});
-      expect(card.child, {'type': 'text', 'data': 'Hello'});
-      expect(StacAppCard.fromJson({'padding': 'invalid'}), const StacAppCard());
-    });
-  });
-
-  group('StacAppChip', () {
-    test('preserves the appChip wire contract and safe defaults', () {
-      final chip = StacAppChip.fromJson({
-        'label': 'All',
-        'selected': true,
-        'small': true,
-        'color': '#123456',
-        'onTap': {'actionType': 'setState'},
-      });
-
-      expect(chip.label, 'All');
-      expect(chip.selected, isTrue);
-      expect(chip.small, isTrue);
-      expect(chip.toJson()['onTap'], {'actionType': 'setState'});
-      expect(
-        StacAppChip.fromJson({'label': 1, 'selected': 'yes'}),
-        const StacAppChip(label: ''),
-      );
-    });
-  });
-
-  group('app control models', () {
-    test('preserve their wire action keys and safe scalar defaults', () {
-      final toggle = StacAppToggle.fromJson({
-        'value': true,
-        'onChange': {'actionType': 'setState'},
-      });
-      final serviceTile = StacAppServiceTile.fromJson({
-        'emoji': '📚',
-        'solid': true,
-        'onTap': {'actionType': 'openUrl'},
-      });
-
-      expect(toggle.toJson()['onChange'], {'actionType': 'setState'});
-      expect(serviceTile.emoji, '📚');
-      expect(serviceTile.toJson()['onTap'], {'actionType': 'openUrl'});
-      expect(StacAppToggle.fromJson({'value': 'true'}), const StacAppToggle());
-      expect(
-        StacAppSmartChip.fromJson({'emoji': 1, 'label': 2, 'value': 3}),
-        const StacAppSmartChip(emoji: '', label: '', value: ''),
-      );
-    });
-  });
-
-  group('StacAppEmptyState', () {
-    test('uses the established defaults for malformed scalar values', () {
-      final state = StacAppEmptyState.fromJson({
-        'emoji': '🗓️',
-        'title': 'No classes',
-        'child': {'type': 'text', 'data': 'Try another day'},
-      });
-
-      expect(state.emoji, '🗓️');
-      expect(state.title, 'No classes');
-      expect(state.child, {'type': 'text', 'data': 'Try another day'});
-      expect(
-        StacAppEmptyState.fromJson({'emoji': 1, 'title': 2}),
-        const StacAppEmptyState(emoji: '✨', title: ''),
-      );
-    });
-  });
-
-  group('Freezed display models', () {
-    test('preserve section title and pill JSON wire contracts', () {
-      final title = StacAppSectionTitle.fromJson({
-        'title': 'Today',
-        'action': 'See all',
-        'onActionTap': {'actionType': 'openPage'},
-      });
-
-      expect(title.toJson()['onActionTap'], {'actionType': 'openPage'});
-      expect(
-        StacAppMetaPill.fromJson({'text': 'New', 'strong': true}),
-        const StacAppMetaPill(text: 'New', strong: true),
-      );
-    });
-  });
-
-  group('icon and row models', () {
-    test('preserve actions and coerce malformed scalar fields safely', () {
-      final iconButton = StacAppIconButton.fromJson({
-        'icon': 'share',
-        'onPressed': {'actionType': 'share'},
-      });
-      final row = StacAppListRow.fromJson({
-        'title': 'Physics',
-        'dense': true,
-        'onTap': {'actionType': 'openPage'},
-      });
-
-      expect(iconButton.toJson()['onPressed'], {'actionType': 'share'});
-      expect(row.toJson()['onTap'], {'actionType': 'openPage'});
-      expect(row.dense, isTrue);
-      expect(
-        StacAppLineIcon.fromJson({'icon': 1, 'size': 'large'}),
-        const StacAppLineIcon(icon: ''),
-      );
-    });
-  });
-
-  group('badge models', () {
-    test('preserve defaults and normalize malformed collections', () {
-      final tag = StacAppTag.fromJson({'label': 'Live', 'withDot': true});
-      final stack = StacAppAvatarStack.fromJson({
+        'size': 'large',
+        'count': '12',
         'names': ['Ada', 1, 'Linus'],
-        'size': 32,
-      });
-
-      expect(tag, const StacAppTag(label: 'Live', withDot: true));
-      expect(stack.names, ['Ada', 'Linus']);
-      expect(stack.size, 32);
+        'padding': {'horizontal': 4, 'top': 2},
+      };
+      expect(stringOf(json, 'label'), '');
+      expect(boolOf(json, 'expanded'), isTrue);
+      expect(doubleOf(json, 'size'), isNull);
+      expect(intOf(json, 'count'), 12);
+      expect(stringListOf(json, 'names'), ['Ada', '1', 'Linus']);
       expect(
-        StacAppAvatar.fromJson({'name': 1, 'size': 'large'}),
-        const StacAppAvatar(name: ''),
+        insetsOf(json, 'padding', 0),
+        const EdgeInsets.only(left: 4, right: 4, top: 2),
       );
+      expect(insetsOf(json, 'missing', 6), const EdgeInsets.all(6));
     });
   });
 
-  group('data models', () {
-    test('preserve action keys and normalize segmented options', () {
-      final segmented = StacAppSegmentedControl.fromJson({
-        'selectedIndex': 1,
-        'options': [
-          {'label': 'Today'},
-          {
-            'label': 'Week',
-            'onSelected': {'actionType': 'openPage'},
-          },
-          'invalid',
-        ],
-      });
-      final error = StacAppErrorState.fromJson({
-        'title': 'Unavailable',
-        'message': 'Try again',
-        'onPrimary': {'actionType': 'reload'},
-      });
-
-      expect(segmented.options, hasLength(2));
-      expect(error.toJson()['onPrimary'], {'actionType': 'reload'});
+  group('labelOf', () {
+    test('digs the first human readable string out of a widget tree', () {
+      expect(labelOf('Plain'), 'Plain');
+      expect(labelOf({'type': 'text', 'data': 'Hello'}), 'Hello');
       expect(
-        StacAppProgressRing.fromJson({'value': 'invalid'}),
-        const StacAppProgressRing(value: 0),
+        labelOf({
+          'type': 'row',
+          'children': [
+            {'type': 'icon', 'icon': 'add'},
+            {'type': 'text', 'data': 'Add'},
+          ],
+        }),
+        'Add',
       );
+      expect(labelOf({'type': 'sizedBox'}), '');
     });
   });
 

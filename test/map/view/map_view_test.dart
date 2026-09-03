@@ -8,7 +8,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:rtu_mirea_app/free_rooms/cubit/free_rooms_cubit.dart';
-import 'package:rtu_mirea_app/free_rooms/cubit/room_booking_cubit.dart';
 import 'package:rtu_mirea_app/map/map.dart';
 
 import '../../helpers/pump_app.dart';
@@ -17,9 +16,6 @@ class _MockMapBloc extends MockBloc<MapEvent, MapState> implements MapBloc {}
 
 class _MockFreeRoomsCubit extends MockCubit<FreeRoomsState>
     implements FreeRoomsCubit {}
-
-class _MockRoomBookingCubit extends MockCubit<RoomBookingState>
-    implements RoomBookingCubit {}
 
 class _RecordingMapController extends SvgInteractiveMapController {
   int zoomInCalls = 0;
@@ -66,29 +62,24 @@ void main() {
 
   late _MockMapBloc bloc;
   late _MockFreeRoomsCubit freeRooms;
-  late _MockRoomBookingCubit saved;
 
   setUp(() {
     bloc = _MockMapBloc();
     freeRooms = _MockFreeRoomsCubit();
-    saved = _MockRoomBookingCubit();
     when(() => freeRooms.state).thenReturn(
       const FreeRoomsState(
         status: FreeRoomsStatus.populated,
         rooms: [FreeRoom(room: 'А-101', campus: 'В-78')],
       ),
     );
-    when(() => saved.state).thenReturn(const RoomBookingState());
     addTearDown(bloc.close);
     addTearDown(freeRooms.close);
-    addTearDown(saved.close);
   });
 
   Widget provide(Widget child) => MultiBlocProvider(
     providers: [
       BlocProvider<MapBloc>.value(value: bloc),
       BlocProvider<FreeRoomsCubit>.value(value: freeRooms),
-      BlocProvider<RoomBookingCubit>.value(value: saved),
     ],
     child: child,
   );

@@ -9,7 +9,12 @@ class _StatsSkeleton extends StatelessWidget {
     return NinjaSkeletonGroup(
       semanticsLabel: context.l10n.loadingContent,
       child: ListView(
-        padding: const .fromLTRB(20, 20, 20, 24),
+        padding: EdgeInsets.fromLTRB(
+          20,
+          20,
+          20,
+          ninjaBottomInset(context) + AppSpacing.lg,
+        ),
         physics: const NeverScrollableScrollPhysics(),
         children: [
           _TotalsStrip(

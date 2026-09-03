@@ -3,30 +3,99 @@ import 'dart:async';
 import 'package:app_ui/app_ui.dart';
 import 'package:campus_repository/campus_repository.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:rtu_mirea_app/common/widgets/app_date_picker.dart';
+import 'package:rtu_mirea_app/common/widgets/app_time_picker.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:rtu_mirea_app/polls/cubit/polls_cubit.dart';
 
-part 'add_option_button.dart';
-part 'expiry_chip.dart';
-part 'option_field.dart';
-part 'toggle_row.dart';
+part 'creator_preview_step.dart';
+part 'creator_questions_step.dart';
+part 'creator_settings_step.dart';
 
-enum _Expiry { none, day, threeDays, week }
+enum _CreatorStep { basics, questions, settings, preview }
 
-extension on _Expiry {
-  Duration? get duration => switch (this) {
-    .none => null,
-    .day => const .new(days: 1),
-    .threeDays => const .new(days: 3),
-    .week => const .new(days: 7),
-  };
+String pollCategoryLabel(AppLocalizations l10n, PollCategory value) =>
+    switch (value) {
+      PollCategory.general => l10n.pollsCategoryGeneral,
+      PollCategory.academic => l10n.pollsCategoryAcademic,
+      PollCategory.events => l10n.pollsCategoryEvents,
+      PollCategory.feedback => l10n.pollsCategoryFeedback,
+      PollCategory.other => l10n.pollsCategoryOther,
+    };
 
-  String label(AppLocalizations l10n) => switch (this) {
-    .none => l10n.pollsExpiryNone,
-    .day => l10n.pollsExpiry24h,
-    .threeDays => l10n.pollsExpiry3d,
-    .week => l10n.pollsExpiry7d,
-  };
+Future<bool?> showPollCreatorSheet(
+  BuildContext context, {
+  required PollsCubit cubit,
+}) {
+  return showAppSheet<bool>(
+    context,
+    title: context.l10n.pollsCreateTitle,
+    child: PollCreatorSheet(cubit: cubit),
+  );
+}
+
+class _QuestionDraft {
+  _QuestionDraft({this.kind = PollQuestionKind.single})
+    : textController = TextEditingController(),
+      isRequired = true,
+      optionControllers = _initialOptions(kind);
+
+  static List<TextEditingController> _initialOptions(PollQuestionKind kind) =>
+      kind == PollQuestionKind.single ||
+          kind == PollQuestionKind.multiple ||
+          kind == PollQuestionKind.quiz
+      ? [TextEditingController(), TextEditingController()]
+      : [];
+
+  final TextEditingController textController;
+  PollQuestionKind kind;
+  bool isRequired;
+  int correctIndex = 0;
+  List<TextEditingController> optionControllers;
+
+  bool get hasOptions =>
+      kind == PollQuestionKind.single ||
+      kind == PollQuestionKind.multiple ||
+      kind == PollQuestionKind.quiz;
+
+  bool get isValid {
+    if (textController.text.trim().isEmpty) return false;
+    if (!hasOptions) return true;
+    final values = optionControllers
+        .map((controller) => controller.text.trim())
+        .where((value) => value.isNotEmpty)
+        .toList();
+    return values.length >= 2 &&
+        values.toSet().length == values.length &&
+        (kind != PollQuestionKind.quiz ||
+            optionControllers[correctIndex].text.trim().isNotEmpty);
+  }
+
+  PollQuestionDraft toDraft() => PollQuestionDraft(
+    text: textController.text.trim(),
+    kind: kind,
+    isRequired: isRequired,
+    options: hasOptions
+        ? [
+            for (final controller in optionControllers)
+              if (controller.text.trim().isNotEmpty) controller.text.trim(),
+          ]
+        : const [],
+    correctIndex: kind == PollQuestionKind.quiz
+        ? optionControllers
+              .take(correctIndex)
+              .where((controller) => controller.text.trim().isNotEmpty)
+              .length
+        : null,
+  );
+
+  void dispose() {
+    textController.dispose();
+    for (final controller in optionControllers) {
+      controller.dispose();
+    }
+  }
 }
 
 class PollCreatorSheet extends StatefulWidget {
@@ -39,89 +108,206 @@ class PollCreatorSheet extends StatefulWidget {
 }
 
 class _PollCreatorSheetState extends State<PollCreatorSheet> {
-  static const _minOptions = 2;
-  static const _maxOptions = 8;
+  static const _maxQuestions = 10;
 
-  final _question = TextEditingController();
-  final _options = [
-    TextEditingController(),
-    TextEditingController(),
-  ];
+  final _title = TextEditingController();
+  final _description = TextEditingController();
+  final _questions = <_QuestionDraft>[_QuestionDraft()];
 
-  PollType _type = .single;
+  _CreatorStep _step = _CreatorStep.basics;
+  PollCategory? _category;
   bool _anonymous = false;
-  bool _showResults = true;
-  _Expiry _expiry = .none;
-  int _correctIndex = 0;
+  PollResultsVisibility _resultsVisibility = PollResultsVisibility.always;
+  bool _allowChange = false;
+  DateTime? _closesAtDate;
+  int _closesHour = 23;
+  int _closesMinute = 59;
+  bool _closesEnabled = false;
   bool _saving = false;
-  bool _failed = false;
+  bool _showStepError = false;
 
   @override
   void dispose() {
-    _question.dispose();
-    for (final option in _options) {
-      option.dispose();
+    _title.dispose();
+    _description.dispose();
+    for (final question in _questions) {
+      question.dispose();
     }
     super.dispose();
   }
 
-  void _addOption() {
-    if (_options.length >= _maxOptions) return;
-    setState(() => _options.add(TextEditingController()));
+  DateTime? get _closesAt {
+    final date = _closesAtDate;
+    if (!_closesEnabled || date == null) return null;
+    return DateTime(
+      date.year,
+      date.month,
+      date.day,
+      _closesHour,
+      _closesMinute,
+    );
   }
 
-  void _removeOption(int index) {
-    if (_options.length <= _minOptions) return;
+  bool get _basicsValid => _title.text.trim().isNotEmpty;
+
+  bool get _questionsValid =>
+      _questions.isNotEmpty && _questions.every((question) => question.isValid);
+
+  void _refresh() => setState(() {});
+
+  void _clearStepError() {
+    if (_showStepError) setState(() => _showStepError = false);
+  }
+
+  void _addQuestion() {
+    if (_questions.length >= _maxQuestions) return;
+    setState(() => _questions.add(_QuestionDraft()));
+  }
+
+  void _removeQuestion(int index) {
+    if (_questions.length <= 1) return;
     setState(() {
-      final removed = _options.removeAt(index);
+      final removed = _questions.removeAt(index);
       WidgetsBinding.instance.addPostFrameCallback((_) => removed.dispose());
-      if (index < _correctIndex) {
-        _correctIndex--;
-      } else if (_correctIndex >= _options.length) {
-        _correctIndex = _options.length - 1;
+    });
+  }
+
+  void _moveQuestion(int index, int delta) {
+    final target = index + delta;
+    if (target < 0 || target >= _questions.length) return;
+    setState(() {
+      final item = _questions.removeAt(index);
+      _questions.insert(target, item);
+    });
+  }
+
+  void _setQuestionKind(int index, PollQuestionKind kind) {
+    setState(() {
+      final question = _questions[index]..kind = kind;
+      if ((kind == PollQuestionKind.single ||
+              kind == PollQuestionKind.multiple ||
+              kind == PollQuestionKind.quiz) &&
+          question.optionControllers.length < 2) {
+        question.optionControllers = [
+          ...question.optionControllers,
+          ...List.generate(
+            2 - question.optionControllers.length,
+            (_) => TextEditingController(),
+          ),
+        ];
       }
     });
   }
 
-  Future<void> _save() async {
-    if (_saving) return;
-    final question = _question.text.trim();
-    final options = <String>[];
-    int? correctIndex;
-    for (final (index, option) in _options.indexed) {
-      final value = option.text.trim();
-      if (value.isEmpty) continue;
-      if (index == _correctIndex) correctIndex = options.length;
-      options.add(value);
-    }
-    if (question.isEmpty || options.length < _minOptions) return;
-    if (_type == .quiz && correctIndex == null) return;
+  void _addOption(int index) {
+    final question = _questions[index];
+    if (question.optionControllers.length >= 10) return;
+    setState(
+      () => question.optionControllers = [
+        ...question.optionControllers,
+        TextEditingController(),
+      ],
+    );
+  }
 
-    FocusScope.of(context).unfocus();
+  void _removeOption(int index, int optionIndex) {
+    final question = _questions[index];
+    if (question.optionControllers.length <= 2) return;
     setState(() {
-      _saving = true;
-      _failed = false;
+      final removed = question.optionControllers.removeAt(optionIndex);
+      if (optionIndex < question.correctIndex) {
+        question.correctIndex--;
+      } else if (question.correctIndex >= question.optionControllers.length) {
+        question.correctIndex = question.optionControllers.length - 1;
+      }
+      WidgetsBinding.instance.addPostFrameCallback((_) => removed.dispose());
     });
-    final expiresAt = _expiry.duration == null
-        ? null
-        : DateTime.now().add(_expiry.duration ?? .zero);
-    final created = await widget.cubit.createPoll(
-      question: question,
-      options: options,
-      type: _type,
+  }
+
+  bool _canGoNext() => switch (_step) {
+    _CreatorStep.basics => _basicsValid,
+    _CreatorStep.questions => _questionsValid,
+    _CreatorStep.settings =>
+      _closesAt == null || _closesAt!.isAfter(DateTime.now()),
+    _CreatorStep.preview => true,
+  };
+
+  void _next() {
+    if (!_canGoNext()) {
+      setState(() => _showStepError = true);
+      return;
+    }
+    if (_step == _CreatorStep.preview) {
+      unawaited(_submit());
+      return;
+    }
+    setState(() {
+      _step = _CreatorStep.values[_step.index + 1];
+      _showStepError = false;
+    });
+  }
+
+  void _back() {
+    if (_step == _CreatorStep.basics || _saving) return;
+    setState(() {
+      _step = _CreatorStep.values[_step.index - 1];
+      _showStepError = false;
+    });
+  }
+
+  Future<void> _pickClosesDate() async {
+    final picked = await showAppDatePicker(
+      context,
+      initial: _closesAtDate ?? DateTime.now().add(const Duration(days: 7)),
+      firstDate: DateTime.now(),
+    );
+    if (picked == null || !mounted) return;
+    setState(() {
+      _closesAtDate = picked;
+      _closesEnabled = true;
+    });
+  }
+
+  Future<void> _pickClosesTime() async {
+    final picked = await showAppTimePicker(
+      context,
+      initial: (hour: _closesHour, minute: _closesMinute),
+    );
+    if (picked == null || !mounted) return;
+    setState(() {
+      _closesHour = picked.hour;
+      _closesMinute = picked.minute;
+    });
+  }
+
+  Future<void> _submit() async {
+    if (!_basicsValid || !_questionsValid || _saving) return;
+    if (_closesAt != null && !_closesAt!.isAfter(DateTime.now())) {
+      setState(() {
+        _step = _CreatorStep.settings;
+        _showStepError = true;
+      });
+      return;
+    }
+    setState(() => _saving = true);
+    final l10n = context.l10n;
+    final navigator = Navigator.of(context);
+    final poll = await widget.cubit.createPoll(
+      title: _title.text.trim(),
+      questions: [for (final question in _questions) question.toDraft()],
+      description: _description.text.trim(),
+      category: _category,
       isAnonymous: _anonymous,
-      showResults: _showResults,
-      expiresAt: expiresAt,
-      correctIndex: _type == .quiz ? correctIndex : null,
+      resultsVisibility: _resultsVisibility,
+      expiresAt: _closesAt,
+      allowChange: _allowChange,
     );
     if (!mounted) return;
-    if (created) {
-      Navigator.of(context).pop(true);
+    setState(() => _saving = false);
+    if (poll != null) {
+      navigator.pop(true);
     } else {
-      setState(() {
-        _saving = false;
-        _failed = true;
-      });
+      ToastManager.showError(context, message: l10n.pollsCreateError);
     }
   }
 
@@ -129,105 +315,174 @@ class _PollCreatorSheetState extends State<PollCreatorSheet> {
   Widget build(BuildContext context) {
     final colors = context.colors;
     final l10n = context.l10n;
+    final totalSteps = _CreatorStep.values.length;
     return Column(
-      mainAxisSize: .min,
-      crossAxisAlignment: .start,
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        NinjaSegmented<PollType>(
-          value: _type,
-          onChanged: (value) => setState(() => _type = value),
-          segments: [
-            NinjaSegment(value: PollType.single, label: l10n.pollsTypeSingle),
-            NinjaSegment(value: PollType.multi, label: l10n.pollsTypeMultiple),
-            NinjaSegment(value: PollType.quiz, label: l10n.pollsTypeQuiz),
-          ],
+        AppProgressBar(value: (_step.index + 1) / totalSteps),
+        const SizedBox(height: AppSpacing.xxs),
+        Text(
+          l10n.pollsStepCounter(_step.index + 1, totalSteps),
+          style: AppText.caption.copyWith(color: colors.muted),
         ),
         const SizedBox(height: AppSpacing.lg),
-        NinjaInput.multiline(
-          controller: _question,
-          autofocus: true,
-          maxLength: 140,
-          minLines: 1,
-          maxLines: 3,
-          placeholder: l10n.pollsQuestionHint,
-        ),
-        const SizedBox(height: AppSpacing.sm),
-        Text(
-          l10n.pollsOptionsLabel,
-          style: AppText.headline.copyWith(color: colors.ink),
-        ),
-        const SizedBox(height: AppSpacing.sm),
-        for (final (index, controller) in _options.indexed) ...[
-          _OptionField(
-            key: ValueKey(controller),
-            controller: controller,
-            hint: l10n.pollsOptionHint(index + 1),
-            isQuiz: _type == .quiz,
-            isCorrect: _correctIndex == index,
-            onMarkCorrect: () => setState(() => _correctIndex = index),
-            canRemove: _options.length > _minOptions,
-            onRemove: () => _removeOption(index),
+        switch (_step) {
+          _CreatorStep.basics => _BasicsStep(
+            titleController: _title,
+            descriptionController: _description,
+            category: _category,
+            showError: _showStepError,
+            onCategoryChanged: (value) => setState(() => _category = value),
+            onChanged: _clearStepError,
           ),
+          _CreatorStep.questions => _QuestionsStep(
+            questions: _questions,
+            showError: _showStepError,
+            onAdd: _addQuestion,
+            onRemove: _removeQuestion,
+            onMove: _moveQuestion,
+            onKindChanged: _setQuestionKind,
+            onAddOption: _addOption,
+            onRemoveOption: _removeOption,
+            onRequiredChanged: (index, {required value}) =>
+                setState(() => _questions[index].isRequired = value),
+            onChanged: () {
+              _refresh();
+              _clearStepError();
+            },
+          ),
+          _CreatorStep.settings => _SettingsStep(
+            anonymous: _anonymous,
+            onAnonymousChanged: (value) => setState(() => _anonymous = value),
+            resultsVisibility: _resultsVisibility,
+            onResultsVisibilityChanged: (value) =>
+                setState(() => _resultsVisibility = value),
+            allowChange: _allowChange,
+            onAllowChangeChanged: (value) =>
+                setState(() => _allowChange = value),
+            closesEnabled: _closesEnabled,
+            closesAt: _closesAt,
+            onClosesCleared: () => setState(() => _closesEnabled = false),
+            onPickDate: () => unawaited(_pickClosesDate()),
+            onPickTime: () => unawaited(_pickClosesTime()),
+            onPreset: (days) => setState(() {
+              final at = DateTime.now().add(Duration(days: days));
+              _closesAtDate = at;
+              _closesHour = at.hour;
+              _closesMinute = at.minute;
+              _closesEnabled = true;
+            }),
+          ),
+          _CreatorStep.preview => _PreviewStep(
+            title: _title.text.trim(),
+            description: _description.text.trim(),
+            category: _category,
+            questions: _questions,
+            anonymous: _anonymous,
+            closesAt: _closesAt,
+          ),
+        },
+        if (_step == _CreatorStep.settings && _showStepError) ...[
           const SizedBox(height: AppSpacing.sm),
-        ],
-        if (_options.length < _maxOptions)
-          _AddOptionButton(label: l10n.pollsAddOption, onTap: _addOption),
-        const SizedBox(height: AppSpacing.fieldGap),
-        Text(
-          l10n.pollsSettings,
-          style: AppText.headline.copyWith(color: colors.ink),
-        ),
-        const SizedBox(height: AppSpacing.sm),
-        _ToggleRow(
-          title: l10n.pollsAnonymous,
-          subtitle: l10n.pollsAnonymousSub,
-          value: _anonymous,
-          onChanged: (value) => setState(() => _anonymous = value),
-        ),
-        const SizedBox(height: AppSpacing.sm),
-        _ToggleRow(
-          title: l10n.pollsShowResults,
-          value: _showResults,
-          onChanged: (value) => setState(() => _showResults = value),
-        ),
-        const SizedBox(height: AppSpacing.md),
-        Text(
-          l10n.pollsExpiry,
-          style: AppText.body.copyWith(
-            color: colors.muted,
-            fontWeight: FontWeight.w700,
+          AppBanner(
+            message: l10n.pollsClosesFuture,
+            tone: AppBannerTone.danger,
           ),
+        ],
+        const SizedBox(height: AppSpacing.lg),
+        Row(
+          children: [
+            if (_step != _CreatorStep.basics) ...[
+              Expanded(
+                child: AppButton.secondary(
+                  label: l10n.back,
+                  onPressed: _saving ? null : _back,
+                ),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+            ],
+            Expanded(
+              child: AppButton.primary(
+                label: _step == _CreatorStep.preview
+                    ? l10n.pollsCreate
+                    : l10n.pollsNext,
+                loading: _saving,
+                onPressed: _saving ? null : _next,
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class _BasicsStep extends StatelessWidget {
+  const _BasicsStep({
+    required this.titleController,
+    required this.descriptionController,
+    required this.category,
+    required this.showError,
+    required this.onCategoryChanged,
+    required this.onChanged,
+  });
+
+  final TextEditingController titleController;
+  final TextEditingController descriptionController;
+  final PollCategory? category;
+  final bool showError;
+  final ValueChanged<PollCategory?> onCategoryChanged;
+  final VoidCallback onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final l10n = context.l10n;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        AppInputField(
+          controller: titleController,
+          placeholder: l10n.pollsTitleHint,
+          autofocus: true,
+          maxLength: 200,
+          errorText: showError && titleController.text.trim().isEmpty
+              ? l10n.pollsTitleRequired
+              : null,
+          onChanged: (_) => onChanged(),
+        ),
+        const SizedBox(height: AppSpacing.sm),
+        AppInputField.multiline(
+          controller: descriptionController,
+          placeholder: l10n.pollsDescriptionHint,
+          maxLength: 2000,
+          minLines: 2,
+          maxLines: 4,
+          onChanged: (_) => onChanged(),
+        ),
+        const SizedBox(height: AppSpacing.lg),
+        Text(
+          l10n.pollsCategoryLabel,
+          style: AppText.captionStrong.copyWith(color: colors.muted),
         ),
         const SizedBox(height: AppSpacing.sm),
         Wrap(
           spacing: 8,
           runSpacing: 8,
           children: [
-            for (final expiry in _Expiry.values)
-              _ExpiryChip(
-                label: expiry.label(l10n),
-                selected: _expiry == expiry,
-                onTap: () => setState(() => _expiry = expiry),
+            AppChip.filter(
+              label: l10n.pollsCategoryAll,
+              selected: category == null,
+              onTap: () => onCategoryChanged(null),
+            ),
+            for (final value in PollCategory.values)
+              AppChip.filter(
+                label: pollCategoryLabel(l10n, value),
+                selected: category == value,
+                onTap: () => onCategoryChanged(value),
               ),
           ],
-        ),
-        const SizedBox(height: AppSpacing.fieldGap),
-        if (_failed) ...[
-          Semantics(
-            liveRegion: true,
-            child: AppBanner(
-              message: l10n.pollsCreateError,
-              tone: AppBannerTone.danger,
-            ),
-          ),
-          const SizedBox(height: AppSpacing.md),
-        ],
-        NinjaButton.primary(
-          label: _saving ? l10n.pollsCreating : l10n.pollsCreate,
-          expanded: true,
-          size: NinjaButtonSize.large,
-          loading: _saving,
-          onPressed: _saving ? null : () => unawaited(_save()),
         ),
       ],
     );

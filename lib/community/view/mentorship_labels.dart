@@ -1,3 +1,4 @@
+import 'package:campus_repository/campus_repository.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 
 String mentorTopicLabel(AppLocalizations l10n, String key) => switch (key) {
@@ -37,3 +38,15 @@ String mentorWhenShortLabel(AppLocalizations l10n, String key) => switch (key) {
   'week' => l10n.mentorshipWhenShortWeek,
   _ => key,
 };
+
+bool mentorMatchesQuery(AppLocalizations l10n, Mentor mentor, String query) {
+  final normalized = query.trim().toLowerCase();
+  if (normalized.isEmpty) return true;
+  final haystack = [
+    mentor.fullName,
+    ?mentor.group,
+    mentor.bio,
+    for (final topic in mentor.topics) mentorTopicLabel(l10n, topic),
+  ].join(' ').toLowerCase();
+  return haystack.contains(normalized);
+}

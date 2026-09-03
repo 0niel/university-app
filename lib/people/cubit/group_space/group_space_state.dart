@@ -8,6 +8,13 @@ abstract class GroupSpaceState with _$GroupSpaceState {
     @Default(false) bool isRefreshing,
     @Default(<String>{}) Set<String> pendingLikeIds,
     @Default(<String>{}) Set<String> pendingLinkDeleteIds,
+    @Default(<CollabNote>[]) List<CollabNote> notesPreview,
+    @Default(<String, List<GroupPostComment>>{})
+    Map<String, List<GroupPostComment>> comments,
+    @Default(<String>{}) Set<String> loadingCommentPostIds,
+    @Default(false) bool isSubmittingComment,
+    @Default(<String>{}) Set<String> pendingCommentDeleteIds,
+    @Default(1) int onlineCount,
     GroupSpaceMutationFailure? mutationFailure,
   }) = _GroupSpaceState;
 }

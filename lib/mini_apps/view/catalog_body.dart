@@ -1,12 +1,14 @@
 part of 'mini_apps_page.dart';
 
 abstract final class _CatalogLayout {
-  static const double bottomInset = AppControlSize.fab + AppSpacing.xxxlg;
-  static const statePadding = EdgeInsets.fromLTRB(
+  static double bottomInset(BuildContext context) =>
+      ninjaBottomInset(context) + AppControlSize.fab + AppSpacing.xxlg;
+
+  static EdgeInsets statePadding(BuildContext context) => EdgeInsets.fromLTRB(
     AppSpacing.screen,
     AppSpacing.zero,
     AppSpacing.screen,
-    bottomInset,
+    bottomInset(context),
   );
 }
 
@@ -39,7 +41,7 @@ class _CatalogBody extends StatelessWidget {
     if (state.status == .failure && state.apps.isEmpty) {
       return SingleChildScrollView(
         key: const ValueKey('catalog-failure'),
-        padding: _CatalogLayout.statePadding,
+        padding: _CatalogLayout.statePadding(context),
         child: NinjaErrorState(
           title: l10n.loadingError,
           message: l10n.tryAgain,
@@ -54,7 +56,7 @@ class _CatalogBody extends StatelessWidget {
       final filtered = state.query.isNotEmpty || state.category != null;
       return SingleChildScrollView(
         key: const ValueKey('catalog-empty'),
-        padding: _CatalogLayout.statePadding,
+        padding: _CatalogLayout.statePadding(context),
         child: NinjaEmptyState(
           icon: AppLineIconWidget(
             filtered ? AppLineIcon.search : AppLineIcon.grid,
@@ -75,7 +77,7 @@ class _CatalogBody extends StatelessWidget {
       backgroundColor: colors.surface,
       onRefresh: () => context.read<MiniAppsCatalogCubit>().load(),
       child: ListView(
-        padding: const .only(bottom: _CatalogLayout.bottomInset),
+        padding: EdgeInsets.only(bottom: _CatalogLayout.bottomInset(context)),
         children: [
           if (state.recents.isNotEmpty) ...[
             _CatalogSectionLabel(title: l10n.miniAppsRecents),

@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$GroupNote {
 
-@JsonKey(defaultValue: '') String get id;@JsonKey(defaultValue: '') String get title;@JsonKey(defaultValue: '') String get authorName; String get body;@JsonKey(fromJson: dateTimeFromJson, toJson: dateTimeToJson) DateTime? get createdAt; bool get isPinned; bool get isMine; int get likes; bool get likedByMe;
+@JsonKey(defaultValue: '') String get id;@JsonKey(defaultValue: '') String get title;@JsonKey(defaultValue: '') String get authorName; String get body;@JsonKey(fromJson: dateTimeFromJson, toJson: dateTimeToJson) DateTime? get createdAt; bool get isPinned; bool get isMine; int get likes; bool get likedByMe; int get commentsCount;
 /// Create a copy of GroupNote
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +28,16 @@ $GroupNoteCopyWith<GroupNote> get copyWith => _$GroupNoteCopyWithImpl<GroupNote>
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is GroupNote&&(identical(other.id, id) || other.id == id)&&(identical(other.title, title) || other.title == title)&&(identical(other.authorName, authorName) || other.authorName == authorName)&&(identical(other.body, body) || other.body == body)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.isPinned, isPinned) || other.isPinned == isPinned)&&(identical(other.isMine, isMine) || other.isMine == isMine)&&(identical(other.likes, likes) || other.likes == likes)&&(identical(other.likedByMe, likedByMe) || other.likedByMe == likedByMe));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is GroupNote&&(identical(other.id, id) || other.id == id)&&(identical(other.title, title) || other.title == title)&&(identical(other.authorName, authorName) || other.authorName == authorName)&&(identical(other.body, body) || other.body == body)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.isPinned, isPinned) || other.isPinned == isPinned)&&(identical(other.isMine, isMine) || other.isMine == isMine)&&(identical(other.likes, likes) || other.likes == likes)&&(identical(other.likedByMe, likedByMe) || other.likedByMe == likedByMe)&&(identical(other.commentsCount, commentsCount) || other.commentsCount == commentsCount));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,title,authorName,body,createdAt,isPinned,isMine,likes,likedByMe);
+int get hashCode => Object.hash(runtimeType,id,title,authorName,body,createdAt,isPinned,isMine,likes,likedByMe,commentsCount);
 
 @override
 String toString() {
-  return 'GroupNote(id: $id, title: $title, authorName: $authorName, body: $body, createdAt: $createdAt, isPinned: $isPinned, isMine: $isMine, likes: $likes, likedByMe: $likedByMe)';
+  return 'GroupNote(id: $id, title: $title, authorName: $authorName, body: $body, createdAt: $createdAt, isPinned: $isPinned, isMine: $isMine, likes: $likes, likedByMe: $likedByMe, commentsCount: $commentsCount)';
 }
 
 
@@ -48,7 +48,7 @@ abstract mixin class $GroupNoteCopyWith<$Res>  {
   factory $GroupNoteCopyWith(GroupNote value, $Res Function(GroupNote) _then) = _$GroupNoteCopyWithImpl;
 @useResult
 $Res call({
-@JsonKey(defaultValue: '') String id,@JsonKey(defaultValue: '') String title,@JsonKey(defaultValue: '') String authorName, String body,@JsonKey(fromJson: dateTimeFromJson, toJson: dateTimeToJson) DateTime? createdAt, bool isPinned, bool isMine, int likes, bool likedByMe
+@JsonKey(defaultValue: '') String id,@JsonKey(defaultValue: '') String title,@JsonKey(defaultValue: '') String authorName, String body,@JsonKey(fromJson: dateTimeFromJson, toJson: dateTimeToJson) DateTime? createdAt, bool isPinned, bool isMine, int likes, bool likedByMe, int commentsCount
 });
 
 
@@ -65,7 +65,7 @@ class _$GroupNoteCopyWithImpl<$Res>
 
 /// Create a copy of GroupNote
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? title = null,Object? authorName = null,Object? body = null,Object? createdAt = freezed,Object? isPinned = null,Object? isMine = null,Object? likes = null,Object? likedByMe = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? title = null,Object? authorName = null,Object? body = null,Object? createdAt = freezed,Object? isPinned = null,Object? isMine = null,Object? likes = null,Object? likedByMe = null,Object? commentsCount = null,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,title: null == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
@@ -76,7 +76,8 @@ as DateTime?,isPinned: null == isPinned ? _self.isPinned : isPinned // ignore: c
 as bool,isMine: null == isMine ? _self.isMine : isMine // ignore: cast_nullable_to_non_nullable
 as bool,likes: null == likes ? _self.likes : likes // ignore: cast_nullable_to_non_nullable
 as int,likedByMe: null == likedByMe ? _self.likedByMe : likedByMe // ignore: cast_nullable_to_non_nullable
-as bool,
+as bool,commentsCount: null == commentsCount ? _self.commentsCount : commentsCount // ignore: cast_nullable_to_non_nullable
+as int,
   ));
 }
 
@@ -161,10 +162,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(defaultValue: '')  String id, @JsonKey(defaultValue: '')  String title, @JsonKey(defaultValue: '')  String authorName,  String body, @JsonKey(fromJson: dateTimeFromJson, toJson: dateTimeToJson)  DateTime? createdAt,  bool isPinned,  bool isMine,  int likes,  bool likedByMe)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(defaultValue: '')  String id, @JsonKey(defaultValue: '')  String title, @JsonKey(defaultValue: '')  String authorName,  String body, @JsonKey(fromJson: dateTimeFromJson, toJson: dateTimeToJson)  DateTime? createdAt,  bool isPinned,  bool isMine,  int likes,  bool likedByMe,  int commentsCount)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _GroupNote() when $default != null:
-return $default(_that.id,_that.title,_that.authorName,_that.body,_that.createdAt,_that.isPinned,_that.isMine,_that.likes,_that.likedByMe);case _:
+return $default(_that.id,_that.title,_that.authorName,_that.body,_that.createdAt,_that.isPinned,_that.isMine,_that.likes,_that.likedByMe,_that.commentsCount);case _:
   return orElse();
 
 }
@@ -182,10 +183,10 @@ return $default(_that.id,_that.title,_that.authorName,_that.body,_that.createdAt
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(defaultValue: '')  String id, @JsonKey(defaultValue: '')  String title, @JsonKey(defaultValue: '')  String authorName,  String body, @JsonKey(fromJson: dateTimeFromJson, toJson: dateTimeToJson)  DateTime? createdAt,  bool isPinned,  bool isMine,  int likes,  bool likedByMe)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(defaultValue: '')  String id, @JsonKey(defaultValue: '')  String title, @JsonKey(defaultValue: '')  String authorName,  String body, @JsonKey(fromJson: dateTimeFromJson, toJson: dateTimeToJson)  DateTime? createdAt,  bool isPinned,  bool isMine,  int likes,  bool likedByMe,  int commentsCount)  $default,) {final _that = this;
 switch (_that) {
 case _GroupNote():
-return $default(_that.id,_that.title,_that.authorName,_that.body,_that.createdAt,_that.isPinned,_that.isMine,_that.likes,_that.likedByMe);case _:
+return $default(_that.id,_that.title,_that.authorName,_that.body,_that.createdAt,_that.isPinned,_that.isMine,_that.likes,_that.likedByMe,_that.commentsCount);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -202,10 +203,10 @@ return $default(_that.id,_that.title,_that.authorName,_that.body,_that.createdAt
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(defaultValue: '')  String id, @JsonKey(defaultValue: '')  String title, @JsonKey(defaultValue: '')  String authorName,  String body, @JsonKey(fromJson: dateTimeFromJson, toJson: dateTimeToJson)  DateTime? createdAt,  bool isPinned,  bool isMine,  int likes,  bool likedByMe)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(defaultValue: '')  String id, @JsonKey(defaultValue: '')  String title, @JsonKey(defaultValue: '')  String authorName,  String body, @JsonKey(fromJson: dateTimeFromJson, toJson: dateTimeToJson)  DateTime? createdAt,  bool isPinned,  bool isMine,  int likes,  bool likedByMe,  int commentsCount)?  $default,) {final _that = this;
 switch (_that) {
 case _GroupNote() when $default != null:
-return $default(_that.id,_that.title,_that.authorName,_that.body,_that.createdAt,_that.isPinned,_that.isMine,_that.likes,_that.likedByMe);case _:
+return $default(_that.id,_that.title,_that.authorName,_that.body,_that.createdAt,_that.isPinned,_that.isMine,_that.likes,_that.likedByMe,_that.commentsCount);case _:
   return null;
 
 }
@@ -217,7 +218,7 @@ return $default(_that.id,_that.title,_that.authorName,_that.body,_that.createdAt
 @JsonSerializable()
 
 class _GroupNote implements GroupNote {
-  const _GroupNote({@JsonKey(defaultValue: '') required this.id, @JsonKey(defaultValue: '') required this.title, @JsonKey(defaultValue: '') required this.authorName, this.body = '', @JsonKey(fromJson: dateTimeFromJson, toJson: dateTimeToJson) this.createdAt, this.isPinned = false, this.isMine = false, this.likes = 0, this.likedByMe = false});
+  const _GroupNote({@JsonKey(defaultValue: '') required this.id, @JsonKey(defaultValue: '') required this.title, @JsonKey(defaultValue: '') required this.authorName, this.body = '', @JsonKey(fromJson: dateTimeFromJson, toJson: dateTimeToJson) this.createdAt, this.isPinned = false, this.isMine = false, this.likes = 0, this.likedByMe = false, this.commentsCount = 0});
   factory _GroupNote.fromJson(Map<String, dynamic> json) => _$GroupNoteFromJson(json);
 
 @override@JsonKey(defaultValue: '') final  String id;
@@ -229,6 +230,7 @@ class _GroupNote implements GroupNote {
 @override@JsonKey() final  bool isMine;
 @override@JsonKey() final  int likes;
 @override@JsonKey() final  bool likedByMe;
+@override@JsonKey() final  int commentsCount;
 
 /// Create a copy of GroupNote
 /// with the given fields replaced by the non-null parameter values.
@@ -243,16 +245,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _GroupNote&&(identical(other.id, id) || other.id == id)&&(identical(other.title, title) || other.title == title)&&(identical(other.authorName, authorName) || other.authorName == authorName)&&(identical(other.body, body) || other.body == body)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.isPinned, isPinned) || other.isPinned == isPinned)&&(identical(other.isMine, isMine) || other.isMine == isMine)&&(identical(other.likes, likes) || other.likes == likes)&&(identical(other.likedByMe, likedByMe) || other.likedByMe == likedByMe));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _GroupNote&&(identical(other.id, id) || other.id == id)&&(identical(other.title, title) || other.title == title)&&(identical(other.authorName, authorName) || other.authorName == authorName)&&(identical(other.body, body) || other.body == body)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.isPinned, isPinned) || other.isPinned == isPinned)&&(identical(other.isMine, isMine) || other.isMine == isMine)&&(identical(other.likes, likes) || other.likes == likes)&&(identical(other.likedByMe, likedByMe) || other.likedByMe == likedByMe)&&(identical(other.commentsCount, commentsCount) || other.commentsCount == commentsCount));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,title,authorName,body,createdAt,isPinned,isMine,likes,likedByMe);
+int get hashCode => Object.hash(runtimeType,id,title,authorName,body,createdAt,isPinned,isMine,likes,likedByMe,commentsCount);
 
 @override
 String toString() {
-  return 'GroupNote(id: $id, title: $title, authorName: $authorName, body: $body, createdAt: $createdAt, isPinned: $isPinned, isMine: $isMine, likes: $likes, likedByMe: $likedByMe)';
+  return 'GroupNote(id: $id, title: $title, authorName: $authorName, body: $body, createdAt: $createdAt, isPinned: $isPinned, isMine: $isMine, likes: $likes, likedByMe: $likedByMe, commentsCount: $commentsCount)';
 }
 
 
@@ -263,7 +265,7 @@ abstract mixin class _$GroupNoteCopyWith<$Res> implements $GroupNoteCopyWith<$Re
   factory _$GroupNoteCopyWith(_GroupNote value, $Res Function(_GroupNote) _then) = __$GroupNoteCopyWithImpl;
 @override @useResult
 $Res call({
-@JsonKey(defaultValue: '') String id,@JsonKey(defaultValue: '') String title,@JsonKey(defaultValue: '') String authorName, String body,@JsonKey(fromJson: dateTimeFromJson, toJson: dateTimeToJson) DateTime? createdAt, bool isPinned, bool isMine, int likes, bool likedByMe
+@JsonKey(defaultValue: '') String id,@JsonKey(defaultValue: '') String title,@JsonKey(defaultValue: '') String authorName, String body,@JsonKey(fromJson: dateTimeFromJson, toJson: dateTimeToJson) DateTime? createdAt, bool isPinned, bool isMine, int likes, bool likedByMe, int commentsCount
 });
 
 
@@ -280,7 +282,7 @@ class __$GroupNoteCopyWithImpl<$Res>
 
 /// Create a copy of GroupNote
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? title = null,Object? authorName = null,Object? body = null,Object? createdAt = freezed,Object? isPinned = null,Object? isMine = null,Object? likes = null,Object? likedByMe = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? title = null,Object? authorName = null,Object? body = null,Object? createdAt = freezed,Object? isPinned = null,Object? isMine = null,Object? likes = null,Object? likedByMe = null,Object? commentsCount = null,}) {
   return _then(_GroupNote(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,title: null == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
@@ -291,7 +293,8 @@ as DateTime?,isPinned: null == isPinned ? _self.isPinned : isPinned // ignore: c
 as bool,isMine: null == isMine ? _self.isMine : isMine // ignore: cast_nullable_to_non_nullable
 as bool,likes: null == likes ? _self.likes : likes // ignore: cast_nullable_to_non_nullable
 as int,likedByMe: null == likedByMe ? _self.likedByMe : likedByMe // ignore: cast_nullable_to_non_nullable
-as bool,
+as bool,commentsCount: null == commentsCount ? _self.commentsCount : commentsCount // ignore: cast_nullable_to_non_nullable
+as int,
   ));
 }
 

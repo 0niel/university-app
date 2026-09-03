@@ -9,6 +9,7 @@ class LostFoundPhotoViewer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: Stack(
@@ -36,13 +37,13 @@ class LostFoundPhotoViewer extends StatelessWidget {
                 height: AppControlSize.iconButton,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.14),
+                  color: colors.white.withValues(alpha: .14),
                   shape: BoxShape.circle,
                 ),
-                child: const AppLineIconWidget(
+                child: AppLineIconWidget(
                   AppLineIcon.close,
                   size: 20,
-                  color: Colors.white,
+                  color: colors.white,
                 ),
               ),
             ),

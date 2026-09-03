@@ -98,6 +98,11 @@ void main() {
     streakDays: 5,
     isCurrentUser: true,
   );
+  final activityCalendar = [
+    ActivityDay(day: DateTime(2026, 8, 29), count: 2),
+    ActivityDay(day: DateTime(2026, 8, 30)),
+    ActivityDay(day: DateTime(2026, 8, 31), count: 3),
+  ];
 
   late GamificationRepository repository;
   late AppBloc appBloc;
@@ -138,6 +143,9 @@ void main() {
     when(
       () => repository.getSettings(),
     ).thenAnswer((_) async => const UserSettings());
+    when(
+      () => repository.getActivityCalendar(days: any(named: 'days')),
+    ).thenAnswer((_) async => activityCalendar);
   });
 
   Widget subject({
@@ -326,22 +334,32 @@ void main() {
     await pumpSearch(2);
   });
 
-  testWidgets('does not invent a two-week streak history', (tester) async {
+  testWidgets('activity header reflects the real server streak count', (
+    tester,
+  ) async {
     await pumpProfile(tester);
-    expect(find.text('сегодня'), findsNothing);
     expect(find.textContaining('стрик 5 дн.'), findsOneWidget);
   });
 
-  testWidgets('real streak history does not override the server streak count', (
-    tester,
-  ) async {
-    when(() => repository.getProfileOverview(any())).thenAnswer(
-      (_) async => overview.copyWith(streakHistory: List.filled(14, true)),
-    );
-    await pumpProfile(tester);
-    expect(find.textContaining('стрик 5 дн.'), findsOneWidget);
-    expect(tester.takeException(), isNull);
-  });
+  testWidgets(
+    'a full activity calendar does not override the server streak count',
+    (tester) async {
+      when(
+        () => repository.getActivityCalendar(days: any(named: 'days')),
+      ).thenAnswer(
+        (_) async => [
+          for (var i = 0; i < 140; i++)
+            ActivityDay(
+              day: DateTime(2026, 4, 15).add(Duration(days: i)),
+              count: i.isEven ? 2 : 0,
+            ),
+        ],
+      );
+      await pumpProfile(tester);
+      expect(find.textContaining('стрик 5 дн.'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    },
+  );
 
   testWidgets('celebrates every badge the sync just unlocked', (tester) async {
     when(
@@ -486,11 +504,6 @@ void main() {
       when(
         () => repository.ensureProfile(any()),
       ).thenAnswer((_) async => profile.copyWith(longestStreak: 9));
-      when(() => repository.getProfileOverview(any())).thenAnswer(
-        (_) async => overview.copyWith(
-          streakHistory: List.generate(14, (index) => index.isEven),
-        ),
-      );
       String? copied;
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
           .setMockMethodCallHandler(SystemChannels.platform, (call) async {
@@ -512,7 +525,7 @@ void main() {
       );
       expect(activity.streakDays, 5);
       expect(activity.longestStreak, 9);
-      expect(activity.history, List.generate(14, (index) => index.isEven));
+      expect(activity.days, activityCalendar);
       await tester.ensureVisible(find.byKey(const ValueKey('profile-share')));
       await tester.tap(find.byKey(const ValueKey('profile-share')));
       await tester.pump();

@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$KnowledgeBankState {
 
- KnowledgeBankStatus get status; UserGamificationProfile get profile; List<StudyMaterial> get materials; List<MaterialAuthor> get authors; String get type;
+ KnowledgeBankStatus get status; UserGamificationProfile get profile; List<StudyMaterial> get materials; List<MaterialAuthor> get authors; String get type; Map<String, String> get previewUrls;
 /// Create a copy of KnowledgeBankState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +25,16 @@ $KnowledgeBankStateCopyWith<KnowledgeBankState> get copyWith => _$KnowledgeBankS
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is KnowledgeBankState&&(identical(other.status, status) || other.status == status)&&(identical(other.profile, profile) || other.profile == profile)&&const DeepCollectionEquality().equals(other.materials, materials)&&const DeepCollectionEquality().equals(other.authors, authors)&&(identical(other.type, type) || other.type == type));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is KnowledgeBankState&&(identical(other.status, status) || other.status == status)&&(identical(other.profile, profile) || other.profile == profile)&&const DeepCollectionEquality().equals(other.materials, materials)&&const DeepCollectionEquality().equals(other.authors, authors)&&(identical(other.type, type) || other.type == type)&&const DeepCollectionEquality().equals(other.previewUrls, previewUrls));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,status,profile,const DeepCollectionEquality().hash(materials),const DeepCollectionEquality().hash(authors),type);
+int get hashCode => Object.hash(runtimeType,status,profile,const DeepCollectionEquality().hash(materials),const DeepCollectionEquality().hash(authors),type,const DeepCollectionEquality().hash(previewUrls));
 
 @override
 String toString() {
-  return 'KnowledgeBankState(status: $status, profile: $profile, materials: $materials, authors: $authors, type: $type)';
+  return 'KnowledgeBankState(status: $status, profile: $profile, materials: $materials, authors: $authors, type: $type, previewUrls: $previewUrls)';
 }
 
 
@@ -45,7 +45,7 @@ abstract mixin class $KnowledgeBankStateCopyWith<$Res>  {
   factory $KnowledgeBankStateCopyWith(KnowledgeBankState value, $Res Function(KnowledgeBankState) _then) = _$KnowledgeBankStateCopyWithImpl;
 @useResult
 $Res call({
- KnowledgeBankStatus status, UserGamificationProfile profile, List<StudyMaterial> materials, List<MaterialAuthor> authors, String type
+ KnowledgeBankStatus status, UserGamificationProfile profile, List<StudyMaterial> materials, List<MaterialAuthor> authors, String type, Map<String, String> previewUrls
 });
 
 
@@ -62,14 +62,15 @@ class _$KnowledgeBankStateCopyWithImpl<$Res>
 
 /// Create a copy of KnowledgeBankState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? status = null,Object? profile = null,Object? materials = null,Object? authors = null,Object? type = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? status = null,Object? profile = null,Object? materials = null,Object? authors = null,Object? type = null,Object? previewUrls = null,}) {
   return _then(_self.copyWith(
 status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as KnowledgeBankStatus,profile: null == profile ? _self.profile : profile // ignore: cast_nullable_to_non_nullable
 as UserGamificationProfile,materials: null == materials ? _self.materials : materials // ignore: cast_nullable_to_non_nullable
 as List<StudyMaterial>,authors: null == authors ? _self.authors : authors // ignore: cast_nullable_to_non_nullable
 as List<MaterialAuthor>,type: null == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
-as String,
+as String,previewUrls: null == previewUrls ? _self.previewUrls : previewUrls // ignore: cast_nullable_to_non_nullable
+as Map<String, String>,
   ));
 }
 /// Create a copy of KnowledgeBankState
@@ -163,10 +164,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( KnowledgeBankStatus status,  UserGamificationProfile profile,  List<StudyMaterial> materials,  List<MaterialAuthor> authors,  String type)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( KnowledgeBankStatus status,  UserGamificationProfile profile,  List<StudyMaterial> materials,  List<MaterialAuthor> authors,  String type,  Map<String, String> previewUrls)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _KnowledgeBankState() when $default != null:
-return $default(_that.status,_that.profile,_that.materials,_that.authors,_that.type);case _:
+return $default(_that.status,_that.profile,_that.materials,_that.authors,_that.type,_that.previewUrls);case _:
   return orElse();
 
 }
@@ -184,10 +185,10 @@ return $default(_that.status,_that.profile,_that.materials,_that.authors,_that.t
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( KnowledgeBankStatus status,  UserGamificationProfile profile,  List<StudyMaterial> materials,  List<MaterialAuthor> authors,  String type)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( KnowledgeBankStatus status,  UserGamificationProfile profile,  List<StudyMaterial> materials,  List<MaterialAuthor> authors,  String type,  Map<String, String> previewUrls)  $default,) {final _that = this;
 switch (_that) {
 case _KnowledgeBankState():
-return $default(_that.status,_that.profile,_that.materials,_that.authors,_that.type);case _:
+return $default(_that.status,_that.profile,_that.materials,_that.authors,_that.type,_that.previewUrls);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -204,10 +205,10 @@ return $default(_that.status,_that.profile,_that.materials,_that.authors,_that.t
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( KnowledgeBankStatus status,  UserGamificationProfile profile,  List<StudyMaterial> materials,  List<MaterialAuthor> authors,  String type)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( KnowledgeBankStatus status,  UserGamificationProfile profile,  List<StudyMaterial> materials,  List<MaterialAuthor> authors,  String type,  Map<String, String> previewUrls)?  $default,) {final _that = this;
 switch (_that) {
 case _KnowledgeBankState() when $default != null:
-return $default(_that.status,_that.profile,_that.materials,_that.authors,_that.type);case _:
+return $default(_that.status,_that.profile,_that.materials,_that.authors,_that.type,_that.previewUrls);case _:
   return null;
 
 }
@@ -219,7 +220,7 @@ return $default(_that.status,_that.profile,_that.materials,_that.authors,_that.t
 
 
 class _KnowledgeBankState extends KnowledgeBankState {
-  const _KnowledgeBankState({this.status = KnowledgeBankStatus.initial, this.profile = UserGamificationProfile.empty, final  List<StudyMaterial> materials = const <StudyMaterial>[], final  List<MaterialAuthor> authors = const <MaterialAuthor>[], this.type = 'all'}): _materials = materials,_authors = authors,super._();
+  const _KnowledgeBankState({this.status = KnowledgeBankStatus.initial, this.profile = UserGamificationProfile.empty, final  List<StudyMaterial> materials = const <StudyMaterial>[], final  List<MaterialAuthor> authors = const <MaterialAuthor>[], this.type = 'all', final  Map<String, String> previewUrls = const <String, String>{}}): _materials = materials,_authors = authors,_previewUrls = previewUrls,super._();
 
 
 @override@JsonKey() final  KnowledgeBankStatus status;
@@ -239,6 +240,13 @@ class _KnowledgeBankState extends KnowledgeBankState {
 }
 
 @override@JsonKey() final  String type;
+ final  Map<String, String> _previewUrls;
+@override@JsonKey() Map<String, String> get previewUrls {
+  if (_previewUrls is EqualUnmodifiableMapView) return _previewUrls;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableMapView(_previewUrls);
+}
+
 
 /// Create a copy of KnowledgeBankState
 /// with the given fields replaced by the non-null parameter values.
@@ -250,16 +258,16 @@ _$KnowledgeBankStateCopyWith<_KnowledgeBankState> get copyWith => __$KnowledgeBa
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _KnowledgeBankState&&(identical(other.status, status) || other.status == status)&&(identical(other.profile, profile) || other.profile == profile)&&const DeepCollectionEquality().equals(other._materials, _materials)&&const DeepCollectionEquality().equals(other._authors, _authors)&&(identical(other.type, type) || other.type == type));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _KnowledgeBankState&&(identical(other.status, status) || other.status == status)&&(identical(other.profile, profile) || other.profile == profile)&&const DeepCollectionEquality().equals(other._materials, _materials)&&const DeepCollectionEquality().equals(other._authors, _authors)&&(identical(other.type, type) || other.type == type)&&const DeepCollectionEquality().equals(other._previewUrls, _previewUrls));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,status,profile,const DeepCollectionEquality().hash(_materials),const DeepCollectionEquality().hash(_authors),type);
+int get hashCode => Object.hash(runtimeType,status,profile,const DeepCollectionEquality().hash(_materials),const DeepCollectionEquality().hash(_authors),type,const DeepCollectionEquality().hash(_previewUrls));
 
 @override
 String toString() {
-  return 'KnowledgeBankState(status: $status, profile: $profile, materials: $materials, authors: $authors, type: $type)';
+  return 'KnowledgeBankState(status: $status, profile: $profile, materials: $materials, authors: $authors, type: $type, previewUrls: $previewUrls)';
 }
 
 
@@ -270,7 +278,7 @@ abstract mixin class _$KnowledgeBankStateCopyWith<$Res> implements $KnowledgeBan
   factory _$KnowledgeBankStateCopyWith(_KnowledgeBankState value, $Res Function(_KnowledgeBankState) _then) = __$KnowledgeBankStateCopyWithImpl;
 @override @useResult
 $Res call({
- KnowledgeBankStatus status, UserGamificationProfile profile, List<StudyMaterial> materials, List<MaterialAuthor> authors, String type
+ KnowledgeBankStatus status, UserGamificationProfile profile, List<StudyMaterial> materials, List<MaterialAuthor> authors, String type, Map<String, String> previewUrls
 });
 
 
@@ -287,14 +295,15 @@ class __$KnowledgeBankStateCopyWithImpl<$Res>
 
 /// Create a copy of KnowledgeBankState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? status = null,Object? profile = null,Object? materials = null,Object? authors = null,Object? type = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? status = null,Object? profile = null,Object? materials = null,Object? authors = null,Object? type = null,Object? previewUrls = null,}) {
   return _then(_KnowledgeBankState(
 status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as KnowledgeBankStatus,profile: null == profile ? _self.profile : profile // ignore: cast_nullable_to_non_nullable
 as UserGamificationProfile,materials: null == materials ? _self._materials : materials // ignore: cast_nullable_to_non_nullable
 as List<StudyMaterial>,authors: null == authors ? _self._authors : authors // ignore: cast_nullable_to_non_nullable
 as List<MaterialAuthor>,type: null == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
-as String,
+as String,previewUrls: null == previewUrls ? _self._previewUrls : previewUrls // ignore: cast_nullable_to_non_nullable
+as Map<String, String>,
   ));
 }
 

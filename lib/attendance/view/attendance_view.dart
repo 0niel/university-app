@@ -15,7 +15,9 @@ class AttendanceView extends StatelessWidget {
     return Scaffold(
       backgroundColor: colors.canvas,
       body: SingleChildScrollView(
-        padding: const EdgeInsets.only(bottom: 40),
+        padding: EdgeInsets.only(
+          bottom: ninjaBottomInset(context) + AppSpacing.lg,
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [

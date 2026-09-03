@@ -108,4 +108,29 @@ void main() {
       throwsA(isA<DeleteDeadlineFailure>()),
     );
   });
+
+  test('updateDeadline uses UpdateDeadlineFailure', () async {
+    final cause = StateError('update failed');
+    when(
+      () => deadlines.updateDeadline(id: 'deadline-1', title: 'New title'),
+    ).thenThrow(cause);
+
+    await expectLater(
+      repository.updateDeadline(id: 'deadline-1', title: 'New title'),
+      throwsA(isA<UpdateDeadlineFailure>()),
+    );
+  });
+
+  test('postponeDeadlines uses PostponeDeadlinesFailure', () async {
+    final cause = StateError('postpone failed');
+    final until = DateTime.utc(2026, 12);
+    when(
+      () => deadlines.postponeDeadlines(ids: ['deadline-1'], until: until),
+    ).thenThrow(cause);
+
+    await expectLater(
+      repository.postponeDeadlines(ids: ['deadline-1'], until: until),
+      throwsA(isA<PostponeDeadlinesFailure>()),
+    );
+  });
 }

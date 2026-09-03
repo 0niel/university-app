@@ -4312,7 +4312,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get deadlineRemindTitle => 'Remind in advance';
 
   @override
-  String get deadlineRemindSubtitle => 'a day before and 2 hours before';
+  String get deadlineRemindSubtitle =>
+      'at the chosen lead time before the deadline';
 
   @override
   String get deadlineShareTitle => 'Share with group';
@@ -10883,4 +10884,1131 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get knowledgePurchaseInsufficient => 'Not enough shurikens';
+
+  @override
+  String mediaViewerIndex(int index, int total) {
+    return '$index / $total';
+  }
+
+  @override
+  String get mediaViewerDownloading => 'Downloading';
+
+  @override
+  String get mediaViewerOpenExternally => 'Open externally';
+
+  @override
+  String get mediaViewerDownloadFailed => 'Couldn\'t download the file';
+
+  @override
+  String get mediaViewerSaved => 'Saved';
+
+  @override
+  String homeLikesCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count likes',
+      one: '$count like',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get teamFinderCreateOtherRole => 'Other';
+
+  @override
+  String get teamFinderCreateCustomRoleLabel => 'CUSTOM ROLE';
+
+  @override
+  String get teamFinderCreateCustomRoleHint => 'e.g. DevOps, Analyst';
+
+  @override
+  String get teamFinderCreateCustomRoleHelper =>
+      'Comma-separated adds several roles';
+
+  @override
+  String get teamFinderCreateTitleError => 'Enter a team name';
+
+  @override
+  String get teamFinderCreateRolesError => 'Pick at least one role';
+
+  @override
+  String get teamFinderCreateDeadlinePlaceholder => 'Pick a date';
+
+  @override
+  String get teamFinderRemoveDeadline => 'Remove';
+
+  @override
+  String teamFinderCreateBoostInsufficient(int balance) {
+    return 'Need 50 shurikens, you have $balance';
+  }
+
+  @override
+  String get teamFinderEditSheetTitle => 'Edit team';
+
+  @override
+  String get teamFinderSaveChanges => 'Save';
+
+  @override
+  String get teamFinderSaving => 'Saving…';
+
+  @override
+  String get teamFinderUpdateError => 'Couldn\'t save changes';
+
+  @override
+  String get teamFinderTeamUpdated => 'Changes saved';
+
+  @override
+  String get teamFinderEditTeam => 'Edit';
+
+  @override
+  String get teamFinderCloseTeam => 'Close recruiting';
+
+  @override
+  String get teamFinderReopenTeam => 'Reopen recruiting';
+
+  @override
+  String get teamFinderCloseConfirmTitle => 'Close recruiting for this team?';
+
+  @override
+  String get teamFinderCloseConfirmBody =>
+      'The team will disappear from search. Reopen it anytime from «Mine».';
+
+  @override
+  String get teamFinderCloseError => 'Couldn\'t close recruiting';
+
+  @override
+  String get teamFinderClosedStatus => 'Recruiting closed';
+
+  @override
+  String get teamFinderSearchHint => 'Team, role, event…';
+
+  @override
+  String get teamFinderSearchEmptyTitle => 'Nothing found';
+
+  @override
+  String get teamFinderSearchEmptySubtitle => 'Try another query or filter';
+
+  @override
+  String get teamFinderRolesFilterLabel => 'ROLES';
+
+  @override
+  String get collabNotesSearchHint => 'Search notes';
+
+  @override
+  String get collabNotesActionRename => 'Rename';
+
+  @override
+  String get collabNotesActionVisibility => 'Change visibility';
+
+  @override
+  String get collabNotesRenameTitle => 'Rename note';
+
+  @override
+  String get collabNotesRenameHint => 'Note title';
+
+  @override
+  String get collabNotesRenameError => 'Could not rename the note';
+
+  @override
+  String get collabNotesVisibilityTitle => 'Note visibility';
+
+  @override
+  String get collabNotesVisibilityError => 'Could not change visibility';
+
+  @override
+  String get collabNotesReadOnlyBanner =>
+      'View only — you can\'t edit this note';
+
+  @override
+  String get collabNotesOfflineStatus => 'No connection — will save later';
+
+  @override
+  String get collabNotesConflictResolved =>
+      'Merged changes from another editor';
+
+  @override
+  String get collabNotesCollaboratorsTooltip => 'Note collaborators';
+
+  @override
+  String get noteToolbarBold => 'Bold';
+
+  @override
+  String get noteToolbarItalic => 'Italic';
+
+  @override
+  String get noteToolbarUnderline => 'Underline';
+
+  @override
+  String get noteToolbarStrike => 'Strikethrough';
+
+  @override
+  String get noteToolbarHeading1 => 'Heading 1';
+
+  @override
+  String get noteToolbarHeading2 => 'Heading 2';
+
+  @override
+  String get noteToolbarHeading3 => 'Heading 3';
+
+  @override
+  String get noteToolbarBulletList => 'Bulleted list';
+
+  @override
+  String get noteToolbarNumberedList => 'Numbered list';
+
+  @override
+  String get noteToolbarChecklist => 'Checklist';
+
+  @override
+  String get noteToolbarQuote => 'Quote';
+
+  @override
+  String get noteToolbarCodeBlock => 'Code block';
+
+  @override
+  String get noteToolbarLink => 'Link';
+
+  @override
+  String get noteToolbarDivider => 'Divider';
+
+  @override
+  String get noteToolbarColor => 'Text colour';
+
+  @override
+  String get noteToolbarHighlight => 'Highlight';
+
+  @override
+  String get noteToolbarImage => 'Image';
+
+  @override
+  String get noteToolbarDrawing => 'Drawing';
+
+  @override
+  String get noteToolbarMic => 'Voice input';
+
+  @override
+  String get noteToolbarUndo => 'Undo';
+
+  @override
+  String get noteToolbarRedo => 'Redo';
+
+  @override
+  String get noteColorDefault => 'Default';
+
+  @override
+  String get noteVoicePermissionTitle => 'Allow microphone access';
+
+  @override
+  String get noteVoicePermissionBody =>
+      'We use speech recognition to type your note by voice. Audio is processed on-device or by the system service and isn\'t stored.';
+
+  @override
+  String get noteVoicePermissionAllow => 'Allow';
+
+  @override
+  String get noteVoiceListening => 'Listening…';
+
+  @override
+  String get noteVoiceUnavailable =>
+      'Voice input isn\'t available on this device';
+
+  @override
+  String get noteVoiceError => 'Couldn\'t recognise speech';
+
+  @override
+  String get noteVoicePermissionDenied =>
+      'Microphone access is denied. Enable it in system settings.';
+
+  @override
+  String get noteDrawingTitle => 'Drawing';
+
+  @override
+  String get noteDrawingPen => 'Pen';
+
+  @override
+  String get noteDrawingMarker => 'Marker';
+
+  @override
+  String get noteDrawingEraser => 'Eraser';
+
+  @override
+  String get noteDrawingUndo => 'Undo stroke';
+
+  @override
+  String get noteDrawingRedo => 'Redo stroke';
+
+  @override
+  String get noteDrawingClear => 'Clear canvas';
+
+  @override
+  String get noteDrawingClearConfirmTitle => 'Clear the drawing?';
+
+  @override
+  String get noteDrawingClearConfirmBody => 'This can\'t be undone.';
+
+  @override
+  String get noteDrawingInsert => 'Insert';
+
+  @override
+  String get noteDrawingWidthThin => 'Thin stroke';
+
+  @override
+  String get noteDrawingWidthMedium => 'Medium stroke';
+
+  @override
+  String get noteDrawingWidthThick => 'Thick stroke';
+
+  @override
+  String get noteDrawingEmpty => 'Draw something first';
+
+  @override
+  String get noteLinkTitle => 'Add link';
+
+  @override
+  String get noteLinkUrlLabel => 'URL';
+
+  @override
+  String get noteLinkUrlHint => 'https://example.com';
+
+  @override
+  String get noteLinkTextLabel => 'Link text';
+
+  @override
+  String get noteLinkTextHint => 'Link';
+
+  @override
+  String get noteLinkInsert => 'Add link';
+
+  @override
+  String get noteImageSourceTitle => 'Add image';
+
+  @override
+  String get noteImageSourceCamera => 'Camera';
+
+  @override
+  String get noteImageSourceGallery => 'Gallery';
+
+  @override
+  String get noteImageUploadError => 'Couldn\'t upload the image';
+
+  @override
+  String get noteImageUploading => 'Uploading image…';
+
+  @override
+  String get serviceWalletShurikensSub => 'Balance and shuriken history';
+
+  @override
+  String get mentorshipSearchHint => 'Name, group, topic, bio';
+
+  @override
+  String get mentorshipSearchEmptyTitle => 'No one found';
+
+  @override
+  String get mentorshipSearchEmptySubtitle => 'Try a different name or topic';
+
+  @override
+  String get mentorshipTopicFilterAll => 'All';
+
+  @override
+  String get mentorshipTelegramLabel => 'TELEGRAM';
+
+  @override
+  String get mentorshipTelegramPlaceholder => 'username';
+
+  @override
+  String get mentorshipTelegramError =>
+      'Enter a valid Telegram username (5-32 chars: letters, digits, _)';
+
+  @override
+  String get mentorshipTelegramButton => 'Telegram';
+
+  @override
+  String profileActivityTooltip(String date, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count actions',
+      one: '$count action',
+    );
+    return '$date · $_temp0';
+  }
+
+  @override
+  String get profileActivityLegendLess => 'less';
+
+  @override
+  String get profileActivityLegendMore => 'more';
+
+  @override
+  String get scheduleLessonLongPressHint =>
+      'Long-press a class to open actions';
+
+  @override
+  String get settingsColorHexInvalid => 'Invalid hex code';
+
+  @override
+  String get deadlinesViewList => 'List';
+
+  @override
+  String get deadlinesViewCalendar => 'Calendar';
+
+  @override
+  String get deadlinesGroupOverdue => 'Overdue';
+
+  @override
+  String get deadlinesGroupTomorrow => 'Tomorrow';
+
+  @override
+  String get deadlinesGroupDone => 'Done';
+
+  @override
+  String deadlinesOverdueBanner(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count deadlines are overdue',
+      one: '$count deadline is overdue',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get deadlinesPostponeAction => 'Move to tomorrow';
+
+  @override
+  String get deadlinesPostponedToast => 'Moved to tomorrow';
+
+  @override
+  String get deadlinesPostponeError => 'Failed to move deadlines. Try again.';
+
+  @override
+  String get deadlineDeleteSemantics => 'Delete deadline';
+
+  @override
+  String get deadlineDeletedToast => 'Deadline deleted';
+
+  @override
+  String get deadlineDeleteError => 'Failed to delete the deadline. Try again.';
+
+  @override
+  String get deadlineActionDuplicate => 'Duplicate';
+
+  @override
+  String get deadlineEditTitle => 'Edit deadline';
+
+  @override
+  String get deadlineUpdatedToast => 'Deadline updated';
+
+  @override
+  String get deadlineDuplicatedToast => 'Deadline duplicated';
+
+  @override
+  String get deadlineProgressLabel => 'PROGRESS';
+
+  @override
+  String get deadlineRemindLeadHour => '1 hour before';
+
+  @override
+  String get deadlineRemindLeadDay => '1 day before';
+
+  @override
+  String get deadlinesCalendarDayEmpty => 'No deadlines on this day';
+
+  @override
+  String deadlineShareMessage(Object title, Object when) {
+    return '$title — due $when';
+  }
+
+  @override
+  String get deadlineActionsTitle => 'Deadline';
+
+  @override
+  String get roomPhotoAdd => 'Add photo';
+
+  @override
+  String get roomPhotoUploadFailed => 'Couldn\'t upload the photo';
+
+  @override
+  String get roomPhotoUploaded => 'Photo added';
+
+  @override
+  String get roomPhotoDeleteConfirmTitle => 'Delete this photo?';
+
+  @override
+  String get roomPhotoDeleteConfirmMessage => 'This can\'t be undone.';
+
+  @override
+  String get roomPhotoDeleted => 'Photo deleted';
+
+  @override
+  String get roomPhotoDeleteFailed => 'Couldn\'t delete the photo';
+
+  @override
+  String get roomPhotosOfflineMessage =>
+      'Check your connection to see room photos.';
+
+  @override
+  String roomPhotoCaption(Object author, Object date) {
+    return '$author · $date';
+  }
+
+  @override
+  String get marketMediaLabel => 'Photos and video';
+
+  @override
+  String get marketMediaHint =>
+      'Up to 6 photos and 1 video. The first photo is the cover.';
+
+  @override
+  String get marketAddPhotoAction => 'Add photo';
+
+  @override
+  String get marketAddVideoAction => 'Add video';
+
+  @override
+  String get marketRemoveMediaItem => 'Remove';
+
+  @override
+  String get marketCoverBadge => 'Cover';
+
+  @override
+  String get marketMediaLimitError => 'Up to 6 photos and 1 video are allowed';
+
+  @override
+  String get marketMediaTypeError => 'Couldn\'t add this file';
+
+  @override
+  String get marketVideoTooLong => 'The video is longer than 60 seconds';
+
+  @override
+  String get marketVideoTooLarge => 'The video is larger than 50 MB';
+
+  @override
+  String get marketUploadingMedia => 'Uploading media…';
+
+  @override
+  String get marketTelegramLabel => 'Telegram';
+
+  @override
+  String get marketTelegramHint => 'username';
+
+  @override
+  String get marketTelegramRequired =>
+      'Add your Telegram so buyers can reach you';
+
+  @override
+  String get marketTelegramInvalid =>
+      '5 to 32 characters: latin letters, digits, _';
+
+  @override
+  String get marketSortNew => 'Newest';
+
+  @override
+  String get marketSortCheap => 'Cheapest';
+
+  @override
+  String get marketEditTitle => 'Edit listing';
+
+  @override
+  String get marketSave => 'Save';
+
+  @override
+  String get marketSaving => 'Saving…';
+
+  @override
+  String get marketEdit => 'Edit';
+
+  @override
+  String get marketArchive => 'Archive';
+
+  @override
+  String get marketArchiveConfirmTitle => 'Archive this listing?';
+
+  @override
+  String get marketArchiveConfirmBody =>
+      'It will disappear from the marketplace, its photos and video will be removed.';
+
+  @override
+  String get marketArchiveError => 'Couldn\'t archive the listing';
+
+  @override
+  String get marketCreateSuccess => 'Listing published';
+
+  @override
+  String get marketUpdateSuccess => 'Changes saved';
+
+  @override
+  String get marketArchiveSuccess => 'Listing archived';
+
+  @override
+  String get marketDeleteSuccess => 'Listing deleted';
+
+  @override
+  String get marketShare => 'Share';
+
+  @override
+  String marketShareText(Object title) {
+    return 'Check out “$title” on the marketplace';
+  }
+
+  @override
+  String get marketFreeToggleLabel => 'Give away for free';
+
+  @override
+  String get teamFinderTeamCreated => 'Team published';
+
+  @override
+  String deadlineDueInHours(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'in ${count}h',
+      one: 'in ${count}h',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String deadlineDueInDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'in $count days',
+      one: 'in $count day',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String deadlineDueInWeeks(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'in $count weeks',
+      one: 'in $count week',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String deadlineOverdueByHours(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'overdue by ${count}h',
+      one: 'overdue by ${count}h',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String deadlineOverdueByDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'overdue by ${count}d',
+      one: 'overdue by ${count}d',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get eventsFilterPast => 'Past';
+
+  @override
+  String get eventsViewList => 'List';
+
+  @override
+  String get eventsViewCalendar => 'Calendar';
+
+  @override
+  String get eventsDayYesterday => 'Yesterday';
+
+  @override
+  String get eventsEmptyPastSub => 'No past events yet';
+
+  @override
+  String get eventsCalendarEmptyTitle => 'Nothing on this day';
+
+  @override
+  String get eventsMineBadge => 'Yours';
+
+  @override
+  String get eventsCreateEndLabel => 'UNTIL';
+
+  @override
+  String get eventsCreateEndPlaceholder => 'No end time';
+
+  @override
+  String get eventsCreateTitleError => 'Enter a title';
+
+  @override
+  String get eventsCreateEndBeforeStartError =>
+      'The event can\'t end before it starts';
+
+  @override
+  String get eventsEditSheetTitle => 'Edit event';
+
+  @override
+  String get eventsSave => 'Save';
+
+  @override
+  String get eventsCreateSuccess => 'Event created';
+
+  @override
+  String get eventsUpdateSuccess => 'Changes saved';
+
+  @override
+  String get eventsUpdateError => 'Couldn\'t save changes. Try again';
+
+  @override
+  String get eventsDeleteConfirmTitle => 'Delete event?';
+
+  @override
+  String get eventsDeleteConfirmMessage =>
+      'It will disappear from the board for everyone';
+
+  @override
+  String get eventsDeleteSuccess => 'Event deleted';
+
+  @override
+  String get eventsDeleteError => 'Couldn\'t delete the event. Try again';
+
+  @override
+  String get eventsEdit => 'Edit';
+
+  @override
+  String get eventsDetailMap => 'On the map';
+
+  @override
+  String get eventsDetailDescriptionEmpty => 'No description';
+
+  @override
+  String get groupSpaceSearchHint => 'Search posts';
+
+  @override
+  String get groupSpaceSearchEmpty => 'Nothing found';
+
+  @override
+  String get groupSpaceCommentsTitle => 'Comments';
+
+  @override
+  String get groupSpaceCommentsEmpty => 'No comments yet';
+
+  @override
+  String get groupSpaceCommentHint => 'Write a comment…';
+
+  @override
+  String get groupSpaceCommentSend => 'Send';
+
+  @override
+  String groupSpaceCommentsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count comments',
+      one: '$count comment',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String groupSpaceOnlineCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count online',
+      one: '$count online',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get groupSpaceQuickAnnouncement => 'Announcement';
+
+  @override
+  String get groupSpaceQuickNote => 'Note';
+
+  @override
+  String get groupSpaceQuickLink => 'Link';
+
+  @override
+  String get groupSpaceShowFull => 'Show more';
+
+  @override
+  String get groupSpaceCollapse => 'Collapse';
+
+  @override
+  String get groupSpaceNotesPreviewEmpty => 'No shared notes yet';
+
+  @override
+  String get groupSpaceSetBirthdayCta => 'Add your birthday';
+
+  @override
+  String get groupSpaceSetBirthdaySubtitle =>
+      'Groupmates will see a reminder before it';
+
+  @override
+  String get groupSpaceSetBirthdayTitle => 'Your birthday';
+
+  @override
+  String get groupSpacePostEmptyError => 'Add a title or a body';
+
+  @override
+  String get groupSpacePostPinToggle => 'Pin to the top';
+
+  @override
+  String get studyGroupTransferOwnership => 'Make an owner';
+
+  @override
+  String get studyGroupTransferOwnershipTitle => 'Make an owner?';
+
+  @override
+  String studyGroupTransferOwnershipBody(Object name) {
+    return '$name will manage the group instead of you.';
+  }
+
+  @override
+  String get studyGroupMemberTools => 'Member tools';
+
+  @override
+  String get knowledgeChipBoard => 'Board photos';
+
+  @override
+  String get knowledgeChipExtra => 'Extra';
+
+  @override
+  String get knowledgeTypeBoard => 'Board photo';
+
+  @override
+  String get knowledgeTypeExtra => 'Extra material';
+
+  @override
+  String get knowledgeLike => 'Like';
+
+  @override
+  String get knowledgeSortNew => 'Newest';
+
+  @override
+  String get knowledgeSortPopular => 'Popular';
+
+  @override
+  String knowledgeSubjectsFilterCount(int count) {
+    return 'Subjects ($count)';
+  }
+
+  @override
+  String get collabNotesKindLabel => 'Type';
+
+  @override
+  String get collabNotesKindLectureFull => 'Lecture';
+
+  @override
+  String get collabNotesKindPracticeFull => 'Practice';
+
+  @override
+  String get collabNotesKindLabFull => 'Lab work';
+
+  @override
+  String get collabNotesKindDocFull => 'Document';
+
+  @override
+  String get knowledgeBatchAddImages => 'Photos';
+
+  @override
+  String get knowledgeBatchAddFiles => 'Files';
+
+  @override
+  String get knowledgeBatchAddCamera => 'Camera';
+
+  @override
+  String get knowledgeBatchEmpty =>
+      'Add photos or files to publish them together';
+
+  @override
+  String knowledgeBatchStatus(int done, int total) {
+    return 'Uploaded $done of $total';
+  }
+
+  @override
+  String get knowledgeMaterialDetailTitle => 'Material';
+
+  @override
+  String get knowledgeMaterialShareLink => 'Share link';
+
+  @override
+  String get knowledgeMaterialDelete => 'Delete';
+
+  @override
+  String get knowledgeMaterialDeleteConfirm =>
+      'Delete this material? This can\'t be undone.';
+
+  @override
+  String get knowledgeMaterialDeleted => 'Material deleted';
+
+  @override
+  String get knowledgeMaterialDeleteFailed => 'Couldn\'t delete the material';
+
+  @override
+  String get knowledgeMaterialAuthor => 'Author';
+
+  @override
+  String get knowledgeViewGrid => 'Grid view';
+
+  @override
+  String get knowledgeViewList => 'List view';
+
+  @override
+  String get knowledgeMaterialDate => 'Date';
+
+  @override
+  String get knowledgeMaterialSize => 'Size';
+
+  @override
+  String get pollsFilterAll => 'All';
+
+  @override
+  String get pollsFilterActive => 'Active';
+
+  @override
+  String get pollsFilterClosed => 'Closed';
+
+  @override
+  String get pollsFilterMine => 'Mine';
+
+  @override
+  String get pollsFilterVoted => 'Completed';
+
+  @override
+  String get pollsCategoryAll => 'All topics';
+
+  @override
+  String get pollsCategoryGeneral => 'General';
+
+  @override
+  String get pollsCategoryAcademic => 'Academic';
+
+  @override
+  String get pollsCategoryEvents => 'Events';
+
+  @override
+  String get pollsCategoryFeedback => 'Feedback';
+
+  @override
+  String get pollsCategoryOther => 'Other';
+
+  @override
+  String get pollsSearchHint => 'Search polls';
+
+  @override
+  String get pollsAuthorAnonymous => 'Anonymous';
+
+  @override
+  String pollsParticipantsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count participants',
+      one: '$count participant',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get pollsTakeAction => 'Take';
+
+  @override
+  String get pollsResultsAction => 'Results';
+
+  @override
+  String get pollsOwnerActions => 'Manage poll';
+
+  @override
+  String get pollsCloseAction => 'Close poll';
+
+  @override
+  String get pollsCloseConfirmTitle => 'Close this poll?';
+
+  @override
+  String get pollsCloseConfirmBody =>
+      'No one will be able to answer after this. This cannot be undone.';
+
+  @override
+  String get pollsCloseSuccess => 'Poll closed';
+
+  @override
+  String get pollsCloseError => 'Failed to close the poll';
+
+  @override
+  String get pollsDeleteSuccess => 'Poll deleted';
+
+  @override
+  String get pollsMyChoice => 'Your choice';
+
+  @override
+  String get pollsResultsNoAnswers => 'No answers yet';
+
+  @override
+  String pollsRatingAverage(String value) {
+    return 'Average rating $value';
+  }
+
+  @override
+  String pollsRatingResponses(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count responses',
+      one: '$count response',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get pollsTextAnswers => 'Answers';
+
+  @override
+  String pollsStepCounter(int current, int total) {
+    return '$current of $total';
+  }
+
+  @override
+  String get pollsRequiredError => 'This question is required';
+
+  @override
+  String get pollsNext => 'Next';
+
+  @override
+  String get pollsSubmit => 'Submit';
+
+  @override
+  String get pollsRunnerSuccess => 'Your answers were saved';
+
+  @override
+  String get pollsTextAnswerHint => 'Type your answer…';
+
+  @override
+  String pollsRatingOption(int value) {
+    return 'Rating $value';
+  }
+
+  @override
+  String get pollsStepBasics => 'Basics';
+
+  @override
+  String get pollsStepQuestions => 'Questions';
+
+  @override
+  String get pollsStepPreview => 'Preview';
+
+  @override
+  String get pollsTitleHint => 'Poll title';
+
+  @override
+  String get pollsDescriptionHint => 'Description (optional)';
+
+  @override
+  String get pollsCategoryLabel => 'Topic';
+
+  @override
+  String get pollsAddQuestion => 'Add question';
+
+  @override
+  String get pollsRemoveQuestion => 'Remove question';
+
+  @override
+  String pollsQuestionNumber(int number) {
+    return 'Question $number';
+  }
+
+  @override
+  String get pollsQuestionKindSingle => 'Single choice';
+
+  @override
+  String get pollsQuestionKindMultiple => 'Multiple choice';
+
+  @override
+  String get pollsQuestionKindText => 'Text';
+
+  @override
+  String get pollsQuestionKindRating => 'Rating';
+
+  @override
+  String get pollsQuestionRequired => 'Required question';
+
+  @override
+  String get pollsMoveUp => 'Move up';
+
+  @override
+  String get pollsMoveDown => 'Move down';
+
+  @override
+  String get pollsResultsVisibility => 'Who can see results';
+
+  @override
+  String get pollsResultsVisibilityAlways => 'Everyone, right away';
+
+  @override
+  String get pollsResultsVisibilityAfterVote => 'After answering';
+
+  @override
+  String get pollsResultsVisibilityAfterClose => 'After the poll closes';
+
+  @override
+  String get pollsAllowChange => 'Allow changing the answer';
+
+  @override
+  String get pollsClosesAt => 'Closing date';
+
+  @override
+  String get pollsClosesAtNone => 'No deadline';
+
+  @override
+  String get pollsClosesAtPick => 'Pick a date';
+
+  @override
+  String get pollsPreviewEmptyQuestions => 'Add at least one question';
+
+  @override
+  String get pollsTitleRequired => 'Enter a poll title';
+
+  @override
+  String get pollsQuestionTextRequired => 'Enter the question text';
+
+  @override
+  String get pollsQuestionOptionsRequired => 'Add at least two options';
+
+  @override
+  String get pollsEmptyFiltered => 'No polls match this filter';
+
+  @override
+  String pollsEmptySearch(String query) {
+    return 'Nothing found for “$query”';
+  }
+
+  @override
+  String get pollsLoadMore => 'Load more';
+
+  @override
+  String get pollsChangeAnswers => 'Change answers';
+
+  @override
+  String get pollsResultsHidden => 'Results are not available yet';
+
+  @override
+  String get pollsEmptyQuestions => 'This poll has no questions';
+
+  @override
+  String get pollsClosesFuture => 'Choose a future closing time';
+
+  @override
+  String get pollsDistinctOptionsRequired =>
+      'Add at least two distinct options and choose a non-empty correct answer for a quiz';
+
+  @override
+  String get pollsCorrectAnswer => 'Correct answer';
+
+  @override
+  String get pollsQuestionTextHint => 'Question text';
 }

@@ -15,6 +15,8 @@ import 'package:rtu_mirea_app/l10n/l10n.dart';
 import '../../helpers/mocks/mock_mentorship_cubit.dart';
 
 void main() {
+  setUpAll(() => registerFallbackValue(const MentorProfileDraft()));
+
   group('MentorshipView', () {
     late MentorshipCubit cubit;
 
@@ -177,6 +179,66 @@ void main() {
 
       verify(() => cubit.actOnRequest('request-1', .cancel)).called(1);
     });
+
+    testWidgets('search filters the mentor list live', (tester) async {
+      const python = Mentor(
+        userId: 'mentor-1',
+        fullName: 'Мария Python',
+        topics: ['python'],
+      );
+      const design = Mentor(
+        userId: 'mentor-2',
+        fullName: 'Олег Дизайн',
+        topics: ['design'],
+      );
+      await tester.pumpWidget(
+        buildSubject(
+          const MentorshipState(
+            status: .ready,
+            requestsStatus: .ready,
+            mentors: [python, design],
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Мария Python'), findsOneWidget);
+      expect(find.text('Олег Дизайн'), findsOneWidget);
+
+      await tester.enterText(find.byType(AppSearchField), 'Дизайн');
+      await tester.pump(const Duration(milliseconds: 400));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Мария Python'), findsNothing);
+      expect(find.text('Олег Дизайн'), findsOneWidget);
+    });
+
+    testWidgets('search with no matches shows the empty-search state', (
+      tester,
+    ) async {
+      const python = Mentor(
+        userId: 'mentor-1',
+        fullName: 'Мария Python',
+        topics: ['python'],
+      );
+      await tester.pumpWidget(
+        buildSubject(
+          const MentorshipState(
+            status: .ready,
+            requestsStatus: .ready,
+            mentors: [python],
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.enterText(find.byType(AppSearchField), 'zzz-not-found');
+      await tester.pump(const Duration(milliseconds: 400));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Никого не нашли'), findsOneWidget);
+      expect(find.text('Мария Python'), findsNothing);
+    });
   });
 
   testWidgets('a mentor without Telegram can still receive a request', (
@@ -294,6 +356,80 @@ void main() {
 
       expect(tester.takeException(), isNull);
     }
+  });
+
+  testWidgets('become-mentor sheet requires a valid Telegram handle to save', (
+    tester,
+  ) async {
+    final cubit = MockMentorshipCubit();
+    when(() => cubit.state).thenReturn(const MentorshipState());
+    when(() => cubit.saveProfile(any())).thenAnswer((_) async => true);
+    await tester.pumpWidget(
+      _app(
+        BlocProvider<MentorshipCubit>.value(
+          value: cubit,
+          child: const Scaffold(body: MentorProfileSheet()),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Python'));
+    await tester.pump();
+
+    await tester.tap(find.text('Сохранить'), warnIfMissed: false);
+    await tester.pump();
+    verifyNever(() => cubit.saveProfile(any()));
+
+    final telegram = find.byWidgetPredicate(
+      (widget) =>
+          widget is AppInputField && widget.leadingIcon == AppLineIcon.at,
+    );
+    await tester.ensureVisible(telegram);
+    await tester.enterText(telegram, 'mentor_ninja');
+    await tester.pump();
+
+    await tester.ensureVisible(find.text('Сохранить'));
+    await tester.tap(find.text('Сохранить'));
+    await tester.pump();
+    verify(() => cubit.saveProfile(any())).called(1);
+  });
+
+  testWidgets('mentor list scroll view reserves the shell bottom inset', (
+    tester,
+  ) async {
+    final cubit = MockMentorshipCubit();
+    const mentor = Mentor(
+      userId: 'mentor-1',
+      fullName: 'Mentor',
+      topics: ['python'],
+    );
+    when(() => cubit.state).thenReturn(
+      const MentorshipState(
+        status: .ready,
+        requestsStatus: .ready,
+        mentors: [mentor],
+      ),
+    );
+    await tester.pumpWidget(
+      _app(
+        Builder(
+          builder: (context) => MediaQuery(
+            data: MediaQuery.of(
+              context,
+            ).copyWith(padding: const EdgeInsets.only(bottom: 40)),
+            child: BlocProvider<MentorshipCubit>.value(
+              value: cubit,
+              child: const MentorshipView(),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final listView = tester.widget<ListView>(find.byType(ListView));
+    final padding = listView.padding! as EdgeInsets;
+    expect(padding.bottom, 40 + AppSpacing.lg);
   });
 }
 

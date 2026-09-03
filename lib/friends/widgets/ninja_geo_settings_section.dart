@@ -44,16 +44,9 @@ class _NinjaGeoSettingsDivider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const .only(
-        left: AppSpacing.xl + 46,
-        right: AppSpacing.xl,
-      ),
-      child: Divider(
-        height: 1,
-        thickness: 1,
-        color: context.colors.line,
-      ),
+    return const AppDivider(
+      indent: AppSpacing.xl + 46,
+      endIndent: AppSpacing.xl,
     );
   }
 }

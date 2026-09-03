@@ -306,7 +306,11 @@ class _ToastQueue {
     required Duration duration,
     required Widget Function(VoidCallback dismiss) builder,
   }) {
-    _overlay = Overlay.of(context, rootOverlay: true);
+    final overlay = Overlay.of(context, rootOverlay: true);
+    if (_overlay != null && !identical(_overlay, overlay)) {
+      _clear();
+    }
+    _overlay = overlay;
 
     final visible = _visible;
     if (visible != null && visible.coalesceKey == coalesceKey) {
@@ -356,8 +360,26 @@ class _ToastQueue {
       if (_visible?.id == queued.id) {
         _visible = null;
       }
-      entry.remove();
+      entry
+        ..remove()
+        ..dispose();
       _advance();
+    }
+
+    void discardOnDispose() {
+      if (handled) return;
+      handled = true;
+      timer?.cancel();
+      if (_visible?.id == queued.id) {
+        _visible = null;
+        _pending.clear();
+        if (identical(_overlay, overlay)) _overlay = null;
+      }
+      scheduleMicrotask(() {
+        entry
+          ..remove()
+          ..dispose();
+      });
     }
 
     void scheduleTimer(Duration duration) {
@@ -389,6 +411,7 @@ class _ToastQueue {
               fromTop: alignTop,
               handle: handle,
               onDismiss: removeAndAdvance,
+              onDispose: discardOnDispose,
               child: Material(
                 color: const Color(0x00000000),
                 child: queued.builder(handle.exit),
@@ -408,6 +431,9 @@ class _ToastQueue {
 
     overlay.insert(entry);
     scheduleTimer(queued.duration);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!overlay.mounted) discardOnDispose();
+    });
   }
 
   void _advance() {
@@ -417,10 +443,13 @@ class _ToastQueue {
   }
 
   @visibleForTesting
-  void debugReset() {
+  void debugReset() => _clear();
+
+  void _clear() {
     _pending.clear();
     _visible?.onForceRemove();
     _visible = null;
+    _overlay = null;
   }
 }
 
@@ -429,6 +458,7 @@ class _AnimatedToastSlot extends StatefulWidget {
     required this.child,
     required this.fromTop,
     required this.onDismiss,
+    required this.onDispose,
     required this.handle,
     required this.dismissibleKey,
   });
@@ -436,6 +466,7 @@ class _AnimatedToastSlot extends StatefulWidget {
   final Widget child;
   final bool fromTop;
   final VoidCallback onDismiss;
+  final VoidCallback onDispose;
   final _ToastAnimationHandle handle;
   final Key dismissibleKey;
 
@@ -462,6 +493,7 @@ class _AnimatedToastSlotState extends State<_AnimatedToastSlot>
   void dispose() {
     widget.handle.onExit = null;
     _controller.dispose();
+    widget.onDispose();
     super.dispose();
   }
 

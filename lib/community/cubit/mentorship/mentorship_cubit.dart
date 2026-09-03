@@ -56,11 +56,16 @@ class MentorshipCubit extends Cubit<MentorshipState> {
   }
 
   Future<bool> saveProfile(MentorProfileDraft draft) async {
-    if (state.isSavingProfile || draft.topics.isEmpty) return false;
+    if (state.isSavingProfile ||
+        draft.topics.isEmpty ||
+        !isValidMentorTelegramHandle(draft.telegramHandle)) {
+      return false;
+    }
     emit(state.copyWith(isSavingProfile: true));
     try {
       await _repository.upsertMentorProfile(
         topics: _normalized(draft.topics),
+        telegramHandle: normalizeMentorTelegramHandle(draft.telegramHandle),
         bio: draft.bio.trim(),
         level: draft.level.trim(),
         formats: _normalized(draft.formats),

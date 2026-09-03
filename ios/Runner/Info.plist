@@ -88,6 +88,10 @@
 		<string>Мы используем ваш календарь для добавления событий.</string>
 		<key>NSCalendarsFullAccessUsageDescription</key>
 		<string>Мы используем ваш календарь для добавления событий.</string>
+		<key>NSMicrophoneUsageDescription</key>
+		<string>Микрофон нужен для голосового ввода текста в конспектах.</string>
+		<key>NSSpeechRecognitionUsageDescription</key>
+		<string>Распознавание речи нужно, чтобы печатать конспект голосом.</string>
 		<key>UIStatusBarHidden</key>
 		<false/>
 		<key>SKAdNetworkItems</key>

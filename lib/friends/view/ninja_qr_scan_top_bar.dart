@@ -14,6 +14,7 @@ class NinjaQrScanTopBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final colors = context.colors;
     return Padding(
       padding: const .fromLTRB(16, 8, 16, 0),
       child: Row(
@@ -30,7 +31,7 @@ class NinjaQrScanTopBar extends StatelessWidget {
               maxLines: 1,
               overflow: .ellipsis,
               textAlign: .center,
-              style: AppText.headline.copyWith(color: Colors.white),
+              style: AppText.headline.copyWith(color: colors.white),
             ),
           ),
           ValueListenableBuilder<MobileScannerState>(

@@ -19,6 +19,15 @@ _CollabNote _$CollabNoteFromJson(Map<String, dynamic> json) =>
         isMine: $checkedConvert('isMine', (v) => v as bool? ?? false),
         isPersonal: $checkedConvert('isPersonal', (v) => v as bool? ?? false),
         revision: $checkedConvert('revision', (v) => (v as num?)?.toInt() ?? 0),
+        documentRevision: $checkedConvert(
+          'documentRevision',
+          (v) => (v as num?)?.toInt() ?? 0,
+        ),
+        document: $checkedConvert('document', (v) => v as List<dynamic>?),
+        collaboratorNames: $checkedConvert(
+          'collaboratorNames',
+          (v) => v == null ? const <String>[] : stringListFromJson(v),
+        ),
         createdAt: $checkedConvert('createdAt', (v) => dateTimeFromJson(v)),
         updatedAt: $checkedConvert('updatedAt', (v) => dateTimeFromJson(v)),
       );
@@ -34,6 +43,9 @@ Map<String, dynamic> _$CollabNoteToJson(_CollabNote instance) =>
       'isMine': instance.isMine,
       'isPersonal': instance.isPersonal,
       'revision': instance.revision,
+      'documentRevision': instance.documentRevision,
+      'document': instance.document,
+      'collaboratorNames': stringListToJson(instance.collaboratorNames),
       'createdAt': dateTimeToJson(instance.createdAt),
       'updatedAt': dateTimeToJson(instance.updatedAt),
     };

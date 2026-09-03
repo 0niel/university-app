@@ -13,10 +13,15 @@ class KnowledgeBankList extends StatelessWidget {
     required this.materials,
     required this.authors,
     required this.openingMaterialIds,
+    required this.onOpen,
     required this.onDownload,
     required this.onRetry,
     required this.onUpload,
     required this.onResetFilter,
+    this.previewUrls = const {},
+    this.onLike,
+    this.onLongPress,
+    this.gridView = false,
     this.footer,
     super.key,
   });
@@ -27,10 +32,15 @@ class KnowledgeBankList extends StatelessWidget {
   final List<StudyMaterial> materials;
   final List<MaterialAuthor> authors;
   final Set<String> openingMaterialIds;
+  final ValueChanged<StudyMaterial> onOpen;
   final ValueChanged<StudyMaterial> onDownload;
   final VoidCallback onRetry;
   final VoidCallback onUpload;
   final VoidCallback onResetFilter;
+  final Map<String, String> previewUrls;
+  final ValueChanged<StudyMaterial>? onLike;
+  final ValueChanged<StudyMaterial>? onLongPress;
+  final bool gridView;
   final Widget? footer;
 
   @override
@@ -115,17 +125,52 @@ class KnowledgeBankList extends StatelessWidget {
         AppSpacing.xxlg,
       ),
       children: [
-        AppListGroup(
-          children: [
-            for (final material in materials)
-              MaterialRow(
-                key: ValueKey(material.id),
-                material: material,
-                loading: openingMaterialIds.contains(material.id),
-                onDownload: () => onDownload(material),
-              ),
-          ],
-        ),
+        if (gridView)
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final cardWidth = (constraints.maxWidth - AppSpacing.md) / 2;
+              return Wrap(
+                spacing: AppSpacing.md,
+                runSpacing: AppSpacing.md,
+                children: [
+                  for (final material in materials)
+                    SizedBox(
+                      key: ValueKey(material.id),
+                      width: cardWidth,
+                      child: MaterialGridCard(
+                        material: material,
+                        loading: openingMaterialIds.contains(material.id),
+                        onOpen: () => onOpen(material),
+                        onDownload: () => onDownload(material),
+                        previewUrl: previewUrls[material.previewPath],
+                        onLike: onLike == null ? null : () => onLike!(material),
+                        onLongPress: onLongPress == null
+                            ? null
+                            : () => onLongPress!(material),
+                      ),
+                    ),
+                ],
+              );
+            },
+          )
+        else
+          AppListGroup(
+            children: [
+              for (final material in materials)
+                MaterialRow(
+                  key: ValueKey(material.id),
+                  material: material,
+                  loading: openingMaterialIds.contains(material.id),
+                  onOpen: () => onOpen(material),
+                  onDownload: () => onDownload(material),
+                  previewUrl: previewUrls[material.previewPath],
+                  onLike: onLike == null ? null : () => onLike!(material),
+                  onLongPress: onLongPress == null
+                      ? null
+                      : () => onLongPress!(material),
+                ),
+            ],
+          ),
         if (authors.isNotEmpty) ...[
           const SizedBox(height: AppSpacing.sheetBottom),
           Text(

@@ -1,4 +1,3 @@
-export 'lesson_editor_color_picker.dart';
 export 'lesson_editor_field_card.dart';
 export 'lesson_editor_field_row.dart';
 export 'lesson_editor_reminder_card.dart';

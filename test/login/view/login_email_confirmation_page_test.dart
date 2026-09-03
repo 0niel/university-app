@@ -165,8 +165,8 @@ void main() {
     await pumpPage(tester);
     await enterCode(tester, '123456');
     expect(
-      tester.widget<AppCodeInput>(find.byType(AppCodeInput)).enabled,
-      isFalse,
+      tester.widget<AppCodeInput>(find.byType(AppCodeInput)).readOnly,
+      isTrue,
     );
     expect(
       find.byKey(const ValueKey('loginEmailConfirmation_checking')),
@@ -180,8 +180,8 @@ void main() {
       findsNothing,
     );
     expect(
-      tester.widget<AppCodeInput>(find.byType(AppCodeInput)).enabled,
-      isFalse,
+      tester.widget<AppCodeInput>(find.byType(AppCodeInput)).readOnly,
+      isTrue,
     );
   });
 }

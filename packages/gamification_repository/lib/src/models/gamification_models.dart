@@ -1,4 +1,5 @@
 export 'academic_profile.dart';
+export 'activity_day.dart';
 export 'gamification_badge.dart';
 export 'gamification_badge_summary.dart';
 export 'gamification_quest.dart';

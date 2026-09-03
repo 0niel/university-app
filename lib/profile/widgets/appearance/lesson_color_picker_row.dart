@@ -88,12 +88,16 @@ class _LessonColorPickerRow extends StatelessWidget {
   }
 
   Future<void> _openCustom(BuildContext context, String label) async {
+    final defaultValue = kDefaultLessonTypeColors[type.name];
     final value = await showAppSheet<int>(
       context,
       title: label,
       subtitle: context.l10n.settingsColorCustom,
       child: LessonColorEditor(
         color: Color(selected),
+        defaultColor: defaultValue,
+        swatches: {?defaultValue, ...kAppColorPaletteSwatches}.toList(),
+        markedValues: {?defaultValue},
         onSaved: (color) =>
             Navigator.of(context, rootNavigator: true).pop(color),
       ),

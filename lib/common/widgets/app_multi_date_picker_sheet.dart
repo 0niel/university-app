@@ -42,13 +42,16 @@ class _AppMultiDatePickerSheetState extends State<AppMultiDatePickerSheet> {
       mainAxisSize: .min,
       crossAxisAlignment: .stretch,
       children: [
-        Row(
+        Wrap(
+          alignment: WrapAlignment.spaceBetween,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          spacing: AppSpacing.md,
+          runSpacing: AppSpacing.sm,
           children: [
             Text(
               l10n.pickerSelectedCount(_selected.length),
               style: AppText.subtext.copyWith(color: colors.muted),
             ),
-            const Spacer(),
             if (_selected.isNotEmpty)
               AppButton.text(
                 label: l10n.pickerClear,
@@ -58,7 +61,7 @@ class _AppMultiDatePickerSheetState extends State<AppMultiDatePickerSheet> {
               ),
           ],
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: AppSpacing.sm),
         AppFlatCalendar(
           firstDay: widget.firstDate,
           lastDay: widget.lastDate,
@@ -68,7 +71,7 @@ class _AppMultiDatePickerSheetState extends State<AppMultiDatePickerSheet> {
           dateEnabledBuilder: widget.dateEnabledBuilder,
           onDateSelected: _toggle,
         ),
-        const SizedBox(height: 14),
+        const SizedBox(height: AppSpacing.sectionGap),
         AppSheetAction(
           label: l10n.done,
           onTap: () =>

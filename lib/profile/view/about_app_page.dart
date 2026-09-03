@@ -39,7 +39,10 @@ class AboutAppPage extends StatelessWidget {
                       const SizedBox(height: AppSpacing.screen),
                       _buildHeader(context),
                       _buildContributorsSection(context),
-                      const SizedBox(height: AppSpacing.xlg),
+                      SizedBox(
+                        key: const ValueKey('about-bottom-inset'),
+                        height: ninjaBottomInset(context) + AppSpacing.lg,
+                      ),
                     ]),
                   ),
                 ],

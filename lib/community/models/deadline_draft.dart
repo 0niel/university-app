@@ -12,5 +12,6 @@ abstract class DeadlineDraft with _$DeadlineDraft {
     @Default('') String subjectName,
     @Default(DeadlinePriority.medium) DeadlinePriority priority,
     @Default(true) bool remind,
+    @Default(60) int remindMinutes,
   }) = _DeadlineDraft;
 }

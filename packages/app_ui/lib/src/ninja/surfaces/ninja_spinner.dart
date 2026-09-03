@@ -98,5 +98,3 @@ class _NinjaSpinnerPainter extends CustomPainter {
       oldDelegate.head != head ||
       oldDelegate.strokeWidth != strokeWidth;
 }
-
-typedef AppSpinner = NinjaSpinner;

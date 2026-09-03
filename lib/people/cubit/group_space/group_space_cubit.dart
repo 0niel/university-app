@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:bloc/bloc.dart';
 import 'package:campus_repository/campus_repository.dart';
 import 'package:collection/collection.dart';
@@ -16,6 +18,11 @@ class GroupSpaceCubit extends Cubit<GroupSpaceState> {
 
   final CampusRepository _repository;
   var _loadRevision = 0;
+  String? _realtimeGroupId;
+  GroupSpaceRealtimeSession? _realtimeSession;
+  GroupSpacePresenceSession? _presenceSession;
+  StreamSubscription<void>? _realtimeSub;
+  StreamSubscription<int>? _presenceSub;
 
   Future<void> load() async {
     final revision = ++_loadRevision;
@@ -30,13 +37,19 @@ class GroupSpaceCubit extends Cubit<GroupSpaceState> {
     try {
       final space = await _repository.getGroupSpace();
       if (revision != _loadRevision) return;
+      final notesPreview = space.hasGroup
+          ? await _fetchNotesPreview()
+          : const <CollabNote>[];
+      if (revision != _loadRevision) return;
       emit(
         state.copyWith(
           status: .success,
           space: _preservePendingLikes(space),
+          notesPreview: notesPreview,
           isRefreshing: false,
         ),
       );
+      _syncRealtime(space);
     } on Object catch (error, stackTrace) {
       if (revision != _loadRevision) return;
       addError(error, stackTrace);
@@ -47,6 +60,14 @@ class GroupSpaceCubit extends Cubit<GroupSpaceState> {
           mutationFailure: coldLoad ? null : .refresh,
         ),
       );
+    }
+  }
+
+  Future<List<CollabNote>> _fetchNotesPreview() async {
+    try {
+      return await _repository.getGroupNotes();
+    } on Object {
+      return state.notesPreview;
     }
   }
 
@@ -69,14 +90,20 @@ class GroupSpaceCubit extends Cubit<GroupSpaceState> {
     required String title,
     required String body,
     required bool announcement,
+    bool pinned = false,
   }) => _mutate(
     failure: .post,
     operation: () => _repository.createGroupPost(
       title: title,
       body: body,
       kind: announcement ? 'announcement' : 'note',
-      pinned: announcement,
+      pinned: announcement || pinned,
     ),
+  );
+
+  Future<bool> setMyBirthDate(DateTime date) => _mutate(
+    failure: .birthday,
+    operation: () => _repository.setMyBirthDate(date),
   );
 
   Future<bool> deleteLink(String id) async {
@@ -118,6 +145,110 @@ class GroupSpaceCubit extends Cubit<GroupSpaceState> {
     }
   }
 
+  Future<void> loadComments(String postId) async {
+    if (state.loadingCommentPostIds.contains(postId)) return;
+    emit(
+      state.copyWith(
+        loadingCommentPostIds: {...state.loadingCommentPostIds, postId},
+      ),
+    );
+    try {
+      final comments = await _repository.getGroupPostComments(postId);
+      if (isClosed) return;
+      emit(
+        state.copyWith(
+          comments: {...state.comments, postId: comments},
+          loadingCommentPostIds: {...state.loadingCommentPostIds}
+            ..remove(postId),
+        ),
+      );
+    } on Object catch (error, stackTrace) {
+      if (isClosed) return;
+      addError(error, stackTrace);
+      emit(
+        state.copyWith(
+          loadingCommentPostIds: {...state.loadingCommentPostIds}
+            ..remove(postId),
+          mutationFailure: .comment,
+        ),
+      );
+    }
+  }
+
+  Future<bool> addComment({
+    required String postId,
+    required String body,
+  }) async {
+    if (state.isSubmittingComment) return false;
+    emit(state.copyWith(isSubmittingComment: true, mutationFailure: null));
+    try {
+      final comment = await _repository.addGroupPostComment(
+        postId: postId,
+        body: body,
+      );
+      if (isClosed) return false;
+      final existing = state.comments[postId] ?? const <GroupPostComment>[];
+      emit(
+        state.copyWith(
+          isSubmittingComment: false,
+          comments: {
+            ...state.comments,
+            postId: [...existing, comment],
+          },
+          space: _bumpCommentsCount(postId, delta: 1),
+        ),
+      );
+      return true;
+    } on Object catch (error, stackTrace) {
+      if (isClosed) return false;
+      addError(error, stackTrace);
+      emit(
+        state.copyWith(isSubmittingComment: false, mutationFailure: .comment),
+      );
+      return false;
+    }
+  }
+
+  Future<bool> deleteComment({
+    required String id,
+    required String postId,
+  }) async {
+    if (state.pendingCommentDeleteIds.contains(id)) return false;
+    emit(
+      state.copyWith(
+        pendingCommentDeleteIds: {...state.pendingCommentDeleteIds, id},
+      ),
+    );
+    try {
+      await _repository.deleteGroupPostComment(id);
+      if (isClosed) return false;
+      final existing = state.comments[postId] ?? const <GroupPostComment>[];
+      emit(
+        state.copyWith(
+          pendingCommentDeleteIds: {...state.pendingCommentDeleteIds}
+            ..remove(id),
+          comments: {
+            ...state.comments,
+            postId: existing.where((comment) => comment.id != id).toList(),
+          },
+          space: _bumpCommentsCount(postId, delta: -1),
+        ),
+      );
+      return true;
+    } on Object catch (error, stackTrace) {
+      if (isClosed) return false;
+      addError(error, stackTrace);
+      emit(
+        state.copyWith(
+          pendingCommentDeleteIds: {...state.pendingCommentDeleteIds}
+            ..remove(id),
+          mutationFailure: .deleteComment,
+        ),
+      );
+      return false;
+    }
+  }
+
   void clearMutationFailure() => emit(state.copyWith(mutationFailure: null));
 
   Future<bool> _mutate({
@@ -145,6 +276,32 @@ class GroupSpaceCubit extends Cubit<GroupSpaceState> {
     return incoming.copyWith(
       notes: [
         for (final note in incoming.notes) pending[note.id] ?? note,
+      ],
+    );
+  }
+
+  GroupSpace _bumpCommentsCount(String postId, {required int delta}) {
+    final space = state.space;
+    final announcement = space.announcement;
+    if (announcement != null && announcement.id == postId) {
+      return space.copyWith(
+        announcement: announcement.copyWith(
+          commentsCount: (announcement.commentsCount + delta).clamp(
+            0,
+            1 << 31,
+          ),
+        ),
+      );
+    }
+    return space.copyWith(
+      notes: [
+        for (final note in space.notes)
+          if (note.id == postId)
+            note.copyWith(
+              commentsCount: (note.commentsCount + delta).clamp(0, 1 << 31),
+            )
+          else
+            note,
       ],
     );
   }
@@ -184,5 +341,55 @@ class GroupSpaceCubit extends Cubit<GroupSpaceState> {
         mutationFailure: failed ? .like : null,
       ),
     );
+  }
+
+  void _syncRealtime(GroupSpace space) {
+    final groupId = space.hasGroup ? space.groupId : null;
+    if (groupId == _realtimeGroupId) return;
+    _realtimeGroupId = groupId;
+
+    final previousSub = _realtimeSub;
+    final previousPresenceSub = _presenceSub;
+    final previousSession = _realtimeSession;
+    final previousPresenceSession = _presenceSession;
+    _realtimeSub = null;
+    _presenceSub = null;
+    _realtimeSession = null;
+    _presenceSession = null;
+    unawaited(previousSub?.cancel());
+    unawaited(previousPresenceSub?.cancel());
+    unawaited(previousSession?.close());
+    unawaited(previousPresenceSession?.close());
+
+    if (groupId == null || groupId.isEmpty) return;
+
+    final realtime = _repository.openGroupSpaceRealtime(groupId);
+    final presence = _repository.openGroupSpacePresence(groupId);
+    _realtimeSession = realtime;
+    _presenceSession = presence;
+    _realtimeSub = realtime.changes.listen(
+      (_) => unawaited(load()),
+      onError: (Object _, StackTrace _) {},
+    );
+    _presenceSub = presence.onlineCount.listen(
+      (count) {
+        if (isClosed) return;
+        emit(state.copyWith(onlineCount: count < 1 ? 1 : count));
+      },
+      onError: (Object _, StackTrace _) {},
+    );
+  }
+
+  @override
+  Future<void> close() async {
+    await _realtimeSub?.cancel();
+    await _presenceSub?.cancel();
+    await _realtimeSession?.close();
+    await _presenceSession?.close();
+    _realtimeSub = null;
+    _presenceSub = null;
+    _realtimeSession = null;
+    _presenceSession = null;
+    return super.close();
   }
 }

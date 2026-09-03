@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:app_ui/app_ui.dart';
+import 'package:community_repository/community_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
@@ -12,6 +13,7 @@ import 'package:rtu_mirea_app/community/view/deadlines/add_deadline_sheet.dart';
 import 'package:rtu_mirea_app/config/config.dart';
 import 'package:rtu_mirea_app/home/cubit/home_cubit.dart';
 import 'package:rtu_mirea_app/home/cubit/home_gamification_cubit.dart';
+import 'package:rtu_mirea_app/home/cubit/home_identity_cubit.dart';
 import 'package:rtu_mirea_app/home/cubit/home_stories_cubit.dart';
 import 'package:rtu_mirea_app/home/view/home_dashboard_metrics.dart';
 import 'package:rtu_mirea_app/home/view/home_day_lessons.dart';
@@ -27,7 +29,20 @@ import 'package:rtu_mirea_app/schedule/view/schedule_page/lesson_text.dart';
 import 'package:rtu_mirea_app/search/search.dart';
 import 'package:rtu_mirea_app/services/services.dart';
 import 'package:rtu_mirea_app/top_discussions/top_discussions.dart';
+import 'package:rtu_mirea_app/top_discussions/view/discourse_topic_utils.dart';
 import 'package:schedule_repository/schedule_repository.dart';
+
+Future<void> _openTopic(BuildContext context, DiscourseTopic topic) async {
+  final repository = context.read<CommunityRepository>();
+  final forumUrl = context.read<UniversityConfig>().communityForumUrl;
+  try {
+    final post = await repository.getTopicFirstPost(topic.id);
+    if (!context.mounted) return;
+    DiscoursePostOverviewRoute(postId: post.id).go(context);
+  } on Exception {
+    openDiscourseTopic(forumUrl, topic.id);
+  }
+}
 
 class HomeDashboardContent extends StatelessWidget {
   const HomeDashboardContent({
@@ -52,9 +67,21 @@ class HomeDashboardContent extends StatelessWidget {
     final colors = context.colors;
     final config = context.read<UniversityConfig>();
     final user = context.watch<AppBloc>().state.user;
-    final name = user.name?.trim();
-    final userName = name == null || name.isEmpty ? l10n.homeStudent : name;
-    final firstName = userName.split(RegExp(r'\s+')).first;
+    final identityCubit = context.watch<HomeIdentityCubit?>();
+    final identity = identityCubit?.state;
+    final fullName = identity?.fullName?.trim();
+    final handle = identity?.handle?.trim();
+    final hasFullName = fullName != null && fullName.isNotEmpty;
+    final hasHandle = handle != null && handle.isNotEmpty;
+    final userName = hasFullName
+        ? fullName
+        : hasHandle
+        ? '@$handle'
+        : l10n.homeStudent;
+    final firstName = hasFullName
+        ? fullName.split(RegExp(r'\s+')).first
+        : userName;
+    final nameLoading = identityCubit != null && identity?.isLoaded != true;
     final state = context.watch<ScheduleBloc>().state;
     final schedule = state.selectedSchedule?.schedule ?? const <SchedulePart>[];
     final changesCubit = context.watch<ScheduleChangesCubit>();
@@ -84,10 +111,16 @@ class HomeDashboardContent extends StatelessWidget {
     final active = [...deadlines.activeDeadlines]
       ..sort((a, b) => a.dueAt.compareTo(b.dueAt));
     final profile = context.watch<HomeGamificationCubit>().state;
-    final sources = context.watch<CategoriesBloc>().state.sources;
+    final categoriesState = context.watch<CategoriesBloc>().state;
+    final sources = categoriesState.sources;
+    final sourcesLoading =
+        categoriesState.status == CategoriesStatus.initial ||
+        categoriesState.status == CategoriesStatus.loading;
     final preferences = context.watch<UiPreferencesCubit>().state;
     final favorites = context.watch<FavoriteServicesCubit>().state;
-    final catalog = context.watch<ServiceCatalogCubit>().state.catalog;
+    final catalogState = context.watch<ServiceCatalogCubit>().state;
+    final catalog = catalogState.catalog;
+    final quickActionsLoading = !favorites.loaded || catalogState.isLoading;
     final seen = <String>{};
     final services = [
       for (final section in ServicesDirectory.sections(
@@ -144,7 +177,7 @@ class HomeDashboardContent extends StatelessWidget {
           physics: const AlwaysScrollableScrollPhysics(),
           padding: EdgeInsets.only(
             top: top,
-            bottom: math.max(130, MediaQuery.paddingOf(context).bottom + 28),
+            bottom: ninjaBottomInset(context) + AppSpacing.lg,
           ),
           children: [
             if (state.isOffline)
@@ -178,6 +211,7 @@ class HomeDashboardContent extends StatelessWidget {
               HomeGreeting(
                 greeting: homeGreeting(l10n, now),
                 name: firstName,
+                nameLoading: nameLoading,
                 subtitle: loading
                     ? l10n.loadingContent
                     : state.selectedSchedule == null
@@ -189,6 +223,7 @@ class HomeDashboardContent extends StatelessWidget {
               sources: sources,
               seenSourceIds: context.watch<HomeStoriesCubit>().state,
               onSourceOpened: context.read<HomeStoriesCubit>().markSeen,
+              loading: sourcesLoading,
             ),
             inset(
               HomeWeekPills(
@@ -304,6 +339,7 @@ class HomeDashboardContent extends StatelessWidget {
                 HomeQuickActions(
                   services: services,
                   onAll: () => const ServicesRoute().go(context),
+                  loading: quickActionsLoading,
                 ),
               ),
             if (preferences.isSectionEnabled(HomeSection.deadlines))
@@ -329,8 +365,7 @@ class HomeDashboardContent extends StatelessWidget {
                 HomeTrendingGroup(
                   state: context.watch<DiscourseBloc>().state,
                   onAll: () => const CommunitiesRoute().go(context),
-                  onOpen: (topic) =>
-                      DiscoursePostOverviewRoute(postId: topic.id).go(context),
+                  onOpen: (topic) => unawaited(_openTopic(context, topic)),
                   onRetry: () => context.read<DiscourseBloc>().add(
                     const DiscourseTopTopicsRequested(),
                   ),

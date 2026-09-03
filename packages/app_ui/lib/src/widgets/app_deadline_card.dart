@@ -13,6 +13,7 @@ class AppDeadlineRow extends StatelessWidget {
     required this.left,
     super.key,
     this.urgent = false,
+    this.warn = false,
     this.done = false,
     this.onTap,
     this.onToggle,
@@ -28,6 +29,7 @@ class AppDeadlineRow extends StatelessWidget {
   final String meta;
   final String left;
   final bool urgent;
+  final bool warn;
   final bool done;
   final VoidCallback? onTap;
   final VoidCallback? onToggle;
@@ -38,8 +40,13 @@ class AppDeadlineRow extends StatelessWidget {
     final colors = context.colors;
     final reduceMotion = MediaQuery.disableAnimationsOf(context) ||
         MediaQuery.accessibleNavigationOf(context);
-    final leftColor =
-        done ? colors.muted2 : (urgent ? colors.danger : colors.muted);
+    final leftColor = done
+        ? colors.muted2
+        : urgent
+            ? colors.danger
+            : warn
+                ? colors.warn
+                : colors.muted;
 
     final row = AnimatedOpacity(
       opacity: done ? .55 : 1,
@@ -82,10 +89,15 @@ class AppDeadlineRow extends StatelessWidget {
               ),
             ),
             const SizedBox(width: AppSpacing.gap),
-            Text(
-              left,
-              style: AppText.sans(12, FontWeight.w800).copyWith(
-                color: leftColor,
+            Flexible(
+              child: Text(
+                left,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.right,
+                style: AppText.sans(12, FontWeight.w800).copyWith(
+                  color: leftColor,
+                ),
               ),
             ),
           ],
@@ -155,6 +167,7 @@ class AppDeadlineCard extends StatelessWidget {
     required this.progress,
     super.key,
     this.urgent = false,
+    this.warn = false,
     this.done = false,
     this.onTap,
     this.onToggle,
@@ -166,6 +179,7 @@ class AppDeadlineCard extends StatelessWidget {
   final String left;
   final double progress;
   final bool urgent;
+  final bool warn;
   final bool done;
   final VoidCallback? onTap;
   final VoidCallback? onToggle;
@@ -180,6 +194,7 @@ class AppDeadlineCard extends StatelessWidget {
         meta: '$subject · $due',
         left: left,
         urgent: urgent,
+        warn: warn,
         done: done,
         onToggle: onToggle,
       ),

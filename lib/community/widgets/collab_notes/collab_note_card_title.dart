@@ -25,7 +25,10 @@ class CollabNoteCardTitle extends StatelessWidget {
           ).copyWith(color: context.colors.ink),
         ),
         if (note.isPersonal)
-          NinjaBadge(context.l10n.collabNotesPersonalBadge, tone: .ink),
+          AppBadge(
+            label: context.l10n.collabNotesPersonalBadge,
+            tone: .ink,
+          ),
       ],
     );
   }

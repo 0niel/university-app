@@ -199,6 +199,50 @@ void main() {
       );
     });
 
+    group('transferOwnership reloads the roster', () {
+      blocTest<StudyGroupCubit, StudyGroupState>(
+        'transfers then reloads, tracking the member id as pending',
+        setUp: () {
+          when(
+            () => repository.transferOwnership(any()),
+          ).thenAnswer((_) async => owned);
+          when(repository.getMyGroup).thenAnswer((_) async => owned);
+        },
+        build: () => StudyGroupCubit(repository: repository),
+        act: (cubit) => cubit.transferOwnership('u2'),
+        expect: () => const <StudyGroupState>[
+          StudyGroupState(pendingMemberIds: {'u2'}),
+          StudyGroupState(
+            status: StudyGroupStatus.populated,
+            data: owned,
+            pendingMemberIds: {'u2'},
+          ),
+          StudyGroupState(status: StudyGroupStatus.populated, data: owned),
+        ],
+        verify: (_) =>
+            verify(() => repository.transferOwnership('u2')).called(1),
+      );
+
+      blocTest<StudyGroupCubit, StudyGroupState>(
+        'ignores a second transfer for the same id while one is pending',
+        setUp: () {
+          when(
+            () => repository.transferOwnership(any()),
+          ).thenAnswer((_) async => owned);
+          when(repository.getMyGroup).thenAnswer((_) async => owned);
+        },
+        build: () => StudyGroupCubit(repository: repository),
+        act: (cubit) async {
+          final first = cubit.transferOwnership('u2');
+          final second = await cubit.transferOwnership('u2');
+          expect(second, isFalse);
+          await first;
+        },
+        verify: (_) =>
+            verify(() => repository.transferOwnership('u2')).called(1),
+      );
+    });
+
     group('respondJoinRequest tracks pending invite ids', () {
       blocTest<StudyGroupCubit, StudyGroupState>(
         'accepts and clears the pending id once resolved',

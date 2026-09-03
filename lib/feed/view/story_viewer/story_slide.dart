@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+import 'dart:ui' show ImageFilter;
 
 import 'package:app_ui/app_ui.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -34,39 +35,52 @@ class StorySlide extends StatelessWidget {
     return Stack(
       fit: StackFit.expand,
       children: [
-        IgnorePointer(
-          child: imageUrl != null && imageUrl.isNotEmpty
-              ? CachedNetworkImage(
+        const IgnorePointer(child: StoryBackdrop()),
+        if (imageUrl != null && imageUrl.isNotEmpty)
+          IgnorePointer(
+            child: ColorFiltered(
+              colorFilter: ColorFilter.mode(
+                dark.canvas.withValues(alpha: .35),
+                BlendMode.darken,
+              ),
+              child: ImageFiltered(
+                imageFilter: ImageFilter.blur(sigmaX: 30, sigmaY: 30),
+                child: CachedNetworkImage(
                   imageUrl: imageUrl,
                   fit: BoxFit.cover,
-                  imageBuilder: (context, provider) {
-                    onMediaReady?.call();
-                    return Image(
-                      image: provider,
-                      fit: BoxFit.cover,
-                    );
-                  },
-                  placeholder: (_, _) => const _StoryBackdrop(),
-                  errorWidget: (_, _, _) {
-                    onMediaReady?.call();
-                    return const _StoryBackdrop();
-                  },
-                )
-              : const _StoryBackdrop(),
-        ),
-        const IgnorePointer(
+                ),
+              ),
+            ),
+          ),
+        if (imageUrl != null && imageUrl.isNotEmpty)
+          IgnorePointer(
+            child: CachedNetworkImage(
+              imageUrl: imageUrl,
+              fit: BoxFit.contain,
+              imageBuilder: (context, provider) {
+                onMediaReady?.call();
+                return Image(image: provider, fit: BoxFit.contain);
+              },
+              placeholder: (_, _) => const SizedBox.shrink(),
+              errorWidget: (_, _, _) {
+                onMediaReady?.call();
+                return const SizedBox.shrink();
+              },
+            ),
+          ),
+        IgnorePointer(
           child: DecoratedBox(
-            key: Key('storyViewer_scrim'),
+            key: const Key('storyViewer_scrim'),
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
-                stops: [0, .3, .55, 1],
+                stops: const [0, .3, .55, 1],
                 colors: [
-                  Color(0x8C000000),
-                  Color(0x00000000),
-                  Color(0x00000000),
-                  Color(0xBF000000),
+                  dark.canvas.withValues(alpha: 140 / 255),
+                  dark.canvas.withValues(alpha: 0),
+                  dark.canvas.withValues(alpha: 0),
+                  dark.canvas.withValues(alpha: 191 / 255),
                 ],
               ),
             ),
@@ -169,8 +183,8 @@ class StorySlide extends StatelessWidget {
   }
 }
 
-class _StoryBackdrop extends StatelessWidget {
-  const _StoryBackdrop();
+class StoryBackdrop extends StatelessWidget {
+  const StoryBackdrop({super.key});
 
   @override
   Widget build(BuildContext context) {

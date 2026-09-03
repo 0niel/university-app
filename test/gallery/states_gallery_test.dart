@@ -30,7 +30,7 @@ void main() {
         supportedLocales: AppLocalizations.supportedLocales,
         home: Builder(
           builder: (context) => Scaffold(
-            backgroundColor: context.ninja.canvas,
+            backgroundColor: context.colors.canvas,
             body: child,
           ),
         ),

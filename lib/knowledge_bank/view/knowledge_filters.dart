@@ -12,8 +12,10 @@ class _KnowledgeFilters extends StatelessWidget {
     final filters = [
       ('all', l10n.knowledgeChipAll),
       ('note', l10n.knowledgeChipNotes),
-      ('exam', l10n.knowledgeChipTickets),
+      ('board', l10n.knowledgeChipBoard),
       ('task', l10n.knowledgeChipSolutions),
+      ('extra', l10n.knowledgeChipExtra),
+      ('exam', l10n.knowledgeChipTickets),
       ('cheat', l10n.knowledgeChipCheats),
     ];
     return AppChipRow<String>(

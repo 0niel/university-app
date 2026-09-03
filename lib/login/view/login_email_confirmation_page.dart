@@ -44,39 +44,67 @@ class _LoginEmailConfirmationForm extends StatefulWidget {
 
 class _LoginEmailConfirmationFormState
     extends State<_LoginEmailConfirmationForm> {
-  var _attempt = 0;
+  final _controller = TextEditingController();
+  final _focusNode = FocusNode();
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    _focusNode.dispose();
+    super.dispose();
+  }
+
+  void _reset() {
+    _controller.clear();
+    if (!_focusNode.hasFocus) _focusNode.requestFocus();
+  }
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final status = context.watch<LoginWithEmailLinkBloc>().state.status;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        AppFieldLabel(l10n.authCodeFromEmail),
-        AppCodeInput(
-          key: ValueKey('loginEmailConfirmation_code_$_attempt'),
-          autofocus: true,
-          enabled:
-              status != LoginWithEmailLinkStatus.loading &&
-              status != LoginWithEmailLinkStatus.success,
-          onCompleted: (code) {
-            context.read<LoginWithEmailLinkBloc>().add(
-              LoginWithEmailCodeSubmitted(email: widget.email, code: code),
-            );
-          },
-        ),
-        const SizedBox(height: 18),
-        _LoginEmailConfirmationStatus(
-          onRetry: () {
-            context.read<LoginWithEmailLinkBloc>().add(
-              const LoginWithEmailCodeResetRequested(),
-            );
-            setState(() => _attempt++);
-          },
-        ),
-      ],
+    return BlocListener<LoginWithEmailLinkBloc, LoginWithEmailLinkState>(
+      listenWhen: (previous, current) => previous.status != current.status,
+      listener: (context, state) {
+        if (state.status == LoginWithEmailLinkStatus.failure) _reset();
+      },
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          AppFieldLabel(l10n.authCodeFromEmail),
+          AppCodeInput(
+            key: const Key('loginEmailConfirmation_code'),
+            controller: _controller,
+            focusNode: _focusNode,
+            autofocus: true,
+            readOnly:
+                status == LoginWithEmailLinkStatus.loading ||
+                status == LoginWithEmailLinkStatus.success,
+            onChanged: (_) {
+              if (status == LoginWithEmailLinkStatus.failure) {
+                context.read<LoginWithEmailLinkBloc>().add(
+                  const LoginWithEmailCodeResetRequested(),
+                );
+              }
+            },
+            onCompleted: (code) {
+              context.read<LoginWithEmailLinkBloc>().add(
+                LoginWithEmailCodeSubmitted(email: widget.email, code: code),
+              );
+            },
+          ),
+          const SizedBox(height: 18),
+          _LoginEmailConfirmationStatus(
+            onRetry: () {
+              context.read<LoginWithEmailLinkBloc>().add(
+                const LoginWithEmailCodeResetRequested(),
+              );
+              _reset();
+            },
+          ),
+        ],
+      ),
     );
   }
 }

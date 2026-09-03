@@ -12,6 +12,7 @@ class _Corner extends StatelessWidget {
     const length = 34.0;
     const thickness = 3.0;
     const radius = BorderRadius.all(Radius.circular(thickness));
+    final color = context.colors.white;
     return SizedBox.square(
       dimension: length,
       child: Stack(
@@ -24,10 +25,7 @@ class _Corner extends StatelessWidget {
             child: Container(
               width: length,
               height: thickness,
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: radius,
-              ),
+              decoration: BoxDecoration(color: color, borderRadius: radius),
             ),
           ),
           Positioned(
@@ -38,10 +36,7 @@ class _Corner extends StatelessWidget {
             child: Container(
               width: thickness,
               height: length,
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: radius,
-              ),
+              decoration: BoxDecoration(color: color, borderRadius: radius),
             ),
           ),
         ],

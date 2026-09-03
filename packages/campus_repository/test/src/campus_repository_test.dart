@@ -126,7 +126,7 @@ void main() {
             .cast<String>();
         return http.Response('[]', 200, request: request);
       }
-      if (path.endsWith('/rest/v1/rpc/create_public_material_v2')) {
+      if (path.endsWith('/rest/v1/rpc/create_public_material_v3')) {
         return http.Response(
           jsonEncode({
             'code': 'P0001',
@@ -240,7 +240,7 @@ void main() {
           uploads++;
           return http.Response('{"Key":"bank/file"}', 200, request: request);
         }
-        expect(request.url.path, '/rest/v1/rpc/create_public_material_v2');
+        expect(request.url.path, '/rest/v1/rpc/create_public_material_v3');
         creations++;
         final parameters = jsonDecode(request.body) as Map;
         expect(parameters['p_subject_names'], [
@@ -253,6 +253,8 @@ void main() {
           parameters['p_file_path'],
           matches('^$_materialUserId/bank/[a-f0-9]{32}\$'),
         );
+        expect(parameters['p_preview_path'], isNull);
+        expect(parameters['p_batch_id'], isNull);
         return http.Response(
           '"00000000-0000-4000-8000-000000000001"',
           200,
@@ -270,6 +272,46 @@ void main() {
     );
     expect(uploads, 1);
     expect(creations, 1);
+  });
+
+  test('uploads a preview image and forwards it with the batch id', () async {
+    final uploadPaths = <String>[];
+    final repository = await _signedInRepository(
+      MockClient((request) async {
+        if (request.url.path.contains('/storage/v1/object/')) {
+          uploadPaths.add(request.url.path);
+          return http.Response('{"Key":"bank/file"}', 200, request: request);
+        }
+        expect(request.url.path, '/rest/v1/rpc/create_public_material_v3');
+        final parameters = jsonDecode(request.body) as Map;
+        expect(
+          parameters['p_preview_path'],
+          matches('^$_materialUserId/bank/previews/[a-f0-9]{32}\\.jpg\$'),
+        );
+        expect(parameters['p_batch_id'], 'batch-1');
+        expect(parameters['p_width'], 480);
+        expect(parameters['p_height'], 640);
+        return http.Response(
+          '"00000000-0000-4000-8000-000000000002"',
+          200,
+          request: request,
+          headers: {'content-type': 'application/json'},
+        );
+      }),
+    );
+    final id = await repository.createPublicMaterial(
+      title: 'Notes',
+      subjectName: 'Математика',
+      fileName: 'notes.pdf',
+      fileBytes: Uint8List.fromList([1, 2, 3]),
+      previewBytes: Uint8List.fromList([4, 5]),
+      width: 480,
+      height: 640,
+      batchId: 'batch-1',
+    );
+    expect(id, '00000000-0000-4000-8000-000000000002');
+    expect(uploadPaths, hasLength(2));
+    expect(uploadPaths.last, contains('/bank/previews/'));
   });
 
   test('requires a subject before uploading a file', () async {
@@ -291,6 +333,61 @@ void main() {
     );
     expect(called, isFalse);
   });
+
+  test('toggleMaterialLike posts the id and parses the like result', () async {
+    final repository = await _signedInRepository(
+      MockClient((request) async {
+        expect(request.url.path, '/rest/v1/rpc/toggle_material_like');
+        final parameters = jsonDecode(request.body) as Map;
+        expect(parameters['p_id'], 'material-1');
+        return http.Response(
+          '{"liked":true,"likes":4}',
+          200,
+          request: request,
+          headers: {'content-type': 'application/json'},
+        );
+      }),
+    );
+    final result = await repository.toggleMaterialLike('material-1');
+    expect(result.liked, isTrue);
+    expect(result.likes, 4);
+  });
+
+  test(
+    'createMaterialPreviewUrls signs only the materials with a preview',
+    () async {
+      final repository = await _signedInRepository(
+        MockClient((request) async {
+          expect(request.url.path, contains('/storage/v1/object/sign/'));
+          final parameters = jsonDecode(request.body) as Map;
+          expect(parameters['paths'], ['user/bank/previews/a.jpg']);
+          return http.Response(
+            jsonEncode([
+              {
+                'signedURL':
+                    '/object/sign/lesson-materials/user/bank/'
+                    'previews/a.jpg?token=abc',
+                'path': 'user/bank/previews/a.jpg',
+              },
+            ]),
+            200,
+            request: request,
+            headers: {'content-type': 'application/json'},
+          );
+        }),
+      );
+      final urls = await repository.createMaterialPreviewUrls(const [
+        StudyMaterial(
+          id: 'm1',
+          title: 'A',
+          previewPath: 'user/bank/previews/a.jpg',
+        ),
+        StudyMaterial(id: 'm2', title: 'B'),
+      ]);
+      expect(urls.keys, ['user/bank/previews/a.jpg']);
+      expect(urls['user/bank/previews/a.jpg'], contains('token=abc'));
+    },
+  );
 
   test(
     'decodes the subject search contract without silently hiding errors',
@@ -772,91 +869,256 @@ void main() {
     expect(deleteCall.$2, {'p_id': 'team-1'});
   });
 
-  test('uses exact marketplace RPC contracts', () async {
-    final calls = <(String, Map<String, Object?>)>[];
-    final client = MockClient((request) async {
-      final method = request.url.pathSegments.lastOrNull ?? '';
-      final body = Map<String, Object?>.from(jsonDecode(request.body) as Map);
-      calls.add((method, body));
-      final response = switch (method) {
-        'get_listings' => jsonEncode([
-          {
-            'id': '123e4567-e89b-42d3-a456-426614174000',
-            'title': 'Book',
-            'price': 500,
-            'showContact': true,
-            'sellerHandle': 'seller_user',
-          },
-        ]),
-        'create_listing' => jsonEncode('123e4567-e89b-42d3-a456-426614174001'),
-        _ => 'null',
-      };
-      return http.Response(
-        response,
-        200,
-        request: request,
-        headers: {'content-type': 'application/json'},
+  group('room photos', () {
+    test('loads photos and stamps a public url for each path', () async {
+      Map<String, Object?>? body;
+      final client = MockClient((request) async {
+        expect(request.url.path, '/rest/v1/rpc/get_room_photos');
+        body = (jsonDecode(request.body) as Map).cast();
+        return http.Response(
+          jsonEncode([
+            {
+              'id': 'photo-1',
+              'path': 'user-1/a.jpg',
+              'createdBy': 'user-1',
+              'authorName': 'Анна',
+              'createdAt': '2026-01-02T03:04:05Z',
+              'isMine': true,
+            },
+          ]),
+          200,
+          request: request,
+          headers: {'content-type': 'application/json'},
+        );
+      });
+
+      final photos = await _repository(
+        client,
+      ).getRoomPhotos(campus: 'В-78', roomKey: 'A101');
+
+      expect(body, {
+        'p_organization_id': 'university',
+        'p_campus': 'В-78',
+        'p_room_key': 'A101',
+      });
+      final [photo] = photos;
+      expect(photo.id, 'photo-1');
+      expect(
+        photo.url,
+        'https://project.supabase.co/storage/v1/object/public/'
+        'room-photos/user-1/a.jpg',
       );
     });
-    final repository = _repository(client);
 
-    final listings = await repository.getListings();
-    final id = await repository.createListing(
-      title: 'Book',
-      price: 500,
-      category: 'books',
-      description: 'Clean',
-      showContact: true,
-    );
-    await repository.setListingSold(
-      id: '123e4567-e89b-42d3-a456-426614174000',
-      sold: true,
-    );
-    await repository.deleteListing(
-      '123e4567-e89b-42d3-a456-426614174000',
+    test(
+      'uploads then registers a room photo and removes it on RPC failure',
+      () async {
+        var uploaded = false;
+        var removed = false;
+        var uploadPath = '';
+        final client = MockClient((request) async {
+          final path = request.url.path;
+          if (request.method == 'POST' &&
+              path.contains('/storage/v1/object/')) {
+            uploaded = true;
+            uploadPath = path;
+            return http.Response(
+              jsonEncode({'Key': path}),
+              200,
+              request: request,
+            );
+          }
+          if (request.method == 'DELETE' && path.endsWith('/room-photos')) {
+            removed = true;
+            return http.Response('[]', 200, request: request);
+          }
+          expect(path, '/rest/v1/rpc/add_room_photo');
+          return http.Response(
+            jsonEncode({
+              'code': 'P0001',
+              'message': 'rejected',
+              'details': null,
+              'hint': null,
+            }),
+            400,
+            request: request,
+          );
+        });
+        final repository = await _signedInRepository(client);
+
+        await expectLater(
+          repository.addRoomPhoto(
+            campus: 'В-78',
+            roomKey: 'A101',
+            bytes: Uint8List.fromList(const [1, 2, 3]),
+            contentType: 'image/jpeg',
+          ),
+          throwsA(isA<PostgrestException>()),
+        );
+
+        expect(uploaded, isTrue);
+        expect(removed, isTrue);
+        expect(
+          uploadPath,
+          startsWith('/storage/v1/object/room-photos/$_materialUserId/'),
+        );
+      },
     );
 
-    expect(listings.singleOrNull?.sellerHandle, 'seller_user');
-    expect(id, '123e4567-e89b-42d3-a456-426614174001');
-    expect(calls.map((call) => call.$1), [
-      'get_listings',
-      'create_listing',
-      'set_listing_sold',
-      'delete_listing',
-    ]);
-    expect(calls.elementAtOrNull(0)?.$2, {'p_organization_id': 'university'});
-    expect(calls.elementAtOrNull(1)?.$2, {
-      'p_organization_id': 'university',
-      'p_title': 'Book',
-      'p_price': 500,
-      'p_category': 'books',
-      'p_emoji': '📦',
-      'p_description': 'Clean',
-      'p_show_contact': true,
+    test('adds a room photo and parses the created row', () async {
+      Map<String, Object?>? rpcBody;
+      final client = MockClient((request) async {
+        final path = request.url.path;
+        if (path.contains('/storage/v1/object/')) {
+          return http.Response(
+            jsonEncode({'Key': path}),
+            200,
+            request: request,
+          );
+        }
+        rpcBody = (jsonDecode(request.body) as Map).cast();
+        return http.Response(
+          jsonEncode({
+            'id': 'photo-1',
+            'path': rpcBody?['p_path'],
+            'width': 1600,
+            'height': 1200,
+            'createdBy': _materialUserId,
+            'authorName': 'Анна',
+            'createdAt': '2026-01-02T03:04:05Z',
+            'isMine': true,
+          }),
+          200,
+          request: request,
+          headers: {'content-type': 'application/json'},
+        );
+      });
+      final repository = await _signedInRepository(client);
+
+      final photo = await repository.addRoomPhoto(
+        campus: 'В-78',
+        roomKey: 'A101',
+        bytes: Uint8List.fromList(const [1, 2, 3]),
+        contentType: 'image/png',
+        width: 1600,
+        height: 1200,
+      );
+
+      expect(rpcBody?['p_organization_id'], 'university');
+      expect(rpcBody?['p_campus'], 'В-78');
+      expect(rpcBody?['p_room_key'], 'A101');
+      expect(rpcBody?['p_width'], 1600);
+      expect(rpcBody?['p_height'], 1200);
+      expect(photo.id, 'photo-1');
+      expect(photo.width, 1600);
+      expect(photo.url, contains('room-photos'));
     });
-    expect(calls.elementAtOrNull(2)?.$2, {
-      'p_id': '123e4567-e89b-42d3-a456-426614174000',
-      'p_sold': true,
+
+    test('rejects an oversized room photo before a network request', () async {
+      var called = false;
+      final repository = _repository(
+        MockClient((request) async {
+          called = true;
+          return http.Response('not called', 500, request: request);
+        }),
+      );
+
+      await expectLater(
+        repository.addRoomPhoto(
+          campus: 'В-78',
+          roomKey: 'A101',
+          bytes: Uint8List(9 * 1024 * 1024),
+          contentType: 'image/jpeg',
+        ),
+        throwsArgumentError,
+      );
+      expect(called, isFalse);
     });
-    expect(calls.elementAtOrNull(3)?.$2, {
-      'p_id': '123e4567-e89b-42d3-a456-426614174000',
+
+    test('deletes a room photo through the expected RPC contract', () async {
+      Map<String, Object?>? body;
+      final paths = <String>[];
+      final client = MockClient((request) async {
+        paths.add(request.url.path);
+        if (request.url.path == '/rest/v1/rpc/delete_room_photo_v2') {
+          body = (jsonDecode(request.body) as Map).cast();
+          return http.Response('"owner/photo.jpg"', 200, request: request);
+        }
+        expect(request.method, 'DELETE');
+        expect(jsonDecode(request.body), {
+          'prefixes': ['owner/photo.jpg'],
+        });
+        return http.Response('[]', 200, request: request);
+      });
+
+      await _repository(client).deleteRoomPhoto('photo-1');
+
+      expect(body, {'p_id': 'photo-1'});
+      expect(paths, [
+        '/rest/v1/rpc/delete_room_photo_v2',
+        '/storage/v1/object/room-photos',
+      ]);
+    });
+
+    test(
+      'does not delete storage when room photo deletion is denied',
+      () async {
+        final paths = <String>[];
+        final client = MockClient((request) async {
+          paths.add(request.url.path);
+          return http.Response(
+            '{"code":"42501","message":"Forbidden"}',
+            403,
+            request: request,
+          );
+        });
+
+        await expectLater(
+          _repository(client).deleteRoomPhoto('photo-1'),
+          throwsA(isA<PostgrestException>()),
+        );
+        expect(paths, ['/rest/v1/rpc/delete_room_photo_v2']);
+      },
+    );
+
+    test('rejects an invalid room photo deletion response', () async {
+      final client = MockClient((request) async {
+        expect(request.url.path, '/rest/v1/rpc/delete_room_photo_v2');
+        return http.Response('null', 200, request: request);
+      });
+
+      await expectLater(
+        _repository(client).deleteRoomPhoto('photo-1'),
+        throwsFormatException,
+      );
     });
   });
 
-  test('createListing rejects a malformed RPC id', () async {
-    final client = MockClient(
-      (request) async => http.Response(
-        jsonEncode('not-a-uuid'),
-        200,
-        request: request,
-        headers: {'content-type': 'application/json'},
-      ),
-    );
+  group('single group note lookup', () {
+    test('returns the matching authorized note', () async {
+      final client = MockClient((request) async {
+        expect(request.url.path, '/rest/v1/rpc/get_group_notes');
+        expect(jsonDecode(request.body), {'p_organization_id': 'university'});
+        return http.Response(
+          '[{"id":"first","title":"First"},'
+          '{"id":"wanted","title":"Current","documentRevision":7}]',
+          200,
+          request: request,
+        );
+      });
 
-    await expectLater(
-      _repository(client).createListing(title: 'Book', price: 500),
-      throwsFormatException,
-    );
+      final note = await _repository(client).getGroupNote('wanted');
+      expect(note?.id, 'wanted');
+      expect(note?.documentRevision, 7);
+    });
+
+    test('returns null for notes outside the authorized list', () async {
+      final client = MockClient(
+        (request) async => http.Response('[]', 200, request: request),
+      );
+
+      expect(await _repository(client).getGroupNote('missing'), isNull);
+    });
   });
 }
 

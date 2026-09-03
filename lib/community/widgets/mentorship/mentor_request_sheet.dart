@@ -29,6 +29,7 @@ class _MentorRequestSheetState extends State<MentorRequestSheet> {
     UniversityConfig.current.mentorWhenSlotKeys.firstOrNull ??
         MentorWhenSlot.week.wireValue,
   );
+  var _failed = false;
 
   MentorWhenSlot _slotFor(String key) =>
       MentorWhenSlot.values.firstWhereOrNull((slot) => slot.wireValue == key) ??
@@ -41,6 +42,7 @@ class _MentorRequestSheetState extends State<MentorRequestSheet> {
   }
 
   Future<void> _send() async {
+    setState(() => _failed = false);
     final sent = await context.read<MentorshipCubit>().sendRequest(
       MentorRequestDraft(
         mentorUserId: widget.mentor.userId,
@@ -53,11 +55,7 @@ class _MentorRequestSheetState extends State<MentorRequestSheet> {
     if (sent) {
       Navigator.of(context).pop(true);
     } else {
-      showNinjaToast(
-        context,
-        showCheck: false,
-        message: context.l10n.mentorshipRequestError,
-      );
+      setState(() => _failed = true);
     }
   }
 
@@ -72,6 +70,11 @@ class _MentorRequestSheetState extends State<MentorRequestSheet> {
         spacing: 16,
         crossAxisAlignment: .start,
         children: [
+          if (_failed)
+            AppBanner(
+              message: context.l10n.mentorshipRequestError,
+              tone: .danger,
+            ),
           _mentorSummary(context),
           _label(context, context.l10n.mentorshipTopicLabel),
           Wrap(
@@ -119,6 +122,7 @@ class _MentorRequestSheetState extends State<MentorRequestSheet> {
                 : context.l10n.mentorshipSendRequest,
             expanded: true,
             size: NinjaButtonSize.large,
+            loading: sending,
             onPressed: sending || _topic.isEmpty
                 ? null
                 : () => unawaited(_send()),

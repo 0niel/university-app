@@ -106,5 +106,64 @@ void main() {
       expect(rail.childrenDelegate.estimatedChildCount, 39);
       expect(tester.takeException(), isNull);
     });
+
+    testWidgets('a background refresh keeps the loaded rail instead of '
+        'flashing the skeleton', (tester) async {
+      when(() => communityRepository.getTopTopics()).thenAnswer(
+        (_) async => const TopTopicsResponse(
+          topics: [
+            DiscourseTopic(
+              id: 1,
+              title: 'Topic 1',
+              postsCount: 2,
+              replyCount: 1,
+              likeCount: 0,
+              views: 20,
+              posters: [],
+            ),
+          ],
+          users: [],
+        ),
+      );
+      await tester.pumpWidget(buildSubject());
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 400));
+      await tester.pump(const Duration(milliseconds: 400));
+      expect(find.byType(TopicNewsCardSkeleton), findsNothing);
+      expect(find.text('Topic 1'), findsOneWidget);
+
+      final pending = Completer<TopTopicsResponse>();
+      when(
+        () => communityRepository.getTopTopics(),
+      ).thenAnswer((_) => pending.future);
+      tester
+          .element(find.byType(TopTopicsContent))
+          .read<DiscourseBloc>()
+          .add(const DiscourseTopTopicsRequested());
+      await tester.pump();
+
+      expect(find.byType(TopicNewsCardSkeleton), findsNothing);
+      expect(find.text('Topic 1'), findsOneWidget);
+
+      pending.complete(
+        const TopTopicsResponse(
+          topics: [
+            DiscourseTopic(
+              id: 1,
+              title: 'Topic 1',
+              postsCount: 2,
+              replyCount: 1,
+              likeCount: 0,
+              views: 20,
+              posters: [],
+            ),
+          ],
+          users: [],
+        ),
+      );
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 400));
+      expect(tester.takeException(), isNull);
+    });
   });
 }

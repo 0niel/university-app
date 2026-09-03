@@ -99,49 +99,71 @@ void main() {
       tester,
     ) async {
       final polls = _Polls();
+      when(() => polls.hasMore).thenReturn(false);
       when(() => polls.state).thenReturn(
         PollsState(
           status: .populated,
           polls: [
             const Poll(
               id: 'consultation',
-              question: 'Когда удобнее консультация по матанализу?',
-              pollType: .single,
-              showResults: false,
-              totalVotes: 24,
-              options: [
-                PollOption(id: 'mon', text: 'Пн 16:20', votes: 8),
-                PollOption(id: 'wed', text: 'Ср 16:20', votes: 11),
-                PollOption(id: 'sat', text: 'Сб 10:40', votes: 5),
+              title: 'Когда удобнее консультация по матанализу?',
+              resultsVisibility: .afterVote,
+              participantsCount: 24,
+              questions: [
+                PollQuestion(
+                  id: 'consultation-time',
+                  text: 'Выберите время консультации',
+                  kind: .single,
+                  options: [
+                    PollOption(id: 'mon', text: 'Пн 16:20', votes: 8),
+                    PollOption(id: 'wed', text: 'Ср 16:20', votes: 11),
+                    PollOption(id: 'sat', text: 'Сб 10:40', votes: 5),
+                  ],
+                ),
               ],
             ),
             const Poll(
               id: 'trip',
-              question: 'Едем на выезд группы 12–13 сентября?',
-              pollType: .single,
-              showResults: false,
-              totalVotes: 21,
-              options: [
-                PollOption(id: 'yes', text: 'Да, еду', votes: 14),
-                PollOption(id: 'day', text: 'Только на день', votes: 4),
-                PollOption(id: 'no', text: 'Нет', votes: 3),
+              title: 'Едем на выезд группы 12–13 сентября?',
+              resultsVisibility: .afterVote,
+              participantsCount: 21,
+              questions: [
+                PollQuestion(
+                  id: 'trip-participation',
+                  text: 'Планируете участвовать?',
+                  kind: .single,
+                  options: [
+                    PollOption(id: 'yes', text: 'Да, еду', votes: 14),
+                    PollOption(id: 'day', text: 'Только на день', votes: 4),
+                    PollOption(id: 'no', text: 'Нет', votes: 3),
+                  ],
+                ),
               ],
             ),
             Poll(
               id: 'canteen',
-              question: 'Оцените столовую В-78 в августе',
-              pollType: .single,
+              title: 'Оцените столовую В-78 в августе',
               expiresAt: DateTime(2026, 8, 31),
-              totalVotes: 556,
-              options: const [
-                PollOption(id: 'great', text: 'Отлично', votes: 120),
-                PollOption(
-                  id: 'ok',
-                  text: 'Нормально',
-                  votes: 340,
-                  votedByMe: true,
+              participantsCount: 556,
+              iParticipated: true,
+              canSeeResults: true,
+              questions: const [
+                PollQuestion(
+                  id: 'canteen-feedback',
+                  text: 'Как вам столовая?',
+                  kind: .single,
+                  myOptionIds: ['ok'],
+                  options: [
+                    PollOption(id: 'great', text: 'Отлично', votes: 120),
+                    PollOption(
+                      id: 'ok',
+                      text: 'Нормально',
+                      votes: 340,
+                      votedByMe: true,
+                    ),
+                    PollOption(id: 'bad', text: 'Плохо', votes: 96),
+                  ],
                 ),
-                PollOption(id: 'bad', text: 'Плохо', votes: 96),
               ],
             ),
           ],

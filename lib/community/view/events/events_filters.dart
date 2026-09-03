@@ -1,5 +1,5 @@
 import 'package:app_ui/app_ui.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:rtu_mirea_app/community/models/models.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 
@@ -20,17 +20,14 @@ class EventsFilters extends StatelessWidget {
       EventsFilter.all: l10n.eventsFilterAll,
       EventsFilter.today: l10n.eventsFilterToday,
       EventsFilter.going: l10n.eventsFilterGoing,
+      EventsFilter.past: l10n.eventsFilterPast,
     };
-    return Wrap(
-      spacing: 6,
-      runSpacing: 6,
-      children: [
+    return AppChipRow<EventsFilter>(
+      value: value,
+      onChanged: onChanged,
+      items: [
         for (final filter in EventsFilter.values)
-          AppChip.filter(
-            label: labels[filter] ?? '',
-            selected: filter == value,
-            onTap: () => onChanged(filter),
-          ),
+          AppChipRowItem(value: filter, label: labels[filter] ?? ''),
       ],
     );
   }

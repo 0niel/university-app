@@ -9,6 +9,7 @@ import 'package:campus_repository/campus_repository.dart';
 import 'package:community_catalog_repository/community_catalog_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:lost_and_found_repository/lost_and_found_repository.dart';
 import 'package:mocktail/mocktail.dart';
@@ -32,6 +33,7 @@ import 'package:rtu_mirea_app/lost_and_found/lost_and_found.dart';
 import 'package:rtu_mirea_app/marketplace/marketplace.dart';
 import 'package:rtu_mirea_app/polls/polls.dart';
 import 'package:rtu_mirea_app/wallet/wallet.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'gallery_fonts.dart';
 
@@ -66,12 +68,16 @@ class _Lost extends MockCubit<LostFoundState> implements LostFoundCubit {}
 
 class _Market extends MockCubit<MarketplaceState> implements MarketplaceCubit {}
 
+class _ContactPrefs extends MockCubit<String>
+    implements MarketContactPrefsCubit {}
+
 class _Wallet extends MockCubit<WalletState> implements WalletCubit {}
 
 class _Campus extends Mock implements CampusRepository {}
 
 void main() {
   setUpAll(() async {
+    SharedPreferences.setMockInitialValues({});
     await loadGalleryFonts();
     registerFallbackValue(
       const FeedRequested(
@@ -186,10 +192,11 @@ void main() {
                   sellerName: 'Мария',
                   description: 'Учебник в хорошем состоянии.',
                   showContact: state != 'private',
-                  sellerHandle: state == 'private' ? null : 'maria',
+                  telegramHandle: state == 'private' ? null : 'maria',
                   isSold: state == 'sold',
                 ),
                 onContact: () {},
+                onShare: () {},
               ),
             ),
         ]);
@@ -249,6 +256,7 @@ Widget _screen(String screen, String status) {
       );
     case 'polls':
       final cubit = _Polls();
+      when(() => cubit.hasMore).thenReturn(false);
       when(() => cubit.state).thenReturn(
         PollsState(
           status: status == 'empty'
@@ -412,12 +420,17 @@ Widget _sheet(String form, {bool pending = false}) {
   final market = _Market();
   when(() => notes.state).thenReturn(CollabNotesState(isCreating: pending));
   when(() => lost.state).thenReturn(LostFoundState(isCreating: pending));
-  when(() => market.state).thenReturn(MarketplaceState(isCreating: pending));
+  when(() => market.state).thenReturn(MarketplaceState(isSaving: pending));
+  final contactPrefs = _ContactPrefs();
+  when(() => contactPrefs.state).thenReturn('');
   final (title, child) = switch (form) {
     'poll' => ('Создать опрос', PollCreatorSheet(cubit: _Polls())),
     'event' => (
       'Новое событие',
-      CreateEventSheet(initialStartsAt: DateTime(2026, 9, 3, 18)),
+      CreateEventSheet(
+        onSubmit: (_) async => true,
+        initialStartsAt: DateTime(2026, 9, 3, 18),
+      ),
     ),
     'note' => (
       'Создать конспект',
@@ -439,8 +452,11 @@ Widget _sheet(String form, {bool pending = false}) {
     ),
     'market' => (
       'Продать вещь',
-      BlocProvider<MarketplaceCubit>.value(
-        value: market,
+      MultiBlocProvider(
+        providers: [
+          BlocProvider<MarketplaceCubit>.value(value: market),
+          BlocProvider<MarketContactPrefsCubit>.value(value: contactPrefs),
+        ],
         child: const MarketSellSheet(),
       ),
     ),
@@ -478,20 +494,27 @@ Widget _lostDetails(String state) {
 
 Widget _editor(NoteEditorStatus status) {
   final cubit = _Editor();
+  final controller = QuillController.basic();
+  controller.document.insert(
+    0,
+    'Производная описывает скорость изменения функции.\n\n'
+    'Правила дифференцирования суммы и произведения.\n\n'
+    'Вопросы к следующему семинару.',
+  );
+  when(() => cubit.controller).thenReturn(controller);
   when(() => cubit.state).thenReturn(
     NoteEditorState(
       title: 'Лекция 4. Производные и дифференциалы',
-      content:
-          'Производная описывает скорость изменения функции.\n\n'
-          'Правила дифференцирования суммы и произведения.\n\n'
-          'Вопросы к следующему семинару.',
       status: status,
       canDelete: true,
     ),
   );
-  return BlocProvider<NoteEditorCubit>.value(
-    value: cubit,
-    child: const Scaffold(body: SafeArea(child: CollabNoteEditorView())),
+  return RepositoryProvider<CampusRepository>.value(
+    value: _Campus(),
+    child: BlocProvider<NoteEditorCubit>.value(
+      value: cubit,
+      child: const Scaffold(body: SafeArea(child: CollabNoteEditorView())),
+    ),
   );
 }
 

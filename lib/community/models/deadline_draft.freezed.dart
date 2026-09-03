@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$DeadlineDraft {
 
- String get title; DateTime get dueAt; DeadlineSource get source; String get subjectName; DeadlinePriority get priority; bool get remind;
+ String get title; DateTime get dueAt; DeadlineSource get source; String get subjectName; DeadlinePriority get priority; bool get remind; int get remindMinutes;
 /// Create a copy of DeadlineDraft
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +25,16 @@ $DeadlineDraftCopyWith<DeadlineDraft> get copyWith => _$DeadlineDraftCopyWithImp
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is DeadlineDraft&&(identical(other.title, title) || other.title == title)&&(identical(other.dueAt, dueAt) || other.dueAt == dueAt)&&(identical(other.source, source) || other.source == source)&&(identical(other.subjectName, subjectName) || other.subjectName == subjectName)&&(identical(other.priority, priority) || other.priority == priority)&&(identical(other.remind, remind) || other.remind == remind));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is DeadlineDraft&&(identical(other.title, title) || other.title == title)&&(identical(other.dueAt, dueAt) || other.dueAt == dueAt)&&(identical(other.source, source) || other.source == source)&&(identical(other.subjectName, subjectName) || other.subjectName == subjectName)&&(identical(other.priority, priority) || other.priority == priority)&&(identical(other.remind, remind) || other.remind == remind)&&(identical(other.remindMinutes, remindMinutes) || other.remindMinutes == remindMinutes));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,title,dueAt,source,subjectName,priority,remind);
+int get hashCode => Object.hash(runtimeType,title,dueAt,source,subjectName,priority,remind,remindMinutes);
 
 @override
 String toString() {
-  return 'DeadlineDraft(title: $title, dueAt: $dueAt, source: $source, subjectName: $subjectName, priority: $priority, remind: $remind)';
+  return 'DeadlineDraft(title: $title, dueAt: $dueAt, source: $source, subjectName: $subjectName, priority: $priority, remind: $remind, remindMinutes: $remindMinutes)';
 }
 
 
@@ -45,7 +45,7 @@ abstract mixin class $DeadlineDraftCopyWith<$Res>  {
   factory $DeadlineDraftCopyWith(DeadlineDraft value, $Res Function(DeadlineDraft) _then) = _$DeadlineDraftCopyWithImpl;
 @useResult
 $Res call({
- String title, DateTime dueAt, DeadlineSource source, String subjectName, DeadlinePriority priority, bool remind
+ String title, DateTime dueAt, DeadlineSource source, String subjectName, DeadlinePriority priority, bool remind, int remindMinutes
 });
 
 
@@ -62,7 +62,7 @@ class _$DeadlineDraftCopyWithImpl<$Res>
 
 /// Create a copy of DeadlineDraft
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? title = null,Object? dueAt = null,Object? source = null,Object? subjectName = null,Object? priority = null,Object? remind = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? title = null,Object? dueAt = null,Object? source = null,Object? subjectName = null,Object? priority = null,Object? remind = null,Object? remindMinutes = null,}) {
   return _then(_self.copyWith(
 title: null == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
 as String,dueAt: null == dueAt ? _self.dueAt : dueAt // ignore: cast_nullable_to_non_nullable
@@ -70,7 +70,8 @@ as DateTime,source: null == source ? _self.source : source // ignore: cast_nulla
 as DeadlineSource,subjectName: null == subjectName ? _self.subjectName : subjectName // ignore: cast_nullable_to_non_nullable
 as String,priority: null == priority ? _self.priority : priority // ignore: cast_nullable_to_non_nullable
 as DeadlinePriority,remind: null == remind ? _self.remind : remind // ignore: cast_nullable_to_non_nullable
-as bool,
+as bool,remindMinutes: null == remindMinutes ? _self.remindMinutes : remindMinutes // ignore: cast_nullable_to_non_nullable
+as int,
   ));
 }
 
@@ -155,10 +156,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String title,  DateTime dueAt,  DeadlineSource source,  String subjectName,  DeadlinePriority priority,  bool remind)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String title,  DateTime dueAt,  DeadlineSource source,  String subjectName,  DeadlinePriority priority,  bool remind,  int remindMinutes)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _DeadlineDraft() when $default != null:
-return $default(_that.title,_that.dueAt,_that.source,_that.subjectName,_that.priority,_that.remind);case _:
+return $default(_that.title,_that.dueAt,_that.source,_that.subjectName,_that.priority,_that.remind,_that.remindMinutes);case _:
   return orElse();
 
 }
@@ -176,10 +177,10 @@ return $default(_that.title,_that.dueAt,_that.source,_that.subjectName,_that.pri
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String title,  DateTime dueAt,  DeadlineSource source,  String subjectName,  DeadlinePriority priority,  bool remind)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String title,  DateTime dueAt,  DeadlineSource source,  String subjectName,  DeadlinePriority priority,  bool remind,  int remindMinutes)  $default,) {final _that = this;
 switch (_that) {
 case _DeadlineDraft():
-return $default(_that.title,_that.dueAt,_that.source,_that.subjectName,_that.priority,_that.remind);case _:
+return $default(_that.title,_that.dueAt,_that.source,_that.subjectName,_that.priority,_that.remind,_that.remindMinutes);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -196,10 +197,10 @@ return $default(_that.title,_that.dueAt,_that.source,_that.subjectName,_that.pri
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String title,  DateTime dueAt,  DeadlineSource source,  String subjectName,  DeadlinePriority priority,  bool remind)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String title,  DateTime dueAt,  DeadlineSource source,  String subjectName,  DeadlinePriority priority,  bool remind,  int remindMinutes)?  $default,) {final _that = this;
 switch (_that) {
 case _DeadlineDraft() when $default != null:
-return $default(_that.title,_that.dueAt,_that.source,_that.subjectName,_that.priority,_that.remind);case _:
+return $default(_that.title,_that.dueAt,_that.source,_that.subjectName,_that.priority,_that.remind,_that.remindMinutes);case _:
   return null;
 
 }
@@ -211,7 +212,7 @@ return $default(_that.title,_that.dueAt,_that.source,_that.subjectName,_that.pri
 
 
 class _DeadlineDraft implements DeadlineDraft {
-  const _DeadlineDraft({required this.title, required this.dueAt, required this.source, this.subjectName = '', this.priority = DeadlinePriority.medium, this.remind = true});
+  const _DeadlineDraft({required this.title, required this.dueAt, required this.source, this.subjectName = '', this.priority = DeadlinePriority.medium, this.remind = true, this.remindMinutes = 60});
 
 
 @override final  String title;
@@ -220,6 +221,7 @@ class _DeadlineDraft implements DeadlineDraft {
 @override@JsonKey() final  String subjectName;
 @override@JsonKey() final  DeadlinePriority priority;
 @override@JsonKey() final  bool remind;
+@override@JsonKey() final  int remindMinutes;
 
 /// Create a copy of DeadlineDraft
 /// with the given fields replaced by the non-null parameter values.
@@ -231,16 +233,16 @@ _$DeadlineDraftCopyWith<_DeadlineDraft> get copyWith => __$DeadlineDraftCopyWith
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _DeadlineDraft&&(identical(other.title, title) || other.title == title)&&(identical(other.dueAt, dueAt) || other.dueAt == dueAt)&&(identical(other.source, source) || other.source == source)&&(identical(other.subjectName, subjectName) || other.subjectName == subjectName)&&(identical(other.priority, priority) || other.priority == priority)&&(identical(other.remind, remind) || other.remind == remind));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _DeadlineDraft&&(identical(other.title, title) || other.title == title)&&(identical(other.dueAt, dueAt) || other.dueAt == dueAt)&&(identical(other.source, source) || other.source == source)&&(identical(other.subjectName, subjectName) || other.subjectName == subjectName)&&(identical(other.priority, priority) || other.priority == priority)&&(identical(other.remind, remind) || other.remind == remind)&&(identical(other.remindMinutes, remindMinutes) || other.remindMinutes == remindMinutes));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,title,dueAt,source,subjectName,priority,remind);
+int get hashCode => Object.hash(runtimeType,title,dueAt,source,subjectName,priority,remind,remindMinutes);
 
 @override
 String toString() {
-  return 'DeadlineDraft(title: $title, dueAt: $dueAt, source: $source, subjectName: $subjectName, priority: $priority, remind: $remind)';
+  return 'DeadlineDraft(title: $title, dueAt: $dueAt, source: $source, subjectName: $subjectName, priority: $priority, remind: $remind, remindMinutes: $remindMinutes)';
 }
 
 
@@ -251,7 +253,7 @@ abstract mixin class _$DeadlineDraftCopyWith<$Res> implements $DeadlineDraftCopy
   factory _$DeadlineDraftCopyWith(_DeadlineDraft value, $Res Function(_DeadlineDraft) _then) = __$DeadlineDraftCopyWithImpl;
 @override @useResult
 $Res call({
- String title, DateTime dueAt, DeadlineSource source, String subjectName, DeadlinePriority priority, bool remind
+ String title, DateTime dueAt, DeadlineSource source, String subjectName, DeadlinePriority priority, bool remind, int remindMinutes
 });
 
 
@@ -268,7 +270,7 @@ class __$DeadlineDraftCopyWithImpl<$Res>
 
 /// Create a copy of DeadlineDraft
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? title = null,Object? dueAt = null,Object? source = null,Object? subjectName = null,Object? priority = null,Object? remind = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? title = null,Object? dueAt = null,Object? source = null,Object? subjectName = null,Object? priority = null,Object? remind = null,Object? remindMinutes = null,}) {
   return _then(_DeadlineDraft(
 title: null == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
 as String,dueAt: null == dueAt ? _self.dueAt : dueAt // ignore: cast_nullable_to_non_nullable
@@ -276,7 +278,8 @@ as DateTime,source: null == source ? _self.source : source // ignore: cast_nulla
 as DeadlineSource,subjectName: null == subjectName ? _self.subjectName : subjectName // ignore: cast_nullable_to_non_nullable
 as String,priority: null == priority ? _self.priority : priority // ignore: cast_nullable_to_non_nullable
 as DeadlinePriority,remind: null == remind ? _self.remind : remind // ignore: cast_nullable_to_non_nullable
-as bool,
+as bool,remindMinutes: null == remindMinutes ? _self.remindMinutes : remindMinutes // ignore: cast_nullable_to_non_nullable
+as int,
   ));
 }
 

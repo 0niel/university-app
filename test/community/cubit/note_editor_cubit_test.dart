@@ -3,11 +3,48 @@ import 'dart:async';
 import 'package:campus_repository/campus_repository.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:rtu_mirea_app/community/community.dart';
+import 'package:rtu_mirea_app/community/cubit/note_editor/note_editor.dart';
 
 import '../../helpers/mocks/mock_campus_repository.dart';
 
-class _MockPresenceSession extends Mock implements CollabNotePresenceSession {}
+class _FakeRealtimeSession implements CollabNoteRealtimeSession {
+  final _editorsController = StreamController<List<String>>.broadcast();
+  final _changesController = StreamController<CollabNoteChange>.broadcast();
+  final _connectionsController = StreamController<void>.broadcast();
+  final broadcasted = <CollabNoteChange>[];
+  bool closed = false;
+
+  @override
+  Stream<List<String>> get editors => _editorsController.stream;
+
+  @override
+  Stream<CollabNoteChange> get changes => _changesController.stream;
+
+  @override
+  Stream<void> get connections => _connectionsController.stream;
+
+  void reconnect() => _connectionsController.add(null);
+
+  void emitEditors(List<String> names) => _editorsController.add(names);
+
+  void emitRemoteChange(CollabNoteChange change) =>
+      _changesController.add(change);
+
+  @override
+  Future<void> broadcastChange(CollabNoteChange change) async {
+    broadcasted.add(change);
+  }
+
+  @override
+  Future<void> close() async {
+    closed = true;
+    await _editorsController.close();
+    await _changesController.close();
+    await _connectionsController.close();
+  }
+}
+
+Future<void> _settle() => Future<void>.delayed(Duration.zero);
 
 void main() {
   group('NoteEditorCubit', () {
@@ -19,130 +56,211 @@ void main() {
       note = const CollabNote(
         id: 'note-1',
         title: 'Initial',
-        content: 'Body',
+        content: 'Body text',
         isMine: true,
         isPersonal: true,
-        revision: 3,
       );
     });
 
-    NoteEditorCubit buildCubit({Duration? debounce}) => NoteEditorCubit(
-      repository: repository,
-      note: note,
-      editorName: 'Alex',
-      saveDebounce: debounce ?? const Duration(days: 1),
-    );
-
-    GroupNoteSaveResult result(int revision) => GroupNoteSaveResult(
-      revision: revision,
-      updatedAt: DateTime(2026, 7, 11, 12),
-    );
-
-    test('coalesces edits made while a save is in flight', () async {
-      final first = Completer<GroupNoteSaveResult>();
-      final calls = <String>[];
+    NoteEditorCubit buildCubit({CollabNote? withNote, Duration? debounce}) {
       when(
-        () => repository.saveGroupNote(
+        () => repository.getGroupNote('note-1'),
+      ).thenAnswer((_) async => withNote ?? note);
+      return NoteEditorCubit(
+        repository: repository,
+        note: withNote ?? note,
+        editorName: 'Alex',
+        saveDebounce: debounce ?? const Duration(days: 1),
+      );
+    }
+
+    GroupNoteDocumentSaveResult saved(int revision, List<Object?> document) =>
+        GroupNoteDocumentSaveResult(
+          revision: revision,
+          updatedAt: DateTime(2026, 7, 11, 12),
+          document: document,
+          content: plainTextFromDelta(document),
+        );
+
+    test('builds the initial document from plain content', () {
+      final cubit = buildCubit();
+
+      expect(cubit.controller.document.toPlainText(), 'Body text\n');
+      expect(cubit.state.title, 'Initial');
+      expect(cubit.state.canDelete, isTrue);
+    });
+
+    test('builds the initial document from a stored delta', () {
+      final withDoc = note.copyWith(
+        document: [
+          {'insert': 'Rich text\n'},
+        ],
+        documentRevision: 2,
+        content: 'stale plain text',
+      );
+      final cubit = buildCubit(withNote: withDoc);
+
+      expect(cubit.controller.document.toPlainText(), 'Rich text\n');
+    });
+
+    test('debounces and saves a local edit', () async {
+      when(
+        () => repository.saveGroupNoteDocument(
           id: any(named: 'id'),
-          title: any(named: 'title'),
-          content: any(named: 'content'),
+          document: any(named: 'document'),
           expectedRevision: any(named: 'expectedRevision'),
         ),
-      ).thenAnswer((invocation) {
-        calls.add(invocation.namedArguments[#content] as String);
-        return calls.length == 1 ? first.future : Future.value(result(5));
+      ).thenAnswer((invocation) async {
+        final document = invocation.namedArguments[#document] as List<Object?>;
+        return saved(1, document);
       });
-      final cubit = buildCubit()..contentChanged('Version one');
+      final cubit = buildCubit();
 
-      final save = cubit.flush();
-      cubit.contentChanged('Version two');
-      expect(calls, ['Version one']);
-      first.complete(result(4));
+      cubit.controller.document.insert(0, 'Hi ');
+      await _settle();
+      expect(cubit.state.status, NoteEditorStatus.dirty);
 
-      expect(await save, isTrue);
-      expect(calls, ['Version one', 'Version two']);
-      expect(cubit.state.persistedRevision, cubit.state.revision);
-      expect(cubit.state.serverRevision, 5);
+      final ok = await cubit.flush();
+
+      expect(ok, isTrue);
+      expect(cubit.state.status, NoteEditorStatus.saved);
+      verify(
+        () => repository.saveGroupNoteDocument(
+          id: 'note-1',
+          document: any(named: 'document'),
+          expectedRevision: 0,
+        ),
+      ).called(1);
       await cubit.close();
     });
 
-    test('keeps a failed draft dirty and retries it', () async {
+    test('coalesces edits made while a save is in flight', () async {
+      final first = Completer<GroupNoteDocumentSaveResult>();
       var calls = 0;
       when(
-        () => repository.saveGroupNote(
+        () => repository.saveGroupNoteDocument(
           id: any(named: 'id'),
-          title: any(named: 'title'),
-          content: any(named: 'content'),
+          document: any(named: 'document'),
           expectedRevision: any(named: 'expectedRevision'),
         ),
-      ).thenAnswer((_) async {
-        if (calls++ == 0) throw Exception('offline');
-        return result(4);
+      ).thenAnswer((invocation) {
+        calls++;
+        final document = invocation.namedArguments[#document] as List<Object?>;
+        if (calls == 1) return first.future;
+        return Future.value(saved(2, document));
       });
-      final cubit = buildCubit()..contentChanged('Local text');
+      final cubit = buildCubit();
+      cubit.controller.document.insert(0, 'One ');
+      await _settle();
 
-      expect(await cubit.flush(), isFalse);
-      expect(cubit.state.status, NoteEditorStatus.failure);
-      expect(cubit.state.hasUnsavedChanges, isTrue);
-      expect(await cubit.flush(), isTrue);
+      final save = cubit.flush();
+      cubit.controller.document.insert(0, 'Two ');
+      await _settle();
+      first.complete(
+        saved(1, [
+          {'insert': 'One Body text\n'},
+        ]),
+      );
+
+      expect(await save, isTrue);
+      expect(calls, 2);
       expect(cubit.state.status, NoteEditorStatus.saved);
       await cubit.close();
     });
 
-    test(
-      'surfaces revision conflicts without overwriting local text',
-      () async {
-        when(
-          () => repository.saveGroupNote(
-            id: any(named: 'id'),
-            title: any(named: 'title'),
-            content: any(named: 'content'),
-            expectedRevision: any(named: 'expectedRevision'),
-          ),
-        ).thenThrow(const CollabNoteConflictException());
-        final cubit = buildCubit()..contentChanged('Important local text');
-
-        expect(await cubit.flush(), isFalse);
-        expect(cubit.state.status, NoteEditorStatus.conflict);
-        expect(cubit.state.content, 'Important local text');
-        expect(cubit.state.hasUnsavedChanges, isTrue);
-        await cubit.close();
-      },
-    );
-
-    test('does not send an empty title', () async {
-      final cubit = buildCubit()..titleChanged('   ');
-
-      expect(await cubit.flush(), isFalse);
-      expect(cubit.state.status, NoteEditorStatus.failure);
-      verifyNever(
-        () => repository.saveGroupNote(
+    test('rebases pending edits on a save conflict', () async {
+      when(
+        () => repository.saveGroupNoteDocument(
           id: any(named: 'id'),
-          title: any(named: 'title'),
-          content: any(named: 'content'),
+          document: any(named: 'document'),
           expectedRevision: any(named: 'expectedRevision'),
         ),
+      ).thenAnswer((invocation) async {
+        final revision = invocation.namedArguments[#expectedRevision] as int;
+        if (revision == 0) {
+          return GroupNoteDocumentSaveResult(
+            revision: 3,
+            updatedAt: DateTime(2026, 7, 11, 12),
+            conflict: true,
+            document: [
+              {'insert': 'Body text from someone else\n'},
+            ],
+            content: 'Body text from someone else',
+          );
+        }
+        final document = invocation.namedArguments[#document] as List<Object?>;
+        return saved(revision + 1, document);
+      });
+      final cubit = buildCubit();
+      cubit.controller.document.insert(0, 'Mine ');
+      await _settle();
+
+      final ok = await cubit.flush();
+
+      expect(ok, isTrue);
+      expect(cubit.state.status, NoteEditorStatus.saved);
+      expect(
+        cubit.controller.document.toPlainText(),
+        contains('Mine'),
+      );
+      expect(
+        cubit.controller.document.toPlainText(),
+        contains('someone else'),
       );
       await cubit.close();
     });
 
-    test('waits for an active save before deleting', () async {
-      final save = Completer<GroupNoteSaveResult>();
+    test('marks the note read-only when it is no longer available', () async {
       when(
-        () => repository.saveGroupNote(
+        () => repository.saveGroupNoteDocument(
           id: any(named: 'id'),
-          title: any(named: 'title'),
-          content: any(named: 'content'),
+          document: any(named: 'document'),
+          expectedRevision: any(named: 'expectedRevision'),
+        ),
+      ).thenThrow(const CollabNoteUnavailableException());
+      final cubit = buildCubit();
+      cubit.controller.document.insert(0, 'Edit ');
+      await _settle();
+
+      expect(await cubit.flush(), isFalse);
+      expect(cubit.state.status, NoteEditorStatus.readOnly);
+      expect(cubit.state.readOnly, isTrue);
+      await cubit.close();
+    });
+
+    test('debounces a title rename separately from the document', () async {
+      when(
+        () => repository.renameGroupNote('note-1', 'New title'),
+      ).thenAnswer((_) async {});
+      final cubit = buildCubit()..titleChanged('New title');
+
+      expect(cubit.state.title, 'New title');
+      verifyNever(() => repository.renameGroupNote(any(), any()));
+
+      await cubit.flush();
+
+      verify(() => repository.renameGroupNote('note-1', 'New title')).called(1);
+      await cubit.close();
+    });
+
+    test('waits for an active save before deleting', () async {
+      final save = Completer<GroupNoteDocumentSaveResult>();
+      when(
+        () => repository.saveGroupNoteDocument(
+          id: any(named: 'id'),
+          document: any(named: 'document'),
           expectedRevision: any(named: 'expectedRevision'),
         ),
       ).thenAnswer((_) => save.future);
       when(() => repository.deleteGroupNote('note-1')).thenAnswer((_) async {});
-      final cubit = buildCubit()..contentChanged('Draft');
+      final cubit = buildCubit();
+      cubit.controller.document.insert(0, 'Draft ');
+      await _settle();
       final saving = cubit.flush();
 
       final deleting = cubit.delete();
       verifyNever(() => repository.deleteGroupNote(any()));
-      save.complete(result(4));
+      save.complete(saved(1, cubit.controller.document.toDelta().toJson()));
 
       await saving;
       expect(await deleting, isTrue);
@@ -151,52 +269,462 @@ void main() {
       await cubit.close();
     });
 
-    test('keeps the saved revision when a concurrent delete fails', () async {
-      final save = Completer<GroupNoteSaveResult>();
+    test('tracks presence and applies remote deltas', () async {
+      final session = _FakeRealtimeSession();
       when(
-        () => repository.saveGroupNote(
-          id: any(named: 'id'),
-          title: any(named: 'title'),
-          content: any(named: 'content'),
-          expectedRevision: any(named: 'expectedRevision'),
-        ),
-      ).thenAnswer((_) => save.future);
-      when(
-        () => repository.deleteGroupNote('note-1'),
-      ).thenThrow(Exception('offline'));
-      final cubit = buildCubit()..contentChanged('Draft');
-      final saving = cubit.flush();
-      final deleting = cubit.delete();
-
-      save.complete(result(4));
-      await saving;
-
-      expect(await deleting, isFalse);
-      expect(cubit.state.serverRevision, 4);
-      await cubit.close();
-    });
-
-    test('owns and closes a shared-note presence session', () async {
-      final presence = _MockPresenceSession();
-      final editors = StreamController<List<String>>();
-      when(() => presence.editors).thenAnswer((_) => editors.stream);
-      when(presence.close).thenAnswer((_) async {});
-      when(
-        () => repository.openGroupNotePresence(
+        () => repository.openGroupNoteRealtime(
           noteId: 'note-1',
           editorName: 'Alex',
         ),
-      ).thenReturn(presence);
-      note = note.copyWith(isPersonal: false);
-      final cubit = buildCubit();
+      ).thenReturn(session);
+      final groupNote = note.copyWith(isPersonal: false);
+      final cubit = buildCubit(withNote: groupNote);
 
-      editors.add(['Alex', 'Sam']);
-      await Future<void>.delayed(Duration.zero);
+      session.emitEditors(['Alex', 'Sam']);
+      await _settle();
       expect(cubit.state.editors, ['Alex', 'Sam']);
-      await cubit.close();
 
-      verify(presence.close).called(1);
-      await editors.close();
+      session.emitRemoteChange(
+        const CollabNoteChange(
+          clientId: 'someone-else',
+          revision: 1,
+          document: [
+            {'insert': 'Body text!!!\n'},
+          ],
+        ),
+      );
+      await _settle();
+      expect(cubit.controller.document.toPlainText(), contains('!!!'));
+
+      await cubit.close();
+      expect(session.closed, isTrue);
     });
+
+    test('ignores its own broadcast client id', () async {
+      final session = _FakeRealtimeSession();
+      when(
+        () => repository.openGroupNoteRealtime(
+          noteId: 'note-1',
+          editorName: 'Alex',
+        ),
+      ).thenReturn(session);
+      when(
+        () => repository.saveGroupNoteDocument(
+          id: any(named: 'id'),
+          document: any(named: 'document'),
+          expectedRevision: any(named: 'expectedRevision'),
+        ),
+      ).thenAnswer(
+        (invocation) async =>
+            saved(1, invocation.namedArguments[#document] as List<Object?>),
+      );
+      final groupNote = note.copyWith(isPersonal: false);
+      final cubit = buildCubit(withNote: groupNote);
+
+      cubit.controller.document.insert(0, 'Typed ');
+      await _settle();
+
+      expect(session.broadcasted, isEmpty);
+      await cubit.flush();
+      expect(session.broadcasted, hasLength(1));
+      session.emitRemoteChange(session.broadcasted.single);
+      await _settle();
+      expect(cubit.controller.document.toPlainText(), 'Typed Body text\n');
+      await cubit.close();
+    });
+
+    void stubSave() {
+      when(
+        () => repository.saveGroupNoteDocument(
+          id: any(named: 'id'),
+          document: any(named: 'document'),
+          expectedRevision: any(named: 'expectedRevision'),
+        ),
+      ).thenAnswer(
+        (invocation) async => saved(
+          (invocation.namedArguments[#expectedRevision] as int) + 1,
+          invocation.namedArguments[#document] as List<Object?>,
+        ),
+      );
+    }
+
+    _FakeRealtimeSession stubRealtime() {
+      final session = _FakeRealtimeSession();
+      when(
+        () => repository.openGroupNoteRealtime(
+          noteId: 'note-1',
+          editorName: 'Alex',
+        ),
+      ).thenReturn(session);
+      return session;
+    }
+
+    CollabNoteChange snapshot(int revision, String text) => CollabNoteChange(
+      clientId: 'other',
+      revision: revision,
+      document: [
+        {'insert': '$text\n'},
+      ],
+    );
+
+    test(
+      'remote snapshot followed by a conflict is not inserted twice',
+      () async {
+        final session = stubRealtime();
+        final cubit = buildCubit(
+          withNote: note.copyWith(content: 'AB', isPersonal: false),
+        );
+        await _settle();
+        session.emitRemoteChange(snapshot(1, 'AXB'));
+        await _settle();
+        cubit.controller.document.insert(0, 'Y');
+        await _settle();
+        var calls = 0;
+        when(
+          () => repository.saveGroupNoteDocument(
+            id: any(named: 'id'),
+            document: any(named: 'document'),
+            expectedRevision: any(named: 'expectedRevision'),
+          ),
+        ).thenAnswer((invocation) async {
+          calls++;
+          if (calls == 1) {
+            return saved(2, [
+              {'insert': 'AXB\n'},
+            ]).copyWith(conflict: true);
+          }
+          expect(invocation.namedArguments[#expectedRevision], 2);
+          return saved(
+            3,
+            invocation.namedArguments[#document] as List<Object?>,
+          );
+        });
+        expect(await cubit.flush(), isTrue);
+        expect(cubit.controller.document.toPlainText(), 'YAXB\n');
+        expect(calls, 2);
+        await cubit.close();
+      },
+    );
+
+    test('rebases a remote deletion past a pending local insertion', () async {
+      stubSave();
+      final session = stubRealtime();
+      final cubit = buildCubit(
+        withNote: note.copyWith(content: 'AB', isPersonal: false),
+      );
+      await _settle();
+      cubit.controller.document.insert(0, 'Q');
+      await _settle();
+      session.emitRemoteChange(snapshot(1, 'A'));
+      await _settle();
+      expect(cubit.controller.document.toPlainText(), 'QA\n');
+      expect(await cubit.flush(), isTrue);
+      await cubit.close();
+    });
+
+    test('ignores duplicate and reversed revision snapshots', () async {
+      final session = stubRealtime();
+      final cubit = buildCubit(withNote: note.copyWith(isPersonal: false));
+      await _settle();
+      session
+        ..emitRemoteChange(snapshot(3, 'Latest'))
+        ..emitRemoteChange(snapshot(2, 'Old'))
+        ..emitRemoteChange(snapshot(3, 'Latest'));
+      await _settle();
+      expect(cubit.controller.document.toPlainText(), 'Latest\n');
+      expect(cubit.state.hasUnsavedChanges, isFalse);
+      await cubit.close();
+      verifyNever(
+        () => repository.saveGroupNoteDocument(
+          id: any(named: 'id'),
+          document: any(named: 'document'),
+          expectedRevision: any(named: 'expectedRevision'),
+        ),
+      );
+    });
+
+    test(
+      'queues a newer snapshot until its own save is acknowledged',
+      () async {
+        final session = stubRealtime();
+        final first = Completer<GroupNoteDocumentSaveResult>();
+        final sent = <List<Object?>>[];
+        when(
+          () => repository.saveGroupNoteDocument(
+            id: any(named: 'id'),
+            document: any(named: 'document'),
+            expectedRevision: any(named: 'expectedRevision'),
+          ),
+        ).thenAnswer((invocation) {
+          final document =
+              invocation.namedArguments[#document] as List<Object?>;
+          sent.add(document);
+          if (sent.length == 1) return first.future;
+          expect(invocation.namedArguments[#expectedRevision], 2);
+          return Future.value(saved(3, document));
+        });
+        final cubit = buildCubit(
+          withNote: note.copyWith(content: 'AB', isPersonal: false),
+        );
+        await _settle();
+        cubit.controller.document.insert(0, 'Y');
+        await _settle();
+        final flushing = cubit.flush();
+        session.emitRemoteChange(snapshot(2, 'YAXB'));
+        cubit.controller.document.insert(0, 'Z');
+        await _settle();
+        first.complete(saved(1, sent.first));
+        expect(await flushing, isTrue);
+        expect(cubit.controller.document.toPlainText(), 'ZYAXB\n');
+        expect(sent, hasLength(2));
+        await cubit.close();
+      },
+    );
+
+    test(
+      'reconnect fetches a missed committed snapshot preserving local edits',
+      () async {
+        stubSave();
+        final session = stubRealtime();
+        final cubit = buildCubit(
+          withNote: note.copyWith(content: 'AB', isPersonal: false),
+        );
+        await _settle();
+        cubit.controller.document.insert(0, 'Q');
+        await _settle();
+        when(() => repository.getGroupNote('note-1')).thenAnswer(
+          (_) async => note.copyWith(
+            content: 'AXB',
+            documentRevision: 4,
+          ),
+        );
+        session.reconnect();
+        await _settle();
+        expect(cubit.controller.document.toPlainText(), 'QAXB\n');
+        expect(await cubit.flush(), isTrue);
+        verify(
+          () => repository.saveGroupNoteDocument(
+            id: 'note-1',
+            document: any(named: 'document'),
+            expectedRevision: 4,
+          ),
+        ).called(1);
+        await cubit.close();
+      },
+    );
+
+    test(
+      'title failure is observable even when the document is clean',
+      () async {
+        when(
+          () => repository.renameGroupNote(any(), any()),
+        ).thenThrow(Exception('offline'));
+        final cubit = buildCubit()..titleChanged('Unsaved title');
+        expect(cubit.state.hasUnsavedChanges, isTrue);
+        expect(await cubit.flush(), isFalse);
+        expect(cubit.state.status, NoteEditorStatus.failure);
+        expect(cubit.state.hasUnsavedChanges, isTrue);
+        cubit.discardChanges();
+        await cubit.close();
+        verify(
+          () => repository.renameGroupNote('note-1', 'Unsaved title'),
+        ).called(1);
+      },
+    );
+
+    test('serializes title edits while a rename is in flight', () async {
+      final first = Completer<void>();
+      when(
+        () => repository.renameGroupNote('note-1', 'First'),
+      ).thenAnswer((_) => first.future);
+      when(
+        () => repository.renameGroupNote('note-1', 'Latest'),
+      ).thenAnswer((_) async {});
+      final cubit = buildCubit()..titleChanged('First');
+      final flushing = cubit.flush();
+      cubit.titleChanged('Latest');
+      final secondFlush = cubit.flush();
+      verifyNever(() => repository.renameGroupNote('note-1', 'Latest'));
+      first.complete();
+      expect(await flushing, isTrue);
+      expect(await secondFlush, isTrue);
+      expect(cubit.state.title, 'Latest');
+      expect(cubit.state.hasUnsavedChanges, isFalse);
+      verify(() => repository.renameGroupNote('note-1', 'First')).called(1);
+      verify(() => repository.renameGroupNote('note-1', 'Latest')).called(1);
+      await cubit.close();
+    });
+
+    test('collaborator can edit document but cannot rename it', () async {
+      stubSave();
+      final cubit = buildCubit(withNote: note.copyWith(isMine: false))
+        ..titleChanged('Forbidden title');
+      cubit.controller.document.insert(0, 'Allowed ');
+      await _settle();
+      expect(cubit.state.title, 'Initial');
+      expect(cubit.state.canRename, isFalse);
+      expect(await cubit.flush(), isTrue);
+      verifyNever(() => repository.renameGroupNote(any(), any()));
+      await cubit.close();
+    });
+
+    test(
+      'document success does not hide a simultaneous title failure',
+      () async {
+        stubSave();
+        when(
+          () => repository.renameGroupNote(any(), any()),
+        ).thenThrow(Exception('rename failed'));
+        final cubit = buildCubit()..titleChanged('Unsaved');
+        cubit.controller.document.insert(0, 'Saved ');
+        await _settle();
+        expect(await cubit.flush(), isFalse);
+        expect(cubit.state.status, NoteEditorStatus.failure);
+        cubit.discardChanges();
+        await cubit.close();
+      },
+    );
+
+    test(
+      'malformed remote snapshots cannot advance the base revision',
+      () async {
+        stubSave();
+        final session = stubRealtime();
+        final cubit = buildCubit(withNote: note.copyWith(isPersonal: false));
+        await _settle();
+        session
+          ..emitRemoteChange(
+            const CollabNoteChange(
+              clientId: 'other',
+              revision: 100,
+              document: [
+                {'retain': 500},
+              ],
+            ),
+          )
+          ..emitRemoteChange(snapshot(1, 'Valid'));
+        await _settle();
+        expect(cubit.controller.document.toPlainText(), 'Valid\n');
+        cubit.controller.document.insert(0, 'Local ');
+        await _settle();
+        expect(await cubit.flush(), isTrue);
+        verify(
+          () => repository.saveGroupNoteDocument(
+            id: 'note-1',
+            document: any(named: 'document'),
+            expectedRevision: 1,
+          ),
+        ).called(1);
+        await cubit.close();
+      },
+    );
+
+    test(
+      'snapshot merging preserves rich formatting and embedded images',
+      () async {
+        stubSave();
+        final session = stubRealtime();
+        final cubit = buildCubit(
+          withNote: note.copyWith(content: 'A', isPersonal: false),
+        );
+        await _settle();
+        cubit.controller.document.insert(0, 'Local ');
+        await _settle();
+        session.emitRemoteChange(
+          const CollabNoteChange(
+            clientId: 'other',
+            revision: 1,
+            document: [
+              {
+                'insert': 'A',
+                'attributes': {'bold': true},
+              },
+              {
+                'insert': {'image': 'https://example.com/image.png'},
+              },
+              {'insert': '\n'},
+            ],
+          ),
+        );
+        await _settle();
+        final document = cubit.controller.document.toDelta().toJson();
+        expect(
+          document,
+          contains(
+            equals({
+              'insert': 'A',
+              'attributes': {'bold': true},
+            }),
+          ),
+        );
+        expect(
+          document,
+          contains(
+            equals({
+              'insert': {'image': 'https://example.com/image.png'},
+            }),
+          ),
+        );
+        expect(cubit.controller.document.toPlainText(), startsWith('Local A'));
+        expect(await cubit.flush(), isTrue);
+        await cubit.close();
+      },
+    );
+
+    test('a stale resync cannot replace a newly saved title', () async {
+      when(
+        () => repository.renameGroupNote(any(), any()),
+      ).thenAnswer((_) async {});
+      final cubit = buildCubit();
+      final oldSnapshot = Completer<CollabNote?>();
+      when(
+        () => repository.getGroupNote('note-1'),
+      ).thenAnswer((_) => oldSnapshot.future);
+      final syncing = cubit.resynchronize();
+      cubit.titleChanged('New title');
+      expect(await cubit.flush(), isTrue);
+      oldSnapshot.complete(note);
+      await syncing;
+      expect(cubit.state.title, 'New title');
+      await cubit.close();
+    });
+
+    test(
+      'nonadvancing conflict fails instead of retrying indefinitely',
+      () async {
+        when(
+          () => repository.saveGroupNoteDocument(
+            id: any(named: 'id'),
+            document: any(named: 'document'),
+            expectedRevision: any(named: 'expectedRevision'),
+          ),
+        ).thenAnswer(
+          (_) async => saved(0, [
+            {'insert': 'Body text\n'},
+          ]).copyWith(conflict: true),
+        );
+        final cubit = buildCubit();
+        cubit.controller.document.insert(0, 'Local ');
+        await _settle();
+        expect(await cubit.flush(), isFalse);
+        expect(cubit.state.status, NoteEditorStatus.failure);
+        cubit.discardChanges();
+        await cubit.close();
+      },
+    );
+
+    test(
+      'rejects blank and oversized titles without silently succeeding',
+      () async {
+        final cubit = buildCubit();
+        for (final invalid in ['', 'x' * 201]) {
+          cubit.titleChanged(invalid);
+          expect(await cubit.flush(), isFalse);
+        }
+        verifyNever(() => repository.renameGroupNote(any(), any()));
+        cubit.discardChanges();
+        await cubit.close();
+      },
+    );
   });
 }

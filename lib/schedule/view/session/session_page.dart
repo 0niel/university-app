@@ -16,17 +16,21 @@ import 'package:rtu_mirea_app/tools/view/widgets/tools_number_sheet.dart';
 import 'package:schedule_repository/schedule_repository.dart';
 
 class SessionPage extends StatelessWidget {
-  const SessionPage({super.key});
+  const SessionPage({this.now, super.key});
+
+  final DateTime? now;
 
   @override
   Widget build(BuildContext context) => BlocProvider(
     create: (_) => ExamTopicsCubit(),
-    child: const _SessionView(),
+    child: _SessionView(now: now),
   );
 }
 
 class _SessionView extends StatefulWidget {
-  const _SessionView();
+  const _SessionView({this.now});
+
+  final DateTime? now;
 
   @override
   State<_SessionView> createState() => _SessionViewState();
@@ -60,9 +64,11 @@ class _SessionViewState extends State<_SessionView> {
     final schedule = context.watch<ScheduleBloc>().state;
     final readiness = context.watch<ExamReadinessCubit>().state;
     final topics = context.watch<ExamTopicsCubit>();
+    final now = widget.now ?? DateTime.now();
     final exams = SessionExam.fromSchedule(
       context,
       schedule.selectedSchedule?.schedule ?? const [],
+      now: now,
     );
     final selected =
         exams.firstWhereOrNull((exam) => exam.key == _selected) ??
@@ -86,11 +92,11 @@ class _SessionViewState extends State<_SessionView> {
             ),
           ),
           SliverPadding(
-            padding: const EdgeInsets.fromLTRB(
+            padding: EdgeInsets.fromLTRB(
               AppSpacing.screen,
               AppSpacing.contentGap,
               AppSpacing.screen,
-              AppSpacing.xxlg,
+              ninjaBottomInset(context) + AppSpacing.lg,
             ),
             sliver: SliverList.list(
               children: [
@@ -161,6 +167,7 @@ class _SessionViewState extends State<_SessionView> {
                     exam: selected,
                     cubit: topics,
                     onChanged: () => _sync(selected),
+                    now: now,
                   ),
                   AppOverline(
                     l10n.examsAllTitle,

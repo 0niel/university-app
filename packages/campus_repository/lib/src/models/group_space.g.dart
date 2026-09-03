@@ -10,6 +10,8 @@ _GroupSpace _$GroupSpaceFromJson(Map<String, dynamic> json) =>
     $checkedCreate('_GroupSpace', json, ($checkedConvert) {
       final val = _GroupSpace(
         group: $checkedConvert('group', (v) => v as String?),
+        groupId: $checkedConvert('groupId', (v) => v as String?),
+        joinCode: $checkedConvert('joinCode', (v) => v as String?),
         emoji: $checkedConvert('emoji', (v) => v as String? ?? '🎓'),
         hasGroup: $checkedConvert(
           'hasGroup',
@@ -21,9 +23,17 @@ _GroupSpace _$GroupSpaceFromJson(Map<String, dynamic> json) =>
           'memberCount',
           (v) => (v as num?)?.toInt() ?? 0,
         ),
+        myBirthdaySet: $checkedConvert(
+          'myBirthdaySet',
+          (v) => v as bool? ?? false,
+        ),
         memberNames: $checkedConvert(
           'memberNames',
           (v) => v == null ? const <String>[] : stringListFromJson(v),
+        ),
+        members: $checkedConvert(
+          'members',
+          (v) => v == null ? const <GroupSpaceMember>[] : _membersFromJson(v),
         ),
         links: $checkedConvert(
           'links',
@@ -48,11 +58,15 @@ _GroupSpace _$GroupSpaceFromJson(Map<String, dynamic> json) =>
 Map<String, dynamic> _$GroupSpaceToJson(_GroupSpace instance) =>
     <String, dynamic>{
       'group': instance.group,
+      'groupId': instance.groupId,
+      'joinCode': instance.joinCode,
       'emoji': instance.emoji,
       'hasGroup': instance.hasGroup,
       'isOwner': instance.isOwner,
       'memberCount': instance.memberCount,
+      'myBirthdaySet': instance.myBirthdaySet,
       'memberNames': stringListToJson(instance.memberNames),
+      'members': _membersToJson(instance.members),
       'links': _linksToJson(instance.links),
       'announcement': _announcementToJson(instance.announcement),
       'notes': _notesToJson(instance.notes),

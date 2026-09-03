@@ -31,9 +31,7 @@ Future<void> showLeaderboardSheet(BuildContext context) {
         activity: ProfileActivityCard(
           streakDays: profile.gamificationProfile.streakDays,
           longestStreak: profile.gamificationProfile.longestStreak,
-          history: profile.hasStreakHistory
-              ? profile.overview.streakHistory
-              : const [],
+          days: profile.activityCalendar,
           onShare: () => unawaited(shareProfileLink(context)),
         ),
       ),

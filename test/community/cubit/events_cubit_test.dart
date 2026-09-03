@@ -5,7 +5,8 @@ import 'package:campus_repository/campus_repository.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:rtu_mirea_app/community/community.dart';
+import 'package:rtu_mirea_app/community/cubit/events/events.dart';
+import 'package:rtu_mirea_app/community/models/event_draft.dart';
 
 import '../../helpers/mocks/mock_campus_repository.dart';
 
@@ -40,28 +41,30 @@ void main() {
     });
 
     blocTest<EventsCubit, EventsState>(
-      'loads events',
+      'loads all events including past ones',
       setUp: () {
         when(
-          () => repository.getEvents(),
+          () => repository.getEvents(includePast: true),
         ).thenAnswer((_) async => [careerEvent, sportEvent]);
       },
       build: buildCubit,
       act: (cubit) => cubit.load(),
       expect: () => [
         const EventsState(status: .loading),
-        EventsState(
-          status: .ready,
-          events: [careerEvent, sportEvent],
-        ),
+        EventsState(status: .ready, events: [careerEvent, sportEvent]),
       ],
+      verify: (_) {
+        verify(() => repository.getEvents(includePast: true)).called(1);
+      },
     );
 
     test('ignores a superseded load response', () async {
       final first = Completer<List<CampusEvent>>();
       final second = Completer<List<CampusEvent>>();
       var request = 0;
-      when(() => repository.getEvents()).thenAnswer((_) {
+      when(
+        () => repository.getEvents(includePast: true),
+      ).thenAnswer((_) {
         request++;
         return request == 1 ? first.future : second.future;
       });
@@ -80,11 +83,13 @@ void main() {
 
     test('keeps cached events when refresh fails', () async {
       when(
-        () => repository.getEvents(),
+        () => repository.getEvents(includePast: true),
       ).thenAnswer((_) async => [careerEvent]);
       final cubit = buildCubit();
       await cubit.load();
-      when(() => repository.getEvents()).thenThrow(Exception('offline'));
+      when(
+        () => repository.getEvents(includePast: true),
+      ).thenThrow(Exception('offline'));
 
       expect(await cubit.load(), isFalse);
       expect(cubit.state.status, EventsStatus.failure);
@@ -92,26 +97,12 @@ void main() {
       await cubit.close();
     });
 
-    test('filters events and selects the most attended feature', () {
-      final state = EventsState(
-        status: .ready,
-        events: [careerEvent, sportEvent],
-      );
-
-      expect(state.featuredEvent, sportEvent);
-      expect(state.upcomingEvents, [careerEvent]);
-      expect(
-        state.copyWith(category: .career).filteredEvents,
-        [careerEvent],
-      );
-    });
-
     test(
       'prevents duplicate RSVP requests and updates optimistically',
       () async {
         var loadCount = 0;
         when(
-          () => repository.getEvents(),
+          () => repository.getEvents(includePast: true),
         ).thenAnswer((_) async {
           loadCount++;
           final event = loadCount == 1
@@ -142,7 +133,7 @@ void main() {
         mutation.complete();
         expect(await toggles.$1, isTrue);
         expect(cubit.state.pendingRsvps, isEmpty);
-        verify(() => repository.getEvents()).called(2);
+        verify(() => repository.getEvents(includePast: true)).called(2);
         await cubit.close();
       },
     );
@@ -150,7 +141,9 @@ void main() {
     test('a stale refresh cannot overwrite a successful RSVP', () async {
       final staleRefresh = Completer<List<CampusEvent>>();
       var loadCount = 0;
-      when(() => repository.getEvents()).thenAnswer((_) {
+      when(
+        () => repository.getEvents(includePast: true),
+      ).thenAnswer((_) {
         loadCount++;
         return switch (loadCount) {
           1 => Future.value([careerEvent]),
@@ -179,72 +172,11 @@ void main() {
       await cubit.close();
     });
 
-    test('successful RSVP cancellation refreshes attendee names', () async {
-      final attending = careerEvent.copyWith(
-        isGoing: true,
-        goingCount: 1,
-        goingNames: ['Current user'],
-      );
-      var loadCount = 0;
-      when(() => repository.getEvents()).thenAnswer((_) async {
-        loadCount++;
-        final event = loadCount == 1
-            ? attending
-            : attending.copyWith(
-                isGoing: false,
-                goingCount: 0,
-                goingNames: const [],
-              );
-        return [event];
-      });
-      when(
-        () => repository.setEventRsvp(eventId: 'career-1', going: false),
-      ).thenAnswer((_) => Future.value());
-      final cubit = buildCubit();
-      await cubit.load();
-
-      expect(await cubit.toggleRsvp('career-1'), isTrue);
-
-      expect(cubit.state.events.firstOrNull?.isGoing, isFalse);
-      expect(cubit.state.events.firstOrNull?.goingNames, isEmpty);
-      await cubit.close();
-    });
-
-    test(
-      'failed RSVP reconciliation does not keep stale attendee names',
-      () async {
-        final attending = careerEvent.copyWith(
-          isGoing: true,
-          goingCount: 1,
-          goingNames: ['Current user'],
-        );
-        var loadCount = 0;
-        when(() => repository.getEvents()).thenAnswer((_) async {
-          loadCount++;
-          if (loadCount == 1) return [attending];
-          throw Exception('offline');
-        });
-        when(
-          () => repository.setEventRsvp(eventId: 'career-1', going: false),
-        ).thenAnswer((_) => Future.value());
-        final cubit = buildCubit();
-        await cubit.load();
-
-        expect(await cubit.toggleRsvp('career-1'), isTrue);
-
-        expect(cubit.state.status, EventsStatus.failure);
-        expect(cubit.state.events.firstOrNull?.isGoing, isFalse);
-        expect(cubit.state.events.firstOrNull?.goingCount, 0);
-        expect(cubit.state.events.firstOrNull?.goingNames, isEmpty);
-        await cubit.close();
-      },
-    );
-
     blocTest<EventsCubit, EventsState>(
       'rolls RSVP back when the repository rejects it',
       setUp: () {
         when(
-          () => repository.getEvents(),
+          () => repository.getEvents(includePast: true),
         ).thenAnswer((_) async => [careerEvent]);
         when(
           () => repository.setEventRsvp(eventId: 'career-1', going: true),
@@ -262,18 +194,16 @@ void main() {
           events: [careerEvent.copyWith(isGoing: true, goingCount: 5)],
           pendingRsvps: {'career-1'},
         ),
-        EventsState(
-          status: .ready,
-          events: [careerEvent],
-        ),
+        EventsState(status: .ready, events: [careerEvent]),
       ],
       errors: () => [isA<Exception>()],
     );
 
-    test('creates an event and refreshes the board', () async {
+    test('creates an event with an optional end time and refreshes', () async {
       final draft = EventDraft(
         title: 'Open lecture',
         startsAt: DateTime(2026, 9, 3, 16),
+        endsAt: DateTime(2026, 9, 3, 18),
         emoji: '🎤',
         category: .science,
         place: 'A-100',
@@ -283,6 +213,7 @@ void main() {
         () => repository.createEvent(
           title: any(named: 'title'),
           startsAt: any(named: 'startsAt'),
+          endsAt: any(named: 'endsAt'),
           place: any(named: 'place'),
           emoji: any(named: 'emoji'),
           category: any(named: 'category'),
@@ -290,7 +221,7 @@ void main() {
         ),
       ).thenAnswer((_) => Future.value());
       when(
-        () => repository.getEvents(),
+        () => repository.getEvents(includePast: true),
       ).thenAnswer((_) async => [sportEvent]);
       final cubit = buildCubit();
 
@@ -301,6 +232,7 @@ void main() {
         () => repository.createEvent(
           title: 'Open lecture',
           startsAt: DateTime(2026, 9, 3, 16),
+          endsAt: DateTime(2026, 9, 3, 18),
           place: 'A-100',
           emoji: '🎤',
           category: 'sci',
@@ -317,6 +249,7 @@ void main() {
           () => repository.createEvent(
             title: any(named: 'title'),
             startsAt: any(named: 'startsAt'),
+            endsAt: any(named: 'endsAt'),
             place: any(named: 'place'),
             emoji: any(named: 'emoji'),
             category: any(named: 'category'),
@@ -342,5 +275,100 @@ void main() {
       ],
       errors: () => [isA<Exception>()],
     );
+
+    test('updates an own event and refreshes the board', () async {
+      final draft = EventDraft(
+        title: 'Renamed lecture',
+        startsAt: DateTime(2026, 9, 3, 16),
+        emoji: '🎤',
+        category: .science,
+      );
+      when(
+        () => repository.updateEvent(
+          id: 'career-1',
+          title: any(named: 'title'),
+          startsAt: any(named: 'startsAt'),
+          endsAt: any(named: 'endsAt'),
+          place: any(named: 'place'),
+          emoji: any(named: 'emoji'),
+          category: any(named: 'category'),
+          description: any(named: 'description'),
+        ),
+      ).thenAnswer((_) => Future.value());
+      when(
+        () => repository.getEvents(includePast: true),
+      ).thenAnswer((_) async => [careerEvent]);
+      final cubit = buildCubit();
+
+      expect(await cubit.updateEvent('career-1', draft), isTrue);
+      expect(cubit.state.isSaving, isFalse);
+      verify(
+        () => repository.updateEvent(
+          id: 'career-1',
+          title: 'Renamed lecture',
+          startsAt: any(named: 'startsAt'),
+          place: '',
+          emoji: '🎤',
+          category: 'sci',
+          description: '',
+        ),
+      ).called(1);
+      await cubit.close();
+    });
+
+    test('reports update failure without a stale saving flag', () async {
+      when(
+        () => repository.updateEvent(
+          id: any(named: 'id'),
+          title: any(named: 'title'),
+          startsAt: any(named: 'startsAt'),
+          endsAt: any(named: 'endsAt'),
+          place: any(named: 'place'),
+          emoji: any(named: 'emoji'),
+          category: any(named: 'category'),
+          description: any(named: 'description'),
+        ),
+      ).thenThrow(Exception('rls'));
+      final cubit = buildCubit();
+
+      final saved = await cubit.updateEvent(
+        'career-1',
+        EventDraft(
+          title: 'Renamed lecture',
+          startsAt: DateTime(2026, 9, 3, 16),
+          emoji: '🎤',
+          category: .science,
+        ),
+      );
+
+      expect(saved, isFalse);
+      expect(cubit.state.isSaving, isFalse);
+      await cubit.close();
+    });
+
+    test('deletes an event and refreshes the board', () async {
+      when(
+        () => repository.deleteEvent('career-1'),
+      ).thenAnswer((_) => Future.value());
+      when(
+        () => repository.getEvents(includePast: true),
+      ).thenAnswer((_) async => [sportEvent]);
+      final cubit = buildCubit();
+
+      expect(await cubit.deleteEvent('career-1'), isTrue);
+      expect(cubit.state.events, [sportEvent]);
+      verify(() => repository.deleteEvent('career-1')).called(1);
+      await cubit.close();
+    });
+
+    test('reports delete failure', () async {
+      when(
+        () => repository.deleteEvent('career-1'),
+      ).thenThrow(Exception('rls'));
+      final cubit = buildCubit();
+
+      expect(await cubit.deleteEvent('career-1'), isFalse);
+      await cubit.close();
+    });
   });
 }

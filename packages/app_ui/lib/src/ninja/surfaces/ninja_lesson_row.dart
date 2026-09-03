@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:app_ui/src/colors/colors.dart';
 import 'package:app_ui/src/ninja/surfaces/ninja_pill_button.dart';
 import 'package:app_ui/src/ninja/surfaces/ninja_progress_bar.dart';
@@ -5,6 +7,7 @@ import 'package:app_ui/src/spacing/app_spacing.dart';
 import 'package:app_ui/src/typography/typography.dart';
 import 'package:app_ui/src/widgets/app_line_icon.dart';
 import 'package:app_ui/src/widgets/app_pressable.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 enum LessonRowState {
@@ -38,6 +41,7 @@ class NinjaLessonRow extends StatelessWidget {
     this.stateLabel,
     this.actions = const <NinjaLessonAction>[],
     this.onTap,
+    this.onLongPress,
     this.onMore,
     this.inset = AppSpacing.screen,
     this.outerVerticalInset = AppSpacing.xs,
@@ -63,6 +67,7 @@ class NinjaLessonRow extends StatelessWidget {
   final String? stateLabel;
   final List<NinjaLessonAction> actions;
   final VoidCallback? onTap;
+  final VoidCallback? onLongPress;
   final VoidCallback? onMore;
   final double inset;
   final double outerVerticalInset;
@@ -291,11 +296,20 @@ class NinjaLessonRow extends StatelessWidget {
       ),
     );
 
-    if (onTap != null) {
+    if (onTap != null || onLongPress != null) {
       row = Semantics(
         button: true,
         label: '$title, $time',
-        child: AppPressable(onTap: onTap, child: row),
+        child: AppPressable(
+          onTap: onTap,
+          onLongPress: onLongPress == null
+              ? null
+              : () {
+                  unawaited(HapticFeedback.mediumImpact());
+                  onLongPress!();
+                },
+          child: row,
+        ),
       );
     }
     return row;

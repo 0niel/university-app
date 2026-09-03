@@ -5,12 +5,10 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:rtu_mirea_app/app/bloc/app_bloc.dart';
-import 'package:rtu_mirea_app/app/locale/locale_cubit.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:rtu_mirea_app/profile/widgets/guest_upgrade_sheet.dart';
 import 'package:rtu_mirea_app/profile/widgets/settings_row.dart';
 import 'package:rtu_mirea_app/profile/widgets/settings_section.dart';
-import 'package:rtu_mirea_app/profile/widgets/settings_sheets.dart';
 
 class SettingsAccountSection extends StatelessWidget {
   const SettingsAccountSection({super.key});
@@ -18,7 +16,6 @@ class SettingsAccountSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final language = context.watch<LocaleCubit>().state;
     final user = context.watch<AppBloc>().state.user;
     return SettingsSection(
       label: l10n.profileAccount,
@@ -37,16 +34,6 @@ class SettingsAccountSection extends StatelessWidget {
             lineIcon: AppLineIcon.at,
             onTap: () => unawaited(showGuestUpgradeSheet(context)),
           ),
-        SettingsRow(
-          title: l10n.settingsLanguage,
-          value: languageLabel(l10n, language),
-          onTap: () => showLanguageSheet(
-            context,
-            current: language,
-            onSelected: (value) =>
-                context.read<LocaleCubit>().setLanguage(value),
-          ),
-        ),
         SettingsRow(
           title: l10n.settingsManageAccount,
           lineIcon: AppLineIcon.user,

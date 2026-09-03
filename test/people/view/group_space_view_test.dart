@@ -12,6 +12,18 @@ import 'package:rtu_mirea_app/people/widgets/group_space/group_space_widgets.dar
 
 import '../../helpers/pump_app.dart';
 
+Finder _primaryScrollable() => find.byType(Scrollable).first;
+
+Future<void> _scrollTo(WidgetTester tester, Finder finder) async {
+  await tester.scrollUntilVisible(
+    finder,
+    200,
+    scrollable: _primaryScrollable(),
+  );
+  await tester.ensureVisible(finder);
+  await tester.pumpAndSettle();
+}
+
 class _MockGroupSpaceCubit extends Mock implements GroupSpaceCubit {}
 
 class _MockExternalLinkLauncher extends Mock implements ExternalLinkLauncher {}
@@ -102,8 +114,8 @@ void main() {
       );
       when(() => cubit.deleteLink('link-1')).thenAnswer((_) async => true);
       await tester.pumpApp(buildSubject(state));
+      await _scrollTo(tester, find.byType(Dismissible));
 
-      // The always-visible trash icon was replaced by swipe-to-delete.
       expect(find.byTooltip('Удалить'), findsNothing);
       expect(find.byType(Dismissible), findsOneWidget);
 
@@ -138,13 +150,12 @@ void main() {
       pendingLinkDeleteIds: {'link-1'},
     );
     await tester.pumpApp(buildSubject(state));
+    await _scrollTo(tester, find.byType(Dismissible));
 
     await tester.drag(find.byType(Dismissible), const Offset(-500, 0));
     await tester.pumpAndSettle();
 
     verifyNever(() => cubit.deleteLink(any()));
-    // AppPressable also renders AnimatedOpacity widgets, so match the
-    // pending-dim value across all of them instead of expecting exactly one.
     expect(
       tester
           .widgetList<AnimatedOpacity>(find.byType(AnimatedOpacity))
@@ -178,7 +189,7 @@ void main() {
       pendingLikeIds: {'note-1'},
     );
     await tester.pumpApp(buildSubject(state));
-    await tester.scrollUntilVisible(find.byType(NinjaGroupNoteCard), 200);
+    await _scrollTo(tester, find.byType(NinjaGroupNoteCard));
 
     final like = tester.widget<AppPressable>(
       find.ancestor(
@@ -219,8 +230,19 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Материалы и примеры к семинару'), findsOneWidget);
-    expect(find.text('Анна'), findsOneWidget);
+    final sheet = find.byType(AppSheet);
+    expect(sheet, findsOneWidget);
+    expect(
+      find.descendant(
+        of: sheet,
+        matching: find.text('Материалы и примеры к семинару'),
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(of: sheet, matching: find.text('Анна')),
+      findsOneWidget,
+    );
   });
 
   testWidgets('fits a 320 px viewport at 200 percent text scale', (
@@ -257,6 +279,7 @@ void main() {
       space: GroupSpace(group: 'ИКБО-01', hasGroup: true, links: [link]),
     );
     await tester.pumpApp(buildSubject(state));
+    await _scrollTo(tester, find.text('Unsafe'));
 
     await tester.tap(find.text('Unsafe'));
     await tester.pump();
@@ -287,6 +310,7 @@ void main() {
           when(() => launcher.open(any())).thenAnswer((_) async => false);
         }
         await tester.pumpApp(buildSubject(state));
+        await _scrollTo(tester, find.text('Safe'));
 
         await tester.tap(find.text('Safe'));
         await tester.pump();

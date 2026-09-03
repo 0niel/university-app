@@ -178,4 +178,119 @@ void main() {
       'pending',
     ]);
   });
+
+  test('all and kind filters hide closed teams', () {
+    final closed = team.copyWith(id: 'closed', status: TeamStatus.closed);
+    final allState = TeamFinderState(teams: [team, closed]);
+    expect(allState.visibleTeams.map((item) => item.id), ['team-1']);
+
+    final kindState = TeamFinderState(
+      teams: [
+        team,
+        closed.copyWith(kind: team.kind),
+      ],
+      filterKey: team.kind,
+    );
+    expect(kindState.visibleTeams.map((item) => item.id), ['team-1']);
+  });
+
+  test('normalizes update data and prevents duplicate submits', () async {
+    final updated = Completer<void>();
+    when(
+      () => repository.updateTeam(
+        id: 'team-1',
+        title: 'Campus Crew',
+        description: 'Build together',
+        neededRoles: ['backend'],
+        capacity: 20,
+        kind: 'project',
+      ),
+    ).thenAnswer((_) => updated.future);
+    when(() => repository.getTeams()).thenAnswer((_) async => [team]);
+    final cubit = buildCubit();
+    const draft = TeamDraft(
+      title: ' Campus Crew ',
+      description: ' Build together ',
+      neededRoles: [' backend ', 'backend', ' '],
+      capacity: 99,
+      kind: ' project ',
+    );
+
+    final firstUpdate = cubit.update(team, draft);
+    expect(await cubit.update(team, draft), isFalse);
+    updated.complete();
+    expect(await firstUpdate, isTrue);
+    verify(
+      () => repository.updateTeam(
+        id: 'team-1',
+        title: 'Campus Crew',
+        description: 'Build together',
+        neededRoles: ['backend'],
+        capacity: 20,
+        kind: 'project',
+      ),
+    ).called(1);
+    await cubit.close();
+  });
+
+  test('update rejects a blank title without calling the repository', () async {
+    final cubit = buildCubit();
+
+    expect(await cubit.update(team, const TeamDraft(title: '  ')), isFalse);
+    verifyNever(
+      () => repository.updateTeam(
+        id: any(named: 'id'),
+        title: any(named: 'title'),
+        eventName: any(named: 'eventName'),
+        description: any(named: 'description'),
+        neededRoles: any(named: 'neededRoles'),
+        capacity: any(named: 'capacity'),
+        kind: any(named: 'kind'),
+        deadlineAt: any(named: 'deadlineAt'),
+        status: any(named: 'status'),
+      ),
+    );
+    await cubit.close();
+  });
+
+  test('close sends the full team payload with status closed', () async {
+    when(
+      () => repository.updateTeam(
+        id: 'team-1',
+        title: 'Campus Crew',
+        status: 'closed',
+      ),
+    ).thenAnswer((_) async {});
+    when(() => repository.getTeams()).thenAnswer((_) async => [team]);
+    final cubit = buildCubit();
+
+    expect(await cubit.closeTeam(team), isTrue);
+    verify(
+      () => repository.updateTeam(
+        id: 'team-1',
+        title: 'Campus Crew',
+        status: 'closed',
+      ),
+    ).called(1);
+    await cubit.close();
+  });
+
+  test('reopen keeps a pending close/reopen from overlapping', () async {
+    final reopened = Completer<void>();
+    when(
+      () => repository.updateTeam(
+        id: 'team-1',
+        title: 'Campus Crew',
+        status: 'open',
+      ),
+    ).thenAnswer((_) => reopened.future);
+    when(() => repository.getTeams()).thenAnswer((_) async => [team]);
+    final cubit = buildCubit();
+
+    final firstReopen = cubit.reopenTeam(team);
+    expect(await cubit.reopenTeam(team), isFalse);
+    reopened.complete();
+    expect(await firstReopen, isTrue);
+    await cubit.close();
+  });
 }

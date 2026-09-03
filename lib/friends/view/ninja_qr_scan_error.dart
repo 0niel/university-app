@@ -14,7 +14,7 @@ class NinjaQrScanError extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ColoredBox(
-      color: Colors.black,
+      color: AppColors.dark.canvas,
       child: Center(
         child: Padding(
           padding: const .symmetric(

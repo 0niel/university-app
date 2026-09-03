@@ -10,24 +10,30 @@ class PollsBody extends StatelessWidget {
     required this.isLoading,
     required this.isFailure,
     required this.polls,
-    required this.pendingPollIds,
-    required this.deletingPollIds,
+    required this.filter,
+    required this.category,
+    required this.query,
     required this.onRetry,
     required this.onCreate,
-    required this.onVote,
-    required this.onDelete,
+    required this.onOpen,
+    required this.onOwnerActions,
+    this.onChangeAnswers,
+    this.onResults,
     super.key,
   });
 
   final bool isLoading;
   final bool isFailure;
   final List<Poll> polls;
-  final Set<String> pendingPollIds;
-  final Set<String> deletingPollIds;
+  final PollFilter filter;
+  final PollCategory? category;
+  final String query;
   final VoidCallback onRetry;
   final VoidCallback onCreate;
-  final void Function(Poll poll, List<String> optionIds) onVote;
-  final ValueChanged<Poll> onDelete;
+  final ValueChanged<Poll> onOpen;
+  final ValueChanged<Poll> onOwnerActions;
+  final ValueChanged<Poll>? onChangeAnswers;
+  final ValueChanged<Poll>? onResults;
 
   @override
   Widget build(BuildContext context) {
@@ -47,6 +53,21 @@ class PollsBody extends StatelessWidget {
       );
     }
     if (polls.isEmpty) {
+      final trimmedQuery = query.trim();
+      if (trimmedQuery.isNotEmpty) {
+        return NinjaEmptyState(
+          key: const ValueKey('polls-empty-search'),
+          icon: const AppLineIconWidget(AppLineIcon.search, size: 24),
+          title: l10n.pollsEmptySearch(trimmedQuery),
+        );
+      }
+      if (filter != PollFilter.all || category != null) {
+        return NinjaEmptyState(
+          key: const ValueKey('polls-empty-filtered'),
+          icon: const AppLineIconWidget(AppLineIcon.chart, size: 24),
+          title: l10n.pollsEmptyFiltered,
+        );
+      }
       return NinjaEmptyState(
         key: const ValueKey('polls-empty'),
         icon: const AppLineIconWidget(AppLineIcon.chart, size: 24),
@@ -64,10 +85,12 @@ class PollsBody extends StatelessWidget {
           PollCard(
             key: ValueKey(poll.id),
             poll: poll,
-            pending: pendingPollIds.contains(poll.id),
-            deleting: deletingPollIds.contains(poll.id),
-            onVote: (optionIds) => onVote(poll, optionIds),
-            onDelete: () => onDelete(poll),
+            onOpen: () => onOpen(poll),
+            onOwnerActions: poll.isMine ? () => onOwnerActions(poll) : null,
+            onChangeAnswers: onChangeAnswers == null
+                ? null
+                : () => onChangeAnswers!(poll),
+            onResults: onResults == null ? null : () => onResults!(poll),
           ).animateListItem(index: index),
         ],
       ],

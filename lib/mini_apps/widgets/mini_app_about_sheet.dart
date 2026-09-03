@@ -67,7 +67,7 @@ class _MiniAppAboutSheetState extends State<MiniAppAboutSheet> {
               Container(
                 padding: const .all(12),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: dialogContext.colors.white,
                   borderRadius: .circular(AppRadius.full),
                 ),
                 child: QrImageView(data: '$_shareLink', size: 200),

@@ -32,20 +32,20 @@ class TeamApplicationsBody extends StatelessWidget {
       );
     }
     if (state.status == .failure && state.applications.isEmpty) {
-      return NinjaErrorState(
+      return AppErrorState(
         key: const ValueKey('applications-failure'),
         title: context.l10n.teamFinderApplicationsLoadError,
         message: context.l10n.teamFinderApplicationsLoadErrorSubtitle,
-        retryLabel: context.l10n.retry,
-        onRetry: () => unawaited(context.read<TeamApplicationsCubit>().load()),
+        primaryLabel: context.l10n.retry,
+        onPrimary: () =>
+            unawaited(context.read<TeamApplicationsCubit>().load()),
       );
     }
     if (state.applications.isEmpty) {
-      return NinjaEmptyState(
+      return AppEmptyState(
         key: const ValueKey('applications-empty'),
-        icon: const AppLineIconWidget(AppLineIcon.inbox, size: 24),
         title: context.l10n.teamFinderApplicationsEmptyTitle,
-        message: context.l10n.teamFinderApplicationsEmptySubtitle,
+        subtitle: context.l10n.teamFinderApplicationsEmptySubtitle,
         actionLabel: context.l10n.retry,
         onAction: () => unawaited(context.read<TeamApplicationsCubit>().load()),
       ).animateEmptyState();
@@ -83,9 +83,8 @@ class TeamApplicationsBody extends StatelessWidget {
     if (changed) {
       onChanged();
     } else {
-      showNinjaToast(
+      ToastManager.showError(
         context,
-        showCheck: false,
         message: context.l10n.teamFinderApplicationActionError,
       );
     }

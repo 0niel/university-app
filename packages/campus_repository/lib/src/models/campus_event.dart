@@ -14,6 +14,8 @@ abstract class CampusEvent with _$CampusEvent {
       toJson: requiredDateTimeToJson,
     )
     required DateTime startsAt,
+    @JsonKey(fromJson: dateTimeFromJson, toJson: dateTimeToJson)
+    DateTime? endsAt,
     @Default('') String description,
     @Default('🎉') String emoji,
     @Default('other') String category,

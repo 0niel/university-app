@@ -9,14 +9,14 @@ class MiniAppScanError extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ColoredBox(
-      color: Colors.black,
+      color: AppColors.dark.canvas,
       child: Center(
         child: Padding(
           padding: const .all(32),
           child: Text(
             message,
             textAlign: .center,
-            style: AppText.body.copyWith(color: Colors.white),
+            style: AppText.body.copyWith(color: context.colors.white),
           ),
         ),
       ),

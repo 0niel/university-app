@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$Mentor {
 
- String get userId; String get fullName;@JsonKey(fromJson: stringListFromJson, toJson: stringListToJson) List<String> get topics; String get bio; int get sessions; String get level;@JsonKey(fromJson: stringListFromJson, toJson: stringListToJson) List<String> get formats; int get price; bool get isMe; int? get course; String? get group; String? get handle;
+ String get userId; String get fullName;@JsonKey(fromJson: stringListFromJson, toJson: stringListToJson) List<String> get topics; String get bio; int get sessions; String get level;@JsonKey(fromJson: stringListFromJson, toJson: stringListToJson) List<String> get formats; int get price; bool get isMe; int? get course; String? get group; String? get handle; String? get telegramHandle;
 /// Create a copy of Mentor
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +28,16 @@ $MentorCopyWith<Mentor> get copyWith => _$MentorCopyWithImpl<Mentor>(this as Men
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Mentor&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.fullName, fullName) || other.fullName == fullName)&&const DeepCollectionEquality().equals(other.topics, topics)&&(identical(other.bio, bio) || other.bio == bio)&&(identical(other.sessions, sessions) || other.sessions == sessions)&&(identical(other.level, level) || other.level == level)&&const DeepCollectionEquality().equals(other.formats, formats)&&(identical(other.price, price) || other.price == price)&&(identical(other.isMe, isMe) || other.isMe == isMe)&&(identical(other.course, course) || other.course == course)&&(identical(other.group, group) || other.group == group)&&(identical(other.handle, handle) || other.handle == handle));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Mentor&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.fullName, fullName) || other.fullName == fullName)&&const DeepCollectionEquality().equals(other.topics, topics)&&(identical(other.bio, bio) || other.bio == bio)&&(identical(other.sessions, sessions) || other.sessions == sessions)&&(identical(other.level, level) || other.level == level)&&const DeepCollectionEquality().equals(other.formats, formats)&&(identical(other.price, price) || other.price == price)&&(identical(other.isMe, isMe) || other.isMe == isMe)&&(identical(other.course, course) || other.course == course)&&(identical(other.group, group) || other.group == group)&&(identical(other.handle, handle) || other.handle == handle)&&(identical(other.telegramHandle, telegramHandle) || other.telegramHandle == telegramHandle));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,userId,fullName,const DeepCollectionEquality().hash(topics),bio,sessions,level,const DeepCollectionEquality().hash(formats),price,isMe,course,group,handle);
+int get hashCode => Object.hash(runtimeType,userId,fullName,const DeepCollectionEquality().hash(topics),bio,sessions,level,const DeepCollectionEquality().hash(formats),price,isMe,course,group,handle,telegramHandle);
 
 @override
 String toString() {
-  return 'Mentor(userId: $userId, fullName: $fullName, topics: $topics, bio: $bio, sessions: $sessions, level: $level, formats: $formats, price: $price, isMe: $isMe, course: $course, group: $group, handle: $handle)';
+  return 'Mentor(userId: $userId, fullName: $fullName, topics: $topics, bio: $bio, sessions: $sessions, level: $level, formats: $formats, price: $price, isMe: $isMe, course: $course, group: $group, handle: $handle, telegramHandle: $telegramHandle)';
 }
 
 
@@ -48,7 +48,7 @@ abstract mixin class $MentorCopyWith<$Res>  {
   factory $MentorCopyWith(Mentor value, $Res Function(Mentor) _then) = _$MentorCopyWithImpl;
 @useResult
 $Res call({
- String userId, String fullName,@JsonKey(fromJson: stringListFromJson, toJson: stringListToJson) List<String> topics, String bio, int sessions, String level,@JsonKey(fromJson: stringListFromJson, toJson: stringListToJson) List<String> formats, int price, bool isMe, int? course, String? group, String? handle
+ String userId, String fullName,@JsonKey(fromJson: stringListFromJson, toJson: stringListToJson) List<String> topics, String bio, int sessions, String level,@JsonKey(fromJson: stringListFromJson, toJson: stringListToJson) List<String> formats, int price, bool isMe, int? course, String? group, String? handle, String? telegramHandle
 });
 
 
@@ -65,7 +65,7 @@ class _$MentorCopyWithImpl<$Res>
 
 /// Create a copy of Mentor
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? userId = null,Object? fullName = null,Object? topics = null,Object? bio = null,Object? sessions = null,Object? level = null,Object? formats = null,Object? price = null,Object? isMe = null,Object? course = freezed,Object? group = freezed,Object? handle = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? userId = null,Object? fullName = null,Object? topics = null,Object? bio = null,Object? sessions = null,Object? level = null,Object? formats = null,Object? price = null,Object? isMe = null,Object? course = freezed,Object? group = freezed,Object? handle = freezed,Object? telegramHandle = freezed,}) {
   return _then(_self.copyWith(
 userId: null == userId ? _self.userId : userId // ignore: cast_nullable_to_non_nullable
 as String,fullName: null == fullName ? _self.fullName : fullName // ignore: cast_nullable_to_non_nullable
@@ -79,6 +79,7 @@ as int,isMe: null == isMe ? _self.isMe : isMe // ignore: cast_nullable_to_non_nu
 as bool,course: freezed == course ? _self.course : course // ignore: cast_nullable_to_non_nullable
 as int?,group: freezed == group ? _self.group : group // ignore: cast_nullable_to_non_nullable
 as String?,handle: freezed == handle ? _self.handle : handle // ignore: cast_nullable_to_non_nullable
+as String?,telegramHandle: freezed == telegramHandle ? _self.telegramHandle : telegramHandle // ignore: cast_nullable_to_non_nullable
 as String?,
   ));
 }
@@ -164,10 +165,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String userId,  String fullName, @JsonKey(fromJson: stringListFromJson, toJson: stringListToJson)  List<String> topics,  String bio,  int sessions,  String level, @JsonKey(fromJson: stringListFromJson, toJson: stringListToJson)  List<String> formats,  int price,  bool isMe,  int? course,  String? group,  String? handle)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String userId,  String fullName, @JsonKey(fromJson: stringListFromJson, toJson: stringListToJson)  List<String> topics,  String bio,  int sessions,  String level, @JsonKey(fromJson: stringListFromJson, toJson: stringListToJson)  List<String> formats,  int price,  bool isMe,  int? course,  String? group,  String? handle,  String? telegramHandle)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Mentor() when $default != null:
-return $default(_that.userId,_that.fullName,_that.topics,_that.bio,_that.sessions,_that.level,_that.formats,_that.price,_that.isMe,_that.course,_that.group,_that.handle);case _:
+return $default(_that.userId,_that.fullName,_that.topics,_that.bio,_that.sessions,_that.level,_that.formats,_that.price,_that.isMe,_that.course,_that.group,_that.handle,_that.telegramHandle);case _:
   return orElse();
 
 }
@@ -185,10 +186,10 @@ return $default(_that.userId,_that.fullName,_that.topics,_that.bio,_that.session
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String userId,  String fullName, @JsonKey(fromJson: stringListFromJson, toJson: stringListToJson)  List<String> topics,  String bio,  int sessions,  String level, @JsonKey(fromJson: stringListFromJson, toJson: stringListToJson)  List<String> formats,  int price,  bool isMe,  int? course,  String? group,  String? handle)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String userId,  String fullName, @JsonKey(fromJson: stringListFromJson, toJson: stringListToJson)  List<String> topics,  String bio,  int sessions,  String level, @JsonKey(fromJson: stringListFromJson, toJson: stringListToJson)  List<String> formats,  int price,  bool isMe,  int? course,  String? group,  String? handle,  String? telegramHandle)  $default,) {final _that = this;
 switch (_that) {
 case _Mentor():
-return $default(_that.userId,_that.fullName,_that.topics,_that.bio,_that.sessions,_that.level,_that.formats,_that.price,_that.isMe,_that.course,_that.group,_that.handle);case _:
+return $default(_that.userId,_that.fullName,_that.topics,_that.bio,_that.sessions,_that.level,_that.formats,_that.price,_that.isMe,_that.course,_that.group,_that.handle,_that.telegramHandle);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -205,10 +206,10 @@ return $default(_that.userId,_that.fullName,_that.topics,_that.bio,_that.session
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String userId,  String fullName, @JsonKey(fromJson: stringListFromJson, toJson: stringListToJson)  List<String> topics,  String bio,  int sessions,  String level, @JsonKey(fromJson: stringListFromJson, toJson: stringListToJson)  List<String> formats,  int price,  bool isMe,  int? course,  String? group,  String? handle)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String userId,  String fullName, @JsonKey(fromJson: stringListFromJson, toJson: stringListToJson)  List<String> topics,  String bio,  int sessions,  String level, @JsonKey(fromJson: stringListFromJson, toJson: stringListToJson)  List<String> formats,  int price,  bool isMe,  int? course,  String? group,  String? handle,  String? telegramHandle)?  $default,) {final _that = this;
 switch (_that) {
 case _Mentor() when $default != null:
-return $default(_that.userId,_that.fullName,_that.topics,_that.bio,_that.sessions,_that.level,_that.formats,_that.price,_that.isMe,_that.course,_that.group,_that.handle);case _:
+return $default(_that.userId,_that.fullName,_that.topics,_that.bio,_that.sessions,_that.level,_that.formats,_that.price,_that.isMe,_that.course,_that.group,_that.handle,_that.telegramHandle);case _:
   return null;
 
 }
@@ -220,7 +221,7 @@ return $default(_that.userId,_that.fullName,_that.topics,_that.bio,_that.session
 @JsonSerializable()
 
 class _Mentor implements Mentor {
-  const _Mentor({required this.userId, required this.fullName, @JsonKey(fromJson: stringListFromJson, toJson: stringListToJson) final  List<String> topics = const <String>[], this.bio = '', this.sessions = 0, this.level = '', @JsonKey(fromJson: stringListFromJson, toJson: stringListToJson) final  List<String> formats = const <String>[], this.price = 0, this.isMe = false, this.course, this.group, this.handle}): _topics = topics,_formats = formats;
+  const _Mentor({required this.userId, required this.fullName, @JsonKey(fromJson: stringListFromJson, toJson: stringListToJson) final  List<String> topics = const <String>[], this.bio = '', this.sessions = 0, this.level = '', @JsonKey(fromJson: stringListFromJson, toJson: stringListToJson) final  List<String> formats = const <String>[], this.price = 0, this.isMe = false, this.course, this.group, this.handle, this.telegramHandle}): _topics = topics,_formats = formats;
   factory _Mentor.fromJson(Map<String, dynamic> json) => _$MentorFromJson(json);
 
 @override final  String userId;
@@ -247,6 +248,7 @@ class _Mentor implements Mentor {
 @override final  int? course;
 @override final  String? group;
 @override final  String? handle;
+@override final  String? telegramHandle;
 
 /// Create a copy of Mentor
 /// with the given fields replaced by the non-null parameter values.
@@ -261,16 +263,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Mentor&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.fullName, fullName) || other.fullName == fullName)&&const DeepCollectionEquality().equals(other._topics, _topics)&&(identical(other.bio, bio) || other.bio == bio)&&(identical(other.sessions, sessions) || other.sessions == sessions)&&(identical(other.level, level) || other.level == level)&&const DeepCollectionEquality().equals(other._formats, _formats)&&(identical(other.price, price) || other.price == price)&&(identical(other.isMe, isMe) || other.isMe == isMe)&&(identical(other.course, course) || other.course == course)&&(identical(other.group, group) || other.group == group)&&(identical(other.handle, handle) || other.handle == handle));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Mentor&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.fullName, fullName) || other.fullName == fullName)&&const DeepCollectionEquality().equals(other._topics, _topics)&&(identical(other.bio, bio) || other.bio == bio)&&(identical(other.sessions, sessions) || other.sessions == sessions)&&(identical(other.level, level) || other.level == level)&&const DeepCollectionEquality().equals(other._formats, _formats)&&(identical(other.price, price) || other.price == price)&&(identical(other.isMe, isMe) || other.isMe == isMe)&&(identical(other.course, course) || other.course == course)&&(identical(other.group, group) || other.group == group)&&(identical(other.handle, handle) || other.handle == handle)&&(identical(other.telegramHandle, telegramHandle) || other.telegramHandle == telegramHandle));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,userId,fullName,const DeepCollectionEquality().hash(_topics),bio,sessions,level,const DeepCollectionEquality().hash(_formats),price,isMe,course,group,handle);
+int get hashCode => Object.hash(runtimeType,userId,fullName,const DeepCollectionEquality().hash(_topics),bio,sessions,level,const DeepCollectionEquality().hash(_formats),price,isMe,course,group,handle,telegramHandle);
 
 @override
 String toString() {
-  return 'Mentor(userId: $userId, fullName: $fullName, topics: $topics, bio: $bio, sessions: $sessions, level: $level, formats: $formats, price: $price, isMe: $isMe, course: $course, group: $group, handle: $handle)';
+  return 'Mentor(userId: $userId, fullName: $fullName, topics: $topics, bio: $bio, sessions: $sessions, level: $level, formats: $formats, price: $price, isMe: $isMe, course: $course, group: $group, handle: $handle, telegramHandle: $telegramHandle)';
 }
 
 
@@ -281,7 +283,7 @@ abstract mixin class _$MentorCopyWith<$Res> implements $MentorCopyWith<$Res> {
   factory _$MentorCopyWith(_Mentor value, $Res Function(_Mentor) _then) = __$MentorCopyWithImpl;
 @override @useResult
 $Res call({
- String userId, String fullName,@JsonKey(fromJson: stringListFromJson, toJson: stringListToJson) List<String> topics, String bio, int sessions, String level,@JsonKey(fromJson: stringListFromJson, toJson: stringListToJson) List<String> formats, int price, bool isMe, int? course, String? group, String? handle
+ String userId, String fullName,@JsonKey(fromJson: stringListFromJson, toJson: stringListToJson) List<String> topics, String bio, int sessions, String level,@JsonKey(fromJson: stringListFromJson, toJson: stringListToJson) List<String> formats, int price, bool isMe, int? course, String? group, String? handle, String? telegramHandle
 });
 
 
@@ -298,7 +300,7 @@ class __$MentorCopyWithImpl<$Res>
 
 /// Create a copy of Mentor
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? userId = null,Object? fullName = null,Object? topics = null,Object? bio = null,Object? sessions = null,Object? level = null,Object? formats = null,Object? price = null,Object? isMe = null,Object? course = freezed,Object? group = freezed,Object? handle = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? userId = null,Object? fullName = null,Object? topics = null,Object? bio = null,Object? sessions = null,Object? level = null,Object? formats = null,Object? price = null,Object? isMe = null,Object? course = freezed,Object? group = freezed,Object? handle = freezed,Object? telegramHandle = freezed,}) {
   return _then(_Mentor(
 userId: null == userId ? _self.userId : userId // ignore: cast_nullable_to_non_nullable
 as String,fullName: null == fullName ? _self.fullName : fullName // ignore: cast_nullable_to_non_nullable
@@ -312,6 +314,7 @@ as int,isMe: null == isMe ? _self.isMe : isMe // ignore: cast_nullable_to_non_nu
 as bool,course: freezed == course ? _self.course : course // ignore: cast_nullable_to_non_nullable
 as int?,group: freezed == group ? _self.group : group // ignore: cast_nullable_to_non_nullable
 as String?,handle: freezed == handle ? _self.handle : handle // ignore: cast_nullable_to_non_nullable
+as String?,telegramHandle: freezed == telegramHandle ? _self.telegramHandle : telegramHandle // ignore: cast_nullable_to_non_nullable
 as String?,
   ));
 }
@@ -323,7 +326,7 @@ as String?,
 /// @nodoc
 mixin _$MentorRequest {
 
- String get id; String get mentorUserId; String get requesterId; String get topic; MentorWhenSlot get whenSlot; String get message; int get price; String get requesterName; String get mentorName; String? get requesterHandle; String? get mentorHandle; bool get isIncoming; MentorRequestStatus get status; bool get mentorConfirmed; bool get requesterConfirmed;@JsonKey(fromJson: dateTimeFromJson, toJson: dateTimeToJson) DateTime? get createdAt;
+ String get id; String get mentorUserId; String get requesterId; String get topic; MentorWhenSlot get whenSlot; String get message; int get price; String get requesterName; String get mentorName; String? get requesterHandle; String? get mentorHandle; String? get mentorTelegramHandle; bool get isIncoming; MentorRequestStatus get status; bool get mentorConfirmed; bool get requesterConfirmed;@JsonKey(fromJson: dateTimeFromJson, toJson: dateTimeToJson) DateTime? get createdAt;
 /// Create a copy of MentorRequest
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -336,16 +339,16 @@ $MentorRequestCopyWith<MentorRequest> get copyWith => _$MentorRequestCopyWithImp
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is MentorRequest&&(identical(other.id, id) || other.id == id)&&(identical(other.mentorUserId, mentorUserId) || other.mentorUserId == mentorUserId)&&(identical(other.requesterId, requesterId) || other.requesterId == requesterId)&&(identical(other.topic, topic) || other.topic == topic)&&(identical(other.whenSlot, whenSlot) || other.whenSlot == whenSlot)&&(identical(other.message, message) || other.message == message)&&(identical(other.price, price) || other.price == price)&&(identical(other.requesterName, requesterName) || other.requesterName == requesterName)&&(identical(other.mentorName, mentorName) || other.mentorName == mentorName)&&(identical(other.requesterHandle, requesterHandle) || other.requesterHandle == requesterHandle)&&(identical(other.mentorHandle, mentorHandle) || other.mentorHandle == mentorHandle)&&(identical(other.isIncoming, isIncoming) || other.isIncoming == isIncoming)&&(identical(other.status, status) || other.status == status)&&(identical(other.mentorConfirmed, mentorConfirmed) || other.mentorConfirmed == mentorConfirmed)&&(identical(other.requesterConfirmed, requesterConfirmed) || other.requesterConfirmed == requesterConfirmed)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is MentorRequest&&(identical(other.id, id) || other.id == id)&&(identical(other.mentorUserId, mentorUserId) || other.mentorUserId == mentorUserId)&&(identical(other.requesterId, requesterId) || other.requesterId == requesterId)&&(identical(other.topic, topic) || other.topic == topic)&&(identical(other.whenSlot, whenSlot) || other.whenSlot == whenSlot)&&(identical(other.message, message) || other.message == message)&&(identical(other.price, price) || other.price == price)&&(identical(other.requesterName, requesterName) || other.requesterName == requesterName)&&(identical(other.mentorName, mentorName) || other.mentorName == mentorName)&&(identical(other.requesterHandle, requesterHandle) || other.requesterHandle == requesterHandle)&&(identical(other.mentorHandle, mentorHandle) || other.mentorHandle == mentorHandle)&&(identical(other.mentorTelegramHandle, mentorTelegramHandle) || other.mentorTelegramHandle == mentorTelegramHandle)&&(identical(other.isIncoming, isIncoming) || other.isIncoming == isIncoming)&&(identical(other.status, status) || other.status == status)&&(identical(other.mentorConfirmed, mentorConfirmed) || other.mentorConfirmed == mentorConfirmed)&&(identical(other.requesterConfirmed, requesterConfirmed) || other.requesterConfirmed == requesterConfirmed)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,mentorUserId,requesterId,topic,whenSlot,message,price,requesterName,mentorName,requesterHandle,mentorHandle,isIncoming,status,mentorConfirmed,requesterConfirmed,createdAt);
+int get hashCode => Object.hash(runtimeType,id,mentorUserId,requesterId,topic,whenSlot,message,price,requesterName,mentorName,requesterHandle,mentorHandle,mentorTelegramHandle,isIncoming,status,mentorConfirmed,requesterConfirmed,createdAt);
 
 @override
 String toString() {
-  return 'MentorRequest(id: $id, mentorUserId: $mentorUserId, requesterId: $requesterId, topic: $topic, whenSlot: $whenSlot, message: $message, price: $price, requesterName: $requesterName, mentorName: $mentorName, requesterHandle: $requesterHandle, mentorHandle: $mentorHandle, isIncoming: $isIncoming, status: $status, mentorConfirmed: $mentorConfirmed, requesterConfirmed: $requesterConfirmed, createdAt: $createdAt)';
+  return 'MentorRequest(id: $id, mentorUserId: $mentorUserId, requesterId: $requesterId, topic: $topic, whenSlot: $whenSlot, message: $message, price: $price, requesterName: $requesterName, mentorName: $mentorName, requesterHandle: $requesterHandle, mentorHandle: $mentorHandle, mentorTelegramHandle: $mentorTelegramHandle, isIncoming: $isIncoming, status: $status, mentorConfirmed: $mentorConfirmed, requesterConfirmed: $requesterConfirmed, createdAt: $createdAt)';
 }
 
 
@@ -356,7 +359,7 @@ abstract mixin class $MentorRequestCopyWith<$Res>  {
   factory $MentorRequestCopyWith(MentorRequest value, $Res Function(MentorRequest) _then) = _$MentorRequestCopyWithImpl;
 @useResult
 $Res call({
- String id, String mentorUserId, String requesterId, String topic, MentorWhenSlot whenSlot, String message, int price, String requesterName, String mentorName, String? requesterHandle, String? mentorHandle, bool isIncoming, MentorRequestStatus status, bool mentorConfirmed, bool requesterConfirmed,@JsonKey(fromJson: dateTimeFromJson, toJson: dateTimeToJson) DateTime? createdAt
+ String id, String mentorUserId, String requesterId, String topic, MentorWhenSlot whenSlot, String message, int price, String requesterName, String mentorName, String? requesterHandle, String? mentorHandle, String? mentorTelegramHandle, bool isIncoming, MentorRequestStatus status, bool mentorConfirmed, bool requesterConfirmed,@JsonKey(fromJson: dateTimeFromJson, toJson: dateTimeToJson) DateTime? createdAt
 });
 
 
@@ -373,7 +376,7 @@ class _$MentorRequestCopyWithImpl<$Res>
 
 /// Create a copy of MentorRequest
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? mentorUserId = null,Object? requesterId = null,Object? topic = null,Object? whenSlot = null,Object? message = null,Object? price = null,Object? requesterName = null,Object? mentorName = null,Object? requesterHandle = freezed,Object? mentorHandle = freezed,Object? isIncoming = null,Object? status = null,Object? mentorConfirmed = null,Object? requesterConfirmed = null,Object? createdAt = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? mentorUserId = null,Object? requesterId = null,Object? topic = null,Object? whenSlot = null,Object? message = null,Object? price = null,Object? requesterName = null,Object? mentorName = null,Object? requesterHandle = freezed,Object? mentorHandle = freezed,Object? mentorTelegramHandle = freezed,Object? isIncoming = null,Object? status = null,Object? mentorConfirmed = null,Object? requesterConfirmed = null,Object? createdAt = freezed,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,mentorUserId: null == mentorUserId ? _self.mentorUserId : mentorUserId // ignore: cast_nullable_to_non_nullable
@@ -386,6 +389,7 @@ as int,requesterName: null == requesterName ? _self.requesterName : requesterNam
 as String,mentorName: null == mentorName ? _self.mentorName : mentorName // ignore: cast_nullable_to_non_nullable
 as String,requesterHandle: freezed == requesterHandle ? _self.requesterHandle : requesterHandle // ignore: cast_nullable_to_non_nullable
 as String?,mentorHandle: freezed == mentorHandle ? _self.mentorHandle : mentorHandle // ignore: cast_nullable_to_non_nullable
+as String?,mentorTelegramHandle: freezed == mentorTelegramHandle ? _self.mentorTelegramHandle : mentorTelegramHandle // ignore: cast_nullable_to_non_nullable
 as String?,isIncoming: null == isIncoming ? _self.isIncoming : isIncoming // ignore: cast_nullable_to_non_nullable
 as bool,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as MentorRequestStatus,mentorConfirmed: null == mentorConfirmed ? _self.mentorConfirmed : mentorConfirmed // ignore: cast_nullable_to_non_nullable
@@ -476,10 +480,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String mentorUserId,  String requesterId,  String topic,  MentorWhenSlot whenSlot,  String message,  int price,  String requesterName,  String mentorName,  String? requesterHandle,  String? mentorHandle,  bool isIncoming,  MentorRequestStatus status,  bool mentorConfirmed,  bool requesterConfirmed, @JsonKey(fromJson: dateTimeFromJson, toJson: dateTimeToJson)  DateTime? createdAt)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String mentorUserId,  String requesterId,  String topic,  MentorWhenSlot whenSlot,  String message,  int price,  String requesterName,  String mentorName,  String? requesterHandle,  String? mentorHandle,  String? mentorTelegramHandle,  bool isIncoming,  MentorRequestStatus status,  bool mentorConfirmed,  bool requesterConfirmed, @JsonKey(fromJson: dateTimeFromJson, toJson: dateTimeToJson)  DateTime? createdAt)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _MentorRequest() when $default != null:
-return $default(_that.id,_that.mentorUserId,_that.requesterId,_that.topic,_that.whenSlot,_that.message,_that.price,_that.requesterName,_that.mentorName,_that.requesterHandle,_that.mentorHandle,_that.isIncoming,_that.status,_that.mentorConfirmed,_that.requesterConfirmed,_that.createdAt);case _:
+return $default(_that.id,_that.mentorUserId,_that.requesterId,_that.topic,_that.whenSlot,_that.message,_that.price,_that.requesterName,_that.mentorName,_that.requesterHandle,_that.mentorHandle,_that.mentorTelegramHandle,_that.isIncoming,_that.status,_that.mentorConfirmed,_that.requesterConfirmed,_that.createdAt);case _:
   return orElse();
 
 }
@@ -497,10 +501,10 @@ return $default(_that.id,_that.mentorUserId,_that.requesterId,_that.topic,_that.
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String mentorUserId,  String requesterId,  String topic,  MentorWhenSlot whenSlot,  String message,  int price,  String requesterName,  String mentorName,  String? requesterHandle,  String? mentorHandle,  bool isIncoming,  MentorRequestStatus status,  bool mentorConfirmed,  bool requesterConfirmed, @JsonKey(fromJson: dateTimeFromJson, toJson: dateTimeToJson)  DateTime? createdAt)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String mentorUserId,  String requesterId,  String topic,  MentorWhenSlot whenSlot,  String message,  int price,  String requesterName,  String mentorName,  String? requesterHandle,  String? mentorHandle,  String? mentorTelegramHandle,  bool isIncoming,  MentorRequestStatus status,  bool mentorConfirmed,  bool requesterConfirmed, @JsonKey(fromJson: dateTimeFromJson, toJson: dateTimeToJson)  DateTime? createdAt)  $default,) {final _that = this;
 switch (_that) {
 case _MentorRequest():
-return $default(_that.id,_that.mentorUserId,_that.requesterId,_that.topic,_that.whenSlot,_that.message,_that.price,_that.requesterName,_that.mentorName,_that.requesterHandle,_that.mentorHandle,_that.isIncoming,_that.status,_that.mentorConfirmed,_that.requesterConfirmed,_that.createdAt);case _:
+return $default(_that.id,_that.mentorUserId,_that.requesterId,_that.topic,_that.whenSlot,_that.message,_that.price,_that.requesterName,_that.mentorName,_that.requesterHandle,_that.mentorHandle,_that.mentorTelegramHandle,_that.isIncoming,_that.status,_that.mentorConfirmed,_that.requesterConfirmed,_that.createdAt);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -517,10 +521,10 @@ return $default(_that.id,_that.mentorUserId,_that.requesterId,_that.topic,_that.
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String mentorUserId,  String requesterId,  String topic,  MentorWhenSlot whenSlot,  String message,  int price,  String requesterName,  String mentorName,  String? requesterHandle,  String? mentorHandle,  bool isIncoming,  MentorRequestStatus status,  bool mentorConfirmed,  bool requesterConfirmed, @JsonKey(fromJson: dateTimeFromJson, toJson: dateTimeToJson)  DateTime? createdAt)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String mentorUserId,  String requesterId,  String topic,  MentorWhenSlot whenSlot,  String message,  int price,  String requesterName,  String mentorName,  String? requesterHandle,  String? mentorHandle,  String? mentorTelegramHandle,  bool isIncoming,  MentorRequestStatus status,  bool mentorConfirmed,  bool requesterConfirmed, @JsonKey(fromJson: dateTimeFromJson, toJson: dateTimeToJson)  DateTime? createdAt)?  $default,) {final _that = this;
 switch (_that) {
 case _MentorRequest() when $default != null:
-return $default(_that.id,_that.mentorUserId,_that.requesterId,_that.topic,_that.whenSlot,_that.message,_that.price,_that.requesterName,_that.mentorName,_that.requesterHandle,_that.mentorHandle,_that.isIncoming,_that.status,_that.mentorConfirmed,_that.requesterConfirmed,_that.createdAt);case _:
+return $default(_that.id,_that.mentorUserId,_that.requesterId,_that.topic,_that.whenSlot,_that.message,_that.price,_that.requesterName,_that.mentorName,_that.requesterHandle,_that.mentorHandle,_that.mentorTelegramHandle,_that.isIncoming,_that.status,_that.mentorConfirmed,_that.requesterConfirmed,_that.createdAt);case _:
   return null;
 
 }
@@ -532,7 +536,7 @@ return $default(_that.id,_that.mentorUserId,_that.requesterId,_that.topic,_that.
 @JsonSerializable()
 
 class _MentorRequest extends MentorRequest {
-  const _MentorRequest({required this.id, required this.mentorUserId, required this.requesterId, this.topic = '', this.whenSlot = MentorWhenSlot.week, this.message = '', this.price = 0, this.requesterName = '', this.mentorName = '', this.requesterHandle, this.mentorHandle, this.isIncoming = true, this.status = MentorRequestStatus.pending, this.mentorConfirmed = false, this.requesterConfirmed = false, @JsonKey(fromJson: dateTimeFromJson, toJson: dateTimeToJson) this.createdAt}): super._();
+  const _MentorRequest({required this.id, required this.mentorUserId, required this.requesterId, this.topic = '', this.whenSlot = MentorWhenSlot.week, this.message = '', this.price = 0, this.requesterName = '', this.mentorName = '', this.requesterHandle, this.mentorHandle, this.mentorTelegramHandle, this.isIncoming = true, this.status = MentorRequestStatus.pending, this.mentorConfirmed = false, this.requesterConfirmed = false, @JsonKey(fromJson: dateTimeFromJson, toJson: dateTimeToJson) this.createdAt}): super._();
   factory _MentorRequest.fromJson(Map<String, dynamic> json) => _$MentorRequestFromJson(json);
 
 @override final  String id;
@@ -546,6 +550,7 @@ class _MentorRequest extends MentorRequest {
 @override@JsonKey() final  String mentorName;
 @override final  String? requesterHandle;
 @override final  String? mentorHandle;
+@override final  String? mentorTelegramHandle;
 @override@JsonKey() final  bool isIncoming;
 @override@JsonKey() final  MentorRequestStatus status;
 @override@JsonKey() final  bool mentorConfirmed;
@@ -565,16 +570,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _MentorRequest&&(identical(other.id, id) || other.id == id)&&(identical(other.mentorUserId, mentorUserId) || other.mentorUserId == mentorUserId)&&(identical(other.requesterId, requesterId) || other.requesterId == requesterId)&&(identical(other.topic, topic) || other.topic == topic)&&(identical(other.whenSlot, whenSlot) || other.whenSlot == whenSlot)&&(identical(other.message, message) || other.message == message)&&(identical(other.price, price) || other.price == price)&&(identical(other.requesterName, requesterName) || other.requesterName == requesterName)&&(identical(other.mentorName, mentorName) || other.mentorName == mentorName)&&(identical(other.requesterHandle, requesterHandle) || other.requesterHandle == requesterHandle)&&(identical(other.mentorHandle, mentorHandle) || other.mentorHandle == mentorHandle)&&(identical(other.isIncoming, isIncoming) || other.isIncoming == isIncoming)&&(identical(other.status, status) || other.status == status)&&(identical(other.mentorConfirmed, mentorConfirmed) || other.mentorConfirmed == mentorConfirmed)&&(identical(other.requesterConfirmed, requesterConfirmed) || other.requesterConfirmed == requesterConfirmed)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _MentorRequest&&(identical(other.id, id) || other.id == id)&&(identical(other.mentorUserId, mentorUserId) || other.mentorUserId == mentorUserId)&&(identical(other.requesterId, requesterId) || other.requesterId == requesterId)&&(identical(other.topic, topic) || other.topic == topic)&&(identical(other.whenSlot, whenSlot) || other.whenSlot == whenSlot)&&(identical(other.message, message) || other.message == message)&&(identical(other.price, price) || other.price == price)&&(identical(other.requesterName, requesterName) || other.requesterName == requesterName)&&(identical(other.mentorName, mentorName) || other.mentorName == mentorName)&&(identical(other.requesterHandle, requesterHandle) || other.requesterHandle == requesterHandle)&&(identical(other.mentorHandle, mentorHandle) || other.mentorHandle == mentorHandle)&&(identical(other.mentorTelegramHandle, mentorTelegramHandle) || other.mentorTelegramHandle == mentorTelegramHandle)&&(identical(other.isIncoming, isIncoming) || other.isIncoming == isIncoming)&&(identical(other.status, status) || other.status == status)&&(identical(other.mentorConfirmed, mentorConfirmed) || other.mentorConfirmed == mentorConfirmed)&&(identical(other.requesterConfirmed, requesterConfirmed) || other.requesterConfirmed == requesterConfirmed)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,mentorUserId,requesterId,topic,whenSlot,message,price,requesterName,mentorName,requesterHandle,mentorHandle,isIncoming,status,mentorConfirmed,requesterConfirmed,createdAt);
+int get hashCode => Object.hash(runtimeType,id,mentorUserId,requesterId,topic,whenSlot,message,price,requesterName,mentorName,requesterHandle,mentorHandle,mentorTelegramHandle,isIncoming,status,mentorConfirmed,requesterConfirmed,createdAt);
 
 @override
 String toString() {
-  return 'MentorRequest(id: $id, mentorUserId: $mentorUserId, requesterId: $requesterId, topic: $topic, whenSlot: $whenSlot, message: $message, price: $price, requesterName: $requesterName, mentorName: $mentorName, requesterHandle: $requesterHandle, mentorHandle: $mentorHandle, isIncoming: $isIncoming, status: $status, mentorConfirmed: $mentorConfirmed, requesterConfirmed: $requesterConfirmed, createdAt: $createdAt)';
+  return 'MentorRequest(id: $id, mentorUserId: $mentorUserId, requesterId: $requesterId, topic: $topic, whenSlot: $whenSlot, message: $message, price: $price, requesterName: $requesterName, mentorName: $mentorName, requesterHandle: $requesterHandle, mentorHandle: $mentorHandle, mentorTelegramHandle: $mentorTelegramHandle, isIncoming: $isIncoming, status: $status, mentorConfirmed: $mentorConfirmed, requesterConfirmed: $requesterConfirmed, createdAt: $createdAt)';
 }
 
 
@@ -585,7 +590,7 @@ abstract mixin class _$MentorRequestCopyWith<$Res> implements $MentorRequestCopy
   factory _$MentorRequestCopyWith(_MentorRequest value, $Res Function(_MentorRequest) _then) = __$MentorRequestCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String mentorUserId, String requesterId, String topic, MentorWhenSlot whenSlot, String message, int price, String requesterName, String mentorName, String? requesterHandle, String? mentorHandle, bool isIncoming, MentorRequestStatus status, bool mentorConfirmed, bool requesterConfirmed,@JsonKey(fromJson: dateTimeFromJson, toJson: dateTimeToJson) DateTime? createdAt
+ String id, String mentorUserId, String requesterId, String topic, MentorWhenSlot whenSlot, String message, int price, String requesterName, String mentorName, String? requesterHandle, String? mentorHandle, String? mentorTelegramHandle, bool isIncoming, MentorRequestStatus status, bool mentorConfirmed, bool requesterConfirmed,@JsonKey(fromJson: dateTimeFromJson, toJson: dateTimeToJson) DateTime? createdAt
 });
 
 
@@ -602,7 +607,7 @@ class __$MentorRequestCopyWithImpl<$Res>
 
 /// Create a copy of MentorRequest
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? mentorUserId = null,Object? requesterId = null,Object? topic = null,Object? whenSlot = null,Object? message = null,Object? price = null,Object? requesterName = null,Object? mentorName = null,Object? requesterHandle = freezed,Object? mentorHandle = freezed,Object? isIncoming = null,Object? status = null,Object? mentorConfirmed = null,Object? requesterConfirmed = null,Object? createdAt = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? mentorUserId = null,Object? requesterId = null,Object? topic = null,Object? whenSlot = null,Object? message = null,Object? price = null,Object? requesterName = null,Object? mentorName = null,Object? requesterHandle = freezed,Object? mentorHandle = freezed,Object? mentorTelegramHandle = freezed,Object? isIncoming = null,Object? status = null,Object? mentorConfirmed = null,Object? requesterConfirmed = null,Object? createdAt = freezed,}) {
   return _then(_MentorRequest(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,mentorUserId: null == mentorUserId ? _self.mentorUserId : mentorUserId // ignore: cast_nullable_to_non_nullable
@@ -615,6 +620,7 @@ as int,requesterName: null == requesterName ? _self.requesterName : requesterNam
 as String,mentorName: null == mentorName ? _self.mentorName : mentorName // ignore: cast_nullable_to_non_nullable
 as String,requesterHandle: freezed == requesterHandle ? _self.requesterHandle : requesterHandle // ignore: cast_nullable_to_non_nullable
 as String?,mentorHandle: freezed == mentorHandle ? _self.mentorHandle : mentorHandle // ignore: cast_nullable_to_non_nullable
+as String?,mentorTelegramHandle: freezed == mentorTelegramHandle ? _self.mentorTelegramHandle : mentorTelegramHandle // ignore: cast_nullable_to_non_nullable
 as String?,isIncoming: null == isIncoming ? _self.isIncoming : isIncoming // ignore: cast_nullable_to_non_nullable
 as bool,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as MentorRequestStatus,mentorConfirmed: null == mentorConfirmed ? _self.mentorConfirmed : mentorConfirmed // ignore: cast_nullable_to_non_nullable

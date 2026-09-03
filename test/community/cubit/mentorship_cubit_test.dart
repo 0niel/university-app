@@ -6,6 +6,8 @@ import 'package:collection/collection.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:rtu_mirea_app/community/community.dart';
+import 'package:rtu_mirea_app/community/view/mentorship_labels.dart';
+import 'package:rtu_mirea_app/l10n/generated/app_localizations_ru.dart';
 
 import '../../helpers/mocks/mock_campus_repository.dart';
 
@@ -120,6 +122,7 @@ void main() {
       when(
         () => repository.upsertMentorProfile(
           topics: ['python'],
+          telegramHandle: 'mentor_ninja',
           bio: 'Help with Dart',
           level: 'course3',
           formats: ['chat'],
@@ -133,6 +136,7 @@ void main() {
       final cubit = buildCubit();
       const draft = MentorProfileDraft(
         topics: [' python ', 'python'],
+        telegramHandle: ' @mentor_ninja ',
         bio: ' Help with Dart ',
         level: ' course3 ',
         formats: [' chat '],
@@ -147,12 +151,30 @@ void main() {
       verify(
         () => repository.upsertMentorProfile(
           topics: ['python'],
+          telegramHandle: 'mentor_ninja',
           bio: 'Help with Dart',
           level: 'course3',
           formats: ['chat'],
           price: 15,
         ),
       ).called(1);
+      await cubit.close();
+    });
+
+    test('rejects a save with an invalid Telegram handle', () async {
+      final cubit = buildCubit();
+      const draft = MentorProfileDraft(
+        topics: ['python'],
+        telegramHandle: 'no',
+      );
+
+      expect(await cubit.saveProfile(draft), isFalse);
+      verifyNever(
+        () => repository.upsertMentorProfile(
+          topics: any(named: 'topics'),
+          telegramHandle: any(named: 'telegramHandle'),
+        ),
+      );
       await cubit.close();
     });
 
@@ -224,6 +246,48 @@ void main() {
       expect(cubit.state.requests.singleOrNull?.status, accepted);
       expect(cubit.state.pendingRequestIds, isEmpty);
       await cubit.close();
+    });
+  });
+
+  group('isValidMentorTelegramHandle', () {
+    test('accepts a bare or @-prefixed handle within the length bounds', () {
+      expect(isValidMentorTelegramHandle('mentor_ninja'), isTrue);
+      expect(isValidMentorTelegramHandle('@mentor_ninja'), isTrue);
+      expect(isValidMentorTelegramHandle(' @mentor_ninja '), isTrue);
+    });
+
+    test('rejects handles that are too short, too long or malformed', () {
+      expect(isValidMentorTelegramHandle(''), isFalse);
+      expect(isValidMentorTelegramHandle('no'), isFalse);
+      expect(isValidMentorTelegramHandle('a' * 33), isFalse);
+      expect(isValidMentorTelegramHandle('bad handle'), isFalse);
+      expect(isValidMentorTelegramHandle('bad-handle'), isFalse);
+    });
+  });
+
+  group('mentorMatchesQuery', () {
+    final l10n = AppLocalizationsRu();
+    const mentor = Mentor(
+      userId: 'mentor-1',
+      fullName: 'Мария Иванова',
+      group: 'ИКБО-01-23',
+      bio: 'Помогаю с алгоритмами',
+      topics: ['python', 'career'],
+    );
+
+    test('matches an empty query', () {
+      expect(mentorMatchesQuery(l10n, mentor, ''), isTrue);
+    });
+
+    test('matches by name, group, bio and topic label', () {
+      expect(mentorMatchesQuery(l10n, mentor, 'мария'), isTrue);
+      expect(mentorMatchesQuery(l10n, mentor, 'икбо'), isTrue);
+      expect(mentorMatchesQuery(l10n, mentor, 'алгоритм'), isTrue);
+      expect(mentorMatchesQuery(l10n, mentor, 'python'), isTrue);
+    });
+
+    test('does not match an unrelated query', () {
+      expect(mentorMatchesQuery(l10n, mentor, 'дизайн'), isFalse);
     });
   });
 }

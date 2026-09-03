@@ -263,7 +263,6 @@ Widget homeDashboardFixture({
       ids: {
         '/services/free-rooms',
         '/services/map',
-        '/services/cowork',
         '/services/deadlines',
         '/services/friends',
       },

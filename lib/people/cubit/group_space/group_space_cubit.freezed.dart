@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$GroupSpaceState {
 
- GroupSpaceStatus get status; GroupSpace get space; bool get isRefreshing; Set<String> get pendingLikeIds; Set<String> get pendingLinkDeleteIds; GroupSpaceMutationFailure? get mutationFailure;
+ GroupSpaceStatus get status; GroupSpace get space; bool get isRefreshing; Set<String> get pendingLikeIds; Set<String> get pendingLinkDeleteIds; List<CollabNote> get notesPreview; Map<String, List<GroupPostComment>> get comments; Set<String> get loadingCommentPostIds; bool get isSubmittingComment; Set<String> get pendingCommentDeleteIds; int get onlineCount; GroupSpaceMutationFailure? get mutationFailure;
 /// Create a copy of GroupSpaceState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +25,16 @@ $GroupSpaceStateCopyWith<GroupSpaceState> get copyWith => _$GroupSpaceStateCopyW
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is GroupSpaceState&&(identical(other.status, status) || other.status == status)&&(identical(other.space, space) || other.space == space)&&(identical(other.isRefreshing, isRefreshing) || other.isRefreshing == isRefreshing)&&const DeepCollectionEquality().equals(other.pendingLikeIds, pendingLikeIds)&&const DeepCollectionEquality().equals(other.pendingLinkDeleteIds, pendingLinkDeleteIds)&&(identical(other.mutationFailure, mutationFailure) || other.mutationFailure == mutationFailure));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is GroupSpaceState&&(identical(other.status, status) || other.status == status)&&(identical(other.space, space) || other.space == space)&&(identical(other.isRefreshing, isRefreshing) || other.isRefreshing == isRefreshing)&&const DeepCollectionEquality().equals(other.pendingLikeIds, pendingLikeIds)&&const DeepCollectionEquality().equals(other.pendingLinkDeleteIds, pendingLinkDeleteIds)&&const DeepCollectionEquality().equals(other.notesPreview, notesPreview)&&const DeepCollectionEquality().equals(other.comments, comments)&&const DeepCollectionEquality().equals(other.loadingCommentPostIds, loadingCommentPostIds)&&(identical(other.isSubmittingComment, isSubmittingComment) || other.isSubmittingComment == isSubmittingComment)&&const DeepCollectionEquality().equals(other.pendingCommentDeleteIds, pendingCommentDeleteIds)&&(identical(other.onlineCount, onlineCount) || other.onlineCount == onlineCount)&&(identical(other.mutationFailure, mutationFailure) || other.mutationFailure == mutationFailure));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,status,space,isRefreshing,const DeepCollectionEquality().hash(pendingLikeIds),const DeepCollectionEquality().hash(pendingLinkDeleteIds),mutationFailure);
+int get hashCode => Object.hash(runtimeType,status,space,isRefreshing,const DeepCollectionEquality().hash(pendingLikeIds),const DeepCollectionEquality().hash(pendingLinkDeleteIds),const DeepCollectionEquality().hash(notesPreview),const DeepCollectionEquality().hash(comments),const DeepCollectionEquality().hash(loadingCommentPostIds),isSubmittingComment,const DeepCollectionEquality().hash(pendingCommentDeleteIds),onlineCount,mutationFailure);
 
 @override
 String toString() {
-  return 'GroupSpaceState(status: $status, space: $space, isRefreshing: $isRefreshing, pendingLikeIds: $pendingLikeIds, pendingLinkDeleteIds: $pendingLinkDeleteIds, mutationFailure: $mutationFailure)';
+  return 'GroupSpaceState(status: $status, space: $space, isRefreshing: $isRefreshing, pendingLikeIds: $pendingLikeIds, pendingLinkDeleteIds: $pendingLinkDeleteIds, notesPreview: $notesPreview, comments: $comments, loadingCommentPostIds: $loadingCommentPostIds, isSubmittingComment: $isSubmittingComment, pendingCommentDeleteIds: $pendingCommentDeleteIds, onlineCount: $onlineCount, mutationFailure: $mutationFailure)';
 }
 
 
@@ -45,7 +45,7 @@ abstract mixin class $GroupSpaceStateCopyWith<$Res>  {
   factory $GroupSpaceStateCopyWith(GroupSpaceState value, $Res Function(GroupSpaceState) _then) = _$GroupSpaceStateCopyWithImpl;
 @useResult
 $Res call({
- GroupSpaceStatus status, GroupSpace space, bool isRefreshing, Set<String> pendingLikeIds, Set<String> pendingLinkDeleteIds, GroupSpaceMutationFailure? mutationFailure
+ GroupSpaceStatus status, GroupSpace space, bool isRefreshing, Set<String> pendingLikeIds, Set<String> pendingLinkDeleteIds, List<CollabNote> notesPreview, Map<String, List<GroupPostComment>> comments, Set<String> loadingCommentPostIds, bool isSubmittingComment, Set<String> pendingCommentDeleteIds, int onlineCount, GroupSpaceMutationFailure? mutationFailure
 });
 
 
@@ -62,14 +62,20 @@ class _$GroupSpaceStateCopyWithImpl<$Res>
 
 /// Create a copy of GroupSpaceState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? status = null,Object? space = null,Object? isRefreshing = null,Object? pendingLikeIds = null,Object? pendingLinkDeleteIds = null,Object? mutationFailure = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? status = null,Object? space = null,Object? isRefreshing = null,Object? pendingLikeIds = null,Object? pendingLinkDeleteIds = null,Object? notesPreview = null,Object? comments = null,Object? loadingCommentPostIds = null,Object? isSubmittingComment = null,Object? pendingCommentDeleteIds = null,Object? onlineCount = null,Object? mutationFailure = freezed,}) {
   return _then(_self.copyWith(
 status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as GroupSpaceStatus,space: null == space ? _self.space : space // ignore: cast_nullable_to_non_nullable
 as GroupSpace,isRefreshing: null == isRefreshing ? _self.isRefreshing : isRefreshing // ignore: cast_nullable_to_non_nullable
 as bool,pendingLikeIds: null == pendingLikeIds ? _self.pendingLikeIds : pendingLikeIds // ignore: cast_nullable_to_non_nullable
 as Set<String>,pendingLinkDeleteIds: null == pendingLinkDeleteIds ? _self.pendingLinkDeleteIds : pendingLinkDeleteIds // ignore: cast_nullable_to_non_nullable
-as Set<String>,mutationFailure: freezed == mutationFailure ? _self.mutationFailure : mutationFailure // ignore: cast_nullable_to_non_nullable
+as Set<String>,notesPreview: null == notesPreview ? _self.notesPreview : notesPreview // ignore: cast_nullable_to_non_nullable
+as List<CollabNote>,comments: null == comments ? _self.comments : comments // ignore: cast_nullable_to_non_nullable
+as Map<String, List<GroupPostComment>>,loadingCommentPostIds: null == loadingCommentPostIds ? _self.loadingCommentPostIds : loadingCommentPostIds // ignore: cast_nullable_to_non_nullable
+as Set<String>,isSubmittingComment: null == isSubmittingComment ? _self.isSubmittingComment : isSubmittingComment // ignore: cast_nullable_to_non_nullable
+as bool,pendingCommentDeleteIds: null == pendingCommentDeleteIds ? _self.pendingCommentDeleteIds : pendingCommentDeleteIds // ignore: cast_nullable_to_non_nullable
+as Set<String>,onlineCount: null == onlineCount ? _self.onlineCount : onlineCount // ignore: cast_nullable_to_non_nullable
+as int,mutationFailure: freezed == mutationFailure ? _self.mutationFailure : mutationFailure // ignore: cast_nullable_to_non_nullable
 as GroupSpaceMutationFailure?,
   ));
 }
@@ -164,10 +170,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( GroupSpaceStatus status,  GroupSpace space,  bool isRefreshing,  Set<String> pendingLikeIds,  Set<String> pendingLinkDeleteIds,  GroupSpaceMutationFailure? mutationFailure)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( GroupSpaceStatus status,  GroupSpace space,  bool isRefreshing,  Set<String> pendingLikeIds,  Set<String> pendingLinkDeleteIds,  List<CollabNote> notesPreview,  Map<String, List<GroupPostComment>> comments,  Set<String> loadingCommentPostIds,  bool isSubmittingComment,  Set<String> pendingCommentDeleteIds,  int onlineCount,  GroupSpaceMutationFailure? mutationFailure)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _GroupSpaceState() when $default != null:
-return $default(_that.status,_that.space,_that.isRefreshing,_that.pendingLikeIds,_that.pendingLinkDeleteIds,_that.mutationFailure);case _:
+return $default(_that.status,_that.space,_that.isRefreshing,_that.pendingLikeIds,_that.pendingLinkDeleteIds,_that.notesPreview,_that.comments,_that.loadingCommentPostIds,_that.isSubmittingComment,_that.pendingCommentDeleteIds,_that.onlineCount,_that.mutationFailure);case _:
   return orElse();
 
 }
@@ -185,10 +191,10 @@ return $default(_that.status,_that.space,_that.isRefreshing,_that.pendingLikeIds
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( GroupSpaceStatus status,  GroupSpace space,  bool isRefreshing,  Set<String> pendingLikeIds,  Set<String> pendingLinkDeleteIds,  GroupSpaceMutationFailure? mutationFailure)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( GroupSpaceStatus status,  GroupSpace space,  bool isRefreshing,  Set<String> pendingLikeIds,  Set<String> pendingLinkDeleteIds,  List<CollabNote> notesPreview,  Map<String, List<GroupPostComment>> comments,  Set<String> loadingCommentPostIds,  bool isSubmittingComment,  Set<String> pendingCommentDeleteIds,  int onlineCount,  GroupSpaceMutationFailure? mutationFailure)  $default,) {final _that = this;
 switch (_that) {
 case _GroupSpaceState():
-return $default(_that.status,_that.space,_that.isRefreshing,_that.pendingLikeIds,_that.pendingLinkDeleteIds,_that.mutationFailure);case _:
+return $default(_that.status,_that.space,_that.isRefreshing,_that.pendingLikeIds,_that.pendingLinkDeleteIds,_that.notesPreview,_that.comments,_that.loadingCommentPostIds,_that.isSubmittingComment,_that.pendingCommentDeleteIds,_that.onlineCount,_that.mutationFailure);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -205,10 +211,10 @@ return $default(_that.status,_that.space,_that.isRefreshing,_that.pendingLikeIds
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( GroupSpaceStatus status,  GroupSpace space,  bool isRefreshing,  Set<String> pendingLikeIds,  Set<String> pendingLinkDeleteIds,  GroupSpaceMutationFailure? mutationFailure)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( GroupSpaceStatus status,  GroupSpace space,  bool isRefreshing,  Set<String> pendingLikeIds,  Set<String> pendingLinkDeleteIds,  List<CollabNote> notesPreview,  Map<String, List<GroupPostComment>> comments,  Set<String> loadingCommentPostIds,  bool isSubmittingComment,  Set<String> pendingCommentDeleteIds,  int onlineCount,  GroupSpaceMutationFailure? mutationFailure)?  $default,) {final _that = this;
 switch (_that) {
 case _GroupSpaceState() when $default != null:
-return $default(_that.status,_that.space,_that.isRefreshing,_that.pendingLikeIds,_that.pendingLinkDeleteIds,_that.mutationFailure);case _:
+return $default(_that.status,_that.space,_that.isRefreshing,_that.pendingLikeIds,_that.pendingLinkDeleteIds,_that.notesPreview,_that.comments,_that.loadingCommentPostIds,_that.isSubmittingComment,_that.pendingCommentDeleteIds,_that.onlineCount,_that.mutationFailure);case _:
   return null;
 
 }
@@ -220,7 +226,7 @@ return $default(_that.status,_that.space,_that.isRefreshing,_that.pendingLikeIds
 
 
 class _GroupSpaceState implements GroupSpaceState {
-  const _GroupSpaceState({this.status = GroupSpaceStatus.initial, this.space = GroupSpace.empty, this.isRefreshing = false, final  Set<String> pendingLikeIds = const <String>{}, final  Set<String> pendingLinkDeleteIds = const <String>{}, this.mutationFailure}): _pendingLikeIds = pendingLikeIds,_pendingLinkDeleteIds = pendingLinkDeleteIds;
+  const _GroupSpaceState({this.status = GroupSpaceStatus.initial, this.space = GroupSpace.empty, this.isRefreshing = false, final  Set<String> pendingLikeIds = const <String>{}, final  Set<String> pendingLinkDeleteIds = const <String>{}, final  List<CollabNote> notesPreview = const <CollabNote>[], final  Map<String, List<GroupPostComment>> comments = const <String, List<GroupPostComment>>{}, final  Set<String> loadingCommentPostIds = const <String>{}, this.isSubmittingComment = false, final  Set<String> pendingCommentDeleteIds = const <String>{}, this.onlineCount = 1, this.mutationFailure}): _pendingLikeIds = pendingLikeIds,_pendingLinkDeleteIds = pendingLinkDeleteIds,_notesPreview = notesPreview,_comments = comments,_loadingCommentPostIds = loadingCommentPostIds,_pendingCommentDeleteIds = pendingCommentDeleteIds;
 
 
 @override@JsonKey() final  GroupSpaceStatus status;
@@ -240,6 +246,36 @@ class _GroupSpaceState implements GroupSpaceState {
   return EqualUnmodifiableSetView(_pendingLinkDeleteIds);
 }
 
+ final  List<CollabNote> _notesPreview;
+@override@JsonKey() List<CollabNote> get notesPreview {
+  if (_notesPreview is EqualUnmodifiableListView) return _notesPreview;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_notesPreview);
+}
+
+ final  Map<String, List<GroupPostComment>> _comments;
+@override@JsonKey() Map<String, List<GroupPostComment>> get comments {
+  if (_comments is EqualUnmodifiableMapView) return _comments;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableMapView(_comments);
+}
+
+ final  Set<String> _loadingCommentPostIds;
+@override@JsonKey() Set<String> get loadingCommentPostIds {
+  if (_loadingCommentPostIds is EqualUnmodifiableSetView) return _loadingCommentPostIds;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableSetView(_loadingCommentPostIds);
+}
+
+@override@JsonKey() final  bool isSubmittingComment;
+ final  Set<String> _pendingCommentDeleteIds;
+@override@JsonKey() Set<String> get pendingCommentDeleteIds {
+  if (_pendingCommentDeleteIds is EqualUnmodifiableSetView) return _pendingCommentDeleteIds;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableSetView(_pendingCommentDeleteIds);
+}
+
+@override@JsonKey() final  int onlineCount;
 @override final  GroupSpaceMutationFailure? mutationFailure;
 
 /// Create a copy of GroupSpaceState
@@ -252,16 +288,16 @@ _$GroupSpaceStateCopyWith<_GroupSpaceState> get copyWith => __$GroupSpaceStateCo
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _GroupSpaceState&&(identical(other.status, status) || other.status == status)&&(identical(other.space, space) || other.space == space)&&(identical(other.isRefreshing, isRefreshing) || other.isRefreshing == isRefreshing)&&const DeepCollectionEquality().equals(other._pendingLikeIds, _pendingLikeIds)&&const DeepCollectionEquality().equals(other._pendingLinkDeleteIds, _pendingLinkDeleteIds)&&(identical(other.mutationFailure, mutationFailure) || other.mutationFailure == mutationFailure));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _GroupSpaceState&&(identical(other.status, status) || other.status == status)&&(identical(other.space, space) || other.space == space)&&(identical(other.isRefreshing, isRefreshing) || other.isRefreshing == isRefreshing)&&const DeepCollectionEquality().equals(other._pendingLikeIds, _pendingLikeIds)&&const DeepCollectionEquality().equals(other._pendingLinkDeleteIds, _pendingLinkDeleteIds)&&const DeepCollectionEquality().equals(other._notesPreview, _notesPreview)&&const DeepCollectionEquality().equals(other._comments, _comments)&&const DeepCollectionEquality().equals(other._loadingCommentPostIds, _loadingCommentPostIds)&&(identical(other.isSubmittingComment, isSubmittingComment) || other.isSubmittingComment == isSubmittingComment)&&const DeepCollectionEquality().equals(other._pendingCommentDeleteIds, _pendingCommentDeleteIds)&&(identical(other.onlineCount, onlineCount) || other.onlineCount == onlineCount)&&(identical(other.mutationFailure, mutationFailure) || other.mutationFailure == mutationFailure));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,status,space,isRefreshing,const DeepCollectionEquality().hash(_pendingLikeIds),const DeepCollectionEquality().hash(_pendingLinkDeleteIds),mutationFailure);
+int get hashCode => Object.hash(runtimeType,status,space,isRefreshing,const DeepCollectionEquality().hash(_pendingLikeIds),const DeepCollectionEquality().hash(_pendingLinkDeleteIds),const DeepCollectionEquality().hash(_notesPreview),const DeepCollectionEquality().hash(_comments),const DeepCollectionEquality().hash(_loadingCommentPostIds),isSubmittingComment,const DeepCollectionEquality().hash(_pendingCommentDeleteIds),onlineCount,mutationFailure);
 
 @override
 String toString() {
-  return 'GroupSpaceState(status: $status, space: $space, isRefreshing: $isRefreshing, pendingLikeIds: $pendingLikeIds, pendingLinkDeleteIds: $pendingLinkDeleteIds, mutationFailure: $mutationFailure)';
+  return 'GroupSpaceState(status: $status, space: $space, isRefreshing: $isRefreshing, pendingLikeIds: $pendingLikeIds, pendingLinkDeleteIds: $pendingLinkDeleteIds, notesPreview: $notesPreview, comments: $comments, loadingCommentPostIds: $loadingCommentPostIds, isSubmittingComment: $isSubmittingComment, pendingCommentDeleteIds: $pendingCommentDeleteIds, onlineCount: $onlineCount, mutationFailure: $mutationFailure)';
 }
 
 
@@ -272,7 +308,7 @@ abstract mixin class _$GroupSpaceStateCopyWith<$Res> implements $GroupSpaceState
   factory _$GroupSpaceStateCopyWith(_GroupSpaceState value, $Res Function(_GroupSpaceState) _then) = __$GroupSpaceStateCopyWithImpl;
 @override @useResult
 $Res call({
- GroupSpaceStatus status, GroupSpace space, bool isRefreshing, Set<String> pendingLikeIds, Set<String> pendingLinkDeleteIds, GroupSpaceMutationFailure? mutationFailure
+ GroupSpaceStatus status, GroupSpace space, bool isRefreshing, Set<String> pendingLikeIds, Set<String> pendingLinkDeleteIds, List<CollabNote> notesPreview, Map<String, List<GroupPostComment>> comments, Set<String> loadingCommentPostIds, bool isSubmittingComment, Set<String> pendingCommentDeleteIds, int onlineCount, GroupSpaceMutationFailure? mutationFailure
 });
 
 
@@ -289,14 +325,20 @@ class __$GroupSpaceStateCopyWithImpl<$Res>
 
 /// Create a copy of GroupSpaceState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? status = null,Object? space = null,Object? isRefreshing = null,Object? pendingLikeIds = null,Object? pendingLinkDeleteIds = null,Object? mutationFailure = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? status = null,Object? space = null,Object? isRefreshing = null,Object? pendingLikeIds = null,Object? pendingLinkDeleteIds = null,Object? notesPreview = null,Object? comments = null,Object? loadingCommentPostIds = null,Object? isSubmittingComment = null,Object? pendingCommentDeleteIds = null,Object? onlineCount = null,Object? mutationFailure = freezed,}) {
   return _then(_GroupSpaceState(
 status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as GroupSpaceStatus,space: null == space ? _self.space : space // ignore: cast_nullable_to_non_nullable
 as GroupSpace,isRefreshing: null == isRefreshing ? _self.isRefreshing : isRefreshing // ignore: cast_nullable_to_non_nullable
 as bool,pendingLikeIds: null == pendingLikeIds ? _self._pendingLikeIds : pendingLikeIds // ignore: cast_nullable_to_non_nullable
 as Set<String>,pendingLinkDeleteIds: null == pendingLinkDeleteIds ? _self._pendingLinkDeleteIds : pendingLinkDeleteIds // ignore: cast_nullable_to_non_nullable
-as Set<String>,mutationFailure: freezed == mutationFailure ? _self.mutationFailure : mutationFailure // ignore: cast_nullable_to_non_nullable
+as Set<String>,notesPreview: null == notesPreview ? _self._notesPreview : notesPreview // ignore: cast_nullable_to_non_nullable
+as List<CollabNote>,comments: null == comments ? _self._comments : comments // ignore: cast_nullable_to_non_nullable
+as Map<String, List<GroupPostComment>>,loadingCommentPostIds: null == loadingCommentPostIds ? _self._loadingCommentPostIds : loadingCommentPostIds // ignore: cast_nullable_to_non_nullable
+as Set<String>,isSubmittingComment: null == isSubmittingComment ? _self.isSubmittingComment : isSubmittingComment // ignore: cast_nullable_to_non_nullable
+as bool,pendingCommentDeleteIds: null == pendingCommentDeleteIds ? _self._pendingCommentDeleteIds : pendingCommentDeleteIds // ignore: cast_nullable_to_non_nullable
+as Set<String>,onlineCount: null == onlineCount ? _self.onlineCount : onlineCount // ignore: cast_nullable_to_non_nullable
+as int,mutationFailure: freezed == mutationFailure ? _self.mutationFailure : mutationFailure // ignore: cast_nullable_to_non_nullable
 as GroupSpaceMutationFailure?,
   ));
 }

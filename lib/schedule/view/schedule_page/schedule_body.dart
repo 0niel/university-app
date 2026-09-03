@@ -45,6 +45,7 @@ class _ScheduleBodyState extends State<ScheduleBody> with ScheduleClockTicker {
   late DateTime _day = dateOnly(widget.now ?? DateTime.now());
   late ScheduleView _view = widget.initialView;
   ScheduleState? _previous;
+  var _hintChecked = false;
 
   @override
   bool get isClockTickNeeded =>
@@ -123,6 +124,18 @@ class _ScheduleBodyState extends State<ScheduleBody> with ScheduleClockTicker {
     }
   }
 
+  void _maybeShowLongPressHint() {
+    if (_hintChecked || !mounted) return;
+    _hintChecked = true;
+    final cubit = context.read<ScheduleDisplayCubit>();
+    if (cubit.state.lessonActionsHintShown) return;
+    cubit.markLessonActionsHintShown();
+    ToastManager.showInfo(
+      context,
+      message: context.l10n.scheduleLessonLongPressHint,
+    );
+  }
+
   Future<void> _refresh() async {
     final bloc = context.read<ScheduleBloc>();
     final complete = bloc.stream.firstWhere(
@@ -152,6 +165,11 @@ class _ScheduleBodyState extends State<ScheduleBody> with ScheduleClockTicker {
         : changesCubit.state.changes.take(0).toList();
     final weekChanges = changesInWeek(changes, _day);
     final schedule = selected?.schedule ?? [];
+    if (!_hintChecked && widget.now == null && schedule.isNotEmpty) {
+      WidgetsBinding.instance.addPostFrameCallback(
+        (_) => _maybeShowLongPressHint(),
+      );
+    }
     final showToday = !isSameDate(_day, widget.now ?? DateTime.now());
     final topInset = MediaQuery.paddingOf(context).top;
     final view = _view;
@@ -336,11 +354,11 @@ class _ScheduleBodyState extends State<ScheduleBody> with ScheduleClockTicker {
                           physics: const AlwaysScrollableScrollPhysics(),
                           slivers: [
                             SliverPadding(
-                              padding: const EdgeInsets.fromLTRB(
-                                20,
+                              padding: EdgeInsets.fromLTRB(
+                                AppSpacing.screen,
                                 0,
-                                20,
-                                100,
+                                AppSpacing.screen,
+                                ninjaBottomInset(context) + AppSpacing.lg,
                               ),
                               sliver: SliverToBoxAdapter(
                                 child: state.status == ScheduleStatus.loading

@@ -6,7 +6,7 @@ class TeamApplicationsSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return NinjaSkeletonGroup(
+    return AppSkeletonGroup(
       child: Column(
         children: [
           for (var index = 0; index < 3; index++)
@@ -21,11 +21,11 @@ class TeamApplicationsSkeleton extends StatelessWidget {
                   padding: EdgeInsets.all(16),
                   child: Column(
                     spacing: 10,
-                    crossAxisAlignment: .start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      NinjaSkeletonRow(),
-                      NinjaSkeleton.bar(height: 11),
-                      NinjaSkeleton(height: 48, radius: AppRadius.field),
+                      AppSkeletonRow(),
+                      AppSkeleton.bar(height: 11),
+                      AppSkeleton(height: 44, radius: AppRadius.field),
                     ],
                   ),
                 ),

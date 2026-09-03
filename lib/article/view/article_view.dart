@@ -87,11 +87,11 @@ class ArticleView extends StatelessWidget {
               ),
             ),
             SliverPadding(
-              padding: const EdgeInsets.fromLTRB(
+              padding: EdgeInsets.fromLTRB(
                 AppSpacing.screen,
                 AppSpacing.contentGap,
                 AppSpacing.screen,
-                AppSpacing.xxlg,
+                ninjaBottomInset(context) + AppSpacing.lg,
               ),
               sliver: SliverToBoxAdapter(
                 child: NinjaStateSwitcher(child: _content(context, state)),

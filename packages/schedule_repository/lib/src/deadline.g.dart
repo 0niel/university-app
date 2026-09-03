@@ -47,6 +47,10 @@ _Deadline _$DeadlineFromJson(Map<String, dynamic> json) =>
               DeadlinePriority.medium,
         ),
         remind: $checkedConvert('remind', (v) => v as bool? ?? true),
+        remindMinutes: $checkedConvert(
+          'remindMinutes',
+          (v) => (v as num?)?.toInt() ?? 60,
+        ),
       );
       return val;
     });
@@ -62,6 +66,7 @@ Map<String, dynamic> _$DeadlineToJson(_Deadline instance) => <String, dynamic>{
   'isMine': instance.isMine,
   'priority': _$DeadlinePriorityEnumMap[instance.priority]!,
   'remind': instance.remind,
+  'remindMinutes': instance.remindMinutes,
 };
 
 const _$DeadlineSourceEnumMap = {

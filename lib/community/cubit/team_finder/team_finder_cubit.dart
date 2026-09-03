@@ -197,6 +197,85 @@ class TeamFinderCubit extends Cubit<TeamFinderState> {
     }
   }
 
+  Future<bool> update(Team team, TeamDraft draft) {
+    if (draft.title.trim().isEmpty) return Future.value(false);
+    return _updateTeam(
+      team.id,
+      () => _repository.updateTeam(
+        id: team.id,
+        title: draft.title.trim(),
+        description: draft.description.trim(),
+        neededRoles: _normalized(draft.neededRoles),
+        capacity: draft.capacity.clamp(2, 20),
+        kind: draft.kind.trim(),
+        deadlineAt: draft.deadlineAt,
+      ),
+    );
+  }
+
+  Future<bool> closeTeam(Team team) => _setStatus(team, 'closed');
+
+  Future<bool> reopenTeam(Team team) => _setStatus(team, 'open');
+
+  Future<bool> _setStatus(Team team, String status) => _updateTeam(
+    team.id,
+    () => _repository.updateTeam(
+      id: team.id,
+      title: team.title,
+      eventName: team.eventName,
+      description: team.description,
+      neededRoles: team.neededRoles,
+      capacity: team.capacity,
+      kind: team.kind,
+      deadlineAt: team.deadlineAt,
+      status: status,
+    ),
+  );
+
+  Future<bool> _updateTeam(
+    String teamId,
+    Future<void> Function() action,
+  ) async {
+    if (state.pendingUpdateIds.contains(teamId)) return false;
+    final fallbackStatus = _stableStatus;
+    _invalidateLoads();
+    emit(
+      state.copyWith(
+        pendingUpdateIds: _pending(state.pendingUpdateIds, teamId, add: true),
+      ),
+    );
+    try {
+      await action();
+      if (isClosed) return false;
+      emit(
+        state.copyWith(
+          pendingUpdateIds: _pending(
+            state.pendingUpdateIds,
+            teamId,
+            add: false,
+          ),
+        ),
+      );
+      await load();
+      return true;
+    } on Exception catch (error, stackTrace) {
+      if (!isClosed) {
+        emit(
+          state.copyWith(
+            status: fallbackStatus,
+            pendingUpdateIds: _pending(
+              state.pendingUpdateIds,
+              teamId,
+              add: false,
+            ),
+          ),
+        );
+        addError(error, stackTrace);
+      }
+      return false;
+    }
+  }
+
   Future<bool> delete(String teamId) async {
     if (state.pendingDeleteIds.contains(teamId)) return false;
     final fallbackStatus = _stableStatus;

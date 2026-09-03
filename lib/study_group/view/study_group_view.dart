@@ -90,6 +90,29 @@ class StudyGroupView extends StatelessWidget {
     }
   }
 
+  Future<void> _transferOwnership(
+    BuildContext context,
+    StudyGroupMember member,
+  ) async {
+    final l10n = context.l10n;
+    final cubit = _cubit(context);
+    final confirmed = await _confirm(
+      context,
+      title: l10n.studyGroupTransferOwnershipTitle,
+      body: l10n.studyGroupTransferOwnershipBody(member.fullName),
+      confirmLabel: l10n.studyGroupTransferOwnership,
+    );
+    if (!confirmed) return;
+    final ok = await cubit.transferOwnership(member.userId);
+    if (!ok && context.mounted) {
+      showNinjaToast(
+        context,
+        showCheck: false,
+        message: l10n.studyGroupGenericError,
+      );
+    }
+  }
+
   Future<void> _respondRequest(
     BuildContext context,
     StudyGroupJoinRequest request, {
@@ -220,6 +243,7 @@ class StudyGroupView extends StatelessWidget {
         group: group,
         onInvite: () => _invite(context, group),
         onRemoveMember: (member) => _removeMember(context, member),
+        onTransferOwnership: (member) => _transferOwnership(context, member),
         onAcceptRequest: (request) =>
             _respondRequest(context, request, accept: true),
         onDeclineRequest: (request) =>

@@ -30,6 +30,9 @@ void main() {
     when(gamification.getProfile).thenAnswer(
       (_) async => UserGamificationProfile.empty,
     );
+    when(() => gamification.getProfileOverview(any())).thenAnswer(
+      (_) async => ProfileOverview.empty,
+    );
     final controller = ScrollController();
     addTearDown(controller.dispose);
     final enabled = ValueNotifier(true);

@@ -13,14 +13,15 @@ class CollabNotesFailure extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListView(
       physics: const AlwaysScrollableScrollPhysics(),
-      padding: const .symmetric(horizontal: AppSpacing.screen),
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screen),
       children: [
         const SizedBox(height: AppSpacing.xxxlg),
-        NinjaErrorState(
+        AppErrorState(
+          lineIcon: AppLineIcon.alert,
           title: context.l10n.collabNotesLoadError,
           message: context.l10n.collabNotesLoadErrorSubtitle,
-          retryLabel: context.l10n.retry,
-          onRetry: () => unawaited(onRetry()),
+          primaryLabel: context.l10n.retry,
+          onPrimary: () => unawaited(onRetry()),
         ),
       ],
     );

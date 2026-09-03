@@ -1,48 +1,27 @@
 import 'package:app_ui/app_ui.dart';
-import 'package:bloc_test/bloc_test.dart';
+import 'package:community_repository/community_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:rtu_mirea_app/config/config.dart';
 import 'package:rtu_mirea_app/contributors/bloc/contributors_bloc.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
-import 'package:rtu_mirea_app/schedule/bloc/schedule_bloc.dart';
-import 'package:rtu_mirea_app/tools/cubit/tools_cubit.dart';
 import 'package:rtu_mirea_app/tools/view/tools_page.dart';
 import 'package:unicons/unicons.dart';
 
 import 'mock_contributors_bloc.dart';
 
-class _MockScheduleBloc extends MockBloc<ScheduleEvent, ScheduleState>
-    implements ScheduleBloc {}
-
-class _MockStorage extends Mock implements Storage {}
-
 void main() {
   group('ToolsView contributors loading', () {
     late ContributorsBloc bloc;
-    late ScheduleBloc schedule;
-    late ToolsCubit tools;
 
     setUp(() {
       bloc = MockContributorsBloc();
-      schedule = _MockScheduleBloc();
-      when(() => schedule.state).thenReturn(const ScheduleState());
-      final storage = _MockStorage();
-      when(() => storage.read(any())).thenReturn(null);
-      when(() => storage.write(any(), any<dynamic>())).thenAnswer((_) async {});
-      HydratedBloc.storage = storage;
-      tools = ToolsCubit();
       when(() => bloc.state).thenReturn(
         const ContributorsState(status: ContributorsStatus.loading),
       );
-    });
-
-    tearDown(() async {
-      await tools.close();
     });
 
     Widget buildSubject({
@@ -81,12 +60,8 @@ void main() {
             webAppPathPrefix: '/app',
             communityChatUrl: communityChatUrl,
           ),
-          child: MultiBlocProvider(
-            providers: [
-              BlocProvider<ContributorsBloc>.value(value: bloc),
-              BlocProvider<ScheduleBloc>.value(value: schedule),
-              BlocProvider<ToolsCubit>.value(value: tools),
-            ],
+          child: BlocProvider<ContributorsBloc>.value(
+            value: bloc,
             child: const ToolsView(),
           ),
         ),
@@ -128,11 +103,23 @@ void main() {
       expect(find.byIcon(UniconsLine.telegram), findsOneWidget);
     });
 
-    testWidgets('refresh stays available below the calculator content', (
+    testWidgets('refresh stays available below the community content', (
       tester,
     ) async {
       when(() => bloc.state).thenReturn(
-        const ContributorsState(status: ContributorsStatus.loaded),
+        const ContributorsState(
+          status: ContributorsStatus.loaded,
+          contributors: ContributorsResponse(
+            contributors: [
+              Contributor(
+                login: 'ninja',
+                avatarUrl: 'https://example.test/ninja.png',
+                htmlUrl: 'https://github.com/ninja',
+                contributions: 42,
+              ),
+            ],
+          ),
+        ),
       );
       await tester.pumpWidget(buildSubject());
       await tester.pump();
@@ -142,7 +129,7 @@ void main() {
         isEmpty,
       );
 
-      final title = tester.widget<Text>(find.text('Инструменты'));
+      final title = tester.widget<Text>(find.text('Сообщество приложения'));
       expect(title.style?.fontSize, AppText.displaySmall.fontSize);
       await tester.scrollUntilVisible(find.text('Обновить данные'), 300);
       final button = find.ancestor(

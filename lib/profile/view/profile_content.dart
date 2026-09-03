@@ -156,8 +156,10 @@ class _ProfileBodyState extends State<_ProfileBody> {
               ProfileActivityCard(
                 streakDays: profile.streakDays,
                 longestStreak: profile.longestStreak,
-                history: state.overview.streakHistory,
+                days: state.activityCalendar,
               ),
+              if (state.hasFailed(ProfileSection.activity))
+                _sectionError(ProfileSection.activity),
               ProfileQuestsGroup(quests: _weekQuests),
               if (state.hasFailed(ProfileSection.quests))
                 _sectionError(ProfileSection.quests),

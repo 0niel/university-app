@@ -18,7 +18,7 @@ class WalletView extends StatelessWidget {
     final l10n = context.l10n;
     final state = context.watch<WalletCubit>().state;
     final cubit = context.read<WalletCubit>();
-    final loading = state.status == .loading;
+    final loading = state.status == .loading && state.history.isEmpty;
     final failed = state.status == .failure && state.history.isEmpty;
 
     return Scaffold(
@@ -42,11 +42,11 @@ class WalletView extends StatelessWidget {
               ),
               if (failed)
                 SliverPadding(
-                  padding: const EdgeInsets.fromLTRB(
+                  padding: EdgeInsets.fromLTRB(
                     AppSpacing.screen,
                     AppSpacing.sm,
                     AppSpacing.screen,
-                    AppSpacing.xxl,
+                    ninjaBottomInset(context) + AppSpacing.lg,
                   ),
                   sliver: SliverToBoxAdapter(
                     child: NinjaErrorState(
@@ -84,11 +84,11 @@ class WalletView extends StatelessWidget {
                   ),
                 ),
                 SliverPadding(
-                  padding: const EdgeInsets.fromLTRB(
+                  padding: EdgeInsets.fromLTRB(
                     AppSpacing.screen,
                     AppSpacing.gap,
                     AppSpacing.screen,
-                    AppSpacing.xxlg,
+                    ninjaBottomInset(context) + AppSpacing.lg,
                   ),
                   sliver: SliverToBoxAdapter(
                     child: NinjaStateSwitcher(

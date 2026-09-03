@@ -1,20 +1,24 @@
 import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
-import 'package:rtu_mirea_app/free_rooms/widgets/room_photo_placeholder.dart';
+import 'package:rtu_mirea_app/free_rooms/widgets/room_photo_gallery.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:rtu_mirea_app/map/models/models.dart';
 
 class MapRoomSheet extends StatelessWidget {
-  const MapRoomSheet({required this.room, super.key});
+  const MapRoomSheet({required this.room, this.campus = '', super.key});
 
   final RoomModel room;
+  final String campus;
 
   @override
   Widget build(BuildContext context) => Column(
     mainAxisSize: MainAxisSize.min,
     crossAxisAlignment: CrossAxisAlignment.stretch,
     children: [
-      const RoomPhotoPlaceholder(),
+      RoomPhotoGallery(
+        campus: campus,
+        roomName: room.name.isEmpty ? room.roomId : room.name,
+      ),
       const SizedBox(height: AppSpacing.lg),
       Text(
         room.name.isEmpty ? room.roomId : room.name,

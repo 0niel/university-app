@@ -177,7 +177,6 @@ class _OnBoardingPageState extends State<OnBoardingPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: context.colors.canvas,
-      bottomNavigationBar: _finishing ? const LinearProgressIndicator() : null,
       body: NinjaStateSwitcher(
         duration: NinjaMotion.slow,
         child: switch (_stage) {
@@ -216,6 +215,7 @@ class _OnBoardingPageState extends State<OnBoardingPage> {
             permissionClient: widget.permissionClient,
             onBack: _beforeSettings,
             onFinish: () => unawaited(_finish()),
+            finishing: _finishing,
           ),
         },
       ),
