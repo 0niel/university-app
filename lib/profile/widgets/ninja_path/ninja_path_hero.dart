@@ -21,7 +21,7 @@ class NinjaPathHero extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final l10n = context.l10n;
     final rank = NinjaRank.fromXp(xp);
     final progress = (xpIntoLevel(xp) / kXpPerLevel).clamp(0.0, 1.0);
@@ -36,10 +36,10 @@ class NinjaPathHero extends StatelessWidget {
       container: true,
       label: '${l10n.ninjaRankRow(levelFromXp(xp))}, ${rank.name}',
       child: Container(
-        padding: const .all(16),
+        padding: const .all(AppSpacing.lg),
         decoration: BoxDecoration(
-          color: colors.accentSoft,
-          borderRadius: .circular(NinjaRadius.card),
+          color: colors.tint2,
+          borderRadius: .circular(AppRadius.card),
         ),
         child: Column(
           crossAxisAlignment: .stretch,
@@ -48,30 +48,30 @@ class NinjaPathHero extends StatelessWidget {
               l10n.ninjaRankRow(levelFromXp(xp)),
               maxLines: 2,
               overflow: .ellipsis,
-              style: NinjaText.microLabel.copyWith(
-                color: colors.onAccentSoftMuted,
+              style: AppText.captionSmall.copyWith(
+                color: colors.muted,
               ),
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: AppSpacing.xs),
             Text(
               rank.name,
               maxLines: 1,
               overflow: .ellipsis,
-              style: NinjaText.display.copyWith(color: colors.onAccentSoft),
+              style: AppText.displaySmall.copyWith(color: colors.ink),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppSpacing.lg),
             ProfileProgressBar(
               value: progress,
               label: '${(progress * 100).round()}%',
               pastel: true,
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppSpacing.lg),
             if (stacked)
               Column(
                 crossAxisAlignment: .stretch,
                 children: [
                   for (final (index, stat) in stats.indexed) ...[
-                    if (index > 0) const SizedBox(height: 8),
+                    if (index > 0) const SizedBox(height: AppSpacing.sm),
                     _HeroStat(value: stat.$1, label: stat.$2),
                   ],
                 ],
@@ -81,7 +81,7 @@ class NinjaPathHero extends StatelessWidget {
                 crossAxisAlignment: .start,
                 children: [
                   for (final (index, stat) in stats.indexed) ...[
-                    if (index > 0) const SizedBox(width: 10),
+                    if (index > 0) const SizedBox(width: AppSpacing.gap),
                     Expanded(
                       child: _HeroStat(value: stat.$1, label: stat.$2),
                     ),

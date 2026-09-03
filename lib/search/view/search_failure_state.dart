@@ -15,10 +15,10 @@ class SearchFailureState extends StatelessWidget {
     return ListView(
       keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
       padding: const EdgeInsets.fromLTRB(
-        NinjaMetrics.screenPadding,
-        24,
-        NinjaMetrics.screenPadding,
-        24,
+        AppSpacing.screen,
+        AppSpacing.xlg,
+        AppSpacing.screen,
+        AppSpacing.xlg,
       ),
       children: [
         NinjaErrorState(

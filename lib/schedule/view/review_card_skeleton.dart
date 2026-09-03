@@ -5,26 +5,26 @@ class _ReviewCardSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     return Container(
       padding: const .all(16),
       decoration: BoxDecoration(
         color: colors.surface,
-        borderRadius: .circular(NinjaRadius.card),
+        borderRadius: .circular(AppRadius.card),
       ),
       child: const Column(
         crossAxisAlignment: .start,
-        spacing: 10,
+        spacing: AppSpacing.gap,
         children: [
           Row(
-            spacing: 10,
+            spacing: AppSpacing.gap,
             children: [
-              NinjaSkeleton(width: 32, height: 32, radius: 32 / 2),
-              Expanded(child: NinjaSkeleton(width: 120, height: 12)),
-              NinjaSkeleton(width: 60, height: 14),
+              AppSkeleton(width: 32, height: 32, radius: AppRadius.sheet / 2),
+              Expanded(child: AppSkeleton(width: 120, height: 12)),
+              AppSkeleton(width: 60, height: 14),
             ],
           ),
-          NinjaSkeleton.bar(height: 11, widthFactor: 0.9),
+          AppSkeleton.bar(height: 11, widthFactor: 0.9),
         ],
       ),
     );

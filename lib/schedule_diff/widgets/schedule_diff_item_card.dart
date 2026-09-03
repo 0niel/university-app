@@ -1,7 +1,6 @@
 import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
-import 'package:rtu_mirea_app/schedule/widgets/ninja_schedule_surface.dart';
 import 'package:rtu_mirea_app/schedule_diff/widgets/field_info.dart';
 import 'package:rtu_mirea_app/schedule_diff/widgets/lesson_field_changes_panel.dart';
 import 'package:rtu_mirea_app/schedule_diff/widgets/when_and_number.dart';
@@ -19,11 +18,11 @@ class ScheduleDiffItemCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final scale = Theme.of(context).scale;
     final color = changeColor(detail.kind, colors);
-    return NinjaScheduleSurface(
-      color: colors.surfaceAlt,
+    return AppCard(
+      color: colors.surface2,
       padding: .all(scale.space(16)),
       child: Column(
         crossAxisAlignment: .start,
@@ -51,7 +50,7 @@ class ScheduleDiffItemCard extends StatelessWidget {
                   children: [
                     Text(
                       detail.subject,
-                      style: NinjaText.body.copyWith(
+                      style: AppText.body.copyWith(
                         fontWeight: .bold,
                         color: colors.ink,
                       ),
@@ -68,11 +67,11 @@ class ScheduleDiffItemCard extends StatelessWidget {
                 ),
                 decoration: BoxDecoration(
                   color: color.withValues(alpha: 0.1),
-                  borderRadius: .circular(NinjaRadius.pill),
+                  borderRadius: .circular(AppRadius.full),
                 ),
                 child: Text(
                   changeLabel(detail.kind, context.l10n),
-                  style: NinjaText.helper.copyWith(
+                  style: AppText.captionSmall.copyWith(
                     color: color,
                     fontWeight: .bold,
                   ),

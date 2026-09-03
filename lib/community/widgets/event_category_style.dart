@@ -15,13 +15,13 @@ const Map<EventCategory, String> kEventCategoryEmojis = {
 String eventCategoryEmoji(EventCategory category) =>
     kEventCategoryEmojis[category] ?? '🎉';
 
-Color eventCategoryColor(NinjaColors colors, EventCategory category) =>
+Color eventCategoryColor(AppColors colors, EventCategory category) =>
     switch (category) {
-      .all || .career => colors.brand,
-      .sport => colors.scarlet,
-      .art => colors.orange,
-      .science => colors.green,
-      .other => colors.amber,
+      .career => colors.practice,
+      .sport => colors.lecture,
+      .art => colors.exam,
+      .science => colors.lab,
+      .all || .other => colors.accent,
     };
 
 String eventCategoryLabel(AppLocalizations l10n, EventCategory category) =>

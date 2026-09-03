@@ -71,9 +71,9 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.byType(NinjaEmptyState), findsOneWidget);
+    expect(find.byType(AppEmptyState), findsOneWidget);
     expect(
-      tester.getSize(find.byType(NinjaEmptyState)).width,
+      tester.getSize(find.byType(AppEmptyState)).width,
       closeTo(390 - NinjaMetrics.screenPadding * 2, .1),
     );
     expect(tester.takeException(), isNull);

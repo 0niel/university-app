@@ -7,17 +7,17 @@ class _HubRowSkeleton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(
-        NinjaMetrics.screenPadding,
+        AppSpacing.screen,
         0,
-        NinjaMetrics.screenPadding,
+        AppSpacing.screen,
         10,
       ),
       child: Container(
         constraints: const BoxConstraints(minHeight: 52),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: context.ninja.surface,
-          borderRadius: BorderRadius.circular(NinjaRadius.card),
+          color: context.colors.surface,
+          borderRadius: BorderRadius.circular(AppRadius.card),
         ),
         child: const Row(
           children: [
@@ -34,7 +34,11 @@ class _HubRowSkeleton extends StatelessWidget {
               ),
             ),
             SizedBox(width: 10),
-            NinjaSkeleton(width: 16, height: 16, radius: 5),
+            NinjaSkeleton(
+              width: 16,
+              height: 16,
+              radius: AppRadius.skeletonThin,
+            ),
           ],
         ),
       ),

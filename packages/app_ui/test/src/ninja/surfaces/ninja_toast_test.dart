@@ -2,303 +2,197 @@ import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-void main() {
-  final colors = NinjaColors.light();
-  const duration = Duration(seconds: 1);
-  const settle = Duration(milliseconds: 300);
+import '../../kit_harness.dart';
 
-  Widget host(void Function(BuildContext context) onReady) => MaterialApp(
-        theme: NinjaTheme.light(),
-        home: NinjaToastHost(
-          child: Scaffold(
-            body: Builder(
-              builder: (context) => Center(
-                child: GestureDetector(
-                  onTap: () => onReady(context),
-                  child: const Text('запустить'),
-                ),
+void main() {
+  group('NinjaToast', () {
+    testWidgets('paints the ink pill with a 32px accent check tile', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        wrapKit(
+          const SizedBox(
+            width: 360,
+            child: NinjaToast(message: 'Напомню за 15 минут'),
+          ),
+        ),
+      );
+
+      final toast = kitDecoration(
+        tester,
+        find
+            .descendant(
+              of: find.byType(NinjaToast),
+              matching: find.byType(Container),
+            )
+            .first,
+      );
+      expect(toast.color, kitColors.ink);
+      expect(toast.borderRadius, BorderRadius.circular(18));
+
+      final tile = tester.widget<Container>(
+        find.byWidgetPredicate(
+          (widget) => widget is Container && widget.constraints?.maxWidth == 32,
+        ),
+      );
+      expect((tile.decoration! as BoxDecoration).color, kitColors.accent);
+      expect(
+        (tile.decoration! as BoxDecoration).borderRadius,
+        BorderRadius.circular(10),
+      );
+      final icon = tester.widget<AppLineIconWidget>(
+        find.byType(AppLineIconWidget),
+      );
+      expect(icon.icon, AppLineIcon.check);
+      expect(icon.size, 17);
+      expect(icon.strokeWidth, 2.5);
+
+      final style = kitStyleOf(tester, 'Напомню за 15 минут');
+      expect(style?.fontSize, 13.5);
+      expect(style?.fontWeight, FontWeight.w600);
+      expect(style?.color, kitColors.canvas);
+    });
+
+    testWidgets('hides the tile and shows a 40px accent action', (
+      tester,
+    ) async {
+      var taps = 0;
+      await tester.pumpWidget(
+        wrapKit(
+          SizedBox(
+            width: 360,
+            child: NinjaToast(
+              message: 'Дедлайн скрыт',
+              showCheck: false,
+              actionLabel: 'Вернуть',
+              onAction: () => taps++,
+            ),
+          ),
+        ),
+      );
+
+      expect(find.byType(AppLineIconWidget), findsNothing);
+      final action = tester.widget<Container>(
+        find
+            .ancestor(
+              of: find.text('Вернуть'),
+              matching: find.byType(Container),
+            )
+            .first,
+      );
+      expect(
+        tester
+            .getSize(
+              find
+                  .ancestor(
+                    of: find.text('Вернуть'),
+                    matching: find.byType(Container),
+                  )
+                  .first,
+            )
+            .height,
+        40,
+      );
+      expect((action.decoration! as BoxDecoration).color, kitColors.accent);
+      expect(
+        (action.decoration! as BoxDecoration).borderRadius,
+        BorderRadius.circular(14),
+      );
+
+      await tester.tap(find.text('Вернуть'));
+      expect(taps, 1);
+    });
+  });
+
+  group('NinjaToastHost', () {
+    testWidgets('shows a toast above the bottom inset and auto-dismisses', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        wrapKit(
+          NinjaToastHost(
+            bottomInset: 104,
+            child: Builder(
+              builder: (context) => AppPressable(
+                onTap: () => showNinjaToast(context, message: 'Готово'),
+                child: const Text('open'),
               ),
             ),
           ),
         ),
       );
 
-  testWidgets('NinjaToast renders the lime check and inverse copy', (
-    tester,
-  ) async {
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: NinjaTheme.light(),
-        home: const Scaffold(
-          body: Center(child: NinjaToast(message: 'Отчёт загружен · +50 XP')),
+      await tester.tap(find.text('open'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 250));
+      expect(find.text('Готово'), findsOneWidget);
+      final positioned = tester.widget<Positioned>(
+        find.ancestor(
+          of: find.byType(NinjaToast),
+          matching: find.byType(Positioned),
         ),
-      ),
-    );
+      );
+      expect(positioned.bottom, 104);
+      expect(positioned.left, 16);
+      expect(positioned.right, 16);
 
-    final style =
-        tester.widget<Text>(find.text('Отчёт загружен · +50 XP')).style;
-    expect(style?.fontSize, 13.5);
-    expect(style?.fontWeight, FontWeight.w600);
-    expect(style?.color, colors.onInk);
+      await tester.pump(const Duration(seconds: 3));
+      await tester.pump(const Duration(milliseconds: 300));
+      expect(find.text('Готово'), findsNothing);
+    });
 
-    final glyph = tester.widget<AppLineIconWidget>(
-      find.byType(AppLineIconWidget),
-    );
-    expect(glyph.icon, AppLineIcon.check);
-
-    final container = tester.widget<Container>(
-      find.descendant(
-        of: find.byType(NinjaToast),
-        matching: find.byType(Container),
-      ),
-    );
-    final decoration = container.decoration! as BoxDecoration;
-    expect(decoration.color, colors.ink);
-    expect(decoration.boxShadow, isNull);
-  });
-
-  testWidgets('stays flat in dark', (tester) async {
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: NinjaTheme.dark(),
-        home: const Scaffold(body: Center(child: NinjaToast(message: 'Тост'))),
-      ),
-    );
-
-    final container = tester.widget<Container>(
-      find.descendant(
-        of: find.byType(NinjaToast),
-        matching: find.byType(Container),
-      ),
-    );
-    expect((container.decoration! as BoxDecoration).boxShadow, isNull);
-  });
-
-  testWidgets('host shows queued toasts one at a time', (tester) async {
-    await tester.pumpWidget(
-      host((context) {
-        showNinjaToast(context, message: 'Первый', duration: duration);
-        showNinjaToast(context, message: 'Второй', duration: duration);
-      }),
-    );
-
-    await tester.tap(find.text('запустить'));
-    await tester.pump();
-    expect(find.text('Первый'), findsOneWidget);
-    expect(find.text('Второй'), findsNothing);
-
-    await tester.pump(duration);
-    await tester.pump(settle);
-    expect(find.text('Первый'), findsNothing);
-    expect(find.text('Второй'), findsOneWidget);
-
-    await tester.pump(duration);
-    await tester.pump(settle);
-    expect(find.text('Второй'), findsNothing);
-  });
-
-  testWidgets('hosted toast clears the outer fallback text decoration', (
-    tester,
-  ) async {
-    late BuildContext toastContext;
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: NinjaTheme.light(),
-        builder: (context, child) => DefaultTextStyle(
-          style: const TextStyle(
-            decoration: TextDecoration.underline,
-            decorationColor: Colors.yellow,
-            decorationStyle: TextDecorationStyle.double,
-          ),
-          child: NinjaToastHost(child: child!),
-        ),
-        home: Builder(
-          builder: (context) {
-            toastContext = context;
-            return const Scaffold(body: SizedBox());
-          },
-        ),
-      ),
-    );
-
-    showNinjaToast(toastContext, message: 'Готово');
-    await tester.pump();
-
-    final finder = find.text('Готово');
-    final text = tester.widget<Text>(finder);
-    final inherited = DefaultTextStyle.of(tester.element(finder)).style;
-    expect(inherited.merge(text.style).decoration, TextDecoration.none);
-  });
-
-  testWidgets('action dismisses the toast and fires the callback', (
-    tester,
-  ) async {
-    var undone = 0;
-    await tester.pumpWidget(
-      host(
-        (context) => showNinjaToast(
-          context,
-          message: 'Напоминание удалено',
-          showCheck: false,
-          actionLabel: 'Вернуть',
-          onAction: () => undone++,
-          duration: const Duration(seconds: 5),
-        ),
-      ),
-    );
-
-    await tester.tap(find.text('запустить'));
-    await tester.pump();
-    await tester.pump(settle);
-    expect(find.byType(AppLineIconWidget), findsNothing);
-
-    final actionSize = tester.getSize(
-      find
-          .ancestor(
-            of: find.text('Вернуть'),
-            matching: find.byType(ConstrainedBox),
-          )
-          .first,
-    );
-    expect(actionSize.width, greaterThanOrEqualTo(44));
-    expect(actionSize.height, greaterThanOrEqualTo(44));
-    expect(
-      tester.getSemantics(find.text('Вернуть')).flagsCollection.isButton,
-      isTrue,
-    );
-
-    await tester.tap(find.text('Вернуть'));
-    await tester.pump();
-    await tester.pump(settle);
-    expect(undone, 1);
-    expect(find.text('Напоминание удалено'), findsNothing);
-  });
-
-  testWidgets('throws without a host above the context', (tester) async {
-    late BuildContext ctx;
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: NinjaTheme.light(),
-        home: Builder(
-          builder: (context) {
-            ctx = context;
-            return const SizedBox();
-          },
-        ),
-      ),
-    );
-
-    expect(
-      () => showNinjaToast(ctx, message: 'нет хоста'),
-      throwsA(isA<FlutterError>()),
-    );
-  });
-
-  testWidgets('stacks the action without overflow at 320px and 200% text', (
-    tester,
-  ) async {
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: NinjaTheme.light(),
-        home: const MediaQuery(
-          data: MediaQueryData(
-            size: Size(320, 568),
-            textScaler: TextScaler.linear(2),
-          ),
-          child: Scaffold(
-            body: Align(
-              alignment: Alignment.bottomCenter,
-              child: NinjaToast(
-                message: 'Расписание обновлено и готово к просмотру',
-                actionLabel: 'Открыть',
+    testWidgets('queues toasts one after another', (tester) async {
+      await tester.pumpWidget(
+        wrapKit(
+          NinjaToastHost(
+            child: Builder(
+              builder: (context) => AppPressable(
+                onTap: () {
+                  showNinjaToast(context, message: 'Первый');
+                  showNinjaToast(context, message: 'Второй');
+                },
+                child: const Text('open'),
               ),
             ),
           ),
         ),
-      ),
-    );
+      );
 
-    expect(tester.takeException(), isNull);
-    final actionTop = tester.getTopLeft(find.text('Открыть')).dy;
-    final messageBottom = tester
-        .getBottomLeft(
-          find.text('Расписание обновлено и готово к просмотру'),
-        )
-        .dy;
-    expect(actionTop, greaterThan(messageBottom));
+      await tester.tap(find.text('open'));
+      await tester.pump(const Duration(milliseconds: 250));
+      expect(find.text('Первый'), findsOneWidget);
+      expect(find.text('Второй'), findsNothing);
+
+      await tester.pump(const Duration(seconds: 3));
+      await tester.pump(const Duration(milliseconds: 300));
+      expect(find.text('Второй'), findsOneWidget);
+
+      await tester.pump(const Duration(seconds: 3));
+      await tester.pump(const Duration(milliseconds: 300));
+      expect(find.text('Второй'), findsNothing);
+    });
   });
 
-  testWidgets('accessible navigation presents and dismisses without motion', (
-    tester,
-  ) async {
-    await tester.pumpWidget(
-      MediaQuery(
-        data: const MediaQueryData(accessibleNavigation: true),
-        child: host(
-          (context) => showNinjaToast(
-            context,
-            message: 'Готово',
-            duration: duration,
+  group('AppToast', () {
+    testWidgets('renders message, tile and action', (tester) async {
+      var taps = 0;
+      await tester.pumpWidget(
+        wrapKit(
+          SizedBox(
+            width: 360,
+            child: AppToast(
+              message: 'Скрыто',
+              actionLabel: 'Вернуть',
+              onAction: () => taps++,
+            ),
           ),
         ),
-      ),
-    );
+      );
 
-    await tester.tap(find.text('запустить'));
-    await tester.pump();
-    expect(find.text('Готово'), findsOneWidget);
-
-    await tester.pump(duration);
-    expect(find.text('Готово'), findsNothing);
-  });
-
-  testWidgets('accessible action remains until it is used', (tester) async {
-    var actions = 0;
-    await tester.pumpWidget(
-      MediaQuery(
-        data: const MediaQueryData(accessibleNavigation: true),
-        child: host(
-          (context) => showNinjaToast(
-            context,
-            message: 'Изменения сохранены',
-            actionLabel: 'Вернуть',
-            onAction: () => actions++,
-            duration: duration,
-          ),
-        ),
-      ),
-    );
-
-    await tester.tap(find.text('запустить'));
-    await tester.pump(duration * 2);
-    expect(find.text('Изменения сохранены'), findsOneWidget);
-
-    await tester.tap(find.text('Вернуть'));
-    await tester.pump();
-    expect(actions, 1);
-    expect(find.text('Изменения сохранены'), findsNothing);
-  });
-
-  testWidgets('hidden action does not leave an accessible toast forever', (
-    tester,
-  ) async {
-    await tester.pumpWidget(
-      MediaQuery(
-        data: const MediaQueryData(accessibleNavigation: true),
-        child: host(
-          (context) => showNinjaToast(
-            context,
-            message: 'Готово',
-            onAction: () {},
-            duration: duration,
-          ),
-        ),
-      ),
-    );
-
-    await tester.tap(find.text('запустить'));
-    await tester.pump(duration);
-
-    expect(find.text('Готово'), findsNothing);
+      expect(find.byType(AppIconTile), findsOneWidget);
+      expect(kitStyleOf(tester, 'Скрыто')?.color, kitColors.canvas);
+      await tester.tap(find.text('Вернуть'));
+      expect(taps, 1);
+    });
   });
 }

@@ -12,8 +12,10 @@ import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:rtu_mirea_app/nfc_pass/bloc/nfc_hce_cubit.dart';
 import 'package:rtu_mirea_app/nfc_pass/bloc/pass_security_cubit.dart';
 import 'package:rtu_mirea_app/profile/cubit/profile_cubit.dart';
+import 'package:rtu_mirea_app/profile/profile_layout.dart';
 import 'package:rtu_mirea_app/profile/utils/settings_search_filter.dart';
 import 'package:rtu_mirea_app/profile/view/notifications_settings_page.dart';
+import 'package:rtu_mirea_app/profile/widgets/settings_widget_preview.dart';
 import 'package:rtu_mirea_app/profile/widgets/widgets.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -31,8 +33,11 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
   final TextEditingController _searchController = TextEditingController();
   String? _cacheLabel;
   String? _version;
+  String? _buildNumber;
   var _clearingCache = false;
   var _query = '';
+  var _showSearch = false;
+  var _showAdvanced = false;
 
   @override
   void initState() {
@@ -73,7 +78,10 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
     try {
       final info = await PackageInfo.fromPlatform();
       if (!mounted) return;
-      setState(() => _version = info.version);
+      setState(() {
+        _version = info.version;
+        _buildNumber = info.buildNumber;
+      });
     } on Exception catch (error, stackTrace) {
       log(
         'Failed to read package version',
@@ -87,7 +95,7 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: context.ninja.canvas,
+      backgroundColor: context.colors.canvas,
       body: BlocBuilder<ProfileCubit, ProfileState>(
         builder: _buildBody,
       ),
@@ -95,21 +103,11 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
   }
 
   Widget _buildBody(BuildContext context, ProfileState state) {
-    final colors = context.ninja;
     final l10n = context.l10n;
     final settings = state.settings;
     final academic = state.overview.academic;
     final filter = SettingsSearchFilter(query: _query, l10n: l10n);
 
-    final name =
-        academic.fullName ??
-        state.user.name ??
-        (state.user.email?.split('@').firstOrNull ??
-            l10n.profileStudentFallback);
-    final identityMeta = [
-      ?academic.group,
-      if (academic.handle != null) '@${academic.handle}',
-    ].join(' · ');
     final cold =
         state.status == ProfileStatus.loading &&
         state.gamificationProfile.isEmpty;
@@ -119,46 +117,26 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
         parent: AlwaysScrollableScrollPhysics(),
       ),
       slivers: [
-        SliverAppBar(
-          pinned: true,
-          backgroundColor: colors.canvas,
-          surfaceTintColor: Colors.transparent,
-          elevation: 0,
-          scrolledUnderElevation: 0,
-          leadingWidth: 60,
-          leading: Center(
-            child: NinjaIconButton(
-              icon: const AppLineIconWidget(.chevronL, size: 20),
-              tooltip: l10n.back,
-              onPressed: () => Navigator.of(context).pop(),
-            ),
-          ),
-          title: Text(
-            l10n.settingsTitle,
-            style: NinjaText.appBarTitle.copyWith(color: colors.ink),
+        SliverToBoxAdapter(
+          child: AppInnerHeader(
+            title: l10n.settingsTitle,
+            backSemanticsLabel: l10n.back,
+            onBack: () => Navigator.of(context).maybePop(),
           ),
         ),
         if (cold)
           const SliverToBoxAdapter(child: SettingsSkeleton.settings())
         else ...[
-          SliverToBoxAdapter(
-            child: ProfileShortcut(
-              name: name,
-              subtitle: identityMeta.isEmpty
-                  ? (state.user.email ?? '')
-                  : identityMeta,
-              onTap: () => showEditIdentitySheet(context, academic),
+          if (_showSearch)
+            SliverPersistentHeader(
+              pinned: true,
+              delegate: SettingsSearchDelegate(
+                hint: l10n.search,
+                controller: _searchController,
+                textScale: MediaQuery.textScalerOf(context).scale(1),
+                onChanged: (value) => setState(() => _query = value),
+              ),
             ),
-          ),
-          SliverPersistentHeader(
-            pinned: true,
-            delegate: SettingsSearchDelegate(
-              hint: l10n.search,
-              controller: _searchController,
-              textScale: MediaQuery.textScalerOf(context).scale(1),
-              onChanged: (value) => setState(() => _query = value),
-            ),
-          ),
           SliverList.list(
             children: [
               if (state.hasFailed(.settings))
@@ -174,8 +152,14 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
               if (filter.showAppearance)
                 SettingsSection(
                   label: l10n.settingsAppearance,
-                  children: const [SettingsAppearance()],
+                  topPadding: 28,
+                  children: const [
+                    SettingsAppearance(preview: SettingsWidgetPreview()),
+                  ],
                 ),
+
+              if (filter.showSchedule)
+                SettingsScheduleSection(group: academic.group),
 
               if (filter.showNotifications)
                 SettingsNotificationsSection(
@@ -189,35 +173,96 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
                   onChanged: (next) => _updateSettings(context, next),
                 ),
 
-              if (filter.showSchedule)
-                SettingsScheduleSection(group: academic.group),
-
-              if (filter.showHome) const SettingsHomeSection(),
-
-              if (filter.showSupport) ...[
-                const SizedBox(height: 20),
-                SupportBanner(
-                  onTap: () {
-                    unawaited(_openGithub());
-                  },
-                ),
-              ],
-
-              if (filter.showData)
-                SettingsDataSection(
-                  cacheLabel: _cacheLabel,
-                  onClearCache: _clearingCache
-                      ? null
-                      : () {
-                          unawaited(_clearCache());
-                        },
-                ),
-
-              if (filter.showAbout) SettingsAboutSection(version: _version),
-
               if (filter.showAccount) const SettingsAccountSection(),
 
-              const SettingsFooterNote(),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.screen,
+                  AppSpacing.section,
+                  AppSpacing.screen,
+                  0,
+                ),
+                child: SettingsCard(
+                  children: [
+                    SettingsRow(
+                      title: l10n.settingsAdvanced,
+                      trailing: AppLineIconWidget(
+                        _showAdvanced
+                            ? AppLineIcon.chevronU
+                            : AppLineIcon.chevronD,
+                      ),
+                      showChevron: false,
+                      onTap: () =>
+                          setState(() => _showAdvanced = !_showAdvanced),
+                    ),
+                  ],
+                ),
+              ),
+
+              if (_showAdvanced || filter.isActive) ...[
+                SettingsSection(
+                  label: l10n.search,
+                  children: [
+                    SettingsRow(
+                      title: l10n.search,
+                      lineIcon: AppLineIcon.search,
+                      onTap: () => setState(() {
+                        _showSearch = !_showSearch;
+                        if (!_showSearch) {
+                          _searchController.clear();
+                          _query = '';
+                        }
+                      }),
+                    ),
+                  ],
+                ),
+                if (filter.showAppearance)
+                  SettingsSection(
+                    label: l10n.settingsAppearance,
+                    children: const [SettingsAdvancedAppearance()],
+                  ),
+
+                if (filter.showHome) const SettingsHomeSection(),
+
+                if (filter.showSupport) ...[
+                  const SizedBox(height: AppSpacing.screen),
+                  SupportBanner(
+                    onTap: () {
+                      unawaited(_openGithub());
+                    },
+                  ),
+                ],
+
+                if (filter.showData)
+                  SettingsDataSection(
+                    cacheLabel: _cacheLabel,
+                    onClearCache: _clearingCache
+                        ? null
+                        : () {
+                            unawaited(_clearCache());
+                          },
+                  ),
+
+                if (filter.showAbout) SettingsAboutSection(version: _version),
+              ],
+
+              if (_version != null && _buildNumber != null)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(
+                    AppSpacing.screen,
+                    AppSpacing.sheetBottom,
+                    AppSpacing.screen,
+                    0,
+                  ),
+                  child: Text(
+                    l10n.settingsVersionBuild(_version!, _buildNumber!),
+                    textAlign: TextAlign.center,
+                    style: AppText.caption.copyWith(
+                      color: context.colors.muted2,
+                    ),
+                  ),
+                ),
+              const SizedBox(height: AppSpacing.xxlg),
             ],
           ),
         ],
@@ -289,15 +334,17 @@ class SettingsSearchDelegate extends SliverPersistentHeaderDelegate {
     required this.hint,
     required this.textScale,
     required this.onChanged,
-    this.controller,
+    required this.controller,
   });
 
   final String hint;
   final double textScale;
   final ValueChanged<String> onChanged;
-  final TextEditingController? controller;
+  final TextEditingController controller;
 
-  double get _height => 72 + (textScale - 1).clamp(0, 1) * 22;
+  double get _height =>
+      ProfileLayout.settingsSearchExtent +
+      (textScale - 1).clamp(0, 1) * ProfileLayout.settingsSearchLargeTextExtra;
 
   @override
   double get minExtent => _height;
@@ -313,18 +360,19 @@ class SettingsSearchDelegate extends SliverPersistentHeaderDelegate {
   ) {
     return SizedBox.expand(
       child: ColoredBox(
-        color: context.ninja.canvas,
+        color: context.colors.canvas,
         child: Padding(
           padding: const .fromLTRB(
-            NinjaMetrics.screenPadding,
+            AppSpacing.screen,
             10,
-            NinjaMetrics.screenPadding,
+            AppSpacing.screen,
             8,
           ),
-          child: NinjaInput(
+          child: AppSearchField(
             controller: controller,
-            placeholder: hint,
-            leadingIcon: const AppLineIconWidget(.search, size: 19),
+            hintText: hint,
+            onCanvas: true,
+            height: _height - ProfileLayout.settingsSearchVerticalInset,
             onChanged: onChanged,
           ),
         ),

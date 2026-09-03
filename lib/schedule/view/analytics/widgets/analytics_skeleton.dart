@@ -10,22 +10,22 @@ class _AnalyticsSkeleton extends StatelessWidget {
       Row(
         children: [
           Expanded(
-            child: NinjaSkeleton(height: 96, radius: NinjaRadius.card),
+            child: AppSkeleton(height: 96, radius: AppRadius.card),
           ),
-          SizedBox(width: 10),
+          SizedBox(width: AppSpacing.gap),
           Expanded(
-            child: NinjaSkeleton(height: 96, radius: NinjaRadius.card),
+            child: AppSkeleton(height: 96, radius: AppRadius.card),
           ),
         ],
       ),
-      SizedBox(height: 10),
-      NinjaSkeleton(height: 232, radius: NinjaRadius.card),
-      SizedBox(height: 10),
-      NinjaSkeleton(height: 148, radius: NinjaRadius.card),
-      SizedBox(height: 10),
-      NinjaSkeleton(height: 76, radius: NinjaRadius.card),
-      SizedBox(height: 10),
-      NinjaSkeleton(height: 76, radius: NinjaRadius.card),
+      SizedBox(height: AppSpacing.gap),
+      AppSkeleton(height: 232, radius: AppRadius.card),
+      SizedBox(height: AppSpacing.gap),
+      AppSkeleton(height: 148, radius: AppRadius.card),
+      SizedBox(height: AppSpacing.gap),
+      AppSkeleton(height: 76, radius: AppRadius.card),
+      SizedBox(height: AppSpacing.gap),
+      AppSkeleton(height: 76, radius: AppRadius.card),
     ],
   );
 }

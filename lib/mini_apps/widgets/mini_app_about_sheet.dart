@@ -54,29 +54,29 @@ class _MiniAppAboutSheetState extends State<MiniAppAboutSheet> {
           padding: const .all(22),
           decoration: BoxDecoration(
             color: colors.surface,
-            borderRadius: .circular(NinjaRadius.dialog),
+            borderRadius: .circular(AppRadius.dialog),
           ),
           child: Column(
             mainAxisSize: .min,
             children: [
               Text(
                 widget.app.name,
-                style: NinjaText.dialogTitle.copyWith(color: colors.ink),
+                style: AppText.heading.copyWith(color: colors.ink),
               ),
-              const SizedBox(height: 14),
+              const SizedBox(height: AppSpacing.sectionGap),
               Container(
                 padding: const .all(12),
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  borderRadius: .circular(NinjaRadius.button),
+                  borderRadius: .circular(AppRadius.full),
                 ),
                 child: QrImageView(data: '$_shareLink', size: 200),
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: AppSpacing.gap),
               Text(
                 l10n.miniAppsQrHint,
                 textAlign: .center,
-                style: NinjaText.subtext.copyWith(color: colors.muted),
+                style: AppText.subtext.copyWith(color: colors.muted),
               ),
             ],
           ),
@@ -101,7 +101,7 @@ class _MiniAppAboutSheetState extends State<MiniAppAboutSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final l10n = context.l10n;
     final app = widget.app;
     return Column(
@@ -111,9 +111,9 @@ class _MiniAppAboutSheetState extends State<MiniAppAboutSheet> {
         if (app.description.isNotEmpty) ...[
           Text(
             app.description,
-            style: NinjaText.subtext.copyWith(color: colors.ink, height: 1.5),
+            style: AppText.subtext.copyWith(color: colors.ink, height: 1.5),
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: AppSpacing.sectionGap),
         ],
         Text(
           [
@@ -123,14 +123,14 @@ class _MiniAppAboutSheetState extends State<MiniAppAboutSheet> {
               '${app.ratingAvg.toStringAsFixed(1)} (${app.ratingCount})',
             'v${app.version}',
           ].join(' · '),
-          style: NinjaText.helper.copyWith(color: colors.muted),
+          style: AppText.captionSmall.copyWith(color: colors.muted),
         ),
         const SizedBox(height: 18),
         Text(
           l10n.miniAppsRate,
-          style: NinjaText.microLabel.copyWith(color: colors.muted),
+          style: AppText.captionSmall.copyWith(color: colors.muted),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: AppSpacing.sm),
         Row(
           spacing: 6,
           children: [
@@ -140,19 +140,19 @@ class _MiniAppAboutSheetState extends State<MiniAppAboutSheet> {
                 semanticsLabel: '$star',
                 semanticsSelected: star == _myRating,
                 child: SizedBox.square(
-                  dimension: NinjaMetrics.minTouchTarget,
+                  dimension: AppControlSize.touchTarget,
                   child: Center(
                     child: AppLineIconWidget(
                       .star,
                       size: 26,
-                      color: star <= _myRating ? colors.brand : colors.disabled,
+                      color: star <= _myRating ? colors.accent : colors.muted2,
                     ),
                   ),
                 ),
               ),
           ],
         ),
-        const SizedBox(height: 14),
+        const SizedBox(height: AppSpacing.sectionGap),
         Row(
           spacing: 8,
           children: [
@@ -161,7 +161,11 @@ class _MiniAppAboutSheetState extends State<MiniAppAboutSheet> {
                 label: l10n.miniAppsQr,
                 size: .small,
                 expanded: true,
-                icon: AppLineIconWidget(.qr, size: 14, color: colors.ink),
+                icon: AppLineIconWidget(
+                  .qr,
+                  size: AppIconSize.xs,
+                  color: colors.ink,
+                ),
                 onPressed: () => unawaited(_showQr()),
               ),
             ),
@@ -170,7 +174,11 @@ class _MiniAppAboutSheetState extends State<MiniAppAboutSheet> {
                 label: l10n.miniAppsShare,
                 size: .small,
                 expanded: true,
-                icon: AppLineIconWidget(.share, size: 14, color: colors.ink),
+                icon: AppLineIconWidget(
+                  .share,
+                  size: AppIconSize.xs,
+                  color: colors.ink,
+                ),
                 onPressed: () => unawaited(
                   SharePlus.instance.share(
                     ShareParams(text: _shareLink.toString()),
@@ -182,12 +190,12 @@ class _MiniAppAboutSheetState extends State<MiniAppAboutSheet> {
         ),
         if (widget.onPermissionsChanged != null &&
             widget.app.requestedPermissions.isNotEmpty) ...[
-          const SizedBox(height: 20),
+          const SizedBox(height: AppSpacing.screen),
           Text(
             l10n.miniAppsPermissionsSection,
-            style: NinjaText.microLabel.copyWith(color: colors.muted),
+            style: AppText.captionSmall.copyWith(color: colors.muted),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: AppSpacing.xs),
           for (final permission in widget.app.requestedPermissions)
             MiniAppPermissionRow(
               permission: permission,

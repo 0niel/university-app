@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import 'package:rtu_mirea_app/common/widgets/ninja_form_input.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:rtu_mirea_app/schedule/schedule.dart';
 import 'package:rtu_mirea_app/search/widgets/global_search_button.dart';
@@ -35,7 +34,7 @@ class _CustomSchedulesPageState extends State<CustomSchedulesPage> {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final l10n = context.l10n;
 
     return Scaffold(
@@ -48,32 +47,27 @@ class _CustomSchedulesPageState extends State<CustomSchedulesPage> {
               parent: AlwaysScrollableScrollPhysics(),
             ),
             slivers: [
-              SliverAppBar(
-                elevation: 0,
-                scrolledUnderElevation: 0,
-                backgroundColor: colors.canvas,
-                surfaceTintColor: Colors.transparent,
-                title: Text(
-                  l10n.mySchedules,
-                  style: NinjaText.headline.copyWith(color: colors.ink),
+              SliverToBoxAdapter(
+                child: AppInnerHeader(
+                  title: l10n.mySchedules,
+                  onBack: () => Navigator.of(context).maybePop(),
+                  actions: [
+                    AppHeaderAction(
+                      icon: AppLineIcon.search,
+                      semanticsLabel: l10n.customSchedulesSearchTitle,
+                      onTap: () => openGlobalSearch(context),
+                    ),
+                  ],
                 ),
-                actions: [
-                  NinjaIconButton(
-                    icon: const AppLineIconWidget(.search, size: 20),
-                    tooltip: l10n.customSchedulesSearchTitle,
-                    onPressed: () => openGlobalSearch(context),
-                  ),
-                  const SizedBox(width: 8),
-                ],
               ),
               SliverSafeArea(
                 top: false,
                 sliver: SliverPadding(
                   padding: const EdgeInsets.fromLTRB(
-                    NinjaMetrics.screenPadding,
-                    8,
-                    NinjaMetrics.screenPadding,
-                    32,
+                    AppSpacing.screen,
+                    AppSpacing.sm,
+                    AppSpacing.screen,
+                    AppSpacing.xxl,
                   ),
                   sliver: SliverList.list(
                     children: [
@@ -87,17 +81,17 @@ class _CustomSchedulesPageState extends State<CustomSchedulesPage> {
                       ),
                       if (state.syncStatus != .initial &&
                           state.syncStatus != .synced)
-                        const SizedBox(height: 10),
-                      NinjaScheduleSurface(
+                        const SizedBox(height: AppSpacing.gap),
+                      AppCard(
                         padding: EdgeInsets.zero,
                         child: Column(
                           children: [
-                            NinjaListCell(
+                            AppListRow(
                               title: l10n.customSchedulesSearchTitle,
                               subtitle: l10n.customSchedulesSearchSubtitle,
                               onTap: () => openGlobalSearch(context),
                             ),
-                            NinjaListCell(
+                            AppListRow(
                               title: l10n.customSchedulesCreate,
                               subtitle: l10n.customSchedulesCreateSubtitle,
                               onTap: _showCreateScheduleDialog,
@@ -105,22 +99,24 @@ class _CustomSchedulesPageState extends State<CustomSchedulesPage> {
                           ],
                         ),
                       ),
-                      const SizedBox(height: 28),
+                      const SizedBox(height: AppSpacing.sheetBottom),
                       if (schedules.isEmpty)
                         _CustomSchedulesEmptyState(
                           onCreate: _showCreateScheduleDialog,
                         )
                       else ...[
-                        NinjaScheduleSectionHeader(
+                        AppSectionTitle(
                           title: l10n.customSchedulesMyCount(schedules.length),
+                          topMargin: AppSpacing.zero,
+                          bottomPadding: AppSpacing.zero,
                         ),
-                        const SizedBox(height: 10),
-                        NinjaScheduleSurface(
+                        const SizedBox(height: AppSpacing.gap),
+                        AppCard(
                           padding: EdgeInsets.zero,
                           child: Column(
                             children: [
                               for (final schedule in schedules)
-                                NinjaListCell(
+                                AppListRow(
                                   key: ValueKey(
                                     'custom_schedule_${schedule.id}',
                                   ),
@@ -169,21 +165,21 @@ class _CustomSchedulesPageState extends State<CustomSchedulesPage> {
       child: Column(
         mainAxisSize: .min,
         children: [
-          NinjaListCell(
+          AppListRow(
             title: context.l10n.customSchedulesOpen,
             onTap: () {
               Navigator.of(context, rootNavigator: true).pop();
               _selectCustomSchedule(schedule);
             },
           ),
-          NinjaListCell(
+          AppListRow(
             title: context.l10n.customSchedulesRename,
             onTap: () {
               Navigator.of(context, rootNavigator: true).pop();
               _showEditDialog(schedule);
             },
           ),
-          NinjaListCell(
+          AppListRow(
             title: context.l10n.delete,
             onTap: () {
               Navigator.of(context, rootNavigator: true).pop();

@@ -18,19 +18,19 @@ class LessonEditorSubjectCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     return Column(
-      spacing: 10,
+      spacing: AppSpacing.gap,
       crossAxisAlignment: .start,
       children: [
         LessonEditorSectionLabel(label),
-        NinjaInput(
+        AppInputField(
           controller: controller,
           placeholder: hint,
           autofocus: true,
           textInputAction: .done,
           onChanged: onChanged,
-          textStyle: NinjaText.dialogTitle.copyWith(color: colors.ink),
+          textStyle: AppText.heading.copyWith(color: colors.ink),
         ),
       ],
     );

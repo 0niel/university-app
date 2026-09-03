@@ -7,6 +7,21 @@ class GamificationRepository {
 
   final SupabaseClient _supabase;
 
+  Future<void> ensureAcademicProfile(
+    String organizationId, {
+    String? academicGroup,
+  }) async {
+    await _supabase
+        .rpc<Object?>(
+          'ensure_academic_profile',
+          params: {
+            'p_organization_id': organizationId,
+            'p_group': ?academicGroup,
+          },
+        )
+        .timeout(const Duration(seconds: 8));
+  }
+
   Future<UserGamificationProfile> ensureProfile(String organizationId) async {
     final response = await _supabase.rpc<Object?>(
       'ensure_gamification_profile',

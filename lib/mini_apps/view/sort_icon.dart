@@ -7,7 +7,7 @@ class _SortIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final icon = switch (sort) {
       MiniAppSort.popular => AppLineIcon.bolt,
       MiniAppSort.newest => AppLineIcon.clock,
@@ -17,11 +17,11 @@ class _SortIcon extends StatelessWidget {
       dimension: 38,
       child: DecoratedBox(
         decoration: BoxDecoration(
-          color: colors.surfaceAlt,
-          borderRadius: BorderRadius.circular(13),
+          color: colors.surface2,
+          borderRadius: BorderRadius.circular(AppRadius.compact),
         ),
         child: Center(
-          child: AppLineIconWidget(icon, size: 19, color: colors.mutedDark),
+          child: AppLineIconWidget(icon, size: 19, color: colors.muted),
         ),
       ),
     );

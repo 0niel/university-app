@@ -17,11 +17,11 @@ class EditorToolbarAction extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final disabled = onPressed == null;
     final tint = disabled
-        ? colors.disabled
-        : (destructive ? colors.scarlet : colors.ink);
+        ? colors.muted2
+        : (destructive ? colors.exam : colors.ink);
     return Tooltip(
       message: tooltip,
       child: Semantics(
@@ -32,11 +32,11 @@ class EditorToolbarAction extends StatelessWidget {
           pressedScale: 0.92,
           onTap: onPressed,
           child: Container(
-            width: NinjaMetrics.minTouchTarget,
-            height: NinjaMetrics.minTouchTarget,
+            width: AppControlSize.iconButton,
+            height: AppControlSize.iconButton,
             alignment: Alignment.center,
             decoration: BoxDecoration(
-              color: disabled ? colors.surface : colors.surfaceAlt,
+              color: disabled ? colors.surface : colors.surface2,
               shape: BoxShape.circle,
             ),
             child: AppLineIconWidget(icon, size: 19, color: tint),

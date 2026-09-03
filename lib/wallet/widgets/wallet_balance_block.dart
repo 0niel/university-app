@@ -25,7 +25,7 @@ class WalletBalanceBlock extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final l10n = context.l10n;
     final balance = NumberFormat(
       '#,###',
@@ -41,11 +41,11 @@ class WalletBalanceBlock extends StatelessWidget {
           : '${l10n.walletBalanceLabel}: $balance',
       child: DecoratedBox(
         decoration: BoxDecoration(
-          color: loading ? colors.surface : colors.accentSoft,
-          borderRadius: BorderRadius.circular(NinjaRadius.card),
+          color: loading ? colors.surface : colors.ink,
+          borderRadius: BorderRadius.circular(AppRadius.hero),
         ),
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(AppSpacing.lg),
           child: loading
               ? const _WalletBalanceBlockSkeleton()
               : Column(
@@ -56,8 +56,8 @@ class WalletBalanceBlock extends StatelessWidget {
                         Expanded(
                           child: Text(
                             l10n.walletBalanceLabel,
-                            style: NinjaText.body.copyWith(
-                              color: colors.onAccentSoftMuted,
+                            style: AppText.body.copyWith(
+                              color: colors.canvas,
                             ),
                           ),
                         ),
@@ -70,38 +70,38 @@ class WalletBalanceBlock extends StatelessWidget {
                             ),
                           ),
                           child: SizedBox.square(
-                            dimension: NinjaMetrics.minTouchTarget,
+                            dimension: AppControlSize.iconButton,
                             child: Center(
                               child: AppLineIconWidget(
                                 AppLineIcon.info,
                                 size: 20,
-                                color: colors.onAccentSoft,
+                                color: colors.canvas,
                               ),
                             ),
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 10),
+                    const SizedBox(height: AppSpacing.gap),
                     Row(
                       children: [
-                        AppNinjaMark(size: 28, color: colors.onAccentSoft),
-                        const SizedBox(width: 12),
+                        AppNinjaMark(size: 28, color: colors.canvas),
+                        const SizedBox(width: AppSpacing.md),
                         Flexible(
                           child: Text(
                             balance,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: NinjaText.tabular(
-                              NinjaText.display.copyWith(
-                                color: colors.onAccentSoft,
+                            style: AppText.tabular(
+                              AppText.displayHero.copyWith(
+                                color: colors.canvas,
                               ),
                             ),
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 18),
+                    const SizedBox(height: AppSpacing.fieldGap),
                     Row(
                       children: [
                         Expanded(
@@ -110,7 +110,7 @@ class WalletBalanceBlock extends StatelessWidget {
                             label: l10n.walletStreakDays,
                           ),
                         ),
-                        const SizedBox(width: 10),
+                        const SizedBox(width: AppSpacing.gap),
                         Expanded(
                           child: _WalletBalanceStat(
                             value: groupRank != null

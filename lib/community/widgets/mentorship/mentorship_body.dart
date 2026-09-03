@@ -29,7 +29,7 @@ class MentorshipBody extends StatelessWidget {
   Widget build(BuildContext context) {
     final state = context.watch<MentorshipCubit>().state;
     return RefreshIndicator(
-      color: context.ninja.ink,
+      color: context.colors.ink,
       onRefresh: context.read<MentorshipCubit>().load,
       child: ListView(
         physics: const AlwaysScrollableScrollPhysics(),
@@ -44,15 +44,15 @@ class MentorshipBody extends StatelessWidget {
   }
 
   Widget _profileCta(BuildContext context, MentorshipState state) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final title = state.isMentor
         ? context.l10n.mentorshipYouAreMentor
         : context.l10n.mentorshipBecomeCta;
     return Padding(
       padding: const EdgeInsets.fromLTRB(
-        NinjaMetrics.screenPadding,
+        AppSpacing.screen,
         0,
-        NinjaMetrics.screenPadding,
+        AppSpacing.screen,
         10,
       ),
       child: AppPressable(
@@ -61,8 +61,8 @@ class MentorshipBody extends StatelessWidget {
         semanticsButton: true,
         child: DecoratedBox(
           decoration: BoxDecoration(
-            color: colors.accentSoft,
-            borderRadius: BorderRadius.circular(NinjaRadius.card),
+            color: colors.tint,
+            borderRadius: BorderRadius.circular(AppRadius.card),
           ),
           child: Padding(
             padding: const EdgeInsets.all(16),
@@ -76,7 +76,7 @@ class MentorshipBody extends StatelessWidget {
                   child: SizedBox.square(
                     dimension: 44,
                     child: Center(
-                      child: AppNinjaMark(size: 20, color: colors.onAccentSoft),
+                      child: AppNinjaMark(size: 20, color: colors.ink),
                     ),
                   ),
                 ),
@@ -87,8 +87,8 @@ class MentorshipBody extends StatelessWidget {
                     children: [
                       Text(
                         title,
-                        style: NinjaText.headline.copyWith(
-                          color: colors.onAccentSoft,
+                        style: AppText.headline.copyWith(
+                          color: colors.ink,
                         ),
                       ),
                       const SizedBox(height: 3),
@@ -96,8 +96,8 @@ class MentorshipBody extends StatelessWidget {
                         state.isMentor
                             ? context.l10n.mentorshipEditHint
                             : context.l10n.mentorshipBecomeHint,
-                        style: NinjaText.helper.copyWith(
-                          color: colors.onAccentSoftMuted,
+                        style: AppText.captionSmall.copyWith(
+                          color: colors.muted,
                           height: 1.35,
                         ),
                       ),
@@ -108,7 +108,7 @@ class MentorshipBody extends StatelessWidget {
                 AppLineIconWidget(
                   .chevronR,
                   size: 16,
-                  color: colors.onAccentSoftMuted,
+                  color: colors.muted,
                 ),
               ],
             ),
@@ -123,12 +123,12 @@ class MentorshipBody extends StatelessWidget {
       return const [
         Padding(
           padding: .fromLTRB(
-            NinjaMetrics.screenPadding,
+            AppSpacing.screen,
             22,
-            NinjaMetrics.screenPadding,
+            AppSpacing.screen,
             0,
           ),
-          child: NinjaSkeleton(height: 88, radius: NinjaRadius.card),
+          child: NinjaSkeleton(height: 88, radius: AppRadius.card),
         ),
       ];
     }
@@ -136,9 +136,9 @@ class MentorshipBody extends StatelessWidget {
       return [
         Padding(
           padding: const .fromLTRB(
-            NinjaMetrics.screenPadding,
+            AppSpacing.screen,
             22,
-            NinjaMetrics.screenPadding,
+            AppSpacing.screen,
             0,
           ),
           child: NinjaErrorState(
@@ -197,9 +197,9 @@ class MentorshipBody extends StatelessWidget {
       return Padding(
         key: const ValueKey('mentors-failure'),
         padding: const .fromLTRB(
-          NinjaMetrics.screenPadding,
+          AppSpacing.screen,
           22,
-          NinjaMetrics.screenPadding,
+          AppSpacing.screen,
           0,
         ),
         child: NinjaErrorState(
@@ -214,9 +214,9 @@ class MentorshipBody extends StatelessWidget {
       return Padding(
         key: const ValueKey('mentors-empty'),
         padding: const .fromLTRB(
-          NinjaMetrics.screenPadding,
+          AppSpacing.screen,
           22,
-          NinjaMetrics.screenPadding,
+          AppSpacing.screen,
           0,
         ),
         child: NinjaEmptyState.screen(

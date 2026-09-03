@@ -11,7 +11,7 @@ class TrendingRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final count = item.count > 0
         ? context.l10n.searchTrendingTimes(item.count)
         : null;
@@ -21,14 +21,14 @@ class TrendingRow extends StatelessWidget {
       child: Container(
         decoration: BoxDecoration(
           color: colors.surface,
-          borderRadius: BorderRadius.circular(NinjaRadius.card),
+          borderRadius: BorderRadius.circular(AppRadius.card),
         ),
         padding: const EdgeInsets.all(AppSpacing.lg),
         child: Row(
           children: [
             DecoratedBox(
               decoration: BoxDecoration(
-                color: colors.brandTint,
+                color: colors.tint,
                 borderRadius: BorderRadius.circular(AppRadius.md),
               ),
               child: SizedBox.square(
@@ -36,7 +36,7 @@ class TrendingRow extends StatelessWidget {
                 child: AppLineIconWidget(
                   AppLineIcon.chart,
                   size: 19,
-                  color: colors.brand,
+                  color: colors.accent,
                 ),
               ),
             ),
@@ -49,7 +49,7 @@ class TrendingRow extends StatelessWidget {
                     item.query,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: NinjaText.body.copyWith(
+                    style: AppText.body.copyWith(
                       color: colors.ink,
                       fontWeight: FontWeight.w700,
                     ),
@@ -58,7 +58,7 @@ class TrendingRow extends StatelessWidget {
                     const SizedBox(height: AppSpacing.xs),
                     Text(
                       count,
-                      style: NinjaText.subtext.copyWith(
+                      style: AppText.subtext.copyWith(
                         color: colors.muted,
                       ),
                     ),
@@ -69,8 +69,8 @@ class TrendingRow extends StatelessWidget {
             const SizedBox(width: AppSpacing.xs),
             AppLineIconWidget(
               AppLineIcon.chevronR,
-              size: 16,
-              color: colors.chevron,
+              size: AppIconSize.sm,
+              color: colors.muted2,
             ),
           ],
         ),

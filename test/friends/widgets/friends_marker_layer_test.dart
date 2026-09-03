@@ -51,6 +51,11 @@ void main() {
       expect(friendPoint(_friendAt(longitude: 37.48)), isNull);
     });
 
+    test('returns null for coordinates outside geographic bounds', () {
+      expect(friendPoint(_friendAt(latitude: 91, longitude: 0)), isNull);
+      expect(friendPoint(_friendAt(latitude: 0, longitude: -181)), isNull);
+    });
+
     test(
       'returns null for non-finite coordinates (flutter_map crash guard)',
       () {
@@ -88,9 +93,9 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Наруто'), findsOneWidget);
-      expect(find.byType(NinjaAvatar), findsOneWidget);
+      expect(find.byType(AppAvatar), findsOneWidget);
 
-      final colors = tester.element(find.byType(FriendMarker)).ninja;
+      final colors = tester.element(find.byType(FriendMarker)).colors;
       final decorations = tester
           .widgetList<Container>(find.byType(Container))
           .map((container) => container.decoration)

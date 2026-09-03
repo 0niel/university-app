@@ -2,29 +2,58 @@ import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../kit_harness.dart';
+
 void main() {
-  Widget wrap(Widget child) => MaterialApp(
-        theme: AppTheme.darkTheme,
-        home: Scaffold(body: Center(child: child)),
+  BoxDecoration pillOf(WidgetTester tester) => kitDecoration(
+        tester,
+        find
+            .descendant(
+              of: find.byType(AppReactionChip),
+              matching: find.byType(Container),
+            )
+            .first,
       );
 
-  group('AppReactionChip', () {
-    testWidgets('renders emoji and count', (tester) async {
-      await tester.pumpWidget(
-        wrap(const AppReactionChip(emoji: '🔥', count: 28)),
-      );
+  testWidgets('renders emoji and count', (tester) async {
+    await tester.pumpWidget(
+      wrapKit(const AppReactionChip(emoji: '🔥', count: 28)),
+    );
 
-      expect(find.text('🔥'), findsOneWidget);
-      expect(find.text('28'), findsOneWidget);
-    });
+    expect(find.text('🔥'), findsOneWidget);
+    expect(find.text('28'), findsOneWidget);
+  });
 
-    testWidgets('picked uses the accent foreground', (tester) async {
-      await tester.pumpWidget(
-        wrap(const AppReactionChip(emoji: '🔥', count: 28, picked: true)),
-      );
+  testWidgets('idle is surface2 with a muted count', (tester) async {
+    await tester.pumpWidget(
+      wrapKit(AppReactionChip(emoji: '🔥', count: 28, onTap: () {})),
+    );
+    await tester.pumpAndSettle();
 
-      final count = tester.widget<Text>(find.text('28'));
-      expect(count.style?.color, AppColors.dark.primary);
-    });
+    expect(pillOf(tester).color, kitColors.surface2);
+    expect(kitStyleOf(tester, '28')?.color, kitColors.muted);
+  });
+
+  testWidgets('picked is tinted with an accent count', (tester) async {
+    await tester.pumpWidget(
+      wrapKit(
+        AppReactionChip(emoji: '🔥', count: 28, picked: true, onTap: () {}),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(pillOf(tester).color, kitColors.tint);
+    expect(kitStyleOf(tester, '28')?.color, kitColors.accent);
+  });
+
+  testWidgets('keeps a 44px tap target and fires', (tester) async {
+    var taps = 0;
+    await tester.pumpWidget(
+      wrapKit(AppReactionChip(emoji: '🔥', count: 1, onTap: () => taps++)),
+    );
+
+    expect(tester.getSize(find.byType(AppReactionChip)).height, 44);
+    await tester.tap(find.byType(AppReactionChip));
+    expect(taps, 1);
   });
 }

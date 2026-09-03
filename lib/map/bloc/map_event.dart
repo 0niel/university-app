@@ -12,4 +12,7 @@ sealed class MapEvent with _$MapEvent {
   }) = FloorSelected;
 
   const factory MapEvent.roomTapped(String roomId) = RoomTapped;
+
+  const factory MapEvent.campusIndexRequested(CampusModel campus) =
+      CampusIndexRequested;
 }

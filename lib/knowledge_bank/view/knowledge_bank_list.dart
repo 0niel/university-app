@@ -1,6 +1,5 @@
 import 'package:app_ui/app_ui.dart';
 import 'package:campus_repository/campus_repository.dart';
-import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:rtu_mirea_app/knowledge_bank/view/knowledge_bank_list_skeleton.dart';
 import 'package:rtu_mirea_app/knowledge_bank/widgets/widgets.dart';
@@ -18,6 +17,7 @@ class KnowledgeBankList extends StatelessWidget {
     required this.onRetry,
     required this.onUpload,
     required this.onResetFilter,
+    this.footer,
     super.key,
   });
 
@@ -31,6 +31,7 @@ class KnowledgeBankList extends StatelessWidget {
   final VoidCallback onRetry;
   final VoidCallback onUpload;
   final VoidCallback onResetFilter;
+  final Widget? footer;
 
   @override
   Widget build(BuildContext context) {
@@ -38,13 +39,18 @@ class KnowledgeBankList extends StatelessWidget {
   }
 
   Widget _body(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final l10n = context.l10n;
     if (isLoading) {
       return ListView(
         key: const ValueKey('knowledge-loading'),
         physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.fromLTRB(20, 8, 20, 110),
+        padding: const EdgeInsets.fromLTRB(
+          AppSpacing.screen,
+          AppSpacing.sm,
+          AppSpacing.screen,
+          110,
+        ),
         children: const [KnowledgeBankListSkeleton()],
       );
     }
@@ -52,7 +58,12 @@ class KnowledgeBankList extends StatelessWidget {
       return ListView(
         key: const ValueKey('knowledge-failure'),
         physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.fromLTRB(20, 24, 20, 100),
+        padding: const EdgeInsets.fromLTRB(
+          AppSpacing.screen,
+          AppSpacing.xlg,
+          AppSpacing.screen,
+          100,
+        ),
         children: [
           NinjaErrorState(
             title: l10n.loadingError,
@@ -67,7 +78,12 @@ class KnowledgeBankList extends StatelessWidget {
       return ListView(
         key: ValueKey(isFiltered ? 'knowledge-filtered' : 'knowledge-empty'),
         physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.fromLTRB(20, 32, 20, 100),
+        padding: const EdgeInsets.fromLTRB(
+          AppSpacing.screen,
+          AppSpacing.xxl,
+          AppSpacing.screen,
+          100,
+        ),
         children: [
           if (isFiltered)
             NinjaEmptyState(
@@ -89,33 +105,41 @@ class KnowledgeBankList extends StatelessWidget {
         ],
       );
     }
-    final itemCount = materials.length + (authors.isEmpty ? 0 : 2);
-    return ListView.separated(
+    return ListView(
       key: const ValueKey('knowledge-ready'),
       physics: const AlwaysScrollableScrollPhysics(),
-      padding: const EdgeInsets.fromLTRB(20, 8, 20, 110),
-      itemCount: itemCount,
-      separatorBuilder: (_, index) => SizedBox(
-        height: index == materials.length - 1 ? 28 : 10,
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.screen,
+        AppSpacing.zero,
+        AppSpacing.screen,
+        AppSpacing.xxlg,
       ),
-      itemBuilder: (context, index) {
-        final material = materials.elementAtOrNull(index);
-        if (material != null) {
-          return MaterialRow(
-            key: ValueKey(material.id),
-            material: material,
-            loading: openingMaterialIds.contains(material.id),
-            onDownload: () => onDownload(material),
-          ).animateListItem(index: index);
-        }
-        if (index == materials.length) {
-          return Text(
+      children: [
+        AppListGroup(
+          children: [
+            for (final material in materials)
+              MaterialRow(
+                key: ValueKey(material.id),
+                material: material,
+                loading: openingMaterialIds.contains(material.id),
+                onDownload: () => onDownload(material),
+              ),
+          ],
+        ),
+        if (authors.isNotEmpty) ...[
+          const SizedBox(height: AppSpacing.sheetBottom),
+          Text(
             l10n.knowledgeTopAuthors,
-            style: NinjaText.title.copyWith(color: colors.ink),
-          );
-        }
-        return TopAuthorsCard(authors: authors);
-      },
+            style: AppText.title.copyWith(color: colors.ink),
+          ),
+          const SizedBox(height: AppSpacing.gap),
+          TopAuthorsCard(authors: authors),
+        ],
+        if (footer != null) ...[
+          const SizedBox(height: AppSpacing.screen),
+          footer!,
+        ],
+      ],
     );
   }
 }

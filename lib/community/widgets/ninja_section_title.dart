@@ -15,12 +15,12 @@ class NinjaSectionTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     return Padding(
       padding: EdgeInsets.fromLTRB(
-        NinjaMetrics.screenPadding,
+        AppSpacing.screen,
         topPadding,
-        NinjaMetrics.screenPadding,
+        AppSpacing.screen,
         4,
       ),
       child: Row(
@@ -32,15 +32,15 @@ class NinjaSectionTitle extends StatelessWidget {
               title,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: NinjaText.title.copyWith(color: colors.ink),
+              style: AppText.title.copyWith(color: colors.ink),
             ),
           ),
           if (count case final value?) ...[
             const SizedBox(width: 10),
             Text(
               '$value',
-              style: NinjaText.tabular(
-                NinjaText.subtext.copyWith(color: colors.mutedDark),
+              style: AppText.tabular(
+                AppText.subtext.copyWith(color: colors.muted),
               ),
             ),
           ],

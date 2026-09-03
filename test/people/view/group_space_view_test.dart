@@ -110,11 +110,7 @@ void main() {
       await tester.drag(find.byType(Dismissible), const Offset(-500, 0));
       await tester.pumpAndSettle();
 
-      final confirmButton = find.byWidgetPredicate(
-        (widget) =>
-            widget is NinjaActionButton &&
-            widget.tone == NinjaActionTone.scarlet,
-      );
+      final confirmButton = find.widgetWithText(NinjaPillButton, 'Удалить');
       expect(confirmButton, findsOneWidget);
       await tester.tap(confirmButton);
       await tester.pumpAndSettle();

@@ -5,6 +5,7 @@ from datetime import UTC
 from typing import Any
 from urllib.parse import urlparse
 
+import httpx
 from loguru import logger
 from telethon import TelegramClient
 from telethon.errors import (
@@ -13,6 +14,7 @@ from telethon.errors import (
     UsernameNotOccupiedError,
 )
 from telethon.sessions import StringSession
+from telethon.tl.functions.channels import GetFullChannelRequest
 from telethon.tl.types import (
     Channel,
     Message,
@@ -21,8 +23,10 @@ from telethon.tl.types import (
 )
 
 from ...clients.base.interfaces import SocialMediaClient
+from ...community_metadata import inspect_community
 from ...config import Settings
 from .models import TelegramChannelInfo, TelegramMedia, TelegramMessage
+from .preview import fetch_message_media
 
 # Import news blocks models
 try:
@@ -352,6 +356,11 @@ class TelegramFetcher(SocialMediaClient):
                 "grouped_message_ids": [msg.id for msg in message_group],
             }
 
+            if total_media > 0:
+                raw_data["media_files"] = await fetch_message_media(
+                    channel_info.username,
+                    primary_message.id,
+                )
             return raw_data
 
         except Exception as e:
@@ -369,15 +378,23 @@ class TelegramFetcher(SocialMediaClient):
             entity = await self.client.get_entity(username)
 
             if isinstance(entity, Channel):
-                full_info = await self.client.get_entity(entity)
+                full_info = (
+                    await self.client(GetFullChannelRequest(channel=entity))
+                ).full_chat
+                async with httpx.AsyncClient(timeout=10) as preview_client:
+                    preview = await inspect_community(
+                        preview_client,
+                        identifier=str(entity.id),
+                        url=f"https://t.me/{entity.username or username}",
+                    )
 
                 return TelegramChannelInfo(
                     id=entity.id,
                     title=entity.title,
-                    username=entity.username,
+                    username=entity.username or username,
                     description=getattr(full_info, "about", ""),
-                    participants_count=getattr(full_info, "participants_count", 0),
-                    photo_url=None,  # Would need additional API call
+                    participants_count=getattr(full_info, "participants_count", None),
+                    photo_url=preview.logo_url,
                     is_verified=entity.verified,
                     is_restricted=entity.restricted,
                 )

@@ -16,7 +16,9 @@ class SettingsRow extends StatelessWidget {
     this.showChevron = true,
     this.danger = false,
     this.enabled = true,
-    this.horizontalPadding = 8,
+    this.horizontalPadding = 16,
+    this.verticalPadding = 15,
+    this.minimumHeight = 50,
     this.onTap,
   });
 
@@ -32,11 +34,13 @@ class SettingsRow extends StatelessWidget {
   final bool enabled;
 
   final double horizontalPadding;
+  final double verticalPadding;
+  final double minimumHeight;
   final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final lineIcon = this.lineIcon;
     final icon = this.icon;
     final row = Semantics(
@@ -45,9 +49,12 @@ class SettingsRow extends StatelessWidget {
       child: AppPressable(
         onTap: enabled ? onTap : null,
         child: ConstrainedBox(
-          constraints: const BoxConstraints(minHeight: 54),
+          constraints: BoxConstraints(minHeight: minimumHeight),
           child: Padding(
-            padding: .symmetric(horizontal: horizontalPadding, vertical: 7),
+            padding: .symmetric(
+              horizontal: horizontalPadding,
+              vertical: verticalPadding,
+            ),
             child: Row(
               children: [
                 if (lineIcon != null || icon != null) ...[
@@ -56,7 +63,7 @@ class SettingsRow extends StatelessWidget {
                     icon: icon,
                     danger: danger,
                   ),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: AppSpacing.md),
                 ],
                 Expanded(
                   child: Column(
@@ -67,46 +74,50 @@ class SettingsRow extends StatelessWidget {
                         title,
                         maxLines: 2,
                         overflow: .ellipsis,
-                        style: NinjaText.body.copyWith(
-                          fontWeight: .w600,
-                          color: danger ? colors.scarlet : colors.ink,
-                        ),
+                        style: AppText.sans(15, FontWeight.w600, height: 4 / 3)
+                            .copyWith(
+                              color: danger ? colors.danger : colors.ink,
+                            ),
                       ),
                       if (subtitle case final subtitleText?) ...[
-                        const SizedBox(height: 3),
+                        const SizedBox(height: AppSpacing.xxs),
                         Text(
                           subtitleText,
                           maxLines: 2,
                           overflow: .ellipsis,
-                          style: NinjaText.helper.copyWith(color: colors.muted),
+                          style: AppText.sans(
+                            12.5,
+                            FontWeight.w500,
+                            height: 1.28,
+                          ).copyWith(color: colors.muted),
                         ),
                       ],
                     ],
                   ),
                 ),
                 if (trailing case final trailingWidget?) ...[
-                  const SizedBox(width: 10),
+                  const SizedBox(width: AppSpacing.gap),
                   trailingWidget,
                 ] else if (value case final valueText?) ...[
-                  const SizedBox(width: 10),
+                  const SizedBox(width: AppSpacing.gap),
                   AppRowTrailing(
                     child: Text(
                       valueText,
                       maxLines: 2,
                       overflow: .ellipsis,
                       textAlign: .end,
-                      style: NinjaText.subtext.copyWith(
+                      style: AppText.sans(14, FontWeight.w500).copyWith(
                         color: valueColor ?? colors.muted,
                       ),
                     ),
                   ),
                 ],
                 if (showChevron && onTap != null) ...[
-                  const SizedBox(width: 8),
+                  const SizedBox(width: AppSpacing.sm),
                   AppLineIconWidget(
                     .chevronR,
                     size: 16,
-                    color: colors.chevron,
+                    color: colors.muted2,
                   ),
                 ],
               ],

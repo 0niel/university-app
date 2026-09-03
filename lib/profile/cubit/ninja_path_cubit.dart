@@ -27,6 +27,7 @@ class NinjaPathCubit extends Cubit<NinjaPathState> {
   }
 
   Future<void> loadBadges() async {
+    if (isClosed || state.badgesStatus == NinjaPathLoadStatus.loading) return;
     emit(state.copyWith(badgesStatus: .loading));
     try {
       final badges = await _gamification.getBadges();
@@ -53,6 +54,7 @@ class NinjaPathCubit extends Cubit<NinjaPathState> {
   }
 
   Future<void> loadQuests() async {
+    if (isClosed || state.questsStatus == NinjaPathLoadStatus.loading) return;
     emit(state.copyWith(questsStatus: .loading));
     try {
       final quests = await _gamification.getQuests();
@@ -72,6 +74,7 @@ class NinjaPathCubit extends Cubit<NinjaPathState> {
   }
 
   Future<void> loadLeaderboard(LeaderboardScope scope) async {
+    if (isClosed) return;
     emit(
       state.copyWith(
         leaderboardStatus: .loading,

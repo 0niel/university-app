@@ -41,12 +41,43 @@ class AppBloc extends HydratedBloc<AppEvent, AppState> {
 
   late StreamSubscription<User> _userSubscription;
   StreamSubscription<RemoteMessage>? _messageOpenedSubscription;
+  final _pendingPushMessages = <RemoteMessage>[];
+  var _handledNotificationNavigationId = 0;
+  var _messageSetupStarted = false;
   var _isClosing = false;
+
+  bool consumeNotificationNavigation(int navigationId) {
+    if (_isClosing ||
+        isClosed ||
+        navigationId <= _handledNotificationNavigationId ||
+        navigationId != state.notificationNavigationId) {
+      return false;
+    }
+    _handledNotificationNavigationId = navigationId;
+    return true;
+  }
+
+  List<RemoteMessage> takePendingPushMessages(String? userId) {
+    if (_isClosing ||
+        isClosed ||
+        userId == null ||
+        userId.isEmpty ||
+        userId != state.user.id) {
+      return const [];
+    }
+    final messages = List<RemoteMessage>.of(_pendingPushMessages);
+    _pendingPushMessages.clear();
+    return messages;
+  }
 
   void _userChanged(User user) => add(AppUserChanged(user));
 
   void _onUserChanged(AppUserChanged event, Emitter<AppState> emit) {
     final user = event.user;
+    if (user.id != state.user.id) {
+      _pendingPushMessages.clear();
+      _handledNotificationNavigationId = state.notificationNavigationId;
+    }
     final status = user == .anonymous
         ? AppStatus.unauthenticated
         : user.isNewUser
@@ -76,17 +107,22 @@ class AppBloc extends HydratedBloc<AppEvent, AppState> {
     _isClosing = true;
     await _messageOpenedSubscription?.cancel();
     await _userSubscription.cancel();
+    _pendingPushMessages.clear();
     return super.close();
   }
 
   Future<void> setupInteractedMessage() async {
     final messaging = _firebaseMessaging;
-    if (messaging == null) return;
+    if (messaging == null || _messageSetupStarted || _isClosing || isClosed) {
+      return;
+    }
+    _messageSetupStarted = true;
+    final initialUserId = state.user.id;
 
     try {
       final initialMessage = await messaging.getInitialMessage();
       if (_isClosing || isClosed) return;
-      if (initialMessage != null) {
+      if (initialMessage != null && initialUserId == state.user.id) {
         _handleMessage(initialMessage);
       }
     } on MissingPluginException catch (error) {
@@ -104,13 +140,21 @@ class AppBloc extends HydratedBloc<AppEvent, AppState> {
   }
 
   void _handleMessage(RemoteMessage message) {
-    add(InteractedMessageReceived(message));
+    if (_isClosing || isClosed) return;
+    add(InteractedMessageReceived(message, userId: state.user.id));
   }
 
   void _onInteractedMessageReceived(
     InteractedMessageReceived event,
     Emitter<AppState> emit,
   ) {
+    if (_isClosing || (event.userId != null && event.userId != state.user.id)) {
+      return;
+    }
+    if (state.user.id.isNotEmpty) {
+      if (_pendingPushMessages.length == 50) _pendingPushMessages.removeAt(0);
+      _pendingPushMessages.add(event.message);
+    }
     final data = event.message.data;
     Logger().i('Handling message: $data');
     final discoursePostId = data['discourse_post_id'] as String?;

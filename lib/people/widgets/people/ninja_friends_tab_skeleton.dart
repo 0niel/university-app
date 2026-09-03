@@ -10,17 +10,17 @@ class NinjaFriendsTabSkeleton extends StatelessWidget {
       padding: const .only(top: 10, bottom: 96),
       children: [
         Padding(
-          padding: const .symmetric(horizontal: NinjaMetrics.screenPadding),
+          padding: const .symmetric(horizontal: AppSpacing.screen),
           child: DecoratedBox(
             decoration: BoxDecoration(
-              color: context.ninja.surface,
-              borderRadius: .circular(NinjaRadius.card),
+              color: context.colors.surface,
+              borderRadius: .circular(AppRadius.card),
             ),
             child: const Padding(
               padding: .fromLTRB(16, 14, 12, 14),
               child: Row(
                 children: [
-                  NinjaSkeleton(width: 44, height: 44, radius: 14),
+                  NinjaSkeleton(width: 44, height: 44, radius: AppRadius.tile),
                   SizedBox(width: 14),
                   Expanded(
                     child: Column(
@@ -39,22 +39,22 @@ class NinjaFriendsTabSkeleton extends StatelessWidget {
         ),
         const SizedBox(height: 28),
         const Padding(
-          padding: .symmetric(horizontal: NinjaMetrics.screenPadding),
+          padding: .symmetric(horizontal: AppSpacing.screen),
           child: NinjaSkeleton.bar(height: 22, widthFactor: 0.36),
         ),
         const SizedBox(height: 10),
         for (var index = 0; index < 6; index++)
           Padding(
             padding: const .fromLTRB(
-              NinjaMetrics.screenPadding,
+              AppSpacing.screen,
               0,
-              NinjaMetrics.screenPadding,
+              AppSpacing.screen,
               8,
             ),
             child: DecoratedBox(
               decoration: BoxDecoration(
-                color: context.ninja.surface,
-                borderRadius: .circular(NinjaRadius.card),
+                color: context.colors.surface,
+                borderRadius: .circular(AppRadius.card),
               ),
               child: const Padding(
                 padding: .symmetric(horizontal: 14, vertical: 13),

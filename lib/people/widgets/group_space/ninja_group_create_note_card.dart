@@ -9,14 +9,14 @@ class NinjaGroupCreateNoteCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     return Padding(
-      padding: const .symmetric(horizontal: NinjaMetrics.screenPadding),
+      padding: const .symmetric(horizontal: AppSpacing.screen),
       child: AppPressable(
         onTap: onTap,
         child: Container(
           constraints: const BoxConstraints(
-            minHeight: NinjaMetrics.minTouchTarget,
+            minHeight: AppControlSize.iconButton,
           ),
           padding: const .symmetric(
             horizontal: 16,
@@ -24,14 +24,14 @@ class NinjaGroupCreateNoteCard extends StatelessWidget {
           ),
           decoration: BoxDecoration(
             color: colors.surface,
-            borderRadius: .circular(NinjaRadius.card),
+            borderRadius: .circular(AppRadius.card),
           ),
           child: Row(
             children: [
               Expanded(
                 child: Text(
                   context.l10n.groupSpaceNotesPlaceholder,
-                  style: NinjaText.subtext.copyWith(color: colors.muted),
+                  style: AppText.subtext.copyWith(color: colors.muted),
                 ),
               ),
               AppLineIconWidget(.plus, size: 20, color: colors.ink),

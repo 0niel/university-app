@@ -24,7 +24,7 @@ class NinjaFriendsTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final l10n = context.l10n;
     final currentTime = now ?? DateTime.now();
     final live = friends
@@ -42,7 +42,7 @@ class NinjaFriendsTab extends StatelessWidget {
       children: [
         Padding(
           padding: const .symmetric(
-            horizontal: NinjaMetrics.screenPadding,
+            horizontal: AppSpacing.screen,
           ),
           child: PeopleMapBanner(live: live),
         ),
@@ -50,7 +50,7 @@ class NinjaFriendsTab extends StatelessWidget {
           NinjaPeopleSectionHeader(l10n.peopleRequestsLabel(requests.length)),
           Padding(
             padding: const .symmetric(
-              horizontal: NinjaMetrics.screenPadding,
+              horizontal: AppSpacing.screen,
             ),
             child: Column(
               spacing: 10,
@@ -75,7 +75,7 @@ class NinjaFriendsTab extends StatelessWidget {
             child: ListView.separated(
               scrollDirection: .horizontal,
               padding: const .symmetric(
-                horizontal: NinjaMetrics.screenPadding,
+                horizontal: AppSpacing.screen,
               ),
               itemCount: live.length,
               separatorBuilder: (_, _) => const SizedBox(width: 16),
@@ -89,9 +89,9 @@ class NinjaFriendsTab extends StatelessWidget {
         if (friends.isEmpty)
           Padding(
             padding: const .fromLTRB(
-              NinjaMetrics.screenPadding,
+              AppSpacing.screen,
               28,
-              NinjaMetrics.screenPadding,
+              AppSpacing.screen,
               0,
             ),
             child: NinjaEmptyState(
@@ -110,15 +110,15 @@ class NinjaFriendsTab extends StatelessWidget {
           for (final (index, friend) in friends.indexed)
             Padding(
               padding: const .fromLTRB(
-                NinjaMetrics.screenPadding,
+                AppSpacing.screen,
                 0,
-                NinjaMetrics.screenPadding,
+                AppSpacing.screen,
                 10,
               ),
               child: DecoratedBox(
                 decoration: BoxDecoration(
                   color: colors.surface,
-                  borderRadius: .circular(NinjaRadius.card),
+                  borderRadius: .circular(AppRadius.card),
                 ),
                 child: Padding(
                   padding: const .symmetric(
@@ -134,7 +134,7 @@ class NinjaFriendsTab extends StatelessWidget {
     );
   }
 
-  Widget _liveFriend(NinjaColors colors, Friend friend) {
+  Widget _liveFriend(AppColors colors, Friend friend) {
     final firstName = friend.fullName
         .split(' ')
         .where((part) => part.isNotEmpty)
@@ -157,7 +157,7 @@ class NinjaFriendsTab extends StatelessWidget {
                   width: 10,
                   height: 10,
                   decoration: BoxDecoration(
-                    color: colors.brand,
+                    color: colors.accent,
                     shape: .circle,
                   ),
                 ),
@@ -170,7 +170,7 @@ class NinjaFriendsTab extends StatelessWidget {
           firstName ?? friend.fullName,
           maxLines: 1,
           overflow: .ellipsis,
-          style: NinjaText.helper.copyWith(
+          style: AppText.caption.copyWith(
             fontWeight: .w600,
             color: colors.ink,
           ),

@@ -10,8 +10,8 @@ class _InfoSurface extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
-        color: context.ninja.surfaceAlt,
-        borderRadius: BorderRadius.circular(NinjaRadius.card),
+        color: context.colors.surface2,
+        borderRadius: BorderRadius.circular(AppRadius.card),
       ),
       child: child,
     );

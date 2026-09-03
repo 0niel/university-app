@@ -71,7 +71,7 @@ class MiniAppRunnerBody extends StatelessWidget {
     key: key,
     child: SingleChildScrollView(
       padding: const .symmetric(
-        horizontal: NinjaMetrics.screenPadding,
+        horizontal: AppSpacing.screen,
         vertical: 24,
       ),
       child: child,

@@ -21,18 +21,19 @@ void main() {
         ),
       );
 
+      expect(find.text('🥷'), findsOneWidget);
       expect(find.text('Маскировка'), findsOneWidget);
       expect(find.text('EXIF стёрт'), findsOneWidget);
       expect(find.text('Настроить'), findsOneWidget);
     });
 
-    testWidgets('gradient variant paints a gradient', (tester) async {
+    testWidgets('the icon variant paints a flat tinted banner', (tester) async {
       await tester.pumpWidget(
         wrap(
-          const AppContextBanner.gradient(
-            emoji: '💘',
-            title: 'Матч',
-            subtitle: 'Telegram',
+          const AppContextBanner(
+            icon: AppLineIcon.shield,
+            title: 'Конфликт',
+            subtitle: 'Расписание изменилось',
           ),
         ),
       );
@@ -45,7 +46,27 @@ void main() {
             )
             .first,
       );
-      expect((container.decoration! as BoxDecoration).gradient, isNotNull);
+      final decoration = container.decoration! as BoxDecoration;
+      expect(decoration.gradient, isNull);
+      expect(decoration.boxShadow, isNull);
+    });
+
+    testWidgets('fires onTap', (tester) async {
+      var tapped = false;
+      await tester.pumpWidget(
+        wrap(
+          AppContextBanner(
+            icon: AppLineIcon.bell,
+            title: 'Синхронизация',
+            subtitle: 'Нет связи',
+            actionLabel: 'Повторить',
+            onTap: () => tapped = true,
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('Повторить'));
+      expect(tapped, isTrue);
     });
   });
 }

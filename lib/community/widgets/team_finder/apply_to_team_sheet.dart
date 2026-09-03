@@ -67,8 +67,8 @@ class _ApplyToTeamSheetState extends State<ApplyToTeamSheet> {
           if (widget.team.neededRoles.isNotEmpty) ...[
             Text(
               context.l10n.teamFinderApplyRoleLabel,
-              style: NinjaText.microLabel.copyWith(
-                color: context.ninja.muted,
+              style: AppText.captionSmall.copyWith(
+                color: context.colors.muted,
               ),
             ),
             Wrap(
@@ -122,8 +122,8 @@ class _ApplyToTeamSheetState extends State<ApplyToTeamSheet> {
     return Container(
       padding: const .all(16),
       decoration: BoxDecoration(
-        color: context.ninja.surface,
-        borderRadius: .circular(NinjaRadius.card),
+        color: context.colors.surface,
+        borderRadius: .circular(AppRadius.card),
       ),
       child: Row(
         spacing: 12,
@@ -138,14 +138,14 @@ class _ApplyToTeamSheetState extends State<ApplyToTeamSheet> {
             child: Column(
               crossAxisAlignment: .start,
               children: [
-                Text(widget.team.title, style: NinjaText.body),
+                Text(widget.team.title, style: AppText.body),
                 Text(
                   context.l10n.teamFinderApplyMembersInfo(
                     widget.team.memberCount,
                     widget.team.capacity,
                     '',
                   ),
-                  style: NinjaText.helper,
+                  style: AppText.captionSmall,
                 ),
               ],
             ),

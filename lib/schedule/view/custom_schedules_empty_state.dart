@@ -7,13 +7,13 @@ class _CustomSchedulesEmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final l10n = context.l10n;
     return Padding(
       padding: const .only(top: 24),
-      child: NinjaEmptyState(
+      child: AppEmptyState(
         title: l10n.customSchedulesEmptyTitle,
-        message: l10n.customSchedulesEmptyDesc,
+        subtitle: l10n.customSchedulesEmptyDesc,
         icon: AppLineIconWidget(
           AppLineIcon.calendar,
           size: 20,

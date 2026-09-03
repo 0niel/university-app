@@ -1,3 +1,4 @@
+import 'package:app_ui/app_ui.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:stac/stac.dart';
@@ -10,6 +11,24 @@ Color? parseHexColor(String? hex) {
   if (digits.length != 8) return null;
   final parsed = int.tryParse(digits, radix: 16);
   return parsed == null ? null : Color(parsed);
+}
+
+Color? parseAppColor(BuildContext context, String? value) {
+  final colors = context.colors;
+  return switch (value) {
+    'accent' => colors.accent,
+    'lecture' => colors.lecture,
+    'practice' => colors.practice,
+    'lab' => colors.lab,
+    'exam' => colors.exam,
+    'warn' => colors.warn,
+    'ink' => colors.ink,
+    'muted' => colors.muted,
+    'surface' => colors.surface,
+    'canvas' => colors.canvas,
+    'tint' => colors.tint,
+    _ => parseHexColor(value),
+  };
 }
 
 /// Wraps an action JSON into a tap callback, null when no action is set.

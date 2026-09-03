@@ -14,13 +14,13 @@ class MiniAppPermissionRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     return Container(
       margin: const .only(bottom: 8),
       padding: const .symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
         color: colors.surface,
-        borderRadius: BorderRadius.circular(NinjaRadius.card),
+        borderRadius: BorderRadius.circular(AppRadius.card),
       ),
       child: Row(
         children: [
@@ -29,24 +29,28 @@ class MiniAppPermissionRow extends StatelessWidget {
             size: 18,
             color: colors.muted,
           ),
-          const SizedBox(width: 14),
+          const SizedBox(width: AppSpacing.sectionGap),
           Expanded(
             child: Column(
               crossAxisAlignment: .start,
               children: [
                 Text(
                   miniAppPermissionLabel(context, permission),
-                  style: NinjaText.body.copyWith(color: colors.ink),
+                  style: AppText.body.copyWith(color: colors.ink),
                 ),
                 Text(
                   miniAppPermissionDescription(context, permission),
-                  style: NinjaText.helper.copyWith(color: colors.muted),
+                  style: AppText.captionSmall.copyWith(color: colors.muted),
                 ),
               ],
             ),
           ),
-          const SizedBox(width: 12),
-          NinjaSwitch(value: value, onChanged: onChanged),
+          const SizedBox(width: AppSpacing.md),
+          AppSwitch(
+            value: value,
+            onChanged: onChanged,
+            semanticsLabel: miniAppPermissionLabel(context, permission),
+          ),
         ],
       ),
     );

@@ -15,7 +15,7 @@ class _RequestCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final l10n = context.l10n;
     final groupName = group;
     return Padding(
@@ -23,14 +23,14 @@ class _RequestCard extends StatelessWidget {
       child: DecoratedBox(
         decoration: BoxDecoration(
           color: colors.surface,
-          borderRadius: .circular(NinjaRadius.card),
+          borderRadius: .circular(AppRadius.card),
         ),
         child: Padding(
-          padding: const .all(16),
+          padding: const .all(AppSpacing.lg),
           child: Row(
             children: [
-              NinjaAvatar(initials: ninjaInitials(fullName)),
-              const SizedBox(width: 14),
+              AppAvatar(name: fullName, size: FriendsLayout.avatar),
+              const SizedBox(width: AppSpacing.sectionGap),
               Expanded(
                 child: Column(
                   crossAxisAlignment: .start,
@@ -38,21 +38,21 @@ class _RequestCard extends StatelessWidget {
                   children: [
                     Text(
                       fullName,
-                      maxLines: 1,
+                      maxLines: 2,
                       overflow: .ellipsis,
-                      style: NinjaText.headline.copyWith(color: colors.ink),
+                      style: AppText.headline.copyWith(color: colors.ink),
                     ),
                     if (groupName != null)
                       Text(
                         groupName,
                         maxLines: 1,
                         overflow: .ellipsis,
-                        style: NinjaText.helper.copyWith(color: colors.muted),
+                        style: AppText.caption.copyWith(color: colors.muted),
                       ),
                   ],
                 ),
               ),
-              const SizedBox(width: 10),
+              const SizedBox(width: AppSpacing.gap),
               Row(
                 mainAxisSize: .min,
                 spacing: 8,

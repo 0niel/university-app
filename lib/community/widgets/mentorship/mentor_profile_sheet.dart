@@ -124,7 +124,6 @@ class _MentorProfileSheetState extends State<MentorProfileSheet> {
             onChanged: saving
                 ? null
                 : (value) => setState(() => _level = value),
-            expanded: true,
             segments: [
               for (final level in levelKeys)
                 NinjaSegment(
@@ -181,25 +180,25 @@ class _MentorProfileSheetState extends State<MentorProfileSheet> {
   }
 
   Widget _reward(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     return Container(
       padding: const .all(16),
       decoration: BoxDecoration(
         color: colors.surface,
-        borderRadius: .circular(NinjaRadius.card),
+        borderRadius: .circular(AppRadius.card),
       ),
       child: Row(
         spacing: 12,
         children: [
           DecoratedBox(
             decoration: BoxDecoration(
-              color: colors.brandTint,
-              borderRadius: .circular(NinjaRadius.control),
+              color: colors.tint,
+              borderRadius: .circular(AppRadius.field),
             ),
             child: SizedBox.square(
               dimension: 44,
               child: Center(
-                child: AppNinjaMark(size: 20, color: colors.brandInk),
+                child: AppNinjaMark(size: 20, color: colors.accent),
               ),
             ),
           ),
@@ -209,14 +208,14 @@ class _MentorProfileSheetState extends State<MentorProfileSheet> {
               children: [
                 Text(
                   context.l10n.mentorshipRewardTitle,
-                  style: NinjaText.body.copyWith(
-                    color: context.ninja.ink,
+                  style: AppText.body.copyWith(
+                    color: context.colors.ink,
                   ),
                 ),
                 Text(
                   context.l10n.mentorshipRewardSubtitle,
-                  style: NinjaText.helper.copyWith(
-                    color: context.ninja.muted,
+                  style: AppText.captionSmall.copyWith(
+                    color: context.colors.muted,
                   ),
                 ),
               ],
@@ -229,15 +228,15 @@ class _MentorProfileSheetState extends State<MentorProfileSheet> {
 
   Widget _label(BuildContext context, String label) => Text(
     label,
-    style: NinjaText.microLabel.copyWith(color: context.ninja.muted),
+    style: AppText.captionSmall.copyWith(color: context.colors.muted),
   );
 
   Widget _priceSelector(BuildContext context, {required bool saving}) {
     return Container(
       padding: const .symmetric(horizontal: 14, vertical: 8),
       decoration: BoxDecoration(
-        color: context.ninja.surface,
-        borderRadius: .circular(NinjaRadius.control),
+        color: context.colors.surface,
+        borderRadius: .circular(AppRadius.field),
       ),
       child: Row(
         spacing: 4,
@@ -245,7 +244,7 @@ class _MentorProfileSheetState extends State<MentorProfileSheet> {
           Expanded(
             child: Text(
               context.l10n.mentorshipPriceTitle,
-              style: NinjaText.body.copyWith(color: context.ninja.ink),
+              style: AppText.body.copyWith(color: context.colors.ink),
             ),
           ),
           NinjaIconButton(
@@ -260,7 +259,7 @@ class _MentorProfileSheetState extends State<MentorProfileSheet> {
             child: Text(
               '$_price',
               textAlign: .center,
-              style: NinjaText.tabular(NinjaText.body),
+              style: AppText.tabular(AppText.body),
             ),
           ),
           NinjaIconButton(

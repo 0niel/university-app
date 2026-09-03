@@ -1,6 +1,7 @@
 import 'package:schedule/schedule.dart' as domain;
 import 'package:schedule_repository/src/models/schedule_target_row.dart';
 import 'package:schedule_repository/src/schedule_target_type.dart';
+import 'package:schedule_repository/src/util/normalize_schedule_search.dart';
 import 'package:schedule_repository/src/util/supabase_json.dart';
 import 'package:supabase/supabase.dart';
 
@@ -44,7 +45,7 @@ class ScheduleRemoteDataSource {
       'search_schedule_targets',
       params: {
         'p_target_type': targetType.wireValue,
-        'p_query': query,
+        'p_query': normalizeScheduleSearch(query),
         'p_organization_id': organizationId,
         'p_limit': limit,
       },

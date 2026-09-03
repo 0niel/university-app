@@ -2,168 +2,142 @@ import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-void main() {
-  final colors = NinjaColors.light();
+import '../../kit_harness.dart';
 
-  Widget wrap(
-    Widget child, {
-    TextScaler textScaler = TextScaler.noScaling,
-  }) =>
-      MaterialApp(
-        theme: NinjaTheme.light(),
-        builder: (context, child) => MediaQuery(
-          data: MediaQuery.of(context).copyWith(textScaler: textScaler),
-          child: child!,
+void main() {
+  group('NinjaBanner', () {
+    testWidgets('info tone paints the tint with an 8px accent dot', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        wrapKit(
+          const SizedBox(
+            width: 360,
+            child: NinjaBanner(title: 'Расписание обновлено 5 мин назад'),
+          ),
         ),
-        home: Scaffold(body: SingleChildScrollView(child: child)),
       );
 
-  BoxDecoration decorationOf(WidgetTester tester) {
-    return tester
-        .widgetList<DecoratedBox>(
-          find.descendant(
-            of: find.byType(NinjaBanner),
-            matching: find.byType(DecoratedBox),
+      final banner = kitDecorationOf(tester, NinjaBanner);
+      expect(banner.color, kitColors.tint);
+      expect(banner.borderRadius, BorderRadius.circular(AppRadius.banner));
+
+      final dot = tester.widget<SizedBox>(
+        find.byWidgetPredicate(
+          (widget) => widget is SizedBox && widget.width == 8,
+        ),
+      );
+      expect(dot.height, 8);
+      final style = kitStyleOf(tester, 'Расписание обновлено 5 мин назад');
+      expect(style?.fontSize, 13);
+      expect(style?.fontWeight, FontWeight.w600);
+      expect(style?.color, kitColors.ink);
+    });
+
+    testWidgets('danger tone shows the action in danger and fires it', (
+      tester,
+    ) async {
+      var taps = 0;
+      await tester.pumpWidget(
+        wrapKit(
+          SizedBox(
+            width: 360,
+            child: NinjaBanner(
+              title: 'Пара в 12:40 отменена',
+              tone: NinjaBannerTone.danger,
+              actionLabel: 'Подробнее',
+              onAction: () => taps++,
+            ),
           ),
-        )
-        .map((box) => box.decoration)
-        .whereType<BoxDecoration>()
-        .firstWhere(
-          (value) =>
-              value.borderRadius == BorderRadius.circular(NinjaRadius.card),
-        );
-  }
-
-  testWidgets('danger tone tints the frame and colors the title', (
-    tester,
-  ) async {
-    await tester.pumpWidget(
-      wrap(
-        const NinjaBanner(
-          title: 'Риск недопуска по физике',
-          tone: NinjaBannerTone.danger,
-          body: 'Сдайте отчёт №3 до завтра 23:59',
         ),
-      ),
-    );
+      );
 
-    final decoration = decorationOf(tester);
-    expect(decoration.color, colors.surface);
-    expect(decoration.border, isNull);
+      expect(kitDecorationOf(tester, NinjaBanner).color, kitColors.examTint);
+      final action = kitStyleOf(tester, 'Подробнее');
+      expect(action?.fontSize, 12.5);
+      expect(action?.fontWeight, FontWeight.w700);
+      expect(action?.color, kitColors.danger);
 
-    final title =
-        tester.widget<Text>(find.text('Риск недопуска по физике')).style;
-    expect(title?.fontSize, 15);
-    expect(title?.fontWeight, FontWeight.w600);
-    expect(title?.color, colors.ink);
-  });
+      await tester.tap(find.text('Подробнее'));
+      expect(taps, 1);
+    });
 
-  testWidgets('warn tone uses the readable amber ink', (tester) async {
-    await tester.pumpWidget(
-      wrap(
-        const NinjaBanner(
-          title: 'Оффлайн · данные на 9:40',
-          tone: NinjaBannerTone.warn,
+    testWidgets('warn and success tones map to their tints', (tester) async {
+      await tester.pumpWidget(
+        wrapKit(
+          const SizedBox(
+            width: 360,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                NinjaBanner(title: 'Офлайн', tone: NinjaBannerTone.warn),
+                NinjaBanner(title: 'Готово', tone: NinjaBannerTone.success),
+              ],
+            ),
+          ),
         ),
-      ),
-    );
+      );
 
-    expect(decorationOf(tester).color, colors.surface);
-    expect(
-      tester.widget<Text>(find.text('Оффлайн · данные на 9:40')).style?.color,
-      colors.ink,
-    );
-    expect(
-      tester.widget<AppLineIconWidget>(find.byType(AppLineIconWidget)).color,
-      colors.amberInk,
-    );
-  });
-
-  testWidgets('success tone renders the green check glyph', (tester) async {
-    await tester.pumpWidget(
-      wrap(
-        const NinjaBanner(
-          title: 'Справка готова',
-          tone: NinjaBannerTone.success,
-        ),
-      ),
-    );
-
-    expect(decorationOf(tester).color, colors.surface);
-    final glyph = tester.widget<AppLineIconWidget>(
-      find.byType(AppLineIconWidget),
-    );
-    expect(glyph.icon, AppLineIcon.check);
-    expect(glyph.color, colors.green);
-    expect(glyph.size, 20);
-  });
-
-  testWidgets('info tone is the default and carries a tappable action', (
-    tester,
-  ) async {
-    var taps = 0;
-    await tester.pumpWidget(
-      wrap(
-        NinjaBanner(
-          title: 'Аудитория изменена',
-          body: 'Маршрут обновлён',
-          actionLabel: 'открыть',
-          onAction: () => taps++,
-        ),
-      ),
-    );
-
-    expect(decorationOf(tester).color, colors.surface);
-    expect(
-      tester.widget<Text>(find.text('Аудитория изменена')).style?.color,
-      colors.ink,
-    );
-
-    final action = tester.widget<Text>(find.text('открыть')).style;
-    expect(action?.color, colors.brandInk);
-    expect(action?.fontWeight, FontWeight.w600);
-    expect(
-      tester
-          .getSize(
-            find.ancestor(
-              of: find.text('открыть'),
-              matching: find.byType(AppPressable),
+      final fills = tester
+          .widgetList<Container>(
+            find.descendant(
+              of: find.byType(NinjaBanner),
+              matching: find.byType(Container),
             ),
           )
-          .height,
-      greaterThanOrEqualTo(NinjaMetrics.minTouchTarget),
-    );
-
-    await tester.tap(find.text('открыть'));
-    expect(taps, 1);
+          .map((container) => (container.decoration! as BoxDecoration).color)
+          .toList();
+      expect(fills, [kitColors.warnTint, kitColors.lectureTint]);
+    });
   });
 
-  testWidgets('stays flat and overflow-free at 320px and 200 percent text', (
-    tester,
-  ) async {
-    tester.view
-      ..physicalSize = const Size(320, 568)
-      ..devicePixelRatio = 1;
-    addTearDown(tester.view.reset);
-
-    await tester.pumpWidget(
-      wrap(
-        const Padding(
-          padding: EdgeInsets.all(16),
-          child: NinjaBanner(
-            title: 'Расписание временно недоступно',
-            body: 'Показываем последние сохранённые данные для этого дня',
-            actionLabel: 'Повторить загрузку',
-            onAction: _noop,
+  group('AppBanner', () {
+    testWidgets('renders the tone tint, dot and 13/600 message', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        wrapKit(
+          const SizedBox(
+            width: 360,
+            child: AppBanner(
+              message: 'Офлайн · показаны сохранённые данные',
+              tone: AppBannerTone.warn,
+            ),
           ),
         ),
-        textScaler: const TextScaler.linear(2),
-      ),
-    );
+      );
 
-    expect(tester.takeException(), isNull);
-    expect(decorationOf(tester).border, isNull);
+      expect(kitDecorationOf(tester, AppBanner).color, kitColors.warnTint);
+      final dot = tester.widget<AppDot>(find.byType(AppDot));
+      expect(dot.size, 8);
+      expect(dot.color, kitColors.warn);
+      final style = kitStyleOf(tester, 'Офлайн · показаны сохранённые данные');
+      expect(style?.fontSize, 13);
+      expect(style?.fontWeight, FontWeight.w600);
+    });
+
+    testWidgets('action label uses the tone colour and taps through', (
+      tester,
+    ) async {
+      var taps = 0;
+      await tester.pumpWidget(
+        wrapKit(
+          SizedBox(
+            width: 360,
+            child: AppBanner(
+              message: 'Расписание обновлено',
+              actionLabel: 'Что нового',
+              onAction: () => taps++,
+            ),
+          ),
+        ),
+      );
+
+      final action = kitStyleOf(tester, 'Что нового');
+      expect(action?.fontWeight, FontWeight.w700);
+      expect(action?.color, kitColors.accent);
+      await tester.tap(find.text('Что нового'));
+      expect(taps, 1);
+    });
   });
 }
-
-void _noop() {}

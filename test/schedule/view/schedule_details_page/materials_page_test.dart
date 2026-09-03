@@ -98,5 +98,48 @@ void main() {
       );
       expect(tester.takeException(), isNull);
     });
+
+    testWidgets('an older failed request cannot replace a successful refresh', (
+      tester,
+    ) async {
+      final oldRequest = Completer<LessonDetailsResponse>();
+      final refreshed = Completer<LessonDetailsResponse>();
+      var requests = 0;
+      when(
+        () => repository.getLessonDetails(
+          subjectName: any(named: 'subjectName'),
+          lessonDate: any(named: 'lessonDate'),
+          lessonBellsNumber: any(named: 'lessonBellsNumber'),
+        ),
+      ).thenAnswer(
+        (_) => requests++ == 0 ? oldRequest.future : refreshed.future,
+      );
+      await tester.pumpWidget(buildSubject());
+      await tester.pump();
+      final refresh = tester
+          .widget<RefreshIndicator>(find.byType(RefreshIndicator))
+          .onRefresh();
+      refreshed.complete(
+        const LessonDetailsResponse(
+          reactions: LessonReactionResponse(counts: {}),
+          materials: [],
+          reviews: [],
+        ),
+      );
+      await refresh;
+      await tester.pumpAndSettle();
+      expect(
+        find.byKey(const ValueKey('materials_page_empty')),
+        findsOneWidget,
+      );
+      oldRequest.completeError(Exception('late network failure'));
+      await tester.pumpAndSettle();
+      expect(
+        find.byKey(const ValueKey('materials_page_empty')),
+        findsOneWidget,
+      );
+      expect(find.byType(AppErrorState), findsNothing);
+      expect(tester.takeException(), isNull);
+    });
   });
 }

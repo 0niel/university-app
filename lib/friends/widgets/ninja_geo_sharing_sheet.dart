@@ -25,15 +25,17 @@ class NinjaGeoSharingSheet extends StatelessWidget {
             if (state.privacySyncFailed) ...[
               Padding(
                 padding: const .symmetric(horizontal: AppSpacing.xl),
-                child: NinjaBanner(
-                  tone: .danger,
+                child: AppErrorState(
                   title: l10n.error,
-                  body: l10n.friendsPrivacySyncError,
-                  actionLabel: l10n.retry,
-                  onAction: () => cubit.updateGeoSettings(settings),
+                  message: l10n.friendsPrivacySyncError,
+                  footnote: null,
+                  primaryLabel: l10n.retry,
+                  onPrimary: state.privacyBusy
+                      ? null
+                      : () => cubit.updateGeoSettings(settings),
                 ),
               ),
-              const SizedBox(height: 14),
+              const SizedBox(height: AppSpacing.sectionGap),
             ],
             _NinjaGeoSharingToggleRow(
               icon: AppLineIcon.pin,
@@ -55,58 +57,58 @@ class NinjaGeoSharingSheet extends StatelessWidget {
                   ? (_) => cubit.toggleGhostMode()
                   : null,
             ),
-            const SizedBox(height: 22),
+            const SizedBox(height: AppSpacing.contentGap),
             _NinjaGeoSettingsSection(
               title: l10n.friendsWhoSeesExact,
               helper: hidden ? l10n.friendsVisNoneSub : null,
-              child: NinjaSegmented<GeoVisibility>(
+              child: AppSegmentedControl<GeoVisibility>(
+                onCanvas: true,
                 value: settings.visibility,
-                expanded: true,
                 onChanged: state.privacyBusy
                     ? null
                     : (v) => cubit.updateGeoSettings(
                         settings.copyWith(visibility: v),
                       ),
-                segments: [
-                  NinjaSegment(
+                options: [
+                  AppSegmentedOption(
                     value: GeoVisibility.all,
                     label: l10n.friendsVisAll,
                   ),
-                  NinjaSegment(
+                  AppSegmentedOption(
                     value: GeoVisibility.none,
                     label: l10n.friendsVisNone,
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 22),
+            const SizedBox(height: AppSpacing.contentGap),
             _NinjaGeoSettingsSection(
               title: l10n.friendsPrecisionHeader,
-              child: NinjaSegmented<GeoPrecision>(
+              child: AppSegmentedControl<GeoPrecision>(
+                onCanvas: true,
                 value: settings.precision,
-                expanded: true,
                 onChanged: state.privacyBusy
                     ? null
                     : (v) => cubit.updateGeoSettings(
                         settings.copyWith(precision: v),
                       ),
-                segments: [
-                  NinjaSegment(
+                options: [
+                  AppSegmentedOption(
                     value: GeoPrecision.exact,
                     label: l10n.friendsPrecisionExact,
                   ),
-                  NinjaSegment(
+                  AppSegmentedOption(
                     value: GeoPrecision.campus,
                     label: l10n.friendsPrecisionCampus,
                   ),
-                  NinjaSegment(
+                  AppSegmentedOption(
                     value: GeoPrecision.city,
                     label: l10n.friendsPrecisionCity,
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: AppSpacing.sm),
           ],
         );
       },

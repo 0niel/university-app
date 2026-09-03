@@ -1,127 +1,74 @@
 import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lost_and_found_repository/lost_and_found_repository.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:rtu_mirea_app/lost_and_found/cubit/lost_found_cubit.dart';
-import 'package:rtu_mirea_app/lost_and_found/widgets/lost_found_cold_error.dart';
-import 'package:rtu_mirea_app/lost_and_found/widgets/lost_found_empty_state.dart';
-import 'package:rtu_mirea_app/lost_and_found/widgets/lost_found_item_card.dart';
-import 'package:rtu_mirea_app/lost_and_found/widgets/lost_found_list_skeleton.dart';
+import 'package:rtu_mirea_app/lost_and_found/models/models.dart';
+import 'package:rtu_mirea_app/lost_and_found/widgets/lost_found_row.dart';
+import 'package:rtu_mirea_app/lost_and_found/widgets/lost_found_skeleton.dart';
 
 class LostFoundBody extends StatelessWidget {
   const LostFoundBody({
     required this.state,
-    required this.header,
-    required this.categoryFilter,
+    required this.tab,
     required this.onItemTap,
-    required this.onReport,
+    required this.onContact,
+    required this.onRetry,
     super.key,
   });
 
   final LostFoundState state;
+  final LostFoundTab tab;
   final ValueChanged<LostFoundItem> onItemTap;
-  final VoidCallback onReport;
-  final Widget header;
-  final Widget categoryFilter;
+  final ValueChanged<LostFoundItem> onContact;
+  final VoidCallback onRetry;
 
   @override
   Widget build(BuildContext context) {
-    final coldLoading = state.status == .loading && state.items.isEmpty;
-    final scrollView = CustomScrollView(
-      key: const PageStorageKey('lost-found-scroll'),
-      physics: const AlwaysScrollableScrollPhysics(
-        parent: BouncingScrollPhysics(),
-      ),
-      slivers: [
-        SliverToBoxAdapter(child: header),
-        SliverToBoxAdapter(child: categoryFilter),
-        const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.lg)),
-        ..._content(context),
-        const SliverToBoxAdapter(child: SizedBox(height: 120)),
-      ],
-    );
-    return RefreshIndicator.adaptive(
-      color: context.ninja.brand,
-      backgroundColor: context.ninja.surface,
-      onRefresh: () async => context.read<LostFoundCubit>().load(),
-      child: coldLoading
-          ? NinjaSkeletonGroup(
-              excludeSemantics: false,
-              semanticsLabel: context.l10n.loadingContent,
-              child: scrollView,
-            )
-          : scrollView,
-    );
+    return NinjaStateSwitcher(child: _content(context));
   }
 
-  List<Widget> _content(BuildContext context) {
-    final items = state.filteredItems;
-    if (items.isEmpty) {
-      return [
-        SliverToBoxAdapter(
-          child: NinjaStateSwitcher(child: _placeholder(context)),
-        ),
-      ];
-    }
-    final textScale = MediaQuery.textScalerOf(context).scale(1);
-    final width = MediaQuery.widthOf(context);
-    final singleColumn = width < 360 || textScale >= 1.3;
-    if (singleColumn) {
-      return [
-        SliverPadding(
-          key: const ValueKey('list'),
-          padding: const EdgeInsets.symmetric(
-            horizontal: NinjaMetrics.screenPadding,
-          ),
-          sliver: SliverList.separated(
-            itemCount: items.length,
-            separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.gap),
-            itemBuilder: (context, index) => SizedBox(
-              height: textScale >= 1.8 ? 290 : 238,
-              child: _tile(items[index], index),
-            ),
-          ),
-        ),
-      ];
-    }
-    return [
-      SliverPadding(
-        key: const ValueKey('grid'),
-        padding: const EdgeInsets.symmetric(
-          horizontal: NinjaMetrics.screenPadding,
-        ),
-        sliver: SliverGrid.builder(
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            crossAxisSpacing: AppSpacing.gap,
-            mainAxisSpacing: AppSpacing.gap,
-            mainAxisExtent: 238,
-          ),
-          itemCount: items.length,
-          itemBuilder: (context, index) => _tile(items[index], index),
-        ),
-      ),
-    ];
-  }
-
-  Widget _placeholder(BuildContext context) {
+  Widget _content(BuildContext context) {
+    final l10n = context.l10n;
     if (state.status == .loading && state.items.isEmpty) {
-      return const LostFoundListSkeleton(key: ValueKey('loading'));
+      return const LostFoundSkeleton(key: ValueKey('lost-found-loading'));
     }
     if (state.status == .failure && state.items.isEmpty) {
-      return LostFoundColdError(
-        onRetry: context.read<LostFoundCubit>().load,
-      ).animateEmptyState(key: const ValueKey('error'));
+      return NinjaErrorState(
+        key: const ValueKey('lost-found-failure'),
+        title: l10n.lostFoundLoadError,
+        message: l10n.lostFoundLoadErrorSub,
+        retryLabel: l10n.retry,
+        onRetry: onRetry,
+      );
     }
-    return LostFoundEmptyState(
-      status: state.tab,
-      onReport: onReport,
-    ).animateEmptyState(key: const ValueKey('empty'));
+    final items = state.items.where(tab.matches).toList(growable: false);
+    if (items.isEmpty) {
+      return AppListGroup(
+        key: ValueKey('lost-found-empty-${tab.name}'),
+        children: [
+          NinjaEmptyState.compact(
+            title: switch (tab) {
+              LostFoundTab.all => l10n.lostFoundEmptyAll,
+              LostFoundTab.found => l10n.lostFoundEmptyFound,
+              LostFoundTab.lost => l10n.lostFoundEmptyLost,
+            },
+            message: l10n.lostFoundEmptySub,
+          ),
+        ],
+      );
+    }
+    return AppListGroup(
+      key: ValueKey('lost-found-list-${tab.name}'),
+      children: [
+        for (final (index, item) in items.indexed)
+          LostFoundRow(
+            key: ValueKey(item.id),
+            item: item,
+            onTap: () => onItemTap(item),
+            onContact: () => onContact(item),
+          ).animateListItem(index: index),
+      ],
+    );
   }
-
-  Widget _tile(LostFoundItem item, int index) => LostFoundItemCard(
-    item: item,
-    onTap: () => onItemTap(item),
-  ).animateListItem(index: index);
 }

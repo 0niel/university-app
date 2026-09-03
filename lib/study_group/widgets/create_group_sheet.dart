@@ -66,7 +66,7 @@ class _CreateGroupSheetState extends State<CreateGroupSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final l10n = context.l10n;
     return Column(
       mainAxisSize: .min,
@@ -90,8 +90,8 @@ class _CreateGroupSheetState extends State<CreateGroupSheet> {
                     height: 48,
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
-                      color: _emoji == emoji ? colors.brand : colors.surfaceAlt,
-                      borderRadius: .circular(NinjaRadius.control),
+                      color: _emoji == emoji ? colors.accent : colors.surface2,
+                      borderRadius: .circular(AppRadius.field),
                     ),
                     child: Text(emoji, style: const TextStyle(fontSize: 22)),
                   ),
@@ -122,12 +122,12 @@ class _CreateGroupSheetState extends State<CreateGroupSheet> {
             onTap: () => setState(() => _discoverable = !_discoverable),
             child: Container(
               constraints: const BoxConstraints(
-                minHeight: NinjaMetrics.minTouchTarget,
+                minHeight: AppControlSize.touchTarget,
               ),
               padding: const .fromLTRB(16, 10, 12, 10),
               decoration: BoxDecoration(
-                color: colors.surfaceAlt,
-                borderRadius: .circular(NinjaRadius.control),
+                color: colors.surface2,
+                borderRadius: .circular(AppRadius.field),
               ),
               child: Row(
                 spacing: 12,
@@ -135,7 +135,7 @@ class _CreateGroupSheetState extends State<CreateGroupSheet> {
                   Expanded(
                     child: Text(
                       l10n.studyGroupDiscoverableLabel,
-                      style: NinjaText.body.copyWith(color: colors.ink),
+                      style: AppText.body.copyWith(color: colors.ink),
                     ),
                   ),
                   ExcludeSemantics(

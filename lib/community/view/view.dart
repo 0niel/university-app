@@ -2,6 +2,7 @@ export 'collab_notes_page.dart';
 export 'collab_notes_view.dart';
 export 'deadline_bucket.dart';
 export 'deadline_buckets.dart';
+export 'deadlines/add_deadline_sheet.dart';
 export 'deadlines_page.dart';
 export 'events_page.dart';
 export 'mentorship_page.dart';

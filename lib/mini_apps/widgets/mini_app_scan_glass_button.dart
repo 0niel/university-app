@@ -32,7 +32,7 @@ class MiniAppScanGlassButton extends StatelessWidget {
           child: Center(
             child: AppLineIconWidget(
               icon,
-              size: 20,
+              size: AppIconSize.md,
               color: active ? Colors.black : Colors.white,
             ),
           ),

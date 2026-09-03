@@ -1,128 +1,238 @@
-import 'package:app_ui/src/ninja/ninja_colors.dart';
-import 'package:app_ui/src/ninja/ninja_text.dart';
-import 'package:app_ui/src/ninja/surfaces/ninja_action_button.dart';
+import 'package:app_ui/src/colors/colors.dart';
+import 'package:app_ui/src/ninja/surfaces/ninja_pill_button.dart';
+import 'package:app_ui/src/ninja/surfaces/ninja_progress_bar.dart';
+import 'package:app_ui/src/spacing/app_spacing.dart';
+import 'package:app_ui/src/typography/typography.dart';
 import 'package:app_ui/src/widgets/app_line_icon.dart';
 import 'package:app_ui/src/widgets/app_pressable.dart';
 import 'package:flutter/widgets.dart';
+
+enum LessonRowState {
+  plain,
+  past,
+  current,
+  next,
+  moved,
+  cancelled,
+  exam,
+  own;
+
+  static const LessonRowState custom = LessonRowState.own;
+}
 
 class NinjaLessonRow extends StatelessWidget {
   const NinjaLessonRow({
     required this.title,
     required this.time,
     super.key,
+    this.endTime,
     this.meta,
     this.color,
+    this.typeLabel,
     this.chipLabel,
     this.chipColor,
     this.past = false,
     this.current = false,
+    this.state,
+    this.progress,
+    this.stateLabel,
     this.actions = const <NinjaLessonAction>[],
     this.onTap,
-    this.inset = NinjaMetrics.screenPadding,
+    this.onMore,
+    this.inset = AppSpacing.screen,
+    this.outerVerticalInset = AppSpacing.xs,
+    this.scheduleStyle = false,
+    this.padding = const EdgeInsets.symmetric(
+      horizontal: AppSpacing.lg,
+      vertical: AppSpacing.sectionGap,
+    ),
   });
 
   final String title;
   final String time;
+  final String? endTime;
   final String? meta;
   final Color? color;
+  final String? typeLabel;
   final String? chipLabel;
   final Color? chipColor;
   final bool past;
   final bool current;
+  final LessonRowState? state;
+  final double? progress;
+  final String? stateLabel;
   final List<NinjaLessonAction> actions;
   final VoidCallback? onTap;
+  final VoidCallback? onMore;
   final double inset;
+  final double outerVerticalInset;
+  final bool scheduleStyle;
+  final EdgeInsets padding;
+
+  LessonRowState get _state {
+    final state = this.state;
+    if (state != null) return state;
+    if (current) return LessonRowState.current;
+    if (past) return LessonRowState.past;
+    return LessonRowState.plain;
+  }
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
-    final accent = color ?? colors.subjectColor(title);
-    final foreground = current ? colors.onInk : colors.ink;
-    final secondary =
-        current ? colors.onInk.withValues(alpha: 0.68) : colors.mutedDark;
-    final largeText = MediaQuery.textScalerOf(context).scale(1) >= 1.5;
+    final colors = context.colors;
+    final state = _state;
+    final accent = switch (state) {
+      LessonRowState.past => colors.surface2,
+      LessonRowState.moved => colors.warn,
+      LessonRowState.cancelled || LessonRowState.exam => colors.exam,
+      LessonRowState.own => colors.ink,
+      _ => color ?? colors.accent,
+    };
+    final cardColor = switch (state) {
+      LessonRowState.current => colors.tint,
+      LessonRowState.exam => colors.examTint,
+      _ => colors.surface,
+    };
+    final titleColor = switch (state) {
+      LessonRowState.past => colors.muted2,
+      LessonRowState.cancelled => colors.muted,
+      _ => colors.ink,
+    };
+    final metaColor = switch (state) {
+      LessonRowState.past => colors.muted2,
+      LessonRowState.moved => colors.warn,
+      LessonRowState.cancelled => colors.danger,
+      _ => colors.muted,
+    };
+    final strike = state == LessonRowState.cancelled
+        ? TextDecoration.lineThrough
+        : TextDecoration.none;
+
     final chip = chipLabel;
     final metaText = meta;
+    final typeLabel = this.typeLabel;
+    final endTime = this.endTime;
+    final progress = this.progress;
+    final stateLabel = this.stateLabel;
 
     Widget row = Padding(
-      padding: EdgeInsets.symmetric(horizontal: inset, vertical: 4),
-      child: DecoratedBox(
+      padding: EdgeInsets.symmetric(
+        horizontal: inset,
+        vertical: outerVerticalInset,
+      ),
+      child: Container(
+        padding: padding,
         decoration: BoxDecoration(
-          color: current ? colors.ink : const Color(0x00000000),
-          borderRadius: BorderRadius.circular(20),
+          color: cardColor,
+          borderRadius: BorderRadius.circular(AppRadius.row),
         ),
-        child: Padding(
-          padding: const EdgeInsets.all(14),
+        child: IntrinsicHeight(
           child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Container(
-                width: 42,
-                height: 42,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: current
-                      ? colors.brand
-                      : accent.withValues(alpha: colors.isDark ? 0.22 : 0.14),
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                child: AppLineIconWidget(
-                  AppLineIcon.book,
-                  size: 20,
-                  color: current ? colors.onInk : accent,
+              SizedBox(
+                width: 44 *
+                    (MediaQuery.textScalerOf(context).scale(14) / 14)
+                        .clamp(1.0, 2.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      time,
+                      style: AppText.time.copyWith(
+                        color: titleColor,
+                        decoration: strike,
+                      ),
+                    ),
+                    if (endTime != null)
+                      Text(
+                        endTime,
+                        style: AppText.timeEnd.copyWith(color: metaColor),
+                      ),
+                  ],
                 ),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: AppSpacing.sectionGap),
+              DecoratedBox(
+                decoration: BoxDecoration(
+                  color: accent,
+                  borderRadius: BorderRadius.circular(AppRadius.xxs),
+                ),
+                child: const SizedBox(width: AppSpacing.xs),
+              ),
+              const SizedBox(width: AppSpacing.sectionGap),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    if (largeText) ...[
-                      _NinjaLessonTitle(
-                        title: title,
-                        chip: chip,
-                        chipColor: chipColor ?? colors.scarlet,
-                        foreground: foreground,
-                      ),
-                      const SizedBox(height: 5),
-                      _NinjaLessonTime(time: time, color: secondary),
-                    ] else
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                    if (typeLabel != null || chip != null)
+                      Wrap(
+                        spacing: AppSpacing.sm,
+                        runSpacing: AppSpacing.xs,
+                        crossAxisAlignment: WrapCrossAlignment.center,
                         children: [
-                          Expanded(
-                            child: _NinjaLessonTitle(
-                              title: title,
-                              chip: chip,
-                              chipColor: chipColor ?? colors.scarlet,
-                              foreground: foreground,
+                          if (typeLabel != null)
+                            Text(
+                              typeLabel,
+                              style: AppText.typeTag.copyWith(color: accent),
                             ),
-                          ),
-                          const SizedBox(width: 10),
-                          _NinjaLessonTime(time: time, color: secondary),
+                          if (chip != null)
+                            Text(
+                              chip,
+                              style: AppText.micro.copyWith(
+                                color: chipColor ?? colors.muted,
+                              ),
+                            ),
                         ],
                       ),
+                    if (typeLabel != null || chip != null)
+                      const SizedBox(height: AppSpacing.xs),
+                    Text(
+                      title,
+                      style: (scheduleStyle
+                              ? AppText.sans(16, FontWeight.w600)
+                              : AppText.headline)
+                          .copyWith(
+                        color: titleColor,
+                        height: 1.25,
+                        decoration: strike,
+                      ),
+                    ),
                     if (metaText != null) ...[
-                      const SizedBox(height: 4),
+                      SizedBox(height: scheduleStyle ? 5 : 4),
                       Text(
                         metaText,
-                        style: NinjaText.subtext.copyWith(color: secondary),
+                        style: (scheduleStyle
+                                ? AppText.sans(13, FontWeight.w400)
+                                : AppText.subtext)
+                            .copyWith(color: metaColor),
+                      ),
+                    ],
+                    if (progress != null) ...[
+                      const SizedBox(height: AppSpacing.gap),
+                      NinjaProgressBar(
+                        value: progress,
+                        height: 4,
+                        trackColor: colors.surface,
                       ),
                     ],
                     if (actions.isNotEmpty) ...[
-                      const SizedBox(height: 12),
+                      const SizedBox(height: AppSpacing.md),
                       Wrap(
-                        spacing: 8,
-                        runSpacing: 8,
+                        spacing: AppSpacing.sm,
+                        runSpacing: AppSpacing.sm,
                         children: [
                           for (final action in actions)
-                            NinjaActionButton(
+                            NinjaPillButton(
                               label: action.label,
                               onPressed: action.onPressed,
-                              tone: current || !action.primary
-                                  ? NinjaActionTone.surface
-                                  : NinjaActionTone.ink,
+                              height: 40,
+                              horizontalPadding: 14,
+                              tone: action.primary
+                                  ? NinjaPillTone.primary
+                                  : NinjaPillTone.secondary,
                             ),
                         ],
                       ),
@@ -130,13 +240,57 @@ class NinjaLessonRow extends StatelessWidget {
                   ],
                 ),
               ),
+              if (onMore != null) ...[
+                const SizedBox(width: AppSpacing.gap),
+                Align(
+                  alignment:
+                      scheduleStyle ? Alignment.topCenter : Alignment.center,
+                  child: Transform.translate(
+                    offset: Offset(0, scheduleStyle ? -4 : 0),
+                    child: AppPressable(
+                      onTap: onMore,
+                      semanticsButton: true,
+                      child: SizedBox.square(
+                        dimension: AppControlSize.touchTarget,
+                        child: Center(
+                          child: Container(
+                            width: 36,
+                            height: 36,
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              color: scheduleStyle ? null : colors.surface2,
+                              shape: BoxShape.circle,
+                            ),
+                            child: AppLineIconWidget(
+                              AppLineIcon.more,
+                              size: AppIconSize.compact,
+                              color: colors.muted,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ] else if (stateLabel != null) ...[
+                const SizedBox(width: AppSpacing.gap),
+                Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(minWidth: 52),
+                    child: Text(
+                      stateLabel,
+                      textAlign: TextAlign.end,
+                      style: AppText.micro.copyWith(color: colors.muted2),
+                    ),
+                  ),
+                ),
+              ],
             ],
           ),
         ),
       ),
     );
 
-    if (past) row = Opacity(opacity: 0.5, child: row);
     if (onTap != null) {
       row = Semantics(
         button: true,
@@ -160,61 +314,6 @@ class NinjaLessonAction {
   final bool primary;
 }
 
-class _NinjaLessonTitle extends StatelessWidget {
-  const _NinjaLessonTitle({
-    required this.title,
-    required this.chip,
-    required this.chipColor,
-    required this.foreground,
-  });
+typedef AppLessonRow = NinjaLessonRow;
 
-  final String title;
-  final String? chip;
-  final Color chipColor;
-  final Color foreground;
-
-  @override
-  Widget build(BuildContext context) {
-    final chip = this.chip;
-    return Wrap(
-      spacing: 8,
-      runSpacing: 5,
-      crossAxisAlignment: WrapCrossAlignment.center,
-      children: [
-        Text(title, style: NinjaText.headline.copyWith(color: foreground)),
-        if (chip != null)
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-            decoration: BoxDecoration(
-              color: chipColor.withValues(alpha: 0.14),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Text(
-              chip,
-              style: NinjaText.badge.copyWith(
-                letterSpacing: 0,
-                color: chipColor,
-              ),
-            ),
-          ),
-      ],
-    );
-  }
-}
-
-class _NinjaLessonTime extends StatelessWidget {
-  const _NinjaLessonTime({required this.time, required this.color});
-
-  final String time;
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    return Text(
-      time,
-      style: NinjaText.tabular(
-        NinjaText.subtext.copyWith(fontWeight: FontWeight.w700, color: color),
-      ),
-    );
-  }
-}
+typedef AppLessonAction = NinjaLessonAction;

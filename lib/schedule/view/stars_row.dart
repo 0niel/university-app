@@ -13,15 +13,15 @@ class _StarsRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     return Padding(
-      padding: const .only(bottom: 4),
+      padding: const .only(bottom: AppSpacing.xs),
       child: Row(
         children: [
           Expanded(
             child: Text(
               label,
-              style: NinjaText.body.copyWith(color: colors.ink),
+              style: AppText.body.copyWith(color: colors.ink),
             ),
           ),
           for (var i = 1; i <= 5; i++)
@@ -30,13 +30,13 @@ class _StarsRow extends StatelessWidget {
               semanticsLabel: '$label $i',
               semanticsSelected: i <= value,
               child: SizedBox.square(
-                dimension: NinjaMetrics.minTouchTarget,
+                dimension: AppControlSize.touchTarget,
                 child: Center(
                   child: Text(
                     '★',
                     style: TextStyle(
                       fontSize: 22,
-                      color: i <= value ? colors.brand : colors.disabledLine,
+                      color: i <= value ? colors.accent : colors.line,
                     ),
                   ),
                 ),

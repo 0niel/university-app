@@ -38,43 +38,58 @@ class _AppFlatCalendarState extends State<AppFlatCalendar> {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
+    final l10n = context.l10n;
+    final locale = l10n.localeName;
+    final month = toBeginningOfSentenceCase(
+      DateFormat.MMMM(locale).format(_focused),
+    );
     return Column(
-      spacing: 4,
       mainAxisSize: .min,
       children: [
         Row(
-          spacing: 8,
           children: [
             Expanded(
-              child: Text(
-                toBeginningOfSentenceCase(
-                      DateFormat('LLLL yyyy', 'ru').format(_focused),
-                    ) ??
-                    '',
-                style: NinjaText.body.copyWith(
-                  color: colors.ink,
-                  fontWeight: .w700,
+              child: Text.rich(
+                TextSpan(
+                  text: month,
+                  style: AppText.section.copyWith(color: colors.ink),
+                  children: [
+                    const TextSpan(text: '  '),
+                    TextSpan(
+                      text: DateFormat.y(locale).format(_focused),
+                      style: AppText.subtext.copyWith(color: colors.muted),
+                    ),
+                  ],
                 ),
               ),
             ),
             AppDatePickerNavButton(
               icon: .chevronL,
+              semanticsLabel: MaterialLocalizations.of(
+                context,
+              ).previousMonthTooltip,
               onTap: () => _shiftMonth(-1),
             ),
+            const SizedBox(width: 8),
             AppDatePickerNavButton(
               icon: .chevronR,
+              semanticsLabel: MaterialLocalizations.of(
+                context,
+              ).nextMonthTooltip,
               onTap: () => _shiftMonth(1),
             ),
           ],
         ),
+        const SizedBox(height: 10),
         TableCalendar(
           firstDay: widget.firstDay,
           lastDay: widget.lastDay,
           focusedDay: _focused,
           headerVisible: false,
           startingDayOfWeek: .monday,
-          rowHeight: 44,
+          rowHeight: AppDatePickerDayCell.height + 4,
+          daysOfWeekHeight: 22,
           availableGestures: .horizontalSwipe,
           enabledDayPredicate: widget.dateEnabledBuilder,
           selectedDayPredicate: widget.dateSelectedBuilder,
@@ -86,27 +101,27 @@ class _AppFlatCalendarState extends State<AppFlatCalendar> {
           calendarBuilders: CalendarBuilders<DateTime>(
             dowBuilder: (context, day) => Center(
               child: Text(
-                DateFormat.E('ru').format(day),
-                style: NinjaText.helper.copyWith(
-                  color: colors.muted,
+                DateFormat.E(locale).format(day).toUpperCase(),
+                style: AppText.sans(10, .w700, letterSpacingEm: 0.04).copyWith(
+                  color: day.weekday >= DateTime.saturday
+                      ? colors.muted2
+                      : colors.muted,
                 ),
               ),
             ),
-            defaultBuilder: (context, day, _) =>
-                AppDatePickerDayCell(day: day, color: colors.ink),
+            defaultBuilder: (context, day, _) => AppDatePickerDayCell(day: day),
             outsideBuilder: (context, day, _) => const SizedBox.shrink(),
-            disabledBuilder: (context, day, _) =>
-                AppDatePickerDayCell(day: day, color: colors.muted),
+            disabledBuilder: (context, day, _) => AppDatePickerDayCell(
+              day: day,
+              state: AppDatePickerDayState.disabled,
+            ),
             todayBuilder: (context, day, _) => AppDatePickerDayCell(
               day: day,
-              color: colors.ink,
-              background: colors.surface,
+              state: AppDatePickerDayState.today,
             ),
             selectedBuilder: (context, day, _) => AppDatePickerDayCell(
               day: day,
-              color: colors.onInk,
-              background: colors.ink,
-              bold: true,
+              state: AppDatePickerDayState.selected,
             ),
           ),
         ),

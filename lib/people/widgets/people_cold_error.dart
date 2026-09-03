@@ -31,7 +31,7 @@ class PeopleColdError extends StatelessWidget {
           icon: AppLineIconWidget(
             AppLineIcon.alert,
             size: 20,
-            color: context.ninja.scarlet,
+            color: context.colors.danger,
           ),
           retryLabel: l10n.retry,
           onRetry: () => unawaited(onRetry()),

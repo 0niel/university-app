@@ -134,3 +134,18 @@ async def test_story_media_failure_fails_the_snapshot_for_a_safe_retry() -> None
             fetcher=Fetcher(),
             channel="university",
         )
+
+
+async def test_missing_story_media_does_not_publish_an_empty_story() -> None:
+    class Fetcher:
+        async def download_story_media(self, *_: Any, **__: Any) -> None:
+            return None
+
+    with pytest.raises(ValueError, match="media is unavailable"):
+        await _prepare_story(
+            {"id": "story-42"},
+            settings=Settings(_env_file=None, APP_ORGANIZATION_ID="university"),
+            ingest=object(),
+            fetcher=Fetcher(),
+            channel="university",
+        )

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:equatable/equatable.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
@@ -59,6 +61,27 @@ class LocalNotificationsClient {
     : _plugin = plugin ?? FlutterLocalNotificationsPlugin();
 
   final FlutterLocalNotificationsPlugin _plugin;
+  static final _interactions = StreamController<String>.broadcast(sync: true);
+  static String? _pendingPayload;
+  static bool _launchCaptured = false;
+
+  Stream<String> get interactions => _interactions.stream;
+
+  String? takePendingInteraction() {
+    final payload = _pendingPayload;
+    _pendingPayload = null;
+    return payload;
+  }
+
+  static void _onInteraction(NotificationResponse response) {
+    final payload = response.payload;
+    if (payload == null || payload.isEmpty) return;
+    if (_interactions.hasListener) {
+      _interactions.add(payload);
+    } else {
+      _pendingPayload = payload;
+    }
+  }
 
   /// Android notification channel id for lesson reminders.
   static const channelId = 'lesson_reminders';
@@ -86,7 +109,16 @@ class LocalNotificationsClient {
     );
     await _plugin.initialize(
       settings: const InitializationSettings(android: android, iOS: darwin),
+      onDidReceiveNotificationResponse: _onInteraction,
     );
+    if (!_launchCaptured) {
+      final launch = await _plugin.getNotificationAppLaunchDetails();
+      _launchCaptured = true;
+      if (launch?.didNotificationLaunchApp == true &&
+          launch?.notificationResponse != null) {
+        _onInteraction(launch!.notificationResponse!);
+      }
+    }
 
     await _plugin
         .resolvePlatformSpecificImplementation<

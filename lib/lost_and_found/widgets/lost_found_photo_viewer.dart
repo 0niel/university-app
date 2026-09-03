@@ -32,8 +32,8 @@ class LostFoundPhotoViewer extends StatelessWidget {
                 context,
               ).closeButtonTooltip,
               child: Container(
-                width: NinjaMetrics.minTouchTarget,
-                height: NinjaMetrics.minTouchTarget,
+                width: AppControlSize.iconButton,
+                height: AppControlSize.iconButton,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
                   color: Colors.white.withValues(alpha: 0.14),

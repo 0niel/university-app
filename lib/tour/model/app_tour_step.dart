@@ -10,7 +10,7 @@ class AppTourStep {
     this.target,
     this.location,
     this.shape = NinjaSpotlightShape.rounded,
-    this.radius = 22,
+    this.radius = AppRadius.row,
     this.padding = 8,
     this.optional = true,
   });

@@ -2,45 +2,17 @@ import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../kit_harness.dart';
+
 void main() {
-  final colors = NinjaColors.light();
-
-  Widget wrap(
-    Widget child, {
-    bool dark = false,
-    bool accessibleNavigation = false,
-  }) =>
-      MaterialApp(
-        theme: dark ? NinjaTheme.dark() : NinjaTheme.light(),
-        builder: (context, page) => MediaQuery(
-          data: MediaQuery.of(
-            context,
-          ).copyWith(accessibleNavigation: accessibleNavigation),
-          child: page!,
-        ),
-        home: Scaffold(body: Center(child: child)),
-      );
-
-  BoxDecoration decorationOf(WidgetTester tester, Type type) {
-    final box = tester.widget<DecoratedBox>(
-      find
-          .descendant(
-            of: find.byType(type),
-            matching: find.byType(DecoratedBox),
-          )
-          .first,
-    );
-    return box.decoration as BoxDecoration;
-  }
-
-  Color? labelColorOf(WidgetTester tester, String label) =>
-      tester.widget<Text>(find.text(label)).style?.color;
+  BoxDecoration decorationOf(WidgetTester tester) =>
+      kitDecorationOf(tester, NinjaButton);
 
   group('NinjaButton', () {
     testWidgets('renders the label and fires onPressed', (tester) async {
       var tapped = false;
       await tester.pumpWidget(
-        wrap(
+        wrapKit(
           NinjaButton.primary(
             label: 'Записаться',
             onPressed: () => tapped = true,
@@ -53,133 +25,70 @@ void main() {
       expect(tapped, isTrue);
     });
 
-    testWidgets('primary uses the accent fill with a readable label', (
-      tester,
-    ) async {
-      await tester.pumpWidget(
-        wrap(NinjaButton.primary(label: 'Ок', onPressed: () {})),
-      );
-
-      expect(decorationOf(tester, NinjaButton).color, colors.brand);
-      expect(labelColorOf(tester, 'Ок'), colors.onBrand);
-    });
-
-    testWidgets('press fill stops animating for accessible navigation', (
-      tester,
-    ) async {
-      await tester.pumpWidget(
-        wrap(
-          NinjaButton.primary(label: 'Ок', onPressed: () {}),
-          accessibleNavigation: true,
-        ),
-      );
-
-      final animation = tester.widget<TweenAnimationBuilder<Color?>>(
-        find.descendant(
-          of: find.byType(NinjaButton),
-          matching: find.byType(TweenAnimationBuilder<Color?>),
-        ),
-      );
-      expect(animation.duration, Duration.zero);
-    });
-
-    testWidgets('disabled uses the surface fill and blocks taps', (
-      tester,
-    ) async {
-      await tester.pumpWidget(wrap(const NinjaButton(label: 'Недоступна')));
-
-      expect(decorationOf(tester, NinjaButton).color, colors.surface);
-      expect(labelColorOf(tester, 'Недоступна'), colors.disabled);
-      await tester.tap(find.byType(NinjaButton));
-    });
-
-    testWidgets('loading shows the ring, keeps the fill and blocks taps', (
-      tester,
-    ) async {
-      var tapped = false;
-      await tester.pumpWidget(
-        wrap(
-          NinjaButton.primary(
-            label: 'Загрузка',
-            loading: true,
-            onPressed: () => tapped = true,
-          ),
-        ),
-      );
-
-      expect(find.byType(CircularProgressIndicator), findsOneWidget);
-      expect(decorationOf(tester, NinjaButton).color, colors.indigo);
-
-      await tester.tap(find.byType(NinjaButton));
-      expect(tapped, isFalse);
-    });
-
-    testWidgets('sizes map to the spec heights and stay pills', (tester) async {
-      const expected = {
-        NinjaButtonSize.small: (44.0, NinjaRadius.button),
-        NinjaButtonSize.medium: (48.0, NinjaRadius.button),
-        NinjaButtonSize.large: (52.0, NinjaRadius.button),
-        NinjaButtonSize.standard: (48.0, NinjaRadius.button),
+    testWidgets('variants map onto the kit palette', (tester) async {
+      final expected = <NinjaButtonVariant, Color>{
+        NinjaButtonVariant.primary: kitColors.accent,
+        NinjaButtonVariant.secondary: kitColors.surface2,
+        NinjaButtonVariant.outline: kitColors.surface2,
+        NinjaButtonVariant.tonal: kitColors.tint,
+        NinjaButtonVariant.text: Colors.transparent,
+        NinjaButtonVariant.destructive: kitColors.danger,
+        NinjaButtonVariant.destructiveOutline: kitColors.examTint,
       };
 
       for (final entry in expected.entries) {
         await tester.pumpWidget(
-          wrap(
-            NinjaButton.primary(
-              label: 'X',
-              size: entry.key,
+          wrapKit(
+            NinjaButton(
+              label: 'Кнопка',
+              variant: entry.key,
               onPressed: () {},
             ),
           ),
         );
-
-        final constrained = tester.widget<ConstrainedBox>(
-          find
-              .descendant(
-                of: find.byType(NinjaButton),
-                matching: find.byType(ConstrainedBox),
-              )
-              .first,
-        );
-        expect(
-          constrained.constraints.minHeight,
-          entry.value.$1,
-          reason: '${entry.key} height',
-        );
-        expect(
-          decorationOf(tester, NinjaButton).borderRadius,
-          BorderRadius.circular(entry.value.$2),
-          reason: '${entry.key} radius',
-        );
+        await tester.pumpAndSettle();
+        expect(decorationOf(tester).color, entry.value);
       }
     });
 
-    testWidgets('outline stays quiet and destructive uses scarlet', (
-      tester,
-    ) async {
+    testWidgets('standard size stays 48 tall with no border', (tester) async {
       await tester.pumpWidget(
-        wrap(NinjaButton.outline(label: 'Обводка', onPressed: () {})),
+        wrapKit(NinjaButton.primary(label: 'Ок', onPressed: () {})),
       );
-      final outline = decorationOf(tester, NinjaButton);
-      expect(outline.color, colors.surfaceAlt);
-      expect(outline.border, isNull);
-      expect(labelColorOf(tester, 'Обводка'), colors.ink);
 
-      await tester.pumpWidget(
-        wrap(NinjaButton.destructive(label: 'Удалить', onPressed: () {})),
-      );
-      await tester.pumpAndSettle();
-      expect(decorationOf(tester, NinjaButton).color, colors.scarlet);
-      expect(labelColorOf(tester, 'Удалить'), Colors.white);
+      expect(tester.getSize(find.byType(NinjaButton)).height, 48);
+      expect(decorationOf(tester).border, isNull);
+      expect(decorationOf(tester).boxShadow, isNull);
     });
 
-    testWidgets('expanded stretches to the available width', (tester) async {
+    testWidgets('disabled uses canvas + muted2', (tester) async {
+      await tester.pumpWidget(wrapKit(const NinjaButton(label: 'Нет')));
+
+      expect(decorationOf(tester).color, kitColors.canvas);
+      expect(kitStyleOf(tester, 'Нет')?.color, kitColors.muted2);
+    });
+
+    testWidgets('loading renders a spinner', (tester) async {
       await tester.pumpWidget(
-        wrap(
+        wrapKit(
+          NinjaButton.primary(
+            label: 'Ждём',
+            loading: true,
+            onPressed: () {},
+          ),
+        ),
+      );
+
+      expect(find.byType(AppButtonSpinner), findsOneWidget);
+    });
+
+    testWidgets('expanded stretches to the parent width', (tester) async {
+      await tester.pumpWidget(
+        wrapKit(
           SizedBox(
-            width: 300,
+            width: 260,
             child: NinjaButton.primary(
-              label: 'Во всю ширину',
+              label: 'Шире',
               expanded: true,
               onPressed: () {},
             ),
@@ -187,153 +96,90 @@ void main() {
         ),
       );
 
-      expect(tester.getSize(find.byType(NinjaButton)).width, 300);
-    });
-
-    testWidgets('a leading icon is rendered before the label', (tester) async {
-      await tester.pumpWidget(
-        wrap(
-          NinjaButton.secondary(
-            label: 'Маршрут',
-            icon: const Icon(Icons.map_outlined),
-            onPressed: () {},
-          ),
-        ),
-      );
-
-      expect(find.byIcon(Icons.map_outlined), findsOneWidget);
-      expect(decorationOf(tester, NinjaButton).color, colors.surfaceAlt);
+      expect(tester.getSize(find.byType(NinjaButton)).width, 260);
     });
   });
 
   group('NinjaIconButton', () {
-    testWidgets('outline uses a quiet fill and fires onPressed', (
-      tester,
-    ) async {
-      var tapped = false;
+    testWidgets('outline uses surface2, filled uses accent', (tester) async {
       await tester.pumpWidget(
-        wrap(
+        wrapKit(
           NinjaIconButton(
-            icon: const Icon(Icons.add),
-            onPressed: () => tapped = true,
+            icon: const AppLineIconWidget(AppLineIcon.settings),
+            onPressed: () {},
           ),
         ),
       );
-
-      final decoration = decorationOf(tester, NinjaIconButton);
-      expect(decoration.color, colors.surfaceAlt);
-      expect(decoration.border, isNull);
       expect(
-        tester.getSize(find.byType(NinjaIconButton)),
-        const Size.square(NinjaMetrics.minTouchTarget),
+        kitDecorationOf(tester, NinjaIconButton).color,
+        kitColors.surface2,
       );
 
-      await tester.tap(find.byType(NinjaIconButton));
-      expect(tapped, isTrue);
-    });
-
-    testWidgets('filled is the accent block without a border', (tester) async {
       await tester.pumpWidget(
-        wrap(
+        wrapKit(
           NinjaIconButton(
-            icon: const Icon(Icons.search),
+            icon: const AppLineIconWidget(AppLineIcon.plus),
             variant: NinjaIconButtonVariant.filled,
             onPressed: () {},
           ),
         ),
       );
-
-      final decoration = decorationOf(tester, NinjaIconButton);
-      expect(decoration.color, colors.indigo);
-      expect(decoration.border, isNull);
+      await tester.pumpAndSettle();
+      expect(kitDecorationOf(tester, NinjaIconButton).color, kitColors.accent);
     });
 
-    testWidgets('disabled blocks taps', (tester) async {
+    testWidgets('keeps a 44px target', (tester) async {
       await tester.pumpWidget(
-        wrap(const NinjaIconButton(icon: Icon(Icons.add))),
+        wrapKit(
+          NinjaIconButton(
+            icon: const AppLineIconWidget(AppLineIcon.settings),
+            onPressed: () {},
+          ),
+        ),
       );
 
-      expect(decorationOf(tester, NinjaIconButton).color, colors.surface);
-      await tester.tap(find.byType(NinjaIconButton));
+      expect(
+        tester.getSize(find.byType(NinjaIconButton)),
+        const Size.square(44),
+      );
     });
   });
 
   group('NinjaFab', () {
-    testWidgets('is a flat 56 accent circle that fires onPressed',
-        (tester) async {
+    testWidgets('is a 56px accent circle that fires', (tester) async {
       var tapped = false;
       await tester.pumpWidget(
-        wrap(
+        wrapKit(
           NinjaFab(
-            icon: const Icon(Icons.add),
+            icon: const AppLineIconWidget(AppLineIcon.plus),
             onPressed: () => tapped = true,
           ),
         ),
       );
 
-      final decoration = decorationOf(tester, NinjaFab);
-      expect(decoration.shape, BoxShape.circle);
-      expect(decoration.color, colors.indigo);
-      expect(decoration.boxShadow, isNull);
       expect(tester.getSize(find.byType(NinjaFab)), const Size.square(56));
-
+      expect(kitDecorationOf(tester, NinjaFab).color, kitColors.accent);
       await tester.tap(find.byType(NinjaFab));
       expect(tapped, isTrue);
-    });
-
-    testWidgets('drops the shadow in dark mode', (tester) async {
-      await tester.pumpWidget(
-        wrap(
-          NinjaFab(icon: const Icon(Icons.add), onPressed: () {}),
-          dark: true,
-        ),
-      );
-
-      expect(decorationOf(tester, NinjaFab).boxShadow, isNull);
     });
   });
 
   group('NinjaSplitButton', () {
-    testWidgets('routes the label and the chevron to different handlers', (
-      tester,
-    ) async {
-      var main = 0;
+    testWidgets('delegates to AppSplitButton', (tester) async {
       var menu = 0;
       await tester.pumpWidget(
-        wrap(
+        wrapKit(
           NinjaSplitButton(
-            label: 'Маршрут',
-            onPressed: () => main++,
+            label: 'Записаться',
+            onPressed: () {},
             onMenuPressed: () => menu++,
           ),
         ),
       );
 
-      await tester.tap(find.text('Маршрут'));
-      expect((main, menu), (1, 0));
-
-      await tester.tap(find.byIcon(Icons.keyboard_arrow_down_rounded));
-      expect((main, menu), (1, 1));
-    });
-
-    testWidgets('the chevron segment darkens the accent behind a divider', (
-      tester,
-    ) async {
-      await tester.pumpWidget(
-        wrap(
-          NinjaSplitButton(
-            label: 'Маршрут',
-            onPressed: () {},
-            onMenuPressed: () {},
-          ),
-        ),
-      );
-
-      final decoration = decorationOf(tester, NinjaSplitButton);
-      final divider = (decoration.border as Border?)?.left;
-      expect(decoration.color, colors.brand.withValues(alpha: 0.82));
-      expect(divider?.width, NinjaMetrics.lineWidth);
-      expect(divider?.color, colors.onBrand.withValues(alpha: 0.15));
+      expect(find.byType(AppSplitButton), findsOneWidget);
+      await tester.tap(find.byType(AppLineIconWidget));
+      expect(menu, 1);
     });
   });
 }

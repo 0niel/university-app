@@ -6,38 +6,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:lost_and_found_repository/lost_and_found_repository.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:rtu_mirea_app/lost_and_found/lost_and_found.dart';
-import 'package:rtu_mirea_app/lost_and_found/widgets/lost_found_empty_state.dart';
-import 'package:rtu_mirea_app/lost_and_found/widgets/lost_found_item_skeleton.dart';
 import 'package:rtu_mirea_app/lost_and_found/widgets/lost_found_photo_thumbnail.dart';
 
 import '../../helpers/mocks/mock_lost_found_cubit.dart';
-
-BoxDecoration _ctaDecoration(WidgetTester tester) {
-  final container = tester.widget<Container>(
-    find
-        .descendant(
-          of: find.byType(LostFoundReportCta),
-          matching: find.byType(Container),
-        )
-        .first,
-  );
-  return container.decoration! as BoxDecoration;
-}
-
-int _pastelCardCount(WidgetTester tester, Color accentSoft) {
-  var count = 0;
-  for (final box in tester.widgetList<DecoratedBox>(
-    find.byType(DecoratedBox),
-  )) {
-    final decoration = box.decoration;
-    if (decoration is BoxDecoration && decoration.color == accentSoft) {
-      count++;
-    }
-  }
-  return count;
-}
+import '../../helpers/pump_app.dart';
 
 void main() {
   late LostFoundCubit cubit;
@@ -53,276 +26,146 @@ void main() {
 
   setUp(() => cubit = MockLostFoundCubit());
 
-  Widget buildSubject(LostFoundState state) {
+  Widget subject(LostFoundState state) {
     when(() => cubit.state).thenReturn(state);
-    return MaterialApp(
-      theme: NinjaTheme.dark(),
-      localizationsDelegates: AppLocalizations.localizationsDelegates,
-      supportedLocales: AppLocalizations.supportedLocales,
-      locale: const Locale('ru'),
-      home: BlocProvider<LostFoundCubit>.value(
-        value: cubit,
-        child: const LostFoundView(),
-      ),
+    return BlocProvider<LostFoundCubit>.value(
+      value: cubit,
+      child: const LostFoundView(),
     );
   }
 
-  testWidgets('uses a skeleton instead of a spinner during cold load', (
-    tester,
-  ) async {
-    await tester.pumpWidget(
-      buildSubject(const LostFoundState(status: .loading)),
-    );
-    await tester.pump(const Duration(milliseconds: 16));
-    await tester.pump(const Duration(milliseconds: 400));
+  Future<void> openReport(WidgetTester tester) async {
+    final header = tester.widget<AppInnerHeader>(find.byType(AppInnerHeader));
+    header.actions.first.onTap!();
+    await tester.pumpAndSettle();
+  }
 
-    expect(find.byType(LostFoundListSkeleton), findsOneWidget);
+  testWidgets('cold loading uses the row skeleton scene', (tester) async {
+    await tester.pumpApp(subject(const LostFoundState(status: .loading)));
+    expect(find.byType(LostFoundSkeleton), findsOneWidget);
     expect(find.byType(CircularProgressIndicator), findsNothing);
     expect(find.byType(NinjaSkeletonGroup), findsOneWidget);
-    expect(tester.binding.transientCallbackCount, 1);
   });
 
-  testWidgets('keeps search available and routes catalogue filters', (
-    tester,
-  ) async {
-    await tester.pumpWidget(
-      buildSubject(LostFoundState(status: .ready, items: [item])),
+  testWidgets('segmented filters hide nonmatching real items', (tester) async {
+    await tester.pumpApp(
+      subject(LostFoundState(status: .ready, items: [item])),
     );
-
-    expect(find.byType(TextField), findsOneWidget);
-    expect(find.byType(Divider), findsNothing);
-
-    await tester.enterText(find.byType(TextField), 'ключ');
-    verify(() => cubit.queryChanged('ключ')).called(1);
-
-    await tester.tap(find.text('Потеряли · 0'));
-    verify(() => cubit.tabChanged(LostFoundItemStatus.lost)).called(1);
-
-    await tester.tap(
-      find.descendant(
-        of: find.byType(LostFoundCategoryPicker),
-        matching: find.text('Ключи'),
-      ),
-    );
-    verify(() => cubit.categoryChanged('keys')).called(1);
+    expect(find.byType(LostFoundRow), findsOneWidget);
+    await tester.tap(find.text('Ищут'));
+    await tester.pumpAndSettle();
+    expect(find.byType(LostFoundRow), findsNothing);
+    await tester.tap(find.text('Все'));
+    await tester.pumpAndSettle();
+    expect(find.byType(LostFoundRow), findsOneWidget);
   });
 
-  testWidgets('interactive filters and photo removal meet touch targets', (
+  testWidgets('photo removal keeps its 44px target and callback', (
     tester,
   ) async {
-    await tester.pumpWidget(
-      buildSubject(LostFoundState(status: .ready, items: [item])),
-    );
-    await tester.pump(const Duration(milliseconds: 400));
-
-    final categoryButton = find.ancestor(
-      of: find.descendant(
-        of: find.byType(LostFoundCategoryPicker),
-        matching: find.text('Ключи'),
-      ),
-      matching: find.byType(AppPressable),
-    );
-    expect(tester.getSize(categoryButton).height, greaterThanOrEqualTo(44));
-
     var removed = false;
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: AppTheme.lightTheme,
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
-        locale: const Locale('ru'),
-        home: Scaffold(
-          body: LostFoundPhotoThumbnail(
-            image: LostFoundImageUpload(
-              bytes: base64Decode(
-                'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0l'
-                'EQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=',
-              ),
-              contentType: 'image/png',
+    await tester.pumpApp(
+      Scaffold(
+        body: LostFoundPhotoThumbnail(
+          image: LostFoundImageUpload(
+            bytes: base64Decode(
+              'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0l'
+              'EQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=',
             ),
-            onRemove: () => removed = true,
+            contentType: 'image/png',
           ),
+          onRemove: () => removed = true,
         ),
       ),
     );
-    await tester.pump();
-
-    final removeButton = find.byType(AppPressable);
-    expect(tester.getSize(removeButton), const Size(44, 44));
-    await tester.tap(removeButton);
+    final button = find.byType(AppPressable);
+    expect(tester.getSize(button), const Size(44, 44));
+    await tester.tap(button);
     expect(removed, isTrue);
   });
 
-  testWidgets('accessibility navigation disables catalogue transitions', (
+  testWidgets('accessible navigation keeps tabs and report action usable', (
     tester,
   ) async {
-    await tester.pumpWidget(
+    await tester.pumpApp(
       MediaQuery(
         data: const MediaQueryData(accessibleNavigation: true),
-        child: buildSubject(LostFoundState(status: .ready, items: [item])),
+        child: subject(LostFoundState(status: .ready, items: [item])),
       ),
     );
-
-    expect(
-      find.descendant(
-        of: find.byType(LostFoundCategoryPicker),
-        matching: find.byType(NinjaChip),
-      ),
-      findsWidgets,
-    );
-
-    final tabTransitions = tester.widgetList<AnimatedContainer>(
-      find.descendant(
-        of: find.byType(NinjaSegmented<LostFoundItemStatus>),
-        matching: find.byType(AnimatedContainer),
-      ),
-    );
-    expect(tabTransitions, isNotEmpty);
-    expect(
-      tabTransitions.every(
-        (transition) => transition.duration == Duration.zero,
-      ),
-      isTrue,
-    );
-
-    await tester.tap(find.byType(LostFoundReportCta));
+    await tester.tap(find.text('Нашли').first);
     await tester.pumpAndSettle();
-    final reportTransition = tester.widget<AnimatedContainer>(
-      find
-          .ancestor(
-            of: find.descendant(
-              of: find.byType(LostFoundReportSheet),
-              matching: find.byWidgetPredicate(
-                (widget) =>
-                    widget is AppLineIconWidget &&
-                    widget.icon == AppLineIcon.heart,
-              ),
-            ),
-            matching: find.byType(AnimatedContainer),
-          )
-          .first,
-    );
-    expect(
-      reportTransition.duration,
-      Duration.zero,
-    );
+    expect(find.byType(LostFoundRow), findsOneWidget);
+    await openReport(tester);
+    expect(find.byType(LostFoundReportSheet), findsOneWidget);
+    expect(tester.takeException(), isNull);
   });
 
-  testWidgets('large-text skeleton matches the catalogue card extent', (
+  testWidgets('loading skeleton fits 320px with large text', (tester) async {
+    await tester.pumpApp(
+      subject(const LostFoundState(status: .loading)),
+      size: const Size(320, 760),
+      textScaler: const TextScaler.linear(2),
+    );
+    expect(find.byType(LostFoundSkeleton), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('security help is present with populated listings', (
     tester,
   ) async {
-    tester.view.physicalSize = const Size(320, 760);
-    tester.view.devicePixelRatio = 1;
-    addTearDown(tester.view.resetPhysicalSize);
-    addTearDown(tester.view.resetDevicePixelRatio);
-
-    await tester.pumpWidget(
-      MediaQuery(
-        data: const MediaQueryData(textScaler: TextScaler.linear(2)),
-        child: buildSubject(const LostFoundState(status: .loading)),
-      ),
+    await tester.pumpApp(
+      subject(LostFoundState(status: .ready, items: [item])),
     );
-    await tester.pump(const Duration(milliseconds: 400));
-    await tester.drag(find.byType(CustomScrollView), const Offset(0, -600));
-    await tester.pump();
-
-    expect(
-      tester.getSize(find.byType(LostFoundItemSkeleton).first).height,
-      290,
-    );
+    expect(find.byType(LostFoundSecurityCard), findsOneWidget);
+    expect(find.byType(AppInnerHeader), findsOneWidget);
   });
 
-  testWidgets("the report card is the screen's only pastel card", (
+  testWidgets('security help remains visible while loading', (tester) async {
+    await tester.pumpApp(subject(const LostFoundState(status: .loading)));
+    expect(find.byType(LostFoundSecurityCard), findsOneWidget);
+    expect(find.byType(LostFoundSkeleton), findsOneWidget);
+  });
+
+  testWidgets('empty catalogue still offers a real report action', (
     tester,
   ) async {
-    await tester.pumpWidget(
-      buildSubject(LostFoundState(status: .ready, items: [item])),
-    );
-    await tester.pump(const Duration(milliseconds: 400));
-
-    final colors = tester.element(find.byType(LostFoundView)).ninja;
-    final decoration = _ctaDecoration(tester);
-    expect(decoration.color, colors.accentSoft);
-    expect(decoration.border, isNull);
-    expect(decoration.boxShadow, isNull);
-    expect(decoration.borderRadius, BorderRadius.circular(NinjaRadius.card));
-    expect(_pastelCardCount(tester, colors.accentSoft), 1);
-  });
-
-  testWidgets('the pastel report card renders plain while loading', (
-    tester,
-  ) async {
-    await tester.pumpWidget(
-      buildSubject(const LostFoundState(status: .loading)),
-    );
-    await tester.pump(const Duration(milliseconds: 400));
-
-    final colors = tester.element(find.byType(LostFoundView)).ninja;
-    expect(_ctaDecoration(tester).color, colors.surface);
-    expect(_pastelCardCount(tester, colors.accentSoft), 0);
-  });
-
-  testWidgets('the empty state offers a report action', (tester) async {
-    await tester.pumpWidget(buildSubject(const LostFoundState(status: .ready)));
-    await tester.pump(const Duration(milliseconds: 400));
-
-    expect(find.byType(LostFoundEmptyState), findsOneWidget);
-
-    await tester.tap(
-      find.descendant(
-        of: find.byType(LostFoundEmptyState),
-        matching: find.text('Сообщить'),
-      ),
-    );
-    await tester.pumpAndSettle();
-
+    await tester.pumpApp(subject(const LostFoundState(status: .ready)));
+    expect(find.byType(NinjaEmptyState), findsOneWidget);
+    await openReport(tester);
     expect(find.byType(LostFoundReportSheet), findsOneWidget);
   });
 
-  testWidgets('shows a retryable cold error instead of an empty state', (
+  testWidgets('cold failure offers retry instead of false empty state', (
     tester,
   ) async {
     when(() => cubit.load()).thenAnswer((_) async => true);
-    await tester.pumpWidget(
-      buildSubject(const LostFoundState(status: .failure)),
-    );
-    await tester.pump(const Duration(milliseconds: 400));
-
+    await tester.pumpApp(subject(const LostFoundState(status: .failure)));
     expect(find.text('Не удалось загрузить объявления'), findsOneWidget);
-    expect(find.text('Находок пока нет'), findsNothing);
     await tester.tap(find.text('Повторить'));
     verify(() => cubit.load()).called(1);
   });
 
-  testWidgets('report form keeps contact sharing off until opted in', (
+  testWidgets('report sharing starts disabled until explicit consent', (
     tester,
   ) async {
-    await tester.pumpWidget(buildSubject(const LostFoundState(status: .ready)));
-
-    await tester.tap(find.byType(LostFoundReportCta));
-    await tester.pumpAndSettle();
-
-    final consent = tester.widget<NinjaSwitch>(find.byType(NinjaSwitch));
-    expect(consent.value, isFalse);
+    await tester.pumpApp(subject(const LostFoundState(status: .ready)));
+    await openReport(tester);
+    expect(tester.widget<NinjaSwitch>(find.byType(NinjaSwitch)).value, isFalse);
     expect(find.textContaining('моего университета'), findsWidgets);
   });
 
-  testWidgets('confirms deletion before invoking the Cubit', (tester) async {
+  testWidgets('deletion requires confirmation before the cubit mutation', (
+    tester,
+  ) async {
     when(() => cubit.deleteItem(item)).thenAnswer((_) async => true);
-    await tester.pumpWidget(
-      buildSubject(LostFoundState(status: .ready, items: [item])),
+    await tester.pumpApp(
+      subject(LostFoundState(status: .ready, items: [item])),
     );
-
-    await tester.tap(
-      find.descendant(
-        of: find.byType(LostFoundItemCard),
-        matching: find.text('Ключи'),
-      ),
-    );
+    await tester.tap(find.text('Ключи'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Удалить объявление'));
     await tester.pumpAndSettle();
-
     expect(find.text('Удалить объявление?'), findsOneWidget);
     verifyNever(() => cubit.deleteItem(item));
     await tester.tap(
@@ -335,45 +178,31 @@ void main() {
     verify(() => cubit.deleteItem(item)).called(1);
   });
 
-  testWidgets('does not expose an email fallback when contact is private', (
+  testWidgets('private contacts never fall back to an email address', (
     tester,
   ) async {
-    final privateItem = item.copyWith(isMine: false, authorName: 'Иван И.');
-    await tester.pumpWidget(
-      buildSubject(LostFoundState(status: .ready, items: [privateItem])),
-    );
-
-    await tester.tap(
-      find.descendant(
-        of: find.byType(LostFoundItemCard),
-        matching: find.text('Ключи'),
+    await tester.pumpApp(
+      subject(
+        LostFoundState(
+          status: .ready,
+          items: [item.copyWith(isMine: false, authorName: 'Иван И.')],
+        ),
       ),
     );
+    await tester.tap(find.text('Ключи'));
     await tester.pumpAndSettle();
-
     expect(find.text('Автор не разрешил показывать контакты'), findsOneWidget);
     expect(find.textContaining('@'), findsNothing);
   });
 
-  testWidgets('supports 320px width at 200% text scale', (tester) async {
-    tester.view.physicalSize = const Size(320, 760);
-    tester.view.devicePixelRatio = 1;
-    addTearDown(tester.view.resetPhysicalSize);
-    addTearDown(tester.view.resetDevicePixelRatio);
-
-    await tester.pumpWidget(
-      MediaQuery(
-        data: const MediaQueryData(textScaler: TextScaler.linear(2)),
-        child: buildSubject(LostFoundState(status: .ready, items: [item])),
-      ),
+  testWidgets('ready rows fit 320px at 200 percent text', (tester) async {
+    await tester.pumpApp(
+      subject(LostFoundState(status: .ready, items: [item])),
+      size: const Size(320, 760),
+      textScaler: const TextScaler.linear(2),
     );
     await tester.pumpAndSettle();
-
     expect(tester.takeException(), isNull);
-    await tester.drag(find.byType(CustomScrollView), const Offset(0, -600));
-    await tester.pumpAndSettle();
-
-    expect(tester.takeException(), isNull);
-    expect(find.byType(LostFoundItemCard), findsOneWidget);
+    expect(find.byType(LostFoundRow), findsOneWidget);
   });
 }

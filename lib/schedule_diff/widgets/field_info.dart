@@ -14,62 +14,62 @@ class FieldInfo {
 FieldInfo fieldInfo(
   LessonField field,
   AppLocalizations l10n,
-  NinjaColors palette,
+  AppColors palette,
 ) {
   switch (field) {
     case .lessonType:
       return FieldInfo(
         l10n.scheduleDiffFieldLessonType,
         AppLineIcon.book,
-        palette.indigo,
+        palette.accent,
       );
     case .time:
       return FieldInfo(
         l10n.scheduleDiffFieldTime,
         AppLineIcon.clock,
-        palette.scarlet,
+        palette.exam,
       );
     case .number:
       return FieldInfo(
         l10n.scheduleDiffFieldNumber,
         AppLineIcon.focus,
-        palette.orange,
+        palette.warn,
       );
     case .teachers:
       return FieldInfo(
         l10n.scheduleDiffFieldTeachers,
         AppLineIcon.school,
-        palette.indigo,
+        palette.accent,
       );
     case .classrooms:
       return FieldInfo(
         l10n.scheduleDiffFieldClassrooms,
         AppLineIcon.pin,
-        palette.green,
+        palette.lecture,
       );
     case .dates:
       return FieldInfo(
         l10n.scheduleDiffFieldDates,
         AppLineIcon.calendar,
-        palette.amber,
+        palette.warn,
       );
     case .groups:
       return FieldInfo(
         l10n.scheduleDiffFieldGroups,
         AppLineIcon.people,
-        palette.scarlet,
+        palette.exam,
       );
   }
 }
 
-Color changeColor(ChangeKind kind, NinjaColors colors) {
+Color changeColor(ChangeKind kind, AppColors colors) {
   switch (kind) {
     case .added:
-      return colors.green;
+      return colors.lecture;
     case .modified:
-      return colors.amber;
+      return colors.warn;
     case .removed:
-      return colors.scarlet;
+      return colors.exam;
   }
 }
 

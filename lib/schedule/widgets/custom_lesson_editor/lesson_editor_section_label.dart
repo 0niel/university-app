@@ -9,6 +9,6 @@ class LessonEditorSectionLabel extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Text(
     text,
-    style: NinjaText.headline.copyWith(color: context.ninja.ink),
+    style: AppText.headline.copyWith(color: context.colors.ink),
   );
 }

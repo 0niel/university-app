@@ -69,7 +69,7 @@ class _ReviewSheetState extends State<_ReviewSheet> {
     mainAxisSize: .min,
     crossAxisAlignment: .start,
     children: [
-      NinjaInput.multiline(
+      AppInputField.multiline(
         controller: _controller,
         maxLines: 5,
         maxLength: 800,
@@ -80,8 +80,8 @@ class _ReviewSheetState extends State<_ReviewSheet> {
         value: _anonymous,
         onChanged: (value) => setState(() => _anonymous = value),
       ),
-      const SizedBox(height: 10),
-      NinjaButton.primary(
+      const SizedBox(height: AppSpacing.gap),
+      AppButton.primary(
         label: _saving
             ? context.l10n.lessonDetailsSaving
             : context.l10n.lessonDetailsSubmitReview,

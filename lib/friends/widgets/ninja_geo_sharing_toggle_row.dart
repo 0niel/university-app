@@ -17,7 +17,7 @@ class _NinjaGeoSharingToggleRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final onChanged = this.onChanged;
     final enabled = onChanged != null;
     final row = Semantics(
@@ -39,16 +39,16 @@ class _NinjaGeoSharingToggleRow extends StatelessWidget {
                   height: 34,
                   alignment: .center,
                   decoration: BoxDecoration(
-                    color: colors.surfaceAlt,
-                    borderRadius: .circular(11),
+                    color: colors.surface2,
+                    borderRadius: .circular(AppRadius.badge),
                   ),
                   child: AppLineIconWidget(
                     icon,
                     size: 18,
-                    color: colors.mutedDark,
+                    color: colors.muted,
                   ),
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: AppSpacing.md),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: .start,
@@ -58,7 +58,7 @@ class _NinjaGeoSharingToggleRow extends StatelessWidget {
                         title,
                         maxLines: 2,
                         overflow: .ellipsis,
-                        style: NinjaText.body.copyWith(
+                        style: AppText.body.copyWith(
                           color: colors.ink,
                           fontWeight: .w600,
                         ),
@@ -68,12 +68,12 @@ class _NinjaGeoSharingToggleRow extends StatelessWidget {
                         subtitle,
                         maxLines: 2,
                         overflow: .ellipsis,
-                        style: NinjaText.helper.copyWith(color: colors.muted),
+                        style: AppText.caption.copyWith(color: colors.muted),
                       ),
                     ],
                   ),
                 ),
-                const SizedBox(width: 10),
+                const SizedBox(width: AppSpacing.gap),
                 NinjaSwitch(value: value, onChanged: onChanged),
               ],
             ),

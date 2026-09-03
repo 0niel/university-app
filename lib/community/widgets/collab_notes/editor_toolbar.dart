@@ -24,18 +24,21 @@ class EditorToolbar extends StatelessWidget {
     final state = context.watch<NoteEditorCubit>().state;
     return Padding(
       padding: const EdgeInsets.fromLTRB(
-        NinjaMetrics.screenPadding,
-        6,
-        NinjaMetrics.screenPadding,
-        10,
+        AppSpacing.screen,
+        AppSpacing.xsm,
+        AppSpacing.screen,
+        AppSpacing.gap,
       ),
       child: DecoratedBox(
         decoration: BoxDecoration(
-          color: context.ninja.surface,
-          borderRadius: BorderRadius.circular(NinjaRadius.pill),
+          color: context.colors.surface,
+          borderRadius: BorderRadius.circular(AppRadius.full),
         ),
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.sm,
+            vertical: AppSpacing.sm,
+          ),
           child: Row(
             spacing: 8,
             children: [

@@ -22,7 +22,7 @@ void main() {
 
     await tester.pumpWidget(_app(cubit));
 
-    expect(find.byType(NinjaBanner), findsOneWidget);
+    expect(find.byType(AppErrorState), findsOneWidget);
     expect(find.text('Ошибка'), findsOneWidget);
     expect(find.textContaining('Сервер не подтвердил'), findsOneWidget);
     expect(find.textContaining('Повторить'), findsOneWidget);
@@ -33,7 +33,6 @@ void main() {
     addTearDown(cubit.close);
     const state = FriendsMapState(
       isGhost: true,
-      geoSettings: GeoSharingSettings(sharing: false),
     );
     when(() => cubit.state).thenReturn(state);
 
@@ -55,8 +54,8 @@ void main() {
 
     await tester.pumpWidget(_app(cubit));
 
-    expect(find.byType(NinjaSegmented<GeoVisibility>), findsOneWidget);
-    expect(find.byType(NinjaSegmented<GeoPrecision>), findsOneWidget);
+    expect(find.byType(AppSegmentedControl<GeoVisibility>), findsOneWidget);
+    expect(find.byType(AppSegmentedControl<GeoPrecision>), findsOneWidget);
     expect(find.text('Все друзья'), findsOneWidget);
     expect(find.text('Никто'), findsOneWidget);
     expect(find.text('тебя нет на карте'), findsNothing);
@@ -89,7 +88,7 @@ void main() {
 
     verify(
       () => cubit.updateGeoSettings(
-        const GeoSharingSettings(sharing: false),
+        const GeoSharingSettings(sharing: true),
       ),
     ).called(1);
   });

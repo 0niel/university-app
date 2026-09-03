@@ -6,7 +6,7 @@ class _WalletStatBlockSkeleton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const Expanded(
-      child: NinjaSkeleton(height: 60, radius: NinjaRadius.control),
+      child: NinjaSkeleton(height: 60, radius: AppRadius.field),
     );
   }
 }

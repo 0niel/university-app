@@ -15,8 +15,7 @@ class KnowledgeBankListSkeleton extends StatelessWidget {
       label: context.l10n.loadingContent,
       child: ExcludeSemantics(
         child: NinjaSkeletonGroup(
-          child: Column(
-            spacing: 10,
+          child: AppListGroup(
             children: List.generate(4, (_) => const _MaterialCardSkeleton()),
           ),
         ),

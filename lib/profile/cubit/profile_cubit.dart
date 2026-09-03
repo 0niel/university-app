@@ -32,6 +32,21 @@ class ProfileCubit extends Cubit<ProfileState> {
     emit(state.copyWith(status: .loading));
     final revision = ++_loadRevision;
 
+    try {
+      await _gamification.ensureAcademicProfile(organizationId);
+    } on Object catch (error, stackTrace) {
+      if (isClosed || revision != _loadRevision) return;
+      emit(
+        state.copyWith(
+          status: .error,
+          failedSections: {...state.failedSections, ProfileSection.profile},
+        ),
+      );
+      addError(error, stackTrace);
+      return;
+    }
+    if (isClosed || revision != _loadRevision) return;
+
     final (synced, _) = await (
       _capture(_gamification.syncGamification),
       _reporting(_gamification.recordActiveDay),
@@ -213,6 +228,7 @@ class ProfileCubit extends Cubit<ProfileState> {
     UserSettings settings,
     int revision,
   ) async {
+    if (isClosed) return;
     final previous = _persistedSettings;
     try {
       final updated = await _gamification.updateSettings(
@@ -222,13 +238,24 @@ class ProfileCubit extends Cubit<ProfileState> {
       _persistedSettings = updated;
       if (!isClosed && revision == _settingsRevision) {
         _settingsRevision++;
-        emit(state.copyWith(settings: updated));
+        emit(
+          state.copyWith(
+            settings: updated,
+            failedSections: {...state.failedSections}
+              ..remove(ProfileSection.settings),
+          ),
+        );
       }
     } on Exception catch (error, stackTrace) {
       if (!isClosed) addError(error, stackTrace);
       if (!isClosed && revision == _settingsRevision) {
         _settingsRevision++;
-        emit(state.copyWith(settings: previous));
+        emit(
+          state.copyWith(
+            settings: previous,
+            failedSections: {...state.failedSections, ProfileSection.settings},
+          ),
+        );
       }
     }
   }

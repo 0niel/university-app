@@ -1,69 +1,137 @@
 import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../../kit_harness.dart';
+
 void main() {
-  Widget wrap(Widget child) => MaterialApp(
-        theme: AppTheme.darkTheme,
-        home: Scaffold(body: Center(child: child)),
-      );
+  testWidgets('renders six cells 56px tall', (tester) async {
+    await tester.pumpWidget(
+      wrapKit(
+        SizedBox(width: 340, child: SixDigitCodeInput(onCompleted: (_) {})),
+      ),
+    );
 
-  group('SixDigitCodeInput', () {
-    testWidgets('renders six fields', (tester) async {
-      await tester.pumpWidget(
-        wrap(SixDigitCodeInput(onCompleted: (_) {})),
-      );
+    expect(find.byType(SixDigitCodeCell), findsNWidgets(6));
+    expect(tester.getSize(find.byType(SixDigitCodeCell).first).height, 56);
+  });
 
-      expect(find.byType(TextField), findsNWidgets(6));
-    });
+  testWidgets('empty cell is surface2, filled cell is tint', (tester) async {
+    final controller = TextEditingController(text: '24');
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(
+      wrapKit(
+        SizedBox(
+          width: 340,
+          child: AppCodeInput(controller: controller),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
 
-    testWidgets('reports the full code only once every cell is filled',
-        (tester) async {
-      String? completed;
-      await tester.pumpWidget(
-        wrap(SixDigitCodeInput(onCompleted: (code) => completed = code)),
-      );
+    final cells = find.byType(SixDigitCodeCell);
+    expect(
+      kitDecoration(
+        tester,
+        find.descendant(of: cells.first, matching: find.byType(Container)),
+      ).color,
+      kitColors.tint,
+    );
+    expect(
+      kitDecoration(
+        tester,
+        find.descendant(of: cells.last, matching: find.byType(Container)),
+      ).color,
+      kitColors.surface2,
+    );
+    expect(find.text('2'), findsOneWidget);
+    expect(find.text('4'), findsOneWidget);
+  });
 
-      final fields = find.byType(TextField);
-      for (var i = 0; i < 6; i++) {
-        await tester.enterText(fields.at(i), '${i + 1}');
-        await tester.pump();
-      }
+  testWidgets('active cell carries a 2px accent ring', (tester) async {
+    final controller = TextEditingController(text: '24');
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(
+      wrapKit(
+        SizedBox(
+          width: 340,
+          child: AppCodeInput(controller: controller, showKeypad: true),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
 
-      expect(completed, '123456');
-    });
+    final third = find.byType(SixDigitCodeCell).at(2);
+    final decoration = kitDecoration(
+      tester,
+      find.descendant(of: third, matching: find.byType(Container)),
+    );
+    expect(decoration.border, Border.all(color: kitColors.accent, width: 2));
+  });
 
-    testWidgets('only accepts digits', (tester) async {
-      String? completed;
-      await tester.pumpWidget(
-        wrap(SixDigitCodeInput(onCompleted: (code) => completed = code)),
-      );
+  testWidgets('keypad appends digits and reports completion', (tester) async {
+    final completed = <String>[];
+    final controller = TextEditingController(text: '12345');
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(
+      wrapKit(
+        SizedBox(
+          width: 360,
+          child: AppCodeInput(
+            controller: controller,
+            showKeypad: true,
+            onCompleted: completed.add,
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
 
-      // Letters are stripped by the digits-only formatter, so the code never
-      // completes from non-numeric input.
-      await tester.enterText(find.byType(TextField).first, 'a');
-      await tester.pump();
+    await tester.tap(find.widgetWithText(Container, '6').first);
+    await tester.pumpAndSettle();
 
-      expect(find.text('a'), findsNothing);
-      expect(completed, isNull);
-    });
+    expect(controller.text, '123456');
+    expect(completed, ['123456']);
+  });
 
-    testWidgets('backspace on an empty cell clears and focuses the previous',
-        (tester) async {
-      await tester.pumpWidget(
-        wrap(SixDigitCodeInput(onCompleted: (_) {})),
-      );
+  testWidgets('keypad backspace removes the last digit', (tester) async {
+    final controller = TextEditingController(text: '123');
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(
+      wrapKit(
+        SizedBox(
+          width: 360,
+          child: AppCodeInput(controller: controller, showKeypad: true),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
 
-      final fields = find.byType(TextField);
-      await tester.enterText(fields.first, '7');
-      await tester.pump();
+    await tester.tap(find.text('⌫'));
+    await tester.pumpAndSettle();
 
-      // Focus auto-advanced to the second (empty) cell; backspace steps back.
-      await tester.sendKeyEvent(LogicalKeyboardKey.backspace);
-      await tester.pump();
+    expect(controller.text, '12');
+  });
 
-      expect(find.text('7'), findsNothing);
-    });
+  testWidgets('typing into the hidden field completes the code', (
+    tester,
+  ) async {
+    final completed = <String>[];
+    await tester.pumpWidget(
+      wrapKit(
+        SizedBox(
+          width: 340,
+          child: SixDigitCodeInput(
+            autofocus: false,
+            onCompleted: completed.add,
+          ),
+        ),
+      ),
+    );
+
+    await tester.enterText(find.byType(TextField), '135790');
+    await tester.pumpAndSettle();
+
+    expect(completed, ['135790']);
   });
 }

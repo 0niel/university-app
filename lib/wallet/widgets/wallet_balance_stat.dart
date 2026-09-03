@@ -8,14 +8,17 @@ class _WalletBalanceStat extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: colors.onAccentSoft.withValues(alpha: .1),
-        borderRadius: BorderRadius.circular(NinjaRadius.control),
+        color: colors.canvas.withValues(alpha: .1),
+        borderRadius: BorderRadius.circular(AppRadius.field),
       ),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.sectionGap,
+          vertical: AppSpacing.md,
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -23,17 +26,17 @@ class _WalletBalanceStat extends StatelessWidget {
               value,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: NinjaText.tabular(
-                NinjaText.headline.copyWith(color: colors.onAccentSoft),
+              style: AppText.tabular(
+                AppText.headline.copyWith(color: colors.canvas),
               ),
             ),
-            const SizedBox(height: 2),
+            const SizedBox(height: AppSpacing.xxs),
             Text(
               label,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: NinjaText.subtext.copyWith(
-                color: colors.onAccentSoftMuted,
+              style: AppText.subtext.copyWith(
+                color: colors.canvas,
               ),
             ),
           ],

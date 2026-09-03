@@ -2,6 +2,7 @@ include: package:very_good_analysis/analysis_options.yaml
 
 analyzer:
   exclude:
+    - "build/**"
     - "**/*.freezed.dart"
     - "**/*.g.dart"
     - "**/*.gen.dart"
@@ -207,6 +208,7 @@ dcm:
           - "**/test/**"
   exclude:
     all:
+      - "build/**"
       - "**/*.freezed.dart"
       - "**/*.g.dart"
       - "**/*.gen.dart"

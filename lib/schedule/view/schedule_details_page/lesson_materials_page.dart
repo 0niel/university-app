@@ -20,6 +20,7 @@ class _LessonMaterialsPageState extends State<LessonMaterialsPage> {
   List<LessonMaterial> _materials = const [];
   bool _loading = true;
   Object? _error;
+  int _loadRevision = 0;
 
   @override
   void initState() {
@@ -28,6 +29,7 @@ class _LessonMaterialsPageState extends State<LessonMaterialsPage> {
   }
 
   Future<void> _load() async {
+    final revision = ++_loadRevision;
     setState(() {
       _loading = true;
       _error = null;
@@ -38,12 +40,18 @@ class _LessonMaterialsPageState extends State<LessonMaterialsPage> {
         lessonDate: widget.selectedDate,
         lessonBellsNumber: widget.lessonNumber,
       );
-      if (!mounted) return;
-      setState(() => _materials = details.materials);
+      if (!mounted || revision != _loadRevision) return;
+      setState(
+        () => _materials = details.materials.sorted(
+          (a, b) => b.createdAt.compareTo(a.createdAt),
+        ),
+      );
     } on Exception catch (error) {
-      if (mounted) setState(() => _error = error);
+      if (mounted && revision == _loadRevision) setState(() => _error = error);
     } finally {
-      if (mounted) setState(() => _loading = false);
+      if (mounted && revision == _loadRevision) {
+        setState(() => _loading = false);
+      }
     }
   }
 
@@ -52,7 +60,9 @@ class _LessonMaterialsPageState extends State<LessonMaterialsPage> {
       final url = await context
           .read<ScheduleRepository>()
           .createLessonMaterialUrl(material);
-      await launchUrlString(url, mode: .externalApplication);
+      if (!await launchUrlString(url, mode: .externalApplication)) {
+        throw Exception('Unable to open material');
+      }
     } on Exception catch (_) {
       if (!mounted) return;
       showNinjaToast(
@@ -74,7 +84,7 @@ class _LessonMaterialsPageState extends State<LessonMaterialsPage> {
           '${widget.lessonNumber}',
       child: RepositoryProvider.value(
         value: repository,
-        child: _UploadMaterialSheet(
+        child: LessonMaterialUploadSheet(
           lesson: widget.lesson,
           selectedDate: widget.selectedDate,
           lessonNumber: widget.lessonNumber,
@@ -92,12 +102,13 @@ class _LessonMaterialsPageState extends State<LessonMaterialsPage> {
     }
     if (_error != null) {
       final l10n = context.l10n;
-      return NinjaErrorState(
+      return AppErrorState(
         key: const ValueKey('materials_page_error'),
         title: l10n.lessonDetailsLoadFailed,
         message: l10n.lessonDetailsCheckConnection,
-        retryLabel: l10n.retry,
-        onRetry: () => unawaited(_load()),
+        primaryLabel: l10n.retry,
+        footnote: null,
+        onPrimary: () => unawaited(_load()),
       );
     }
     if (_materials.isEmpty) {
@@ -113,7 +124,7 @@ class _LessonMaterialsPageState extends State<LessonMaterialsPage> {
       children: [
         for (final (index, material) in _materials.indexed)
           Padding(
-            padding: const .only(bottom: 10),
+            padding: const .only(bottom: AppSpacing.gap),
             child: _MaterialCard(
               material: material,
               onDownload: () => unawaited(_download(material)),
@@ -126,46 +137,34 @@ class _LessonMaterialsPageState extends State<LessonMaterialsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: context.ninja.canvas,
-      floatingActionButton: NinjaFab(
-        icon: AppLineIconWidget(
-          .plus,
-          size: 24,
-          color: context.ninja.onBrand,
-        ),
+      backgroundColor: context.colors.canvas,
+      floatingActionButton: AppFab(
+        icon: AppLineIcon.plus,
         tooltip: context.l10n.lessonDetailsUpload,
         onPressed: () => unawaited(_showUploadSheet()),
       ),
       body: RefreshIndicator(
         onRefresh: _load,
-        color: context.ninja.ink,
+        color: context.colors.ink,
         child: CustomScrollView(
           physics: const BouncingScrollPhysics(
             parent: AlwaysScrollableScrollPhysics(),
           ),
           slivers: [
-            SliverAppBar(
-              elevation: 0,
-              scrolledUnderElevation: 0,
-              backgroundColor: context.ninja.canvas,
-              surfaceTintColor: Colors.transparent,
-              leading: NinjaIconButton(
-                icon: const AppLineIconWidget(.chevronL, size: 20),
-                tooltip: context.l10n.back,
-                onPressed: () => Navigator.of(context).maybePop(),
-              ),
-              title: Text(
-                context.l10n.lessonDetailsMaterialsPage,
-                style: NinjaText.headline.copyWith(color: context.ninja.ink),
+            SliverToBoxAdapter(
+              child: AppInnerHeader(
+                title: context.l10n.lessonDetailsMaterialsPage,
+                backSemanticsLabel: context.l10n.back,
+                onBack: () => Navigator.of(context).maybePop(),
               ),
             ),
             SliverSafeArea(
               top: false,
               sliver: SliverPadding(
                 padding: const EdgeInsets.fromLTRB(
-                  NinjaMetrics.screenPadding,
-                  8,
-                  NinjaMetrics.screenPadding,
+                  AppSpacing.screen,
+                  AppSpacing.sm,
+                  AppSpacing.screen,
                   120,
                 ),
                 sliver: SliverList.list(
@@ -177,37 +176,39 @@ class _LessonMaterialsPageState extends State<LessonMaterialsPage> {
                         widget.lesson,
                       ).toLowerCase()} '
                       '${widget.lessonNumber}',
-                      style: NinjaText.subtext.copyWith(
-                        color: context.ninja.muted,
+                      style: AppText.subtext.copyWith(
+                        color: context.colors.muted,
                       ),
                     ),
-                    const SizedBox(height: 14),
+                    const SizedBox(height: AppSpacing.sectionGap),
                     _ContributeBanner(
                       onTap: () => unawaited(_showUploadSheet()),
                     ),
-                    const SizedBox(height: 28),
-                    Row(
+                    const SizedBox(height: AppSpacing.sheetBottom),
+                    Wrap(
+                      alignment: WrapAlignment.spaceBetween,
+                      spacing: AppSpacing.md,
+                      runSpacing: AppSpacing.xsm,
                       children: [
                         Text(
                           context.l10n.lessonDetailsMaterialsCount(
                             _materials.length,
                           ),
-                          style: NinjaText.subtext.copyWith(
-                            color: context.ninja.muted,
+                          style: AppText.subtext.copyWith(
+                            color: context.colors.muted,
                             fontWeight: .w700,
                           ),
                         ),
-                        const Spacer(),
                         Text(
                           context.l10n.lessonDetailsNewestFirst,
-                          style: NinjaText.helper.copyWith(
-                            color: context.ninja.muted,
+                          style: AppText.captionSmall.copyWith(
+                            color: context.colors.muted,
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 12),
-                    NinjaStateSwitcher(child: _buildState(context)),
+                    const SizedBox(height: AppSpacing.md),
+                    AppStateSwitcher(child: _buildState(context)),
                   ],
                 ),
               ),

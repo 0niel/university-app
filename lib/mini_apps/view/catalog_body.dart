@@ -1,5 +1,15 @@
 part of 'mini_apps_page.dart';
 
+abstract final class _CatalogLayout {
+  static const double bottomInset = AppControlSize.fab + AppSpacing.xxxlg;
+  static const statePadding = EdgeInsets.fromLTRB(
+    AppSpacing.screen,
+    AppSpacing.zero,
+    AppSpacing.screen,
+    bottomInset,
+  );
+}
+
 class _CatalogBody extends StatelessWidget {
   const _CatalogBody({
     required this.state,
@@ -21,15 +31,15 @@ class _CatalogBody extends StatelessWidget {
   }
 
   Widget _body(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final l10n = context.l10n;
     if (state.status == .loading && state.apps.isEmpty) {
       return const _CatalogSkeleton(key: ValueKey('catalog-loading'));
     }
     if (state.status == .failure && state.apps.isEmpty) {
-      return Padding(
+      return SingleChildScrollView(
         key: const ValueKey('catalog-failure'),
-        padding: const .symmetric(horizontal: NinjaMetrics.screenPadding),
+        padding: _CatalogLayout.statePadding,
         child: NinjaErrorState(
           title: l10n.loadingError,
           message: l10n.tryAgain,
@@ -41,25 +51,31 @@ class _CatalogBody extends StatelessWidget {
       );
     }
     if (state.apps.isEmpty && state.myApps.isEmpty) {
-      return Padding(
+      final filtered = state.query.isNotEmpty || state.category != null;
+      return SingleChildScrollView(
         key: const ValueKey('catalog-empty'),
-        padding: const .symmetric(horizontal: NinjaMetrics.screenPadding),
+        padding: _CatalogLayout.statePadding,
         child: NinjaEmptyState(
-          icon: const AppLineIconWidget(AppLineIcon.grid),
-          title: l10n.miniAppsEmptyTitle,
-          message: l10n.miniAppsEmptySubtitle,
-          actionLabel: l10n.miniAppsCreate,
-          onAction: onCreate,
+          icon: AppLineIconWidget(
+            filtered ? AppLineIcon.search : AppLineIcon.grid,
+          ),
+          title: filtered ? l10n.miniAppsNothingFound : l10n.miniAppsEmptyTitle,
+          message: filtered
+              ? l10n.miniAppsNothingFoundSubtitle
+              : l10n.miniAppsEmptySubtitle,
+          actionLabel: filtered ? l10n.resetFilter : l10n.miniAppsCreate,
+          onAction: filtered ? onResetFilters : onCreate,
+          outlinedAction: filtered,
         ).animateEmptyState(),
       );
     }
     return RefreshIndicator(
       key: const ValueKey('catalog-ready'),
-      color: colors.brand,
+      color: colors.accent,
       backgroundColor: colors.surface,
       onRefresh: () => context.read<MiniAppsCatalogCubit>().load(),
       child: ListView(
-        padding: const .only(bottom: 120),
+        padding: const .only(bottom: _CatalogLayout.bottomInset),
         children: [
           if (state.recents.isNotEmpty) ...[
             _CatalogSectionLabel(title: l10n.miniAppsRecents),
@@ -67,17 +83,17 @@ class _CatalogBody extends StatelessWidget {
               apps: state.recents,
               onOpen: onOpen,
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: AppSpacing.gap),
           ],
           if (state.myApps.isNotEmpty) ...[
             _CatalogSectionLabel(title: l10n.miniAppsMyApps),
             for (final (index, app) in state.myApps.indexed)
               Padding(
                 padding: const EdgeInsets.fromLTRB(
-                  NinjaMetrics.screenPadding,
+                  AppSpacing.screen,
                   0,
-                  NinjaMetrics.screenPadding,
-                  10,
+                  AppSpacing.screen,
+                  AppSpacing.gap,
                 ),
                 child: MiniAppCard(
                   app: app,
@@ -91,10 +107,10 @@ class _CatalogBody extends StatelessWidget {
           for (final (index, app) in state.apps.indexed)
             Padding(
               padding: const EdgeInsets.fromLTRB(
-                NinjaMetrics.screenPadding,
+                AppSpacing.screen,
                 0,
-                NinjaMetrics.screenPadding,
-                10,
+                AppSpacing.screen,
+                AppSpacing.gap,
               ),
               child: MiniAppCard(
                 app: app,
@@ -105,9 +121,9 @@ class _CatalogBody extends StatelessWidget {
           if (state.apps.isEmpty)
             Padding(
               padding: const .fromLTRB(
-                NinjaMetrics.screenPadding,
+                AppSpacing.screen,
                 16,
-                NinjaMetrics.screenPadding,
+                AppSpacing.screen,
                 0,
               ),
               child: NinjaEmptyState(

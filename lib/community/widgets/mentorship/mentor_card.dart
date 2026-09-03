@@ -18,7 +18,7 @@ class MentorCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final course = mentor.course;
     final courseLabel = course == null
         ? null
@@ -26,15 +26,15 @@ class MentorCard extends StatelessWidget {
     final subtitle = <String>[?courseLabel, ?mentor.group].join(' · ');
     return Padding(
       padding: const EdgeInsets.fromLTRB(
-        NinjaMetrics.screenPadding,
+        AppSpacing.screen,
         0,
-        NinjaMetrics.screenPadding,
+        AppSpacing.screen,
         10,
       ),
       child: DecoratedBox(
         decoration: BoxDecoration(
           color: colors.surface,
-          borderRadius: BorderRadius.circular(NinjaRadius.card),
+          borderRadius: BorderRadius.circular(AppRadius.card),
         ),
         child: Padding(
           padding: const EdgeInsets.all(16),
@@ -56,7 +56,7 @@ class MentorCard extends StatelessWidget {
                           children: [
                             Text(
                               mentor.fullName,
-                              style: NinjaText.body.copyWith(color: colors.ink),
+                              style: AppText.body.copyWith(color: colors.ink),
                             ),
                             if (mentor.isMe)
                               NinjaBadge(
@@ -68,7 +68,7 @@ class MentorCard extends StatelessWidget {
                         if (subtitle.isNotEmpty)
                           Text(
                             subtitle,
-                            style: NinjaText.helper.copyWith(
+                            style: AppText.captionSmall.copyWith(
                               color: colors.muted,
                             ),
                           ),
@@ -87,8 +87,8 @@ class MentorCard extends StatelessWidget {
                         ),
                         Text(
                           '${mentor.sessions}',
-                          style: NinjaText.tabular(
-                            NinjaText.subtext.copyWith(color: colors.muted),
+                          style: AppText.tabular(
+                            AppText.subtext.copyWith(color: colors.muted),
                           ),
                         ),
                       ],
@@ -100,15 +100,15 @@ class MentorCard extends StatelessWidget {
                   mentor.bio,
                   maxLines: 3,
                   overflow: .ellipsis,
-                  style: NinjaText.subtext.copyWith(
-                    color: colors.mutedDark,
+                  style: AppText.subtext.copyWith(
+                    color: colors.muted,
                     height: 1.4,
                   ),
                 ),
               if (mentor.topics.isNotEmpty)
                 Text(
                   mentor.topics.join(' · '),
-                  style: NinjaText.helper.copyWith(color: colors.brandInk),
+                  style: AppText.captionSmall.copyWith(color: colors.accent),
                 ),
               if (mentor.isMe)
                 NinjaButton.secondary(

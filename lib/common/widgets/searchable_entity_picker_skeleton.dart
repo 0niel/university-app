@@ -16,7 +16,11 @@ class _SearchableEntityPickerSkeleton extends StatelessWidget {
             const Row(
               spacing: 12,
               children: [
-                NinjaSkeleton(width: 24, height: 24, radius: 12),
+                NinjaSkeleton(
+                  width: 24,
+                  height: 24,
+                  radius: AppRadius.iconTile,
+                ),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: .start,

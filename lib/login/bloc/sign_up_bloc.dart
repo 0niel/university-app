@@ -92,7 +92,7 @@ class SignUpBloc extends Bloc<SignUpEvent, SignUpState> {
     SignUpSubmitted event,
     Emitter<SignUpState> emit,
   ) async {
-    if (!state.isValid) return;
+    if (!state.isValid || state.status.isInProgress) return;
     emit(state.copyWith(status: .inProgress));
     try {
       await userRepository.signUp(

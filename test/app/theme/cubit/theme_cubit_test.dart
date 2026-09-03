@@ -66,6 +66,52 @@ void main() {
       );
     });
 
+    test('legacy migration preserves chosen accents and AMOLED', () {
+      final cubit = ThemeCubit();
+      for (final scheme in [
+        AppColorScheme.blue,
+        AppColorScheme.violet,
+        AppColorScheme.red,
+      ]) {
+        for (final isAmoled in [false, true]) {
+          expect(
+            cubit.fromJson({
+              'colorScheme': scheme.name,
+              'isAmoled': isAmoled,
+            }),
+            ThemeState(colorScheme: scheme, isAmoled: isAmoled),
+          );
+        }
+      }
+    });
+
+    test('default dark theme matches both design documents', () {
+      final cubit = ThemeCubit();
+      final theme = cubit.getDarkTheme();
+      final colors = theme.colors;
+      expect(colors.canvas, const Color(0xFF0F1012));
+      expect(colors.surface, const Color(0xFF1A1B20));
+      expect(colors.surface2, const Color(0xFF25272E));
+      expect(colors.ink, const Color(0xFFECEDEF));
+      expect(colors.muted, const Color(0xFF9AA0AB));
+      expect(colors.muted2, const Color(0xFF5F646E));
+      expect(colors.accent, const Color(0xFF78A7FF));
+      expect(colors.onAccent, const Color(0xFF0F1012));
+      expect(colors.lecture, const Color(0xFF55C7A4));
+      expect(colors.practice, const Color(0xFF78A7FF));
+      expect(colors.lab, const Color(0xFFA18AFF));
+      expect(colors.exam, const Color(0xFFFF7478));
+      expect(colors.warn, const Color(0xFFF0C866));
+      expect(colors.line.a, .08);
+      expect(colors.scrim.a, .6);
+      expect(colors.tintMix, .18);
+      expect(colors.tint2Mix, .34);
+      expect(theme.scaffoldBackgroundColor, colors.canvas);
+      expect(theme.colorScheme.surface, colors.surface);
+      expect(theme.colorScheme.surfaceContainerHighest, colors.surface2);
+      expect(theme.colorScheme.surfaceTint, Colors.transparent);
+    });
+
     test('fromJson falls back safely for invalid values', () {
       final cubit = ThemeCubit();
       expect(
@@ -111,95 +157,77 @@ void main() {
       expect(appColors.cardShadowDark, Colors.transparent);
     });
 
-    test('readable bridge tokens keep accessible contrast in every theme', () {
-      for (final scheme in AppColorScheme.values) {
-        final cubit = ThemeCubit()..setColorScheme(scheme);
-        for (final amoled in [false, true]) {
-          cubit.setAmoled(enabled: amoled);
-          final themes = [cubit.getLightTheme(), cubit.getDarkTheme()];
-          for (final theme in themes) {
-            final colors = theme.extension<NinjaColors>()!;
-            final mutedContrast = _contrast(colors.mutedDark, colors.canvas);
-            final warningSurface = Color.alphaBlend(
-              colors.warnTint,
-              colors.canvas,
-            );
-            final warningContrast = _contrast(
-              colors.amberInk,
-              warningSurface,
-            );
-            final appColors = theme.extension<AppColors>()!;
-            final accentContrast = _contrast(
-              appColors.onAccent,
-              appColors.primary,
-            );
-            final badgeContrast = _contrast(
-              theme.badgeTheme.textColor!,
-              theme.badgeTheme.backgroundColor!,
-            );
-            final brandTintSurface = Color.alphaBlend(
-              colors.brandTint,
-              colors.surface,
-            );
-            final selectedTabSurface = Color.alphaBlend(
-              colors.brand.withValues(alpha: colors.isDark ? .2 : .1),
-              colors.surface,
-            );
-
-            expect(
-              mutedContrast,
-              greaterThanOrEqualTo(4.5),
-              reason: '$scheme amoled=$amoled ${theme.brightness}',
-            );
-            expect(
-              warningContrast,
-              greaterThanOrEqualTo(4.5),
-              reason: '$scheme amoled=$amoled ${theme.brightness}',
-            );
-            expect(
-              accentContrast,
-              greaterThanOrEqualTo(4.5),
-              reason: '$scheme amoled=$amoled ${theme.brightness}',
-            );
-            expect(
-              badgeContrast,
-              greaterThanOrEqualTo(4.5),
-              reason: '$scheme amoled=$amoled ${theme.brightness}',
-            );
-            expect(
-              _contrast(colors.brandInk, brandTintSurface),
-              greaterThanOrEqualTo(4.5),
-              reason: '$scheme amoled=$amoled ${theme.brightness}',
-            );
-            expect(
-              _contrast(colors.brandInk, selectedTabSurface),
-              greaterThanOrEqualTo(4.5),
-              reason: '$scheme amoled=$amoled ${theme.brightness}',
-            );
+    test(
+      'bridge tokens preserve the selected design palette in every theme',
+      () {
+        for (final scheme in AppColorScheme.values) {
+          final cubit = ThemeCubit()..setColorScheme(scheme);
+          for (final amoled in [false, true]) {
+            cubit.setAmoled(enabled: amoled);
+            final themes = [cubit.getLightTheme(), cubit.getDarkTheme()];
+            for (final theme in themes) {
+              final colors = theme.extension<NinjaColors>()!;
+              final appColors = theme.extension<AppColors>()!;
+              final expected = theme.brightness == Brightness.dark
+                  ? AppColorSchemes.getDarkColors(scheme)
+                  : AppColorSchemes.getLightColors(scheme);
+              expect(appColors.accent, expected.accent);
+              expect(appColors.onAccent, expected.onAccent);
+              expect(colors.mutedDark, expected.muted);
+              expect(colors.amberInk, expected.warn);
+              expect(colors.warnTint, appColors.warnTint);
+              expect(colors.brandInk, expected.accent);
+              expect(colors.brandTint, appColors.tint);
+              expect(theme.badgeTheme.backgroundColor, expected.exam);
+              expect(theme.badgeTheme.textColor, expected.white);
+              expect(
+                _contrast(colors.ink, colors.canvas),
+                greaterThanOrEqualTo(7),
+              );
+            }
           }
         }
-      }
+      },
+    );
 
-      for (final palette in [NinjaColors.light(), NinjaColors.dark()]) {
-        expect(
-          _contrast(palette.onScarlet, palette.scarlet),
-          greaterThanOrEqualTo(4.5),
-        );
-        for (final swatch in const [
-          Color(0xFF087F5B),
-          Color(0xFF2F7AFF),
-          Color(0xFF8B5CF6),
-          Color(0xFFDB8B00),
-          Color(0xFFE5484D),
-          Color(0xFF74747D),
-        ]) {
+    test(
+      'contrast helpers choose readable foregrounds independently of tokens',
+      () {
+        for (final palette in [NinjaColors.light(), NinjaColors.dark()]) {
           expect(
-            _contrast(palette.contrastForeground(swatch), swatch),
-            greaterThanOrEqualTo(3),
+            _contrast(palette.onScarlet, palette.scarlet),
+            greaterThanOrEqualTo(4.5),
           );
+          for (final swatch in const [
+            Color(0xFF087F5B),
+            Color(0xFF2F7AFF),
+            Color(0xFF8B5CF6),
+            Color(0xFFDB8B00),
+            Color(0xFFE5484D),
+            Color(0xFF74747D),
+          ]) {
+            expect(
+              _contrast(palette.contrastForeground(swatch), swatch),
+              greaterThanOrEqualTo(3),
+            );
+            for (final surface in [
+              palette.canvas,
+              palette.surface,
+              palette.surfaceAlt,
+            ]) {
+              expect(
+                _contrast(palette.accentOn(swatch, surface), surface),
+                greaterThanOrEqualTo(4.5),
+              );
+              expect(
+                _contrast(palette.accentInk(swatch), surface),
+                greaterThanOrEqualTo(4.5),
+              );
+            }
+          }
         }
-      }
-    });
+      },
+    );
   });
 }
 

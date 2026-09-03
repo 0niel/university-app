@@ -13,7 +13,7 @@ class _HubSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final stackHeader = MediaQuery.textScalerOf(context).scale(1) >= 1.4;
     final edit = NinjaButton.text(
       label: context.l10n.edit,
@@ -27,9 +27,9 @@ class _HubSection extends StatelessWidget {
         children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(
-              NinjaMetrics.screenPadding,
+              AppSpacing.screen,
               10,
-              NinjaMetrics.screenPadding,
+              AppSpacing.screen,
               10,
             ),
             child: stackHeader
@@ -38,7 +38,7 @@ class _HubSection extends StatelessWidget {
                     children: [
                       Text(
                         title,
-                        style: NinjaText.headline.copyWith(color: colors.ink),
+                        style: AppText.headline.copyWith(color: colors.ink),
                       ),
                       const SizedBox(height: 4),
                       edit,
@@ -49,7 +49,7 @@ class _HubSection extends StatelessWidget {
                       Expanded(
                         child: Text(
                           title,
-                          style: NinjaText.headline.copyWith(color: colors.ink),
+                          style: AppText.headline.copyWith(color: colors.ink),
                         ),
                       ),
                       edit,

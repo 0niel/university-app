@@ -13,7 +13,7 @@ class ScheduleDiffView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final scale = Theme.of(context).scale;
     final totalChanges =
         diff.added.length + diff.modified.length + diff.removed.length;
@@ -25,20 +25,18 @@ class ScheduleDiffView extends StatelessWidget {
           parent: AlwaysScrollableScrollPhysics(),
         ),
         slivers: [
-          SliverAppBar(
-            pinned: true,
-            elevation: 0,
-            scrolledUnderElevation: 0,
-            backgroundColor: colors.canvas,
-            surfaceTintColor: Colors.transparent,
-            title: Text(context.l10n.scheduleDiffTitle),
+          SliverToBoxAdapter(
+            child: AppInnerHeader(
+              title: context.l10n.scheduleDiffTitle,
+              onBack: () => Navigator.of(context).maybePop(),
+            ),
           ),
           SliverToBoxAdapter(
             child: Padding(
               padding: .fromLTRB(
-                NinjaMetrics.screenPadding,
+                AppSpacing.screen,
                 scale.space(20),
-                NinjaMetrics.screenPadding,
+                AppSpacing.screen,
                 scale.space(8),
               ),
               child: Column(
@@ -46,12 +44,12 @@ class ScheduleDiffView extends StatelessWidget {
                 children: [
                   Text(
                     title,
-                    style: NinjaText.headline.copyWith(color: colors.ink),
+                    style: AppText.headline.copyWith(color: colors.ink),
                   ),
                   SizedBox(height: scale.space(4)),
                   Text(
                     context.l10n.scheduleDiffFoundChanges(totalChanges),
-                    style: NinjaText.subtext.copyWith(color: colors.muted),
+                    style: AppText.subtext.copyWith(color: colors.muted),
                   ),
                   SizedBox(height: scale.space(16)),
                   ScheduleDiffSummaryRow(diff: diff),
@@ -65,7 +63,7 @@ class ScheduleDiffView extends StatelessWidget {
               subtitle: context.l10n.scheduleDiffAddedCount(
                 diff.added.length,
               ),
-              color: colors.green,
+              color: colors.lecture,
               icon: AppLineIcon.plus,
               items: diff.added,
             ),
@@ -75,7 +73,7 @@ class ScheduleDiffView extends StatelessWidget {
               subtitle: context.l10n.scheduleDiffModifiedCount(
                 diff.modified.length,
               ),
-              color: colors.amber,
+              color: colors.warn,
               icon: AppLineIcon.pencil,
               items: diff.modified,
             ),
@@ -85,7 +83,7 @@ class ScheduleDiffView extends StatelessWidget {
               subtitle: context.l10n.scheduleDiffRemovedCount(
                 diff.removed.length,
               ),
-              color: colors.scarlet,
+              color: colors.exam,
               icon: AppLineIcon.trash,
               items: diff.removed,
             ),

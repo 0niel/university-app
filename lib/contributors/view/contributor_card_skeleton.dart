@@ -3,7 +3,7 @@ part of 'contributors_content.dart';
 class _ContributorCardSkeleton extends StatelessWidget {
   const _ContributorCardSkeleton({required this.colors});
 
-  final NinjaColors colors;
+  final AppColors colors;
 
   @override
   Widget build(BuildContext context) {
@@ -12,7 +12,7 @@ class _ContributorCardSkeleton extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: colors.surface,
-        borderRadius: BorderRadius.circular(NinjaRadius.card),
+        borderRadius: BorderRadius.circular(AppRadius.card),
       ),
       child: const Column(
         mainAxisAlignment: MainAxisAlignment.center,

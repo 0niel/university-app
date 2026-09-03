@@ -17,9 +17,12 @@ class CollabNoteCardTitle extends StatelessWidget {
       children: [
         Text(
           note.title,
-          maxLines: 1,
+          maxLines: 2,
           overflow: .ellipsis,
-          style: NinjaText.body.copyWith(color: context.ninja.ink),
+          style: AppText.sans(
+            14.5,
+            FontWeight.w600,
+          ).copyWith(color: context.colors.ink),
         ),
         if (note.isPersonal)
           NinjaBadge(context.l10n.collabNotesPersonalBadge, tone: .ink),

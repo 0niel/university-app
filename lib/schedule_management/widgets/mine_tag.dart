@@ -5,16 +5,16 @@ class _MineTag extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
       decoration: BoxDecoration(
-        color: colors.onAccentSoft.withValues(alpha: .12),
-        borderRadius: BorderRadius.circular(NinjaRadius.pill),
+        color: colors.ink.withValues(alpha: .12),
+        borderRadius: BorderRadius.circular(AppRadius.full),
       ),
       child: Text(
         context.l10n.scheduleHubMineBadge,
-        style: NinjaText.badge.copyWith(color: colors.onAccentSoft),
+        style: AppText.badge.copyWith(color: colors.ink),
       ),
     );
   }

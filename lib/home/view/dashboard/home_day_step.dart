@@ -1,1 +1,0 @@
-enum HomeDayStep { previous, next }

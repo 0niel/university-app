@@ -1,6 +1,7 @@
 import 'dart:async';
 
-import 'package:app_ui/src/ninja/ninja_colors.dart';
+import 'package:app_ui/src/colors/colors.dart';
+import 'package:app_ui/src/spacing/app_spacing.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -10,7 +11,7 @@ class NinjaSkeleton extends StatelessWidget {
     super.key,
     this.width,
     this.widthFactor,
-    this.radius = 8,
+    this.radius = AppRadius.checkbox,
     this.pulse = true,
     this.shimmer = true,
   });
@@ -32,7 +33,7 @@ class NinjaSkeleton extends StatelessWidget {
     this.pulse = true,
     this.shimmer = true,
   })  : width = null,
-        radius = 999;
+        radius = AppRadius.full;
 
   const NinjaSkeleton.tile({
     super.key,
@@ -41,7 +42,7 @@ class NinjaSkeleton extends StatelessWidget {
     this.pulse = true,
     this.shimmer = true,
   })  : widthFactor = null,
-        radius = 18;
+        radius = AppRadius.field;
 
   final double? width;
   final double height;
@@ -63,24 +64,14 @@ class NinjaSkeleton extends StatelessWidget {
   }
 
   Widget _buildGeometry(BuildContext context, _NinjaSkeletonSceneData? scene) {
-    final colors = context.ninja;
-    final peak = Color.alphaBlend(
-      colors.brand.withValues(alpha: colors.isDark ? .09 : .055),
-      colors.surfaceAlt,
-    );
-    final base = Color.lerp(colors.surfaceAlt, peak, .26)!;
     final animation =
         pulse && shimmer && scene?.animate == true ? scene!.animation : null;
     Widget geometry = _NinjaSkeletonGeometry(
       width: width,
       height: height,
       radius: radius,
-      base: base,
-      highlight: colors.isDark
-          ? colors.ink.withValues(alpha: .075)
-          : colors.surface.withValues(alpha: .72),
+      base: context.colors.surface2,
       animation: animation,
-      viewportSize: MediaQuery.maybeSizeOf(context) ?? const Size(360, 800),
     );
     final factor = widthFactor;
     if (factor != null) {
@@ -118,6 +109,8 @@ class NinjaSkeletonGroup extends StatefulWidget {
     this.pulse = true,
     this.semanticsLabel,
   });
+
+  static const Duration period = Duration(milliseconds: 1400);
 
   final Widget child;
   final bool excludeSemantics;
@@ -163,7 +156,7 @@ class _NinjaSkeletonGroupState extends State<NinjaSkeletonGroup>
     if (animate) {
       final controller = _controller ??= AnimationController(
         vsync: this,
-        duration: const Duration(milliseconds: 2200),
+        duration: NinjaSkeletonGroup.period,
       );
       unawaited(controller.repeat());
     } else {
@@ -240,18 +233,14 @@ class _NinjaSkeletonGeometry extends LeafRenderObjectWidget {
     required this.height,
     required this.radius,
     required this.base,
-    required this.highlight,
     required this.animation,
-    required this.viewportSize,
   });
 
   final double? width;
   final double height;
   final double radius;
   final Color base;
-  final Color highlight;
   final Animation<double>? animation;
-  final Size viewportSize;
 
   @override
   RenderObject createRenderObject(BuildContext context) {
@@ -260,9 +249,7 @@ class _NinjaSkeletonGeometry extends LeafRenderObjectWidget {
       height: height,
       radius: radius,
       base: base,
-      highlight: highlight,
       animation: animation,
-      viewportSize: viewportSize,
     );
   }
 
@@ -276,9 +263,7 @@ class _NinjaSkeletonGeometry extends LeafRenderObjectWidget {
       ..height = height
       ..radius = radius
       ..base = base
-      ..highlight = highlight
-      ..animation = animation
-      ..viewportSize = viewportSize;
+      ..animation = animation;
   }
 }
 
@@ -288,24 +273,18 @@ class _RenderNinjaSkeletonGeometry extends RenderBox {
     required double height,
     required double radius,
     required Color base,
-    required Color highlight,
     required Animation<double>? animation,
-    required Size viewportSize,
   })  : _width = width,
         _height = height,
         _radius = radius,
         _base = base,
-        _highlight = highlight,
-        _animation = animation,
-        _viewportSize = viewportSize;
+        _animation = animation;
 
   double? _width;
   double _height;
   double _radius;
   Color _base;
-  Color _highlight;
   Animation<double>? _animation;
-  Size _viewportSize;
 
   double? get width => _width;
   set width(double? value) {
@@ -335,26 +314,12 @@ class _RenderNinjaSkeletonGeometry extends RenderBox {
     markNeedsPaint();
   }
 
-  Color get highlight => _highlight;
-  set highlight(Color value) {
-    if (_highlight == value) return;
-    _highlight = value;
-    markNeedsPaint();
-  }
-
   Animation<double>? get animation => _animation;
   set animation(Animation<double>? value) {
     if (_animation == value) return;
     if (attached) _animation?.removeListener(markNeedsPaint);
     _animation = value;
     if (attached) _animation?.addListener(markNeedsPaint);
-    markNeedsPaint();
-  }
-
-  Size get viewportSize => _viewportSize;
-  set viewportSize(Size value) {
-    if (_viewportSize == value) return;
-    _viewportSize = value;
     markNeedsPaint();
   }
 
@@ -388,42 +353,22 @@ class _RenderNinjaSkeletonGeometry extends RenderBox {
     super.detach();
   }
 
+  static double pulseOpacity(double t) {
+    final phase = t < .5 ? t * 2 : (1 - t) * 2;
+    return 1 - .5 * Curves.easeInOut.transform(phase);
+  }
+
   @override
   void paint(PaintingContext context, Offset offset) {
     final bounds = offset & size;
     final rrect = RRect.fromRectAndRadius(bounds, Radius.circular(_radius));
-    context.canvas.drawRRect(rrect, Paint()..color = _base);
     final currentAnimation = _animation;
-    if (currentAnimation == null || size.isEmpty) return;
-
-    final globalOrigin = localToGlobal(Offset.zero);
-    final viewportWidth = _viewportSize.width.clamp(1, double.infinity);
-    final viewportHeight = _viewportSize.height.clamp(1, double.infinity);
-    final progress = Curves.easeInOutCubic.transform(currentAnimation.value);
-    final centerX = (-.35 + progress * 1.7) * viewportWidth;
-    final localCenterX = centerX - globalOrigin.dx + offset.dx;
-    final top = -globalOrigin.dy + offset.dy;
-    final sweepWidth = viewportWidth * .34;
-    final shader = LinearGradient(
-      begin: Alignment.bottomLeft,
-      end: Alignment.topRight,
-      colors: [
-        const Color(0x00000000),
-        _highlight.withValues(alpha: 0),
-        _highlight,
-        _highlight.withValues(alpha: 0),
-        const Color(0x00000000),
-      ],
-      stops: const [0, .32, .5, .68, 1],
-    ).createShader(
-      Rect.fromLTWH(
-        localCenterX - sweepWidth,
-        top - viewportHeight * .18,
-        sweepWidth * 2,
-        viewportHeight * 1.36,
-      ),
+    final opacity =
+        currentAnimation == null ? 1.0 : pulseOpacity(currentAnimation.value);
+    context.canvas.drawRRect(
+      rrect,
+      Paint()..color = _base.withValues(alpha: _base.a * opacity),
     );
-    context.canvas.drawRRect(rrect, Paint()..shader = shader);
   }
 }
 
@@ -438,14 +383,14 @@ class NinjaSkeletonRow extends StatelessWidget {
     return Row(
       children: [
         NinjaSkeleton.avatar(pulse: pulse, shimmer: shimmer),
-        const SizedBox(width: 12),
+        const SizedBox(width: AppSpacing.md),
         Expanded(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               NinjaSkeleton.bar(pulse: pulse, shimmer: shimmer),
-              const SizedBox(height: 8),
+              const SizedBox(height: AppSpacing.sm),
               NinjaSkeleton.bar(
                 height: 10,
                 widthFactor: 0.58,
@@ -460,12 +405,77 @@ class NinjaSkeletonRow extends StatelessWidget {
   }
 }
 
+class AppSkeletonRow extends StatelessWidget {
+  const AppSkeletonRow({
+    super.key,
+    this.showTrailing = true,
+    this.pulse = true,
+    this.padding = const EdgeInsets.symmetric(
+      horizontal: AppSpacing.sectionGap,
+      vertical: AppSpacing.md,
+    ),
+  });
+
+  final bool showTrailing;
+  final bool pulse;
+  final EdgeInsetsGeometry padding;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+
+    return NinjaSkeletonGroup(
+      pulse: pulse,
+      child: Container(
+        padding: padding,
+        decoration: BoxDecoration(
+          color: colors.canvas,
+          borderRadius: BorderRadius.circular(AppRadius.lg),
+        ),
+        child: Row(
+          children: [
+            const NinjaSkeleton(width: 44, height: 44, radius: AppRadius.tile),
+            const SizedBox(width: AppSpacing.md),
+            const Expanded(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  NinjaSkeleton(
+                    height: 12,
+                    widthFactor: .7,
+                    radius: AppRadius.focusOutline,
+                  ),
+                  SizedBox(height: AppSpacing.sm),
+                  NinjaSkeleton(
+                    height: 10,
+                    widthFactor: .45,
+                    radius: AppRadius.skeletonThin,
+                  ),
+                ],
+              ),
+            ),
+            if (showTrailing) ...[
+              const SizedBox(width: AppSpacing.md),
+              const NinjaSkeleton(
+                width: 48,
+                height: 22,
+                radius: AppRadius.full,
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class NinjaSkeletonMedia extends StatelessWidget {
   const NinjaSkeletonMedia({
     required this.height,
     super.key,
     this.width,
-    this.radius = 18,
+    this.radius = AppRadius.field,
     this.markSize = 42,
   });
 
@@ -476,14 +486,11 @@ class NinjaSkeletonMedia extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     return ClipRRect(
       borderRadius: BorderRadius.circular(radius),
       child: ColoredBox(
-        color: Color.alphaBlend(
-          colors.brand.withValues(alpha: colors.isDark ? .08 : .05),
-          colors.surfaceAlt,
-        ),
+        color: colors.surface2,
         child: SizedBox(
           width: width ?? double.infinity,
           height: height,
@@ -499,3 +506,9 @@ class NinjaSkeletonMedia extends StatelessWidget {
     );
   }
 }
+
+typedef AppSkeleton = NinjaSkeleton;
+
+typedef AppSkeletonGroup = NinjaSkeletonGroup;
+
+typedef AppSkeletonMedia = NinjaSkeletonMedia;

@@ -6,18 +6,22 @@ class _LeaderboardRowSkeleton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const Padding(
-      padding: .symmetric(horizontal: 16, vertical: 12),
+      padding: .symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.md),
       child: Row(
         children: [
           SizedBox(
             width: 30,
-            child: NinjaSkeleton(width: 16, height: 12, radius: 6),
+            child: NinjaSkeleton(
+              width: 16,
+              height: 12,
+              radius: AppRadius.focusOutline,
+            ),
           ),
           NinjaSkeleton.avatar(size: 32),
-          SizedBox(width: 12),
+          SizedBox(width: AppSpacing.md),
           Expanded(child: NinjaSkeleton.bar(height: 13, widthFactor: 0.6)),
-          SizedBox(width: 10),
-          NinjaSkeleton(width: 40, height: 12, radius: 6),
+          SizedBox(width: AppSpacing.gap),
+          NinjaSkeleton(width: 40, height: 12, radius: AppRadius.focusOutline),
         ],
       ),
     );

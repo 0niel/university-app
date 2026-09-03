@@ -38,7 +38,7 @@ class _AccentColorPicker extends StatelessWidget {
       builder: (context, state) => Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          for (final scheme in AppColorScheme.values)
+          for (final scheme in AppColorSchemes.selectable)
             AppRadioRow(
               title: _accentLabel(context, scheme),
               selected: state.colorScheme == scheme,

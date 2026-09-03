@@ -41,7 +41,7 @@ class _SearchCoachOverlayState extends State<SearchCoachOverlay> {
     final anchor = _anchor;
     if (anchor == null) return const SizedBox.shrink();
 
-    final colors = context.ninja;
+    final colors = context.colors;
     final l10n = context.l10n;
     final center = anchor.center;
     final radius = anchor.longestSide / 2 + 6;
@@ -59,7 +59,7 @@ class _SearchCoachOverlayState extends State<SearchCoachOverlay> {
                 scrim: colors.isDark
                     ? colors.canvas.withValues(alpha: 0.7)
                     : colors.ink.withValues(alpha: 0.62),
-                ring: colors.brand,
+                ring: colors.accent,
               ),
             ),
           ),

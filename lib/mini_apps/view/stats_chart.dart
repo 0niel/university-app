@@ -15,7 +15,7 @@ class _StatsChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final step = math.max(1, (_maxValue / 3).ceil());
     final maxY = _maxValue <= 0
         ? 1.0
@@ -31,7 +31,7 @@ class _StatsChart extends StatelessWidget {
           drawVerticalLine: false,
           horizontalInterval: step.toDouble(),
           getDrawingHorizontalLine: (_) =>
-              FlLine(color: colors.line, strokeWidth: NinjaMetrics.lineWidth),
+              FlLine(color: colors.line, strokeWidth: 1),
         ),
         titlesData: FlTitlesData(
           topTitles: const AxisTitles(),
@@ -60,7 +60,7 @@ class _StatsChart extends StatelessWidget {
         ),
         lineBarsData: [
           _line(_spots((s) => s.launches), colors.ink),
-          _line(_spots((s) => s.uniqueUsers), colors.brand),
+          _line(_spots((s) => s.uniqueUsers), colors.accent),
         ],
       ),
     );
@@ -85,7 +85,7 @@ class _StatsChart extends StatelessWidget {
     List<LineBarSpot> spots,
   ) {
     if (spots.isEmpty) return const [];
-    final colors = context.ninja;
+    final colors = context.colors;
     final l10n = context.l10n;
     final index = spots.firstOrNull?.x.toInt();
     final day = index == null ? null : stats.elementAtOrNull(index)?.day;
@@ -101,15 +101,15 @@ class _StatsChart extends StatelessWidget {
 
     final item = LineTooltipItem(
       header,
-      NinjaText.subtext.copyWith(color: colors.ink, fontWeight: .w700),
+      AppText.subtext.copyWith(color: colors.ink, fontWeight: .w700),
       children: [
         TextSpan(
           text: '\n${l10n.miniAppsStatsLaunches}: ${valueFor(0)}',
-          style: NinjaText.helper.copyWith(color: colors.ink),
+          style: AppText.captionSmall.copyWith(color: colors.ink),
         ),
         TextSpan(
           text: '\n${l10n.miniAppsStatsUsers}: ${valueFor(1)}',
-          style: NinjaText.helper.copyWith(color: colors.brandInk),
+          style: AppText.captionSmall.copyWith(color: colors.accent),
         ),
       ],
     );

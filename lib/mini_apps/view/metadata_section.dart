@@ -19,7 +19,7 @@ class _MetadataSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final l10n = context.l10n;
     return Column(
       crossAxisAlignment: .start,
@@ -56,7 +56,7 @@ class _MetadataSection extends StatelessWidget {
           placeholder: l10n.miniAppsSubmitSlugHint,
           leadingIcon: Text(
             'apps/',
-            style: NinjaText.body.copyWith(color: colors.muted),
+            style: AppText.body.copyWith(color: colors.muted),
           ),
         ),
         NinjaInput.multiline(

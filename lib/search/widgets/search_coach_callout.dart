@@ -15,11 +15,11 @@ class SearchCoachCallout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     return DecoratedBox(
       decoration: BoxDecoration(
         color: colors.surface,
-        borderRadius: BorderRadius.circular(NinjaRadius.card),
+        borderRadius: BorderRadius.circular(AppRadius.card),
       ),
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.lg),
@@ -29,17 +29,17 @@ class SearchCoachCallout extends StatelessWidget {
           children: [
             Text(
               title,
-              style: NinjaText.headline.copyWith(color: colors.ink),
+              style: AppText.headline.copyWith(color: colors.ink),
             ),
             const SizedBox(height: 8),
             Text(
               body,
-              style: NinjaText.body.copyWith(color: colors.muted),
+              style: AppText.body.copyWith(color: colors.muted),
             ),
             const SizedBox(height: 12),
             Text(
               gesture,
-              style: NinjaText.button.copyWith(color: colors.brand),
+              style: AppText.button.copyWith(color: colors.accent),
             ),
           ],
         ),

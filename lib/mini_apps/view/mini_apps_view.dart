@@ -50,7 +50,7 @@ class _MiniAppsViewState extends State<MiniAppsView> {
     final selected = await showAppSheet<MiniAppSort>(
       context,
       title: context.l10n.miniAppsSortTitle,
-      backgroundColor: context.ninja.canvas,
+      backgroundColor: context.colors.canvas,
       contentPadding: EdgeInsets.zero,
       child: _MiniAppsSortSheet(selected: cubit.state.sort),
     );
@@ -60,7 +60,7 @@ class _MiniAppsViewState extends State<MiniAppsView> {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final l10n = context.l10n;
     final state = context.watch<MiniAppsCatalogCubit>().state;
     return Scaffold(
@@ -70,48 +70,63 @@ class _MiniAppsViewState extends State<MiniAppsView> {
         label: l10n.miniAppsCreate,
         onPressed: () => context.go('/services/apps/submit'),
       ),
-      body: NestedScrollView(
-        headerSliverBuilder: (context, innerBoxIsScrolled) => [
-          _MiniAppsAppBar(
-            isModerator: state.isModerator,
-            isSearching: state.isSearching,
-            onSearchToggled: _toggleSearch,
-          ),
-          SliverPadding(
-            padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
-            sliver: SliverToBoxAdapter(
-              child: _MiniAppsHero(count: state.apps.length),
-            ),
-          ),
-        ],
-        body: Column(
+      body: SafeArea(
+        top: false,
+        child: Column(
           children: [
-            if (state.isSearching)
-              _MiniAppsSearchField(controller: _searchController),
-            const SizedBox(height: 14),
-            _CategoryChips(category: state.category),
-            Padding(
-              padding: const .fromLTRB(
-                NinjaMetrics.screenPadding,
-                8,
-                NinjaMetrics.screenPadding,
-                10,
-              ),
-              child: Align(
-                alignment: AlignmentDirectional.centerEnd,
-                child: _MiniAppsSortButton(
-                  label: _miniAppSortLabel(l10n, state.sort),
-                  onPressed: () => unawaited(_openSort()),
-                ),
-              ),
+            _MiniAppsAppBar(
+              isModerator: state.isModerator,
+              isSearching: state.isSearching,
+              onSearchToggled: _toggleSearch,
             ),
+            const SizedBox(height: AppSpacing.xlg),
             Expanded(
-              child: _CatalogBody(
-                state: state,
-                onOpen: _openApp,
-                onActions: (app) => unawaited(_openActions(app)),
-                onCreate: () => context.go('/services/apps/submit'),
-                onResetFilters: _resetFilters,
+              child: NestedScrollView(
+                headerSliverBuilder: (context, innerBoxIsScrolled) => [
+                  SliverPadding(
+                    padding: const EdgeInsets.fromLTRB(
+                      AppSpacing.screen,
+                      0,
+                      AppSpacing.screen,
+                      AppSpacing.lg,
+                    ),
+                    sliver: SliverToBoxAdapter(
+                      child: _MiniAppsHero(count: state.apps.length),
+                    ),
+                  ),
+                ],
+                body: Column(
+                  children: [
+                    if (state.isSearching)
+                      _MiniAppsSearchField(controller: _searchController),
+                    const SizedBox(height: AppSpacing.sectionGap),
+                    _CategoryChips(category: state.category),
+                    Padding(
+                      padding: const .fromLTRB(
+                        AppSpacing.screen,
+                        8,
+                        AppSpacing.screen,
+                        10,
+                      ),
+                      child: Align(
+                        alignment: AlignmentDirectional.centerEnd,
+                        child: _MiniAppsSortButton(
+                          label: _miniAppSortLabel(l10n, state.sort),
+                          onPressed: () => unawaited(_openSort()),
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: _CatalogBody(
+                        state: state,
+                        onOpen: _openApp,
+                        onActions: (app) => unawaited(_openActions(app)),
+                        onCreate: () => context.go('/services/apps/submit'),
+                        onResetFilters: _resetFilters,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ],

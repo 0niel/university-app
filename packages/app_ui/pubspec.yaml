@@ -60,6 +60,11 @@ flutter:
     - assets/maps/mp-1/
     
   fonts:
+    - family: Literata
+      fonts:
+        - asset: assets/fonts/Literata/Literata-Variable.ttf
+        - asset: assets/fonts/Literata/Literata-Italic-Variable.ttf
+          style: italic
     - family: Montserrat
       fonts:
         - asset: assets/fonts/Montserrat/Montserrat-SemiBold.ttf

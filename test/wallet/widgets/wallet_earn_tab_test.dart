@@ -28,17 +28,18 @@ void main() {
       // Non-live rows stay collapsed until the toggle is tapped.
       expect(find.text('Держи стрик'), findsNothing);
       expect(find.text('Позови друга'), findsNothing);
-      expect(find.text('Скоро · 7'), findsOneWidget);
+      expect(find.text('Скоро · 6'), findsOneWidget);
     });
 
     testWidgets('expands every non-live row on toggle tap', (tester) async {
       await tester.pumpWidget(_wrap(const WalletEarnTab()));
 
-      await tester.tap(find.text('Скоро · 7'));
+      await tester.tap(find.text('Скоро · 6'));
       await tester.pump();
 
       expect(find.text('Держи стрик'), findsOneWidget);
       expect(find.text('Позови друга'), findsOneWidget);
+      expect(find.text('Посещай пары'), findsNothing);
     });
   });
 }

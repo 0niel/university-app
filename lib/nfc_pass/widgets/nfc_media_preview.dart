@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
+import 'package:rtu_mirea_app/nfc_pass/widgets/nfc_pass_card.dart';
 import 'package:rtu_mirea_app/nfc_pass/widgets/nfc_video_preview.dart';
 
 class NfcMediaPreview extends StatelessWidget {
@@ -19,13 +20,17 @@ class NfcMediaPreview extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final colors = context.ninja;
+    final colors = context.colors;
     final path = filePath;
 
     final Widget preview;
     final String caption;
     if (path == null) {
-      preview = ColoredBox(color: colors.surface);
+      preview = DecoratedBox(
+        decoration: BoxDecoration(
+          gradient: NfcPassCard.backgroundGradient(context),
+        ),
+      );
       caption = l10n.nfcPassDefaultBackground;
     } else if (isVideo) {
       preview = NfcVideoPreview(filePath: path);
@@ -35,6 +40,16 @@ class NfcMediaPreview extends StatelessWidget {
         File(path),
         fit: BoxFit.cover,
         semanticLabel: l10n.nfcPassPreviewImageHint,
+        errorBuilder: (context, error, stackTrace) => Center(
+          child: Padding(
+            padding: const EdgeInsets.all(AppSpacing.lg),
+            child: Text(
+              l10n.nfcPassMediaUnavailable,
+              textAlign: TextAlign.center,
+              style: AppText.body.copyWith(color: colors.muted),
+            ),
+          ),
+        ),
       );
       caption = l10n.nfcPassPreviewImageHint;
     }
@@ -44,21 +59,27 @@ class NfcMediaPreview extends StatelessWidget {
       children: [
         Text(
           l10n.nfcPassPreviewTitle,
-          style: NinjaText.title.copyWith(color: colors.ink),
+          style: AppText.title.copyWith(color: colors.ink),
         ),
-        const SizedBox(height: 10),
-        ClipRRect(
-          borderRadius: BorderRadius.circular(NinjaRadius.card),
-          child: SizedBox(
-            height: 200,
-            width: double.infinity,
-            child: preview,
+        const SizedBox(height: AppSpacing.gap),
+        Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(
+              maxWidth: NfcPassCard.previewWidth,
+            ),
+            child: AspectRatio(
+              aspectRatio: NfcPassCard.aspectRatio,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(AppRadius.card),
+                child: preview,
+              ),
+            ),
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: AppSpacing.sm),
         Text(
           caption,
-          style: NinjaText.subtext.copyWith(color: colors.muted),
+          style: AppText.subtext.copyWith(color: colors.muted),
         ),
       ],
     );

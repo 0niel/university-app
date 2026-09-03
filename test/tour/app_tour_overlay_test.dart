@@ -108,7 +108,7 @@ void main() {
     await tester.pumpWidget(_app(router, controller));
     await tester.pump();
 
-    expect(find.byType(NinjaCoachCard), findsNothing);
+    expect(find.byType(TourCoachCard), findsNothing);
     expect(find.byType(NinjaSpotlight), findsNothing);
     expect(find.text('Экран А'), findsOneWidget);
   });
@@ -121,7 +121,8 @@ void main() {
     await _advance(tester);
 
     expect(find.text('Поиск по всему кампусу'), findsOneWidget);
-    expect(find.text('1 из 2'), findsOneWidget);
+    expect(find.byType(TourCoachCard), findsOneWidget);
+    expect(find.text('1 ИЗ 2'), findsOneWidget);
     expect(find.text('Далее'), findsOneWidget);
     expect(find.text('Пропустить'), findsOneWidget);
 
@@ -196,7 +197,7 @@ void main() {
 
     expect(find.text('Экран Б'), findsOneWidget);
     expect(find.text('Твой путь ниндзя'), findsOneWidget);
-    expect(find.text('2 из 2'), findsOneWidget);
+    expect(find.text('2 ИЗ 2'), findsOneWidget);
     expect(find.text('Готово'), findsOneWidget);
 
     final spotlight = tester.widget<NinjaSpotlight>(
@@ -216,7 +217,7 @@ void main() {
     await tester.tap(find.text('Готово'));
     await _advance(tester);
 
-    expect(find.byType(NinjaCoachCard), findsNothing);
+    expect(find.byType(TourCoachCard), findsNothing);
     expect(controller.isActive, isFalse);
   });
 
@@ -229,7 +230,7 @@ void main() {
     await tester.tap(find.text('Пропустить'));
     await _advance(tester);
 
-    expect(find.byType(NinjaCoachCard), findsNothing);
+    expect(find.byType(TourCoachCard), findsNothing);
     expect(find.byType(NinjaSpotlight), findsNothing);
     expect(find.text('Экран А'), findsOneWidget);
     expect(controller.isActive, isFalse);
@@ -247,7 +248,7 @@ void main() {
     await _advance(tester);
 
     expect(controller.isActive, isFalse);
-    expect(find.byType(NinjaCoachCard), findsNothing);
+    expect(find.byType(TourCoachCard), findsNothing);
     expect(find.text('Экран А'), findsOneWidget);
   });
 

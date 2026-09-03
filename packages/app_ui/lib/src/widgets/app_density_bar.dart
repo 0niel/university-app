@@ -1,5 +1,8 @@
-import 'package:app_ui/app_ui.dart';
-import 'package:flutter/material.dart';
+import 'package:app_ui/src/colors/colors.dart';
+import 'package:app_ui/src/spacing/app_spacing.dart';
+import 'package:app_ui/src/typography/typography.dart';
+import 'package:app_ui/src/widgets/app_segmented_bar.dart';
+import 'package:flutter/widgets.dart';
 
 class AppDensityBar extends StatelessWidget {
   const AppDensityBar({
@@ -17,45 +20,32 @@ class AppDensityBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).colors;
+    final colors = context.colors;
     final center = centerLabel;
     final hasLabels = leftLabel != null || center != null || rightLabel != null;
+    final style = AppText.captionSmall.copyWith(color: colors.muted2);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        ClipRRect(
-          borderRadius: BorderRadius.circular(4),
-          child: SizedBox(
-            height: 8,
-            child: Row(
-              children: [
-                for (var i = 0; i < segments.length; i++) ...[
-                  Expanded(child: ColoredBox(color: segments[i])),
-                  if (i != segments.length - 1) const SizedBox(width: 3),
-                ],
-              ],
-            ),
-          ),
+        AppSegmentedBar(
+          segments: [
+            for (final color in segments)
+              AppSegmentedBarPart(flex: 1, color: color),
+          ],
         ),
         if (hasLabels) ...[
-          const SizedBox(height: 6),
+          const SizedBox(height: AppSpacing.xsm),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(leftLabel ?? '', style: _labelStyle(colors)),
-              if (center != null) Text(center, style: _labelStyle(colors)),
-              Text(rightLabel ?? '', style: _labelStyle(colors)),
+              Text(leftLabel ?? '', style: style),
+              if (center != null) Text(center, style: style),
+              Text(rightLabel ?? '', style: style),
             ],
           ),
         ],
       ],
     );
   }
-
-  TextStyle _labelStyle(AppColors colors) => AppText.captionSmall.copyWith(
-        fontSize: 10,
-        color: colors.deactiveDarker,
-        fontWeight: FontWeight.w600,
-      );
 }

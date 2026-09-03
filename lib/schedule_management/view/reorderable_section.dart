@@ -14,7 +14,7 @@ class _ReorderableSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (entries.isEmpty) return const SizedBox.shrink();
-    final colors = context.ninja;
+    final colors = context.colors;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 18),
@@ -23,14 +23,14 @@ class _ReorderableSection extends StatelessWidget {
         children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(
-              NinjaMetrics.screenPadding,
+              AppSpacing.screen,
               10,
-              NinjaMetrics.screenPadding,
+              AppSpacing.screen,
               10,
             ),
             child: Text(
               title,
-              style: NinjaText.headline.copyWith(color: colors.ink),
+              style: AppText.headline.copyWith(color: colors.ink),
             ),
           ),
           ReorderableListView.builder(

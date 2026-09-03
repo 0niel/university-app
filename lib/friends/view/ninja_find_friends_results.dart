@@ -33,21 +33,42 @@ class NinjaFindFriendsResults extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return NinjaStateSwitcher(child: _content(context));
+    final content = _content(context);
+    return NinjaStateSwitcher(
+      child: SizedBox(
+        key: content.key,
+        width: double.infinity,
+        child: content,
+      ),
+    );
   }
 
   Widget _content(BuildContext context) {
     if (state.searching) {
       return const NinjaFindFriendsResultsSkeleton(key: ValueKey('searching'));
     }
+    if (state.searchFailed) {
+      return Padding(
+        key: const ValueKey('search-failure'),
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screen),
+        child: AppErrorState(
+          title: context.l10n.loadingError,
+          message: null,
+          footnote: null,
+          primaryLabel: context.l10n.retry,
+          onPrimary: () =>
+              unawaited(context.read<FindFriendsCubit>().search(state.query)),
+        ),
+      );
+    }
     if (state.results.isEmpty) {
       return Padding(
         key: const ValueKey('empty'),
-        padding: const .symmetric(horizontal: NinjaMetrics.screenPadding),
-        child: NinjaEmptyState(
-          icon: const AppLineIconWidget(AppLineIcon.search),
+        padding: const .symmetric(horizontal: AppSpacing.screen),
+        child: AppEmptyState(
+          lineIcon: AppLineIcon.search,
           title: context.l10n.friendsNoneFound,
-          message: context.l10n.friendsNoneFoundSub,
+          subtitle: context.l10n.friendsNoneFoundSub,
         ).animateEmptyState(),
       );
     }
@@ -60,6 +81,7 @@ class NinjaFindFriendsResults extends StatelessWidget {
           ];
     return Column(
       key: const ValueKey('results'),
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         for (final (index, user) in results.indexed)
           NinjaFindFriendCard(
@@ -70,6 +92,7 @@ class NinjaFindFriendsResults extends StatelessWidget {
             ].join(' · '),
             trailing: FindFriendsAddAction(
               sent: state.isSent(user.userId, user.friendshipStatus),
+              loading: state.sendingTo.contains(user.userId),
               isFriend: user.friendshipStatus == 'accepted',
               onAdd: () => unawaited(_sendRequest(context, user.userId)),
             ),

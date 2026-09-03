@@ -9,8 +9,8 @@ class _ResultRowSkeleton extends StatelessWidget {
     final height = 78 + (scale - 1).clamp(0, 1).toDouble() * 40;
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: context.ninja.surface,
-        borderRadius: BorderRadius.circular(NinjaRadius.card),
+        color: context.colors.surface,
+        borderRadius: BorderRadius.circular(AppRadius.card),
       ),
       child: SizedBox(
         height: height,

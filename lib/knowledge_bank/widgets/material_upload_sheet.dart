@@ -6,10 +6,10 @@ import 'package:app_ui/app_ui.dart';
 import 'package:campus_repository/campus_repository.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:mime/mime.dart';
 import 'package:rtu_mirea_app/knowledge_bank/config/knowledge_material_types.dart';
+import 'package:rtu_mirea_app/knowledge_bank/widgets/material_subject_picker.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
-
-part 'price_step_button.dart';
 
 const int _kUploadRewardAmount = 30;
 const int _kMaxUploadBytes = 50 * 1024 * 1024;
@@ -23,11 +23,13 @@ class MaterialUploadSheet extends StatefulWidget {
     super.key,
     this.filePickerBuilder,
     this.fileReaderBuilder,
+    this.initialSubjects = const [],
   });
 
   final CampusRepository repository;
   final MaterialFilePicker? filePickerBuilder;
   final MaterialFileReader? fileReaderBuilder;
+  final List<String> initialSubjects;
 
   @override
   State<MaterialUploadSheet> createState() => _MaterialUploadSheetState();
@@ -35,12 +37,15 @@ class MaterialUploadSheet extends StatefulWidget {
 
 class _MaterialUploadSheetState extends State<MaterialUploadSheet> {
   final _title = TextEditingController();
-  final _subject = TextEditingController();
+  Set<String> _subjects = {};
   String _type = 'note';
   int _price = 0;
   bool _anonymous = false;
   bool _saving = false;
   bool _hasTitle = false;
+  bool _picking = false;
+  bool _fileFailed = false;
+  bool _uploadFailed = false;
 
   String? _fileName;
   Uint8List? _fileBytes;
@@ -49,20 +54,32 @@ class _MaterialUploadSheetState extends State<MaterialUploadSheet> {
   @override
   void dispose() {
     _title.dispose();
-    _subject.dispose();
     super.dispose();
   }
 
   Future<void> _pickFile() async {
+    if (_saving || _picking) return;
+    setState(() {
+      _picking = true;
+      _fileFailed = false;
+    });
     try {
       final file = await (widget.filePickerBuilder ?? FilePicker.pickFile)();
-      if (file == null || !mounted || file.size > _kMaxUploadBytes) return;
+      if (file == null || !mounted) return;
+      if (file.size > _kMaxUploadBytes) {
+        setState(() => _fileFailed = true);
+        return;
+      }
       final bytes = await (widget.fileReaderBuilder ?? _readFile)(file);
-      if (!mounted || bytes.length > _kMaxUploadBytes) return;
+      if (!mounted) return;
+      if (bytes.isEmpty || bytes.length > _kMaxUploadBytes) {
+        setState(() => _fileFailed = true);
+        return;
+      }
       setState(() {
         _fileName = file.name;
         _fileBytes = bytes;
-        _mimeType = null;
+        _mimeType = lookupMimeType(file.name, headerBytes: bytes);
         if (_title.text.trim().isEmpty) {
           final extensionIndex = file.name.lastIndexOf('.');
           _title.text = extensionIndex > 0
@@ -71,12 +88,15 @@ class _MaterialUploadSheetState extends State<MaterialUploadSheet> {
         }
         _hasTitle = _title.text.trim().isNotEmpty;
       });
-    } on Exception catch (error, stackTrace) {
+    } on Object catch (error, stackTrace) {
       log(
         'Failed to pick a material file',
         error: error,
         stackTrace: stackTrace,
       );
+      if (mounted) setState(() => _fileFailed = true);
+    } finally {
+      if (mounted) setState(() => _picking = false);
     }
   }
 
@@ -84,14 +104,24 @@ class _MaterialUploadSheetState extends State<MaterialUploadSheet> {
     final title = _title.text.trim();
     final fileName = _fileName;
     final fileBytes = _fileBytes;
-    if (title.isEmpty || fileName == null || fileBytes == null || _saving) {
+    if (title.isEmpty ||
+        title.length > 200 ||
+        _subjects.isEmpty ||
+        fileName == null ||
+        fileBytes == null ||
+        _saving) {
       return;
     }
-    setState(() => _saving = true);
+    FocusScope.of(context).unfocus();
+    setState(() {
+      _saving = true;
+      _uploadFailed = false;
+    });
     try {
       await widget.repository.createPublicMaterial(
         title: title,
-        subjectName: _subject.text.trim(),
+        subjectName: _subjects.first,
+        subjectNames: _subjects.toList(growable: false),
         materialType: _type,
         price: _price,
         isAnonymous: _anonymous,
@@ -100,52 +130,77 @@ class _MaterialUploadSheetState extends State<MaterialUploadSheet> {
         mimeType: _mimeType,
       );
       if (mounted) Navigator.of(context).pop(true);
-    } on Exception catch (error, stackTrace) {
+    } on Object catch (error, stackTrace) {
       log('Failed to upload a material', error: error, stackTrace: stackTrace);
       if (mounted) {
         setState(() {
           _saving = false;
+          _uploadFailed = true;
         });
       }
     }
   }
 
+  Future<void> _chooseSubjects() async {
+    final selected = await showMaterialSubjectPicker(
+      context,
+      repository: widget.repository,
+      selected: _subjects,
+      initialSubjects: widget.initialSubjects,
+    );
+    if (!mounted || selected == null) return;
+    setState(() => _subjects = selected);
+  }
+
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final l10n = context.l10n;
     final bytes = _fileBytes;
-    final canSave = !_saving && bytes != null && _fileName != null && _hasTitle;
+    final canSave =
+        !_saving &&
+        !_picking &&
+        bytes != null &&
+        _fileName != null &&
+        _hasTitle &&
+        _title.text.trim().length <= 200 &&
+        _subjects.isNotEmpty;
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         AppPressable(
-          onTap: () => unawaited(_pickFile()),
+          onTap: _saving || _picking ? null : () => unawaited(_pickFile()),
           child: Container(
             width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 22),
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.lg,
+              vertical: AppSpacing.contentGap,
+            ),
             decoration: BoxDecoration(
               color: colors.surface,
-              borderRadius: BorderRadius.circular(NinjaRadius.card),
+              borderRadius: BorderRadius.circular(AppRadius.card),
             ),
             child: Column(
               children: [
-                AppLineIconWidget(
-                  AppLineIcon.folder,
-                  color: colors.muted,
-                ),
-                const SizedBox(height: 10),
+                if (_picking)
+                  const NinjaSpinner(size: 24)
+                else
+                  AppLineIconWidget(
+                    AppLineIcon.folder,
+                    color: colors.muted,
+                  ),
+                const SizedBox(height: AppSpacing.gap),
                 Text(
                   _fileName ?? l10n.knowledgeUploadFilePrompt,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: NinjaText.body.copyWith(
-                    fontWeight: FontWeight.w800,
+                  style: AppText.body.copyWith(
+                    fontWeight: FontWeight.w600,
                     color: colors.ink,
                   ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: AppSpacing.xs),
                 Text(
                   bytes == null
                       ? l10n.knowledgeUploadFileHint
@@ -153,44 +208,76 @@ class _MaterialUploadSheetState extends State<MaterialUploadSheet> {
                           (bytes.length / 1024 / 1024).toStringAsFixed(1),
                         ),
                   textAlign: TextAlign.center,
-                  style: NinjaText.helper.copyWith(color: colors.muted),
+                  style: AppText.captionSmall.copyWith(color: colors.muted),
                 ),
               ],
             ),
           ),
         ),
-        const SizedBox(height: 18),
+        const SizedBox(height: AppSpacing.fieldGap),
+        if (_fileFailed) ...[
+          Semantics(
+            liveRegion: true,
+            child: AppBanner(
+              message: l10n.knowledgeFileError,
+              tone: AppBannerTone.danger,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.md),
+        ],
         Text(
           l10n.knowledgeUploadTypeLabel,
-          style: NinjaText.microLabel.copyWith(color: colors.muted),
+          style: AppText.captionSmall.copyWith(color: colors.muted),
         ),
-        const SizedBox(height: 10),
+        const SizedBox(height: AppSpacing.gap),
         Wrap(
           spacing: 8,
           runSpacing: 8,
           children: [
             for (final key in KnowledgeMaterialTypes.keys)
-              NinjaChip(
+              AppChip(
                 label: KnowledgeMaterialTypes.labelOf(l10n, key),
                 selected: _type == key,
-                onTap: () => setState(() => _type = key),
+                onTap: _saving ? null : () => setState(() => _type = key),
               ),
           ],
         ),
-        const SizedBox(height: 14),
-        NinjaInput(
+        const SizedBox(height: AppSpacing.sectionGap),
+        AppInputField(
           controller: _title,
+          enabled: !_saving,
           placeholder: l10n.knowledgeUploadTitleHint,
+          maxLength: 200,
           onChanged: (value) => setState(
             () => _hasTitle = value.trim().isNotEmpty,
           ),
         ),
-        const SizedBox(height: 10),
-        NinjaInput(
-          controller: _subject,
-          placeholder: l10n.knowledgeUploadSubjectHint,
+        const SizedBox(height: AppSpacing.gap),
+        AppSelectField(
+          label: l10n.knowledgeSubjectsTitle,
+          value: _subjects.join(' · '),
+          placeholder: l10n.knowledgeSubjectsFilter,
+          helperText: l10n.knowledgeSubjectsHint,
+          enabled: !_saving,
+          onTap: () => unawaited(_chooseSubjects()),
         ),
-        const SizedBox(height: 16),
+        if (_subjects.isNotEmpty) ...[
+          const SizedBox(height: AppSpacing.sm),
+          Wrap(
+            spacing: AppSpacing.sm,
+            runSpacing: AppSpacing.sm,
+            children: [
+              for (final subject in _subjects)
+                AppChip(
+                  label: subject,
+                  selected: true,
+                  enabled: !_saving,
+                  onRemove: () => setState(() => _subjects.remove(subject)),
+                ),
+            ],
+          ),
+        ],
+        const SizedBox(height: AppSpacing.lg),
         Row(
           children: [
             Expanded(
@@ -200,12 +287,12 @@ class _MaterialUploadSheetState extends State<MaterialUploadSheet> {
                 children: [
                   Text(
                     l10n.knowledgeUploadPriceLabel,
-                    style: NinjaText.body.copyWith(color: colors.ink),
+                    style: AppText.body.copyWith(color: colors.ink),
                   ),
-                  const SizedBox(height: 2),
+                  const SizedBox(height: AppSpacing.xxs),
                   Text(
                     l10n.knowledgeUploadPriceHint,
-                    style: NinjaText.subtext.copyWith(
+                    style: AppText.subtext.copyWith(
                       fontSize: 12,
                       color: colors.muted,
                     ),
@@ -213,67 +300,61 @@ class _MaterialUploadSheetState extends State<MaterialUploadSheet> {
                 ],
               ),
             ),
-            const SizedBox(width: 12),
-            _PriceStepButton(
-              icon: AppLineIcon.minus,
-              semanticLabel: l10n.knowledgeUploadDecreasePrice,
-              onTap: _price <= 0
+            const SizedBox(width: AppSpacing.md),
+            AppStepper(
+              value: _price,
+              max: 500,
+              decrementSemanticLabel: l10n.knowledgeUploadDecreasePrice,
+              incrementSemanticLabel: l10n.knowledgeUploadIncreasePrice,
+              onChanged: _saving
                   ? null
-                  : () => setState(() => _price = (_price - 10).clamp(0, 500)),
-            ),
-            SizedBox(
-              width: 62,
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  AppNinjaMark(size: 12, color: colors.ink),
-                  const SizedBox(width: 5),
-                  Text(
-                    '$_price',
-                    style: NinjaText.tabular(
-                      NinjaText.body.copyWith(
-                        fontWeight: FontWeight.w800,
-                        color: colors.ink,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            _PriceStepButton(
-              icon: AppLineIcon.plus,
-              semanticLabel: l10n.knowledgeUploadIncreasePrice,
-              onTap: () => setState(() => _price = (_price + 10).clamp(0, 500)),
+                  : (value) => setState(() {
+                      _price = (_price + (value > _price ? 10 : -10)).clamp(
+                        0,
+                        500,
+                      );
+                    }),
             ),
           ],
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: AppSpacing.lg),
         Row(
           children: [
             Expanded(
               child: Text(
                 l10n.knowledgeUploadAnonymous,
-                style: NinjaText.body.copyWith(color: colors.ink),
+                style: AppText.body.copyWith(color: colors.ink),
               ),
             ),
-            const SizedBox(width: 12),
-            NinjaSwitch(
+            const SizedBox(width: AppSpacing.md),
+            AppSwitch(
               value: _anonymous,
-              onChanged: (value) => setState(() => _anonymous = value),
+              onChanged: _saving
+                  ? null
+                  : (value) => setState(() => _anonymous = value),
             ),
           ],
         ),
-        const SizedBox(height: 16),
-        NinjaBanner(
-          title: l10n.knowledgeUploadReward(_kUploadRewardAmount),
+        const SizedBox(height: AppSpacing.lg),
+        AppBanner(
+          message: l10n.knowledgeUploadReward(_kUploadRewardAmount),
         ),
-        const SizedBox(height: 18),
-        NinjaButton.primary(
+        const SizedBox(height: AppSpacing.fieldGap),
+        if (_uploadFailed) ...[
+          Semantics(
+            liveRegion: true,
+            child: AppBanner(
+              message: l10n.knowledgeUploadError,
+              tone: AppBannerTone.danger,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.md),
+        ],
+        AppButton.primary(
           label: _saving
               ? l10n.knowledgeUploadPublishing
               : l10n.knowledgeUploadPublish,
-          size: NinjaButtonSize.large,
+          size: AppButtonSize.large,
           expanded: true,
           loading: _saving,
           onPressed: canSave ? () => unawaited(_save()) : null,
@@ -283,4 +364,13 @@ class _MaterialUploadSheetState extends State<MaterialUploadSheet> {
   }
 }
 
-Future<Uint8List> _readFile(PlatformFile file) => file.readAsBytes();
+Future<Uint8List> _readFile(PlatformFile file) async {
+  final bytes = BytesBuilder(copy: false);
+  await for (final chunk in file.readAsByteStream()) {
+    if (bytes.length + chunk.length > _kMaxUploadBytes) {
+      throw const FormatException('Material exceeds the upload limit');
+    }
+    bytes.add(chunk);
+  }
+  return bytes.takeBytes();
+}

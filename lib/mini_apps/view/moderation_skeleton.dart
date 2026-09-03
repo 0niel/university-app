@@ -13,17 +13,25 @@ class _ModerationSkeleton extends StatelessWidget {
         children: [
           const Padding(
             padding: .fromLTRB(
-              NinjaMetrics.screenPadding,
+              AppSpacing.screen,
               28,
-              NinjaMetrics.screenPadding,
+              AppSpacing.screen,
               10,
             ),
             child: Column(
               crossAxisAlignment: .start,
               spacing: 6,
               children: [
-                NinjaSkeleton(width: 160, height: 19, radius: 9),
-                NinjaSkeleton(width: 220, height: 12, radius: 6),
+                NinjaSkeleton(
+                  width: 160,
+                  height: 19,
+                  radius: AppRadius.skeleton,
+                ),
+                NinjaSkeleton(
+                  width: 220,
+                  height: 12,
+                  radius: AppRadius.focusOutline,
+                ),
               ],
             ),
           ),

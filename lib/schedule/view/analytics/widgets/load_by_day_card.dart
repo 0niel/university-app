@@ -7,7 +7,7 @@ class _LoadByDayCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final l10n = context.l10n;
     final labels = [
       l10n.weekdayShortMon,
@@ -30,15 +30,15 @@ class _LoadByDayCard extends StatelessWidget {
         ? null
         : labels.elementAtOrNull(overloadedDay.key - 1);
 
-    return NinjaScheduleSurface(
+    return AppCard(
       child: Column(
         crossAxisAlignment: .start,
         children: [
           Text(
             l10n.analyticsLoadByDay,
-            style: NinjaText.headline.copyWith(color: colors.ink),
+            style: AppText.headline.copyWith(color: colors.ink),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: AppSpacing.xs),
           Text(
             overloadedDay != null && overloadedDayLabel != null
                 ? l10n.analyticsOverloadedDay(
@@ -46,14 +46,14 @@ class _LoadByDayCard extends StatelessWidget {
                     overloadedDay.value.toStringAsFixed(0),
                   )
                 : l10n.analyticsBalancedWeek,
-            style: NinjaText.subtext.copyWith(color: colors.muted),
+            style: AppText.subtext.copyWith(color: colors.muted),
           ),
-          const SizedBox(height: 18),
+          const SizedBox(height: AppSpacing.fieldGap),
           SizedBox(
             height: 130,
             child: Row(
               crossAxisAlignment: .end,
-              spacing: 8,
+              spacing: AppSpacing.sm,
               children: [
                 for (var weekday = 1; weekday <= 7; weekday++)
                   Expanded(

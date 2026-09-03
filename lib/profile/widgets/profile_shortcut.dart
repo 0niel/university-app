@@ -1,6 +1,5 @@
 import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
-import 'package:rtu_mirea_app/common/utils/ninja_initials.dart';
 
 class ProfileShortcut extends StatelessWidget {
   const ProfileShortcut({
@@ -16,12 +15,12 @@ class ProfileShortcut extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     return Padding(
       padding: const .fromLTRB(
-        NinjaMetrics.screenPadding,
+        AppSpacing.screen,
         8,
-        NinjaMetrics.screenPadding,
+        AppSpacing.screen,
         0,
       ),
       child: Semantics(
@@ -31,17 +30,18 @@ class ProfileShortcut extends StatelessWidget {
           child: Container(
             decoration: BoxDecoration(
               color: colors.surface,
-              borderRadius: .circular(NinjaRadius.card),
+              borderRadius: .circular(AppRadius.card),
             ),
-            padding: const .all(14),
+            padding: const .all(AppSpacing.sectionGap),
             child: Row(
               children: [
-                NinjaAvatar(
-                  initials: ninjaInitials(name),
-                  size: 52,
-                  tone: NinjaAvatarTone.indigo,
+                AppAvatar(
+                  name: name,
+                  size: AppControlSize.buttonLarge,
+                  color: colors.onAccent,
+                  backgroundColor: colors.accent,
                 ),
-                const SizedBox(width: 14),
+                const SizedBox(width: AppSpacing.sectionGap),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: .start,
@@ -50,18 +50,18 @@ class ProfileShortcut extends StatelessWidget {
                         name,
                         maxLines: 2,
                         overflow: .ellipsis,
-                        style: NinjaText.body.copyWith(
+                        style: AppText.body.copyWith(
                           color: colors.ink,
                           fontWeight: .w700,
                         ),
                       ),
                       if (subtitle.isNotEmpty) ...[
-                        const SizedBox(height: 4),
+                        const SizedBox(height: AppSpacing.xs),
                         Text(
                           subtitle,
                           maxLines: 2,
                           overflow: .ellipsis,
-                          style: NinjaText.subtext.copyWith(
+                          style: AppText.subtext.copyWith(
                             color: colors.muted,
                           ),
                         ),
@@ -69,19 +69,19 @@ class ProfileShortcut extends StatelessWidget {
                     ],
                   ),
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: AppSpacing.md),
                 Container(
-                  width: 44,
-                  height: 44,
+                  width: AppControlSize.iconButton,
+                  height: AppControlSize.iconButton,
                   alignment: .center,
                   decoration: BoxDecoration(
-                    color: colors.brandTint,
-                    borderRadius: .circular(14),
+                    color: colors.tint,
+                    borderRadius: .circular(AppRadius.tile),
                   ),
                   child: AppLineIconWidget(
                     .pencil,
                     size: 19,
-                    color: colors.brandInk,
+                    color: colors.accent,
                   ),
                 ),
               ],

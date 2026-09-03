@@ -4,6 +4,13 @@ abstract class LoginWithEmailLinkEvent extends Equatable {
   const LoginWithEmailLinkEvent();
 }
 
+class LoginWithEmailCodeResetRequested extends LoginWithEmailLinkEvent {
+  const LoginWithEmailCodeResetRequested();
+
+  @override
+  List<Object> get props => [];
+}
+
 class LoginWithEmailLinkSubmitted extends LoginWithEmailLinkEvent
     with AnalyticsEventMixin {
   const LoginWithEmailLinkSubmitted(this.emailLink);

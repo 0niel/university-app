@@ -7,7 +7,7 @@ class PeopleMapBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final l10n = context.l10n;
     final title = live.isEmpty
         ? l10n.peopleMapTitle
@@ -19,7 +19,7 @@ class PeopleMapBanner extends StatelessWidget {
       child: Container(
         decoration: BoxDecoration(
           color: colors.surface,
-          borderRadius: .circular(NinjaRadius.card),
+          borderRadius: .circular(AppRadius.card),
         ),
         padding: const .fromLTRB(16, 14, 12, 14),
         child: Row(
@@ -29,10 +29,10 @@ class PeopleMapBanner extends StatelessWidget {
               height: 44,
               alignment: .center,
               decoration: BoxDecoration(
-                color: colors.brandTint,
-                borderRadius: .circular(14),
+                color: colors.tint,
+                borderRadius: .circular(AppRadius.tile),
               ),
-              child: AppLineIconWidget(.map, size: 21, color: colors.brandInk),
+              child: AppLineIconWidget(.map, size: 21, color: colors.accent),
             ),
             const SizedBox(width: 14),
             Expanded(
@@ -43,7 +43,7 @@ class PeopleMapBanner extends StatelessWidget {
                     title,
                     maxLines: 2,
                     overflow: .ellipsis,
-                    style: NinjaText.body.copyWith(
+                    style: AppText.body.copyWith(
                       color: colors.ink,
                       fontWeight: .w600,
                     ),
@@ -53,7 +53,7 @@ class PeopleMapBanner extends StatelessWidget {
                     l10n.peopleMapOpen,
                     maxLines: 1,
                     overflow: .ellipsis,
-                    style: NinjaText.helper.copyWith(color: colors.muted),
+                    style: AppText.caption.copyWith(color: colors.muted),
                   ),
                 ],
               ),
@@ -63,7 +63,7 @@ class PeopleMapBanner extends StatelessWidget {
               _LiveAvatars(live: live),
             ],
             const SizedBox(width: 4),
-            AppLineIconWidget(.chevronR, size: 16, color: colors.chevron),
+            AppLineIconWidget(.chevronR, size: 16, color: colors.muted2),
           ],
         ),
       ),

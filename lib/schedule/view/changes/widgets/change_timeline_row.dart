@@ -8,20 +8,20 @@ class _ChangeTimelineRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final style = _styleFor(context, change);
     final locale = Localizations.localeOf(context).toString();
 
     return Padding(
-      padding: .only(bottom: last ? 4 : 10),
-      child: NinjaScheduleSurface(
+      padding: .only(bottom: last ? AppSpacing.xs : AppSpacing.gap),
+      child: AppCard(
         child: Row(
           crossAxisAlignment: .start,
-          spacing: 12,
+          spacing: AppSpacing.md,
           children: [
             Container(
-              width: NinjaMetrics.minTouchTarget,
-              height: NinjaMetrics.minTouchTarget,
+              width: AppControlSize.touchTarget,
+              height: AppControlSize.touchTarget,
               decoration: BoxDecoration(
                 color: style.color.withValues(alpha: .12),
                 shape: .circle,
@@ -40,43 +40,45 @@ class _ChangeTimelineRow extends StatelessWidget {
                 children: [
                   Text(
                     style.title,
-                    style: NinjaText.headline.copyWith(color: colors.ink),
+                    style: AppText.headline.copyWith(color: colors.ink),
                   ),
                   if (style.description.isNotEmpty) ...[
-                    const SizedBox(height: 3),
+                    const SizedBox(height: ScheduleMetrics.compactGap),
                     Text(
                       style.description,
-                      style: NinjaText.subtext.copyWith(
+                      style: AppText.subtext.copyWith(
                         color: colors.muted,
                         height: 1.4,
                       ),
                     ),
                   ],
-                  const SizedBox(height: 8),
+                  const SizedBox(height: AppSpacing.sm),
                   Wrap(
-                    spacing: 8,
-                    runSpacing: 4,
+                    spacing: AppSpacing.sm,
+                    runSpacing: AppSpacing.xs,
                     crossAxisAlignment: .center,
                     children: [
                       Container(
                         padding: const .symmetric(
                           horizontal: 9,
-                          vertical: 3,
+                          vertical: ScheduleMetrics.compactGap,
                         ),
                         decoration: BoxDecoration(
-                          color: colors.surfaceAlt,
-                          borderRadius: .circular(NinjaRadius.pill),
+                          color: colors.surface2,
+                          borderRadius: .circular(AppRadius.full),
                         ),
                         child: Text(
                           _dayChip(context, change.lessonDate, locale),
-                          style: NinjaText.helper.copyWith(
-                            color: colors.mutedDark,
+                          style: AppText.captionSmall.copyWith(
+                            color: colors.muted,
                           ),
                         ),
                       ),
                       Text(
                         _relativeTime(context, change.createdAt),
-                        style: NinjaText.helper.copyWith(color: colors.muted),
+                        style: AppText.captionSmall.copyWith(
+                          color: colors.muted,
+                        ),
                       ),
                     ],
                   ),
@@ -93,7 +95,7 @@ class _ChangeTimelineRow extends StatelessWidget {
     BuildContext context,
     ScheduleChange scheduleChange,
   ) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final l10n = context.l10n;
     final oldValue = scheduleChange.oldValue;
     final newValue = scheduleChange.newValue;
@@ -101,7 +103,7 @@ class _ChangeTimelineRow extends StatelessWidget {
     return switch (scheduleChange.kind) {
       .move => (
         icon: AppLineIcon.clock,
-        color: colors.brand,
+        color: colors.accent,
         title: l10n.changeMovedTitle(scheduleChange.subject),
         description: l10n.changeMovedDescription(
           oldValue.start ?? '—',
@@ -110,7 +112,7 @@ class _ChangeTimelineRow extends StatelessWidget {
       ),
       .cancel => (
         icon: AppLineIcon.close,
-        color: colors.scarlet,
+        color: colors.exam,
         title: l10n.changeCancelledTitle(scheduleChange.subject),
         description: switch (oldValue.start) {
           final start? => l10n.changeCancelledDescription(start),
@@ -119,7 +121,7 @@ class _ChangeTimelineRow extends StatelessWidget {
       ),
       .add => (
         icon: AppLineIcon.plus,
-        color: colors.brand,
+        color: colors.accent,
         title: l10n.changeAddedTitle(scheduleChange.subject),
         description: [
           if (newValue.teachers.isNotEmpty) newValue.teachers.join(', '),
@@ -129,7 +131,7 @@ class _ChangeTimelineRow extends StatelessWidget {
       ),
       .teacher => (
         icon: AppLineIcon.people,
-        color: colors.brand,
+        color: colors.accent,
         title: l10n.changeTeacherTitle,
         description:
             '${scheduleChange.subject}: ${oldValue.teachers.join(', ')} → '
@@ -137,7 +139,7 @@ class _ChangeTimelineRow extends StatelessWidget {
       ),
       .room => (
         icon: AppLineIcon.pin,
-        color: colors.brand,
+        color: colors.accent,
         title: l10n.changeRoomTitle,
         description:
             '${scheduleChange.subject}: ${oldValue.rooms.join(', ')} → '

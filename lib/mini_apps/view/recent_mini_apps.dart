@@ -13,19 +13,19 @@ class _RecentMiniApps extends StatelessWidget {
       height: textScale >= 1.6 ? 138 : 102,
       child: ListView.separated(
         padding: const EdgeInsets.symmetric(
-          horizontal: NinjaMetrics.screenPadding,
+          horizontal: AppSpacing.screen,
         ),
         scrollDirection: Axis.horizontal,
         physics: const BouncingScrollPhysics(),
         itemCount: apps.length,
-        separatorBuilder: (_, _) => const SizedBox(width: 16),
+        separatorBuilder: (_, _) => const SizedBox(width: AppSpacing.lg),
         itemBuilder: (context, index) {
           final app = apps[index];
           return SizedBox(
             width: textScale >= 1.6 ? 108 : 76,
             child: AppServiceTile(
               emoji: app.iconEmoji,
-              color: context.ninja.brand,
+              color: context.colors.accent,
               label: app.name,
               size: textScale >= 1.6 ? 58 : 52,
               onTap: () => onOpen(app),

@@ -14,7 +14,7 @@ class NotificationsSettingsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: context.ninja.canvas,
+      backgroundColor: context.colors.canvas,
       body: BlocBuilder<ProfileCubit, ProfileState>(
         builder: _buildBody,
       ),
@@ -22,7 +22,7 @@ class NotificationsSettingsPage extends StatelessWidget {
   }
 
   Widget _buildBody(BuildContext context, ProfileState state) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final l10n = context.l10n;
     final settings = state.settings;
     final isMasterOn = settings.notificationsEnabled;
@@ -42,23 +42,11 @@ class NotificationsSettingsPage extends StatelessWidget {
         parent: AlwaysScrollableScrollPhysics(),
       ),
       slivers: [
-        SliverAppBar(
-          pinned: true,
-          backgroundColor: colors.canvas,
-          surfaceTintColor: Colors.transparent,
-          elevation: 0,
-          scrolledUnderElevation: 0,
-          leadingWidth: 60,
-          leading: Center(
-            child: NinjaIconButton(
-              icon: const AppLineIconWidget(.chevronL, size: 20),
-              tooltip: l10n.back,
-              onPressed: () => Navigator.of(context).pop(),
-            ),
-          ),
-          title: Text(
-            l10n.notifications,
-            style: NinjaText.appBarTitle.copyWith(color: colors.ink),
+        SliverToBoxAdapter(
+          child: AppInnerHeader(
+            title: l10n.notifications,
+            backSemanticsLabel: l10n.back,
+            onBack: () => Navigator.of(context).maybePop(),
           ),
         ),
         if (cold)
@@ -67,14 +55,14 @@ class NotificationsSettingsPage extends StatelessWidget {
           SliverToBoxAdapter(
             child: Padding(
               padding: const .fromLTRB(
-                NinjaMetrics.screenPadding,
+                AppSpacing.screen,
                 8,
-                NinjaMetrics.screenPadding,
+                AppSpacing.screen,
                 6,
               ),
               child: Text(
                 l10n.settingsNotificationsPushSub,
-                style: NinjaText.subtext.copyWith(color: colors.mutedDark),
+                style: AppText.subtext.copyWith(color: colors.muted),
               ),
             ),
           ),
@@ -88,9 +76,9 @@ class NotificationsSettingsPage extends StatelessWidget {
                 ),
               Padding(
                 padding: const .fromLTRB(
-                  NinjaMetrics.screenPadding,
+                  AppSpacing.screen,
                   12,
-                  NinjaMetrics.screenPadding,
+                  AppSpacing.screen,
                   0,
                 ),
                 child: SettingsCard(

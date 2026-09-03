@@ -52,7 +52,7 @@ void main() {
       verify(() => cubit.load()).called(1);
     });
 
-    testWidgets('become-mentor card is the single pastel card', (
+    testWidgets('become-mentor card uses the single accent-tinted surface', (
       tester,
     ) async {
       const mentor = Mentor(
@@ -71,17 +71,21 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      final colors = AppTheme.darkTheme.extension<NinjaColors>()!;
+      final colors = tester.element(find.byType(MentorshipView)).colors;
       final pastel = tester
           .widgetList<DecoratedBox>(find.byType(DecoratedBox))
           .map((box) => box.decoration)
           .whereType<BoxDecoration>()
-          .where((decoration) => decoration.color == colors.accentSoft)
+          .where(
+            (decoration) =>
+                decoration.color == colors.tint &&
+                decoration.shape == BoxShape.rectangle,
+          )
           .toList();
       expect(pastel, hasLength(1));
       expect(
         pastel.single.borderRadius,
-        BorderRadius.circular(NinjaRadius.card),
+        BorderRadius.circular(AppRadius.card),
       );
     });
 

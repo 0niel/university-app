@@ -136,7 +136,7 @@ class TeamFinderView extends StatelessWidget {
       listener: (context, _) =>
           _showError(context, context.l10n.teamFinderRefreshError),
       builder: (context, _) => Scaffold(
-        backgroundColor: context.ninja.canvas,
+        backgroundColor: context.colors.canvas,
         floatingActionButton: NinjaCommunityFab(
           label: context.l10n.teamFinderCreateCta,
           onPressed: () => unawaited(_create(context)),

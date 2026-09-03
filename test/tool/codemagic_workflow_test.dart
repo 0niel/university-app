@@ -38,6 +38,37 @@ void main() {
     expect(workflow, isNot(contains('mirea.ninja.mireaapp')));
   });
 
+  test('uploads iOS builds only for beta testing', () {
+    final workflows = configuration['workflows'] as YamlMap;
+    final release = workflows['ios-beta-release'] as YamlMap;
+    final publishing = release['publishing'] as YamlMap;
+    final appStore = publishing['app_store_connect'] as YamlMap;
+
+    expect(appStore['submit_to_testflight'], isTrue);
+    expect(appStore['submit_to_app_store'], isFalse);
+  });
+
+  test('publishes patches only to staging', () {
+    final workflows = configuration['workflows'] as YamlMap;
+    final patch = workflows['ios-patch'] as YamlMap;
+    final scripts = patch['scripts'] as YamlList;
+    final commands = scripts
+        .cast<YamlMap>()
+        .map((step) => step['script'] as String)
+        .where((script) => script.contains('shorebird patch'))
+        .toList();
+
+    expect(commands, hasLength(1));
+    final arguments = commands.single.split(RegExp(r'\s+'));
+    expect(arguments, contains('--track=staging'));
+    expect(
+      arguments.indexOf('--track=staging'),
+      lessThan(arguments.indexOf('--')),
+    );
+    expect(workflow, isNot(contains('shorebird patches promote')));
+    expect(workflow, isNot(contains('--track=stable')));
+  });
+
   test('keeps credentials in Codemagic variable groups', () {
     expect(workflow, contains('- shorebird'));
     expect(workflow, contains('- app_store'));

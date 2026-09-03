@@ -35,7 +35,7 @@ class StacAppServiceTileParser extends StacParser<StacAppServiceTile> {
   Widget parse(BuildContext context, StacAppServiceTile model) {
     return AppServiceTile(
       emoji: model.emoji,
-      color: parseHexColor(model.color) ?? context.colors.primary,
+      color: parseAppColor(context, model.color) ?? context.colors.accent,
       label: model.label,
       solid: model.solid,
       onTap: actionCallback(context, model.actionJson),

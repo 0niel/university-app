@@ -17,8 +17,8 @@ class HighlightedTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
-    final baseStyle = NinjaText.title.copyWith(
+    final colors = context.colors;
+    final baseStyle = AppText.title.copyWith(
       color: baseColor ?? colors.ink,
     );
 
@@ -43,7 +43,7 @@ class HighlightedTitle extends StatelessWidget {
           TextSpan(
             text: name.substring(start, end),
             style: baseStyle.copyWith(
-              color: highlightColor ?? colors.brand,
+              color: highlightColor ?? colors.accent,
             ),
           ),
           if (end < name.length) TextSpan(text: name.substring(end)),

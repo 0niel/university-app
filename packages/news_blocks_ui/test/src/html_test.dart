@@ -151,7 +151,7 @@ void main() {
 
         final expectedStyle =
             flutter_html.Style.fromTextStyle(
-              theme.textTheme.displayMedium!.copyWith(letterSpacing: 0),
+              theme.textTheme.displayMedium!,
             ).generateTextStyle();
 
         final widget =
@@ -172,7 +172,7 @@ void main() {
 
         final expectedStyle =
             flutter_html.Style.fromTextStyle(
-              theme.textTheme.displaySmall!.copyWith(letterSpacing: 0),
+              theme.textTheme.displaySmall!,
             ).generateTextStyle();
 
         final widget =
@@ -193,7 +193,7 @@ void main() {
 
         final expectedStyle =
             flutter_html.Style.fromTextStyle(
-              theme.textTheme.headlineMedium!.copyWith(letterSpacing: 0),
+              theme.textTheme.headlineMedium!,
             ).generateTextStyle();
 
         final widget =
@@ -214,7 +214,7 @@ void main() {
 
         final expectedStyle =
             flutter_html.Style.fromTextStyle(
-              theme.textTheme.headlineSmall!.copyWith(letterSpacing: 0),
+              theme.textTheme.headlineSmall!,
             ).generateTextStyle();
 
         final widget =
@@ -235,7 +235,7 @@ void main() {
 
         final expectedStyle =
             flutter_html.Style.fromTextStyle(
-              theme.textTheme.titleLarge!.copyWith(letterSpacing: 0),
+              theme.textTheme.titleLarge!,
             ).generateTextStyle();
 
         final widget =

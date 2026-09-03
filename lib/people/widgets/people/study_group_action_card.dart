@@ -16,7 +16,7 @@ class StudyGroupActionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     return AppPressable(
       onTap: onTap,
       semanticsLabel: '$title, $subtitle',
@@ -24,7 +24,7 @@ class StudyGroupActionCard extends StatelessWidget {
       child: Container(
         decoration: BoxDecoration(
           color: colors.surface,
-          borderRadius: .circular(NinjaRadius.card),
+          borderRadius: .circular(AppRadius.card),
         ),
         padding: const .fromLTRB(16, 14, 12, 14),
         child: Row(
@@ -34,10 +34,10 @@ class StudyGroupActionCard extends StatelessWidget {
               height: 34,
               alignment: .center,
               decoration: BoxDecoration(
-                color: colors.surfaceAlt,
-                borderRadius: .circular(11),
+                color: colors.surface2,
+                borderRadius: .circular(AppRadius.badge),
               ),
-              child: AppLineIconWidget(icon, size: 18, color: colors.mutedDark),
+              child: AppLineIconWidget(icon, size: 18, color: colors.muted),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -48,7 +48,7 @@ class StudyGroupActionCard extends StatelessWidget {
                     title,
                     maxLines: 2,
                     overflow: .ellipsis,
-                    style: NinjaText.body.copyWith(
+                    style: AppText.body.copyWith(
                       color: colors.ink,
                       fontWeight: .w600,
                     ),
@@ -58,13 +58,13 @@ class StudyGroupActionCard extends StatelessWidget {
                     subtitle,
                     maxLines: 2,
                     overflow: .ellipsis,
-                    style: NinjaText.helper.copyWith(color: colors.muted),
+                    style: AppText.caption.copyWith(color: colors.muted),
                   ),
                 ],
               ),
             ),
             const SizedBox(width: 8),
-            AppLineIconWidget(.chevronR, size: 16, color: colors.chevron),
+            AppLineIconWidget(.chevronR, size: 16, color: colors.muted2),
           ],
         ),
       ),

@@ -1,5 +1,10 @@
-import 'package:app_ui/app_ui.dart';
-import 'package:flutter/material.dart';
+import 'package:app_ui/src/colors/colors.dart';
+import 'package:app_ui/src/spacing/app_spacing.dart';
+import 'package:app_ui/src/typography/typography.dart';
+import 'package:app_ui/src/widgets/app_divider.dart';
+import 'package:app_ui/src/widgets/app_line_icon.dart';
+import 'package:app_ui/src/widgets/app_pressable.dart';
+import 'package:flutter/widgets.dart';
 
 class AppSettingsRow extends StatelessWidget {
   const AppSettingsRow({
@@ -12,6 +17,7 @@ class AppSettingsRow extends StatelessWidget {
     this.isFirst = false,
     this.isLast = false,
     this.showChevron = true,
+    this.isDestructive = false,
   });
 
   final String title;
@@ -22,62 +28,65 @@ class AppSettingsRow extends StatelessWidget {
   final bool isFirst;
   final bool isLast;
   final bool showChevron;
+  final bool isDestructive;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final subtitleText = subtitle;
+    final leadingWidget = leading;
+    final trailingWidget = trailing;
+    final titleColor = isDestructive ? colors.danger : colors.ink;
+    final dense = subtitleText != null || leadingWidget != null;
+
     return AppPressable(
       onTap: onTap,
+      semanticsLabel: subtitleText == null ? title : '$title, $subtitleText',
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           if (!isFirst)
-            Divider(
-              height: 0.5,
-              thickness: 0.5,
-              indent: leading != null ? 56 : 16,
-              color: colors.divider,
-            ),
+            AppDivider(indent: leadingWidget != null ? 64 : AppSpacing.lg),
           Padding(
-            padding: const EdgeInsets.symmetric(
+            padding: EdgeInsets.symmetric(
               horizontal: AppSpacing.lg,
-              vertical: AppSpacing.md,
+              vertical: dense ? AppSpacing.actionInset : 15,
             ),
             child: Row(
               children: [
-                if (leading != null) ...[
-                  leading!,
-                  const SizedBox(width: 12),
+                if (leadingWidget != null) ...[
+                  leadingWidget,
+                  const SizedBox(width: AppSpacing.md),
                 ],
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
                         title,
-                        style: AppText.body.copyWith(color: colors.active),
+                        style: AppText.body.copyWith(color: titleColor),
                       ),
-                      if (subtitle != null) ...[
-                        const SizedBox(height: 2),
+                      if (subtitleText != null) ...[
+                        const SizedBox(height: AppSpacing.xxs),
                         Text(
-                          subtitle!,
-                          style: AppText.captionSmall.copyWith(
-                            color: colors.deactive,
-                          ),
+                          subtitleText,
+                          style: AppText.caption.copyWith(color: colors.muted),
                         ),
                       ],
                     ],
                   ),
                 ),
-                if (trailing != null) ...[
-                  const SizedBox(width: 8),
-                  trailing!,
+                if (trailingWidget != null) ...[
+                  const SizedBox(width: AppSpacing.sm),
+                  trailingWidget,
                 ] else if (showChevron && onTap != null) ...[
-                  const SizedBox(width: 8),
-                  Icon(
-                    Icons.chevron_right_rounded,
-                    size: 18,
-                    color: colors.deactiveDarker,
+                  const SizedBox(width: AppSpacing.sm),
+                  AppLineIconWidget(
+                    AppLineIcon.chevronR,
+                    size: AppIconSize.xs,
+                    color: colors.muted2,
+                    strokeWidth: 2.5,
                   ),
                 ],
               ],

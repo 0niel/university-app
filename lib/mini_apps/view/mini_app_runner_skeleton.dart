@@ -10,21 +10,25 @@ class MiniAppRunnerSkeleton extends StatelessWidget {
     return NinjaSkeletonGroup(
       semanticsLabel: context.l10n.loadingContent,
       child: ListView(
-        padding: const .all(NinjaMetrics.screenPadding),
+        padding: const .all(AppSpacing.screen),
         children: [
-          const NinjaSkeleton(height: 28, radius: NinjaRadius.button),
-          const SizedBox(height: 14),
+          const NinjaSkeleton(height: 28, radius: AppRadius.full),
+          const SizedBox(height: AppSpacing.sectionGap),
           DecoratedBox(
             decoration: BoxDecoration(
-              color: context.ninja.surface,
-              borderRadius: .circular(NinjaRadius.card),
+              color: context.colors.surface,
+              borderRadius: .circular(AppRadius.card),
             ),
             child: const Padding(
               padding: .all(18),
               child: Row(
                 children: [
-                  NinjaSkeleton(width: 52, height: 52, radius: 16),
-                  SizedBox(width: 14),
+                  NinjaSkeleton(
+                    width: 52,
+                    height: 52,
+                    radius: AppRadius.banner,
+                  ),
+                  SizedBox(width: AppSpacing.sectionGap),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: .start,
@@ -40,11 +44,11 @@ class MiniAppRunnerSkeleton extends StatelessWidget {
               ),
             ),
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: AppSpacing.sectionGap),
           DecoratedBox(
             decoration: BoxDecoration(
-              color: context.ninja.surface,
-              borderRadius: .circular(NinjaRadius.card),
+              color: context.colors.surface,
+              borderRadius: .circular(AppRadius.card),
             ),
             child: const Padding(
               padding: .all(16),
@@ -53,15 +57,15 @@ class MiniAppRunnerSkeleton extends StatelessWidget {
                 spacing: 12,
                 children: [
                   NinjaSkeleton.bar(height: 13, widthFactor: 0.38),
-                  NinjaSkeleton(height: 48, radius: NinjaRadius.control),
-                  NinjaSkeleton(height: 48, radius: NinjaRadius.control),
-                  NinjaSkeleton(height: 48, radius: NinjaRadius.control),
+                  NinjaSkeleton(height: 48, radius: AppRadius.field),
+                  NinjaSkeleton(height: 48, radius: AppRadius.field),
+                  NinjaSkeleton(height: 48, radius: AppRadius.field),
                 ],
               ),
             ),
           ),
-          const SizedBox(height: 14),
-          const NinjaSkeleton(height: 56, radius: NinjaRadius.button),
+          const SizedBox(height: AppSpacing.sectionGap),
+          const NinjaSkeleton(height: 56, radius: AppRadius.full),
         ],
       ),
     );

@@ -25,7 +25,7 @@ class LostFoundGallery extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     return SizedBox(
       height: 180,
       child: LayoutBuilder(
@@ -44,7 +44,7 @@ class LostFoundGallery extends StatelessWidget {
                 semanticsLabel:
                     '${context.l10n.lostFoundPhotosLabel} ${index + 1} / ${images.length}',
                 child: ClipRRect(
-                  borderRadius: BorderRadius.circular(NinjaRadius.card),
+                  borderRadius: BorderRadius.circular(AppRadius.card),
                   child: CachedNetworkImage(
                     imageUrl: url,
                     fit: .cover,
@@ -53,9 +53,9 @@ class LostFoundGallery extends StatelessWidget {
                             MediaQuery.accessibleNavigationOf(context))
                         ? Duration.zero
                         : const Duration(milliseconds: 180),
-                    placeholder: (_, _) => ColoredBox(color: colors.surfaceAlt),
+                    placeholder: (_, _) => ColoredBox(color: colors.surface2),
                     errorWidget: (_, _, _) => ColoredBox(
-                      color: colors.surfaceAlt,
+                      color: colors.surface2,
                       child: AppLineIconWidget(
                         AppLineIcon.imageOff,
                         color: colors.muted,

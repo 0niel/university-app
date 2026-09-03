@@ -22,21 +22,21 @@ class FriendsPillButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final enabled = onTap != null && !loading;
     final (background, foreground) = enabled || loading
         ? friendsToneColors(colors, tone)
-        : (colors.surface, colors.disabled);
+        : (colors.surface, colors.muted2);
     final leading = icon;
 
     final pill = Container(
       constraints: const BoxConstraints(
-        minHeight: NinjaMetrics.minTouchTarget,
+        minHeight: AppControlSize.iconButton,
       ),
-      padding: const .symmetric(horizontal: 18, vertical: 11),
+      padding: const .symmetric(horizontal: AppSpacing.fieldGap, vertical: 11),
       decoration: BoxDecoration(
         color: background,
-        borderRadius: .circular(NinjaRadius.pill),
+        borderRadius: .circular(AppRadius.full),
       ),
       child: Row(
         mainAxisSize: expanded ? .max : .min,
@@ -53,7 +53,7 @@ class FriendsPillButton extends StatelessWidget {
               maxLines: 1,
               overflow: .ellipsis,
               textAlign: .center,
-              style: NinjaText.button.copyWith(color: foreground),
+              style: AppText.button.copyWith(color: foreground),
             ),
           ),
         ],

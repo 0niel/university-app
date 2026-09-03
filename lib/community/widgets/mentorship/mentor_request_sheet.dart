@@ -132,8 +132,8 @@ class _MentorRequestSheetState extends State<MentorRequestSheet> {
     return Container(
       padding: const .all(16),
       decoration: BoxDecoration(
-        color: context.ninja.surface,
-        borderRadius: .circular(NinjaRadius.card),
+        color: context.colors.surface,
+        borderRadius: .circular(AppRadius.card),
       ),
       child: Row(
         spacing: 12,
@@ -145,7 +145,7 @@ class _MentorRequestSheetState extends State<MentorRequestSheet> {
           Expanded(
             child: Text(
               widget.mentor.fullName,
-              style: NinjaText.body.copyWith(color: context.ninja.ink),
+              style: AppText.body.copyWith(color: context.colors.ink),
             ),
           ),
         ],
@@ -154,24 +154,24 @@ class _MentorRequestSheetState extends State<MentorRequestSheet> {
   }
 
   Widget _priceHint(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     return Container(
       padding: const .all(16),
       decoration: BoxDecoration(
         color: colors.surface,
-        borderRadius: .circular(NinjaRadius.card),
+        borderRadius: .circular(AppRadius.card),
       ),
       child: Text(
         widget.mentor.price == 0
             ? context.l10n.mentorshipFreeSession
             : context.l10n.mentorshipPaidSession(widget.mentor.price),
-        style: NinjaText.helper.copyWith(color: colors.mutedDark),
+        style: AppText.captionSmall.copyWith(color: colors.muted),
       ),
     );
   }
 
   Widget _label(BuildContext context, String label) => Text(
     label,
-    style: NinjaText.microLabel.copyWith(color: context.ninja.muted),
+    style: AppText.captionSmall.copyWith(color: context.colors.muted),
   );
 }

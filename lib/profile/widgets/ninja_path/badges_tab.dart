@@ -6,6 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gamification_repository/gamification_repository.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:rtu_mirea_app/profile/cubit/ninja_path_cubit.dart';
+import 'package:rtu_mirea_app/profile/profile_layout.dart';
 import 'package:rtu_mirea_app/profile/widgets/ninja_path/badge_tile.dart';
 import 'package:rtu_mirea_app/profile/widgets/ninja_path/ninja_path_skeleton.dart';
 import 'package:rtu_mirea_app/profile/widgets/ninja_path/ninja_path_tab_empty.dart';
@@ -16,10 +17,17 @@ part 'category_header.dart';
 part 'recently_unlocked_card.dart';
 
 ({int columns, double aspectRatio}) badgeGridSpec(BuildContext context) {
-  if (MediaQuery.textScalerOf(context).scale(1) >= 1.5) {
-    return (columns: 2, aspectRatio: 0.62);
+  if (MediaQuery.textScalerOf(context).scale(1) >=
+      ProfileLayout.largeTextScale) {
+    return (
+      columns: ProfileLayout.largeTextBadgeColumns,
+      aspectRatio: ProfileLayout.largeTextBadgeAspectRatio,
+    );
   }
-  return (columns: 3, aspectRatio: 0.66);
+  return (
+    columns: ProfileLayout.badgeColumns,
+    aspectRatio: ProfileLayout.badgeAspectRatio,
+  );
 }
 
 class BadgesTab extends StatelessWidget {

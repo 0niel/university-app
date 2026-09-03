@@ -23,39 +23,35 @@ class AppDatePickerSheet extends StatefulWidget {
 class _AppDatePickerSheetState extends State<AppDatePickerSheet> {
   late DateTime _selected = widget.initial;
 
+  void _pop(DateTime value) =>
+      Navigator.of(context, rootNavigator: true).pop(value);
+
+  int get _quickIndex => widget.quickChips.indexWhere(
+    (chip) => _sameDay(chip.date, _selected),
+  );
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     return Column(
-      spacing: 12,
       mainAxisSize: .min,
       crossAxisAlignment: .stretch,
       children: [
-        if (widget.quickChips.isNotEmpty)
-          SizedBox(
-            height: 44,
-            child: ListView.separated(
-              scrollDirection: .horizontal,
-              padding: const .symmetric(horizontal: 20),
-              itemCount: widget.quickChips.length,
-              separatorBuilder: (_, _) => const SizedBox(width: 8),
-              itemBuilder: (context, index) {
-                final chip = widget.quickChips[index];
-                return AppDatePickerQuickChip(
-                  label: chip.label,
-                  selected: _sameDay(chip.date, _selected),
-                  onTap: () => Navigator.of(
-                    context,
-                    rootNavigator: true,
-                  ).pop(chip.date),
-                );
-              },
-            ),
+        if (widget.quickChips.isNotEmpty) ...[
+          AppChipRow<int>(
+            padding: const .symmetric(horizontal: AppSpacing.screen),
+            value: _quickIndex,
+            items: [
+              for (final (index, chip) in widget.quickChips.indexed)
+                AppChipRowItem(value: index, label: chip.label),
+            ],
+            onChanged: (index) => _pop(widget.quickChips[index].date),
           ),
+          const SizedBox(height: 14),
+        ],
         Padding(
-          padding: const .symmetric(horizontal: 20),
+          padding: const .symmetric(horizontal: AppSpacing.screen),
           child: Column(
-            spacing: 16,
             mainAxisSize: .min,
             crossAxisAlignment: .stretch,
             children: [
@@ -67,14 +63,8 @@ class _AppDatePickerSheetState extends State<AppDatePickerSheet> {
                 dateEnabledBuilder: widget.dateEnabledBuilder,
                 onDateSelected: (day) => setState(() => _selected = day),
               ),
-              NinjaButton.primary(
-                label: l10n.done,
-                expanded: true,
-                onPressed: () => Navigator.of(
-                  context,
-                  rootNavigator: true,
-                ).pop(_selected),
-              ),
+              const SizedBox(height: 14),
+              AppSheetAction(label: l10n.done, onTap: () => _pop(_selected)),
             ],
           ),
         ),

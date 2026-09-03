@@ -19,11 +19,10 @@ export function buildNewsBlocks(
   const author = channel.title || `@${channel.username}`;
   const cover = photos[0] ?? videos[0]?.thumbUrl ??
     post.linkPreview?.imageUrl;
-  const totalMedia = photos.length + videos.length;
 
   const blocks: Json[] = [];
 
-  if (totalMedia > 1) {
+  if (photos.length > 1) {
     blocks.push(
       articleIntroduction({
         title,
@@ -33,17 +32,10 @@ export function buildNewsBlocks(
       }),
     );
     pushBody(blocks, post, title);
-    blocks.push(slideshowIntroduction(post, title, channel, photos, videos));
-    return blocks;
-  }
-
-  if (!post.text && videos.length === 1) {
-    blocks.push({
-      type: "__video_introduction__",
-      category_id: CATEGORY_ID,
-      title,
-      video_url: videos[0].url,
-    });
+    blocks.push(slideshowIntroduction(post, title, channel, photos));
+    for (const video of videos) {
+      blocks.push({ type: "__video__", video_url: video.url });
+    }
     return blocks;
   }
 
@@ -109,7 +101,6 @@ function slideshowIntroduction(
   title: string,
   channel: TelegramChannelInfo,
   photos: string[],
-  videos: { url: string; thumbUrl?: string }[],
 ): Json {
   const slides: Json[] = [];
   let index = 0;
@@ -122,15 +113,6 @@ function slideshowIntroduction(
       image_url: url,
     });
   }
-  for (const video of videos) {
-    slides.push({
-      type: "__slide_block__",
-      caption: `Видео ${++index}`,
-      description: "",
-      photo_credit: channel.title,
-      image_url: video.thumbUrl ?? video.url,
-    });
-  }
   const slideshow: Json = {
     type: "__slideshow__",
     title,
@@ -139,7 +121,7 @@ function slideshowIntroduction(
   return {
     type: "__slideshow_introduction__",
     title,
-    cover_image_url: photos[0] ?? videos[0]?.thumbUrl ?? "",
+    cover_image_url: photos[0],
     action: {
       type: "__navigate_to_slideshow__",
       article_id: String(post.id),

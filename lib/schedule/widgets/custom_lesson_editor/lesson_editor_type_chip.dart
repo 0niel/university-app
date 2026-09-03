@@ -15,27 +15,27 @@ class LessonEditorTypeChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     return AppPressable(
       onTap: onTap,
       semanticsLabel: label,
       semanticsSelected: selected,
       child: Container(
         constraints: const BoxConstraints(
-          minHeight: NinjaMetrics.minTouchTarget,
+          minHeight: AppControlSize.touchTarget,
         ),
         padding: const .symmetric(horizontal: 16),
         decoration: BoxDecoration(
-          color: selected ? colors.brandTint : colors.surface,
-          borderRadius: .circular(NinjaRadius.pill),
+          color: selected ? colors.tint : colors.surface,
+          borderRadius: .circular(AppRadius.full),
         ),
         child: Center(
           widthFactor: 1,
           child: Text(
             label,
-            style: NinjaText.body.copyWith(
+            style: AppText.body.copyWith(
               fontSize: 13,
-              color: selected ? colors.brandInk : colors.mutedDark,
+              color: selected ? colors.accent : colors.muted,
             ),
           ),
         ),

@@ -2,10 +2,10 @@ import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:friends_repository/friends_repository.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:rtu_mirea_app/common/utils/ninja_initials.dart';
+import 'package:rtu_mirea_app/friends/cubit/friends_list_cubit.dart';
+import 'package:rtu_mirea_app/friends/friends_layout.dart';
 import 'package:rtu_mirea_app/friends/widgets/friends_pill_button.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 part 'ninja_friends_panel_skeleton.dart';
 part 'friend_card_sheet.dart';
@@ -44,7 +44,12 @@ class NinjaFriendsPanel extends StatelessWidget {
     final friendLng = friend.longitude;
     if (myLat == null ||
         myLng == null ||
-        !friend.hasLocation ||
+        !myLat.isFinite ||
+        !myLng.isFinite ||
+        myLat.abs() > 90 ||
+        myLng.abs() > 180 ||
+        friendPresence(friend, DateTime.now()) == FriendPresence.off ||
+        friend.isGhost ||
         friendLat == null ||
         friendLng == null) {
       return null;
@@ -65,27 +70,28 @@ class NinjaFriendsPanel extends StatelessWidget {
     if (failed) {
       return Padding(
         key: const ValueKey('failure'),
-        padding: const .symmetric(horizontal: NinjaMetrics.screenPadding),
-        child: NinjaErrorState(
+        padding: const .symmetric(horizontal: AppSpacing.screen),
+        child: AppErrorState(
           title: l10n.loadingError,
           message: l10n.tryAgain,
-          retryLabel: l10n.retry,
-          onRetry: onRetry,
+          footnote: null,
+          primaryLabel: l10n.retry,
+          onPrimary: onRetry,
         ),
       );
     }
     if (friends.isEmpty) {
       return Padding(
         key: const ValueKey('empty'),
-        padding: const .symmetric(horizontal: NinjaMetrics.screenPadding),
+        padding: const .symmetric(horizontal: AppSpacing.screen),
         child: Column(
           children: [
-            NinjaEmptyState(
-              icon: const AppLineIconWidget(AppLineIcon.people),
+            AppEmptyState(
+              lineIcon: AppLineIcon.people,
               title: l10n.friendsEmptyTitle,
-              message: l10n.friendsEmptySub,
+              subtitle: l10n.friendsEmptySub,
             ),
-            const SizedBox(height: 14),
+            const SizedBox(height: AppSpacing.sectionGap),
             FriendsPillButton(
               label: l10n.friendsAddFriend,
               icon: .plus,
@@ -110,7 +116,7 @@ class NinjaFriendsPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final l10n = context.l10n;
     return DraggableScrollableSheet(
       controller: controller,
@@ -122,7 +128,7 @@ class NinjaFriendsPanel extends StatelessWidget {
           decoration: BoxDecoration(
             color: colors.canvas,
             borderRadius: const .vertical(
-              top: .circular(NinjaRadius.sheet),
+              top: .circular(AppRadius.sheet),
             ),
           ),
           child: ListView(
@@ -134,16 +140,16 @@ class NinjaFriendsPanel extends StatelessWidget {
                   width: 36,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: colors.surfaceAlt,
-                    borderRadius: .circular(NinjaRadius.pill),
+                    color: colors.surface2,
+                    borderRadius: .circular(AppRadius.full),
                   ),
                 ),
               ),
               Padding(
                 padding: const .fromLTRB(
-                  NinjaMetrics.screenPadding,
+                  AppSpacing.screen,
                   14,
-                  NinjaMetrics.screenPadding,
+                  AppSpacing.screen,
                   12,
                 ),
                 child: Row(
@@ -151,16 +157,24 @@ class NinjaFriendsPanel extends StatelessWidget {
                   children: [
                     Text(
                       l10n.friendsTitle,
-                      style: NinjaText.title.copyWith(color: colors.ink),
+                      style: AppText.title.copyWith(color: colors.ink),
                     ),
                     if (loading)
-                      const NinjaSkeleton(width: 18, height: 12, radius: 6)
+                      const NinjaSkeleton(
+                        width: 18,
+                        height: 12,
+                        radius: AppRadius.focusOutline,
+                      )
                     else
                       Text(
                         '${friends.length}',
-                        style: NinjaText.tabular(
-                          NinjaText.subtext.copyWith(color: colors.muted),
-                        ),
+                        style: AppText.subtext
+                            .copyWith(color: colors.muted)
+                            .copyWith(
+                              fontFeatures: const [
+                                FontFeature.tabularFigures(),
+                              ],
+                            ),
                       ),
                     const Spacer(),
                     FriendsPillButton(

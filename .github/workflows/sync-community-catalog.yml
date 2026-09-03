@@ -1,0 +1,54 @@
+name: Sync community catalog
+
+on:
+  schedule:
+    - cron: "19,49 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: community-catalog-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    if: vars.SUPABASE_URL != ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: tools/social_media_fetcher
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: Set up Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+        with:
+          python-version: "3.12"
+      - name: Set up uv
+        uses: astral-sh/setup-uv@11f9893b081a58869d3b5fccaea48c9e9e46f990
+        with:
+          enable-cache: true
+          cache-dependency-glob: tools/social_media_fetcher/uv.lock
+      - name: Install dependencies
+        run: uv sync --locked
+      - name: Verify metadata parser
+        run: uv run pytest tests/test_community_metadata.py
+      - name: Refresh public community metadata
+        env:
+          SUPABASE_URL: ${{ vars.SUPABASE_URL }}
+          APP_ORGANIZATION_ID: ${{ vars.APP_ORGANIZATION_ID || 'mirea' }}
+          SUPABASE_INGEST_KEY: ${{ secrets.SUPABASE_INGEST_KEY }}
+        run: uv run python sync_communities.py --apply --output-json community-observations.json
+      - name: Upload verification report
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: community-observations
+          path: tools/social_media_fetcher/community-observations.json
+          if-no-files-found: warn
+          retention-days: 14

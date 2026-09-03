@@ -7,6 +7,25 @@ import 'package:test/test.dart';
 
 void main() {
   group('DiscourseApiClient', () {
+    test('top topics use a wider period and explicit page', () async {
+      final client = DiscourseApiClient(
+        baseUrl: 'https://example.com',
+        httpClient: MockClient((request) async {
+          expect(request.url.queryParameters, {
+            'period': 'yearly',
+            'page': '2',
+          });
+          return http.Response.bytes(
+            utf8.encode(jsonEncode(_topJson())),
+            200,
+            headers: const {'content-type': 'application/json; charset=utf-8'},
+          );
+        }),
+      );
+      final top = await client.getTop(page: 2);
+      expect(top.topicList.moreTopicsUrl, '/top/yearly?page=3');
+    });
+
     test('getTop parses object-shaped tags', () async {
       final client = _clientReturning(_topJson());
 
@@ -139,6 +158,7 @@ Map<String, dynamic> _topJson() {
       'can_create_topic': true,
       'for_period': 'monthly',
       'per_page': 50,
+      'more_topics_url': '/top/yearly?page=3',
       'top_tags': [
         {'id': 5, 'name': 'первый-курс', 'slug': 'pervyj-kurs'},
       ],

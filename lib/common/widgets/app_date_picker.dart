@@ -6,7 +6,6 @@ import 'package:table_calendar/table_calendar.dart';
 
 part 'app_date_picker_day_cell.dart';
 part 'app_date_picker_nav_button.dart';
-part 'app_date_picker_quick_chip.dart';
 part 'app_date_picker_sheet.dart';
 part 'app_flat_calendar.dart';
 part 'app_multi_date_picker_sheet.dart';

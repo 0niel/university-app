@@ -21,18 +21,18 @@ class NinjaGroupNoteCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     return Padding(
       padding: const .fromLTRB(
-        NinjaMetrics.screenPadding,
+        AppSpacing.screen,
         0,
-        NinjaMetrics.screenPadding,
+        AppSpacing.screen,
         10,
       ),
       child: DecoratedBox(
         decoration: BoxDecoration(
           color: colors.surface,
-          borderRadius: .circular(NinjaRadius.card),
+          borderRadius: .circular(AppRadius.card),
         ),
         child: Padding(
           padding: const .fromLTRB(16, 14, 8, 4),
@@ -51,7 +51,7 @@ class NinjaGroupNoteCard extends StatelessWidget {
                       note.authorName,
                       maxLines: 1,
                       overflow: .ellipsis,
-                      style: NinjaText.helper.copyWith(color: colors.muted),
+                      style: AppText.caption.copyWith(color: colors.muted),
                     ),
                   ),
                   if (note.isPinned) ...[
@@ -69,7 +69,7 @@ class NinjaGroupNoteCard extends StatelessWidget {
                   children: [
                     Text(
                       note.title,
-                      style: NinjaText.headline.copyWith(color: colors.ink),
+                      style: AppText.headline.copyWith(color: colors.ink),
                     ),
                     if (note.body.isNotEmpty) ...[
                       const SizedBox(height: 4),
@@ -77,7 +77,7 @@ class NinjaGroupNoteCard extends StatelessWidget {
                         note.body,
                         maxLines: 4,
                         overflow: .ellipsis,
-                        style: NinjaText.subtext.copyWith(
+                        style: AppText.subtext.copyWith(
                           color: colors.muted,
                           height: 1.45,
                         ),
@@ -105,8 +105,8 @@ class NinjaGroupNoteCard extends StatelessWidget {
                             },
                       child: ConstrainedBox(
                         constraints: const BoxConstraints(
-                          minWidth: NinjaMetrics.minTouchTarget,
-                          minHeight: NinjaMetrics.minTouchTarget,
+                          minWidth: AppControlSize.iconButton,
+                          minHeight: AppControlSize.iconButton,
                         ),
                         child: Row(
                           spacing: 4,
@@ -117,14 +117,14 @@ class NinjaGroupNoteCard extends StatelessWidget {
                               .heart,
                               size: 18,
                               color: note.likedByMe
-                                  ? colors.brandInk
+                                  ? colors.accent
                                   : colors.muted,
                             ),
                             Text(
                               '${note.likes}',
-                              style: NinjaText.helper.copyWith(
+                              style: AppText.caption.copyWith(
                                 color: note.likedByMe
-                                    ? colors.brandInk
+                                    ? colors.accent
                                     : colors.muted,
                                 fontWeight: .w700,
                               ),

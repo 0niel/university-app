@@ -222,7 +222,7 @@ void main() {
       expect(find.text('Новый опрос'), findsOneWidget);
     });
 
-    testWidgets('results render an 8px pill bar with a tabular percent', (
+    testWidgets('results render a full-row option bar with a tabular percent', (
       tester,
     ) async {
       const poll = Poll(
@@ -246,26 +246,13 @@ void main() {
       await tester.pumpWidget(buildSubject(cubit, reduceMotion: true));
       await tester.pumpAndSettle();
 
-      final bars = find.descendant(
-        of: find.byType(PollCard),
-        matching: find.byWidgetPredicate(
-          (widget) =>
-              widget is SizedBox &&
-              widget.height == 8 &&
-              widget.child is TweenAnimationBuilder<double>,
-        ),
-      );
+      final bars = find.byType(PollOptionBar);
       expect(bars, findsNWidgets(2));
       for (final bar in bars.evaluate()) {
-        final clip = tester.widget<ClipRRect>(
-          find
-              .ancestor(
-                of: find.byWidget(bar.widget),
-                matching: find.byType(ClipRRect),
-              )
-              .first,
+        expect(
+          tester.getSize(find.byWidget(bar.widget)).height,
+          greaterThanOrEqualTo(44),
         );
-        expect(clip.borderRadius, BorderRadius.circular(NinjaRadius.pill));
       }
 
       final percent = tester.widget<Text>(find.text('75%'));
@@ -274,6 +261,12 @@ void main() {
         contains(const FontFeature.tabularFigures()),
       );
       expect(find.text('25%'), findsOneWidget);
+      for (final (index, label) in ['Go', 'Rust'].indexed) {
+        expect(
+          tester.getCenter(find.text(label)).dy,
+          closeTo(tester.getCenter(bars.at(index)).dy, .1),
+        );
+      }
     });
 
     testWidgets('fits 320px at 200 percent with reduced motion', (

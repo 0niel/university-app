@@ -10,7 +10,6 @@ class _RangeSelector extends StatelessWidget {
     final l10n = context.l10n;
     return NinjaSegmented<MiniAppStatsRange>(
       value: range,
-      expanded: true,
       onChanged: (value) =>
           context.read<MiniAppStatsCubit>().rangeChanged(value),
       segments: [

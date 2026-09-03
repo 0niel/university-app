@@ -17,19 +17,19 @@ class NinjaDiscoverStudyGroupCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final l10n = context.l10n;
     return Padding(
       padding: const .fromLTRB(
-        NinjaMetrics.screenPadding,
+        AppSpacing.screen,
         0,
-        NinjaMetrics.screenPadding,
+        AppSpacing.screen,
         10,
       ),
       child: DecoratedBox(
         decoration: BoxDecoration(
           color: colors.surface,
-          borderRadius: .circular(NinjaRadius.card),
+          borderRadius: .circular(AppRadius.card),
         ),
         child: Padding(
           padding: const .all(16),
@@ -41,8 +41,8 @@ class NinjaDiscoverStudyGroupCard extends StatelessWidget {
                 height: 44,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
-                  color: colors.surfaceAlt,
-                  borderRadius: .circular(NinjaRadius.control),
+                  color: colors.surface2,
+                  borderRadius: .circular(AppRadius.field),
                 ),
                 child: Text(group.emoji, style: const TextStyle(fontSize: 22)),
               ),
@@ -54,7 +54,7 @@ class NinjaDiscoverStudyGroupCard extends StatelessWidget {
                       group.name,
                       maxLines: 1,
                       overflow: .ellipsis,
-                      style: NinjaText.headline.copyWith(color: colors.ink),
+                      style: AppText.headline.copyWith(color: colors.ink),
                     ),
                     const SizedBox(height: 3),
                     Text(
@@ -65,7 +65,7 @@ class NinjaDiscoverStudyGroupCard extends StatelessWidget {
                       ].join(' · '),
                       maxLines: 1,
                       overflow: .ellipsis,
-                      style: NinjaText.subtext.copyWith(color: colors.muted),
+                      style: AppText.subtext.copyWith(color: colors.muted),
                     ),
                   ],
                 ),

@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:app_ui/app_ui.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gamification_repository/gamification_repository.dart';
@@ -102,20 +103,21 @@ Future<void> showProfileVisibilitySheet(
     context,
     title: l10n.settingsWhoSeesProfile,
     subtitle: l10n.settingsVisibilitySheetSubtitle,
-    contentPadding: .zero,
     child: Column(
       mainAxisSize: .min,
       crossAxisAlignment: .stretch,
       children: [
         for (final visibility in ProfileVisibility.values)
-          _SelectRow(
-            label: visibilityLabel(l10n, visibility),
-            value: visibility,
-            groupValue: current,
-            onTap: () {
-              onSelected(visibility);
-              Navigator.of(context).pop();
-            },
+          Padding(
+            padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+            child: AppRadioRow(
+              title: visibilityLabel(l10n, visibility),
+              selected: current == visibility,
+              onTap: () {
+                onSelected(visibility);
+                Navigator.of(context, rootNavigator: true).pop();
+              },
+            ),
           ),
       ],
     ),
@@ -186,39 +188,105 @@ Future<void> showHomeContentSheet(BuildContext context) {
 
 Future<void> showWidgetSheet(BuildContext context) {
   final l10n = context.l10n;
-  final colors = context.ninja;
   final scheduleBloc = context.read<ScheduleBloc>();
+  final selected = scheduleBloc.state.selectedSchedule;
+  final supported = !kIsWeb && defaultTargetPlatform == TargetPlatform.android;
   return showAppSheet<void>(
     context,
     title: l10n.settingsScreenWidgets,
-    child: Column(
+    child: ScheduleWidgetRefreshSheet(
+      unavailableMessage: !supported
+          ? l10n.settingsWidgetUnsupported
+          : selected == null
+          ? l10n.scheduleNotSelected
+          : null,
+      onRefresh: !supported || selected == null
+          ? null
+          : () => const ScheduleWidgetUpdater(
+              HomeScreenWidgetService(),
+            ).updateWidgetsFromSelectedSchedule(selected),
+    ),
+  );
+}
+
+class ScheduleWidgetRefreshSheet extends StatefulWidget {
+  const ScheduleWidgetRefreshSheet({
+    this.onRefresh,
+    this.unavailableMessage,
+    super.key,
+  });
+
+  final Future<void> Function()? onRefresh;
+  final String? unavailableMessage;
+
+  @override
+  State<ScheduleWidgetRefreshSheet> createState() =>
+      _ScheduleWidgetRefreshSheetState();
+}
+
+class _ScheduleWidgetRefreshSheetState
+    extends State<ScheduleWidgetRefreshSheet> {
+  var _busy = false;
+  var _failed = false;
+  var _requested = false;
+
+  Future<void> _refresh() async {
+    final refresh = widget.onRefresh;
+    if (_busy || refresh == null) return;
+    setState(() {
+      _busy = true;
+      _failed = false;
+      _requested = false;
+    });
+    try {
+      await refresh();
+      if (mounted) setState(() => _requested = true);
+    } on Exception {
+      if (mounted) setState(() => _failed = true);
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final colors = context.colors;
+    return Column(
       mainAxisSize: .min,
       crossAxisAlignment: .stretch,
       children: [
         Text(
           l10n.settingsWidgetSheetSubtitle,
-          style: NinjaText.subtext.copyWith(height: 1.5, color: colors.muted),
+          style: AppText.subtext.copyWith(height: 1.5, color: colors.muted),
         ),
-        const SizedBox(height: 18),
-        NinjaButton.primary(
+        const SizedBox(height: AppSpacing.fieldGap),
+        if (widget.unavailableMessage case final message?) ...[
+          AppEmptyState.compact(title: message),
+          const SizedBox(height: AppSpacing.md),
+        ],
+        if (_failed) ...[
+          AppErrorState.compact(title: l10n.error),
+          const SizedBox(height: AppSpacing.md),
+        ],
+        if (_requested) ...[
+          Text(
+            l10n.settingsWidgetRefreshRequested,
+            style: AppText.body.copyWith(color: colors.lecture),
+          ),
+          const SizedBox(height: AppSpacing.md),
+        ],
+        AppButton.primary(
           label: l10n.settingsWidgetRefresh,
           size: .large,
           expanded: true,
-          onPressed: () {
-            final selected = scheduleBloc.state.selectedSchedule;
-            if (selected != null) {
-              unawaited(
-                const ScheduleWidgetUpdater(
-                  HomeScreenWidgetService(),
-                ).updateWidgetsFromSelectedSchedule(selected),
-              );
-            }
-            Navigator.of(context).pop();
-            showNinjaToast(context, message: l10n.settingsWidgetRefreshed);
-          },
+          loading: _busy,
+          onPressed: _busy || widget.onRefresh == null
+              ? null
+              : () => unawaited(_refresh()),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: AppSpacing.sm),
       ],
-    ),
-  );
+    );
+  }
 }

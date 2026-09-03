@@ -1,27 +1,23 @@
 import 'dart:async';
 
 import 'package:app_ui/app_ui.dart';
-import 'package:collection/collection.dart';
-import 'package:flutter/material.dart' hide TimeOfDay;
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:intl/intl.dart';
+import 'package:friends_repository/friends_repository.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:rtu_mirea_app/schedule/bloc/schedule_bloc.dart';
+import 'package:rtu_mirea_app/schedule/cubit/cubit.dart';
 import 'package:rtu_mirea_app/schedule/models/models.dart';
 import 'package:rtu_mirea_app/schedule/view/compare/comparison_logic.dart';
-import 'package:rtu_mirea_app/schedule/widgets/lesson_card.dart';
-import 'package:rtu_mirea_app/schedule/widgets/ninja_schedule_surface.dart';
+import 'package:rtu_mirea_app/schedule/view/compare/widgets/comparison_day_details.dart';
+import 'package:rtu_mirea_app/schedule/view/schedule_page/lesson_status.dart';
+import 'package:rtu_mirea_app/schedule/view/schedule_page/schedule_dates.dart';
+import 'package:rtu_mirea_app/schedule/view/schedule_page/schedule_week_view.dart';
+import 'package:rtu_mirea_app/schedule/view/schedule_page/sheets/compare_sheet.dart';
 import 'package:schedule_repository/schedule_repository.dart';
 
-part 'widgets/common_window_banner.dart';
-part 'widgets/compare_skeleton.dart';
 part 'widgets/group_picker_results_skeleton.dart';
 part 'widgets/group_picker_sheet.dart';
-part 'widgets/person_card.dart';
-part 'widgets/slot_cell_skeleton.dart';
-part 'widgets/slot_cell.dart';
-part 'widgets/slot_row_skeleton.dart';
-part 'widgets/slot_row.dart';
 
 class ComparePage extends StatefulWidget {
   const ComparePage({super.key});
@@ -31,157 +27,253 @@ class ComparePage extends StatefulWidget {
 }
 
 class _ComparePageState extends State<ComparePage> {
-  DateTime _day = _dateOnly(DateTime.now());
+  DateTime _day = dateOnly(DateTime.now());
   Group? _friendGroup;
-  List<LessonSchedulePart> _friendLessons = const [];
+  List<SchedulePart> _friendSchedule = const [];
   bool _loadingFriend = false;
-  Object? _friendError;
+  bool _friendError = false;
+  int _revision = 0;
+  bool _weekView = false;
 
-  static DateTime _dateOnly(DateTime value) =>
-      .new(value.year, value.month, value.day);
+  Future<void> _pickFriend() async {
+    final comparison = context.read<ScheduleComparisonCubit>();
+    final previous = comparison.friend;
+    await showCompareSheet(context);
+    if (mounted && comparison.friend != previous) {
+      _revision++;
+      setState(() {
+        _friendGroup = null;
+        _friendError = false;
+        _loadingFriend = false;
+        _weekView = false;
+      });
+    }
+  }
+
+  Future<void> _pickFriendGroup() async {
+    final group = await showAppSheet<Group>(
+      context,
+      title: context.l10n.comparePickerTitle,
+      subtitle: context.l10n.comparePickerDescription,
+      child: _GroupPickerSheet(repository: context.read<ScheduleRepository>()),
+    );
+    if (group != null && mounted) await _loadFriendSchedule(group);
+  }
+
+  Future<void> _loadFriendSchedule(Group group) async {
+    final revision = ++_revision;
+    setState(() {
+      _friendGroup = group;
+      _friendSchedule = const [];
+      _loadingFriend = true;
+      _friendError = false;
+    });
+    try {
+      final response = await context.read<ScheduleRepository>().getSchedule(
+        group: group.name,
+      );
+      if (!mounted || revision != _revision) return;
+      setState(() {
+        _friendSchedule = response.data;
+        _loadingFriend = false;
+      });
+      context.read<ScheduleComparisonCubit?>()?.start(
+        SelectedGroupSchedule(group: group, schedule: response.data),
+      );
+    } on Exception {
+      if (!mounted || revision != _revision) return;
+      setState(() {
+        _loadingFriend = false;
+        _friendError = true;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
     final l10n = context.l10n;
     final state = context.watch<ScheduleBloc>().state;
-    final friendGroup = _friendGroup;
-    final myTitle = switch (state.selectedSchedule) {
-      SelectedGroupSchedule(:final group) => group.name,
-      SelectedTeacherSchedule(:final teacher) => teacher.name,
-      SelectedClassroomSchedule(:final classroom) => classroom.name,
-      SelectedCustomSchedule(:final name) => name,
-      null => l10n.compareMySchedule,
-    };
-    final myLessons = lessonsOnDay(
-      state.selectedSchedule?.schedule ?? const [],
-      _day,
+    final preferences =
+        context.watch<SchedulePreferencesCubit?>()?.state ??
+        const SchedulePreferencesState();
+    final display =
+        context.watch<ScheduleDisplayCubit?>()?.state ??
+        const ScheduleDisplayState();
+    final comparison = context.watch<ScheduleComparisonCubit?>();
+    final activities =
+        context.watch<UserActivitiesCubit?>()?.state.activities ?? const [];
+    final selected = state.selectedSchedule;
+    final changesCubit = context.watch<ScheduleChangesCubit?>();
+    final request = changesRequestFor(selected);
+    final changes =
+        request != null &&
+            changesCubit != null &&
+            changesCubit.matchesTarget(request.$1, request.$2)
+        ? changesCubit.state.changes
+        : const <ScheduleChange>[];
+    final group = _friendGroup;
+    final friend = group == null
+        ? comparison?.friend
+        : _loadingFriend || _friendError
+        ? null
+        : SelectedGroupSchedule(group: group, schedule: _friendSchedule);
+    final friendName =
+        group == null && comparison?.friendName.isNotEmpty == true
+        ? comparison!.friendName
+        : friend?.name ?? group?.name ?? l10n.comparePickGroup;
+    final myOccupancy = comparisonOccupancyForDay(
+      day: _day,
+      schedule: selected?.schedule ?? const [],
+      activities: activities,
+      includeLessons: false,
     );
-    final friendLessons = lessonsOnDay(_friendLessons, _day);
-    final slots = buildComparisonSlots(myLessons, friendLessons);
-    final commonWindow = slots.firstWhereOrNull((slot) => slot.bothFree);
-    final locale = Localizations.localeOf(context).toString();
-
+    final friendOccupancy = comparisonOccupancyForDay(
+      day: _day,
+      schedule: friend?.schedule ?? const [],
+      activities: const [],
+      includeLessons: false,
+    );
     return Scaffold(
-      backgroundColor: colors.canvas,
+      backgroundColor: context.colors.canvas,
       body: CustomScrollView(
-        physics: const BouncingScrollPhysics(
-          parent: AlwaysScrollableScrollPhysics(),
-        ),
         slivers: [
-          SliverAppBar(
-            elevation: 0,
-            scrolledUnderElevation: 0,
-            backgroundColor: colors.canvas,
-            surfaceTintColor: Colors.transparent,
-            title: Text(
-              l10n.compareTitle,
-              style: NinjaText.headline.copyWith(color: colors.ink),
-            ),
-            actions: [
-              NinjaIconButton(
-                icon: const AppLineIconWidget(
-                  .plus,
-                  size: 20,
+          SliverToBoxAdapter(
+            child: AppInnerHeader(
+              title: l10n.compareTitle,
+              subtitle: l10n.compareSubtitle,
+              onBack: () => Navigator.of(context).maybePop(),
+              actions: [
+                if (context.read<FriendsRepository?>() != null &&
+                    comparison != null)
+                  AppHeaderAction(
+                    icon: AppLineIcon.people,
+                    semanticsLabel: l10n.scheduleCompareFriend,
+                    onTap: _pickFriend,
+                  ),
+                AppHeaderAction(
+                  icon: AppLineIcon.plus,
+                  semanticsLabel: l10n.comparePick,
+                  onTap: _pickFriendGroup,
                 ),
-                tooltip: l10n.comparePick,
-                onPressed: () => unawaited(_pickFriendGroup()),
-              ),
-              const SizedBox(width: 8),
-            ],
+              ],
+            ),
           ),
           SliverSafeArea(
             top: false,
             sliver: SliverPadding(
               padding: const EdgeInsets.fromLTRB(
-                NinjaMetrics.screenPadding,
-                8,
-                NinjaMetrics.screenPadding,
-                32,
+                AppSpacing.screen,
+                AppSpacing.screen,
+                AppSpacing.screen,
+                AppSpacing.xxl,
               ),
               sliver: SliverList.list(
                 children: [
-                  LayoutBuilder(
-                    builder: (context, constraints) {
-                      final stacked =
-                          constraints.maxWidth < 420 ||
-                          MediaQuery.textScalerOf(context).scale(1) > 1.4;
-                      final mine = _PersonCard(
-                        label: l10n.compareYou,
-                        subtitle: myTitle,
-                      );
-                      final friend = NinjaScheduleSurface(
-                        padding: EdgeInsets.zero,
-                        onTap: () => unawaited(_pickFriendGroup()),
-                        semanticLabel: l10n.comparePick,
-                        child: _PersonCard(
-                          label: friendGroup?.name ?? l10n.comparePickGroup,
-                          subtitle: friendGroup != null
-                              ? l10n.compareFriend
-                              : l10n.compareTapToPick,
-                          muted: friendGroup == null,
-                        ),
-                      );
-                      if (stacked) {
-                        return Column(
-                          children: [mine, const SizedBox(height: 10), friend],
-                        );
-                      }
-                      return Row(
-                        children: [
-                          Expanded(child: mine),
-                          const SizedBox(width: 10),
-                          Expanded(child: friend),
-                        ],
-                      );
-                    },
-                  ),
-                  const SizedBox(height: 18),
-                  Row(
-                    mainAxisAlignment: .center,
+                  AppListGroup(
                     children: [
-                      NinjaIconButton(
-                        icon: const AppLineIconWidget(
-                          .chevronL,
-                          size: 18,
+                      AppListRow(
+                        title: selected?.name ?? l10n.compareMySchedule,
+                        subtitle: l10n.compareYou,
+                        leading: AppAvatar(
+                          name: selected?.name ?? l10n.compareYou,
+                          size: 40,
                         ),
-                        tooltip: l10n.previousDay,
-                        onPressed: () => setState(
-                          () => _day = _day.subtract(const Duration(days: 1)),
-                        ),
+                        strong: true,
                       ),
-                      Padding(
-                        padding: const .symmetric(horizontal: 14),
-                        child: Text(
-                          _capitalize(
-                            DateFormat('EEEE, d MMMM', locale).format(_day),
-                          ),
-                          style: NinjaText.body.copyWith(
-                            color: colors.ink,
-                          ),
-                        ),
-                      ),
-                      NinjaIconButton(
-                        icon: const AppLineIconWidget(
-                          .chevronR,
-                          size: 18,
-                        ),
-                        tooltip: l10n.nextDay,
-                        onPressed: () => setState(
-                          () => _day = _day.add(const Duration(days: 1)),
-                        ),
+                      AppListRow(
+                        key: const ValueKey('comparison-pick-schedule'),
+                        title: friendName,
+                        subtitle: friend == null
+                            ? l10n.compareTapToPick
+                            : '${friend.name} · ${l10n.compareChangeSchedule}',
+                        leading: friend == null
+                            ? const AppLineIconWidget(AppLineIcon.plus)
+                            : AppAvatar(name: friendName, size: 40),
+                        strong: true,
+                        onTap: _pickFriendGroup,
                       ),
                     ],
                   ),
-                  const SizedBox(height: 14),
-                  NinjaStateSwitcher(
-                    child: _buildComparison(
-                      context,
-                      friendGroup: friendGroup,
-                      slots: slots,
-                      commonWindow: commonWindow,
+                  const SizedBox(height: AppSpacing.lg),
+                  if (_loadingFriend)
+                    const Column(
+                      spacing: AppSpacing.md,
+                      children: [
+                        AppSkeleton(height: AppControlSize.touchTarget),
+                        AppSkeleton(height: 360),
+                      ],
+                    )
+                  else if (_friendError)
+                    AppErrorState(
+                      title: l10n.compareLoadError,
+                      message: l10n.lessonDetailsCheckConnection,
+                      primaryLabel: l10n.retry,
+                      onPrimary: () => _loadFriendSchedule(group!),
+                      footnote: null,
+                    )
+                  else if (selected == null)
+                    AppEmptyState(
+                      title: l10n.compareMySchedule,
+                      subtitle: l10n.noScheduleSelected,
+                    )
+                  else if (friend == null)
+                    AppEmptyState(
+                      title: l10n.comparePickGroup,
+                      subtitle: l10n.compareEmptyHint,
+                      actionLabel: l10n.comparePick,
+                      onAction: _pickFriendGroup,
+                    )
+                  else ...[
+                    AppSegmentedControl<bool>(
+                      options: [
+                        AppSegmentedOption(
+                          value: false,
+                          label: l10n.compareDayView,
+                        ),
+                        AppSegmentedOption(
+                          value: true,
+                          label: l10n.compareWeekView,
+                        ),
+                      ],
+                      value: _weekView,
+                      onChanged: (value) => setState(() => _weekView = value),
                     ),
-                  ),
+                    const SizedBox(height: AppSpacing.sectionGap),
+                    if (_weekView) ...[
+                      ScheduleWeekView(
+                        day: _day,
+                        schedule: selected.schedule,
+                        changes: changes,
+                        preferences: preferences,
+                        display: display,
+                        activities: activities,
+                        friend: friend,
+                        onCompare: _pickFriendGroup,
+                        onDay: (value) => setState(() {
+                          _day = dateOnly(value);
+                          _weekView = false;
+                        }),
+                      ),
+                      const SizedBox(height: AppSpacing.section),
+                    ],
+                    ComparisonDayDetails(
+                      day: _day,
+                      mine: lessonsOnDay(selected.schedule, _day)
+                          .where(
+                            (lesson) =>
+                                !isCancelled(changeFor(changes, lesson, _day)),
+                          )
+                          .toList(),
+                      friends: lessonsOnDay(friend.schedule, _day),
+                      myName: selected.name,
+                      friendName: friendName,
+                      onDay: (value) => setState(() => _day = dateOnly(value)),
+                      myBusyRanges: myOccupancy.ranges,
+                      friendBusyRanges: friendOccupancy.ranges,
+                      myUncertainFrom: myOccupancy.uncertainFrom,
+                      friendUncertainFrom: friendOccupancy.uncertainFrom,
+                    ),
+                  ],
                 ],
               ),
             ),
@@ -190,113 +282,4 @@ class _ComparePageState extends State<ComparePage> {
       ),
     );
   }
-
-  Widget _buildComparison(
-    BuildContext context, {
-    required Group? friendGroup,
-    required List<ComparisonSlot> slots,
-    required ComparisonSlot? commonWindow,
-  }) {
-    final l10n = context.l10n;
-    if (_loadingFriend) {
-      return const _CompareSkeleton(key: ValueKey('compare_skeleton'));
-    }
-    if (friendGroup == null) {
-      return NinjaEmptyState(
-        title: l10n.comparePickGroup,
-        message: l10n.compareEmptyHint,
-        icon: AppLineIconWidget(
-          AppLineIcon.people,
-          size: 20,
-          color: context.ninja.muted,
-        ),
-        actionLabel: l10n.comparePick,
-        onAction: () => unawaited(_pickFriendGroup()),
-      ).animateEmptyState(key: const ValueKey('compare_pick'));
-    }
-    if (_friendError != null) {
-      return NinjaErrorState(
-        title: l10n.compareLoadError,
-        message: l10n.lessonDetailsCheckConnection,
-        retryLabel: l10n.retry,
-        onRetry: () => unawaited(_loadFriendSchedule(friendGroup)),
-      ).animateEmptyState(key: const ValueKey('compare_error'));
-    }
-    if (slots.isEmpty) {
-      return NinjaEmptyState(
-        title: l10n.compareNoLessonsBoth,
-        icon: AppLineIconWidget(
-          AppLineIcon.calendar,
-          size: 20,
-          color: context.ninja.muted,
-        ),
-      ).animateEmptyState(key: const ValueKey('compare_free'));
-    }
-    return Column(
-      key: const ValueKey('compare_slots'),
-      crossAxisAlignment: .stretch,
-      children: [
-        if (commonWindow != null) ...[
-          _CommonWindowBanner(window: commonWindow),
-          const SizedBox(height: 28),
-        ],
-        for (final (index, slot) in slots.indexed) ...[
-          _SlotRow(slot: slot).animateListItem(index: index),
-          const SizedBox(height: 10),
-        ],
-      ],
-    );
-  }
-
-  Future<void> _pickFriendGroup() async {
-    final repository = context.read<ScheduleRepository>();
-    final group = await showAppSheet<Group>(
-      context,
-      title: context.l10n.comparePickerTitle,
-      subtitle: context.l10n.comparePickerDescription,
-      heightFraction: 0.6,
-      child: _GroupPickerSheet(repository: repository),
-    );
-    if (group != null && mounted) await _loadFriendSchedule(group);
-  }
-
-  Future<void> _loadFriendSchedule(Group group) async {
-    setState(() {
-      _friendGroup = group;
-      _loadingFriend = true;
-      _friendError = null;
-    });
-    try {
-      final response = await context.read<ScheduleRepository>().getSchedule(
-        group: group.name,
-      );
-      if (!mounted) return;
-      setState(() {
-        _friendLessons = response.data.whereType<LessonSchedulePart>().toList();
-        _loadingFriend = false;
-      });
-    } on Exception catch (error) {
-      if (!mounted) return;
-      setState(() {
-        _loadingFriend = false;
-        _friendError = error;
-      });
-      showNinjaToast(
-        context,
-        showCheck: false,
-        message: context.l10n.compareLoadError,
-      );
-    }
-  }
-
-  static String _capitalize(String value) =>
-      value.isEmpty ? value : value[0].toUpperCase() + value.substring(1);
 }
-
-String _compareInitials(String name) => name
-    .trim()
-    .split(RegExp(r'\s+'))
-    .where((part) => part.isNotEmpty)
-    .take(2)
-    .map((part) => part.characters.firstOrNull?.toUpperCase() ?? '')
-    .join();

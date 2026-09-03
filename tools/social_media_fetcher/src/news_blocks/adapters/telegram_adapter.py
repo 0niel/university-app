@@ -3,6 +3,7 @@
 from datetime import datetime
 from typing import Any
 
+from ...community_metadata import https_url
 from ..models import (
     ArticleIntroductionBlock,
     ImageBlock,
@@ -40,38 +41,34 @@ class TelegramToNewsBlocksAdapter(SocialMediaToNewsBlocksAdapter):
             published_at = datetime.now()
 
         media_files = raw_data.get("media_files", {})
-        photo_file_ids = list(media_files.get("photos", []))
-        video_file_ids = list(media_files.get("videos", []))
+        photo_file_ids = [
+            url for value in media_files.get("photos", []) if (url := https_url(value))
+        ]
+        video_file_ids = [
+            url for value in media_files.get("videos", []) if (url := https_url(value))
+        ]
 
         if not photo_file_ids and not video_file_ids:
             photo = raw_data.get("photo")
             video = raw_data.get("video")
             if photo:
                 file_id = photo.get("file_id", "")
-                if file_id:
+                if https_url(file_id):
                     photo_file_ids.append(file_id)
             if video:
                 file_id = video.get("file_id", "")
-                if file_id:
+                if https_url(file_id):
                     video_file_ids.append(file_id)
 
         is_circles = bool(raw_data.get("is_circles", False))
-        total_media_count = int(
-            raw_data.get("total_media_count", len(photo_file_ids) + len(video_file_ids))
-        )
-        media_group_count = int(raw_data.get("media_group_count", 1))
 
         title = self._extract_title(text, channel_title)
 
-        should_create_slideshow = total_media_count > 1 or media_group_count > 1
+        should_create_slideshow = len(photo_file_ids) > 1
 
         if should_create_slideshow:
             # Order: Article intro -> TextLead -> Slideshow intro (with action)
-            cover = (
-                photo_file_ids[0]
-                if photo_file_ids
-                else (video_file_ids[0] if video_file_ids else None)
-            ) or None
+            cover = photo_file_ids[0]
             blocks.append(
                 ArticleIntroductionBlock(
                     type=ArticleIntroductionBlock.get_identifier(),
@@ -100,7 +97,7 @@ class TelegramToNewsBlocksAdapter(SocialMediaToNewsBlocksAdapter):
             slideshow_blocks = self._create_slideshow_blocks(
                 title=title,
                 photo_file_ids=photo_file_ids,
-                video_file_ids=video_file_ids,
+                video_file_ids=[],
                 text=text,
                 channel_title=channel_title,
                 channel_username=channel_username,
@@ -108,6 +105,7 @@ class TelegramToNewsBlocksAdapter(SocialMediaToNewsBlocksAdapter):
                 is_circles=is_circles,
             )
             blocks.extend(slideshow_blocks)
+            blocks.extend(self._create_media_blocks([], video_file_ids))
         else:
             if not text.strip() and video_file_ids:
                 # Video-only post: use a video introduction block
@@ -125,11 +123,7 @@ class TelegramToNewsBlocksAdapter(SocialMediaToNewsBlocksAdapter):
                     self._create_media_blocks(photo_file_ids, remaining_videos)
                 )
             else:
-                cover = (
-                    photo_file_ids[0]
-                    if photo_file_ids
-                    else (video_file_ids[0] if video_file_ids else None)
-                ) or None
+                cover = photo_file_ids[0] if photo_file_ids else None
                 # Force small->large behavior by ensuring we have an image for PostLargeBlock
                 intro_block = ArticleIntroductionBlock(
                     type=ArticleIntroductionBlock.get_identifier(),

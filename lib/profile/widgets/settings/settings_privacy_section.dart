@@ -7,6 +7,7 @@ import 'package:gamification_repository/gamification_repository.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:rtu_mirea_app/nfc_pass/bloc/nfc_hce_cubit.dart';
 import 'package:rtu_mirea_app/nfc_pass/bloc/pass_security_cubit.dart';
+import 'package:rtu_mirea_app/profile/cubit/geo_sharing_cubit.dart';
 import 'package:rtu_mirea_app/profile/widgets/settings_row.dart';
 import 'package:rtu_mirea_app/profile/widgets/settings_section.dart';
 import 'package:rtu_mirea_app/profile/widgets/settings_sheets.dart';
@@ -27,9 +28,25 @@ class SettingsPrivacySection extends StatelessWidget {
     final l10n = context.l10n;
     final pass = context.watch<PassSecurityCubit>().state;
     final nfcHce = context.watch<NfcHceCubit>().state;
+    final geo = context.watch<GeoSharingCubit>();
     return SettingsSection(
       label: l10n.settingsPrivacy,
       children: [
+        if (geo.state.failed)
+          AppErrorState.compact(title: l10n.friendsPrivacySyncError),
+        SettingsToggleRow(
+          label: l10n.settingsShowToFriends,
+          sub: l10n.friendsPrivacySub,
+          value: geo.state.sharing,
+          onChanged: geo.state.busy
+              ? null
+              : (value) async {
+                  final saved = await geo.setSharing(enabled: value);
+                  if (!saved && context.mounted) {
+                    ToastManager.showError(context, message: l10n.error);
+                  }
+                },
+        ),
         SettingsRow(
           title: l10n.settingsWhoSeesProfile,
           lineIcon: AppLineIcon.view,

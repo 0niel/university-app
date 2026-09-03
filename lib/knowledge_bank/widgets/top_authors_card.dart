@@ -10,50 +10,53 @@ class TopAuthorsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final l10n = context.l10n;
     return DecoratedBox(
       decoration: BoxDecoration(
         color: colors.surface,
-        borderRadius: BorderRadius.circular(NinjaRadius.card),
+        borderRadius: BorderRadius.circular(AppRadius.card),
       ),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.lg,
+          vertical: AppSpacing.xsm,
+        ),
         child: Column(
           children: [
             for (final (index, author) in authors.indexed)
               Padding(
-                padding: const EdgeInsets.symmetric(vertical: 10),
+                padding: const EdgeInsets.symmetric(vertical: AppSpacing.gap),
                 child: Row(
                   children: [
                     CircleAvatar(
-                      radius: 18,
+                      radius: AppRadius.field,
                       backgroundColor: index == 0
-                          ? colors.brandTint
-                          : colors.surfaceAlt,
+                          ? colors.tint
+                          : colors.surface2,
                       child: Text(
                         '${index + 1}',
-                        style: NinjaText.tabular(
-                          NinjaText.body.copyWith(
+                        style: AppText.tabular(
+                          AppText.body.copyWith(
                             fontWeight: FontWeight.w700,
-                            color: index == 0 ? colors.brandInk : colors.muted,
+                            color: index == 0 ? colors.accent : colors.muted,
                           ),
                         ),
                       ),
                     ),
-                    const SizedBox(width: 12),
+                    const SizedBox(width: AppSpacing.md),
                     Expanded(
                       child: Text(
                         author.name,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: NinjaText.body.copyWith(
+                        style: AppText.body.copyWith(
                           color: colors.ink,
                           fontWeight: FontWeight.w700,
                         ),
                       ),
                     ),
-                    const SizedBox(width: 10),
+                    const SizedBox(width: AppSpacing.gap),
                     AppRowTrailing(
                       child: Text(
                         l10n.knowledgeAuthorStats(
@@ -62,7 +65,7 @@ class TopAuthorsCard extends StatelessWidget {
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: NinjaText.subtext.copyWith(color: colors.muted),
+                        style: AppText.subtext.copyWith(color: colors.muted),
                       ),
                     ),
                   ],

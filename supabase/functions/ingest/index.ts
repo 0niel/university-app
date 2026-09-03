@@ -1,5 +1,5 @@
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
-import { requireIngestKey } from "./auth.ts";
+import { ingestAuthScope, requireIngestKey } from "./auth.ts";
 import { corsHeaders, jsonResponse } from "./http.ts";
 import {
   DatabaseIngestPayload,
@@ -144,11 +144,14 @@ Deno.serve(async (req) => {
     return jsonResponse({ error: message }, 400);
   }
 
-  const authScope = (payload.entity === "sync_start" ||
-      payload.entity === "sync_finish") && payload.source_type === "schedule"
-    ? "schedule"
-    : payload.entity;
-  const authError = requireIngestKey(
+  const authScope = payload.entity === "sync_start" ||
+      payload.entity === "sync_finish"
+    ? ingestAuthScope(payload.entity, payload.source_type, payload.source)
+    : ingestAuthScope(
+      payload.entity,
+      payload.entity === "news_items" ? payload.source.source_type : undefined,
+    );
+  const authError = await requireIngestKey(
     req,
     payload.organization_id,
     authScope,
@@ -167,6 +170,22 @@ Deno.serve(async (req) => {
   const supabase = createClient(supabaseUrl, serviceRoleKey, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
+
+  if (
+    payload.entity === "community_catalog_targets" ||
+    payload.entity === "community_observations"
+  ) {
+    const { data, error } = payload.entity === "community_catalog_targets"
+      ? await supabase.rpc("get_community_sync_targets", {
+        p_organization_id: payload.organization_id,
+      })
+      : await supabase.rpc("apply_community_observations", {
+        p_organization_id: payload.organization_id,
+        p_observations: payload.observations,
+      });
+    if (error) return jsonResponse({ error: error.message }, 500);
+    return jsonResponse({ ok: true, result: data });
+  }
 
   if (payload.entity === "story_media_upload") {
     return await createStoryMediaUpload(supabase, payload);

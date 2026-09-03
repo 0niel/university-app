@@ -15,21 +15,21 @@ class ScheduleSelectorInfoChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     return Container(
       padding: const .symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
         color: colors.surface,
-        borderRadius: .circular(NinjaRadius.pill),
+        borderRadius: .circular(AppRadius.full),
       ),
       child: Row(
         mainAxisSize: .min,
-        spacing: 6,
+        spacing: AppSpacing.xsm,
         children: [
           AppLineIconWidget(icon, size: 15, color: color),
           Text(
             label,
-            style: NinjaText.helper.copyWith(color: colors.mutedDark),
+            style: AppText.captionSmall.copyWith(color: colors.muted),
           ),
         ],
       ),

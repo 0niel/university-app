@@ -10,6 +10,7 @@ abstract class StudyMaterial with _$StudyMaterial {
     @JsonKey(defaultValue: '') required String id,
     @JsonKey(defaultValue: '') required String title,
     @Default('') String subjectName,
+    @Default(<String>[]) List<String> subjectNames,
     @Default('note') String materialType,
     @Default(0) int downloads,
     @Default(0) int likes,
@@ -32,6 +33,12 @@ abstract class StudyMaterial with _$StudyMaterial {
       _$StudyMaterialFromJson(json);
 
   bool get isFree => price == 0;
+
+  List<String> get subjects => subjectNames.isNotEmpty
+      ? subjectNames
+      : subjectName.trim().isEmpty
+      ? const []
+      : [subjectName];
 }
 
 @freezed

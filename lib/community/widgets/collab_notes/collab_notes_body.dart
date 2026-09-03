@@ -8,16 +8,45 @@ import 'package:rtu_mirea_app/community/widgets/collab_notes/collab_notes_failur
 import 'package:rtu_mirea_app/community/widgets/collab_notes/collab_notes_skeleton.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 
-class CollabNotesBody extends StatelessWidget {
+class CollabNotesBody extends StatefulWidget {
   const CollabNotesBody({super.key, this.onOpen, this.onCreate});
 
   final ValueChanged<CollabNote>? onOpen;
   final VoidCallback? onCreate;
 
   @override
+  State<CollabNotesBody> createState() => _CollabNotesBodyState();
+}
+
+class _CollabNotesBodyState extends State<CollabNotesBody> {
+  String _filter = 'all';
+
+  @override
   Widget build(BuildContext context) {
     final state = context.watch<CollabNotesCubit>().state;
-    return NinjaStateSwitcher(child: _content(context, state));
+    final l10n = context.l10n;
+    return Column(
+      children: [
+        const SizedBox(height: AppSpacing.screen),
+        AppChipRow<String>(
+          value: _filter,
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screen),
+          items: [
+            AppChipRowItem(value: 'all', label: l10n.collabNotesFilterAll),
+            AppChipRowItem(value: 'new', label: l10n.collabNotesFilterNew),
+            AppChipRowItem(value: 'mine', label: l10n.collabNotesFilterMine),
+            AppChipRowItem(value: 'group', label: l10n.collabNotesFilterGroup),
+            AppChipRowItem(
+              value: 'personal',
+              label: l10n.collabNotesFilterPersonal,
+            ),
+          ],
+          onChanged: (value) => setState(() => _filter = value),
+        ),
+        const SizedBox(height: AppSpacing.sectionGap),
+        Expanded(child: NinjaStateSwitcher(child: _content(context, state))),
+      ],
+    );
   }
 
   Widget _content(BuildContext context, CollabNotesState state) {
@@ -30,24 +59,36 @@ class CollabNotesBody extends StatelessWidget {
         onRetry: context.read<CollabNotesCubit>().load,
       );
     }
-    if (state.notes.isEmpty) {
+    final cutoff = DateTime.now().subtract(const Duration(days: 7));
+    final notes = state.notes
+        .where(
+          (note) => switch (_filter) {
+            'mine' => note.isMine,
+            'group' => !note.isPersonal,
+            'personal' => note.isPersonal,
+            'new' => note.createdAt?.isAfter(cutoff) ?? false,
+            _ => true,
+          },
+        )
+        .toList(growable: false);
+    if (notes.isEmpty) {
       return ListView(
         key: const ValueKey('notes-empty'),
         physics: const AlwaysScrollableScrollPhysics(),
         children: [
           Padding(
             padding: const .fromLTRB(
-              NinjaMetrics.screenPadding,
-              64,
-              NinjaMetrics.screenPadding,
-              0,
+              AppSpacing.screen,
+              AppSpacing.xxxlg,
+              AppSpacing.screen,
+              AppSpacing.zero,
             ),
             child: NinjaEmptyState.screen(
               icon: const AppLineIconWidget(AppLineIcon.pencil, size: 24),
               title: context.l10n.collabNotesEmptyTitle,
               message: context.l10n.collabNotesEmptySubtitle,
               actionLabel: context.l10n.collabNotesCreateTitle,
-              onAction: onCreate,
+              onAction: widget.onCreate,
             ).animateEmptyState(),
           ),
         ],
@@ -55,19 +96,28 @@ class CollabNotesBody extends StatelessWidget {
     }
     return RefreshIndicator(
       key: const ValueKey('notes-list'),
-      color: context.ninja.ink,
+      color: context.colors.ink,
       onRefresh: context.read<CollabNotesCubit>().load,
-      child: ListView.builder(
+      child: ListView(
         physics: const AlwaysScrollableScrollPhysics(),
-        padding: const .fromLTRB(0, 8, 0, 96),
-        itemCount: state.notes.length,
-        itemBuilder: (context, index) {
-          final note = state.notes[index];
-          return CollabNoteCard(
-            note: note,
-            onTap: () => onOpen?.call(note),
-          ).animateListItem(key: ValueKey(note.id), index: index);
-        },
+        padding: const .fromLTRB(
+          AppSpacing.screen,
+          AppSpacing.zero,
+          AppSpacing.screen,
+          96,
+        ),
+        children: [
+          AppListGroup(
+            children: [
+              for (final note in notes)
+                CollabNoteCard(
+                  key: ValueKey(note.id),
+                  note: note,
+                  onTap: () => widget.onOpen?.call(note),
+                ),
+            ],
+          ),
+        ],
       ),
     );
   }

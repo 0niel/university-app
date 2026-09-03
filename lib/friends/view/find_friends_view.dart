@@ -52,7 +52,13 @@ class _FindFriendsViewState extends State<FindFriendsView> {
     _debounce = Timer(
       const Duration(milliseconds: 350),
       () {
-        if (mounted) unawaited(context.read<FindFriendsCubit>().search(query));
+        if (!mounted) return;
+        final cubit = context.read<FindFriendsCubit>();
+        unawaited(cubit.search(query));
+        if (query.trim().length < 2 &&
+            cubit.state.status == FindFriendsStatus.initial) {
+          unawaited(cubit.loadInitial());
+        }
       },
     );
   }
@@ -109,16 +115,21 @@ class _FindFriendsViewState extends State<FindFriendsView> {
   }
 
   void _invite() {
-    final link = DeepLinks.shareLink('/services/people?add=$_myUserId');
-    unawaited(SharePlus.instance.share(ShareParams(text: link.toString())));
+    final link = DeepLinks.appLink('/services/people?add=$_myUserId');
+    unawaited(
+      SharePlus.instance.share(
+        ShareParams(text: context.l10n.friendsInviteMessage(link.toString())),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     return Scaffold(
       backgroundColor: colors.canvas,
       body: SafeArea(
+        top: false,
         child: Column(
           children: [
             NinjaFindFriendsHeader(
@@ -128,24 +139,20 @@ class _FindFriendsViewState extends State<FindFriendsView> {
             ),
             Padding(
               padding: const .fromLTRB(
-                NinjaMetrics.screenPadding,
-                8,
-                NinjaMetrics.screenPadding,
+                AppSpacing.screen,
+                24,
+                AppSpacing.screen,
                 14,
               ),
               child: Hero(
                 tag: 'find-friends-search',
                 child: Material(
                   color: Colors.transparent,
-                  child: NinjaInput(
+                  child: AppSearchField(
                     controller: _controller,
                     onChanged: _onQueryChanged,
-                    placeholder: context.l10n.friendsSearchHint,
-                    leadingIcon: AppLineIconWidget(
-                      .search,
-                      size: 17,
-                      color: colors.muted,
-                    ),
+                    hintText: context.l10n.friendsSearchHint,
+                    onCanvas: true,
                   ),
                 ),
               ),

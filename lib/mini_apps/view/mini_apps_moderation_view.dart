@@ -5,24 +5,24 @@ class MiniAppsModerationView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final l10n = context.l10n;
     final state = context.watch<MiniAppsModerationCubit>().state;
-    return Scaffold(
-      backgroundColor: colors.canvas,
-      appBar: NinjaAppBar.inner(
-        title: l10n.miniAppsModerationTitle,
-        onBack: () => Navigator.of(context).maybePop(),
-        backSemanticLabel: l10n.back,
-      ),
+    return MiniAppScaffold(
+      title: l10n.miniAppsModerationTitle,
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(20, 12, 20, 8),
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.screen,
+              0,
+              AppSpacing.screen,
+              AppSpacing.lg,
+            ),
             child: Text(
               l10n.miniAppsModerationSubtitle,
-              style: NinjaText.body.copyWith(color: colors.muted),
+              style: AppText.body.copyWith(color: colors.muted),
             ),
           ),
           Expanded(child: _ModerationBody(state: state)),

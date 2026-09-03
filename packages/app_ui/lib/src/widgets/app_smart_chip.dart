@@ -1,4 +1,6 @@
-import 'package:app_ui/app_ui.dart';
+import 'package:app_ui/src/colors/colors.dart';
+import 'package:app_ui/src/spacing/app_spacing.dart';
+import 'package:app_ui/src/typography/typography.dart';
 import 'package:flutter/material.dart';
 
 class AppSmartChip extends StatelessWidget {
@@ -22,35 +24,37 @@ class AppSmartChip extends StatelessWidget {
   final Widget? icon;
   final String label;
   final String value;
-
   final Color tone;
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     return Semantics(
       container: true,
       label: '$label, $value',
       child: ExcludeSemantics(
         child: Container(
-          constraints: const BoxConstraints(minHeight: 48),
-          padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 8),
+          constraints: const BoxConstraints(minHeight: AppControlSize.field),
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.chipInset,
+            vertical: AppSpacing.sm,
+          ),
           decoration: BoxDecoration(
-            color: colors.surfaceAlt,
-            borderRadius: BorderRadius.circular(NinjaRadius.button),
+            color: colors.surface2,
+            borderRadius: BorderRadius.circular(AppRadius.field),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
               Container(
-                width: 3,
+                width: 4,
                 height: 30,
                 decoration: BoxDecoration(
                   color: tone,
-                  borderRadius: BorderRadius.circular(2),
+                  borderRadius: BorderRadius.circular(AppRadius.xxs),
                 ),
               ),
-              const SizedBox(width: 9),
+              const SizedBox(width: AppSpacing.badgeInset),
               icon ??
                   Text(
                     emoji ?? '',
@@ -66,16 +70,13 @@ class AppSmartChip extends StatelessWidget {
                       label,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: NinjaText.helper.copyWith(color: colors.muted),
+                      style: AppText.caption.copyWith(color: colors.muted),
                     ),
                     Text(
                       value,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: NinjaText.body.copyWith(
-                        fontWeight: FontWeight.w800,
-                        color: colors.ink,
-                      ),
+                      style: AppText.bodyStrong.copyWith(color: colors.ink),
                     ),
                   ],
                 ),

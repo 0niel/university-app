@@ -11,7 +11,7 @@ class _SectionHeaderSkeleton extends StatelessWidget {
         children: [
           Expanded(child: NinjaSkeleton.bar(height: 19, widthFactor: 0.42)),
           SizedBox(width: 10),
-          NinjaSkeleton(width: 84, height: 36, radius: NinjaRadius.pill),
+          NinjaSkeleton(width: 84, height: 36, radius: AppRadius.full),
         ],
       ),
     );

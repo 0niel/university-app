@@ -19,7 +19,7 @@ class _LegendDot extends StatelessWidget {
         ),
         Text(
           label,
-          style: NinjaText.helper.copyWith(color: context.ninja.muted),
+          style: AppText.captionSmall.copyWith(color: context.colors.muted),
         ),
       ],
     );

@@ -38,8 +38,8 @@ void main() {
     );
   }
 
-  List<NinjaSwitch> toggles(WidgetTester tester) =>
-      tester.widgetList<NinjaSwitch>(find.byType(NinjaSwitch)).toList();
+  List<AppSwitch> toggles(WidgetTester tester) =>
+      tester.widgetList<AppSwitch>(find.byType(AppSwitch)).toList();
 
   testWidgets('children follow the master switch when it is on', (
     tester,
@@ -71,7 +71,7 @@ void main() {
     await tester.pumpWidget(subject(const UserSettings()));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.byType(NinjaSwitch).last);
+    await tester.tap(find.byType(AppSwitch).last);
     await tester.pumpAndSettle();
 
     verify(

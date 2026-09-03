@@ -15,17 +15,12 @@ class MiniAppIconTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        color: accent.withValues(alpha: 0.12),
-        borderRadius: .circular(NinjaRadius.button),
-      ),
-      alignment: .center,
+    return AppIconTile(
+      size: size,
+      background: context.colors.tintOf(accent),
       child: Text(
         emoji,
-        style: TextStyle(fontSize: size * 0.5, height: 1),
+        style: AppText.sans(size * .5, FontWeight.w400, height: 1),
       ),
     );
   }

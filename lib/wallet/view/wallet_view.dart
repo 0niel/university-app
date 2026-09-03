@@ -14,7 +14,7 @@ class WalletView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final l10n = context.l10n;
     final state = context.watch<WalletCubit>().state;
     final cubit = context.read<WalletCubit>();
@@ -23,9 +23,8 @@ class WalletView extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: colors.canvas,
-      appBar: NinjaAppBar(title: l10n.walletTitle),
       body: RefreshIndicator(
-        color: colors.brand,
+        color: colors.accent,
         backgroundColor: colors.surface,
         onRefresh: cubit.load,
         child: NinjaSkeletonGroup(
@@ -34,13 +33,20 @@ class WalletView extends StatelessWidget {
           child: CustomScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
             slivers: [
+              SliverToBoxAdapter(
+                child: AppInnerHeader(
+                  title: l10n.walletTitle,
+                  onBack: () => Navigator.of(context).maybePop(),
+                  backSemanticsLabel: l10n.back,
+                ),
+              ),
               if (failed)
                 SliverPadding(
                   padding: const EdgeInsets.fromLTRB(
-                    NinjaMetrics.screenPadding,
-                    8,
-                    NinjaMetrics.screenPadding,
-                    32,
+                    AppSpacing.screen,
+                    AppSpacing.sm,
+                    AppSpacing.screen,
+                    AppSpacing.xxl,
                   ),
                   sliver: SliverToBoxAdapter(
                     child: NinjaErrorState(
@@ -54,10 +60,10 @@ class WalletView extends StatelessWidget {
               else ...[
                 SliverPadding(
                   padding: const EdgeInsets.fromLTRB(
-                    NinjaMetrics.screenPadding,
-                    4,
-                    NinjaMetrics.screenPadding,
-                    10,
+                    AppSpacing.screen,
+                    AppSpacing.xs,
+                    AppSpacing.screen,
+                    AppSpacing.gap,
                   ),
                   sliver: SliverToBoxAdapter(
                     child: WalletBalanceBlock(
@@ -79,10 +85,10 @@ class WalletView extends StatelessWidget {
                 ),
                 SliverPadding(
                   padding: const EdgeInsets.fromLTRB(
-                    NinjaMetrics.screenPadding,
-                    10,
-                    NinjaMetrics.screenPadding,
-                    40,
+                    AppSpacing.screen,
+                    AppSpacing.gap,
+                    AppSpacing.screen,
+                    AppSpacing.xxlg,
                   ),
                   sliver: SliverToBoxAdapter(
                     child: NinjaStateSwitcher(

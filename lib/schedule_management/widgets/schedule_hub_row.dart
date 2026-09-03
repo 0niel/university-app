@@ -23,7 +23,7 @@ class ScheduleHubRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final l10n = context.l10n;
     final status = ScheduleLiveStatus.of(schedule);
     final meta = [
@@ -37,9 +37,9 @@ class ScheduleHubRow extends StatelessWidget {
       semanticsLabel: '$name, $meta',
       child: Padding(
         padding: const EdgeInsets.fromLTRB(
-          NinjaMetrics.screenPadding,
+          AppSpacing.screen,
           0,
-          NinjaMetrics.screenPadding,
+          AppSpacing.screen,
           10,
         ),
         child: Container(
@@ -47,7 +47,7 @@ class ScheduleHubRow extends StatelessWidget {
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             color: colors.surface,
-            borderRadius: BorderRadius.circular(NinjaRadius.card),
+            borderRadius: BorderRadius.circular(AppRadius.card),
           ),
           child: Row(
             children: [
@@ -62,7 +62,7 @@ class ScheduleHubRow extends StatelessWidget {
                       name,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: NinjaText.headline.copyWith(color: colors.ink),
+                      style: AppText.headline.copyWith(color: colors.ink),
                     ),
                     if (status.isLive) ...[
                       const SizedBox(height: 5),
@@ -76,7 +76,7 @@ class ScheduleHubRow extends StatelessWidget {
                       meta,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: NinjaText.subtext.copyWith(color: colors.muted),
+                      style: AppText.subtext.copyWith(color: colors.muted),
                     ),
                   ],
                 ),
@@ -85,7 +85,7 @@ class ScheduleHubRow extends StatelessWidget {
               AppLineIconWidget(
                 AppLineIcon.chevronR,
                 size: 16,
-                color: colors.chevron,
+                color: colors.muted2,
               ),
             ],
           ),

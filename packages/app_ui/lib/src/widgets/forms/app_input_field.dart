@@ -1,4 +1,10 @@
-import 'package:app_ui/app_ui.dart';
+import 'package:app_ui/src/colors/colors.dart';
+import 'package:app_ui/src/spacing/app_spacing.dart';
+import 'package:app_ui/src/typography/typography.dart';
+import 'package:app_ui/src/widgets/app_line_icon.dart';
+import 'package:app_ui/src/widgets/app_press_state.dart';
+import 'package:app_ui/src/widgets/forms/app_field_label.dart';
+import 'package:app_ui/src/widgets/forms/app_form_metrics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -9,6 +15,7 @@ class AppInputField extends StatefulWidget {
     this.placeholder,
     this.label,
     this.leadingIcon,
+    this.leading,
     this.trailing,
     this.obscureText = false,
     this.showPasswordToggle = false,
@@ -17,25 +24,30 @@ class AppInputField extends StatefulWidget {
     this.onTap,
     this.errorText,
     this.helperText,
+    this.success = false,
     this.keyboardType,
     this.textInputAction,
+    this.textCapitalization = TextCapitalization.none,
     this.autofillHints,
     this.fillColor,
-    this.height = 54,
-    this.borderRadius = AppRadius.button,
+    this.height = AppControlSize.field,
+    this.borderRadius = AppRadius.field,
     this.maxLines = 1,
     this.minLines,
     this.maxLength,
+    this.showCounter = false,
+    this.showClear = true,
     this.enabled = true,
     this.readOnly = false,
     this.autofocus = false,
     this.focusNode,
     this.inputFormatters,
+    this.textAlign = TextAlign.start,
+    this.textStyle,
     this.validator,
     this.autovalidateMode,
   });
 
-  /// Convenience constructor for a multi-line textarea.
   const AppInputField.multiline({
     super.key,
     this.controller,
@@ -49,6 +61,7 @@ class AppInputField extends StatefulWidget {
     this.maxLines = 6,
     this.minLines = 3,
     this.maxLength,
+    this.showCounter = true,
     this.enabled = true,
     this.readOnly = false,
     this.autofocus = false,
@@ -56,102 +69,57 @@ class AppInputField extends StatefulWidget {
     this.inputFormatters,
     this.validator,
     this.autovalidateMode,
-    this.borderRadius = AppRadius.button,
+    this.textStyle,
+    this.borderRadius = AppRadius.field,
   })  : leadingIcon = null,
+        leading = null,
         trailing = null,
         obscureText = false,
         showPasswordToggle = false,
+        success = false,
+        showClear = false,
         onSubmitted = null,
         keyboardType = TextInputType.multiline,
         textInputAction = TextInputAction.newline,
+        textCapitalization = TextCapitalization.sentences,
         autofillHints = null,
-        height = 0;
+        textAlign = TextAlign.start,
+        height = AppControlSize.field;
 
-  /// Controls the edited text.
   final TextEditingController? controller;
-
-  /// Placeholder shown when the field is empty.
   final String? placeholder;
-
-  /// Optional uppercase label rendered above the field.
   final String? label;
-
-  /// Which design line icon to show before the text.
   final AppLineIcon? leadingIcon;
-
-  /// Optional custom trailing widget. Ignored when [showPasswordToggle] is set.
+  final Widget? leading;
   final Widget? trailing;
-
-  /// Whether to obscure the text (password entry).
   final bool obscureText;
-
-  /// Whether to render the eye/eye-off toggle (only when [obscureText]).
   final bool showPasswordToggle;
-
-  /// Called when the text changes.
   final ValueChanged<String>? onChanged;
-
-  /// Called when the user submits from the keyboard.
   final ValueChanged<String>? onSubmitted;
-
-  /// Called when the field is tapped (e.g. read-only picker fields).
   final VoidCallback? onTap;
-
-  /// Error message rendered beneath the field; also outlines the fill.
   final String? errorText;
-
-  /// Helper message rendered beneath the field when there is no error.
   final String? helperText;
-
-  /// Keyboard type.
+  final bool success;
   final TextInputType? keyboardType;
-
-  /// Keyboard action button.
   final TextInputAction? textInputAction;
-
-  /// Autofill hints for the platform.
+  final TextCapitalization textCapitalization;
   final Iterable<String>? autofillHints;
-
-  /// Overrides the surface fill colour.
   final Color? fillColor;
-
-  /// Field height (single-line only). Multi-line fields grow with content.
   final double height;
-
-  /// Corner radius of the fill.
   final double borderRadius;
-
-  /// Maximum number of lines. `1` keeps the fixed-height pill; values `> 1`
-  /// (or `null`) turn it into a growing textarea.
   final int? maxLines;
-
-  /// Minimum number of lines for multi-line fields.
   final int? minLines;
-
-  /// Optional character limit (shows the platform counter).
   final int? maxLength;
-
-  /// Whether the field accepts input. Disabled fields are dimmed.
+  final bool showCounter;
+  final bool showClear;
   final bool enabled;
-
-  /// Whether the field is read-only (still focusable, e.g. picker triggers).
   final bool readOnly;
-
-  /// Whether to autofocus on mount.
   final bool autofocus;
-
-  /// External focus node.
   final FocusNode? focusNode;
-
-  /// Optional input formatters.
   final List<TextInputFormatter>? inputFormatters;
-
-  /// Optional form validator. When provided, the field participates in the
-  /// enclosing [Form] and renders the validation error beneath itself.
+  final TextAlign textAlign;
+  final TextStyle? textStyle;
   final FormFieldValidator<String>? validator;
-
-  /// When to auto-validate; defaults to [AutovalidateMode.onUserInteraction]
-  /// when a [validator] is set.
   final AutovalidateMode? autovalidateMode;
 
   @override
@@ -159,118 +127,243 @@ class AppInputField extends StatefulWidget {
 }
 
 class _AppInputFieldState extends State<AppInputField> {
+  late TextEditingController _controller =
+      widget.controller ?? TextEditingController();
+  late FocusNode _focusNode = widget.focusNode ?? FocusNode();
   late bool _obscured = widget.obscureText;
-  late final FocusNode _focusNode = widget.focusNode ?? FocusNode();
+  late bool _focused = _focusNode.hasFocus;
+
+  @override
+  void initState() {
+    super.initState();
+    _focusNode.addListener(_onFocusChanged);
+  }
+
+  @override
+  void didUpdateWidget(covariant AppInputField oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.controller != widget.controller) {
+      final value = _controller.value;
+      if (oldWidget.controller == null) _controller.dispose();
+      _controller = widget.controller ?? TextEditingController.fromValue(value);
+    }
+    if (oldWidget.focusNode != widget.focusNode) {
+      _focusNode.removeListener(_onFocusChanged);
+      if (oldWidget.focusNode == null) _focusNode.dispose();
+      _focusNode = widget.focusNode ?? FocusNode();
+      _focused = _focusNode.hasFocus;
+      _focusNode.addListener(_onFocusChanged);
+    }
+    if (oldWidget.obscureText != widget.obscureText) {
+      _obscured = widget.obscureText;
+    }
+  }
 
   @override
   void dispose() {
+    _focusNode.removeListener(_onFocusChanged);
     if (widget.focusNode == null) _focusNode.dispose();
+    if (widget.controller == null) _controller.dispose();
     super.dispose();
+  }
+
+  void _onFocusChanged() {
+    if (!mounted) return;
+    setState(() => _focused = _focusNode.hasFocus);
   }
 
   @override
   Widget build(BuildContext context) {
     if (widget.validator == null) {
-      return _buildField(context, widget.errorText, null);
+      return _build(context, widget.errorText, null);
     }
     return FormField<String>(
-      initialValue: widget.controller?.text ?? '',
+      key: ObjectKey(_controller),
+      initialValue: _controller.text,
       validator: widget.validator,
       autovalidateMode:
           widget.autovalidateMode ?? AutovalidateMode.onUserInteraction,
-      builder: (state) =>
-          _buildField(context, state.errorText, state.didChange),
+      builder: (state) => _build(context, state.errorText, state.didChange),
+    );
+  }
+
+  Color _fill(AppColors colors, String? errorText) {
+    if (!widget.enabled) return colors.canvas;
+    if (widget.fillColor != null) return widget.fillColor!;
+    if (errorText != null) return colors.examTint;
+    if (widget.success) return colors.lectureTint;
+    if (_focused) return colors.tint;
+    return colors.surface2;
+  }
+
+  Widget _build(
+    BuildContext context,
+    String? errorText,
+    ValueChanged<String>? onValidate,
+  ) {
+    final colors = context.colors;
+    final multiline = widget.maxLines != 1;
+    final label = widget.label;
+    final helper = widget.helperText;
+    final reduceMotion = MediaQuery.disableAnimationsOf(context) ||
+        MediaQuery.accessibleNavigationOf(context);
+    final leading = widget.leading ??
+        (widget.leadingIcon == null
+            ? null
+            : AppLineIconWidget(
+                widget.leadingIcon!,
+                size: AppFormMetrics.leadingIcon,
+                color: colors.muted,
+              ));
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (label != null) AppFieldLabel(label),
+        AnimatedContainer(
+          duration:
+              reduceMotion ? Duration.zero : const Duration(milliseconds: 200),
+          curve: Curves.easeOut,
+          height: multiline ? null : widget.height,
+          constraints: multiline
+              ? const BoxConstraints(minHeight: AppFormMetrics.multilineHeight)
+              : null,
+          padding: EdgeInsets.only(
+            left: leading == null
+                ? AppFormMetrics.inset
+                : AppFormMetrics.leadingInset,
+            right: widget.showPasswordToggle && widget.obscureText
+                ? AppFormMetrics.trailingInset
+                : leading == null
+                    ? AppFormMetrics.inset
+                    : AppFormMetrics.leadingInset,
+            top: multiline ? AppFormMetrics.multilineInset : AppSpacing.zero,
+            bottom: multiline ? AppFormMetrics.multilineInset : AppSpacing.zero,
+          ),
+          decoration: BoxDecoration(
+            color: _fill(colors, errorText),
+            borderRadius: BorderRadius.circular(widget.borderRadius),
+          ),
+          child: multiline
+              ? _buildMultiline(colors, onValidate)
+              : _buildSingleLine(colors, leading, onValidate),
+        ),
+        if (errorText != null)
+          _AppFieldMessage(
+            text: errorText,
+            color: colors.danger,
+            showIcon: true,
+          )
+        else if (helper != null)
+          _AppFieldMessage(text: helper, color: colors.muted, showIcon: false),
+      ],
+    );
+  }
+
+  Widget _buildSingleLine(
+    AppColors colors,
+    Widget? leading,
+    ValueChanged<String>? onValidate,
+  ) {
+    return Row(
+      children: [
+        if (leading != null) ...[
+          leading,
+          const SizedBox(width: AppFormMetrics.leadingGap),
+        ],
+        Expanded(child: _buildField(colors, onValidate, multiline: false)),
+        ValueListenableBuilder<TextEditingValue>(
+          valueListenable: _controller,
+          builder: (context, value, _) {
+            final trailing =
+                _buildTrailing(context, colors, value.text, onValidate);
+            return trailing ?? const SizedBox.shrink();
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMultiline(AppColors colors, ValueChanged<String>? onValidate) {
+    final maxLength = widget.maxLength;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        _buildField(colors, onValidate, multiline: true),
+        if (widget.showCounter && maxLength != null) ...[
+          const SizedBox(height: AppSpacing.sm),
+          ValueListenableBuilder<TextEditingValue>(
+            valueListenable: _controller,
+            builder: (context, value, _) => Text(
+              '${value.text.characters.length} / $maxLength',
+              textAlign: TextAlign.right,
+              style:
+                  AppText.sans(AppFormMetrics.counterFontSize, FontWeight.w500)
+                      .copyWith(
+                color: colors.muted,
+              ),
+            ),
+          ),
+        ],
+      ],
     );
   }
 
   Widget _buildField(
-    BuildContext context,
-    String? errorText,
-    ValueChanged<String>? onChangedExtra,
-  ) {
-    final colors = Theme.of(context).colors;
-    final hasError = errorText != null;
-    final multiline = widget.maxLines != 1;
-    final enabled = widget.enabled;
-    final leadingIcon = widget.leadingIcon;
-    final label = widget.label;
-    final helperText = widget.helperText;
-
-    final fill =
-        !enabled ? colors.surfaceLow : (widget.fillColor ?? colors.surfaceHigh);
-
-    Widget? trailing;
-    if (widget.showPasswordToggle && widget.obscureText) {
-      final russian = Localizations.localeOf(context).languageCode == 'ru';
-      final semanticLabel = _obscured
-          ? russian
-              ? 'Показать пароль'
-              : 'Show password'
-          : russian
-              ? 'Скрыть пароль'
-              : 'Hide password';
-      trailing = Semantics(
-        button: true,
-        toggled: !_obscured,
-        label: semanticLabel,
-        child: ExcludeSemantics(
-          child: AppPressable(
-            pressedScale: 0.92,
-            onTap: () => setState(() => _obscured = !_obscured),
-            child: SizedBox.square(
-              dimension: 44,
-              child: Center(
-                child: AppLineIconWidget(
-                  _obscured ? AppLineIcon.hide : AppLineIcon.view,
-                  size: 18,
-                  color: colors.deactiveDarker,
-                ),
-              ),
-            ),
-          ),
-        ),
+    AppColors colors,
+    ValueChanged<String>? onValidate, {
+    required bool multiline,
+  }) {
+    final ink = widget.enabled ? colors.ink : colors.muted2;
+    var style = AppText.body.copyWith(color: ink);
+    if (multiline) {
+      style = AppText.sans(
+        AppFormMetrics.multilineFontSize,
+        FontWeight.w500,
+        height: AppFormMetrics.multilineLineHeight,
+      ).copyWith(
+        color: ink,
       );
-    } else {
-      trailing = widget.trailing;
+    } else if (_obscured) {
+      style = AppText.sans(AppFormMetrics.passwordFontSize, FontWeight.w600)
+          .copyWith(
+        color: ink,
+        letterSpacing: AppFormMetrics.passwordLetterSpacing,
+      );
     }
+    final override = widget.textStyle;
+    if (override != null) style = style.merge(override);
 
-    // Flat design: no focus ring. Only a subtle error outline remains so
-    // validation failures stay legible; focus is conveyed by the accent caret.
-    final border = hasError
-        ? Border.all(color: colors.error.withValues(alpha: 0.8))
-        : null;
-
-    final field = TextField(
-      controller: widget.controller,
+    return TextField(
+      controller: _controller,
       focusNode: _focusNode,
-      onChanged: (value) {
-        widget.onChanged?.call(value);
-        onChangedExtra?.call(value);
-      },
-      onSubmitted: widget.onSubmitted,
-      onTap: widget.onTap,
-      enabled: enabled,
+      enabled: widget.enabled,
       readOnly: widget.readOnly,
       autofocus: widget.autofocus,
       obscureText: _obscured,
       keyboardType: widget.keyboardType,
       textInputAction: widget.textInputAction,
+      textCapitalization: widget.textCapitalization,
       autofillHints: widget.autofillHints,
-      maxLines: widget.maxLines,
-      minLines: widget.minLines,
-      maxLength: widget.maxLength,
       inputFormatters: widget.inputFormatters,
-      cursorColor: colors.primary,
-      style: AppText.bodyLarge.copyWith(
-        color: enabled ? colors.active : colors.deactiveDarker,
-      ),
-      // Reset any global InputDecorationTheme so the field is just text inside
-      // the surrounding flat pill.
+      maxLength: widget.maxLength,
+      maxLines: multiline ? widget.maxLines : 1,
+      minLines: multiline ? widget.minLines : null,
+      textAlign: widget.textAlign,
+      cursorColor: colors.accent,
+      style: style,
+      onChanged: (value) {
+        widget.onChanged?.call(value);
+        onValidate?.call(value);
+      },
+      onSubmitted: widget.onSubmitted,
+      onTap: widget.onTap,
       decoration: InputDecoration(
         isCollapsed: true,
         isDense: true,
         filled: false,
-        fillColor: Colors.transparent,
         counterText: '',
         contentPadding: EdgeInsets.zero,
         border: InputBorder.none,
@@ -280,74 +373,132 @@ class _AppInputFieldState extends State<AppInputField> {
         errorBorder: InputBorder.none,
         focusedErrorBorder: InputBorder.none,
         hintText: widget.placeholder,
-        hintStyle: AppText.bodyLarge.copyWith(color: colors.deactiveDarker),
+        hintStyle:
+            AppText.sans(AppFormMetrics.hintFontSize, FontWeight.w600).copyWith(
+          color: colors.muted2,
+        ),
       ),
     );
+  }
 
-    final pill = Container(
-      height: multiline ? null : widget.height,
-      constraints: multiline ? const BoxConstraints(minHeight: 96) : null,
-      padding: EdgeInsets.symmetric(
-        horizontal: AppSpacing.lg,
-        vertical: multiline ? AppSpacing.md : 0,
-      ),
-      decoration: BoxDecoration(
-        color: fill,
-        borderRadius: BorderRadius.circular(widget.borderRadius),
-        border: border,
-      ),
-      child: Row(
-        crossAxisAlignment:
-            multiline ? CrossAxisAlignment.start : CrossAxisAlignment.center,
-        children: [
-          if (leadingIcon != null) ...[
-            AppLineIconWidget(
-              leadingIcon,
-              size: 20,
-              color: colors.deactiveDarker,
+  Widget? _buildTrailing(
+    BuildContext context,
+    AppColors colors,
+    String text,
+    ValueChanged<String>? onValidate,
+  ) {
+    if (widget.showPasswordToggle && widget.obscureText) {
+      final russian = Localizations.localeOf(context).languageCode == 'ru';
+      return AppPressState(
+        enabled: widget.enabled,
+        onTap: widget.enabled
+            ? () => setState(() => _obscured = !_obscured)
+            : null,
+        pressedScale: 0.9,
+        semanticsLabel: _obscured
+            ? (russian ? 'Показать пароль' : 'Show password')
+            : (russian ? 'Скрыть пароль' : 'Hide password'),
+        semanticsToggled: !_obscured,
+        builder: (context, {required pressed}) => SizedBox.square(
+          dimension: AppControlSize.iconButton,
+          child: Center(
+            child: AppLineIconWidget(
+              _obscured ? AppLineIcon.hide : AppLineIcon.view,
+              size: AppFormMetrics.leadingIcon,
+              color: colors.muted,
             ),
-            const SizedBox(width: AppSpacing.md),
+          ),
+        ),
+      );
+    }
+
+    if (widget.trailing != null) return widget.trailing;
+
+    if (widget.success) {
+      return AppLineIconWidget(
+        AppLineIcon.check,
+        size: AppFormMetrics.successIcon,
+        color: colors.lecture,
+        strokeWidth: AppFormMetrics.successStroke,
+      );
+    }
+
+    if (!widget.showClear ||
+        !widget.enabled ||
+        widget.readOnly ||
+        text.isEmpty) {
+      return null;
+    }
+
+    final russian = Localizations.localeOf(context).languageCode == 'ru';
+    return AppPressState(
+      onTap: () {
+        _controller.clear();
+        widget.onChanged?.call('');
+        onValidate?.call('');
+      },
+      pressedScale: 0.9,
+      semanticsLabel: russian ? 'Очистить поле' : 'Clear field',
+      builder: (context, {required pressed}) => SizedBox.square(
+        dimension: AppControlSize.touchTarget,
+        child: Align(
+          alignment: Alignment.centerRight,
+          child: SizedBox.square(
+            dimension: AppFormMetrics.clearVisualSize,
+            child: Center(
+              child: AppLineIconWidget(
+                AppLineIcon.close,
+                size: AppIconSize.sm,
+                color: colors.muted,
+                strokeWidth: AppFormMetrics.iconStroke,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _AppFieldMessage extends StatelessWidget {
+  const _AppFieldMessage({
+    required this.text,
+    required this.color,
+    required this.showIcon,
+  });
+
+  final String text;
+  final Color color;
+  final bool showIcon;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: AppFormMetrics.messageGap),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (showIcon) ...[
+            AppLineIconWidget(
+              AppLineIcon.alert,
+              size: AppFormMetrics.messageIcon,
+              color: color,
+              strokeWidth: AppFormMetrics.iconStroke,
+            ),
+            const SizedBox(width: AppFormMetrics.messageGap),
           ],
-          Expanded(child: field),
-          if (trailing != null) ...[
-            const SizedBox(width: AppSpacing.sm),
-            trailing,
-          ],
+          Expanded(
+            child: Text(
+              text,
+              style: AppText.sans(
+                AppFormMetrics.messageFontSize,
+                FontWeight.w500,
+                height: AppFormMetrics.messageLineHeight,
+              ).copyWith(color: color),
+            ),
+          ),
         ],
       ),
-    );
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        if (label != null)
-          Padding(
-            padding: const EdgeInsets.only(left: AppSpacing.xxs, bottom: 10),
-            child: Text(
-              label.toUpperCase(),
-              style: AppText.overline.copyWith(
-                color: colors.deactiveDarker,
-                fontWeight: FontWeight.w700,
-                letterSpacing: 0.5,
-              ),
-            ),
-          ),
-        Opacity(opacity: enabled ? 1 : 0.7, child: pill),
-        if (hasError || widget.helperText != null)
-          Padding(
-            padding: const EdgeInsets.only(
-              top: AppSpacing.xs,
-              left: AppSpacing.xs,
-            ),
-            child: Text(
-              errorText ?? helperText ?? '',
-              style: AppText.caption.copyWith(
-                color: hasError ? colors.error : colors.deactiveDarker,
-              ),
-            ),
-          ),
-      ],
     );
   }
 }

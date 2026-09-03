@@ -7,6 +7,7 @@ class _MaterialsPreview extends StatelessWidget {
     required this.materials,
     required this.onRetry,
     required this.onOpenAll,
+    required this.onUpload,
   });
 
   final bool loading;
@@ -14,6 +15,7 @@ class _MaterialsPreview extends StatelessWidget {
   final List<LessonMaterial> materials;
   final VoidCallback onRetry;
   final VoidCallback onOpenAll;
+  final VoidCallback onUpload;
 
   @override
   Widget build(BuildContext context) {
@@ -23,22 +25,20 @@ class _MaterialsPreview extends StatelessWidget {
       children: [
         _SectionTitle(
           title: l10n.lessonDetailsMaterials,
-          action: materials.isEmpty
-              ? null
-              : l10n.lessonDetailsAllCount(materials.length),
-          onAction: onOpenAll,
+          action: l10n.lessonMaterialsAdd,
+          onAction: onUpload,
         ),
-        NinjaStateSwitcher(child: _buildState(l10n)),
+        AppStateSwitcher(child: _buildState(l10n)),
       ],
     );
   }
 
   Widget _buildState(AppLocalizations l10n) {
     const inset = EdgeInsets.fromLTRB(
-      NinjaMetrics.screenPadding,
-      0,
-      NinjaMetrics.screenPadding,
-      16,
+      AppSpacing.screen,
+      AppSpacing.zero,
+      AppSpacing.screen,
+      AppSpacing.lg,
     );
 
     if (loading) {
@@ -50,11 +50,12 @@ class _MaterialsPreview extends StatelessWidget {
       return Padding(
         key: const ValueKey('materials_preview_error'),
         padding: inset,
-        child: NinjaErrorCard(
+        child: AppErrorState(
           title: l10n.lessonDetailsLoadFailed,
           message: l10n.lessonDetailsCheckConnection,
-          actionLabel: l10n.lessonDetailsTapRetry,
-          onAction: onRetry,
+          primaryLabel: l10n.lessonDetailsTapRetry,
+          footnote: null,
+          onPrimary: onRetry,
         ),
       );
     }
@@ -63,11 +64,11 @@ class _MaterialsPreview extends StatelessWidget {
         padding: inset,
         child: SizedBox(
           width: double.infinity,
-          child: NinjaEmptyState(
+          child: AppEmptyState(
             title: l10n.lessonDetailsNoMaterialsYet,
-            message: l10n.lessonDetailsUploadHint,
+            subtitle: l10n.lessonDetailsUploadHint,
             actionLabel: l10n.lessonDetailsUpload,
-            onAction: onOpenAll,
+            onAction: onUpload,
           ),
         ),
       ).animateEmptyState(key: const ValueKey('materials_preview_empty'));
@@ -75,10 +76,9 @@ class _MaterialsPreview extends StatelessWidget {
     return Padding(
       key: const ValueKey('materials_preview_list'),
       padding: const EdgeInsets.symmetric(
-        horizontal: NinjaMetrics.screenPadding,
+        horizontal: AppSpacing.screen,
       ),
-      child: Column(
-        spacing: 10,
+      child: AppListGroup(
         children: [
           for (final (index, material) in materials.take(4).indexed)
             _MaterialInlineRow(

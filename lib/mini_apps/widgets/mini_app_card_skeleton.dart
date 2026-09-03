@@ -6,14 +6,14 @@ class MiniAppCardSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final textScale = MediaQuery.textScalerOf(context).scale(1);
     final titleHeight = (12 * textScale).clamp(12.0, 22.0);
     final detailHeight = (11 * textScale).clamp(11.0, 18.0);
     return DecoratedBox(
       decoration: BoxDecoration(
         color: colors.surface,
-        borderRadius: BorderRadius.circular(NinjaRadius.card),
+        borderRadius: BorderRadius.circular(AppRadius.card),
       ),
       child: Padding(
         padding: const .all(16),
@@ -21,15 +21,17 @@ class MiniAppCardSkeleton extends StatelessWidget {
           children: [
             DecoratedBox(
               decoration: BoxDecoration(
-                color: colors.brandTint,
-                borderRadius: .circular(NinjaRadius.button),
+                color: colors.tint,
+                borderRadius: .circular(AppRadius.full),
               ),
               child: const SizedBox.square(
-                dimension: 44,
-                child: Center(child: NinjaSkeleton.avatar(size: 20)),
+                dimension: AppControlSize.touchTarget,
+                child: Center(
+                  child: NinjaSkeleton.avatar(size: AppIconSize.md),
+                ),
               ),
             ),
-            const SizedBox(width: 14),
+            const SizedBox(width: AppSpacing.sectionGap),
             Expanded(
               child: Column(
                 crossAxisAlignment: .start,
@@ -38,7 +40,7 @@ class MiniAppCardSkeleton extends StatelessWidget {
                     height: titleHeight,
                     widthFactor: 0.5,
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: AppSpacing.sm),
                   NinjaSkeleton.bar(height: detailHeight),
                   const SizedBox(height: 5),
                   NinjaSkeleton.bar(
@@ -48,7 +50,7 @@ class MiniAppCardSkeleton extends StatelessWidget {
                 ],
               ),
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: AppSpacing.sm),
             const Column(
               crossAxisAlignment: .end,
               spacing: 6,

@@ -265,11 +265,13 @@ class FriendsMapCubit extends Cubit<FriendsMapState> {
 
   @visibleForTesting
   Future<void> refineViaWifi() async {
-    if (_wifiRefinementInProgress) return;
+    if (_wifiRefinementInProgress || isClosed || _isClosing) return;
     _wifiRefinementInProgress = true;
     try {
       if (!await _ensureWifiScanPermission()) return;
+      if (isClosed || _isClosing) return;
       final accessPoints = await _repository.scanWifiAccessPoints();
+      if (isClosed || _isClosing) return;
       if (accessPoints.length < 2) return;
 
       final device = _lastDevicePosition;
@@ -288,7 +290,7 @@ class FriendsMapCubit extends Cubit<FriendsMapState> {
       }
 
       final estimate = await _repository.resolveWifiPosition(accessPoints);
-      if (estimate == null) return;
+      if (estimate == null || isClosed || _isClosing) return;
       _onWifiEstimate(estimate);
     } on Exception catch (error, stackTrace) {
       addError(error, stackTrace);
@@ -303,7 +305,13 @@ class FriendsMapCubit extends Cubit<FriendsMapState> {
     DateTime now,
   ) async {
     final settings = state.geoSettings;
-    if (!settings.sharing || state.isGhost) return;
+    if (!settings.sharing ||
+        settings.visibility == .none ||
+        state.isGhost ||
+        isClosed ||
+        _isClosing) {
+      return;
+    }
     final last = _lastWifiSubmitAt;
     if (last != null && now.difference(last) < _wifiSubmitInterval) return;
     _lastWifiSubmitAt = now;
@@ -342,7 +350,7 @@ class FriendsMapCubit extends Cubit<FriendsMapState> {
       final status = await _permissions.requestNearbyWifiDevices();
       _wifiPermissionGranted = status.isGranted || status.isLimited;
     } on Exception {
-      _wifiPermissionGranted = true;
+      _wifiPermissionGranted = false;
     }
     return _wifiPermissionGranted ?? false;
   }
@@ -352,16 +360,23 @@ class FriendsMapCubit extends Cubit<FriendsMapState> {
 
   Future<void> _loadGeoSettings() async {
     final prefs = _preferences;
-    if (prefs == null) return;
     try {
-      final entry = await prefs.get(_geoPrefsKey);
+      final entry = await prefs?.get(_geoPrefsKey);
       if (isClosed) return;
-      if (entry != null) {
-        final settings = GeoSharingSettings.fromJson(entry.value);
-        await _applyGeoSettings(settings, persist: false);
+      final settings = entry == null
+          ? const GeoSharingSettings()
+          : GeoSharingSettings.fromJson(entry.value);
+      await _applyGeoSettings(settings, persist: false);
+    } on Object catch (error, stackTrace) {
+      if (!isClosed) {
+        emit(
+          state.copyWith(
+            geoSettings: state.geoSettings.copyWith(sharing: false),
+            isGhost: true,
+            privacySyncFailed: true,
+          ),
+        );
       }
-    } on Exception catch (error, stackTrace) {
-      if (!isClosed) emit(state.copyWith(privacySyncFailed: true));
       addError(error, stackTrace);
     }
   }
@@ -378,11 +393,35 @@ class FriendsMapCubit extends Cubit<FriendsMapState> {
       if (!isClosed && !_isClosing) {
         emit(state.copyWith(privacyBusy: false));
       }
-    } on Exception catch (error, stackTrace) {
-      if (!isClosed) {
-        emit(state.copyWith(privacySyncFailed: true, privacyBusy: false));
-      }
+    } on Object catch (error, stackTrace) {
+      if (isClosed || _isClosing) return;
       addError(error, stackTrace);
+      final safe = settings.copyWith(
+        sharing: false,
+        visibility: .none,
+        privacyForcedGhost: true,
+      );
+      emit(
+        state.copyWith(
+          geoSettings: safe,
+          isGhost: true,
+          privacySyncFailed: true,
+        ),
+      );
+      try {
+        await _preferences?.set(_geoPrefsKey, safe.toJson());
+      } on Object catch (error, stackTrace) {
+        if (!isClosed && !_isClosing) addError(error, stackTrace);
+      }
+      if (isClosed || _isClosing) return;
+      try {
+        await _repository.setGhostMode(ghost: true);
+      } on Object catch (error, stackTrace) {
+        if (!isClosed && !_isClosing) addError(error, stackTrace);
+      }
+      if (!isClosed && !_isClosing) {
+        emit(state.copyWith(privacyBusy: false));
+      }
     }
   }
 
@@ -390,6 +429,7 @@ class FriendsMapCubit extends Cubit<FriendsMapState> {
     GeoSharingSettings settings, {
     required bool persist,
   }) async {
+    if (isClosed || _isClosing) return;
     final shouldHide = !settings.sharing || settings.visibility == .none;
     final wasPrivacyForced =
         state.geoSettings.privacyForcedGhost || settings.privacyForcedGhost;
@@ -409,14 +449,16 @@ class FriendsMapCubit extends Cubit<FriendsMapState> {
         );
       }
       await _repository.setGhostMode(ghost: true);
+      if (isClosed || _isClosing) return;
       if (persist) await _preferences?.set(_geoPrefsKey, normalized.toJson());
     } else if (wasPrivacyForced) {
       if (persist) await _preferences?.set(_geoPrefsKey, normalized.toJson());
+      if (isClosed || _isClosing) return;
       await _repository.setGhostMode(ghost: false);
     } else if (persist) {
       await _preferences?.set(_geoPrefsKey, normalized.toJson());
     }
-    if (isClosed) return;
+    if (isClosed || _isClosing) return;
     emit(
       state.copyWith(
         geoSettings: normalized,

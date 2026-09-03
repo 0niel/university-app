@@ -1,6 +1,9 @@
-part of '../schedule_page.dart';
+import 'dart:async';
 
-mixin _ScheduleClockTicker<T extends StatefulWidget> on State<T> {
+import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
+
+mixin ScheduleClockTicker<T extends StatefulWidget> on State<T> {
   Timer? _clockTicker;
   ValueListenable<TickerModeData>? _tickerMode;
 

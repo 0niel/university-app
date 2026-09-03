@@ -59,6 +59,8 @@ void main() {
         isButton: true,
         hasEnabledState: true,
         isEnabled: true,
+        isFocusable: true,
+        hasFocusAction: true,
         hasTapAction: true,
       ),
     );

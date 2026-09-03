@@ -21,7 +21,7 @@ class WatchConnectivityCubit extends Cubit<WatchConnectivityState> {
   StreamSubscription<Map<String, dynamic>>? _messageSubscription;
 
   void initialize() {
-    if (!_isSupportedPlatform) {
+    if (isClosed || _messageSubscription != null || !_isSupportedPlatform) {
       return;
     }
 
@@ -48,6 +48,7 @@ class WatchConnectivityCubit extends Cubit<WatchConnectivityState> {
       (defaultTargetPlatform == .android || defaultTargetPlatform == .iOS);
 
   void _handleMessage(Map<String, dynamic> messageData) {
+    if (isClosed) return;
     final message = WatchMessage.fromMap(messageData);
     emit(state.copyWith(lastMessage: message));
 

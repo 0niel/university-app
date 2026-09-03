@@ -20,10 +20,12 @@ import 'package:rtu_mirea_app/app/theme/cubit/theme_cubit.dart';
 import 'package:rtu_mirea_app/app/view/app_boot_placeholder.dart';
 import 'package:rtu_mirea_app/app/view/app_device_token_sync.dart';
 import 'package:rtu_mirea_app/app/view/app_router_view.dart';
+import 'package:rtu_mirea_app/app/widgets/user_preferences_scope.dart';
 import 'package:rtu_mirea_app/categories/categories.dart';
 import 'package:rtu_mirea_app/config/config.dart';
 import 'package:rtu_mirea_app/di/app_scope.dart';
 import 'package:rtu_mirea_app/feed/feed.dart';
+import 'package:rtu_mirea_app/free_rooms/cubit/room_booking_cubit.dart';
 import 'package:rtu_mirea_app/home/cubit/home_cubit.dart';
 import 'package:rtu_mirea_app/nfc_pass/nfc_pass.dart';
 import 'package:rtu_mirea_app/profile/cubit/sync_preferences_cubit.dart';
@@ -89,6 +91,9 @@ class App extends StatelessWidget {
               BlocProvider(create: (_) => HomeCubit()),
               BlocProvider(create: (_) => ThemeCubit()),
               BlocProvider(create: (_) => LocaleCubit()),
+              BlocProvider(create: (_) => RoomBookingCubit()),
+              BlocProvider(create: (_) => ScheduleDisplayCubit()),
+              BlocProvider(create: (_) => LessonRemindersCubit()),
               BlocProvider(create: (_) => UiPreferencesCubit()),
               BlocProvider(
                 create: (_) {
@@ -224,7 +229,7 @@ class App extends StatelessWidget {
             ],
             child: AppDeviceTokenSync(
               controller: tokenSyncController,
-              child: const AppRouterView(),
+              child: const UserPreferencesScope(child: AppRouterView()),
             ),
           ),
         );

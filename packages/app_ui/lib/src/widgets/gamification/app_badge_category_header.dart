@@ -1,5 +1,7 @@
-import 'package:app_ui/app_ui.dart';
-import 'package:flutter/material.dart';
+import 'package:app_ui/src/colors/colors.dart';
+import 'package:app_ui/src/spacing/app_spacing.dart';
+import 'package:app_ui/src/typography/typography.dart';
+import 'package:flutter/widgets.dart';
 
 class AppBadgeCategoryHeader extends StatelessWidget {
   const AppBadgeCategoryHeader({
@@ -21,18 +23,14 @@ class AppBadgeCategoryHeader extends StatelessWidget {
         Expanded(
           child: Text(
             title,
-            style: AppText.heading.copyWith(
-              color: colors.active,
-              letterSpacing: -0.2,
-            ),
+            style: AppText.sectionSmall.copyWith(color: colors.ink),
           ),
         ),
+        const SizedBox(width: AppSpacing.gap),
         Text(
           '$done/$total',
-          style: AppText.caption.copyWith(
-            color: colors.deactiveDarker,
-            fontWeight: FontWeight.w600,
-            fontFeatures: [const FontFeature.tabularFigures()],
+          style: AppText.tabular(AppText.subtextStrong).copyWith(
+            color: colors.muted,
           ),
         ),
       ],

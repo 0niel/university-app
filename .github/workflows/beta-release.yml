@@ -299,13 +299,14 @@ jobs:
               --clobber \
               --repo "$GITHUB_REPOSITORY"
             gh release edit "$TAG" \
+              --notes '' \
               --prerelease \
               --target "$RELEASE_SHA" \
               --title "Beta $RELEASE_VERSION" \
               --repo "$GITHUB_REPOSITORY"
           else
             gh release create "$TAG" dist/* \
-              --generate-notes \
+              --notes '' \
               --prerelease \
               --target "$RELEASE_SHA" \
               --title "Beta $RELEASE_VERSION" \

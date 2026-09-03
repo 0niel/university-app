@@ -75,6 +75,9 @@ void main() {
   setUp(() {
     gamificationRepository = MockGamificationRepository();
     when(
+      () => gamificationRepository.ensureAcademicProfile(any()),
+    ).thenAnswer((_) async {});
+    when(
       () => gamificationRepository.syncGamification(),
     ).thenAnswer((_) async => const <GamificationBadge>[]);
     when(
@@ -110,6 +113,48 @@ void main() {
   );
 
   group('ProfileCubit', () {
+    test('creates the academic profile before fetching gamification', () async {
+      final ready = Completer<void>();
+      when(
+        () => gamificationRepository.ensureAcademicProfile(any()),
+      ).thenAnswer((_) => ready.future);
+      final cubit = buildCubit();
+      final loading = cubit.load();
+      verifyNever(gamificationRepository.syncGamification);
+      verifyNever(() => gamificationRepository.ensureProfile(any()));
+      ready.complete();
+      await loading;
+      verifyInOrder([
+        () => gamificationRepository.ensureAcademicProfile(organizationId),
+        gamificationRepository.syncGamification,
+        () => gamificationRepository.ensureProfile(organizationId),
+      ]);
+      expect(cubit.state.status, ProfileStatus.loaded);
+      await cubit.close();
+    });
+
+    test('bootstrap failure keeps guest identity and retry recovers', () async {
+      when(
+        () => gamificationRepository.ensureAcademicProfile(any()),
+      ).thenThrow(Exception('offline'));
+      final cubit = ProfileCubit(
+        gamificationRepository: gamificationRepository,
+        organizationId: organizationId,
+        currentUser: const User(id: 'guest', isGuest: true),
+      );
+      await cubit.load();
+      expect(cubit.state.status, ProfileStatus.error);
+      expect(cubit.state.user, const User(id: 'guest', isGuest: true));
+      verifyNever(gamificationRepository.syncGamification);
+      when(
+        () => gamificationRepository.ensureAcademicProfile(any()),
+      ).thenAnswer((_) async {});
+      await cubit.load();
+      expect(cubit.state.status, ProfileStatus.loaded);
+      expect(cubit.state.failedSections, isEmpty);
+      await cubit.close();
+    });
+
     test('initial state seeds the current user', () {
       final cubit = buildCubit();
       expect(cubit.state.status, ProfileStatus.initial);
@@ -494,7 +539,10 @@ void main() {
         act: (cubit) => cubit.updateSettings(next),
         expect: () => const <ProfileState>[
           ProfileState(user: currentUser, settings: next),
-          ProfileState(user: currentUser),
+          ProfileState(
+            user: currentUser,
+            failedSections: {ProfileSection.settings},
+          ),
         ],
       );
 

@@ -51,8 +51,7 @@ class _AppActionsSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     final cubit = context.read<MiniAppsCatalogCubit>();
     final l10n = context.l10n;
-    return Column(
-      mainAxisSize: .min,
+    return AppListGroup(
       children: [
         _MiniAppActionTile(
           title: l10n.miniAppsOpen,
@@ -128,7 +127,7 @@ class _AppActionsSheet extends StatelessWidget {
             ),
           _MiniAppActionTile(
             title: l10n.miniAppsDelete,
-            titleColor: context.ninja.scarlet,
+            titleColor: context.colors.exam,
             onTap: () {
               unawaited(cubit.deleteMyApp(app));
               Navigator.of(context).pop();
@@ -154,6 +153,7 @@ class _AppActionsSheet extends StatelessWidget {
     required bool canRestore,
   }) async {
     final repository = context.read<MiniAppsRepository>();
+    final cubit = context.read<MiniAppsCatalogCubit>();
     Navigator.of(context).pop();
     final restored = await showAppSheet<bool>(
       context,
@@ -165,7 +165,7 @@ class _AppActionsSheet extends StatelessWidget {
         canRestore: canRestore,
       ),
     );
-    if (restored != true || !context.mounted) return;
-    unawaited(context.read<MiniAppsCatalogCubit>().load());
+    if (restored != true || cubit.isClosed) return;
+    unawaited(cubit.load());
   }
 }

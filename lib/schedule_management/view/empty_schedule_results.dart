@@ -12,16 +12,16 @@ class _EmptyScheduleResults extends StatelessWidget {
       children: [
         Padding(
           padding: const EdgeInsets.fromLTRB(
-            NinjaMetrics.screenPadding,
+            AppSpacing.screen,
             8,
-            NinjaMetrics.screenPadding,
+            AppSpacing.screen,
             18,
           ),
           child: NinjaEmptyState(
             icon: AppLineIconWidget(
               AppLineIcon.search,
               size: 20,
-              color: context.ninja.muted,
+              color: context.colors.muted,
             ),
             title: context.l10n.addScheduleNoResults,
           ).animateEmptyState(),

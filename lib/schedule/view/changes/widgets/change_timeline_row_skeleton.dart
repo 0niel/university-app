@@ -8,25 +8,28 @@ class _ChangeTimelineRowSkeleton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: .only(bottom: last ? 4 : 10),
-      child: const NinjaScheduleSurface(
+      padding: .only(bottom: last ? AppSpacing.xs : AppSpacing.gap),
+      child: const AppCard(
         child: Row(
           crossAxisAlignment: .start,
-          spacing: 12,
+          spacing: AppSpacing.md,
           children: [
-            NinjaSkeleton.avatar(),
+            AppSkeleton.avatar(),
             Expanded(
               child: Column(
                 crossAxisAlignment: .start,
-                spacing: 6,
+                spacing: AppSpacing.xsm,
                 children: [
-                  NinjaSkeleton.bar(height: 14, widthFactor: 0.7),
-                  NinjaSkeleton.bar(height: 11, widthFactor: 0.5),
-                  SizedBox(height: 2),
-                  NinjaSkeleton(
+                  AppSkeleton.bar(
+                    height: AppSpacing.sectionGap,
+                    widthFactor: 0.7,
+                  ),
+                  AppSkeleton.bar(height: 11, widthFactor: 0.5),
+                  SizedBox(height: AppSpacing.xxs),
+                  AppSkeleton(
                     width: 72,
-                    height: 18,
-                    radius: NinjaRadius.pill,
+                    height: AppSpacing.fieldGap,
+                    radius: AppRadius.full,
                   ),
                 ],
               ),

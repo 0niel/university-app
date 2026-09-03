@@ -18,9 +18,9 @@ class App extends StatelessWidget {
             extensions: [
               if (isAmbientModeActive)
                 AppColors.dark.copyWith(
-                  active: Colors.white70,
-                  deactive: Colors.white38,
-                  primary: Colors.white24,
+                  ink: Colors.white70,
+                  muted: Colors.white38,
+                  accent: Colors.white24,
                 )
               else
                 AppColors.dark,

@@ -11,7 +11,7 @@ void main() {
     late CampusRepository campusRepository;
 
     const roomA = FreeRoom(room: 'А-101', campus: 'mp1');
-    const roomB = FreeRoom(room: 'Б-202', campus: 'mp1');
+    const roomB = FreeRoom(room: 'Б-202', campus: 'v78');
     late List<FreeRoom> rooms;
 
     setUp(() {
@@ -69,29 +69,29 @@ void main() {
       );
     });
 
-    group('buildingChanged', () {
+    group('campusChanged', () {
       blocTest<FreeRoomsCubit, FreeRoomsState>(
-        'emits the new building filter',
+        'emits the new campus filter',
         build: buildCubit,
-        act: (cubit) => cubit.buildingChanged('А'),
-        expect: () => const <FreeRoomsState>[FreeRoomsState(building: 'А')],
+        act: (cubit) => cubit.campusChanged('mp1'),
+        expect: () => const <FreeRoomsState>[FreeRoomsState(campus: 'mp1')],
       );
     });
 
     group('getters', () {
-      test('filteredRooms returns all rooms when building is "all"', () {
+      test('filtered returns all rooms when no campus is selected', () {
         const state = FreeRoomsState(rooms: [roomA, roomB]);
-        expect(state.filteredRooms, equals(const [roomA, roomB]));
+        expect(state.filtered({}), equals(const [roomA, roomB]));
       });
 
-      test('filteredRooms keeps only rooms in the active building', () {
-        const state = FreeRoomsState(rooms: [roomA, roomB], building: 'А');
-        expect(state.filteredRooms, equals(const [roomA]));
+      test('filtered keeps only rooms in the active campus', () {
+        const state = FreeRoomsState(rooms: [roomA, roomB], campus: 'mp1');
+        expect(state.filtered({}), equals(const [roomA]));
       });
 
-      test('buildings returns distinct, sorted building codes', () {
+      test('campuses returns distinct sorted campus codes', () {
         const state = FreeRoomsState(rooms: [roomB, roomA, roomA]);
-        expect(state.buildings, equals(const ['А', 'Б']));
+        expect(state.campuses, equals(const ['mp1', 'v78']));
       });
     });
   });

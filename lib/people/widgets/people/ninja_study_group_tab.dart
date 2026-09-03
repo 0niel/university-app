@@ -39,12 +39,12 @@ class NinjaStudyGroupTab extends StatelessWidget {
       );
     }
 
-    final colors = context.ninja;
+    final colors = context.colors;
     final l10n = context.l10n;
     final members = study.members;
     final friendsInGroup = members.where((member) => member.isFriend).length;
     const inset = EdgeInsets.symmetric(
-      horizontal: NinjaMetrics.screenPadding,
+      horizontal: AppSpacing.screen,
     );
     return ListView(
       physics: const AlwaysScrollableScrollPhysics(),
@@ -56,7 +56,7 @@ class NinjaStudyGroupTab extends StatelessWidget {
             padding: const .all(16),
             decoration: BoxDecoration(
               color: colors.surface,
-              borderRadius: .circular(NinjaRadius.card),
+              borderRadius: .circular(AppRadius.card),
             ),
             child: Row(
               spacing: 14,
@@ -66,8 +66,8 @@ class NinjaStudyGroupTab extends StatelessWidget {
                   height: 44,
                   alignment: .center,
                   decoration: BoxDecoration(
-                    color: colors.surfaceAlt,
-                    borderRadius: .circular(14),
+                    color: colors.surface2,
+                    borderRadius: .circular(AppRadius.tile),
                   ),
                   child: Text(
                     group.emoji,
@@ -82,7 +82,7 @@ class NinjaStudyGroupTab extends StatelessWidget {
                         group.name,
                         maxLines: 2,
                         overflow: .ellipsis,
-                        style: NinjaText.title.copyWith(color: colors.ink),
+                        style: AppText.title.copyWith(color: colors.ink),
                       ),
                       const SizedBox(height: 3),
                       Text(
@@ -93,7 +93,7 @@ class NinjaStudyGroupTab extends StatelessWidget {
                         ].join(' · '),
                         maxLines: 2,
                         overflow: .ellipsis,
-                        style: NinjaText.helper.copyWith(color: colors.muted),
+                        style: AppText.caption.copyWith(color: colors.muted),
                       ),
                     ],
                   ),
@@ -128,15 +128,15 @@ class NinjaStudyGroupTab extends StatelessWidget {
         for (final (index, member) in members.indexed)
           Padding(
             padding: const .fromLTRB(
-              NinjaMetrics.screenPadding,
+              AppSpacing.screen,
               0,
-              NinjaMetrics.screenPadding,
+              AppSpacing.screen,
               10,
             ),
             child: DecoratedBox(
               decoration: BoxDecoration(
                 color: colors.surface,
-                borderRadius: .circular(NinjaRadius.card),
+                borderRadius: .circular(AppRadius.card),
               ),
               child: Padding(
                 padding: const .symmetric(horizontal: 14, vertical: 13),

@@ -17,7 +17,9 @@ part 'events/field_label.dart';
 part 'events/sheet_picker_field.dart';
 
 class CreateEventSheet extends StatefulWidget {
-  const CreateEventSheet({super.key});
+  const CreateEventSheet({super.key, this.initialStartsAt});
+
+  final DateTime? initialStartsAt;
 
   @override
   State<CreateEventSheet> createState() => _CreateEventSheetState();
@@ -34,7 +36,8 @@ class _CreateEventSheetState extends State<CreateEventSheet> {
     _placeController,
   ]);
 
-  DateTime _startsAt = DateTime.now().add(const Duration(days: 1));
+  late DateTime _startsAt =
+      widget.initialStartsAt ?? DateTime.now().add(const Duration(days: 1));
   EventCategory _category = .other;
   String? _coverEmoji;
 
@@ -117,31 +120,31 @@ class _CreateEventSheetState extends State<CreateEventSheet> {
             emoji: _emoji,
           ),
         ),
-        const SizedBox(height: 14),
+        const SizedBox(height: AppSpacing.sectionGap),
         _FieldLabel(l10n.eventsCreateCoverLabel),
-        const SizedBox(height: 8),
+        const SizedBox(height: AppSpacing.sm),
         _EmojiPicker(
           emojis: _coverEmojis,
           selected: _coverEmoji,
           onSelected: (emoji) => setState(() => _coverEmoji = emoji),
         ),
-        const SizedBox(height: 14),
+        const SizedBox(height: AppSpacing.sectionGap),
         NinjaInput(
           controller: _titleController,
           autofocus: true,
           label: l10n.eventsCreateNameLabel,
           placeholder: l10n.eventsCreateNameHint,
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: AppSpacing.md),
         _FieldLabel(l10n.eventsCreateCategoryLabel),
-        const SizedBox(height: 8),
+        const SizedBox(height: AppSpacing.sm),
         _CategoryPicker(
           selected: _category,
           onSelected: (category) => setState(() => _category = category),
         ),
-        const SizedBox(height: 14),
+        const SizedBox(height: AppSpacing.sectionGap),
         _FieldLabel(l10n.eventsCreateWhenLabel),
-        const SizedBox(height: 8),
+        const SizedBox(height: AppSpacing.sm),
         Row(
           spacing: 10,
           children: [
@@ -163,20 +166,20 @@ class _CreateEventSheetState extends State<CreateEventSheet> {
             ),
           ],
         ),
-        const SizedBox(height: 14),
+        const SizedBox(height: AppSpacing.sectionGap),
         NinjaInput(
           controller: _placeController,
           label: l10n.eventsCreateWhereLabel,
           placeholder: l10n.eventsCreatePlaceHint,
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: AppSpacing.md),
         NinjaInput.multiline(
           controller: _descriptionController,
           minLines: 2,
           maxLines: 4,
           placeholder: l10n.eventsCreateDescriptionHint,
         ),
-        const SizedBox(height: 18),
+        const SizedBox(height: AppSpacing.fieldGap),
         AnimatedBuilder(
           animation: _titleController,
           builder: (_, _) => NinjaButton.primary(

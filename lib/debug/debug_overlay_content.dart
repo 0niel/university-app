@@ -49,7 +49,7 @@ class _DebugOverlayContentState extends State<_DebugOverlayContent> {
                 child: GestureDetector(
                   onTap: _closePanel,
                   child: ColoredBox(
-                    color: context.ninja.ink.withValues(alpha: 0.5),
+                    color: context.colors.ink.withValues(alpha: 0.5),
                   ),
                 ),
               ),

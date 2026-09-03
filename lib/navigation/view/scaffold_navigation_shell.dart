@@ -13,13 +13,17 @@ class ScaffoldNavigationShell extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final useRail = constraints.maxWidth >= 720;
-        final bottomInset = useRail ? 0.0 : NinjaBottomBar.extentOf(context);
+        final bottomInset = useRail ? 0.0 : AppBottomBar.extentOf(context);
         final body = useRail
             ? Row(
                 children: [
-                  AppNavigationRail(
-                    currentIndex: navigationShell.currentIndex,
-                    onSelected: _setActiveIndex,
+                  ScheduleNavBadge(
+                    builder: (context, {required hasUnread}) =>
+                        AppNavigationRail(
+                          currentIndex: navigationShell.currentIndex,
+                          onSelected: _setActiveIndex,
+                          scheduleBadge: hasUnread,
+                        ),
                   ),
                   Expanded(child: navigationShell),
                 ],
@@ -27,19 +31,20 @@ class ScaffoldNavigationShell extends StatelessWidget {
             : navigationShell;
         final insetBody = useRail
             ? body
-            : NinjaBottomBarViewport(
-                bottomInset: bottomInset,
-                child: body,
-              );
+            : AppBottomBarViewport(bottomInset: bottomInset, child: body);
         return Scaffold(
-          backgroundColor: context.ninja.canvas,
+          backgroundColor: context.colors.canvas,
           extendBody: true,
           body: insetBody,
           bottomNavigationBar: useRail
               ? null
-              : AppBottomNavigationBar(
-                  currentIndex: navigationShell.currentIndex,
-                  onSelected: _setActiveIndex,
+              : ScheduleNavBadge(
+                  builder: (context, {required hasUnread}) =>
+                      AppBottomNavigationBar(
+                        currentIndex: navigationShell.currentIndex,
+                        onSelected: _setActiveIndex,
+                        scheduleBadge: hasUnread,
+                      ),
                 ),
         );
       },

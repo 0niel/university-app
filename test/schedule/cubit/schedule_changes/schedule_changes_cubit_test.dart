@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -40,6 +42,51 @@ void main() {
     });
 
     group('load', () {
+      test('a stale response cannot replace another target', () async {
+        final first = Completer<List<ScheduleChange>>();
+        when(
+          () => scheduleRepository.getScheduleChanges(
+            targetType: ScheduleTargetType.group,
+            target: 'first',
+          ),
+        ).thenAnswer((_) => first.future);
+        final cubit = buildCubit();
+        addTearDown(cubit.close);
+        final pending = cubit.load(
+          targetType: ScheduleTargetType.group,
+          target: 'first',
+        );
+        await cubit.load(
+          targetType: ScheduleTargetType.group,
+          target: 'second',
+        );
+        first.complete([]);
+        await pending;
+        expect(cubit.state.changes, [change]);
+        expect(cubit.matchesTarget(ScheduleTargetType.group, 'second'), isTrue);
+      });
+
+      test('clearing a target invalidates in-flight requests', () async {
+        final response = Completer<List<ScheduleChange>>();
+        when(
+          () => scheduleRepository.getScheduleChanges(
+            targetType: any(named: 'targetType'),
+            target: any(named: 'target'),
+          ),
+        ).thenAnswer((_) => response.future);
+        final cubit = buildCubit();
+        addTearDown(cubit.close);
+        final pending = cubit.load(
+          targetType: ScheduleTargetType.group,
+          target: 'first',
+        );
+        cubit.clear();
+        response.complete([change]);
+        await pending;
+        expect(cubit.state, const ScheduleChangesState());
+        expect(cubit.matchesTarget(ScheduleTargetType.group, 'first'), isFalse);
+      });
+
       blocTest<ScheduleChangesCubit, ScheduleChangesState>(
         'emits [loading, populated] when getScheduleChanges succeeds',
         build: buildCubit,

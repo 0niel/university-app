@@ -8,25 +8,29 @@ class _SearchDiscoveryIntro extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     return Container(
       decoration: BoxDecoration(
         color: colors.surface,
-        borderRadius: .circular(NinjaRadius.card),
+        borderRadius: .circular(AppRadius.card),
       ),
       padding: const .all(AppSpacing.lg),
       child: Row(
         crossAxisAlignment: .start,
         children: [
           Container(
-            width: NinjaMetrics.minTouchTarget,
-            height: NinjaMetrics.minTouchTarget,
+            width: AppControlSize.iconButton,
+            height: AppControlSize.iconButton,
             alignment: .center,
             decoration: BoxDecoration(
-              color: colors.brandTint,
+              color: colors.tint,
               borderRadius: .circular(AppRadius.md),
             ),
-            child: AppLineIconWidget(.search, size: 20, color: colors.brand),
+            child: AppLineIconWidget(
+              .search,
+              size: AppIconSize.md,
+              color: colors.accent,
+            ),
           ),
           const SizedBox(width: AppSpacing.md),
           Expanded(
@@ -35,12 +39,12 @@ class _SearchDiscoveryIntro extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: NinjaText.title.copyWith(color: colors.ink),
+                  style: AppText.title.copyWith(color: colors.ink),
                 ),
                 const SizedBox(height: AppSpacing.xs),
                 Text(
                   message,
-                  style: NinjaText.subtext.copyWith(color: colors.muted),
+                  style: AppText.subtext.copyWith(color: colors.muted),
                 ),
               ],
             ),

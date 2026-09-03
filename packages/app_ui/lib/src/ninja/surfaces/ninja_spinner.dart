@@ -1,19 +1,22 @@
 import 'dart:async';
 import 'dart:math' as math;
 
-import 'package:app_ui/src/ninja/ninja_colors.dart';
+import 'package:app_ui/src/colors/colors.dart';
 import 'package:flutter/widgets.dart';
 
 class NinjaSpinner extends StatefulWidget {
   const NinjaSpinner({
     super.key,
-    this.size = 24,
+    this.size = 28,
     this.strokeWidth = 3,
     this.color,
+    this.trackColor,
   });
+
   final double size;
   final double strokeWidth;
   final Color? color;
+  final Color? trackColor;
 
   @override
   State<NinjaSpinner> createState() => _NinjaSpinnerState();
@@ -23,7 +26,7 @@ class _NinjaSpinnerState extends State<NinjaSpinner>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller = AnimationController(
     vsync: this,
-    duration: const Duration(milliseconds: 900),
+    duration: const Duration(milliseconds: 800),
   );
 
   @override
@@ -45,7 +48,7 @@ class _NinjaSpinnerState extends State<NinjaSpinner>
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     return SizedBox(
       width: widget.size,
       height: widget.size,
@@ -53,8 +56,8 @@ class _NinjaSpinnerState extends State<NinjaSpinner>
         turns: _controller,
         child: CustomPaint(
           painter: _NinjaSpinnerPainter(
-            track: colors.surface,
-            head: widget.color ?? colors.ink,
+            track: widget.trackColor ?? colors.surface2,
+            head: widget.color ?? colors.accent,
             strokeWidth: widget.strokeWidth,
           ),
         ),
@@ -95,3 +98,5 @@ class _NinjaSpinnerPainter extends CustomPainter {
       oldDelegate.head != head ||
       oldDelegate.strokeWidth != strokeWidth;
 }
+
+typedef AppSpinner = NinjaSpinner;

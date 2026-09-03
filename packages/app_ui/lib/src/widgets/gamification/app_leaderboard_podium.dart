@@ -1,5 +1,7 @@
-import 'package:app_ui/app_ui.dart';
-import 'package:flutter/material.dart';
+import 'package:app_ui/src/spacing/app_spacing.dart';
+import 'package:app_ui/src/widgets/gamification/app_leaderboard_entry.dart';
+import 'package:app_ui/src/widgets/gamification/app_leaderboard_podium_column.dart';
+import 'package:flutter/widgets.dart';
 
 class AppLeaderboardPodium extends StatelessWidget {
   const AppLeaderboardPodium({
@@ -23,25 +25,25 @@ class AppLeaderboardPodium extends StatelessWidget {
             entry: second,
             height: 70,
             medal: '🥈',
-            avatarSize: 42,
+            avatarSize: 44,
           ),
         ),
-        const SizedBox(width: 8),
+        const SizedBox(width: AppSpacing.sm),
         Expanded(
           child: AppLeaderboardPodiumColumn(
             entry: first,
             height: 92,
             medal: '🥇',
-            avatarSize: 52,
+            avatarSize: 56,
           ),
         ),
-        const SizedBox(width: 8),
+        const SizedBox(width: AppSpacing.sm),
         Expanded(
           child: AppLeaderboardPodiumColumn(
             entry: third,
             height: 56,
             medal: '🥉',
-            avatarSize: 42,
+            avatarSize: 44,
           ),
         ),
       ],

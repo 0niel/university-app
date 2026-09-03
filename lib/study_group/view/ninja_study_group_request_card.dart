@@ -16,7 +16,7 @@ class NinjaStudyGroupRequestCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final l10n = context.l10n;
     final handle = request.handle;
     return Padding(
@@ -24,7 +24,7 @@ class NinjaStudyGroupRequestCard extends StatelessWidget {
       child: DecoratedBox(
         decoration: BoxDecoration(
           color: colors.surface,
-          borderRadius: .circular(NinjaRadius.card),
+          borderRadius: .circular(AppRadius.card),
         ),
         child: Padding(
           padding: const .all(16),
@@ -40,7 +40,7 @@ class NinjaStudyGroupRequestCard extends StatelessWidget {
                       request.fullName,
                       maxLines: 1,
                       overflow: .ellipsis,
-                      style: NinjaText.headline.copyWith(color: colors.ink),
+                      style: AppText.headline.copyWith(color: colors.ink),
                     ),
                     if (handle != null) ...[
                       const SizedBox(height: 3),
@@ -48,7 +48,7 @@ class NinjaStudyGroupRequestCard extends StatelessWidget {
                         '@$handle',
                         maxLines: 1,
                         overflow: .ellipsis,
-                        style: NinjaText.subtext.copyWith(color: colors.muted),
+                        style: AppText.subtext.copyWith(color: colors.muted),
                       ),
                     ],
                   ],
@@ -64,7 +64,7 @@ class NinjaStudyGroupRequestCard extends StatelessWidget {
                       icon: AppLineIconWidget(
                         .check,
                         size: 20,
-                        color: colors.brand,
+                        color: colors.accent,
                       ),
                       tooltip: l10n.studyGroupAccept,
                       onPressed: pending ? null : onAccept,
@@ -73,7 +73,7 @@ class NinjaStudyGroupRequestCard extends StatelessWidget {
                       icon: AppLineIconWidget(
                         .close,
                         size: 20,
-                        color: colors.scarlet,
+                        color: colors.exam,
                       ),
                       tooltip: l10n.studyGroupDecline,
                       onPressed: pending ? null : onDecline,

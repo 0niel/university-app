@@ -22,35 +22,30 @@ class ScheduleManagementView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final l10n = context.l10n;
 
     return Scaffold(
       backgroundColor: colors.canvas,
-      floatingActionButton: NinjaFab(
-        icon: const AppLineIconWidget(AppLineIcon.plus),
+      floatingActionButton: AppFab(
+        icon: AppLineIcon.plus,
         tooltip: l10n.add,
         onPressed: () => _openAdd(context),
       ),
       body: NestedScrollView(
         headerSliverBuilder: (context, innerBoxIsScrolled) => [
-          SliverAppBar(
-            elevation: 0,
-            scrolledUnderElevation: 0,
-            backgroundColor: colors.canvas,
-            surfaceTintColor: Colors.transparent,
-            title: Text(
-              l10n.schedulesTitle,
-              style: NinjaText.headline.copyWith(color: colors.ink),
+          SliverToBoxAdapter(
+            child: AppInnerHeader(
+              title: l10n.schedulesTitle,
+              onBack: () => Navigator.of(context).maybePop(),
+              actions: [
+                AppHeaderAction(
+                  icon: AppLineIcon.search,
+                  semanticsLabel: l10n.addScheduleTitle,
+                  onTap: () => _openAdd(context),
+                ),
+              ],
             ),
-            actions: [
-              NinjaIconButton(
-                icon: const AppLineIconWidget(AppLineIcon.search),
-                tooltip: l10n.addScheduleTitle,
-                onPressed: () => _openAdd(context),
-              ),
-              const SizedBox(width: 8),
-            ],
           ),
         ],
         body: BlocBuilder<ScheduleBloc, ScheduleState>(

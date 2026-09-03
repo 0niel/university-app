@@ -33,13 +33,13 @@ class _ScreenEditor extends StatelessWidget {
               ),
             ),
             NinjaIconButton(
-              icon: const AppLineIconWidget(.view, size: 20),
+              icon: const AppLineIconWidget(.view, size: AppIconSize.md),
               tooltip: l10n.miniAppsSubmitPreview,
               onPressed: onPreview,
             ),
             if (onRemove case final removeCallback?)
               NinjaIconButton(
-                icon: const AppLineIconWidget(.close, size: 20),
+                icon: const AppLineIconWidget(.close, size: AppIconSize.md),
                 tooltip: l10n.miniAppsSubmitRemoveScreen,
                 onPressed: removeCallback,
               ),

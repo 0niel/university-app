@@ -8,20 +8,26 @@ class _LeaderboardRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final me = entry.isCurrentUser;
     return Semantics(
       container: true,
       label: '#$position, ${entry.displayName}',
       child: Container(
-        margin: const .symmetric(horizontal: 6, vertical: 2),
-        padding: const .symmetric(horizontal: 10, vertical: 10),
+        margin: const .symmetric(
+          horizontal: AppSpacing.xsm,
+          vertical: AppSpacing.xxs,
+        ),
+        padding: const .symmetric(
+          horizontal: AppSpacing.gap,
+          vertical: AppSpacing.gap,
+        ),
         constraints: const BoxConstraints(
-          minHeight: NinjaMetrics.minTouchTarget,
+          minHeight: AppControlSize.iconButton,
         ),
         decoration: BoxDecoration(
-          color: me ? colors.brandTint : const Color(0x00000000),
-          borderRadius: .circular(NinjaRadius.control),
+          color: me ? colors.tint : const Color.fromARGB(0, 0, 0, 0),
+          borderRadius: .circular(AppRadius.field),
         ),
         child: Row(
           children: [
@@ -31,36 +37,38 @@ class _LeaderboardRow extends StatelessWidget {
                 '$position',
                 maxLines: 1,
                 overflow: .ellipsis,
-                style: NinjaText.tabular(
-                  NinjaText.microLabel.copyWith(
-                    color: me ? colors.brandInk : colors.mutedDark,
-                  ),
-                ),
+                style: AppText.captionSmall
+                    .copyWith(
+                      color: me ? colors.accent : colors.muted,
+                    )
+                    .copyWith(
+                      fontFeatures: const [FontFeature.tabularFigures()],
+                    ),
               ),
             ),
-            NinjaAvatar(initials: ninjaInitials(entry.displayName), size: 32),
-            const SizedBox(width: 12),
+            AppAvatar(name: entry.displayName, size: 40),
+            const SizedBox(width: AppSpacing.md),
             Expanded(
               child: Text(
                 entry.displayName,
                 maxLines: 2,
                 overflow: .ellipsis,
-                style: NinjaText.body.copyWith(
+                style: AppText.body.copyWith(
                   color: colors.ink,
                   fontWeight: me ? .w700 : .w500,
                 ),
               ),
             ),
-            const SizedBox(width: 10),
+            const SizedBox(width: AppSpacing.gap),
             Text(
               '${entry.xp}',
               maxLines: 1,
               overflow: .ellipsis,
-              style: NinjaText.tabular(
-                NinjaText.microLabel.copyWith(
-                  color: me ? colors.brandInk : colors.mutedDark,
-                ),
-              ),
+              style: AppText.captionSmall
+                  .copyWith(
+                    color: me ? colors.accent : colors.muted,
+                  )
+                  .copyWith(fontFeatures: const [FontFeature.tabularFigures()]),
             ),
           ],
         ),

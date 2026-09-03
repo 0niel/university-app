@@ -5,10 +5,7 @@
 /// begin/ingest/finish RPC path the ingest boundary uses. Scheduled by
 /// pg_cron via `internal.request_telegram_feed_sync`.
 
-import {
-  createClient,
-  SupabaseClient,
-} from "npm:@supabase/supabase-js@2.110.2";
+import { createClient, SupabaseClient } from "@supabase/supabase-js";
 import { buildNewsBlocks, extractTitle } from "./blocks.ts";
 import {
   fetchPreviewPage,
@@ -75,8 +72,9 @@ function sourcePayload(
     category,
     is_active: true,
     metadata: {
-      subscribers: channel.subscribers ?? null,
-      avatar_url: channel.imageUrl ?? null,
+      ...(channel.subscribers ? { subscribers: channel.subscribers } : {}),
+      ...(channel.imageUrl ? { avatar_url: channel.imageUrl } : {}),
+      metadata_checked_at: new Date().toISOString(),
     },
   };
 }
@@ -163,11 +161,10 @@ async function syncChannel(
     syncRunId = begin.sync_run_id;
 
     const checkpoint = begin.checkpoint ?? {};
-    const lastMessageId =
-      checkpoint.cursor_type === "telegram_message_id" &&
+    const lastMessageId = checkpoint.cursor_type === "telegram_message_id" &&
         typeof checkpoint.last_message_id === "number"
-        ? checkpoint.last_message_id
-        : null;
+      ? checkpoint.last_message_id
+      : null;
 
     const { channel, posts } = await collectPosts(
       config.username,
@@ -175,14 +172,12 @@ async function syncChannel(
       backfillPages,
     );
 
-    if (posts.length > 0) {
-      await rpc(supabase, "ingest_news_items", {
-        p_organization_id: organizationId,
-        p_source: sourcePayload(channel, config.category),
-        p_items: posts.map((post) => itemPayload(post, channel)),
-        p_sync_run_id: syncRunId,
-      });
-    }
+    await rpc(supabase, "ingest_news_items", {
+      p_organization_id: organizationId,
+      p_source: sourcePayload(channel, config.category),
+      p_items: posts.map((post) => itemPayload(post, channel)),
+      p_sync_run_id: syncRunId,
+    });
 
     const newLast = posts.length > 0
       ? posts[posts.length - 1].id

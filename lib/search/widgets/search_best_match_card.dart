@@ -20,15 +20,15 @@ class SearchBestMatchCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final subtitleText = subtitle;
     return AppPressable(
       onTap: onPressed,
       semanticsLabel: '$tagLabel, $name',
       child: DecoratedBox(
         decoration: BoxDecoration(
-          color: colors.accentSoft,
-          borderRadius: BorderRadius.circular(NinjaRadius.card),
+          color: colors.tint,
+          borderRadius: BorderRadius.circular(AppRadius.card),
         ),
         child: Padding(
           padding: const EdgeInsets.all(AppSpacing.lg),
@@ -39,8 +39,8 @@ class SearchBestMatchCard extends StatelessWidget {
                 children: [
                   DecoratedBox(
                     decoration: BoxDecoration(
-                      color: colors.onAccentSoft.withValues(alpha: .12),
-                      borderRadius: BorderRadius.circular(NinjaRadius.control),
+                      color: colors.ink.withValues(alpha: .12),
+                      borderRadius: BorderRadius.circular(AppRadius.field),
                     ),
                     child: SizedBox.square(
                       dimension: 44,
@@ -48,7 +48,7 @@ class SearchBestMatchCard extends StatelessWidget {
                         child: AppLineIconWidget(
                           AppLineIcon.focus,
                           size: 20,
-                          color: colors.onAccentSoft,
+                          color: colors.ink,
                         ),
                       ),
                     ),
@@ -59,15 +59,15 @@ class SearchBestMatchCard extends StatelessWidget {
                       tagLabel,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: NinjaText.body.copyWith(
-                        color: colors.onAccentSoftMuted,
+                      style: AppText.body.copyWith(
+                        color: colors.muted,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
                   ),
                   DecoratedBox(
                     decoration: BoxDecoration(
-                      color: colors.onAccentSoft.withValues(alpha: .12),
+                      color: colors.ink.withValues(alpha: .12),
                       shape: BoxShape.circle,
                     ),
                     child: SizedBox.square(
@@ -76,7 +76,7 @@ class SearchBestMatchCard extends StatelessWidget {
                         child: AppLineIconWidget(
                           AppLineIcon.arrowRight,
                           size: 18,
-                          color: colors.onAccentSoft,
+                          color: colors.ink,
                         ),
                       ),
                     ),
@@ -87,8 +87,8 @@ class SearchBestMatchCard extends StatelessWidget {
               HighlightedTitle(
                 name: name,
                 query: query,
-                baseColor: colors.onAccentSoftMuted,
-                highlightColor: colors.onAccentSoft,
+                baseColor: colors.muted,
+                highlightColor: colors.ink,
               ),
               if (subtitleText != null && subtitleText.isNotEmpty) ...[
                 const SizedBox(height: AppSpacing.sm),
@@ -96,8 +96,8 @@ class SearchBestMatchCard extends StatelessWidget {
                   subtitleText,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: NinjaText.body.copyWith(
-                    color: colors.onAccentSoftMuted,
+                  style: AppText.body.copyWith(
+                    color: colors.muted,
                   ),
                 ),
               ],

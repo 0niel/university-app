@@ -1,98 +1,47 @@
-import 'package:app_ui/app_ui.dart';
-import 'package:flutter/material.dart';
-import 'package:hugeicons/hugeicons.dart';
+import 'package:app_ui/src/colors/colors.dart';
+import 'package:app_ui/src/spacing/app_spacing.dart';
+import 'package:app_ui/src/widgets/app_error_state.dart';
+import 'package:app_ui/src/widgets/app_line_icon.dart';
+import 'package:flutter/widgets.dart';
 
 class FailureScreen extends StatelessWidget {
   const FailureScreen({
     required this.title,
     super.key,
     this.description,
-    this.icon,
-    this.iconSize = 40,
-    this.iconColor,
-    this.iconBackgroundColor,
+    this.icon = AppLineIcon.alert,
     this.buttonText,
-    this.buttonIcon,
     this.onButtonPressed,
-    this.buttonBackgroundColor,
-    this.padding = const EdgeInsets.all(AppSpacing.xxlg),
+    this.padding = const EdgeInsets.all(AppSpacing.screen),
   });
 
   final String title;
-
   final String? description;
-
-  final HugeIcon? icon;
-
-  final double iconSize;
-
-  final Color? iconColor;
-
-  final Color? iconBackgroundColor;
-
+  final AppLineIcon icon;
   final String? buttonText;
-
-  final HugeIcon? buttonIcon;
-
   final VoidCallback? onButtonPressed;
-
-  final Color? buttonBackgroundColor;
-
   final EdgeInsets padding;
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).colors;
+    final colors = context.colors;
+    final label = buttonText;
 
-    return Center(
-      child: Padding(
-        padding: padding,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            if (icon != null) ...[
-              Container(
-                width: 80,
-                height: 80,
-                decoration: BoxDecoration(
-                  color: iconBackgroundColor ??
-                      colors.background02.withValues(alpha: 0.5),
-                  shape: BoxShape.circle,
-                ),
-                child: Center(
-                  child: icon,
-                ),
-              ),
-              const SizedBox(height: AppSpacing.xlg),
-            ],
-            Text(
-              title,
-              style: AppText.heading.copyWith(fontWeight: FontWeight.w600),
-              textAlign: TextAlign.center,
+    return ColoredBox(
+      color: colors.canvas,
+      child: SafeArea(
+        child: Center(
+          child: SingleChildScrollView(
+            padding: padding,
+            child: AppErrorState(
+              lineIcon: icon,
+              title: title,
+              message: description,
+              primaryLabel: label ?? '',
+              onPrimary: onButtonPressed,
+              footnote: null,
             ),
-            if (description != null) ...[
-              const SizedBox(height: AppSpacing.lg),
-              Text(
-                description!,
-                style: AppText.body.copyWith(color: colors.deactive),
-                textAlign: TextAlign.center,
-              ),
-            ],
-            if (buttonText != null && onButtonPressed != null) ...[
-              const SizedBox(height: AppSpacing.xxlg),
-              AppButton.primary(
-                onPressed: onButtonPressed,
-                icon: buttonIcon ??
-                    HugeIcon(
-                      icon: HugeIcons.strokeRoundedAddSquare,
-                      color: colors.white,
-                    ),
-                label: buttonText!,
-                expanded: true,
-                backgroundColor: buttonBackgroundColor,
-              ),
-            ],
-          ],
+          ),
         ),
       ),
     );

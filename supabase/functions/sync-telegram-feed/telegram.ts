@@ -47,34 +47,37 @@ export async function fetchPreviewPage(
   username: string,
   before?: number,
 ): Promise<TelegramPreviewPage> {
+  if (!/^[a-zA-Z][a-zA-Z0-9_]{3,31}$/.test(username)) {
+    throw new Error("Invalid Telegram channel username");
+  }
   const query = before ? `?before=${before}` : "";
   const response = await fetch(`https://t.me/s/${username}${query}`, {
     headers: { "User-Agent": USER_AGENT, "Accept-Language": "ru,en" },
+    signal: AbortSignal.timeout(15000),
   });
   if (!response.ok) {
     throw new Error(`t.me/s/${username} responded ${response.status}`);
   }
   const html = await response.text();
+  if (
+    !html.includes("tgme_channel_info") && !html.includes("tgme_widget_message")
+  ) {
+    throw new Error(
+      `t.me/s/${username} did not return a public channel preview`,
+    );
+  }
   return {
     channel: parseChannelInfo(html, username),
     posts: parsePosts(html, username),
   };
 }
 
-function parseChannelInfo(
+export function parseChannelInfo(
   html: string,
   username: string,
 ): TelegramChannelInfo {
-  const title = decodeEntities(
-    matchFirst(
-      html,
-      /<meta property="og:title" content="([^"]*)"/,
-    ) ?? username,
-  );
-  const imageUrl = matchFirst(
-    html,
-    /<meta property="og:image" content="([^"]*)"/,
-  );
+  const title = metaContent(html, "og:title") ?? username;
+  const imageUrl = metaContent(html, "og:image");
   const subscribers = matchFirst(
     html,
     /<span class="counter_value">([^<]*)<\/span>\s*<span class="counter_type">subscriber/,
@@ -89,7 +92,7 @@ function parseChannelInfo(
   };
 }
 
-function parsePosts(html: string, username: string): TelegramPost[] {
+export function parsePosts(html: string, username: string): TelegramPost[] {
   const posts: TelegramPost[] = [];
   const chunks = html.split('<div class="tgme_widget_message_wrap').slice(1);
   for (const chunk of chunks) {
@@ -122,9 +125,8 @@ function parsePost(chunk: string, username: string): TelegramPost | null {
   const linkPreview = parseLinkPreview(chunk);
   if (!text && media.length === 0 && !linkPreview) return null;
 
-  const publishedAt =
-    matchFirst(chunk, /<time datetime="([^"]+)"/) ??
-      new Date().toISOString();
+  const publishedAt = matchFirst(chunk, /<time datetime="([^"]+)"/);
+  if (!publishedAt || !Number.isFinite(Date.parse(publishedAt))) return null;
   const views = matchFirst(
     chunk,
     /<span class="tgme_widget_message_views">([^<]*)<\/span>/,
@@ -150,7 +152,7 @@ function parseMedia(chunk: string): TelegramMedia[] {
     /class="tgme_widget_message_photo_wrap[^"]*"[^>]*style="[^"]*background-image:url\('([^']+)'\)/g;
   for (const match of chunk.matchAll(photoPattern)) {
     if (match[1].startsWith("https://")) {
-      media.push({ kind: "photo", url: match[1] });
+      media.push({ kind: "photo", url: decodeEntities(match[1]) });
     }
   }
 
@@ -160,8 +162,10 @@ function parseMedia(chunk: string): TelegramMedia[] {
     if (match[2]?.startsWith("https://")) {
       media.push({
         kind: "video",
-        url: match[2],
-        thumbUrl: match[1]?.startsWith("https://") ? match[1] : undefined,
+        url: decodeEntities(match[2]),
+        thumbUrl: match[1]?.startsWith("https://")
+          ? decodeEntities(match[1])
+          : undefined,
       });
     }
   }
@@ -173,7 +177,7 @@ function parseMedia(chunk: string): TelegramMedia[] {
       /class="tgme_widget_message_video_thumb[^"]*"[^>]*style="[^"]*background-image:url\('([^']+)'\)/g;
     for (const match of chunk.matchAll(thumbPattern)) {
       if (match[1].startsWith("https://")) {
-        media.push({ kind: "photo", url: match[1] });
+        media.push({ kind: "photo", url: decodeEntities(match[1]) });
       }
     }
   }
@@ -203,7 +207,9 @@ function parseLinkPreview(chunk: string): TelegramPost["linkPreview"] {
     url: decodeEntities(url),
     title: title ? htmlToPlainText(title) : undefined,
     description: description ? htmlToPlainText(description) : undefined,
-    imageUrl: imageUrl?.startsWith("https://") ? imageUrl : undefined,
+    imageUrl: imageUrl?.startsWith("https://")
+      ? decodeEntities(imageUrl)
+      : undefined,
   };
 }
 
@@ -232,12 +238,35 @@ function decodeEntities(value: string): string {
     "&nbsp;": " ",
   };
   return value
-    .replace(/&#(\d+);/g, (_, code) => String.fromCodePoint(Number(code)))
+    .replace(/&#(\d+);/g, (_, code) => decodeCodePoint(Number(code)))
     .replace(
       /&#x([0-9a-f]+);/gi,
-      (_, code) => String.fromCodePoint(Number.parseInt(code, 16)),
+      (_, code) => decodeCodePoint(Number.parseInt(code, 16)),
     )
     .replace(/&[a-z]+;|&#\d+;/gi, (entity) => named[entity] ?? entity);
+}
+
+function decodeCodePoint(value: number): string {
+  return Number.isInteger(value) && value >= 0 && value <= 0x10ffff
+    ? String.fromCodePoint(value)
+    : "\ufffd";
+}
+
+function metaContent(html: string, property: string): string | undefined {
+  for (const match of html.matchAll(/<meta\b[^>]*>/gi)) {
+    const attributes = new Map(
+      [...match[0].matchAll(/([\w:-]+)\s*=\s*(["'])(.*?)\2/gs)]
+        .map((attribute) => [attribute[1].toLowerCase(), attribute[3]]),
+    );
+    if (
+      attributes.get("property") === property ||
+      attributes.get("name") === property
+    ) {
+      const value = attributes.get("content");
+      return value == null ? undefined : decodeEntities(value);
+    }
+  }
+  return undefined;
 }
 
 function matchFirst(value: string, pattern: RegExp): string | undefined {

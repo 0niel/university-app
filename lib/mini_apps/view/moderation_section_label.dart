@@ -8,12 +8,12 @@ class _ModerationSectionLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     return Padding(
       padding: const .fromLTRB(
-        NinjaMetrics.screenPadding,
+        AppSpacing.screen,
         28,
-        NinjaMetrics.screenPadding,
+        AppSpacing.screen,
         10,
       ),
       child: Column(
@@ -21,12 +21,12 @@ class _ModerationSectionLabel extends StatelessWidget {
         children: [
           Text(
             title,
-            style: NinjaText.title.copyWith(color: colors.ink),
+            style: AppText.title.copyWith(color: colors.ink),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: AppSpacing.xs),
           Text(
             subtitle,
-            style: NinjaText.subtext.copyWith(color: colors.muted),
+            style: AppText.subtext.copyWith(color: colors.muted),
           ),
         ],
       ),

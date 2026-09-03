@@ -6,7 +6,7 @@ class EmojiTile extends StatelessWidget {
     super.key,
     this.emoji,
     this.icon,
-    this.size = NinjaMetrics.minTouchTarget,
+    this.size = AppControlSize.iconButton,
     this.emojiSize = 20,
   }) : assert(
          emoji != null || icon != null,
@@ -21,21 +21,21 @@ class EmojiTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final iconValue = icon;
     return Container(
       width: size,
       height: size,
       alignment: Alignment.center,
       decoration: BoxDecoration(
-        color: colors.brandTint,
-        borderRadius: .circular(NinjaRadius.control),
+        color: colors.tint,
+        borderRadius: .circular(AppRadius.field),
       ),
       child: iconValue != null
           ? AppLineIconWidget(
               iconValue,
               size: emojiSize,
-              color: colors.brandInk,
+              color: colors.accent,
             )
           : Text(emoji!, style: TextStyle(fontSize: emojiSize)),
     );

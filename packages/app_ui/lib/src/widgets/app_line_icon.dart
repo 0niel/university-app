@@ -328,8 +328,7 @@ class AppLineIconWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final resolved =
-        color ?? IconTheme.of(context).color ?? Theme.of(context).colors.active;
+    final resolved = color ?? IconTheme.of(context).color ?? context.colors.ink;
     final svg =
         '<svg xmlns="http://www.w3.org/2000/svg" width="$size" height="$size" '
         'viewBox="0 0 24 24" fill="none" stroke="#000000" '

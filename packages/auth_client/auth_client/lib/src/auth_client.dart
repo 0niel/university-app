@@ -68,6 +68,19 @@ abstract class AuthenticationClient {
   /// Throws a [SignInAnonymouslyFailure] if an exception occurs.
   Future<void> signInAnonymously();
 
+  Future<void> linkGuestEmail({required String userId, required String email});
+
+  Future<void> verifyGuestEmail({
+    required String userId,
+    required String email,
+    required String code,
+  });
+
+  Future<void> setAccountPassword({
+    required String userId,
+    required String password,
+  });
+
   /// Sends a password reset email containing a one-time code to the provided
   /// [email].
   ///

@@ -13,7 +13,7 @@ class AvatarStack extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     const step = _size - _overlap;
 
     return LayoutBuilder(
@@ -49,7 +49,7 @@ class AvatarStack extends StatelessWidget {
                     ),
                     child: CircleAvatar(
                       radius: (_size - 4) / 2,
-                      backgroundColor: colors.surfaceAlt,
+                      backgroundColor: colors.surface2,
                       backgroundImage: visible[i].avatarUrl.isNotEmpty
                           ? NetworkImage(visible[i].avatarUrl)
                           : null,
@@ -72,12 +72,12 @@ class AvatarStack extends StatelessWidget {
                       alignment: Alignment.center,
                       decoration: BoxDecoration(
                         shape: .circle,
-                        color: colors.surfaceAlt,
+                        color: colors.surface2,
                       ),
                       child: Text(
                         '+$rest',
-                        style: NinjaText.helper.copyWith(
-                          color: colors.mutedDark,
+                        style: AppText.caption.copyWith(
+                          color: colors.muted,
                           fontWeight: .w600,
                         ),
                       ),

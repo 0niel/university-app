@@ -122,7 +122,10 @@ void main() {
 
       when(() => repository.searchGroups(any())).thenAnswer((_) async => []);
 
-      await tester.tap(find.byType(NinjaActionButton).first);
+      final error = tester.widget<NinjaErrorState>(
+        find.byType(NinjaErrorState),
+      );
+      await tester.tap(find.text(error.retryLabel!));
       await tester.pumpAndSettle();
 
       verify(() => repository.searchGroups(any())).called(greaterThan(1));
@@ -184,6 +187,7 @@ void main() {
 
       await tester.enterText(find.byType(EditableText), 'broken');
       await tester.pump(const Duration(milliseconds: 301));
+      expect(tester.takeException(), isNull);
       await tester.pumpAndSettle();
 
       expect(find.text('Старая группа'), findsNothing);

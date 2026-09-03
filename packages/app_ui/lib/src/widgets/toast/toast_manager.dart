@@ -1,26 +1,25 @@
 import 'dart:async';
 import 'dart:developer';
+import 'dart:math' as math;
 
-import 'package:app_ui/app_ui.dart';
+import 'package:app_ui/src/colors/colors.dart';
+import 'package:app_ui/src/spacing/app_spacing.dart';
+import 'package:app_ui/src/typography/typography.dart';
+import 'package:app_ui/src/widgets/app_icon_tile.dart';
+import 'package:app_ui/src/widgets/app_line_icon.dart';
+import 'package:app_ui/src/widgets/app_toast.dart';
+import 'package:app_ui/src/widgets/profile/app_achievement_toast.dart';
+import 'package:app_ui/src/widgets/profile/app_push_notification_banner.dart';
+import 'package:app_ui/src/widgets/toast/toast_controller.dart';
+import 'package:app_ui/src/widgets/toast/toast_type.dart';
 import 'package:flutter/material.dart';
 
-/// Single self-hosted toast/banner/celebration presentation system.
-///
-/// Renders via its own [Overlay] entries (no third-party toast package).
-/// Two independent slots exist: a top slot for [showBanner] and a bottom
-/// slot shared by the typed toasts ([showInfo]/[showSuccess]/[showWarning]/
-/// [showError]/[showLoading]) and [showCelebration]. Each slot shows at most
-/// one item at a time, queues the rest (FIFO) and coalesces duplicate
-/// requests (same kind + message) into the currently visible one by simply
-/// extending its duration instead of stacking a new one.
 class ToastManager {
   const ToastManager._();
 
   static final _ToastQueue _bottomQueue = _ToastQueue(alignTop: false);
   static final _ToastQueue _topQueue = _ToastQueue(alignTop: true);
 
-  /// Clears all queued/visible toasts without animation. Intended for test
-  /// isolation between `testWidgets` blocks that share this static state.
   @visibleForTesting
   static void debugReset() {
     _bottomQueue.debugReset();
@@ -142,10 +141,6 @@ class ToastManager {
     }
   }
 
-  /// Top-anchored push-style banner (see [AppPushNotificationBanner]).
-  ///
-  /// Renders in its own slot, independent from the bottom toast slot, so a
-  /// banner and a regular toast can be visible at the same time.
   static ToastController showBanner(
     BuildContext context, {
     required String title,
@@ -170,8 +165,6 @@ class ToastManager {
     );
   }
 
-  /// Bottom celebration toast (see [AppAchievementToast]). Shares the bottom
-  /// slot/queue with the typed toasts above.
   static ToastController showCelebration(
     BuildContext context, {
     required String emoji,
@@ -206,103 +199,38 @@ class ToastManager {
     Duration duration = const Duration(milliseconds: 2000),
   }) {
     final colors = Theme.of(context).colors;
-
-    final filled = type == ToastType.success || type == ToastType.error;
-    final background = switch (type) {
-      ToastType.success => colors.success,
-      ToastType.error => colors.error,
-      ToastType.info ||
-      ToastType.warning ||
-      ToastType.loading =>
-        colors.surface,
+    final tone = switch (type) {
+      ToastType.success => colors.lecture,
+      ToastType.error => colors.exam,
+      ToastType.warning => colors.warn,
+      ToastType.info || ToastType.loading => colors.accent,
     };
-    final foreground = filled ? colors.white : colors.active;
+    final icon = switch (type) {
+      ToastType.success => AppLineIcon.check,
+      ToastType.error || ToastType.warning => AppLineIcon.alert,
+      ToastType.info => AppLineIcon.info,
+      ToastType.loading => AppLineIcon.refresh,
+    };
 
-    final Widget leading;
-    if (emoji != null) {
-      leading = Text(emoji, style: const TextStyle(fontSize: 18));
-    } else {
-      leading = switch (type) {
-        ToastType.loading => SizedBox(
-            width: 18,
-            height: 18,
-            child: CircularProgressIndicator(
-              strokeWidth: 2,
-              valueColor: AlwaysStoppedAnimation<Color>(colors.primary),
-            ),
-          ),
-        ToastType.success => AppLineIconWidget(
-            AppLineIcon.check,
-            size: 18,
-            color: foreground,
-          ),
-        ToastType.error => AppLineIconWidget(
-            AppLineIcon.alert,
-            size: 18,
-            color: foreground,
-          ),
-        ToastType.warning => AppLineIconWidget(
-            AppLineIcon.alert,
-            size: 18,
-            color: colors.warning,
-          ),
-        ToastType.info => AppLineIconWidget(
-            AppLineIcon.check,
-            size: 18,
-            color: colors.primary,
-          ),
-      };
-    }
-
-    Widget buildToastChild(VoidCallback dismiss) => Container(
-          constraints: const BoxConstraints(maxWidth: 600),
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.lg,
-            vertical: AppSpacing.md,
-          ),
-          decoration: BoxDecoration(
-            color: background,
-            borderRadius: BorderRadius.circular(AppRadius.md),
-            boxShadow: const [
-              BoxShadow(
-                color: Color(0x4D000000),
-                blurRadius: 24,
-                offset: Offset(0, 8),
-              ),
-            ],
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              leading,
-              const SizedBox(width: AppSpacing.gap),
-              Flexible(
-                child: Text(
-                  message,
-                  style: AppText.body.copyWith(
-                    color: foreground,
-                    fontWeight: FontWeight.w600,
-                  ),
+    Widget buildToastChild(VoidCallback dismiss) => AppToast(
+          message: message,
+          icon: icon,
+          iconColor: tone,
+          actionLabel: actionLabel,
+          onAction: onAction == null
+              ? null
+              : () {
+                  dismiss();
+                  onAction.call();
+                },
+          leading: emoji == null
+              ? null
+              : AppIconTile(
+                  size: 32,
+                  radius: AppRadius.sm,
+                  background: colors.surface2,
+                  child: Text(emoji, style: AppText.sans(17, FontWeight.w400)),
                 ),
-              ),
-              if (actionLabel != null) ...[
-                const SizedBox(width: AppSpacing.md),
-                AppPressable(
-                  onTap: () {
-                    dismiss();
-                    onAction?.call();
-                  },
-                  child: Text(
-                    actionLabel,
-                    style: AppText.body.copyWith(
-                      color: filled ? colors.white : colors.primary,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ),
-              ],
-            ],
-          ),
         );
 
     return _bottomQueue.show(
@@ -328,12 +256,14 @@ class _QueuedToast {
     required this.coalesceKey,
     required this.duration,
     required this.builder,
+    required this.bottomInset,
   });
 
   final int id;
   final String coalesceKey;
   Duration duration;
   final Widget Function(VoidCallback dismiss) builder;
+  final double bottomInset;
 }
 
 class _VisibleToast {
@@ -347,13 +277,8 @@ class _VisibleToast {
 
   final int id;
   final String coalesceKey;
-
-  /// Animated (slide-out) dismissal, used by the public [ToastController].
   final VoidCallback onRequestDismiss;
   final void Function(Duration duration) onRestartTimer;
-
-  /// Immediate, non-animated removal used internally (queue advance, test
-  /// reset) so it never races a ticker/animation across a torn-down tree.
   final VoidCallback onForceRemove;
 }
 
@@ -394,6 +319,10 @@ class _ToastQueue {
       coalesceKey: coalesceKey,
       duration: duration,
       builder: builder,
+      bottomInset: math.max(
+        MediaQuery.paddingOf(context).bottom,
+        MediaQuery.viewPaddingOf(context).bottom,
+      ),
     );
 
     if (_visible == null) {
@@ -443,10 +372,16 @@ class _ToastQueue {
         final padding = MediaQuery.paddingOf(entryContext);
         final viewInsets = MediaQuery.viewInsetsOf(entryContext);
         return Positioned(
-          top: alignTop ? padding.top + 8 : null,
-          bottom: alignTop ? null : viewInsets.bottom + padding.bottom + 24,
-          left: alignTop ? 10 : 16,
-          right: alignTop ? 10 : 16,
+          top: alignTop ? padding.top + AppSpacing.sm : null,
+          bottom: alignTop
+              ? null
+              : math.max(
+                    viewInsets.bottom,
+                    math.max(padding.bottom, queued.bottomInset),
+                  ) +
+                  AppSpacing.xlg,
+          left: AppSpacing.lg,
+          right: AppSpacing.lg,
           child: Semantics(
             liveRegion: true,
             child: _AnimatedToastSlot(
@@ -455,7 +390,7 @@ class _ToastQueue {
               handle: handle,
               onDismiss: removeAndAdvance,
               child: Material(
-                color: Colors.transparent,
+                color: const Color(0x00000000),
                 child: queued.builder(handle.exit),
               ),
             ),

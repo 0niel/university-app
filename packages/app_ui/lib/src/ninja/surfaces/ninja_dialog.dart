@@ -1,6 +1,7 @@
-import 'package:app_ui/src/ninja/ninja_colors.dart';
-import 'package:app_ui/src/ninja/ninja_text.dart';
-import 'package:app_ui/src/ninja/surfaces/ninja_action_button.dart';
+import 'package:app_ui/src/colors/colors.dart';
+import 'package:app_ui/src/ninja/surfaces/ninja_pill_button.dart';
+import 'package:app_ui/src/spacing/app_spacing.dart';
+import 'package:app_ui/src/typography/typography.dart';
 import 'package:flutter/material.dart';
 
 class NinjaDialog extends StatelessWidget {
@@ -8,6 +9,7 @@ class NinjaDialog extends StatelessWidget {
     required this.title,
     super.key,
     this.message,
+    this.icon,
     this.confirmLabel,
     this.onConfirm,
     this.cancelLabel,
@@ -18,6 +20,7 @@ class NinjaDialog extends StatelessWidget {
 
   final String title;
   final String? message;
+  final Widget? icon;
   final String? confirmLabel;
   final VoidCallback? onConfirm;
   final String? cancelLabel;
@@ -27,36 +30,54 @@ class NinjaDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final messageText = message;
     final extra = child;
     final hasActions = confirmLabel != null || cancelLabel != null;
+    final iconWidget = icon;
 
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: colors.surface,
-        borderRadius: BorderRadius.circular(NinjaRadius.dialog),
+        color: colors.canvas,
+        borderRadius: BorderRadius.circular(AppRadius.dialog),
       ),
       child: Padding(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.fromLTRB(
+          AppSpacing.xl,
+          AppSpacing.contentGap,
+          AppSpacing.xl,
+          AppSpacing.lg,
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
+            if (iconWidget != null) ...[
+              Center(child: iconWidget),
+              const SizedBox(height: AppSpacing.sectionGap),
+            ],
             Text(
               title,
-              style: NinjaText.dialogTitle.copyWith(color: colors.ink),
+              style: AppText.sans(17, FontWeight.w700, height: 1.2)
+                  .copyWith(color: colors.ink),
             ),
             if (messageText != null) ...[
-              const SizedBox(height: 6),
+              const SizedBox(height: AppSpacing.sm),
               Text(
                 messageText,
-                style: NinjaText.body.copyWith(color: colors.mutedDark),
+                style: AppText.compact.copyWith(
+                  color: colors.muted,
+                  fontWeight: FontWeight.w500,
+                  height: 1.45,
+                ),
               ),
             ],
-            if (extra != null) ...[const SizedBox(height: 14), extra],
+            if (extra != null) ...[
+              const SizedBox(height: AppSpacing.sectionGap),
+              extra,
+            ],
             if (hasActions) ...[
-              const SizedBox(height: 18),
+              const SizedBox(height: AppSpacing.fieldGap),
               _NinjaDialogActions(
                 cancelLabel: cancelLabel,
                 onCancel: onCancel,
@@ -92,23 +113,26 @@ class _NinjaDialogActions extends StatelessWidget {
     final cancel = cancelLabel;
     final confirm = confirmLabel;
     final largeText = MediaQuery.textScalerOf(context).scale(1) >= 1.5;
+
     final cancelButton = cancel == null
         ? null
-        : NinjaActionButton(
+        : NinjaPillButton(
             label: cancel,
             onPressed: onCancel,
-            tone: NinjaActionTone.surface,
+            tone: NinjaPillTone.surface,
+            height: AppControlSize.buttonMedium,
             expanded: true,
-            radius: 14,
+            textStyle: AppText.bodyStrong,
           );
     final confirmButton = confirm == null
         ? null
-        : NinjaActionButton(
+        : NinjaPillButton(
             label: confirm,
             onPressed: onConfirm,
-            tone: destructive ? NinjaActionTone.scarlet : NinjaActionTone.ink,
+            tone: destructive ? NinjaPillTone.danger : NinjaPillTone.primary,
+            height: AppControlSize.buttonMedium,
             expanded: true,
-            radius: 14,
+            textStyle: AppText.bodyStrong,
           );
 
     if (largeText) {
@@ -117,7 +141,7 @@ class _NinjaDialogActions extends StatelessWidget {
         children: [
           if (confirmButton != null) confirmButton,
           if (confirmButton != null && cancelButton != null)
-            const SizedBox(height: 8),
+            const SizedBox(height: AppSpacing.sm),
           if (cancelButton != null) cancelButton,
         ],
       );
@@ -127,7 +151,7 @@ class _NinjaDialogActions extends StatelessWidget {
       children: [
         if (cancelButton != null) Expanded(child: cancelButton),
         if (cancelButton != null && confirmButton != null)
-          const SizedBox(width: 8),
+          const SizedBox(width: AppSpacing.sm),
         if (confirmButton != null) Expanded(child: confirmButton),
       ],
     );
@@ -140,17 +164,17 @@ Future<T?> showNinjaDialog<T>(
   bool barrierDismissible = true,
   double maxWidth = 340,
 }) {
-  final colors = context.ninja;
+  final colors = context.colors;
   return showDialog(
     context: context,
     barrierDismissible: barrierDismissible,
-    barrierColor: colors.ink.withValues(alpha: colors.isDark ? 0.68 : 0.48),
+    barrierColor: colors.scrim,
     builder: (dialogContext) => Material(
       type: MaterialType.transparency,
       child: SafeArea(
         child: Center(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
+            padding: const EdgeInsets.all(AppSpacing.xlg),
             child: ConstrainedBox(
               constraints: BoxConstraints(maxWidth: maxWidth),
               child: builder(dialogContext),

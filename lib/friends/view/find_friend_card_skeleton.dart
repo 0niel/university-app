@@ -7,22 +7,22 @@ class _FindFriendCardSkeleton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const .fromLTRB(
-        NinjaMetrics.screenPadding,
+        AppSpacing.screen,
         0,
-        NinjaMetrics.screenPadding,
+        AppSpacing.screen,
         10,
       ),
       child: DecoratedBox(
         decoration: BoxDecoration(
-          color: context.ninja.surface,
-          borderRadius: .circular(NinjaRadius.card),
+          color: context.colors.surface,
+          borderRadius: .circular(AppRadius.card),
         ),
         child: const Padding(
           padding: .all(16),
           child: Row(
             children: [
               NinjaSkeleton.avatar(),
-              SizedBox(width: 14),
+              SizedBox(width: AppSpacing.sectionGap),
               Expanded(
                 child: Column(
                   crossAxisAlignment: .start,
@@ -33,8 +33,8 @@ class _FindFriendCardSkeleton extends StatelessWidget {
                   ],
                 ),
               ),
-              SizedBox(width: 10),
-              NinjaSkeleton(width: 88, height: 44, radius: NinjaRadius.pill),
+              SizedBox(width: AppSpacing.gap),
+              NinjaSkeleton(width: 88, height: 44, radius: AppRadius.full),
             ],
           ),
         ),

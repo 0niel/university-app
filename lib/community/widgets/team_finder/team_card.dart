@@ -38,18 +38,18 @@ class TeamCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     return Padding(
       padding: const EdgeInsets.fromLTRB(
-        NinjaMetrics.screenPadding,
+        AppSpacing.screen,
         0,
-        NinjaMetrics.screenPadding,
+        AppSpacing.screen,
         10,
       ),
       child: DecoratedBox(
         decoration: BoxDecoration(
           color: colors.surface,
-          borderRadius: BorderRadius.circular(NinjaRadius.card),
+          borderRadius: BorderRadius.circular(AppRadius.card),
         ),
         child: Padding(
           padding: const EdgeInsets.all(16),
@@ -60,19 +60,19 @@ class TeamCard extends StatelessWidget {
               _metadata(context),
               Text(
                 team.title,
-                style: NinjaText.title.copyWith(color: colors.ink),
+                style: AppText.title.copyWith(color: colors.ink),
               ),
               Text(
                 teamKindLabel(context.l10n, team.kind),
-                style: NinjaText.helper.copyWith(color: colors.mutedDark),
+                style: AppText.captionSmall.copyWith(color: colors.muted),
               ),
               if (team.description.isNotEmpty)
                 Text(
                   team.description,
                   maxLines: 4,
                   overflow: TextOverflow.ellipsis,
-                  style: NinjaText.subtext.copyWith(
-                    color: colors.mutedDark,
+                  style: AppText.subtext.copyWith(
+                    color: colors.muted,
                     height: 1.4,
                   ),
                 ),
@@ -85,8 +85,8 @@ class TeamCard extends StatelessWidget {
                         ),
                       )
                       .join(' · '),
-                  style: NinjaText.helper.copyWith(
-                    color: colors.brandInk,
+                  style: AppText.captionSmall.copyWith(
+                    color: colors.accent,
                     height: 1.35,
                   ),
                 ),
@@ -105,8 +105,8 @@ class TeamCard extends StatelessWidget {
                         team.memberCount,
                         team.capacity,
                       ),
-                      style: NinjaText.helper.copyWith(
-                        color: colors.mutedDark,
+                      style: AppText.captionSmall.copyWith(
+                        color: colors.muted,
                       ),
                     ),
                   ),
@@ -141,14 +141,14 @@ class TeamCard extends StatelessWidget {
                 : context.l10n.teamFinderDeadlineUntil(
                     formatTeamDate(context, deadline),
                   ),
-            style: NinjaText.helper.copyWith(
-              color: _isBurning ? context.ninja.scarlet : context.ninja.muted,
+            style: AppText.captionSmall.copyWith(
+              color: _isBurning ? context.colors.exam : context.colors.muted,
             ),
           ),
         Text(
           teamRelativeTime(context.l10n, team.createdAt),
-          style: NinjaText.helper.copyWith(
-            color: context.ninja.muted,
+          style: AppText.captionSmall.copyWith(
+            color: context.colors.muted,
           ),
         ),
       ],
@@ -166,8 +166,8 @@ class TeamCard extends StatelessWidget {
               child: Text(
                 context.l10n.teamFinderNoApplications,
                 textAlign: .center,
-                style: NinjaText.subtext.copyWith(
-                  color: context.ninja.muted,
+                style: AppText.subtext.copyWith(
+                  color: context.colors.muted,
                 ),
               ),
             ),

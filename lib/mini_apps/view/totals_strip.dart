@@ -11,7 +11,7 @@ class _TotalsStrip extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         for (var index = 0; index < children.length; index++) ...[
-          if (index > 0) const SizedBox(width: 8),
+          if (index > 0) const SizedBox(width: AppSpacing.sm),
           Expanded(child: children[index]),
         ],
       ],

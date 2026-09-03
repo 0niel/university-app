@@ -16,7 +16,7 @@ class FriendsMapStatusPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final l10n = context.l10n;
     final accented = !loading && !isGhost;
     final label = isGhost
@@ -30,12 +30,15 @@ class FriendsMapStatusPill extends StatelessWidget {
       child: ExcludeSemantics(
         child: Container(
           constraints: const BoxConstraints(
-            minHeight: NinjaMetrics.minTouchTarget,
+            minHeight: AppControlSize.iconButton,
           ),
-          padding: const .symmetric(horizontal: 14, vertical: 10),
+          padding: const .symmetric(
+            horizontal: AppSpacing.sectionGap,
+            vertical: AppSpacing.gap,
+          ),
           decoration: BoxDecoration(
-            color: accented ? colors.accentSoft : colors.surfaceAlt,
-            borderRadius: .circular(NinjaRadius.pill),
+            color: accented ? colors.tint2 : colors.surface2,
+            borderRadius: .circular(AppRadius.full),
           ),
           child: loading
               ? const Center(
@@ -49,7 +52,7 @@ class FriendsMapStatusPill extends StatelessWidget {
                       width: 7,
                       height: 7,
                       decoration: BoxDecoration(
-                        color: accented ? colors.onAccentSoft : colors.muted,
+                        color: accented ? colors.ink : colors.muted,
                         shape: .circle,
                       ),
                     ),
@@ -58,13 +61,15 @@ class FriendsMapStatusPill extends StatelessWidget {
                         label,
                         maxLines: 1,
                         overflow: .ellipsis,
-                        style: NinjaText.tabular(
-                          NinjaText.microLabel.copyWith(
-                            color: accented
-                                ? colors.onAccentSoft
-                                : colors.mutedDark,
-                          ),
-                        ),
+                        style: AppText.captionSmall
+                            .copyWith(
+                              color: accented ? colors.ink : colors.muted,
+                            )
+                            .copyWith(
+                              fontFeatures: const [
+                                FontFeature.tabularFigures(),
+                              ],
+                            ),
                       ),
                     ),
                   ],

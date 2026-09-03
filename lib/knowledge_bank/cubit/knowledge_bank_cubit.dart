@@ -15,43 +15,47 @@ class KnowledgeBankCubit extends Cubit<KnowledgeBankState> {
 
   final CampusRepository _campusRepository;
   final GamificationRepository _gamificationRepository;
+  int _loadRevision = 0;
 
   Future<void> load() async {
+    if (isClosed) return;
+    final revision = ++_loadRevision;
     emit(state.copyWith(status: .loading));
     try {
       final (profileResult, materialsResult, authorsResult) = await (
         _loadSource(
-          _gamificationRepository.getProfile(),
+          _gamificationRepository.getProfile,
           state.profile,
         ),
         _loadSource(
-          _campusRepository.getPublicMaterials(),
+          _campusRepository.getPublicMaterials,
           state.materials,
         ),
         _loadSource(
-          _campusRepository.getTopMaterialAuthors(),
+          _campusRepository.getTopMaterialAuthors,
           state.authors,
         ),
       ).wait;
-      final hasFreshData =
-          profileResult.succeeded ||
-          materialsResult.succeeded ||
-          authorsResult.succeeded;
+      if (isClosed || revision != _loadRevision) return;
       emit(
         state.copyWith(
-          status: hasFreshData ? .populated : .failure,
+          status: materialsResult.succeeded ? .populated : .failure,
           profile: profileResult.value,
           materials: materialsResult.value,
           authors: authorsResult.value,
         ),
       );
-    } on Exception catch (error, stackTrace) {
+    } on Object catch (error, stackTrace) {
+      if (isClosed || revision != _loadRevision) return;
       emit(state.copyWith(status: .failure));
       addError(error, stackTrace);
     }
   }
 
-  void typeChanged(String type) => emit(state.copyWith(type: type));
+  void typeChanged(String type) {
+    if (isClosed) return;
+    emit(state.copyWith(type: type));
+  }
 
   Future<Uri?> materialUrl(StudyMaterial material) async {
     try {
@@ -65,6 +69,24 @@ class KnowledgeBankCubit extends Cubit<KnowledgeBankState> {
       addError(error, stackTrace);
       return null;
     }
+  }
+
+  Future<MaterialAccess> materialAccess(StudyMaterial material) =>
+      _campusRepository.getPublicMaterialAccess(material);
+
+  Future<void> purchaseMaterial(
+    StudyMaterial material, {
+    required int expectedPrice,
+  }) async {
+    await _campusRepository.purchasePublicMaterial(
+      material,
+      expectedPrice: expectedPrice,
+    );
+    final profile = await _loadSource(
+      _gamificationRepository.getProfile,
+      state.profile,
+    );
+    if (!isClosed) emit(state.copyWith(profile: profile.value));
   }
 
   Future<void> materialOpened(StudyMaterial material) async {
@@ -90,13 +112,13 @@ class KnowledgeBankCubit extends Cubit<KnowledgeBankState> {
       material.copyWith(downloads: material.downloads + 1);
 
   Future<({T value, bool succeeded})> _loadSource<T>(
-    Future<T> future,
+    Future<T> Function() operation,
     T fallback,
   ) async {
     try {
-      return (value: await future, succeeded: true);
-    } on Exception catch (error, stackTrace) {
-      addError(error, stackTrace);
+      return (value: await operation(), succeeded: true);
+    } on Object catch (error, stackTrace) {
+      if (!isClosed) addError(error, stackTrace);
       return (value: fallback, succeeded: false);
     }
   }

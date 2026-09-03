@@ -10,6 +10,7 @@ abstract class AuthenticationUser with _$AuthenticationUser {
     String? name,
     String? photo,
     @Default(true) bool isNewUser,
+    @Default(false) bool isGuest,
   }) = _AuthenticationUser;
 
   const AuthenticationUser._();

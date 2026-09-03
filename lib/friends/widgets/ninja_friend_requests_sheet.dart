@@ -3,8 +3,8 @@ import 'dart:async';
 import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:rtu_mirea_app/common/utils/ninja_initials.dart';
 import 'package:rtu_mirea_app/friends/cubit/friends_map_cubit.dart';
+import 'package:rtu_mirea_app/friends/friends_layout.dart';
 import 'package:rtu_mirea_app/friends/widgets/friends_circle_button.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 
@@ -39,10 +39,9 @@ class NinjaFriendRequestsSheet extends StatelessWidget {
       child: state.requests.isEmpty
           ? Center(
               key: const ValueKey('empty'),
-              child: NinjaEmptyState(
-                icon: const AppLineIconWidget(AppLineIcon.inbox),
+              child: AppEmptyState(
                 title: l10n.friendsNoRequests,
-                message: l10n.friendsNoRequestsSub,
+                subtitle: l10n.friendsNoRequestsSub,
               ).animateEmptyState(),
             )
           : Column(

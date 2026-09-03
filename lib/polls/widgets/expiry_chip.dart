@@ -13,7 +13,7 @@ class _ExpiryChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     return AppPressable(
       onTap: onTap,
       child: AnimatedContainer(
@@ -23,15 +23,18 @@ class _ExpiryChip extends StatelessWidget {
             ? Duration.zero
             : const Duration(milliseconds: 160),
         constraints: const BoxConstraints(minHeight: 44),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.sectionGap,
+          vertical: AppSpacing.gap,
+        ),
         decoration: BoxDecoration(
-          color: selected ? colors.brandTint : colors.surfaceAlt,
-          borderRadius: BorderRadius.circular(NinjaRadius.pill),
+          color: selected ? colors.tint : colors.surface2,
+          borderRadius: BorderRadius.circular(AppRadius.full),
         ),
         child: Text(
           label,
-          style: NinjaText.button.copyWith(
-            color: selected ? colors.brand : colors.muted,
+          style: AppText.button.copyWith(
+            color: selected ? colors.accent : colors.muted,
           ),
         ),
       ),

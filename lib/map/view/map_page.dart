@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:rtu_mirea_app/free_rooms/cubit/free_rooms_cubit.dart';
 import 'package:rtu_mirea_app/map/bloc/map_bloc.dart';
 import 'package:rtu_mirea_app/map/config/campuses_config.dart';
 import 'package:rtu_mirea_app/map/services/services.dart';
@@ -43,11 +44,18 @@ class _MapPageState extends State<MapPage> {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => MapBloc(
-        availableCampuses: CampusesConfig.campuses,
-        objectsService: ObjectsService(),
-      )..add(const MapEvent.initialized()),
-      child: const MapView(),
+      create: (context) {
+        final cubit = FreeRoomsCubit(campusRepository: context.read());
+        unawaited(cubit.load());
+        return cubit;
+      },
+      child: BlocProvider(
+        create: (_) => MapBloc(
+          availableCampuses: CampusesConfig.campuses,
+          objectsService: ObjectsService(),
+        )..add(const MapEvent.initialized()),
+        child: const MapView(),
+      ),
     );
   }
 }

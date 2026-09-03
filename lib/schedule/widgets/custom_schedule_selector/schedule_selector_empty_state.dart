@@ -9,11 +9,11 @@ class ScheduleSelectorEmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final l10n = context.l10n;
-    return NinjaEmptyState(
+    return AppEmptyState(
       title: l10n.noOwnSchedules,
-      message: l10n.createCustomSchedule,
+      subtitle: l10n.createCustomSchedule,
       icon: AppLineIconWidget(
         AppLineIcon.calendar,
         size: 20,

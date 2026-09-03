@@ -8,9 +8,9 @@ class _ActionTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final subtitle = action.subtitle;
-    final accent = action.isDestructive ? colors.scarlet : colors.brand;
+    final accent = action.isDestructive ? colors.exam : colors.accent;
     return AppPressable(
       onTap: () {
         onClose();
@@ -28,7 +28,7 @@ class _ActionTile extends StatelessWidget {
                 children: [
                   Text(
                     action.label,
-                    style: NinjaText.body.copyWith(
+                    style: AppText.body.copyWith(
                       color: action.isDestructive ? accent : colors.ink,
                     ),
                   ),
@@ -37,7 +37,7 @@ class _ActionTile extends StatelessWidget {
                       padding: const .only(top: 2),
                       child: Text(
                         subtitle,
-                        style: NinjaText.helper.copyWith(
+                        style: AppText.captionSmall.copyWith(
                           color: colors.muted,
                         ),
                       ),
@@ -45,10 +45,10 @@ class _ActionTile extends StatelessWidget {
                 ],
               ),
             ),
-            NinjaGlyphIcon(
-              NinjaGlyph.chevronRight,
+            AppLineIconWidget(
+              AppLineIcon.chevronR,
               size: 14,
-              color: colors.chevron,
+              color: colors.muted2,
               strokeWidth: 2.5,
             ),
           ],

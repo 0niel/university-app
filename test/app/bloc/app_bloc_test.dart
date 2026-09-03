@@ -201,6 +201,102 @@ void main() {
     });
 
     group('InteractedMessageReceived', () {
+      test(
+        'retains cold-start history until the matching user consumes it',
+        () async {
+          final messaging = MockFirebaseMessaging();
+          const message = RemoteMessage(
+            messageId: 'cold-start',
+            data: {'route': '/profile', 'title': 'Updated'},
+          );
+          when(messaging.getInitialMessage).thenAnswer((_) async => message);
+          final bloc = AppBloc(
+            firebaseMessaging: messaging,
+            userRepository: userRepository,
+            user: user,
+          );
+          final navigated = bloc.stream.firstWhere(
+            (state) => state.notificationNavigationId == 1,
+          );
+
+          await bloc.setupInteractedMessage();
+          await navigated;
+          await bloc.setupInteractedMessage();
+
+          expect(bloc.takePendingPushMessages(newUser.id), isEmpty);
+          expect(bloc.takePendingPushMessages(user.id), [message]);
+          expect(bloc.takePendingPushMessages(user.id), isEmpty);
+          expect(bloc.state.routeToOpen, '/profile');
+          expect(bloc.state.notificationNavigationId, 1);
+          verify(messaging.getInitialMessage).called(1);
+          await bloc.close();
+        },
+      );
+
+      test(
+        'drops a cold-start message resolved after the user changes',
+        () async {
+          final messaging = MockFirebaseMessaging();
+          final initialMessage = Completer<RemoteMessage?>();
+          when(
+            messaging.getInitialMessage,
+          ).thenAnswer((_) => initialMessage.future);
+          final bloc = AppBloc(
+            firebaseMessaging: messaging,
+            userRepository: userRepository,
+            user: user,
+          );
+          final setup = bloc.setupInteractedMessage();
+          final userChanged = bloc.stream.firstWhere(
+            (state) => state.user.id == newUser.id,
+          );
+          bloc.add(const AppUserChanged(newUser));
+          await userChanged;
+          initialMessage.complete(
+            const RemoteMessage(data: {'route': '/profile'}),
+          );
+          await setup;
+
+          expect(bloc.takePendingPushMessages(newUser.id), isEmpty);
+          expect(bloc.state.notificationNavigationId, 0);
+          await bloc.close();
+        },
+      );
+
+      test(
+        'clears pending history and ignores queued taps for another user',
+        () async {
+          final bloc = buildBloc(initialUser: user);
+          final navigated = bloc.stream.firstWhere(
+            (state) => state.notificationNavigationId == 1,
+          );
+          bloc.add(
+            InteractedMessageReceived(
+              const RemoteMessage(data: {'route': '/profile'}),
+              userId: user.id,
+            ),
+          );
+          await navigated;
+          final userChanged = bloc.stream.firstWhere(
+            (state) => state.user.id == newUser.id,
+          );
+          bloc.add(const AppUserChanged(newUser));
+          await userChanged;
+          bloc.add(
+            InteractedMessageReceived(
+              const RemoteMessage(data: {'route': '/services'}),
+              userId: user.id,
+            ),
+          );
+          await Future<void>.delayed(Duration.zero);
+
+          expect(bloc.takePendingPushMessages(user.id), isEmpty);
+          expect(bloc.takePendingPushMessages(newUser.id), isEmpty);
+          expect(bloc.state.notificationNavigationId, 1);
+          await bloc.close();
+        },
+      );
+
       blocTest<AppBloc, AppState>(
         'emits every identical notification tap',
         build: buildBloc,

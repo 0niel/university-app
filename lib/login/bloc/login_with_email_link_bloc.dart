@@ -17,6 +17,11 @@ class LoginWithEmailLinkBloc
     : super(const LoginWithEmailLinkState()) {
     on<LoginWithEmailLinkSubmitted>(_onLoginWithEmailLinkSubmitted);
     on<LoginWithEmailCodeSubmitted>(_onLoginWithEmailCodeSubmitted);
+    on<LoginWithEmailCodeResetRequested>((event, emit) {
+      if (state.status != LoginWithEmailLinkStatus.loading) {
+        emit(const LoginWithEmailLinkState());
+      }
+    });
 
     _incomingEmailLinksSub = userRepository.incomingEmailLinks
         .handleError(addError)
@@ -31,6 +36,7 @@ class LoginWithEmailLinkBloc
     LoginWithEmailLinkSubmitted event,
     Emitter<LoginWithEmailLinkState> emit,
   ) async {
+    if (state.status == LoginWithEmailLinkStatus.loading) return;
     try {
       emit(state.copyWith(status: .loading));
 
@@ -47,7 +53,7 @@ class LoginWithEmailLinkBloc
       }
 
       final redirectUrl = Uri.tryParse(
-        emailLink.queryParameters['continueUrl']!,
+        emailLink.queryParameters['continueUrl'] ?? '',
       );
 
       final email = redirectUrl?.queryParameters['email'];
@@ -73,6 +79,10 @@ class LoginWithEmailLinkBloc
     LoginWithEmailCodeSubmitted event,
     Emitter<LoginWithEmailLinkState> emit,
   ) async {
+    if (state.status == LoginWithEmailLinkStatus.loading ||
+        state.status == LoginWithEmailLinkStatus.success) {
+      return;
+    }
     try {
       emit(state.copyWith(status: .loading));
 

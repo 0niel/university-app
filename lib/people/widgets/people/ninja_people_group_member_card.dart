@@ -14,7 +14,7 @@ class NinjaPeopleGroupMemberCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final l10n = context.l10n;
     final status = switch (member) {
       _ when member.isOwner => NinjaBadge(l10n.studyGroupOwnerTag, tone: .ink),
@@ -45,12 +45,12 @@ class NinjaPeopleGroupMemberCard extends StatelessWidget {
                   Text(
                     member.fullName,
                     overflow: .ellipsis,
-                    style: NinjaText.body.copyWith(color: colors.ink),
+                    style: AppText.body.copyWith(color: colors.ink),
                   ),
                   if (handle != null && handle.isNotEmpty)
                     Text(
                       '@$handle',
-                      style: NinjaText.helper.copyWith(
+                      style: AppText.caption.copyWith(
                         color: colors.muted,
                       ),
                     ),

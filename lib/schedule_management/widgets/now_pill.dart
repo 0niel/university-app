@@ -8,7 +8,7 @@ class _NowPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final colors = context.ninja;
+    final colors = context.colors;
     final ongoing = status.ongoing;
     final next = status.next;
     final String headline;
@@ -35,8 +35,8 @@ class _NowPill extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
-        color: colors.onAccentSoft.withValues(alpha: .1),
-        borderRadius: BorderRadius.circular(NinjaRadius.control),
+        color: colors.ink.withValues(alpha: .1),
+        borderRadius: BorderRadius.circular(AppRadius.field),
       ),
       child: Row(
         spacing: 8,
@@ -44,7 +44,7 @@ class _NowPill extends StatelessWidget {
           if (ongoing != null) ...[
             DecoratedBox(
               decoration: BoxDecoration(
-                color: colors.onAccentSoft,
+                color: colors.ink,
                 shape: BoxShape.circle,
               ),
               child: const SizedBox.square(dimension: 8),
@@ -61,9 +61,9 @@ class _NowPill extends StatelessWidget {
                   headline,
                   maxLines: 2,
                   overflow: .ellipsis,
-                  style: NinjaText.body.copyWith(
+                  style: AppText.body.copyWith(
                     fontWeight: FontWeight.w600,
-                    color: colors.onAccentSoft,
+                    color: colors.ink,
                   ),
                 ),
                 if (meta != null)
@@ -71,9 +71,9 @@ class _NowPill extends StatelessWidget {
                     meta,
                     maxLines: 2,
                     overflow: .ellipsis,
-                    style: NinjaText.tabular(
-                      NinjaText.subtext.copyWith(
-                        color: colors.onAccentSoftMuted,
+                    style: AppText.tabular(
+                      AppText.subtext.copyWith(
+                        color: colors.muted,
                       ),
                     ),
                   ),
@@ -83,7 +83,7 @@ class _NowPill extends StatelessWidget {
           AppLineIconWidget(
             AppLineIcon.chevronR,
             size: 16,
-            color: colors.onAccentSoftMuted,
+            color: colors.muted,
           ),
         ],
       ),

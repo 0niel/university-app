@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import Any, Literal
 
 from telethon.tl.functions.stories import (
@@ -48,7 +48,7 @@ def normalize_story(story: StoryItem, username: str) -> dict[str, Any]:
 def _required_date(value: datetime | None, field: str) -> datetime:
     if value is None:
         raise ValueError(f"Telegram story has no {field}")
-    return value
+    return value.replace(tzinfo=UTC) if value.tzinfo is None else value.astimezone(UTC)
 
 
 def _media_type(story: StoryItem) -> str:
@@ -79,10 +79,13 @@ class TelegramStoriesFetcher(TelegramFetcher):
         entity = await self.client.get_input_entity(username)
         response = await self.client(GetPeerStoriesRequest(peer=entity))
         stories = response.stories.stories
+        now = datetime.now(UTC)
         return [
             normalize_story(story, username)
             for story in stories
             if isinstance(story, StoryItem)
+            and _required_date(story.expire_date, "expire_date") > now
+            and _media_type(story) in {"image", "video"}
         ][: max(0, limit)]
 
     async def download_story_media(

@@ -27,7 +27,6 @@ import 'package:timezone/timezone.dart' as tz;
 import 'package:url_launcher/url_launcher.dart';
 
 part 'mini_app_runner_view.dart';
-part 'runner_app_bar.dart';
 
 typedef MiniAppsRuntimeInitializer = Future<void> Function();
 
@@ -67,25 +66,35 @@ class _MiniAppRunnerPageState extends State<MiniAppRunnerPage> {
     });
   }
 
+  void _close() {
+    if (Navigator.of(context).canPop()) {
+      Navigator.of(context).pop();
+    } else {
+      context.go('/services/apps');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<void>(
       future: _initialization,
       builder: (context, snapshot) {
         if (snapshot.connectionState != .done) {
-          return Scaffold(
-            backgroundColor: context.ninja.canvas,
+          return MiniAppScaffold(
+            title: context.l10n.miniAppsTitle,
+            onBack: _close,
             body: const MiniAppRunnerSkeleton(),
           );
         }
         if (snapshot.hasError) {
           final l10n = context.l10n;
-          return Scaffold(
-            backgroundColor: context.ninja.canvas,
+          return MiniAppScaffold(
+            title: l10n.miniAppsTitle,
+            onBack: _close,
             body: Center(
-              child: Padding(
+              child: SingleChildScrollView(
                 padding: const .symmetric(
-                  horizontal: NinjaMetrics.screenPadding,
+                  horizontal: AppSpacing.screen,
                 ),
                 child: NinjaErrorState(
                   title: l10n.miniAppsRunnerError,

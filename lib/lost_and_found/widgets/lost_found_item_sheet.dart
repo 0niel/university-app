@@ -68,7 +68,7 @@ class LostFoundItemSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final l10n = context.l10n;
     final telegram = item.telegramContactInfo;
     final phone = item.phoneNumberContactInfo;
@@ -95,7 +95,7 @@ class LostFoundItemSheet extends StatelessWidget {
             _InfoSurface(
               child: Text(
                 value,
-                style: NinjaText.body.copyWith(
+                style: AppText.body.copyWith(
                   color: colors.ink,
                   height: 1.5,
                 ),
@@ -111,13 +111,13 @@ class LostFoundItemSheet extends StatelessWidget {
                   AppLineIconWidget(
                     AppLineIcon.pin,
                     size: AppIconSize.md,
-                    color: colors.brand,
+                    color: colors.accent,
                   ),
                   const SizedBox(width: AppSpacing.md),
                   Expanded(
                     child: Text(
                       item.location,
-                      style: NinjaText.body.copyWith(
+                      style: AppText.body.copyWith(
                         color: colors.ink,
                         fontWeight: FontWeight.w700,
                       ),
@@ -187,7 +187,7 @@ class LostFoundItemSheet extends StatelessWidget {
                     Expanded(
                       child: Text(
                         l10n.lostFoundContactUnavailable,
-                        style: NinjaText.body.copyWith(color: colors.muted),
+                        style: AppText.body.copyWith(color: colors.muted),
                       ),
                     ),
                   ],

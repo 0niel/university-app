@@ -32,6 +32,14 @@ class _LessonTypesColorPicker extends StatelessWidget {
       builder: (context, state) => Column(
         crossAxisAlignment: .stretch,
         children: [
+          Align(
+            alignment: AlignmentDirectional.centerEnd,
+            child: AppButton.text(
+              label: context.l10n.reset,
+              size: AppButtonSize.small,
+              onPressed: cubit.resetLessonTypeColors,
+            ),
+          ),
           for (var index = 0; index < _kLessonTypes.length; index++)
             Padding(
               padding: EdgeInsets.only(top: index == 0 ? 0 : 18),

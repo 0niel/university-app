@@ -2,90 +2,98 @@ import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../../kit_harness.dart';
+
 void main() {
-  final colors = NinjaColors.light();
-
-  Widget wrap(Widget child) => MaterialApp(
-        theme: NinjaTheme.light(),
-        home: Scaffold(body: Center(child: child)),
-      );
-
   group('NinjaTooltip', () {
-    testWidgets('renders an ink bubble with an arrow above', (tester) async {
+    testWidgets('paints an ink r12 bubble with 12.5/600 canvas text', (
+      tester,
+    ) async {
       await tester.pumpWidget(
-        wrap(const NinjaTooltip(message: 'Числитель — нечётная неделя')),
+        wrapKit(const NinjaTooltip(message: 'Тап — отметиться на паре')),
       );
 
-      final style =
-          tester.widget<Text>(find.text('Числитель — нечётная неделя')).style;
-      expect(style?.fontSize, 12);
-      expect(style?.fontWeight, FontWeight.w700);
-      expect(style?.color, colors.onInk);
-
-      final arrow = tester.widget<PositionedDirectional>(
-        find.byType(PositionedDirectional),
+      final bubble = kitDecoration(
+        tester,
+        find
+            .descendant(
+              of: find.byType(NinjaTooltip),
+              matching: find.byType(DecoratedBox),
+            )
+            .last,
       );
-      expect(arrow.start, 22);
-      expect(arrow.top, -5);
-      expect(arrow.bottom, isNull);
+      expect(bubble.color, kitColors.ink);
+      expect(bubble.borderRadius, BorderRadius.circular(12));
+
+      final style = kitStyleOf(tester, 'Тап — отметиться на паре');
+      expect(style?.fontSize, 12.5);
+      expect(style?.fontWeight, FontWeight.w600);
+      expect(style?.color, kitColors.canvas);
     });
 
-    testWidgets('flips the arrow to the bottom edge', (tester) async {
+    testWidgets('has a 10px rotated tail', (tester) async {
       await tester.pumpWidget(
-        wrap(
-          const NinjaTooltip(
-            message: 'Подсказка',
-            arrow: NinjaTooltipArrow.down,
-          ),
-        ),
+        wrapKit(const NinjaTooltip(message: 'Подсказка')),
       );
 
-      final arrow = tester.widget<PositionedDirectional>(
-        find.byType(PositionedDirectional),
+      final tail = tester.widget<Container>(
+        find.descendant(
+          of: find.byType(Transform),
+          matching: find.byType(Container),
+        ),
       );
-      expect(arrow.top, isNull);
-      expect(arrow.bottom, -5);
+      expect(tail.constraints?.maxWidth, 10);
+      expect((tail.decoration! as BoxDecoration).color, kitColors.ink);
+    });
+  });
+
+  group('AppTooltip', () {
+    testWidgets('renders the label and tail in both directions', (
+      tester,
+    ) async {
+      await tester.pumpWidget(wrapKit(const AppTooltip(label: 'Вниз')));
+      expect(kitStyleOf(tester, 'Вниз')?.color, kitColors.canvas);
+      expect(
+        find.descendant(
+          of: find.byType(AppTooltip),
+          matching: find.byType(Transform),
+        ),
+        findsOneWidget,
+      );
+
+      await tester.pumpWidget(
+        wrapKit(const AppTooltip(label: 'Вверх', arrow: AppTooltipArrow.up)),
+      );
+      expect(find.text('Вверх'), findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byType(AppTooltip),
+          matching: find.byType(Transform),
+        ),
+        findsOneWidget,
+      );
     });
   });
 
   group('NinjaFeatureHint', () {
-    testWidgets('renders a restrained brand surface and accessible action', (
-      tester,
-    ) async {
+    testWidgets('renders on tint with an action', (tester) async {
       var taps = 0;
       await tester.pumpWidget(
-        wrap(
-          NinjaFeatureHint(
-            title: 'Новое: маршруты между парами',
-            body: 'Тапните «окно» в расписании — покажем путь.',
-            actionLabel: 'Понятно',
-            onAction: () => taps++,
+        wrapKit(
+          SizedBox(
+            width: 360,
+            child: NinjaFeatureHint(
+              title: 'Новое',
+              body: 'Теперь можно отмечаться на парах',
+              actionLabel: 'Понятно',
+              onAction: () => taps++,
+            ),
           ),
         ),
       );
 
-      final title =
-          tester.widget<Text>(find.text('Новое: маршруты между парами')).style;
-      expect(title?.fontSize, 12.5);
-      expect(title?.fontWeight, FontWeight.w800);
-      expect(title?.color, colors.ink);
-
-      final action = tester.widget<Text>(find.text('Понятно')).style;
-      expect(action?.color, colors.brandInk);
-      expect(action?.fontWeight, FontWeight.w700);
-      expect(tester.getSize(find.text('Понятно')).height, lessThan(44));
-      expect(
-        tester
-            .getSize(
-              find.ancestor(
-                of: find.text('Понятно'),
-                matching: find.byType(ConstrainedBox),
-              ),
-            )
-            .height,
-        greaterThanOrEqualTo(44),
-      );
-
+      expect(kitDecorationOf(tester, NinjaFeatureHint).color, kitColors.tint);
+      expect(find.byType(AppIconTile), findsOneWidget);
       await tester.tap(find.text('Понятно'));
       expect(taps, 1);
     });

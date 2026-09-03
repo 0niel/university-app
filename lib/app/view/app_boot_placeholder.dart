@@ -7,14 +7,13 @@ class AppBootPlaceholder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = MediaQuery.platformBrightnessOf(context) == Brightness.dark;
-    final colors = isDark ? NinjaColors.dark() : NinjaColors.light();
+    final colors = isDark ? AppColors.dark : AppColors.light;
     return ColoredBox(
       color: colors.canvas,
       child: Center(
-        child: AppNinjaMark(
-          size: 56,
-          color: colors.brand,
-          spin: !MediaQuery.disableAnimationsOf(context),
+        child: AppSpinner(
+          color: colors.accent,
+          trackColor: colors.surface2,
         ),
       ),
     );

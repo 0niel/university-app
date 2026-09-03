@@ -13,7 +13,7 @@ class _DayBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
 
     return Column(
       mainAxisAlignment: .end,
@@ -21,11 +21,11 @@ class _DayBar extends StatelessWidget {
         if (hours > 0)
           Text(
             hours.toStringAsFixed(hours.truncateToDouble() == hours ? 0 : 1),
-            style: NinjaText.tabular(
-              NinjaText.helper.copyWith(color: colors.muted),
+            style: AppText.tabular(
+              AppText.captionSmall.copyWith(color: colors.muted),
             ),
           ),
-        const SizedBox(height: 6),
+        const SizedBox(height: AppSpacing.xsm),
         FractionallySizedBox(
           widthFactor: 1,
           child: AnimatedContainer(
@@ -33,15 +33,15 @@ class _DayBar extends StatelessWidget {
             curve: NinjaMotion.enter,
             height: hours <= 0 ? 0 : (hours / maxHours * 88).clamp(6, 88),
             decoration: BoxDecoration(
-              color: hours > 0 ? colors.brand : Colors.transparent,
-              borderRadius: .circular(NinjaRadius.pill),
+              color: hours > 0 ? colors.accent : Colors.transparent,
+              borderRadius: .circular(AppRadius.full),
             ),
           ),
         ),
-        const SizedBox(height: 6),
+        const SizedBox(height: AppSpacing.xsm),
         Text(
           label,
-          style: NinjaText.helper.copyWith(color: colors.muted),
+          style: AppText.captionSmall.copyWith(color: colors.muted),
         ),
       ],
     );

@@ -1,5 +1,7 @@
+import 'dart:math' as math;
+
 import 'package:app_ui/app_ui.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:rtu_mirea_app/search/bloc/search_bloc.dart';
@@ -53,9 +55,6 @@ class _SearchViewState extends State<SearchView> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final textScale = MediaQuery.textScalerOf(context).scale(1);
-    final modeBarHeight = (60 + (textScale - 1) * 18).clamp(60, 80).toDouble();
-    final toolbarHeight = (68 + (textScale - 1) * 20).clamp(68, 88).toDouble();
 
     return BlocConsumer<SearchBloc, SearchState>(
       listener: (context, state) {
@@ -69,60 +68,102 @@ class _SearchViewState extends State<SearchView> {
         }
       },
       builder: (context, state) {
-        return NestedScrollView(
-          floatHeaderSlivers: true,
-          headerSliverBuilder: (context, innerBoxIsScrolled) => [
-            SliverAppBar(
-              pinned: true,
-              floating: true,
-              snap: true,
-              automaticallyImplyLeading: false,
-              toolbarHeight: toolbarHeight,
-              titleSpacing: NinjaMetrics.screenPadding,
-              backgroundColor: context.ninja.canvas,
-              surfaceTintColor: Colors.transparent,
-              shadowColor: Colors.transparent,
-              scrolledUnderElevation: 0,
-              title: Row(
-                children: [
-                  Expanded(
-                    child: SearchTextField(
-                      key: const Key('searchPage_searchTextField'),
-                      controller: _controller,
-                      autofocus: (widget.query ?? '').isEmpty,
-                    ),
-                  ),
-                  const SizedBox(width: AppSpacing.xs),
-                  NinjaButton.text(
-                    label: l10n.cancel,
-                    size: NinjaButtonSize.small,
-                    onPressed: () => Navigator.of(context).maybePop(),
-                  ),
-                ],
-              ),
-              bottom: PreferredSize(
-                preferredSize: Size.fromHeight(modeBarHeight),
-                child: const Padding(
-                  padding: EdgeInsets.only(bottom: AppSpacing.lg),
-                  child: SearchModeSelect(),
+        return Column(
+          children: [
+            Padding(
+              padding: EdgeInsets.fromLTRB(
+                AppSpacing.screen,
+                math.max(
+                  AppSpacing.screenTop,
+                  MediaQuery.paddingOf(context).top + AppSpacing.md,
                 ),
+                AppSpacing.screen,
+                AppSpacing.lg,
+              ),
+              child: _SearchControls(
+                controller: _controller,
+                autofocus: (widget.query ?? '').isEmpty,
+              ),
+            ),
+            const Padding(
+              padding: EdgeInsets.only(bottom: AppSpacing.lg),
+              child: SearchModeSelect(),
+            ),
+            Expanded(
+              child: NinjaStateSwitcher(
+                child: _query.trim().isEmpty
+                    ? SearchZeroState(
+                        key: const ValueKey('search-zero'),
+                        state: state,
+                        onQuerySelected: _setQuery,
+                      )
+                    : SearchResults(
+                        key: const ValueKey('search-results'),
+                        state: state,
+                        query: _query.trim(),
+                        onQuerySelected: _setQuery,
+                      ),
               ),
             ),
           ],
-          body: NinjaStateSwitcher(
-            child: _query.trim().isEmpty
-                ? SearchZeroState(
-                    key: const ValueKey('search-zero'),
-                    state: state,
-                    onQuerySelected: _setQuery,
-                  )
-                : SearchResults(
-                    key: const ValueKey('search-results'),
-                    state: state,
-                    query: _query.trim(),
-                    onQuerySelected: _setQuery,
-                  ),
-          ),
+        );
+      },
+    );
+  }
+}
+
+class _SearchControls extends StatelessWidget {
+  const _SearchControls({required this.controller, required this.autofocus});
+
+  static const double _minFieldWidth = 160;
+
+  final TextEditingController controller;
+  final bool autofocus;
+
+  @override
+  Widget build(BuildContext context) {
+    final label = context.l10n.cancel;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final painter = TextPainter(
+          text: TextSpan(text: label, style: AppButtonSize.small.textStyle),
+          textDirection: Directionality.of(context),
+          textScaler: MediaQuery.textScalerOf(context),
+          locale: Localizations.maybeLocaleOf(context),
+          maxLines: 1,
+        )..layout();
+        final cancelWidth =
+            painter.width + AppButtonSize.small.horizontalPadding * 2;
+        painter.dispose();
+        final stacked =
+            constraints.maxWidth - cancelWidth - AppSpacing.sm < _minFieldWidth;
+        final field = SearchTextField(
+          key: const Key('searchPage_searchTextField'),
+          controller: controller,
+          autofocus: autofocus,
+        );
+        final cancel = AppButton.text(
+          label: label,
+          size: AppButtonSize.small,
+          onPressed: () => Navigator.of(context).maybePop(),
+        );
+        if (stacked) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              field,
+              const SizedBox(height: AppSpacing.sm),
+              Align(alignment: AlignmentDirectional.centerEnd, child: cancel),
+            ],
+          );
+        }
+        return Row(
+          children: [
+            Expanded(child: field),
+            const SizedBox(width: AppSpacing.sm),
+            cancel,
+          ],
         );
       },
     );

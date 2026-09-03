@@ -7,13 +7,13 @@ class NavGlyphIcon extends StatelessWidget {
   const NavGlyphIcon(
     this.glyph, {
     super.key,
-    this.filled = false,
-    this.size = 22,
+    this.size = 23,
+    this.strokeWidth = 2.2,
   });
 
   final NavGlyph glyph;
-  final bool filled;
   final double size;
+  final double strokeWidth;
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +26,7 @@ class NavGlyphIcon extends StatelessWidget {
         NavGlyph.profile => AppLineIcon.user,
       },
       size: size,
-      strokeWidth: filled ? 2.5 : 2,
+      strokeWidth: strokeWidth,
     );
   }
 }

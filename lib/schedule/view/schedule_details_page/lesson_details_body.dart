@@ -20,6 +20,8 @@ class _LessonDetailsBody extends StatelessWidget {
     required this.onReviewTap,
     required this.onRetryDetails,
     required this.onOpenMaterials,
+    required this.onUploadMaterial,
+    required this.onRemind,
   });
 
   final LessonSchedulePart lesson;
@@ -40,10 +42,18 @@ class _LessonDetailsBody extends StatelessWidget {
   final VoidCallback onReviewTap;
   final VoidCallback onRetryDetails;
   final VoidCallback onOpenMaterials;
+  final VoidCallback onUploadMaterial;
+  final VoidCallback onRemind;
 
   @override
   Widget build(BuildContext context) {
     final coldLoad = loading && details == null;
+    final changes = changesForSelectedLesson(
+      context.watch<ScheduleChangesCubit?>(),
+      context.watch<ScheduleBloc?>()?.state.selectedSchedule,
+      lesson,
+    );
+    final change = changeFor(changes, lesson, selectedDate);
 
     return CustomScrollView(
       physics: const BouncingScrollPhysics(
@@ -54,18 +64,52 @@ class _LessonDetailsBody extends StatelessWidget {
           title: lesson.subject,
           onBack: onBack,
           onShare: onShare,
-          onMore: onMore,
         ),
         SliverSafeArea(
           top: false,
           sliver: SliverList(
             delegate: SliverChildListDelegate([
-              const SizedBox(height: 8),
+              const SizedBox(height: AppSpacing.sm),
+              if (isCancelled(change) || isMoved(change))
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(
+                    AppSpacing.screen,
+                    AppSpacing.zero,
+                    AppSpacing.screen,
+                    AppSpacing.lg,
+                  ),
+                  child: AppBanner(
+                    message: isCancelled(change)
+                        ? context.l10n.lessonCancelledBanner
+                        : context.l10n.lessonMovedBanner(
+                            change!.oldValue.rooms.join(', '),
+                            change.newValue.rooms.join(', '),
+                          ),
+                    tone: isCancelled(change)
+                        ? AppBannerTone.danger
+                        : AppBannerTone.warn,
+                  ),
+                ),
               _SubjectHero(lesson: lesson, selectedDate: selectedDate),
-              _LessonProgressCard(lesson: lesson, selectedDate: selectedDate),
-              _LessonActionGrid(onNote: onNote, onRoute: onRoute),
               _TeacherCard(lesson: lesson, profile: teacherProfile),
+              _LessonProgressCard(lesson: lesson, selectedDate: selectedDate),
+              _LessonActionGrid(
+                onNote: onNote,
+                onRoute: onRoute,
+                onRemind: onRemind,
+                onMaterials: onOpenMaterials,
+                lesson: lesson,
+                day: selectedDate,
+              ),
               if (showGroups) _GroupsCard(lesson: lesson),
+              _MaterialsPreview(
+                loading: coldLoad,
+                error: loadError,
+                materials: details?.materials ?? const [],
+                onRetry: onRetryDetails,
+                onOpenAll: onOpenMaterials,
+                onUpload: onUploadMaterial,
+              ),
               _ReactionsSection(
                 loading: coldLoad,
                 pending: reactionBusy,
@@ -74,15 +118,18 @@ class _LessonDetailsBody extends StatelessWidget {
                 onReactionTap: onReactionTap,
                 onReviewTap: onReviewTap,
               ),
-              _MaterialsPreview(
-                loading: coldLoad,
-                error: loadError,
-                materials: details?.materials ?? const [],
-                onRetry: onRetryDetails,
-                onOpenAll: onOpenMaterials,
-              ),
+              _GroupNoteCard(lesson: lesson, day: selectedDate, onTap: onNote),
               if (peers.isNotEmpty) _PeersCard(peers: peers),
-              const SizedBox(height: 32),
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.screen,
+                ),
+                child: AppButton.text(
+                  label: context.l10n.lessonDetailsAddToSchedule,
+                  onPressed: onMore,
+                ),
+              ),
+              const SizedBox(height: AppSpacing.xxl),
             ]),
           ),
         ),

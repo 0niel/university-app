@@ -7,13 +7,13 @@ class _MiniAppsSearchField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final l10n = context.l10n;
     return Padding(
       padding: const .fromLTRB(
-        NinjaMetrics.screenPadding,
+        AppSpacing.screen,
         4,
-        NinjaMetrics.screenPadding,
+        AppSpacing.screen,
         0,
       ),
       child: NinjaInput(

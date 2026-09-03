@@ -7,20 +7,20 @@ class WalletHistoryRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final emoji = entry.emoji;
     return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.all(16),
+      margin: const EdgeInsets.only(bottom: AppSpacing.gap),
+      padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
         color: colors.surface,
-        borderRadius: BorderRadius.circular(NinjaRadius.card),
+        borderRadius: BorderRadius.circular(AppRadius.card),
       ),
       child: Row(
         children: [
           if (emoji.isNotEmpty) ...[
             Text(emoji, style: const TextStyle(fontSize: 16)),
-            const SizedBox(width: 10),
+            const SizedBox(width: AppSpacing.gap),
           ],
           Expanded(
             child: Column(
@@ -30,22 +30,22 @@ class WalletHistoryRow extends StatelessWidget {
                 Text(
                   entry.title,
                   overflow: TextOverflow.ellipsis,
-                  style: NinjaText.headline.copyWith(color: colors.ink),
+                  style: AppText.headline.copyWith(color: colors.ink),
                 ),
-                const SizedBox(height: 2),
+                const SizedBox(height: AppSpacing.xxs),
                 Text(
                   _formatWalletHistoryTimestamp(context, entry.createdAt),
-                  style: NinjaText.subtext.copyWith(color: colors.muted),
+                  style: AppText.subtext.copyWith(color: colors.muted),
                 ),
               ],
             ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: AppSpacing.md),
           Text(
             entry.isSpend ? '−${-entry.amount}' : '+${entry.amount}',
-            style: NinjaText.tabular(
-              NinjaText.body.copyWith(
-                color: entry.isSpend ? colors.muted : colors.brandInk,
+            style: AppText.tabular(
+              AppText.body.copyWith(
+                color: entry.isSpend ? colors.ink : colors.lecture,
                 fontWeight: FontWeight.w600,
               ),
             ),

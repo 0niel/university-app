@@ -13,7 +13,7 @@ class _NinjaGroupSpaceSectionHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final title = this.title;
     if (title == null) return const SizedBox(height: 18);
     final action = actionLabel;
@@ -22,13 +22,13 @@ class _NinjaGroupSpaceSectionHeader extends StatelessWidget {
       title,
       maxLines: 2,
       overflow: .ellipsis,
-      style: NinjaText.title.copyWith(color: colors.ink),
+      style: AppText.title.copyWith(color: colors.ink),
     );
     return Padding(
       padding: const .fromLTRB(
-        NinjaMetrics.screenPadding,
+        AppSpacing.screen,
         28,
-        NinjaMetrics.screenPadding,
+        AppSpacing.screen,
         8,
       ),
       child: stacked

@@ -32,31 +32,31 @@ class _NotificationsToggleRowState extends State<NotificationsToggleRow> {
       label: widget.label,
       sub: widget.sub,
       value: settings.notificationsEnabled,
-      onChanged: (enabled) =>
-          unawaited(_setEnabled(settings, enabled: enabled)),
+      onChanged: _requesting
+          ? null
+          : (enabled) => unawaited(_setEnabled(enabled: enabled)),
     );
   }
 
-  Future<void> _setEnabled(
-    UserSettings settings, {
+  Future<void> _setEnabled({
     required bool enabled,
   }) async {
     if (_requesting) return;
     final profileCubit = context.read<ProfileCubit>();
-    if (!enabled) {
-      await profileCubit.updateSettings(
-        settings.copyWith(notificationsEnabled: false),
-      );
-      return;
-    }
     setState(() => _requesting = true);
     try {
+      if (!enabled) {
+        await profileCubit.updateSettings(
+          profileCubit.state.settings.copyWith(notificationsEnabled: false),
+        );
+        return;
+      }
       final repository = context.read<LocalNotificationsRepository>();
       final isGranted = await repository.ensurePermission();
-      if (!mounted) return;
+      if (!mounted || profileCubit.isClosed) return;
       if (isGranted) {
         await profileCubit.updateSettings(
-          settings.copyWith(notificationsEnabled: true),
+          profileCubit.state.settings.copyWith(notificationsEnabled: true),
         );
       } else {
         showNinjaToast(context, message: context.l10n.error, showCheck: false);

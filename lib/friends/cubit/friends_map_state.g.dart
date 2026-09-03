@@ -9,14 +9,14 @@ part of 'friends_map_state.dart';
 _GeoSharingSettings _$GeoSharingSettingsFromJson(Map<String, dynamic> json) =>
     $checkedCreate('_GeoSharingSettings', json, ($checkedConvert) {
       final val = _GeoSharingSettings(
-        sharing: $checkedConvert('sharing', (v) => v as bool? ?? true),
+        sharing: $checkedConvert('sharing', (v) => v as bool? ?? false),
         visibility: $checkedConvert(
           'visibility',
           (v) =>
               $enumDecodeNullable(
                 _$GeoVisibilityEnumMap,
                 v,
-                unknownValue: GeoVisibility.all,
+                unknownValue: GeoVisibility.none,
               ) ??
               GeoVisibility.all,
         ),

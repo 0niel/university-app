@@ -76,10 +76,11 @@ class CommunityRepository {
   }
 
   /// Loads the current top-topic feed from Discourse.
-  Future<TopTopicsResponse> getTopTopics() async {
+  Future<TopTopicsResponse> getTopTopics({int page = 0}) async {
     try {
-      final top = await _discourse.getTop();
+      final top = await _discourse.getTop(page: page);
       return TopTopicsResponse(
+        hasMore: top.topicList.moreTopicsUrl?.isNotEmpty ?? false,
         topics:
             top.topicList.topics
                 .map(

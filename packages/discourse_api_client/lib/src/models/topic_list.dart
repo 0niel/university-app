@@ -14,6 +14,7 @@ abstract class TopicList with _$TopicList {
     @JsonKey(name: 'per_page') required int perPage,
     @JsonKey(name: 'top_tags') required List<Object?> topTags,
     required List<Topic> topics,
+    @JsonKey(name: 'more_topics_url') String? moreTopicsUrl,
   }) = _TopicList;
 
   factory TopicList.fromJson(Map<String, dynamic> json) =>

@@ -1,5 +1,6 @@
-import 'package:app_ui/app_ui.dart';
-import 'package:flutter/material.dart';
+import 'package:app_ui/src/spacing/app_spacing.dart';
+import 'package:app_ui/src/typography/typography.dart';
+import 'package:flutter/widgets.dart';
 
 class AppNinjaRankStat extends StatelessWidget {
   const AppNinjaRankStat({
@@ -17,20 +18,14 @@ class AppNinjaRankStat extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
       children: [
-        Text(
-          value,
-          style: AppText.title.copyWith(
-            color: color,
-            fontSize: 20,
-            fontWeight: FontWeight.w800,
-            fontFeatures: [const FontFeature.tabularFigures()],
-          ),
-        ),
+        Text(value, style: AppText.metric.copyWith(color: color)),
+        const SizedBox(height: AppSpacing.xxs),
         Text(
           label,
           style: AppText.captionSmall.copyWith(
-            color: color.withValues(alpha: 0.8),
+            color: color.withValues(alpha: .8),
           ),
         ),
       ],

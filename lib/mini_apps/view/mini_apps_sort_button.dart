@@ -8,7 +8,7 @@ class _MiniAppsSortButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final l10n = context.l10n;
     return Semantics(
       button: true,
@@ -18,31 +18,42 @@ class _MiniAppsSortButton extends StatelessWidget {
         onTap: onPressed,
         child: Container(
           constraints: const BoxConstraints(
-            minHeight: NinjaMetrics.minTouchTarget,
+            minHeight: AppControlSize.touchTarget,
           ),
           decoration: BoxDecoration(
-            color: colors.surfaceAlt,
-            borderRadius: BorderRadius.circular(NinjaRadius.pill),
+            color: colors.surface2,
+            borderRadius: BorderRadius.circular(AppRadius.full),
           ),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.lg,
+              vertical: AppSpacing.gap,
+            ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                AppLineIconWidget(.filter, size: 16, color: colors.brandInk),
-                const SizedBox(width: 8),
+                AppLineIconWidget(
+                  .filter,
+                  size: AppIconSize.sm,
+                  color: colors.accent,
+                ),
+                const SizedBox(width: AppSpacing.sm),
                 Flexible(
                   child: Text(
                     label,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: NinjaText.buttonSmall.copyWith(
-                      color: colors.brandInk,
+                    style: AppText.buttonSmall.copyWith(
+                      color: colors.accent,
                     ),
                   ),
                 ),
                 const SizedBox(width: 6),
-                AppLineIconWidget(.chevronD, size: 14, color: colors.brandInk),
+                AppLineIconWidget(
+                  .chevronD,
+                  size: AppIconSize.xs,
+                  color: colors.accent,
+                ),
               ],
             ),
           ),

@@ -9,13 +9,17 @@ void main() {
       );
 
   group('AppPrivacyChip', () {
-    testWidgets('renders the emoji+label and a check icon', (tester) async {
+    testWidgets('renders the emoji+label and a line check icon',
+        (tester) async {
       await tester.pumpWidget(
         wrap(const AppPrivacyChip(icon: '📍', label: 'геолокация')),
       );
 
       expect(find.text('📍 геолокация'), findsOneWidget);
-      expect(find.byIcon(Icons.check_rounded), findsOneWidget);
+      final icon = tester.widget<AppLineIconWidget>(
+        find.byType(AppLineIconWidget),
+      );
+      expect(icon.icon, AppLineIcon.check);
     });
   });
 }

@@ -60,7 +60,7 @@ class _QrScanPageState extends State<QrScanPage> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final colors = context.ninja;
+    final colors = context.colors;
     return Scaffold(
       backgroundColor: Colors.black,
       body: Stack(
@@ -82,28 +82,31 @@ class _QrScanPageState extends State<QrScanPage> {
                 const Spacer(),
                 Padding(
                   padding: const .fromLTRB(
-                    NinjaMetrics.screenPadding,
+                    AppSpacing.screen,
                     0,
-                    NinjaMetrics.screenPadding,
+                    AppSpacing.screen,
                     48,
                   ),
                   child: Container(
                     constraints: const BoxConstraints(
-                      minHeight: NinjaMetrics.minTouchTarget,
+                      minHeight: AppControlSize.iconButton,
                     ),
-                    padding: const .symmetric(horizontal: 18, vertical: 12),
+                    padding: const .symmetric(
+                      horizontal: AppSpacing.fieldGap,
+                      vertical: AppSpacing.md,
+                    ),
                     alignment: .center,
                     decoration: BoxDecoration(
                       color: Colors.white.withValues(alpha: 0.14),
-                      borderRadius: .circular(NinjaRadius.pill),
+                      borderRadius: .circular(AppRadius.full),
                     ),
                     child: Text(
                       _invalid
                           ? l10n.friendsScanInvalid
                           : l10n.friendsScanInstruction,
                       textAlign: .center,
-                      style: NinjaText.body.copyWith(
-                        color: _invalid ? colors.scarlet : Colors.white,
+                      style: AppText.body.copyWith(
+                        color: _invalid ? colors.danger : Colors.white,
                       ),
                     ),
                   ),

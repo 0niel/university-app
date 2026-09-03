@@ -61,7 +61,7 @@ class TeamFinderBody extends StatelessWidget {
     }
     return RefreshIndicator(
       key: ValueKey('teams-${_variantKey(state)}'),
-      color: context.ninja.ink,
+      color: context.colors.ink,
       onRefresh: context.read<TeamFinderCubit>().load,
       child: _list(context, state),
     );
@@ -80,9 +80,9 @@ class TeamFinderBody extends StatelessWidget {
         children: [
           Padding(
             padding: const .fromLTRB(
-              NinjaMetrics.screenPadding,
+              AppSpacing.screen,
               40,
-              NinjaMetrics.screenPadding,
+              AppSpacing.screen,
               0,
             ),
             child: NinjaErrorState(
@@ -102,9 +102,9 @@ class TeamFinderBody extends StatelessWidget {
         children: [
           Padding(
             padding: const .fromLTRB(
-              NinjaMetrics.screenPadding,
+              AppSpacing.screen,
               64,
-              NinjaMetrics.screenPadding,
+              AppSpacing.screen,
               0,
             ),
             child: NinjaEmptyState.screen(

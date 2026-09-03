@@ -13,13 +13,13 @@ class NinjaFindFriendsSectionHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final subtitleText = subtitle;
     return Padding(
       padding: const .fromLTRB(
-        NinjaMetrics.screenPadding,
+        AppSpacing.screen,
         26,
-        NinjaMetrics.screenPadding,
+        AppSpacing.screen,
         12,
       ),
       child: Column(
@@ -28,12 +28,12 @@ class NinjaFindFriendsSectionHeader extends StatelessWidget {
         children: [
           Text(
             title,
-            style: NinjaText.headline.copyWith(color: colors.ink),
+            style: AppText.headline.copyWith(color: colors.ink),
           ),
           if (subtitleText != null)
             Text(
               subtitleText,
-              style: NinjaText.helper.copyWith(color: colors.muted),
+              style: AppText.caption.copyWith(color: colors.muted),
             ),
         ],
       ),

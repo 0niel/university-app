@@ -1,6 +1,12 @@
-import 'package:app_ui/app_ui.dart';
-import 'package:flutter/material.dart';
-import 'package:hugeicons/hugeicons.dart';
+import 'package:app_ui/src/colors/colors.dart';
+import 'package:app_ui/src/spacing/app_spacing.dart';
+import 'package:app_ui/src/typography/typography.dart';
+import 'package:app_ui/src/widgets/app_card.dart';
+import 'package:app_ui/src/widgets/app_icon_tile.dart';
+import 'package:app_ui/src/widgets/app_line_icon.dart';
+import 'package:app_ui/src/widgets/app_list_group.dart';
+import 'package:app_ui/src/widgets/app_pressable.dart';
+import 'package:flutter/widgets.dart';
 
 class ActionCardItem {
   const ActionCardItem({
@@ -14,81 +20,85 @@ class ActionCardItem {
 
   final String title;
   final String subtitle;
-  final HugeIcon icon;
+  final AppLineIcon icon;
   final VoidCallback onTap;
   final Color? iconColor;
   final String? badge;
 }
 
 class ActionCardTile extends StatelessWidget {
-  const ActionCardTile({
-    required this.item,
-    super.key,
-  });
+  const ActionCardTile({required this.item, super.key});
 
   final ActionCardItem item;
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).colors;
+    final colors = context.colors;
+    final tone = item.iconColor ?? colors.accent;
     final badge = item.badge;
 
     return AppPressable(
       onTap: item.onTap,
+      semanticsLabel: '${item.title}, ${item.subtitle}',
       child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.lg),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.lg,
+          vertical: AppSpacing.actionInset,
+        ),
         child: Row(
           children: [
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color:
-                    (item.iconColor ?? colors.primary).withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: item.icon,
+            AppIconTile(
+              icon: item.icon,
+              size: AppControlSize.iconTileMedium,
+              iconSize: AppIconSize.md,
+              background: colors.tintOf(tone),
+              foreground: tone,
             ),
-            const SizedBox(width: 16),
+            const SizedBox(width: AppSpacing.md),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
                     item.title,
-                    style: AppText.bodyStrong.copyWith(
-                      color: colors.active,
-                      fontWeight: FontWeight.w600,
-                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppText.bodyStrong.copyWith(color: colors.ink),
                   ),
-                  const SizedBox(height: 2),
+                  const SizedBox(height: AppSpacing.xxs),
                   Text(
                     item.subtitle,
-                    style: AppText.caption.copyWith(
-                      color: colors.deactive,
-                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppText.caption.copyWith(color: colors.muted),
                   ),
                 ],
               ),
             ),
             if (badge != null) ...[
+              const SizedBox(width: AppSpacing.sm),
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.badgeInset,
+                  vertical: AppSpacing.fine,
+                ),
                 decoration: BoxDecoration(
-                  color: colors.primary.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(8),
+                  color: colors.tint,
+                  borderRadius: BorderRadius.circular(AppRadius.full),
                 ),
                 child: Text(
                   badge,
-                  style: AppText.bodyStrong.copyWith(color: colors.primary),
+                  style: AppText.badge.copyWith(color: colors.accent),
                 ),
               ),
-              const SizedBox(width: 8),
             ],
-            Icon(
-              Icons.arrow_forward_ios_rounded,
-              color: colors.deactive,
-              size: 16,
+            const SizedBox(width: AppSpacing.sm),
+            AppLineIconWidget(
+              AppLineIcon.chevronR,
+              size: AppIconSize.xs,
+              color: colors.muted2,
+              strokeWidth: 2.5,
             ),
           ],
         ),
@@ -98,57 +108,31 @@ class ActionCardTile extends StatelessWidget {
 }
 
 class ActionCard extends StatelessWidget {
-  const ActionCard({
-    required this.item,
-    super.key,
-  });
+  const ActionCard({required this.item, super.key});
 
   final ActionCardItem item;
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: EdgeInsets.zero,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(16),
-        child: ActionCardTile(item: item),
-      ),
+    return AppCard(
+      padding: EdgeInsets.zero,
+      child: ActionCardTile(item: item),
     );
   }
 }
 
 class ActionCardGroup extends StatelessWidget {
-  const ActionCardGroup({
-    required this.items,
-    super.key,
-  });
+  const ActionCardGroup({required this.items, super.key});
 
   final List<ActionCardItem> items;
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).colors;
-
-    return Container(
-      decoration: BoxDecoration(
-        color: colors.background02,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: colors.background03.withValues(alpha: 0.5)),
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(16),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            for (var i = 0; i < items.length; i++) ...[
-              ActionCardTile(item: items[i]),
-              if (i < items.length - 1)
-                Divider(height: 1, color: colors.background03),
-            ],
-          ],
-        ),
-      ),
+    return AppListGroup(
+      dividerIndent: 68,
+      children: [
+        for (final item in items) ActionCardTile(item: item),
+      ],
     );
   }
 }

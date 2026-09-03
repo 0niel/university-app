@@ -1,45 +1,52 @@
 part of 'teacher_profile_page.dart';
 
 class _ReviewCard extends StatelessWidget {
-  const _ReviewCard({required this.review});
+  const _ReviewCard({required this.review, this.compact = false});
 
   final TeacherReview review;
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     return Container(
-      padding: const .all(16),
+      padding: compact
+          ? const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: 13)
+          : const EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
         color: colors.surface,
-        borderRadius: .circular(NinjaRadius.card),
+        borderRadius: .circular(AppRadius.card),
       ),
       child: Column(
         crossAxisAlignment: .start,
         children: [
           Row(
-            spacing: 10,
+            spacing: AppSpacing.gap,
             children: [
-              AppAvatar(name: review.authorName, size: 32),
+              if (!compact) AppAvatar(name: review.authorName, size: 32),
               Expanded(
                 child: Text(
                   review.authorName,
-                  style: NinjaText.body.copyWith(color: colors.ink),
+                  style:
+                      (compact
+                              ? AppText.sans(12, FontWeight.w600)
+                              : AppText.body)
+                          .copyWith(color: compact ? colors.muted : colors.ink),
                 ),
               ),
               Text(
                 '★' * review.average.round(),
-                style: NinjaText.subtext.copyWith(color: colors.brandInk),
+                style: AppText.subtext.copyWith(color: colors.accent),
               ),
             ],
           ),
           if (review.body.isNotEmpty) ...[
-            const SizedBox(height: 8),
+            SizedBox(height: compact ? 6 : 8),
             Text(
               review.body,
-              style: NinjaText.subtext.copyWith(
-                color: colors.muted,
-                height: 1.45,
+              style: AppText.sans(14, FontWeight.w400).copyWith(
+                color: compact ? colors.ink : colors.muted,
+                height: 1.4,
               ),
             ),
           ],

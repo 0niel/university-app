@@ -8,7 +8,7 @@ class _SubmitSectionLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final subtitleText = subtitle;
     return Padding(
       padding: const .only(bottom: 10),
@@ -17,13 +17,13 @@ class _SubmitSectionLabel extends StatelessWidget {
         children: [
           Text(
             title,
-            style: NinjaText.title.copyWith(color: colors.ink),
+            style: AppText.title.copyWith(color: colors.ink),
           ),
           if (subtitleText != null) ...[
-            const SizedBox(height: 4),
+            const SizedBox(height: AppSpacing.xs),
             Text(
               subtitleText,
-              style: NinjaText.subtext.copyWith(color: colors.muted),
+              style: AppText.subtext.copyWith(color: colors.muted),
             ),
           ],
         ],

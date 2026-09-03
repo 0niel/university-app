@@ -1,6 +1,13 @@
-import 'package:app_ui/app_ui.dart';
+import 'package:app_ui/src/colors/colors.dart';
+import 'package:app_ui/src/spacing/app_spacing.dart';
+import 'package:app_ui/src/typography/typography.dart';
+import 'package:app_ui/src/widgets/app_line_icon.dart';
+import 'package:app_ui/src/widgets/app_ninja_mark.dart';
+import 'package:app_ui/src/widgets/app_pressable.dart';
 import 'package:app_ui/src/widgets/gamification/app_ninja_rank_stat.dart';
-import 'package:flutter/material.dart';
+import 'package:app_ui/src/widgets/gamification/ninja_rank.dart';
+import 'package:app_ui/src/widgets/profile/profile_xp.dart';
+import 'package:flutter/widgets.dart';
 
 class AppNinjaRankHero extends StatelessWidget {
   const AppNinjaRankHero({
@@ -15,6 +22,7 @@ class AppNinjaRankHero extends StatelessWidget {
     required this.shurikensLabel,
     super.key,
     this.onShare,
+    this.shareLabel = 'Поделиться',
   });
 
   final int xp;
@@ -22,12 +30,12 @@ class AppNinjaRankHero extends StatelessWidget {
   final int badgeCount;
   final int streakDays;
   final int shurikens;
-
   final String rankLabel;
   final String badgesLabel;
   final String streakLabel;
   final String shurikensLabel;
   final VoidCallback? onShare;
+  final String shareLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -36,13 +44,15 @@ class AppNinjaRankHero extends StatelessWidget {
     final nextRank = rank.next;
     final into = xpIntoLevel(xp);
     final progress = (into / kXpPerLevel).clamp(0.0, 1.0);
+    final onAccent = colors.onAccent;
+    final share = onShare;
 
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(AppSpacing.xl),
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
-        color: colors.primary,
-        borderRadius: BorderRadius.circular(AppRadius.xl),
+        color: colors.accent,
+        borderRadius: BorderRadius.circular(AppRadius.hero),
       ),
       child: Stack(
         children: [
@@ -51,10 +61,10 @@ class AppNinjaRankHero extends StatelessWidget {
             top: -20,
             child: IgnorePointer(
               child: Opacity(
-                opacity: 0.15,
+                opacity: .15,
                 child: AppNinjaMark(
                   size: 140,
-                  color: colors.onAccent,
+                  color: onAccent,
                   spin: true,
                   cutout: false,
                 ),
@@ -64,90 +74,112 @@ class AppNinjaRankHero extends StatelessWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                rankLabel,
-                style: AppText.overline.copyWith(
-                  color: colors.onAccent.withValues(alpha: 0.8),
-                ),
-              ),
-              const SizedBox(height: 4),
               Row(
                 children: [
-                  Text(rank.emoji, style: const TextStyle(fontSize: 30)),
-                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      rankLabel,
+                      style: AppText.overline.copyWith(
+                        color: onAccent.withValues(alpha: .8),
+                      ),
+                    ),
+                  ),
+                  if (share != null)
+                    AppPressable(
+                      onTap: share,
+                      semanticsLabel: shareLabel,
+                      semanticsButton: true,
+                      child: Container(
+                        width: AppControlSize.iconButton,
+                        height: AppControlSize.iconButton,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: onAccent.withValues(alpha: .16),
+                          shape: BoxShape.circle,
+                        ),
+                        child: AppLineIconWidget(
+                          AppLineIcon.share,
+                          size: AppIconSize.md,
+                          color: onAccent,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.xs),
+              Row(
+                children: [
+                  Text(
+                    rank.emoji,
+                    style: const TextStyle(fontSize: 30, height: 1),
+                  ),
+                  const SizedBox(width: AppSpacing.gap),
                   Flexible(
                     child: Text(
                       rank.name,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: AppText.display.copyWith(
-                        color: colors.onAccent,
-                        fontSize: 34,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: -1,
-                      ),
+                      style: AppText.display.copyWith(color: onAccent),
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 18),
+              const SizedBox(height: AppSpacing.fieldGap),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
                     '$into XP',
-                    style: AppText.caption.copyWith(
-                      color: colors.onAccent.withValues(alpha: 0.8),
-                      fontWeight: FontWeight.w600,
+                    style: AppText.tabular(AppText.captionStrong).copyWith(
+                      color: onAccent.withValues(alpha: .8),
                     ),
                   ),
                   if (nextRank != null)
                     Text(
-                      '→ ${nextRank.name} · $kXpPerLevel',
-                      style: AppText.caption.copyWith(
-                        color: colors.onAccent.withValues(alpha: 0.8),
-                        fontWeight: FontWeight.w600,
+                      '${nextRank.name} · $kXpPerLevel',
+                      style: AppText.tabular(AppText.captionStrong).copyWith(
+                        color: onAccent.withValues(alpha: .8),
                       ),
                     ),
                 ],
               ),
-              const SizedBox(height: 6),
+              const SizedBox(height: AppSpacing.sm),
               ClipRRect(
-                borderRadius: BorderRadius.circular(4),
+                borderRadius: BorderRadius.circular(AppRadius.bar),
                 child: SizedBox(
-                  height: 8,
+                  height: 6,
                   child: Stack(
+                    fit: StackFit.expand,
                     children: [
-                      Container(
-                        color: colors.onAccent.withValues(alpha: 0.25),
-                      ),
+                      ColoredBox(color: onAccent.withValues(alpha: .25)),
                       FractionallySizedBox(
+                        alignment: Alignment.centerLeft,
                         widthFactor: progress,
-                        child: Container(color: colors.onAccent),
+                        child: ColoredBox(color: onAccent),
                       ),
                     ],
                   ),
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.lg),
               Row(
                 children: [
                   AppNinjaRankStat(
                     value: '$badgeCount',
                     label: badgesLabel,
-                    color: colors.onAccent,
+                    color: onAccent,
                   ),
-                  const SizedBox(width: 16),
+                  const SizedBox(width: AppSpacing.lg),
                   AppNinjaRankStat(
-                    value: '🔥 $streakDays',
+                    value: '$streakDays',
                     label: streakLabel,
-                    color: colors.onAccent,
+                    color: onAccent,
                   ),
-                  const SizedBox(width: 16),
+                  const SizedBox(width: AppSpacing.lg),
                   AppNinjaRankStat(
-                    value: _formatNumber(shurikens),
+                    value: formatThousands(shurikens),
                     label: shurikensLabel,
-                    color: colors.onAccent,
+                    color: onAccent,
                   ),
                 ],
               ),
@@ -156,14 +188,5 @@ class AppNinjaRankHero extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  static String _formatNumber(int n) {
-    if (n >= 1000) {
-      final s = n.toString();
-      final split = s.length - 3;
-      return '${s.substring(0, split)} ${s.substring(split)}';
-    }
-    return n.toString();
   }
 }

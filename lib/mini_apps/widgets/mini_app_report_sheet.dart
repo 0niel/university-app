@@ -20,6 +20,7 @@ class _MiniAppReportSheetState extends State<MiniAppReportSheet> {
   final _detailsController = TextEditingController();
   MiniAppReportReason _reason = .broken;
   bool _sending = false;
+  bool _failed = false;
 
   @override
   void dispose() {
@@ -29,13 +30,24 @@ class _MiniAppReportSheetState extends State<MiniAppReportSheet> {
 
   Future<void> _send() async {
     if (_sending) return;
-    setState(() => _sending = true);
-    final sent = await widget.onSubmit(_reason, _detailsController.text.trim());
+    setState(() {
+      _sending = true;
+      _failed = false;
+    });
+    var sent = false;
+    try {
+      sent = await widget.onSubmit(_reason, _detailsController.text.trim());
+    } on Exception {
+      sent = false;
+    }
     if (!mounted) return;
     if (sent) {
       Navigator.of(context).pop(true);
     } else {
-      setState(() => _sending = false);
+      setState(() {
+        _sending = false;
+        _failed = true;
+      });
     }
   }
 
@@ -58,14 +70,18 @@ class _MiniAppReportSheetState extends State<MiniAppReportSheet> {
               ),
           ],
         ),
-        const SizedBox(height: 14),
+        const SizedBox(height: AppSpacing.sectionGap),
         NinjaInput.multiline(
           controller: _detailsController,
           maxLength: 500,
           maxLines: 3,
           placeholder: l10n.miniAppsReportDetailsHint,
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: AppSpacing.md),
+        if (_failed) ...[
+          NinjaBanner(title: l10n.miniAppsReportFailure, tone: .danger),
+          const SizedBox(height: AppSpacing.md),
+        ],
         NinjaButton.destructive(
           label: _sending
               ? l10n.miniAppsReportSending

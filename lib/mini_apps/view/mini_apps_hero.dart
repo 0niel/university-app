@@ -7,18 +7,18 @@ class _MiniAppsHero extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final l10n = context.l10n;
     final largeText = MediaQuery.textScalerOf(context).scale(1) >= 1.5;
     final icon = DecoratedBox(
       decoration: BoxDecoration(
-        color: colors.onAccentSoft.withValues(alpha: .12),
-        borderRadius: BorderRadius.circular(NinjaRadius.button),
+        color: colors.ink.withValues(alpha: .12),
+        borderRadius: BorderRadius.circular(AppRadius.full),
       ),
       child: SizedBox.square(
-        dimension: 44,
+        dimension: AppControlSize.touchTarget,
         child: Center(
-          child: AppLineIconWidget(.grid, size: 21, color: colors.onAccentSoft),
+          child: AppLineIconWidget(.grid, size: 21, color: colors.ink),
         ),
       ),
     );
@@ -30,21 +30,21 @@ class _MiniAppsHero extends StatelessWidget {
           l10n.miniAppsCatalogSection,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          style: NinjaText.headline.copyWith(color: colors.onAccentSoft),
+          style: AppText.headline.copyWith(color: colors.ink),
         ),
-        const SizedBox(height: 2),
+        const SizedBox(height: AppSpacing.xxs),
         Text(
           l10n.miniAppsSubtitle(count),
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
-          style: NinjaText.subtext.copyWith(color: colors.onAccentSoftMuted),
+          style: AppText.subtext.copyWith(color: colors.muted),
         ),
       ],
     );
     final total = Text(
       '$count',
-      style: NinjaText.tabular(
-        NinjaText.title.copyWith(color: colors.onAccentSoft),
+      style: AppText.tabular(
+        AppText.title.copyWith(color: colors.ink),
       ),
     );
 
@@ -54,11 +54,11 @@ class _MiniAppsHero extends StatelessWidget {
       child: ExcludeSemantics(
         child: DecoratedBox(
           decoration: BoxDecoration(
-            color: colors.accentSoft,
-            borderRadius: BorderRadius.circular(NinjaRadius.card),
+            color: colors.tint2,
+            borderRadius: BorderRadius.circular(AppRadius.card),
           ),
           child: Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(AppSpacing.lg),
             child: largeText
                 ? Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -67,20 +67,20 @@ class _MiniAppsHero extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           icon,
-                          const SizedBox(width: 12),
+                          const SizedBox(width: AppSpacing.md),
                           Expanded(child: labels),
                         ],
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: AppSpacing.md),
                       total,
                     ],
                   )
                 : Row(
                     children: [
                       icon,
-                      const SizedBox(width: 12),
+                      const SizedBox(width: AppSpacing.md),
                       Expanded(child: labels),
-                      const SizedBox(width: 10),
+                      const SizedBox(width: AppSpacing.gap),
                       total,
                     ],
                   ),

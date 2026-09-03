@@ -26,16 +26,16 @@ class CalendarWeeksHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final isMonthView = format == .month;
     return Container(
       decoration: BoxDecoration(
         color: isMonthView ? null : colors.surface,
-        borderRadius: isMonthView ? null : .circular(NinjaRadius.card),
+        borderRadius: isMonthView ? null : .circular(AppRadius.card),
       ),
       margin: const .symmetric(
-        horizontal: NinjaMetrics.screenPadding,
-        vertical: 4,
+        horizontal: AppSpacing.screen,
+        vertical: AppSpacing.xs,
       ),
       child: Row(
         mainAxisAlignment: .spaceBetween,
@@ -62,17 +62,17 @@ class CalendarWeeksHeader extends StatelessWidget {
 
   Widget _buildNavigationButton({
     required AppLineIcon icon,
-    required NinjaColors colors,
+    required AppColors colors,
     required String label,
     required VoidCallback onPressed,
   }) => AppPressable(
     onTap: onPressed,
     semanticsLabel: label,
     child: SizedBox.square(
-      dimension: NinjaMetrics.minTouchTarget,
+      dimension: AppControlSize.touchTarget,
       child: DecoratedBox(
         decoration: BoxDecoration(
-          color: colors.surfaceAlt,
+          color: colors.surface2,
           shape: .circle,
         ),
         child: Center(
@@ -84,7 +84,7 @@ class CalendarWeeksHeader extends StatelessWidget {
 
   Widget _buildHeaderTitle(
     BuildContext context,
-    NinjaColors colors,
+    AppColors colors,
     bool isMonthView,
   ) {
     final locale = Localizations.localeOf(context).toString();
@@ -99,29 +99,32 @@ class CalendarWeeksHeader extends StatelessWidget {
       semanticsButton: onHeaderTap != null,
       child: ConstrainedBox(
         constraints: const BoxConstraints(
-          minHeight: NinjaMetrics.minTouchTarget,
+          minHeight: AppControlSize.touchTarget,
         ),
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.sm,
+            vertical: AppSpacing.xsm,
+          ),
           child: Wrap(
             alignment: WrapAlignment.center,
             crossAxisAlignment: WrapCrossAlignment.center,
-            spacing: 6,
-            runSpacing: 2,
+            spacing: AppSpacing.xsm,
+            runSpacing: AppSpacing.xxs,
             children: [
               if (!isMonthView)
                 Text(
                   monthAndYear,
-                  style: NinjaText.body.copyWith(color: colors.mutedDark),
+                  style: AppText.body.copyWith(color: colors.muted),
                 ),
               AppLineIconWidget(
                 AppLineIcon.calendar,
                 size: 14,
-                color: colors.mutedDark,
+                color: colors.muted,
               ),
               Text(
                 context.l10n.studyWeekNumber(week),
-                style: NinjaText.body.copyWith(
+                style: AppText.body.copyWith(
                   fontWeight: .w600,
                   color: colors.ink,
                 ),

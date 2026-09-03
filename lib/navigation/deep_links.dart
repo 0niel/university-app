@@ -33,14 +33,18 @@ abstract final class DeepLinks {
     if (value == null || value.isEmpty || !value.startsWith('/')) {
       return null;
     }
-    var normalized = value.endsWith('/') && value.length > 1
-        ? value.substring(0, value.length - 1)
-        : value;
-    if (normalized == '/info') normalized = '/feed';
+    final parsed = Uri.tryParse(value);
+    if (parsed == null || parsed.hasScheme || parsed.hasAuthority) return null;
+    final uri = parsed.normalizePath();
+    var path = uri.path;
+    if (path.endsWith('/') && path.length > 1) {
+      path = path.substring(0, path.length - 1);
+    }
+    if (path == '/info') path = '/feed';
     final allowed = allowedRoots.any(
-      (root) => normalized == root || normalized.startsWith('$root/'),
+      (root) => path == root || path.startsWith('$root/'),
     );
-    return allowed ? normalized : null;
+    return allowed ? uri.replace(path: path).toString() : null;
   }
 
   static Uri shareLink(
@@ -49,9 +53,26 @@ abstract final class DeepLinks {
   }) {
     final deployment = config ?? .current;
     final normalized = normalizeLocation(location) ?? '/feed';
+    final parsed = Uri.parse(normalized);
     return Uri.https(
       deployment.webAppHost,
-      '${deployment.webAppPathPrefix}$normalized',
+      '${deployment.webAppPathPrefix}${parsed.path}',
+    ).replace(query: parsed.hasQuery ? parsed.query : null);
+  }
+
+  static Uri appLink(
+    String location, {
+    UniversityConfig? config,
+  }) {
+    final deployment = config ?? .current;
+    final normalized = normalizeLocation(location) ?? '/feed';
+    final parsed = Uri.parse(normalized);
+    final segments = parsed.pathSegments;
+    return Uri(
+      scheme: deployment.deepLinkScheme,
+      host: segments.isEmpty ? 'feed' : segments.first,
+      pathSegments: segments.skip(1),
+      query: parsed.hasQuery ? parsed.query : null,
     );
   }
 }

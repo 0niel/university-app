@@ -77,5 +77,34 @@ void main() {
       expect(tester.getSize(find.byType(TopTopicsContent)).height, 272);
       expect(tester.takeException(), isNull);
     });
+
+    testWidgets('the rail does not truncate a populated page at fifteen', (
+      tester,
+    ) async {
+      when(() => communityRepository.getTopTopics()).thenAnswer(
+        (_) async => TopTopicsResponse(
+          topics: List.generate(
+            20,
+            (index) => DiscourseTopic(
+              id: index + 1,
+              title: 'Topic $index',
+              postsCount: 2,
+              replyCount: 1,
+              likeCount: 0,
+              views: 20,
+              posters: const [],
+            ),
+          ),
+          users: const [],
+        ),
+      );
+      await tester.pumpWidget(buildSubject());
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 400));
+      await tester.pump(const Duration(milliseconds: 400));
+      final rail = tester.widget<ListView>(find.byType(ListView));
+      expect(rail.childrenDelegate.estimatedChildCount, 39);
+      expect(tester.takeException(), isNull);
+    });
   });
 }

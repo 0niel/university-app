@@ -30,7 +30,11 @@ class PersonRowSkeleton extends StatelessWidget {
         if (trailingLastSeen)
           const NinjaSkeleton(width: 48, height: 11)
         else if (trailingTag)
-          const NinjaSkeleton(width: 64, height: 28, radius: 7),
+          const NinjaSkeleton(
+            width: 64,
+            height: 28,
+            radius: AppRadius.skeletonSmall,
+          ),
       ],
     );
   }

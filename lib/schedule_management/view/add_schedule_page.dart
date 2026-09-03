@@ -27,24 +27,10 @@ class AddSchedulePage extends StatelessWidget {
         scheduleRepository: context.read(),
         friendsRepository: context.read(),
         campusRepository: context.read(),
-      ),
+      )..add(const SearchModeChanged(searchMode: SearchMode.schedule)),
       child: Scaffold(
-        backgroundColor: context.ninja.canvas,
-        body: NestedScrollView(
-          headerSliverBuilder: (context, innerBoxIsScrolled) => [
-            SliverAppBar(
-              elevation: 0,
-              scrolledUnderElevation: 0,
-              backgroundColor: context.ninja.canvas,
-              surfaceTintColor: Colors.transparent,
-              title: Text(
-                context.l10n.addScheduleTitle,
-                style: NinjaText.headline.copyWith(color: context.ninja.ink),
-              ),
-            ),
-          ],
-          body: const AddScheduleView(),
-        ),
+        backgroundColor: context.colors.canvas,
+        body: const AddScheduleView(),
       ),
     );
   }

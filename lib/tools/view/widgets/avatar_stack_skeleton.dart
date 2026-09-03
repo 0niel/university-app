@@ -10,7 +10,7 @@ class AvatarStackSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     const step = _size - _overlap;
     const width = _size + (_count - 1) * step;
 

@@ -1,87 +1,97 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:app_ui/app_ui.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:rtu_mirea_app/config/config.dart';
 import 'package:rtu_mirea_app/contributors/bloc/contributors_bloc.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
+import 'package:rtu_mirea_app/schedule/bloc/schedule_bloc.dart';
+import 'package:rtu_mirea_app/search/view/search_subjects.dart';
 import 'package:rtu_mirea_app/tools/view/widgets/app_community_grid.dart';
 import 'package:rtu_mirea_app/tools/view/widgets/contributors_card.dart';
+import 'package:rtu_mirea_app/tools/view/widgets/tools_calculators.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-part 'tools_header.dart';
-
-class ToolsView extends StatelessWidget {
+class ToolsView extends StatefulWidget {
   const ToolsView({super.key});
+
+  @override
+  State<ToolsView> createState() => _ToolsViewState();
+}
+
+class _ToolsViewState extends State<ToolsView> {
+  int _tab = 0;
 
   Future<void> _open(String url) async {
     final uri = Uri.tryParse(url);
-    if (uri == null) return;
-    await launchUrl(uri, mode: .externalApplication);
+    if (uri == null || !{'https', 'http'}.contains(uri.scheme)) return;
+    await launchUrl(uri, mode: LaunchMode.externalApplication);
   }
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
     final l10n = context.l10n;
-
-    return Scaffold(
-      backgroundColor: colors.canvas,
-      body: BlocBuilder<ContributorsBloc, ContributorsState>(
-        builder: (context, state) {
-          void reload() => context.read<ContributorsBloc>().add(
-            const ContributorsRequested(),
-          );
-          return RefreshIndicator(
-            color: colors.brand,
-            backgroundColor: colors.surface,
-            onRefresh: () async => reload(),
-            child: CustomScrollView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              slivers: [
-                SliverToBoxAdapter(
-                  child: _ToolsHeader(
-                    busy: state.status == .loading,
-                    onRefresh: reload,
-                  ),
-                ),
-                SliverPadding(
-                  padding: const EdgeInsets.fromLTRB(
-                    NinjaMetrics.screenPadding,
-                    0,
-                    NinjaMetrics.screenPadding,
-                    40,
-                  ),
-                  sliver: SliverList.list(
-                    children: [
-                      Text(
-                        l10n.toolsCommunitySection,
-                        style: NinjaText.title.copyWith(color: colors.ink),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        l10n.toolsCommunitySectionSubtitle,
-                        style: NinjaText.subtext.copyWith(color: colors.muted),
-                      ),
-                      const SizedBox(height: 16),
-                      AppCommunityGrid(
-                        chatUrl: context
-                            .read<UniversityConfig>()
-                            .communityChatUrl,
-                        onOpen: (url) => unawaited(_open(url)),
-                      ),
-                      const SizedBox(height: 28),
-                      ContributorsCard(
-                        onBecomeContributor: (url) => unawaited(_open(url)),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+    final subjects = context.select<ScheduleBloc, List<String>>(
+      (bloc) => scheduleSubjects(bloc.state.selectedSchedule),
+    );
+    final labels = [l10n.toolsTabGrant, l10n.toolsTabEcts];
+    return ColoredBox(
+      color: context.colors.canvas,
+      child: ListView(
+        padding: const EdgeInsets.fromLTRB(
+          AppSpacing.screen,
+          0,
+          AppSpacing.screen,
+          AppSpacing.xxlg,
+        ),
+        children: [
+          AppInnerHeader(
+            title: l10n.toolsPageTitle,
+            padding: EdgeInsets.only(
+              top: math.max(
+                AppSpacing.screenTop,
+                MediaQuery.paddingOf(context).top + AppSpacing.md,
+              ),
             ),
-          );
-        },
+            backSemanticsLabel: l10n.back,
+            onBack: () => Navigator.of(context).maybePop(),
+          ),
+          const SizedBox(height: AppSpacing.screen),
+          AppSegmentedControl<int>(
+            options: [
+              for (final (index, label) in labels.indexed)
+                AppSegmentedOption(value: index, label: label),
+            ],
+            value: _tab,
+            onCanvas: true,
+            onChanged: (value) => setState(() => _tab = value),
+          ),
+          const SizedBox(height: AppSpacing.sectionGap),
+          if (_tab == 0)
+            const ToolsGrantPanel()
+          else
+            ToolsCreditsPanel(subjects: subjects),
+          AppSectionTitle(
+            title: l10n.toolsCommunitySection,
+            subtitle: l10n.toolsCommunitySectionSubtitle,
+          ),
+          AppCommunityGrid(
+            chatUrl: context.read<UniversityConfig>().communityChatUrl,
+            onOpen: (url) => unawaited(_open(url)),
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          ContributorsCard(onBecomeContributor: (url) => unawaited(_open(url))),
+          const SizedBox(height: AppSpacing.md),
+          AppButton.secondary(
+            label: l10n.refreshData,
+            icon: const AppLineIconWidget(AppLineIcon.refresh),
+            onPressed: () => context.read<ContributorsBloc>().add(
+              const ContributorsRequested(),
+            ),
+          ),
+        ],
       ),
     );
   }

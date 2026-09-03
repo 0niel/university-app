@@ -8,7 +8,10 @@ class _MaterialText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
+    final size = compact
+        ? '${_formatFileSize(context.l10n, material.fileSize)} · '
+        : '';
     return Column(
       crossAxisAlignment: .start,
       mainAxisSize: .min,
@@ -17,21 +20,21 @@ class _MaterialText extends StatelessWidget {
           material.title,
           maxLines: 1,
           overflow: .ellipsis,
-          style: NinjaText.body.copyWith(color: colors.ink),
+          style: AppText.cell.copyWith(color: colors.ink),
         ),
-        const SizedBox(height: 3),
+        const SizedBox(height: ScheduleMetrics.compactGap),
         Text(
-          '${material.authorName} · '
+          '$size${material.authorName} · '
           '${_relativeWhen(context.l10n, material.createdAt)}',
           maxLines: 1,
           overflow: .ellipsis,
-          style: NinjaText.subtext.copyWith(
-            fontSize: 11.5,
+          style: AppText.subtext.copyWith(
+            fontSize: 12,
             color: colors.muted,
           ),
         ),
         if (!compact) ...[
-          const SizedBox(height: 6),
+          const SizedBox(height: AppSpacing.xsm),
           _MaterialMeta(material: material),
         ],
       ],

@@ -13,6 +13,10 @@ class LocalNotificationsRepository {
   final LocalNotificationsClient _client;
   final PermissionClient _permissionClient;
 
+  Stream<String> get interactions => _client.interactions;
+
+  String? takePendingInteraction() => _client.takePendingInteraction();
+
   /// Upper bound on simultaneously scheduled reminders, kept below iOS's
   /// 64-pending-notification limit. The soonest reminders win.
   static const maxScheduledReminders = 60;
@@ -42,22 +46,59 @@ class LocalNotificationsRepository {
     return status.isGranted;
   }
 
-  /// Replaces every pending reminder belonging to [scheduleId] with
-  /// [reminders]. Existing reminders for the schedule (matched by payload) are
-  /// cancelled first; then the soonest [maxScheduledReminders] are scheduled.
   Future<void> syncLessonReminders({
     required String scheduleId,
     required List<LessonReminder> reminders,
   }) async {
     try {
       await initialize();
-      await _cancelScheduledReminders(scheduleId);
-
       final now = DateTime.now();
       final ordered =
           reminders.where((reminder) => reminder.when.isAfter(now)).toList()
             ..sort((a, b) => a.when.compareTo(b.when));
-      for (final reminder in ordered.take(maxScheduledReminders)) {
+      if (ordered.isNotEmpty && !await hasPermission()) {
+        throw StateError('Notification permission is not granted');
+      }
+      final pending = await _client.pending();
+      final foreignCount = pending
+          .where((item) => item.payload != scheduleId)
+          .length;
+      final capacity = (maxScheduledReminders - foreignCount).clamp(
+        0,
+        maxScheduledReminders,
+      );
+      final unique = <int, LessonReminder>{};
+      for (final reminder in ordered) {
+        unique.putIfAbsent(reminder.id, () => reminder);
+      }
+      final selected = unique.values.take(capacity).toList();
+      final ids = selected.map((reminder) => reminder.id).toSet();
+      if (pending.any(
+        (reminder) =>
+            reminder.payload != scheduleId && ids.contains(reminder.id),
+      )) {
+        throw StateError('Notification identifier belongs to another schedule');
+      }
+      final pendingIds = pending.map((reminder) => reminder.id).toSet();
+      final stale = pending
+          .where(
+            (reminder) =>
+                reminder.payload == scheduleId && !ids.contains(reminder.id),
+          )
+          .map((reminder) => reminder.id)
+          .toList();
+      var removed = 0;
+      Future<void> removeStale() async {
+        final id = stale[removed];
+        await _client.cancel(id);
+        pendingIds.remove(id);
+        removed++;
+      }
+
+      for (final reminder in selected) {
+        if (!pendingIds.contains(reminder.id) && pendingIds.length >= 64) {
+          await removeStale();
+        }
         await _client.schedule(
           id: reminder.id,
           title: reminder.title,
@@ -65,8 +106,16 @@ class LocalNotificationsRepository {
           when: reminder.when,
           payload: scheduleId,
         );
+        pendingIds.add(reminder.id);
+        while (pendingIds.length > maxScheduledReminders &&
+            removed < stale.length) {
+          await removeStale();
+        }
       }
-    } on Exception catch (error, stackTrace) {
+      while (removed < stale.length) {
+        await removeStale();
+      }
+    } on Object catch (error, stackTrace) {
       Error.throwWithStackTrace(SyncRemindersFailure(error), stackTrace);
     }
   }

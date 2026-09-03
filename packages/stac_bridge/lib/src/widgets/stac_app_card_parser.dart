@@ -15,19 +15,11 @@ class StacAppCardParser extends StacParser<StacAppCard> {
 
   @override
   Widget parse(BuildContext context, StacAppCard model) {
-    final colors = Theme.of(context).colors;
-    final radius = BorderRadius.circular(AppRadius.lg);
-    return Material(
-      color: parseHexColor(model.color) ?? colors.surface,
-      borderRadius: radius,
-      clipBehavior: .antiAlias,
-      child: InkWell(
-        onTap: actionCallback(context, model.actionJson),
-        child: Padding(
-          padding: .all(model.padding),
-          child: childWidget(context, model.child) ?? const SizedBox.shrink(),
-        ),
-      ),
+    return AppCard(
+      color: parseAppColor(context, model.color),
+      onTap: actionCallback(context, model.actionJson),
+      padding: .all(model.padding),
+      child: childWidget(context, model.child) ?? const SizedBox.shrink(),
     );
   }
 }

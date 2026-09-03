@@ -28,9 +28,9 @@ class SearchZeroState extends StatelessWidget {
       children: [
         Padding(
           padding: const EdgeInsets.fromLTRB(
-            NinjaMetrics.screenPadding,
+            AppSpacing.screen,
             AppSpacing.md,
-            NinjaMetrics.screenPadding,
+            AppSpacing.screen,
             28,
           ),
           child: _SearchDiscoveryIntro(
@@ -41,7 +41,7 @@ class SearchZeroState extends StatelessWidget {
         if (state.searchHisoty.isNotEmpty) ...[
           Padding(
             padding: const EdgeInsets.symmetric(
-              horizontal: NinjaMetrics.screenPadding,
+              horizontal: AppSpacing.screen,
             ),
             child: Row(
               children: [
@@ -61,7 +61,7 @@ class SearchZeroState extends StatelessWidget {
           const SizedBox(height: AppSpacing.md),
           Padding(
             padding: const EdgeInsets.symmetric(
-              horizontal: NinjaMetrics.screenPadding,
+              horizontal: AppSpacing.screen,
             ),
             child: Column(
               spacing: AppSpacing.gap,
@@ -82,14 +82,14 @@ class SearchZeroState extends StatelessWidget {
         if (state.trending.isNotEmpty) ...[
           Padding(
             padding: const EdgeInsets.symmetric(
-              horizontal: NinjaMetrics.screenPadding,
+              horizontal: AppSpacing.screen,
             ),
             child: SearchHeadlineText(headerText: l10n.searchTrendingNow),
           ),
           const SizedBox(height: AppSpacing.md),
           Padding(
             padding: const EdgeInsets.symmetric(
-              horizontal: NinjaMetrics.screenPadding,
+              horizontal: AppSpacing.screen,
             ),
             child: Column(
               spacing: AppSpacing.gap,

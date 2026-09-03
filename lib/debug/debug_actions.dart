@@ -216,7 +216,7 @@ void _showInfoDialog(BuildContext context) {
         onCancel: () => Navigator.of(dialogContext).pop(),
         child: SelectableText(
           text,
-          style: NinjaText.helper.copyWith(
+          style: AppText.captionSmall.copyWith(
             color: dialogContext.ninja.muted,
             height: 1.5,
             fontFamily: 'monospace',

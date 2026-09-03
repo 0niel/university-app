@@ -28,9 +28,9 @@ class _LessonColorPickerRow extends StatelessWidget {
       children: [
         Text(
           label,
-          style: NinjaText.headline.copyWith(color: context.ninja.ink),
+          style: AppText.headline.copyWith(color: context.colors.ink),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: AppSpacing.sm),
         Wrap(
           spacing: 4,
           runSpacing: 4,
@@ -43,7 +43,7 @@ class _LessonColorPickerRow extends StatelessWidget {
                 child: AppPressable(
                   onTap: () => onSelected(value),
                   child: SizedBox.square(
-                    dimension: NinjaMetrics.minTouchTarget,
+                    dimension: AppControlSize.iconButton,
                     child: Center(
                       child: Container(
                         width: 30,
@@ -56,9 +56,9 @@ class _LessonColorPickerRow extends StatelessWidget {
                         child: selected == value
                             ? NinjaCheckMark(
                                 size: 13,
-                                color: context.ninja.contrastForeground(
-                                  Color(value),
-                                ),
+                                color: Color(value).computeLuminance() > 0.45
+                                    ? context.colors.ink
+                                    : context.colors.white,
                               )
                             : null,
                       ),
@@ -66,9 +66,38 @@ class _LessonColorPickerRow extends StatelessWidget {
                   ),
                 ),
               ),
+            AppButton.secondary(
+              key: ValueKey('lesson-color-custom-${type.name}'),
+              label: l10n.settingsColorCustom,
+              size: AppButtonSize.small,
+              icon: Container(
+                width: 18,
+                height: 18,
+                decoration: BoxDecoration(
+                  color: Color(selected),
+                  shape: BoxShape.circle,
+                  border: Border.all(color: context.colors.line),
+                ),
+              ),
+              onPressed: () => _openCustom(context, label),
+            ),
           ],
         ),
       ],
     );
+  }
+
+  Future<void> _openCustom(BuildContext context, String label) async {
+    final value = await showAppSheet<int>(
+      context,
+      title: label,
+      subtitle: context.l10n.settingsColorCustom,
+      child: LessonColorEditor(
+        color: Color(selected),
+        onSaved: (color) =>
+            Navigator.of(context, rootNavigator: true).pop(color),
+      ),
+    );
+    if (value != null) onSelected(value);
   }
 }

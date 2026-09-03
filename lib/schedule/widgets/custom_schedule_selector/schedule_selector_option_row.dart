@@ -17,30 +17,30 @@ class ScheduleSelectorOptionRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final description = schedule.description;
     final lessonsCount = schedule.lessons.length;
     final selected = selectedId == schedule.id;
 
     return Padding(
-      padding: const .only(bottom: 10),
+      padding: const .only(bottom: AppSpacing.gap),
       child: AppPressable(
         onTap: () => onSelected(schedule.id),
         semanticsLabel: schedule.name,
         semanticsSelected: selected,
         child: AnimatedContainer(
           duration: NinjaMotion.of(context, NinjaMotion.fast),
-          constraints: const BoxConstraints(minHeight: 64),
-          padding: const .all(12),
+          constraints: const BoxConstraints(minHeight: AppControlSize.dayPill),
+          padding: const .all(AppSpacing.md),
           decoration: BoxDecoration(
-            color: selected ? colors.brandTint : colors.surfaceAlt,
-            borderRadius: .circular(NinjaRadius.card),
+            color: selected ? colors.tint : colors.surface2,
+            borderRadius: .circular(AppRadius.card),
           ),
           child: Row(
             children: [
               Container(
-                width: 44,
-                height: 44,
+                width: AppControlSize.touchTarget,
+                height: AppControlSize.touchTarget,
                 decoration: BoxDecoration(
                   color: colors.surface,
                   shape: .circle,
@@ -48,18 +48,18 @@ class ScheduleSelectorOptionRow extends StatelessWidget {
                 child: Center(
                   child: AppLineIconWidget(
                     AppLineIcon.calendar,
-                    color: selected ? colors.brandInk : colors.mutedDark,
+                    color: selected ? colors.accent : colors.muted,
                   ),
                 ),
               ),
-              const SizedBox(width: 14),
+              const SizedBox(width: AppSpacing.sectionGap),
               Expanded(
                 child: Column(
                   crossAxisAlignment: .start,
                   children: [
                     Text(
                       schedule.name,
-                      style: NinjaText.body.copyWith(
+                      style: AppText.body.copyWith(
                         color: colors.ink,
                         fontWeight: .w600,
                       ),
@@ -67,20 +67,20 @@ class ScheduleSelectorOptionRow extends StatelessWidget {
                     if (description case final value? when value.isNotEmpty)
                       Text(
                         value,
-                        style: NinjaText.subtext.copyWith(color: colors.muted),
+                        style: AppText.subtext.copyWith(color: colors.muted),
                         maxLines: 2,
                         overflow: .ellipsis,
                       ),
                     Text(
                       '$lessonsCount '
                       '${context.l10n.classesCount(lessonsCount)}',
-                      style: NinjaText.subtext.copyWith(color: colors.muted),
+                      style: AppText.subtext.copyWith(color: colors.muted),
                     ),
                   ],
                 ),
               ),
-              const SizedBox(width: 10),
-              NinjaRadio<String>(
+              const SizedBox(width: AppSpacing.gap),
+              AppRadio<String>(
                 value: schedule.id,
                 groupValue: selectedId,
                 onChanged: onSelected,

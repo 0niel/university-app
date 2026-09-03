@@ -11,8 +11,8 @@ class _LeftLabel extends StatelessWidget {
       padding: const .only(right: 6),
       child: Text(
         '${value.toInt()}',
-        style: NinjaText.tabular(
-          NinjaText.helper.copyWith(color: context.ninja.muted),
+        style: AppText.tabular(
+          AppText.captionSmall.copyWith(color: context.colors.muted),
         ),
         textAlign: .right,
       ),

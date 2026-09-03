@@ -20,28 +20,28 @@ class SearchResultsSkeleton extends StatelessWidget {
         children: [
           const Padding(
             padding: EdgeInsets.symmetric(
-              horizontal: NinjaMetrics.screenPadding,
+              horizontal: AppSpacing.screen,
             ),
             child: NinjaSkeleton(width: 156, height: 20),
           ),
           const SizedBox(height: AppSpacing.md),
           const Padding(
             padding: EdgeInsets.symmetric(
-              horizontal: NinjaMetrics.screenPadding,
+              horizontal: AppSpacing.screen,
             ),
             child: BestMatchSkeletonCard(),
           ),
           const SizedBox(height: 28),
           const Padding(
             padding: EdgeInsets.symmetric(
-              horizontal: NinjaMetrics.screenPadding,
+              horizontal: AppSpacing.screen,
             ),
             child: NinjaSkeleton(width: 174, height: 20),
           ),
           const SizedBox(height: AppSpacing.md),
           Padding(
             padding: const EdgeInsets.symmetric(
-              horizontal: NinjaMetrics.screenPadding,
+              horizontal: AppSpacing.screen,
             ),
             child: Column(
               spacing: AppSpacing.gap,

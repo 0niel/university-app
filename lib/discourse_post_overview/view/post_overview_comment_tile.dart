@@ -6,6 +6,7 @@ import 'package:rtu_mirea_app/config/config.dart';
 import 'package:rtu_mirea_app/discourse_post_overview/view/ninja_forum_avatar.dart';
 import 'package:rtu_mirea_app/discourse_post_overview/view/post_overview_formatting.dart';
 import 'package:rtu_mirea_app/discourse_post_overview/view/post_overview_html.dart';
+import 'package:rtu_mirea_app/discourse_post_overview/view/post_overview_metrics.dart';
 
 class PostOverviewCommentTile extends StatelessWidget {
   const PostOverviewCommentTile({required this.comment, super.key});
@@ -14,14 +15,14 @@ class PostOverviewCommentTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: colors.surfaceAlt,
-        borderRadius: BorderRadius.circular(NinjaRadius.card),
+        color: colors.surface,
+        borderRadius: BorderRadius.circular(AppRadius.card),
       ),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(AppSpacing.lg),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -29,13 +30,14 @@ class PostOverviewCommentTile extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 NinjaForumAvatar(
-                  size: 38,
+                  name: comment.username,
+                  size: PostOverviewMetrics.commentAvatar,
                   url: avatarUrl(
                     context.read<UniversityConfig>().communityForumUrl,
                     comment.avatarTemplate,
                   ),
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: AppSpacing.md),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -44,22 +46,24 @@ class PostOverviewCommentTile extends StatelessWidget {
                         comment.username,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
-                        style: NinjaText.headline.copyWith(color: colors.ink),
+                        style: AppText.headline.copyWith(color: colors.ink),
                       ),
-                      const SizedBox(height: 2),
+                      const SizedBox(height: AppSpacing.xxs),
                       Text(
                         formatPostDate(comment.createdAt),
-                        style: NinjaText.helper.copyWith(color: colors.muted),
+                        style: AppText.captionSmall.copyWith(
+                          color: colors.muted,
+                        ),
                       ),
                     ],
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: AppSpacing.gap),
             SelectionArea(child: PostOverviewHtml(data: comment.cooked)),
             if (comment.likeCount > 0) ...[
-              const SizedBox(height: 8),
+              const SizedBox(height: AppSpacing.sm),
               Semantics(
                 label: '${comment.likeCount}',
                 child: Row(
@@ -68,12 +72,12 @@ class PostOverviewCommentTile extends StatelessWidget {
                     AppLineIconWidget(
                       AppLineIcon.heart,
                       size: 16,
-                      color: colors.scarlet,
+                      color: colors.exam,
                     ),
                     const SizedBox(width: 5),
                     Text(
                       '${comment.likeCount}',
-                      style: NinjaText.helper.copyWith(color: colors.muted),
+                      style: AppText.captionSmall.copyWith(color: colors.muted),
                     ),
                   ],
                 ),

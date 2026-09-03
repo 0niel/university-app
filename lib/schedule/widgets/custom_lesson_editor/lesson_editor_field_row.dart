@@ -1,5 +1,6 @@
 import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
+import 'package:rtu_mirea_app/schedule/widgets/schedule_metrics.dart';
 
 class LessonEditorFieldRow extends StatelessWidget {
   const LessonEditorFieldRow({
@@ -23,7 +24,7 @@ class LessonEditorFieldRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final useStackedLayout =
         stacked || MediaQuery.textScalerOf(context).scale(1) > 1.3;
     return AppPressable(
@@ -31,24 +32,27 @@ class LessonEditorFieldRow extends StatelessWidget {
       semanticsLabel: '$label, $value',
       child: Container(
         constraints: const BoxConstraints(
-          minHeight: NinjaMetrics.minTouchTarget,
+          minHeight: AppControlSize.touchTarget,
         ),
-        padding: const .symmetric(horizontal: 16, vertical: 14),
+        padding: const .symmetric(
+          horizontal: AppSpacing.lg,
+          vertical: AppSpacing.sectionGap,
+        ),
         decoration: BoxDecoration(
           color: colors.surface,
-          borderRadius: BorderRadius.circular(NinjaRadius.card),
+          borderRadius: BorderRadius.circular(AppRadius.card),
         ),
         child: Row(
           children: [
-            AppLineIconWidget(icon, size: 20, color: colors.mutedDark),
-            const SizedBox(width: 12),
+            AppLineIconWidget(icon, size: 20, color: colors.muted),
+            const SizedBox(width: AppSpacing.md),
             Expanded(
               child: useStackedLayout
                   ? _buildStackedValue(context)
                   : _buildInlineValue(context),
             ),
-            const SizedBox(width: 8),
-            AppLineIconWidget(.chevronR, size: 16, color: colors.chevron),
+            const SizedBox(width: AppSpacing.sm),
+            AppLineIconWidget(.chevronR, size: 16, color: colors.muted2),
           ],
         ),
       ),
@@ -56,20 +60,20 @@ class LessonEditorFieldRow extends StatelessWidget {
   }
 
   Widget _buildStackedValue(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     return Column(
-      spacing: 3,
+      spacing: ScheduleMetrics.compactGap,
       crossAxisAlignment: .start,
       children: [
         Text(
           label,
-          style: NinjaText.helper.copyWith(color: colors.muted),
+          style: AppText.captionSmall.copyWith(color: colors.muted),
         ),
         Text(
           value,
           maxLines: 2,
           overflow: .ellipsis,
-          style: NinjaText.body.copyWith(
+          style: AppText.body.copyWith(
             color: muted ? colors.muted : colors.ink,
             fontWeight: muted ? .w500 : .w600,
           ),
@@ -79,13 +83,13 @@ class LessonEditorFieldRow extends StatelessWidget {
   }
 
   Widget _buildInlineValue(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     return Row(
       children: [
         Expanded(
           child: Text(
             label,
-            style: NinjaText.helper.copyWith(color: colors.muted),
+            style: AppText.captionSmall.copyWith(color: colors.muted),
           ),
         ),
         Flexible(
@@ -93,8 +97,8 @@ class LessonEditorFieldRow extends StatelessWidget {
             value,
             maxLines: 1,
             overflow: .ellipsis,
-            style: NinjaText.tabular(
-              NinjaText.body.copyWith(
+            style: AppText.tabular(
+              AppText.body.copyWith(
                 color: colors.ink,
                 fontWeight: .w600,
               ),

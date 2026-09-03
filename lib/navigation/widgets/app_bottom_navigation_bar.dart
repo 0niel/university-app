@@ -1,8 +1,8 @@
 import 'dart:async';
 
 import 'package:app_ui/app_ui.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:rtu_mirea_app/navigation/tab_reselect_notifier.dart';
 import 'package:rtu_mirea_app/navigation/widgets/nav_glyph.dart';
@@ -14,41 +14,48 @@ class AppBottomNavigationBar extends StatelessWidget {
   const AppBottomNavigationBar({
     required this.currentIndex,
     required this.onSelected,
+    this.scheduleBadge = false,
     super.key,
   });
 
   final int currentIndex;
   final ValueChanged<int> onSelected;
+  final bool scheduleBadge;
 
   @override
   Widget build(BuildContext context) {
     return AppTourAnchor(
       target: .navigationBar,
-      child: NinjaBottomBar(
+      child: AppBottomBar(
         currentIndex: currentIndex,
         onSelected: (index) => handleNavigationSelection(
           currentIndex: currentIndex,
           destinationIndex: index,
           onSelected: onSelected,
         ),
-        items: _navigationDestinations(context)
-            .map(
-              (item) => NinjaBottomBarItem(
-                icon: NavGlyphIcon(item.glyph),
-                activeIcon: NavGlyphIcon(item.glyph, filled: true),
-                label: item.label,
-              ),
-            )
-            .toList(),
+        items: navigationBarItems(context, scheduleBadge: scheduleBadge),
       ),
     );
   }
 }
 
-typedef _NavigationDestination = ({
-  NavGlyph glyph,
-  String label,
-});
+List<AppBottomBarItem> navigationBarItems(
+  BuildContext context, {
+  required bool scheduleBadge,
+}) {
+  final colors = context.colors;
+  return [
+    for (final item in _navigationDestinations(context))
+      AppBottomBarItem(
+        icon: NavGlyphIcon(item.glyph),
+        label: item.label,
+        hasBadge: scheduleBadge && item.glyph == NavGlyph.schedule,
+        badgeColor: colors.warn,
+      ),
+  ];
+}
+
+typedef _NavigationDestination = ({NavGlyph glyph, String label});
 
 List<_NavigationDestination> _navigationDestinations(BuildContext context) {
   final l10n = context.l10n;

@@ -18,33 +18,46 @@ class _MockCubit extends MockCubit<LostFoundState> implements LostFoundCubit {}
 void main() {
   late LostFoundCubit cubit;
 
-  LostFoundItem item(String name, String location, String category, int day) =>
-      LostFoundItem(
-        id: name,
-        authorId: 'u1',
-        itemName: name,
-        status: LostFoundItemStatus.found,
-        createdAt: DateTime.utc(2026, 8, day),
-        category: category,
-        location: location,
-      );
+  LostFoundItem item(
+    String name,
+    String location,
+    String author,
+    Duration age, {
+    LostFoundItemStatus status = LostFoundItemStatus.found,
+  }) => LostFoundItem(
+    id: name,
+    authorId: 'u1',
+    itemName: name,
+    status: status,
+    createdAt: DateTime.now().subtract(age),
+    authorName: author,
+    location: location,
+  );
 
   setUpAll(() async {
     TestWidgetsFlutterBinding.ensureInitialized();
-    final loader = FontLoader('Inter');
+    final loader = FontLoader('packages/app_ui/Onest');
     for (final weight in const [
       'Regular',
       'Medium',
       'SemiBold',
       'Bold',
+      'ExtraBold',
     ]) {
       loader.addFont(
         rootBundle.load(
-          'packages/app_ui/assets/fonts/Inter/Inter-$weight.ttf',
+          'packages/app_ui/assets/fonts/Onest/Onest-$weight.ttf',
         ),
       );
     }
     await loader.load();
+    final serif = FontLoader('packages/app_ui/Literata')
+      ..addFont(
+        rootBundle.load(
+          'packages/app_ui/assets/fonts/Literata/Literata-Variable.ttf',
+        ),
+      );
+    await serif.load();
   });
 
   setUp(() => cubit = _MockCubit());
@@ -52,17 +65,46 @@ void main() {
   for (final brightness in Brightness.values) {
     testWidgets('modern lost & found · ${brightness.name}', (tester) async {
       final state = LostFoundState(
+        status: .ready,
         items: [
-          item('Наушники, чёрные', 'ауд. 314 Б', 'electronics', 13),
-          item('Студенческий билет', 'столовая Б', 'documents', 13),
-          item('Термокружка', 'библиотека', 'other', 12),
-          item('Зонт, синий', 'корп. А, гардероб', 'clothes', 11),
+          item(
+            'AirPods Pro в белом кейсе',
+            'А-318 · 2-я парта',
+            'Аня К.',
+            const Duration(hours: 2),
+          ),
+          item(
+            'Студенческий · Романов М.',
+            'Столовая В-78',
+            'Охрана · стойка 1 этаж',
+            const Duration(hours: 4),
+          ),
+          item(
+            'Чёрный зонт Xiaomi',
+            'Библиотека, читальный зал',
+            'Тимур Л.',
+            const Duration(days: 1),
+            status: .lost,
+          ),
+          item(
+            'Ключ с брелоком-совой',
+            'И-204',
+            'Кузнецов А. П.',
+            const Duration(days: 1),
+          ),
+          item(
+            'Тетрадь по матанализу (зелёная)',
+            'А-320',
+            'Даша С.',
+            const Duration(days: 2),
+            status: .lost,
+          ),
         ],
       );
       when(() => cubit.state).thenReturn(state);
 
       tester.view
-        ..physicalSize = const Size(390, 900)
+        ..physicalSize = const Size(390, 844)
         ..devicePixelRatio = 1;
       addTearDown(tester.view.reset);
 

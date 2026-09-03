@@ -1,3 +1,4 @@
+import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
 
 class LessonEditorFieldCard extends StatelessWidget {
@@ -7,7 +8,7 @@ class LessonEditorFieldCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Column(
-    spacing: 10,
+    spacing: AppSpacing.gap,
     children: children,
   );
 }

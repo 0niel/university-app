@@ -15,9 +15,9 @@ class NinjaGroupSpaceSkeleton extends StatelessWidget {
       child: SingleChildScrollView(
         physics: const NeverScrollableScrollPhysics(),
         padding: const .fromLTRB(
-          NinjaMetrics.screenPadding,
+          AppSpacing.screen,
           12,
-          NinjaMetrics.screenPadding,
+          AppSpacing.screen,
           24,
         ),
         child: Column(
@@ -25,18 +25,18 @@ class NinjaGroupSpaceSkeleton extends StatelessWidget {
           children: [
             NinjaSkeleton(
               height: 88 + grow * 44,
-              radius: NinjaRadius.card,
+              radius: AppRadius.card,
             ),
             const SizedBox(height: 18),
-            NinjaSkeleton(height: 64 + grow * 32, radius: NinjaRadius.card),
+            NinjaSkeleton(height: 64 + grow * 32, radius: AppRadius.card),
             const _SectionHeaderSkeleton(),
-            NinjaSkeleton(height: 92 + grow * 48, radius: NinjaRadius.card),
+            NinjaSkeleton(height: 92 + grow * 48, radius: AppRadius.card),
             const _SectionHeaderSkeleton(),
-            NinjaSkeleton(height: 64 + grow * 32, radius: NinjaRadius.card),
+            NinjaSkeleton(height: 64 + grow * 32, radius: AppRadius.card),
             const _SectionHeaderSkeleton(),
-            NinjaSkeleton(height: 52 + grow * 26, radius: NinjaRadius.card),
+            NinjaSkeleton(height: 52 + grow * 26, radius: AppRadius.card),
             const SizedBox(height: 10),
-            NinjaSkeleton(height: 132 + grow * 60, radius: NinjaRadius.card),
+            NinjaSkeleton(height: 132 + grow * 60, radius: AppRadius.card),
           ],
         ),
       ),

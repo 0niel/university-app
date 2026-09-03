@@ -2,46 +2,94 @@ import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:formz/formz.dart';
-import 'package:rtu_mirea_app/config/config.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:rtu_mirea_app/login/login.dart';
 import 'package:rtu_mirea_app/navigation/routes/routes.dart';
 
-part 'login_with_email_form_email_input.dart';
-part 'login_with_email_form_next_button.dart';
-part 'login_with_email_form_university_hint.dart';
-
-class LoginWithEmailForm extends StatelessWidget {
+class LoginWithEmailForm extends StatefulWidget {
   const LoginWithEmailForm({super.key});
 
   @override
+  State<LoginWithEmailForm> createState() => _LoginWithEmailFormState();
+}
+
+class _LoginWithEmailFormState extends State<LoginWithEmailForm> {
+  final _controller = TextEditingController();
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final email = context.select<LoginBloc, String>(
-      (bloc) => bloc.state.email.value,
-    );
+    final l10n = context.l10n;
+    final colors = context.colors;
+    final state = context.watch<LoginBloc>().state;
     return BlocListener<LoginBloc, LoginState>(
+      listenWhen: (previous, current) => previous.status != current.status,
       listener: (context, state) {
         if (state.status.isSuccess) {
-          LoginEmailConfirmationRoute(email: email).go(context);
+          LoginEmailConfirmationRoute(email: state.email.value).go(context);
         } else if (state.status.isFailure) {
-          showNinjaToast(
-            context,
-            message: context.l10n.authEmailLinkFailed,
-            showCheck: false,
-          );
+          ToastManager.showError(context, message: l10n.authEmailLinkFailed);
         }
       },
-      child: const Column(
-        crossAxisAlignment: .stretch,
-        mainAxisSize: .min,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.min,
         children: [
-          _LoginWithEmailFormEmailInput(),
-          SizedBox(height: 12),
-          _LoginWithEmailFormUniversityHint(),
-          SizedBox(height: 24),
-          _LoginWithEmailFormNextButton(),
+          AppInputField(
+            key: const Key('loginWithEmailForm_emailInput_textField'),
+            controller: _controller,
+            enabled: !state.status.isInProgress,
+            label: l10n.authYourEmail,
+            placeholder: l10n.loginEmailPlaceholder,
+            leadingIcon: AppLineIcon.at,
+            keyboardType: TextInputType.emailAddress,
+            textInputAction: TextInputAction.done,
+            autofillHints: const [AutofillHints.email],
+            onChanged: (email) =>
+                context.read<LoginBloc>().add(LoginEmailChanged(email)),
+            onSubmitted: (_) {
+              final bloc = context.read<LoginBloc>();
+              if (bloc.state.isEmailValid && !bloc.state.status.isInProgress) {
+                bloc.add(EmailLinkRequested());
+              }
+            },
+            errorText: !state.email.isPure && !state.email.isValid
+                ? l10n.authInvalidEmail
+                : null,
+          ),
+          const SizedBox(height: 12),
+          AuthHintCard(
+            key: const Key('loginWithEmailForm_terms_and_privacy_policy'),
+            icon: AppLineIcon.at,
+            color: colors.lecture,
+            title: l10n.authAnyEmailHint,
+          ),
         ],
       ),
+    );
+  }
+}
+
+class LoginWithEmailNextButton extends StatelessWidget {
+  const LoginWithEmailNextButton({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final state = context.watch<LoginBloc>().state;
+    return AppButton.primary(
+      key: const Key('loginWithEmailForm_nextButton'),
+      label: context.l10n.authNext,
+      size: AppButtonSize.hero,
+      expanded: true,
+      loading: state.status.isInProgress,
+      onPressed: state.isEmailValid
+          ? () => context.read<LoginBloc>().add(EmailLinkRequested())
+          : null,
     );
   }
 }

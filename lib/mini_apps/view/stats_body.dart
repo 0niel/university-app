@@ -8,7 +8,7 @@ class _StatsBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final l10n = context.l10n;
     final launches = stats.fold(0, (a, s) => a + s.launches);
     final users = stats.fold(0, (a, s) => a + s.uniqueUsers);
@@ -36,11 +36,11 @@ class _StatsBody extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: AppSpacing.lg),
         DecoratedBox(
           decoration: BoxDecoration(
             color: colors.surface,
-            borderRadius: BorderRadius.circular(NinjaRadius.card),
+            borderRadius: BorderRadius.circular(AppRadius.card),
           ),
           child: SizedBox(
             height: 260,
@@ -50,13 +50,14 @@ class _StatsBody extends StatelessWidget {
             ),
           ),
         ),
-        const SizedBox(height: 10),
-        Row(
-          mainAxisAlignment: .center,
+        const SizedBox(height: AppSpacing.gap),
+        Wrap(
+          alignment: .center,
           spacing: 16,
+          runSpacing: 8,
           children: [
             _LegendDot(color: colors.ink, label: l10n.miniAppsStatsLaunches),
-            _LegendDot(color: colors.brand, label: l10n.miniAppsStatsUsers),
+            _LegendDot(color: colors.accent, label: l10n.miniAppsStatsUsers),
           ],
         ),
       ],

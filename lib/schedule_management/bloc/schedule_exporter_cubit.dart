@@ -15,6 +15,7 @@ class ScheduleExporterCubit extends Cubit<ScheduleExporterState> {
   Future<void> exportSchedule({
     required String calendarName,
     required List<LessonSchedulePart> lessons,
+    List<CalendarSchedulePart> events = const [],
     bool? includeEmojis,
     bool? includeShortTypeNames,
     List<int>? reminderMinutes,
@@ -30,6 +31,7 @@ class ScheduleExporterCubit extends Cubit<ScheduleExporterState> {
       await _scheduleExporterRepository.exportScheduleToCalendar(
         calendarName: calendarName,
         lessons: lessons,
+        events: events,
         includeEmojis: includeEmojis ?? true,
         includeShortTypeNames: includeShortTypeNames ?? true,
         reminderMinutes: reminderMinutes ?? const [10, 30, 720],

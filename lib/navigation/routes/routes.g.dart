@@ -203,8 +203,8 @@ mixin $GlobalSearchRoute on GoRouteData {
 }
 
 RouteBase get $shellRouteData => StatefulShellRouteData.$route(
-  factory: $ShellRouteDataExtension._fromState,
   navigatorContainerBuilder: ShellRouteData.$navigatorContainerBuilder,
+  factory: $ShellRouteDataExtension._fromState,
   branches: [
     StatefulShellBranchData.$branch(
       routes: [
@@ -261,6 +261,10 @@ RouteBase get $shellRouteData => StatefulShellRouteData.$route(
             GoRouteData.$route(
               path: 'edit/:scheduleId',
               factory: $ScheduleEditRoute._fromState,
+            ),
+            GoRouteData.$route(
+              path: 'session',
+              factory: $ScheduleSessionRoute._fromState,
             ),
           ],
         ),
@@ -352,6 +356,14 @@ RouteBase get $shellRouteData => StatefulShellRouteData.$route(
             GoRouteData.$route(
               path: 'friends-map',
               factory: $FriendsMapRoute._fromState,
+            ),
+            GoRouteData.$route(
+              path: 'friends',
+              factory: $FriendsRoute._fromState,
+            ),
+            GoRouteData.$route(
+              path: 'cowork',
+              factory: $CoworkRoute._fromState,
             ),
             GoRouteData.$route(
               path: 'people',
@@ -684,6 +696,27 @@ mixin $ScheduleEditRoute on GoRouteData {
   String get location => GoRouteData.$location(
     '/schedule/edit/${Uri.encodeComponent(_self.scheduleId)}',
   );
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $ScheduleSessionRoute on GoRouteData {
+  static ScheduleSessionRoute _fromState(GoRouterState state) =>
+      const ScheduleSessionRoute();
+
+  @override
+  String get location => GoRouteData.$location('/schedule/session');
 
   @override
   void go(BuildContext context) => context.go(location);
@@ -1151,6 +1184,46 @@ mixin $FriendsMapRoute on GoRouteData {
 
   @override
   String get location => GoRouteData.$location('/services/friends-map');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $FriendsRoute on GoRouteData {
+  static FriendsRoute _fromState(GoRouterState state) => const FriendsRoute();
+
+  @override
+  String get location => GoRouteData.$location('/services/friends');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $CoworkRoute on GoRouteData {
+  static CoworkRoute _fromState(GoRouterState state) => const CoworkRoute();
+
+  @override
+  String get location => GoRouteData.$location('/services/cowork');
 
   @override
   void go(BuildContext context) => context.go(location);

@@ -23,7 +23,7 @@ class NinjaNoStudyGroupTab extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     const inset = EdgeInsets.symmetric(
-      horizontal: NinjaMetrics.screenPadding,
+      horizontal: AppSpacing.screen,
     );
     return ListView(
       physics: const AlwaysScrollableScrollPhysics(),
@@ -36,7 +36,7 @@ class NinjaNoStudyGroupTab extends StatelessWidget {
             message: l10n.studyGroupNoGroupSubtitle,
             icon: AppLineIconWidget(
               AppLineIcon.people,
-              color: context.ninja.muted,
+              color: context.colors.muted,
             ),
             actionLabel: l10n.studyGroupCreateCta,
             onAction: () => unawaited(onCreate()),
@@ -60,9 +60,9 @@ class NinjaNoStudyGroupTab extends StatelessWidget {
           for (final invite in invites)
             Padding(
               padding: const .fromLTRB(
-                NinjaMetrics.screenPadding,
+                AppSpacing.screen,
                 0,
-                NinjaMetrics.screenPadding,
+                AppSpacing.screen,
                 10,
               ),
               child: StudyGroupInviteCard(

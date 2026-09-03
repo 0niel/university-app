@@ -4,7 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   Widget wrap(Widget child) => MaterialApp(
-        theme: NinjaTheme.light(),
+        theme: ThemeData(extensions: const [AppColors.light]),
         home: Scaffold(body: Center(child: child)),
       );
 
@@ -33,16 +33,11 @@ void main() {
       expect(semantics.flagsCollection.isButton, isTrue);
     });
 
-    testWidgets('uses the authored accent and requested size', (tester) async {
+    testWidgets('uses the tinted accent and the requested size',
+        (tester) async {
       const accent = Color(0xFFFF7A00);
       await tester.pumpWidget(
-        wrap(
-          const AppServiceTile(
-            emoji: '🧩',
-            color: accent,
-            size: 60,
-          ),
-        ),
+        wrap(const AppServiceTile(emoji: '🧩', color: accent, size: 60)),
       );
 
       expect(tester.getSize(find.byType(AppServiceTile)), const Size(60, 60));
@@ -52,10 +47,27 @@ void main() {
           .whereType<BoxDecoration>();
       expect(
         decorations.any(
-          (decoration) => decoration.color == accent.withValues(alpha: 0.16),
+          (decoration) =>
+              decoration.color == AppColors.light.tintOf(accent) &&
+              decoration.borderRadius == BorderRadius.circular(18),
         ),
         isTrue,
       );
+    });
+
+    testWidgets('solid fills the tile with the raw colour', (tester) async {
+      const accent = Color(0xFFFF7A00);
+      await tester.pumpWidget(
+        wrap(
+          const AppServiceTile(emoji: '🧩', color: accent, solid: true),
+        ),
+      );
+
+      final decorations = tester
+          .widgetList<DecoratedBox>(find.byType(DecoratedBox))
+          .map((box) => box.decoration)
+          .whereType<BoxDecoration>();
+      expect(decorations.any((d) => d.color == accent), isTrue);
     });
 
     testWidgets('renders UIKit icon content without an emoji', (tester) async {

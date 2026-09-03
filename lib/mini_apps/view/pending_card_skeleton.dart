@@ -7,9 +7,9 @@ class _PendingCardSkeleton extends StatelessWidget {
   Widget build(BuildContext context) {
     return const Padding(
       padding: .fromLTRB(
-        NinjaMetrics.screenPadding,
+        AppSpacing.screen,
         0,
-        NinjaMetrics.screenPadding,
+        AppSpacing.screen,
         10,
       ),
       child: Column(
@@ -20,12 +20,22 @@ class _PendingCardSkeleton extends StatelessWidget {
             child: Column(
               spacing: 8,
               children: [
-                NinjaSkeleton(height: 44, radius: 9),
+                NinjaSkeleton(height: 44, radius: AppRadius.skeleton),
                 Row(
                   spacing: 8,
                   children: [
-                    Expanded(child: NinjaSkeleton(height: 44, radius: 9)),
-                    Expanded(child: NinjaSkeleton(height: 44, radius: 9)),
+                    Expanded(
+                      child: NinjaSkeleton(
+                        height: 44,
+                        radius: AppRadius.skeleton,
+                      ),
+                    ),
+                    Expanded(
+                      child: NinjaSkeleton(
+                        height: 44,
+                        radius: AppRadius.skeleton,
+                      ),
+                    ),
                   ],
                 ),
               ],

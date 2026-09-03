@@ -1,111 +1,232 @@
-import 'package:app_ui/app_ui.dart';
-import 'package:collection/collection.dart';
-import 'package:flutter/material.dart';
+import 'package:app_ui/src/colors/colors.dart';
+import 'package:app_ui/src/typography/typography.dart';
+import 'package:app_ui/src/widgets/app_stripe_placeholder.dart';
+import 'package:flutter/widgets.dart';
 
-/// Design: "Avatar" · Аватары — app-shell.jsx.
-///
-/// Initials avatar with deterministically seeded background color.
-///
-/// Pass [color] to override the auto-assigned palette color.
 class AppAvatar extends StatelessWidget {
-  const AppAvatar({required this.name, super.key, this.size = 36, this.color});
+  const AppAvatar({
+    required this.name,
+    super.key,
+    this.size = 36,
+    this.color,
+    this.backgroundColor,
+    this.textStyle,
+    this.imageUrl,
+    this.levelBadge,
+    this.online,
+  });
 
   final String name;
   final double size;
   final Color? color;
+  final Color? backgroundColor;
+  final TextStyle? textStyle;
+  final String? imageUrl;
+  final int? levelBadge;
+  final bool? online;
 
-  static const _palette = [
-    Color(0xFF7C5CFF),
-    Color(0xFFFF6FB1),
-    Color(0xFF34D399),
-    Color(0xFF4DA8FF),
-    Color(0xFFFFB020),
-    Color(0xFFFF5577),
-  ];
+  static List<Color> _palette(AppColors colors) => [
+        colors.accent,
+        colors.lecture,
+        colors.lab,
+        colors.exam,
+        colors.warn,
+        colors.practice,
+      ];
 
-  /// Deterministic palette color for [name] — same seeding the avatar uses
-  /// internally. Lets callers (e.g. map markers) tint surrounding chrome to
-  /// match the avatar without re-implementing the hash.
-  static Color colorFor(String name) {
-    final hash = name.codeUnits.fold(0, (a, c) => a + c);
-    return _palette.elementAtOrNull(hash % _palette.length) ??
-        (_palette.firstOrNull ?? const Color(0xFF7C5CFF));
+  static Color _pick(List<Color> palette, String name) {
+    final hash = name.codeUnits.fold(0, (sum, unit) => sum + unit);
+    return palette[hash % palette.length];
+  }
+
+  static Color colorFor(String name) => _pick(_palette(AppColors.light), name);
+
+  static TextStyle initialsStyle(double size) {
+    if (size <= 26) return AppText.sans(9, FontWeight.w800, height: 1);
+    if (size <= 30) return AppText.sans(10, FontWeight.w800, height: 1);
+    if (size <= 36) return AppText.sans(11, FontWeight.w800, height: 1);
+    if (size <= 48) return AppText.sans(13, FontWeight.w700, height: 1);
+    if (size <= 64) return AppText.sans(18, FontWeight.w700, height: 1);
+    if (size <= 80) return AppText.sans(22, FontWeight.w700, height: 1);
+    return AppText.sans(28, FontWeight.w700, height: 1);
+  }
+
+  static String initialsOf(String name) {
+    final parts = name
+        .trim()
+        .split(RegExp(r'\s+'))
+        .where((part) => part.isNotEmpty)
+        .take(2)
+        .map((part) => part.characters.first.toUpperCase());
+    final initials = parts.join();
+    return initials.isEmpty ? '?' : initials;
   }
 
   @override
   Widget build(BuildContext context) {
-    final bg = color ?? colorFor(name);
-    final initials = name
-        .trim()
-        .split(RegExp(r'\s+'))
-        .where((s) => s.isNotEmpty)
-        .take(2)
-        .map((s) => s.characters.firstOrNull?.toUpperCase() ?? '')
-        .join();
+    final colors = context.colors;
+    final tone = color ?? _pick(_palette(colors), name);
+    final url = imageUrl;
+    final level = levelBadge;
+    final dot = online;
 
-    return Container(
+    Widget avatar = Container(
       width: size,
       height: size,
-      decoration: BoxDecoration(color: bg, shape: BoxShape.circle),
       alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: backgroundColor ?? colors.tintOf(tone),
+        shape: BoxShape.circle,
+      ),
       child: Text(
-        initials.isEmpty ? '?' : initials,
-        style: AppText.tabular(
-          TextStyle(
-            fontSize: size * 0.38,
-            fontWeight: FontWeight.w600,
-            color: Colors.white,
-            height: 1,
+        initialsOf(name),
+        style: (textStyle ?? initialsStyle(size)).copyWith(color: tone),
+      ),
+    );
+
+    if (url != null && url.isNotEmpty) {
+      final placeholder = AppStripePlaceholder(
+        shape: BoxShape.circle,
+        base: colors.surface2,
+        stripe: colors.surface,
+        stripeWidth: 6,
+      );
+      avatar = ClipOval(
+        child: SizedBox(
+          width: size,
+          height: size,
+          child: Image.network(
+            url,
+            width: size,
+            height: size,
+            fit: BoxFit.cover,
+            loadingBuilder: (context, child, progress) =>
+                progress == null ? child : placeholder,
+            errorBuilder: (context, error, stackTrace) => placeholder,
           ),
         ),
+      );
+    }
+
+    if (level == null && dot == null) return avatar;
+
+    return SizedBox(
+      width: size,
+      height: size,
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          Positioned.fill(child: avatar),
+          if (level != null)
+            Positioned(
+              right: -2,
+              bottom: -2,
+              child: Container(
+                width: 20,
+                height: 20,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: colors.accent,
+                  shape: BoxShape.circle,
+                  border: Border.all(color: colors.surface, width: 2),
+                ),
+                child: Text(
+                  '$level',
+                  style: AppText.countBadge.copyWith(color: colors.onAccent),
+                ),
+              ),
+            ),
+          if (dot != null)
+            Positioned(
+              right: 0,
+              top: level == null ? null : 0,
+              bottom: level == null ? 0 : null,
+              child: Container(
+                width: 12,
+                height: 12,
+                decoration: BoxDecoration(
+                  color: dot ? colors.lecture : colors.muted2,
+                  shape: BoxShape.circle,
+                  border: Border.all(color: colors.surface, width: 2),
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }
 }
 
-/// Design: avatar stack · Аватары — screens-uikit.jsx.
-///
-/// A stacked row of [AppAvatar] widgets with overlap. Each avatar wears a
-/// background-colored ring to separate it from the one beneath.
 class AppAvatarStack extends StatelessWidget {
   const AppAvatarStack({
     required this.names,
     super.key,
     this.size = 36,
-    this.overlap = 10,
+    this.overlap,
+    this.maxVisible,
+    this.extra = 0,
   });
 
-  /// Ring width drawn around each avatar; counts toward the laid-out diameter.
-  static const _ring = 2.0;
+  static const double _ring = 2;
 
   final List<String> names;
   final double size;
-  final double overlap;
+  final double? overlap;
+  final int? maxVisible;
+  final int extra;
 
   @override
   Widget build(BuildContext context) {
     if (names.isEmpty) return const SizedBox.shrink();
-    final bg = Theme.of(context).colors.background01;
-    // The ring adds [_ring] px on every side (Border is laid out as padding),
-    // so the real avatar diameter is size + 2·ring — size the box to it, else
-    // the ring is clipped top/bottom/right.
+
+    final colors = context.colors;
+    final limit = maxVisible == null
+        ? names.length
+        : (maxVisible! < names.length ? maxVisible! : names.length);
+    final visible = names.take(limit).toList();
+    final hidden = extra + (names.length - visible.length);
+    final step = size - (overlap ?? (size <= 30 ? 8 : 10));
     final diameter = size + _ring * 2;
-    final step = size - overlap;
+    final count = visible.length + (hidden > 0 ? 1 : 0);
+
+    Widget ringed(Widget child) => Container(
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            border: Border.all(color: colors.surface, width: _ring),
+          ),
+          child: child,
+        );
+
     return SizedBox(
       height: diameter,
-      width: diameter + (names.length - 1) * step,
+      width: diameter + (count - 1) * step,
       child: Stack(
         clipBehavior: Clip.none,
         children: [
-          for (var i = 0; i < names.length; i++)
+          for (var i = 0; i < visible.length; i++)
             Positioned(
               left: i * step,
-              child: Container(
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(color: bg, width: _ring),
+              child: ringed(AppAvatar(name: visible[i], size: size)),
+            ),
+          if (hidden > 0)
+            Positioned(
+              left: visible.length * step,
+              child: ringed(
+                Container(
+                  width: size,
+                  height: size,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: colors.surface2,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Text(
+                    '+$hidden',
+                    style: AppAvatar.initialsStyle(
+                      size,
+                    ).copyWith(color: colors.muted),
+                  ),
                 ),
-                child: AppAvatar(name: names[i], size: size),
               ),
             ),
         ],

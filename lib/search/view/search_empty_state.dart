@@ -19,17 +19,20 @@ class SearchEmptyState extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     return ListView(
-      padding: const EdgeInsets.only(bottom: 24),
+      padding: const EdgeInsets.only(bottom: AppSpacing.xlg),
       children: [
         Padding(
           padding: const EdgeInsets.fromLTRB(
-            NinjaMetrics.screenPadding,
-            24,
-            NinjaMetrics.screenPadding,
+            AppSpacing.screen,
+            AppSpacing.xlg,
+            AppSpacing.screen,
             0,
           ),
           child: NinjaEmptyState.screen(
-            icon: const AppLineIconWidget(AppLineIcon.search, size: 24),
+            icon: const AppLineIconWidget(
+              AppLineIcon.search,
+              size: AppIconSize.lg,
+            ),
             title: l10n.searchNoResults,
             message: l10n.searchNoResultsHint,
             actionLabel: l10n.clear,
@@ -40,14 +43,14 @@ class SearchEmptyState extends StatelessWidget {
           const SizedBox(height: 28),
           Padding(
             padding: const EdgeInsets.symmetric(
-              horizontal: NinjaMetrics.screenPadding,
+              horizontal: AppSpacing.screen,
             ),
             child: SearchHeadlineText(headerText: l10n.searchRecent),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpacing.sm),
           Padding(
             padding: const EdgeInsets.symmetric(
-              horizontal: NinjaMetrics.screenPadding,
+              horizontal: AppSpacing.screen,
             ),
             child: Column(
               spacing: AppSpacing.gap,

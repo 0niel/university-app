@@ -65,7 +65,7 @@ class _MiniAppScanPageState extends State<MiniAppScanPage> {
                   child: Text(
                     l10n.miniAppsScanInstruction,
                     textAlign: .center,
-                    style: NinjaText.body.copyWith(color: Colors.white),
+                    style: AppText.body.copyWith(color: Colors.white),
                   ),
                 ),
               ],

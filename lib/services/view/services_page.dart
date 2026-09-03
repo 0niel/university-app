@@ -10,11 +10,8 @@ class ServicesPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: context.ninja.canvas,
-      body: SafeArea(
-        bottom: false,
-        child: ServicesView(initialEditMode: initialEditMode),
-      ),
+      backgroundColor: context.colors.canvas,
+      body: ServicesView(initialEditMode: initialEditMode),
     );
   }
 }

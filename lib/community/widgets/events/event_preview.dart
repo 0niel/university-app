@@ -17,16 +17,16 @@ class _EventPreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final l10n = context.l10n;
     final locale = Localizations.localeOf(context).languageCode;
     return DecoratedBox(
       decoration: BoxDecoration(
         color: colors.surface,
-        borderRadius: BorderRadius.circular(NinjaRadius.card),
+        borderRadius: BorderRadius.circular(AppRadius.card),
       ),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(AppSpacing.lg),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -35,12 +35,12 @@ class _EventPreview extends StatelessWidget {
               height: 44,
               alignment: Alignment.center,
               decoration: BoxDecoration(
-                color: colors.brandTint,
-                borderRadius: BorderRadius.circular(NinjaRadius.control),
+                color: colors.tint,
+                borderRadius: BorderRadius.circular(AppRadius.field),
               ),
               child: Text(emoji, style: const TextStyle(fontSize: 22)),
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: AppSpacing.md),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -50,7 +50,7 @@ class _EventPreview extends StatelessWidget {
                     title.isEmpty ? l10n.eventsCreatePreviewTitle : title,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: NinjaText.headline.copyWith(color: colors.ink),
+                    style: AppText.headline.copyWith(color: colors.ink),
                   ),
                   const SizedBox(height: 3),
                   Text(
@@ -61,7 +61,7 @@ class _EventPreview extends StatelessWidget {
                     ].join(' · '),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: NinjaText.subtext.copyWith(color: colors.muted),
+                    style: AppText.subtext.copyWith(color: colors.muted),
                   ),
                 ],
               ),

@@ -67,6 +67,181 @@ void main() {
     });
 
     group('user', () {
+      UserRepository initializingRepository(
+        Future<void> Function(String) initialize, {
+        Duration timeout = const Duration(seconds: 8),
+        void Function(Object, StackTrace)? onError,
+      }) => UserRepository(
+        authenticationClient: authenticationClient,
+        packageInfoClient: packageInfoClient,
+        deepLinkService: deepLinkService,
+        storage: storage,
+        initializeUser: initialize,
+        initializationTimeout: timeout,
+        onInitializationError: onError,
+      );
+
+      test(
+        'waits for the minimal guest profile before emitting authentication',
+        () async {
+          final pending = Completer<void>();
+          final initialized = <String>[];
+          final emitted = <User>[];
+          when(() => authenticationClient.user).thenAnswer(
+            (_) => Stream.value(
+              const AuthenticationUser(id: 'guest', isGuest: true),
+            ),
+          );
+          final repository = initializingRepository((id) {
+            initialized.add(id);
+            return pending.future;
+          });
+          final subscription = repository.user.listen(emitted.add);
+          await Future<void>.delayed(Duration.zero);
+          expect(initialized, ['guest']);
+          expect(emitted, isEmpty);
+          pending.complete();
+          await Future<void>.delayed(Duration.zero);
+          expect(emitted.single, const User(id: 'guest', isGuest: true));
+          await subscription.cancel();
+        },
+      );
+
+      for (final replacement in [
+        AuthenticationUser.anonymous,
+        const AuthenticationUser(id: 'replacement'),
+      ]) {
+        test(
+          'ignores a late bootstrap after auth changes to ${replacement.id}',
+          () async {
+            final authentication = StreamController<AuthenticationUser>(
+              sync: true,
+            );
+            final pending = Completer<void>();
+            final emitted = <User>[];
+            final initialized = <String>[];
+            when(
+              () => authenticationClient.user,
+            ).thenAnswer((_) => authentication.stream);
+            final repository = initializingRepository((id) {
+              initialized.add(id);
+              return id == 'old' ? pending.future : Future.value();
+            });
+            final subscription = repository.user.listen(emitted.add);
+            authentication.add(
+              const AuthenticationUser(id: 'old', isGuest: true),
+            );
+            await Future<void>.delayed(Duration.zero);
+            authentication.add(replacement);
+            await Future<void>.delayed(Duration.zero);
+            expect(emitted.map((user) => user.id), [replacement.id]);
+            pending.complete();
+            await Future<void>.delayed(Duration.zero);
+            expect(emitted.map((user) => user.id), [replacement.id]);
+            expect(
+              initialized,
+              replacement.isAnonymous ? ['old'] : ['old', 'replacement'],
+            );
+            await subscription.cancel();
+            await authentication.close();
+          },
+        );
+      }
+
+      test(
+        'same-UID guest linking ignores a late anonymous bootstrap',
+        () async {
+          final authentication = StreamController<AuthenticationUser>(
+            sync: true,
+          );
+          final pendingGuest = Completer<void>();
+          final initialized = <String>[];
+          final emitted = <User>[];
+          when(
+            () => authenticationClient.user,
+          ).thenAnswer((_) => authentication.stream);
+          final repository = initializingRepository((id) {
+            initialized.add(id);
+            return initialized.length == 1
+                ? pendingGuest.future
+                : Future.value();
+          });
+          final subscription = repository.user.listen(emitted.add);
+          authentication.add(
+            const AuthenticationUser(id: 'same', isGuest: true),
+          );
+          await Future<void>.delayed(Duration.zero);
+          authentication.add(
+            const AuthenticationUser(id: 'same', email: 'linked@example.org'),
+          );
+          await Future<void>.delayed(Duration.zero);
+          expect(emitted, [
+            const User(id: 'same', email: 'linked@example.org'),
+          ]);
+          pendingGuest.complete();
+          await Future<void>.delayed(Duration.zero);
+          expect(emitted, [
+            const User(id: 'same', email: 'linked@example.org'),
+          ]);
+          expect(initialized, ['same', 'same']);
+          await subscription.cancel();
+          await authentication.close();
+        },
+      );
+
+      test(
+        'initialization errors preserve authentication and remain observable',
+        () async {
+          final errors = <Object>[];
+          final failure = StateError('offline');
+          when(() => authenticationClient.user).thenAnswer(
+            (_) => Stream.value(
+              const AuthenticationUser(id: 'guest', isGuest: true),
+            ),
+          );
+          final repository = initializingRepository(
+            (_) => Future.error(failure),
+            onError: (error, _) => errors.add(error),
+          );
+          expect(
+            await repository.user.first,
+            const User(id: 'guest', isGuest: true),
+          );
+          expect(errors, [failure]);
+        },
+      );
+
+      test(
+        'a stalled initialization has a bounded authenticated fallback',
+        () async {
+          final pending = Completer<void>();
+          final errors = <Object>[];
+          when(() => authenticationClient.user).thenAnswer(
+            (_) => Stream.value(const AuthenticationUser(id: 'normal')),
+          );
+          final repository = initializingRepository(
+            (_) => pending.future,
+            timeout: const Duration(milliseconds: 1),
+            onError: (error, _) => errors.add(error),
+          );
+          expect(await repository.user.first, const User(id: 'normal'));
+          expect(errors.single, isA<TimeoutException>());
+          pending.complete();
+        },
+      );
+
+      test('keeps a real guest session distinct from signed out', () async {
+        when(() => authenticationClient.user).thenAnswer(
+          (_) => Stream.value(
+            const AuthenticationUser(id: 'guest-id', isGuest: true),
+          ),
+        );
+        final user = await userRepository.user.first;
+        expect(user.id, 'guest-id');
+        expect(user.isGuest, isTrue);
+        expect(user.isAnonymous, isFalse);
+      });
+
       test('calls user on AuthenticationClient', () async {
         when(
           () => authenticationClient.user,
@@ -420,6 +595,59 @@ void main() {
         );
       });
     });
+
+    test(
+      'guest upgrade forwards every step with the original user id',
+      () async {
+        when(
+          () => authenticationClient.linkGuestEmail(
+            userId: 'guest-id',
+            email: 'user@gmail.com',
+          ),
+        ).thenAnswer((_) async {});
+        when(
+          () => authenticationClient.verifyGuestEmail(
+            userId: 'guest-id',
+            email: 'user@gmail.com',
+            code: '123456',
+          ),
+        ).thenAnswer((_) async {});
+        when(
+          () => authenticationClient.setAccountPassword(
+            userId: 'guest-id',
+            password: 'password123',
+          ),
+        ).thenAnswer((_) async {});
+        await userRepository.linkGuestEmail(
+          userId: 'guest-id',
+          email: 'user@gmail.com',
+        );
+        await userRepository.verifyGuestEmail(
+          userId: 'guest-id',
+          email: 'user@gmail.com',
+          code: '123456',
+        );
+        await userRepository.setAccountPassword(
+          userId: 'guest-id',
+          password: 'password123',
+        );
+        verifyInOrder([
+          () => authenticationClient.linkGuestEmail(
+            userId: 'guest-id',
+            email: 'user@gmail.com',
+          ),
+          () => authenticationClient.verifyGuestEmail(
+            userId: 'guest-id',
+            email: 'user@gmail.com',
+            code: '123456',
+          ),
+          () => authenticationClient.setAccountPassword(
+            userId: 'guest-id',
+            password: 'password123',
+          ),
+        ]);
+      },
+    );
 
     group('sendPasswordResetEmail', () {
       const email = 'email@example.com';

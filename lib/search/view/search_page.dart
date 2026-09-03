@@ -23,8 +23,8 @@ class SearchPage extends StatelessWidget {
             ..add(SearchQueryChanged(searchQuery: query ?? ''))
             ..add(const SearchTrendingRequested()),
       child: Scaffold(
-        backgroundColor: context.ninja.canvas,
-        body: SafeArea(child: SearchView(query: query)),
+        backgroundColor: context.colors.canvas,
+        body: SafeArea(top: false, child: SearchView(query: query)),
       ),
     );
   }

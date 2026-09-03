@@ -33,7 +33,7 @@ class FriendsMapControls extends StatelessWidget {
             MediaQuery.disableAnimationsOf(context) ||
             MediaQuery.accessibleNavigationOf(context);
         return Positioned(
-          right: NinjaMetrics.screenPadding,
+          right: AppSpacing.screen,
           bottom: bottom,
           child: IgnorePointer(
             ignoring: !visible,

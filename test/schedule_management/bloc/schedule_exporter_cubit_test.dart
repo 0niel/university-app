@@ -21,6 +21,7 @@ void main() {
       () => repository.exportScheduleToCalendar(
         calendarName: any(named: 'calendarName'),
         lessons: any(named: 'lessons'),
+        events: any(named: 'events'),
         includeEmojis: any(named: 'includeEmojis'),
         includeShortTypeNames: any(named: 'includeShortTypeNames'),
         reminderMinutes: any(named: 'reminderMinutes'),
@@ -36,6 +37,38 @@ void main() {
     });
 
     group('exportSchedule', () {
+      final events = [
+        CalendarSchedulePart(
+          title: 'Conference',
+          dates: [DateTime(2030, 9, 2)],
+          startsAt: DateTime(2030, 9, 2, 12),
+          endsAt: DateTime(2030, 9, 2, 14),
+        ),
+      ];
+      blocTest<ScheduleExporterCubit, ScheduleExporterState>(
+        'forwards actual calendar events alongside lessons',
+        build: buildCubit,
+        act: (cubit) => cubit.exportSchedule(
+          calendarName: 'Study',
+          lessons: const [],
+          events: events,
+        ),
+        verify: (_) {
+          verify(
+            () => repository.exportScheduleToCalendar(
+              calendarName: 'Study',
+              lessons: const [],
+              events: events,
+              includeShortTypeNames: true,
+            ),
+          ).called(1);
+        },
+        expect: () => const <ScheduleExporterState>[
+          ScheduleExporterState(isLoading: true),
+          ScheduleExporterState(isSuccess: true),
+        ],
+      );
+
       blocTest<ScheduleExporterCubit, ScheduleExporterState>(
         'emits [loading, success] when the export succeeds',
         build: buildCubit,

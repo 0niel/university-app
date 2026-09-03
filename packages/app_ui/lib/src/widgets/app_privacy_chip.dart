@@ -1,5 +1,8 @@
-import 'package:app_ui/app_ui.dart';
-import 'package:flutter/material.dart';
+import 'package:app_ui/src/colors/colors.dart';
+import 'package:app_ui/src/spacing/app_spacing.dart';
+import 'package:app_ui/src/typography/typography.dart';
+import 'package:app_ui/src/widgets/app_line_icon.dart';
+import 'package:flutter/widgets.dart';
 
 class AppPrivacyChip extends StatelessWidget {
   const AppPrivacyChip({
@@ -15,22 +18,27 @@ class AppPrivacyChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 7),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.gap,
+        vertical: AppSpacing.xsm,
+      ),
       decoration: BoxDecoration(
-        color: colors.success.withValues(alpha: 0.16),
+        color: colors.lectureTint,
         borderRadius: BorderRadius.circular(AppRadius.full),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.check_rounded, size: 13, color: colors.success),
-          const SizedBox(width: 6),
+          AppLineIconWidget(
+            AppLineIcon.check,
+            size: AppIconSize.badge,
+            color: colors.lecture,
+            strokeWidth: 2.5,
+          ),
+          const SizedBox(width: AppSpacing.xsm),
           Text(
             '$icon $label',
-            style: AppText.caption.copyWith(
-              fontWeight: FontWeight.w600,
-              color: colors.success,
-            ),
+            style: AppText.captionStrong.copyWith(color: colors.lecture),
           ),
         ],
       ),

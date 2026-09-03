@@ -1,7 +1,22 @@
-part of '../view/onboarding_page.dart';
+import 'dart:async';
+import 'dart:developer';
 
-class _IdentityStep extends StatefulWidget {
-  const _IdentityStep({
+import 'package:app_ui/app_ui.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gamification_repository/gamification_repository.dart';
+import 'package:rtu_mirea_app/app/bloc/app_bloc.dart';
+import 'package:rtu_mirea_app/config/config.dart';
+import 'package:rtu_mirea_app/l10n/l10n.dart';
+import 'package:rtu_mirea_app/login/widgets/widgets.dart';
+
+enum _HandleCheck { idle, checking, available, taken, invalid, failed }
+
+class OnboardingIdentityStep extends StatefulWidget {
+  const OnboardingIdentityStep({
+    required this.step,
+    required this.totalSteps,
     required this.onBack,
     required this.onNext,
     this.initialName,
@@ -9,23 +24,24 @@ class _IdentityStep extends StatefulWidget {
     super.key,
   });
 
+  final int step;
+  final int totalSteps;
   final VoidCallback onBack;
   final void Function(String name, String handle) onNext;
-
   final String? initialName;
   final String? initialHandle;
 
   @override
-  State<_IdentityStep> createState() => _IdentityStepState();
+  State<OnboardingIdentityStep> createState() => _OnboardingIdentityStepState();
 }
 
-class _IdentityStepState extends State<_IdentityStep> {
+class _OnboardingIdentityStepState extends State<OnboardingIdentityStep> {
   static final _handleRegex = RegExp(r'^[a-z0-9_]{3,20}$');
 
   final _name = TextEditingController();
   final _handle = TextEditingController();
   Timer? _debounce;
-  _HandleCheck _check = .idle;
+  _HandleCheck _check = _HandleCheck.idle;
   var _saving = false;
   var _hasName = false;
   var _availabilityRequest = 0;
@@ -34,23 +50,29 @@ class _IdentityStepState extends State<_IdentityStep> {
 
   GamificationRepository get _repo => context.read();
 
-  @override
-  void initState() {
-    super.initState();
-    final savedName = widget.initialName?.trim() ?? '';
-    final authName = context.read<AppBloc>().state.user.name?.trim() ?? '';
-    _name.text = savedName.isNotEmpty ? savedName : authName;
-    _hasName = _name.text.trim().isNotEmpty;
-
-    final savedHandle = widget.initialHandle?.trim() ?? '';
-    if (savedHandle.isNotEmpty) {
-      _handle.text = savedHandle;
-      _check = .available;
+  String _authName() {
+    try {
+      return context.read<AppBloc>().state.user.name?.trim() ?? '';
+    } on ProviderNotFoundException {
+      return '';
     }
   }
 
   @override
-  void didUpdateWidget(covariant _IdentityStep oldWidget) {
+  void initState() {
+    super.initState();
+    final savedName = widget.initialName?.trim() ?? '';
+    _name.text = savedName.isNotEmpty ? savedName : _authName();
+    _hasName = _name.text.trim().isNotEmpty;
+    final savedHandle = widget.initialHandle?.trim() ?? '';
+    if (savedHandle.isNotEmpty) {
+      _handle.text = savedHandle;
+      _check = _HandleCheck.available;
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant OnboardingIdentityStep oldWidget) {
     super.didUpdateWidget(oldWidget);
     final nextName = widget.initialName?.trim() ?? '';
     if (!_nameDirty && nextName.isNotEmpty && nextName != _name.text) {
@@ -60,7 +82,7 @@ class _IdentityStepState extends State<_IdentityStep> {
     final nextHandle = widget.initialHandle?.trim() ?? '';
     if (!_handleDirty && nextHandle.isNotEmpty && nextHandle != _handle.text) {
       _handle.text = nextHandle;
-      _check = .available;
+      _check = _HandleCheck.available;
     }
   }
 
@@ -84,18 +106,18 @@ class _IdentityStepState extends State<_IdentityStep> {
     _availabilityRequest++;
     final handle = value.trim();
     if (handle.isEmpty) {
-      setState(() => _check = .idle);
+      setState(() => _check = _HandleCheck.idle);
       return;
     }
     if (!_handleRegex.hasMatch(handle)) {
-      setState(() => _check = .invalid);
+      setState(() => _check = _HandleCheck.invalid);
       return;
     }
     if (handle == widget.initialHandle?.trim()) {
-      setState(() => _check = .available);
+      setState(() => _check = _HandleCheck.available);
       return;
     }
-    setState(() => _check = .checking);
+    setState(() => _check = _HandleCheck.checking);
     final request = _availabilityRequest;
     _debounce = Timer(const Duration(milliseconds: 400), () {
       unawaited(_checkHandle(handle, request));
@@ -107,7 +129,10 @@ class _IdentityStepState extends State<_IdentityStep> {
       final isAvailable = await _repo.isHandleAvailable(handle);
       if (!mounted || request != _availabilityRequest) return;
       if (_handle.text.trim() != handle) return;
-      setState(() => _check = isAvailable ? .available : .taken);
+      setState(
+        () =>
+            _check = isAvailable ? _HandleCheck.available : _HandleCheck.taken,
+      );
     } on Exception catch (error, stackTrace) {
       log(
         'Handle availability check failed',
@@ -116,39 +141,39 @@ class _IdentityStepState extends State<_IdentityStep> {
         name: 'OnboardingIdentityStep',
       );
       if (mounted && request == _availabilityRequest) {
-        setState(() => _check = .idle);
+        setState(() => _check = _HandleCheck.failed);
       }
     }
   }
 
-  bool get _canSubmit => !_saving && _hasName && _check == .available;
+  bool get _canSubmit =>
+      !_saving && _hasName && _check == _HandleCheck.available;
 
   Future<void> _save() async {
     if (!_canSubmit) return;
+    final name = _name.text.trim();
+    final handle = _handle.text.trim();
     setState(() => _saving = true);
     try {
       await _repo.setUserIdentity(
         organizationId: context.read<UniversityConfig>().organizationId,
-        fullName: _name.text.trim(),
-        handle: _handle.text.trim(),
+        fullName: name,
+        handle: handle,
       );
-      if (mounted) {
-        widget.onNext(_name.text.trim(), _handle.text.trim());
-      }
+      if (mounted) widget.onNext(name, handle);
     } on HandleTakenException {
       if (mounted) {
         setState(() {
-          _check = .taken;
+          _check = _HandleCheck.taken;
           _saving = false;
         });
       }
     } on Exception {
       if (mounted) {
         setState(() => _saving = false);
-        showNinjaToast(
+        ToastManager.showError(
           context,
           message: context.l10n.identitySaveError,
-          showCheck: false,
         );
       }
     }
@@ -157,24 +182,92 @@ class _IdentityStepState extends State<_IdentityStep> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    return _OnboardStep(
-      step: 2,
-      total: 3,
-      showBack: true,
+    final (String? error, String? helper) = switch (_check) {
+      _HandleCheck.taken => (l10n.identityHandleTaken, null),
+      _HandleCheck.invalid => (l10n.identityHandleInvalid, null),
+      _HandleCheck.available => (null, l10n.identityHandleAvailable),
+      _HandleCheck.failed => (null, null),
+      _HandleCheck.idle ||
+      _HandleCheck.checking => (null, l10n.identityHandleHelp),
+    };
+    return AuthPageLayout(
+      step: widget.step,
+      totalSteps: widget.totalSteps,
+      title: l10n.onboardingIdentityTitle,
+      subtitle: l10n.onboardingIdentitySubtitle,
       onBack: widget.onBack,
-      ctaLabel: _saving ? l10n.identitySaving : l10n.onboardingNext,
-      ctaEnabled: _canSubmit,
-      ctaLoading: _saving,
-      onCta: () {
-        unawaited(_save());
-      },
-      child: _IdentityBody(
-        nameController: _name,
-        handleController: _handle,
-        check: _check,
-        onNameChanged: _onNameChanged,
-        onHandleChanged: _onHandleChanged,
+      actions: AppButton.primary(
+        key: const Key('onboarding_identityContinue'),
+        label: _saving ? l10n.identitySaving : l10n.onboardingContinue,
+        size: AppButtonSize.hero,
+        expanded: true,
+        loading: _saving,
+        onPressed: _canSubmit ? () => unawaited(_save()) : null,
       ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          AppInputField(
+            key: const Key('onboarding_identityName'),
+            controller: _name,
+            enabled: !_saving,
+            label: l10n.identityNameLabel,
+            placeholder: l10n.identityNameHint,
+            textInputAction: TextInputAction.next,
+            textCapitalization: TextCapitalization.words,
+            onChanged: _onNameChanged,
+          ),
+          const SizedBox(height: 16),
+          AppInputField(
+            key: const Key('onboarding_identityHandle'),
+            controller: _handle,
+            enabled: !_saving,
+            label: l10n.identityHandleLabel,
+            placeholder: l10n.identityHandleHint,
+            leadingIcon: AppLineIcon.at,
+            trailing: _check == _HandleCheck.checking
+                ? const AppSpinner(size: 18)
+                : null,
+            showClear: false,
+            success: _check == _HandleCheck.available,
+            inputFormatters: [
+              const _HandleInputFormatter(),
+              LengthLimitingTextInputFormatter(20),
+            ],
+            onChanged: _onHandleChanged,
+            errorText: error,
+            helperText: helper,
+          ),
+          if (_check == _HandleCheck.failed) ...[
+            const SizedBox(height: 12),
+            AppBanner(
+              message: l10n.identityHandleCheckError,
+              tone: AppBannerTone.warn,
+              actionLabel: l10n.retry,
+              onAction: () => _onHandleChanged(_handle.text),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _HandleInputFormatter extends TextInputFormatter {
+  const _HandleInputFormatter();
+
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    final filtered = newValue.text.toLowerCase().replaceAll(
+      RegExp('[^a-z0-9_]'),
+      '',
+    );
+    return TextEditingValue(
+      text: filtered,
+      selection: TextSelection.collapsed(offset: filtered.length),
     );
   }
 }

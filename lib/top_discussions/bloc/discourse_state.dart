@@ -5,6 +5,9 @@ abstract class DiscourseState with _$DiscourseState {
   const factory DiscourseState({
     TopTopicsResponse? topTopics,
     @Default(DiscourseStatus.initial) DiscourseStatus status,
+    @Default(false) bool isLoadingMore,
+    @Default(false) bool loadMoreFailed,
+    @Default(0) int page,
   }) = _DiscourseState;
 
   const DiscourseState._();

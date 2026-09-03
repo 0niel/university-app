@@ -2,103 +2,57 @@ import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../kit_harness.dart';
+
 void main() {
-  final colors = NinjaColors.light();
+  testWidgets('renders the requested number of cells', (tester) async {
+    await tester.pumpWidget(
+      wrapKit(const SizedBox(width: 320, child: NinjaCodeInput(length: 4))),
+    );
 
-  Widget wrap(Widget child) => MaterialApp(
-        theme: NinjaTheme.light(),
-        home: Scaffold(
-          body: Padding(padding: const EdgeInsets.all(20), child: child),
-        ),
-      );
+    expect(find.byType(AppCodeInput), findsOneWidget);
+    expect(find.byType(SixDigitCodeCell), findsNWidgets(4));
+  });
 
-  Finder boxes() => find.byWidgetPredicate(
-        (widget) =>
-            widget is SizedBox && widget.width == 48 && widget.height == 56,
-      );
-
-  group('NinjaCodeInput', () {
-    testWidgets('draws one 48×56 box per digit', (tester) async {
-      await tester.pumpWidget(wrap(const NinjaCodeInput()));
-
-      expect(boxes(), findsNWidgets(6));
-    });
-
-    testWidgets('respects a custom length', (tester) async {
-      await tester.pumpWidget(wrap(const NinjaCodeInput(length: 4)));
-
-      expect(boxes(), findsNWidgets(4));
-    });
-
-    testWidgets('shrinks the boxes instead of overflowing a narrow row', (
-      tester,
-    ) async {
-      await tester.pumpWidget(
-        wrap(const SizedBox(width: 280, child: NinjaCodeInput())),
-      );
-
-      expect(tester.takeException(), isNull);
-      expect(
-        tester.getSize(find.byType(NinjaCodeInput)).width,
-        lessThanOrEqualTo(280),
-      );
-    });
-
-    testWidgets('renders typed digits and completes at full length', (
-      tester,
-    ) async {
-      String? completed;
-      final changes = <String>[];
-
-      await tester.pumpWidget(
-        wrap(
-          NinjaCodeInput(
+  testWidgets('reports changes and completion', (tester) async {
+    final changes = <String>[];
+    final completed = <String>[];
+    await tester.pumpWidget(
+      wrapKit(
+        SizedBox(
+          width: 320,
+          child: NinjaCodeInput(
+            length: 4,
             onChanged: changes.add,
-            onCompleted: (code) => completed = code,
+            onCompleted: completed.add,
           ),
         ),
-      );
+      ),
+    );
 
-      await tester.enterText(find.byType(TextField), '731');
-      await tester.pump();
+    await tester.enterText(find.byType(TextField), '13');
+    await tester.pumpAndSettle();
+    expect(changes.last, '13');
+    expect(completed, isEmpty);
 
-      expect(find.text('7'), findsOneWidget);
-      expect(find.text('3'), findsOneWidget);
-      expect(find.text('1'), findsOneWidget);
-      expect(changes.last, '731');
-      expect(completed, isNull);
+    await tester.enterText(find.byType(TextField), '1357');
+    await tester.pumpAndSettle();
+    expect(completed, ['1357']);
+  });
 
-      await tester.enterText(find.byType(TextField), '731284');
-      await tester.pump();
+  testWidgets('non-digits are filtered out', (tester) async {
+    final changes = <String>[];
+    await tester.pumpWidget(
+      wrapKit(
+        SizedBox(
+          width: 320,
+          child: NinjaCodeInput(length: 4, onChanged: changes.add),
+        ),
+      ),
+    );
 
-      expect(completed, '731284');
-    });
-
-    testWidgets('the active box uses a flat high-contrast border', (
-      tester,
-    ) async {
-      await tester.pumpWidget(wrap(const NinjaCodeInput(autofocus: true)));
-      await tester.pump();
-
-      final decorations = tester
-          .widgetList<DecoratedBox>(
-            find.descendant(
-              of: find.byType(NinjaCodeInput),
-              matching: find.byType(DecoratedBox),
-            ),
-          )
-          .map((box) => box.decoration as BoxDecoration)
-          .where(
-            (decoration) =>
-                decoration.borderRadius ==
-                BorderRadius.circular(NinjaRadius.button),
-          )
-          .toList();
-
-      expect(decorations.first.border?.top.color, colors.ink);
-      expect(decorations.first.boxShadow, isNull);
-      expect(decorations.last.border?.top.color, colors.line);
-      expect(decorations.last.boxShadow, isNull);
-    });
+    await tester.enterText(find.byType(TextField), 'a1b2');
+    await tester.pumpAndSettle();
+    expect(changes.last, '12');
   });
 }

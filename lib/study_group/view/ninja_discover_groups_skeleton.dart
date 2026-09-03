@@ -11,12 +11,12 @@ class _NinjaDiscoverGroupsSkeleton extends StatelessWidget {
         itemCount: 6,
         itemBuilder: (context, index) => const Padding(
           padding: .fromLTRB(
-            NinjaMetrics.screenPadding,
+            AppSpacing.screen,
             0,
-            NinjaMetrics.screenPadding,
+            AppSpacing.screen,
             10,
           ),
-          child: NinjaSkeleton(height: 78, radius: NinjaRadius.card),
+          child: NinjaSkeleton(height: 78, radius: AppRadius.card),
         ),
       ),
     );

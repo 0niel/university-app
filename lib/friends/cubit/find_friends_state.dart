@@ -9,7 +9,9 @@ abstract class FindFriendsState with _$FindFriendsState {
     @Default(<UserSearchResult>[]) List<UserSearchResult> results,
     @Default('') String query,
     @Default(false) bool searching,
+    @Default(false) bool searchFailed,
     @Default(<String>{}) Set<String> sentTo,
+    @Default(<String>{}) Set<String> sendingTo,
     @Default(false) bool isAddingGroup,
   }) = _FindFriendsState;
 

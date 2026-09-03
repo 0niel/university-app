@@ -13,20 +13,17 @@ class _NinjaFriendCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final l10n = context.l10n;
-    final locationUpdatedAt = friend.locationUpdatedAt;
-    final live =
-        friend.hasLocation &&
-        locationUpdatedAt != null &&
-        DateTime.now().difference(locationUpdatedAt).inMinutes < 5;
+    final presence = friendPresence(friend, DateTime.now());
+    final live = presence == FriendPresence.live;
 
     final String statusText;
     if (friend.isGhost) {
       statusText = l10n.friendsStatusHidden;
     } else if (live) {
       statusText = l10n.friendsStatusLive;
-    } else if (friend.hasLocation) {
+    } else if (presence == FriendPresence.recent) {
       statusText = l10n.friendsStatusRecent;
     } else {
       statusText = l10n.friendsStatusGeoOff;
@@ -35,9 +32,9 @@ class _NinjaFriendCard extends StatelessWidget {
 
     return Padding(
       padding: const .fromLTRB(
-        NinjaMetrics.screenPadding,
+        AppSpacing.screen,
         0,
-        NinjaMetrics.screenPadding,
+        AppSpacing.screen,
         10,
       ),
       child: AppPressable(
@@ -46,17 +43,18 @@ class _NinjaFriendCard extends StatelessWidget {
         child: DecoratedBox(
           decoration: BoxDecoration(
             color: colors.surface,
-            borderRadius: .circular(NinjaRadius.card),
+            borderRadius: .circular(AppRadius.card),
           ),
           child: Padding(
-            padding: const .all(16),
+            padding: const .all(AppSpacing.lg),
             child: Row(
               children: [
-                NinjaAvatar(
-                  initials: ninjaInitials(friend.fullName),
+                AppAvatar(
+                  name: friend.fullName,
+                  size: FriendsLayout.avatar,
                   online: live,
                 ),
-                const SizedBox(width: 14),
+                const SizedBox(width: AppSpacing.sectionGap),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: .start,
@@ -70,7 +68,7 @@ class _NinjaFriendCard extends StatelessWidget {
                               friend.fullName,
                               maxLines: 1,
                               overflow: .ellipsis,
-                              style: NinjaText.headline.copyWith(
+                              style: AppText.headline.copyWith(
                                 color: colors.ink,
                               ),
                             ),
@@ -86,12 +84,12 @@ class _NinjaFriendCard extends StatelessWidget {
                         meta,
                         maxLines: 1,
                         overflow: .ellipsis,
-                        style: NinjaText.helper.copyWith(color: colors.muted),
+                        style: AppText.caption.copyWith(color: colors.muted),
                       ),
                     ],
                   ),
                 ),
-                const SizedBox(width: 10),
+                const SizedBox(width: AppSpacing.gap),
                 Column(
                   crossAxisAlignment: .end,
                   spacing: 5,
@@ -99,20 +97,24 @@ class _NinjaFriendCard extends StatelessWidget {
                     if (distance case final distanceText?)
                       Container(
                         padding: const .symmetric(
-                          horizontal: 10,
+                          horizontal: AppSpacing.gap,
                           vertical: 5,
                         ),
                         decoration: BoxDecoration(
-                          color: colors.surfaceAlt,
-                          borderRadius: .circular(NinjaRadius.pill),
+                          color: colors.surface2,
+                          borderRadius: .circular(AppRadius.full),
                         ),
                         child: Text(
                           distanceText,
-                          style: NinjaText.tabular(
-                            NinjaText.microLabel.copyWith(
-                              color: colors.mutedDark,
-                            ),
-                          ),
+                          style: AppText.captionSmall
+                              .copyWith(
+                                color: colors.muted,
+                              )
+                              .copyWith(
+                                fontFeatures: const [
+                                  FontFeature.tabularFigures(),
+                                ],
+                              ),
                         ),
                       ),
                     if (friend.battery case final battery?)
@@ -127,9 +129,13 @@ class _NinjaFriendCard extends StatelessWidget {
                           ),
                           Text(
                             '$battery%',
-                            style: NinjaText.tabular(
-                              NinjaText.helper.copyWith(color: colors.muted),
-                            ),
+                            style: AppText.caption
+                                .copyWith(color: colors.muted)
+                                .copyWith(
+                                  fontFeatures: const [
+                                    FontFeature.tabularFigures(),
+                                  ],
+                                ),
                           ),
                         ],
                       ),

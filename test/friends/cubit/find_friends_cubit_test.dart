@@ -139,6 +139,7 @@ void main() {
         isA<FindFriendsState>().having((s) => s.searching, 'searching', true),
         isA<FindFriendsState>()
             .having((s) => s.searching, 'searching', false)
+            .having((s) => s.searchFailed, 'searchFailed', true)
             .having((s) => s.results, 'results', isEmpty),
       ],
       errors: () => [isA<Exception>()],
@@ -154,20 +155,27 @@ void main() {
       build: () => FindFriendsCubit(friendsRepository: repository),
       act: (cubit) => cubit.sendRequest('g1'),
       expect: () => [
+        isA<FindFriendsState>()
+            .having((s) => s.sendingTo, 'sendingTo', {'g1'})
+            .having((s) => s.sentTo, 'sentTo', isEmpty),
         isA<FindFriendsState>().having((s) => s.sentTo, 'sentTo', {'g1'}),
       ],
     );
 
     blocTest<FindFriendsCubit, FindFriendsState>(
-      'rolls sentTo back and reports the error on failure',
+      'clears pending without marking the request sent on failure',
       setUp: () => when(
         () => repository.sendFriendRequest(any()),
       ).thenThrow(Exception('x')),
       build: () => FindFriendsCubit(friendsRepository: repository),
       act: (cubit) => cubit.sendRequest('g1'),
       expect: () => [
-        isA<FindFriendsState>().having((s) => s.sentTo, 'sentTo', {'g1'}),
-        isA<FindFriendsState>().having((s) => s.sentTo, 'sentTo', isEmpty),
+        isA<FindFriendsState>()
+            .having((s) => s.sendingTo, 'sendingTo', {'g1'})
+            .having((s) => s.sentTo, 'sentTo', isEmpty),
+        isA<FindFriendsState>()
+            .having((s) => s.sendingTo, 'sendingTo', isEmpty)
+            .having((s) => s.sentTo, 'sentTo', isEmpty),
       ],
       errors: () => [isA<Exception>()],
     );
@@ -201,7 +209,9 @@ void main() {
           'isAddingGroup',
           true,
         ),
+        isA<FindFriendsState>().having((s) => s.sendingTo, 'sendingTo', {'g1'}),
         isA<FindFriendsState>().having((s) => s.sentTo, 'sentTo', {'g1'}),
+        isA<FindFriendsState>().having((s) => s.sendingTo, 'sendingTo', {'g2'}),
         isA<FindFriendsState>().having(
           (s) => s.sentTo,
           'sentTo',

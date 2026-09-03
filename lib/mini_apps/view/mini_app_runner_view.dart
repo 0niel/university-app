@@ -107,7 +107,6 @@ class _MiniAppRunnerViewState extends State<_MiniAppRunnerView> {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
     return BlocConsumer<MiniAppRunnerCubit, MiniAppRunnerState>(
       listenWhen: (previous, current) =>
           previous.status != current.status &&
@@ -115,13 +114,17 @@ class _MiniAppRunnerViewState extends State<_MiniAppRunnerView> {
       listener: _onStatus,
       builder: (context, state) {
         final app = state.app;
-        return Scaffold(
-          backgroundColor: colors.canvas,
-          appBar: _RunnerAppBar(
-            title: app?.name ?? '',
-            onBack: _close,
-            onMenu: app == null ? null : () => unawaited(_openMenu(app)),
-          ),
+        return MiniAppScaffold(
+          title: app?.name ?? context.l10n.miniAppsTitle,
+          onBack: _close,
+          actions: [
+            if (app != null)
+              AppHeaderAction(
+                icon: AppLineIcon.more,
+                semanticsLabel: context.l10n.miniAppsAbout,
+                onTap: () => unawaited(_openMenu(app)),
+              ),
+          ],
           body: MiniAppRunnerBody(state: state),
         );
       },
@@ -133,8 +136,7 @@ class _MiniAppRunnerViewState extends State<_MiniAppRunnerView> {
     final action = await showAppSheet<String>(
       context,
       title: app.name,
-      child: Column(
-        mainAxisSize: .min,
+      child: AppListGroup(
         children: [
           for (final (value, label) in <(String, String)>[
             ('reload', l10n.miniAppsReload),
@@ -143,36 +145,11 @@ class _MiniAppRunnerViewState extends State<_MiniAppRunnerView> {
             ('close', l10n.miniAppsClose),
           ])
             Builder(
-              builder: (sheetContext) => Padding(
-                padding: const EdgeInsets.only(bottom: 10),
-                child: AppPressable(
-                  onTap: () => Navigator.of(sheetContext).pop(value),
-                  semanticsLabel: label,
-                  semanticsButton: true,
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      color: sheetContext.ninja.surface,
-                      borderRadius: BorderRadius.circular(NinjaRadius.card),
-                    ),
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(
-                        minHeight: NinjaMetrics.minTouchTarget,
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 14,
-                        ),
-                        child: Text(
-                          label,
-                          style: NinjaText.body.copyWith(
-                            color: sheetContext.ninja.ink,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
+              builder: (sheetContext) => AppListRow(
+                title: label,
+                showChevron: false,
+                destructive: value == 'report',
+                onTap: () => Navigator.of(sheetContext).pop(value),
               ),
             ),
         ],

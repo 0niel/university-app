@@ -20,7 +20,7 @@ void main() {
       communityRepository = MockCommunityRepository();
     });
 
-    Widget buildSubject({double textScale = 1}) {
+    Widget buildSubject({double textScale = 1, int postId = 1}) {
       return MultiRepositoryProvider(
         providers: [
           RepositoryProvider<CommunityRepository>.value(
@@ -43,6 +43,7 @@ void main() {
         ],
         child: MaterialApp(
           theme: AppTheme.darkTheme,
+          locale: const Locale('ru'),
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
           builder: (context, child) => MediaQuery(
@@ -53,7 +54,7 @@ void main() {
             ),
             child: child!,
           ),
-          home: const DiscoursePostOverviewPageView(postId: 1),
+          home: DiscoursePostOverviewPageView(postId: postId),
         ),
       );
     }
@@ -70,6 +71,7 @@ void main() {
 
         expect(find.byType(NinjaSkeleton), findsWidgets);
         expect(find.byType(CircularProgressIndicator), findsNothing);
+        expect(find.byType(AppInnerHeader), findsOneWidget);
       },
     );
 
@@ -112,6 +114,69 @@ void main() {
       expect(find.text('student'), findsOneWidget);
       expect(find.text('reader'), findsOneWidget);
       expect(tester.takeException(), isNull);
+    });
+
+    testWidgets(
+      'comment failure is distinct from an empty thread and can retry',
+      (tester) async {
+        when(() => communityRepository.getPost(1)).thenAnswer(
+          (_) async => DiscoursePost(
+            id: 1,
+            topicId: 10,
+            username: 'student',
+            avatarTemplate: '',
+            cooked: '<p>Текст поста</p>',
+            createdAt: DateTime(2026),
+          ),
+        );
+        var requests = 0;
+        when(() => communityRepository.getPostComments(topicId: 10)).thenAnswer(
+          (_) async {
+            requests++;
+            if (requests == 1) throw Exception('offline');
+            return [];
+          },
+        );
+        await tester.pumpWidget(buildSubject());
+        await tester.pumpAndSettle();
+        expect(find.text('Не удалось загрузить комментарии'), findsOneWidget);
+        expect(find.text('Пока нет комментариев'), findsNothing);
+        await tester.ensureVisible(find.text('Повторить'));
+        await tester.tap(find.text('Повторить'));
+        await tester.pumpAndSettle();
+        expect(find.text('Пока нет комментариев'), findsOneWidget);
+        expect(find.text('Не удалось загрузить комментарии'), findsNothing);
+      },
+    );
+
+    testWidgets('changing the post id replaces the scoped loader', (
+      tester,
+    ) async {
+      when(() => communityRepository.getPost(any())).thenAnswer((
+        invocation,
+      ) async {
+        final id = invocation.positionalArguments.single as int;
+        return DiscoursePost(
+          id: id,
+          topicId: id * 10,
+          username: 'student_$id',
+          avatarTemplate: '',
+          cooked: '<p>Post $id</p>',
+          createdAt: DateTime(2026),
+        );
+      });
+      when(
+        () =>
+            communityRepository.getPostComments(topicId: any(named: 'topicId')),
+      ).thenAnswer((_) async => []);
+      await tester.pumpWidget(buildSubject());
+      await tester.pumpAndSettle();
+      expect(find.text('student_1'), findsOneWidget);
+      await tester.pumpWidget(buildSubject(postId: 2));
+      await tester.pumpAndSettle();
+      expect(find.text('student_2'), findsOneWidget);
+      expect(find.text('student_1'), findsNothing);
+      verify(() => communityRepository.getPost(2)).called(1);
     });
   });
 }

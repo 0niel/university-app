@@ -12,36 +12,36 @@ class ScheduleSelectorLessonPreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final l10n = context.l10n;
-    final accent = LessonCard.colorOf(lesson);
+    final accent = LessonCard.colorOfFor(context, lesson);
     final timeRange =
         '${lesson.lessonBells.startTime} - ${lesson.lessonBells.endTime}';
 
     return Container(
       padding: const .all(16),
       decoration: BoxDecoration(
-        color: colors.surfaceAlt,
-        borderRadius: .circular(NinjaRadius.card),
+        color: colors.surface2,
+        borderRadius: .circular(AppRadius.card),
       ),
       child: Column(
         crossAxisAlignment: .start,
-        spacing: 8,
+        spacing: AppSpacing.sm,
         children: [
           Row(
             spacing: 9,
             children: [
               Container(
-                width: NinjaMetrics.subjectBarWidthCompact,
+                width: 4,
                 height: 14,
                 decoration: BoxDecoration(
                   color: accent,
-                  borderRadius: .circular(NinjaRadius.pill),
+                  borderRadius: .circular(AppRadius.full),
                 ),
               ),
               Text(
                 l10n.addedClass,
-                style: NinjaText.subtext.copyWith(color: colors.muted),
+                style: AppText.subtext.copyWith(color: colors.muted),
               ),
             ],
           ),
@@ -49,11 +49,11 @@ class ScheduleSelectorLessonPreview extends StatelessWidget {
             lesson.subject,
             maxLines: 3,
             overflow: TextOverflow.ellipsis,
-            style: NinjaText.headline.copyWith(color: colors.ink),
+            style: AppText.headline.copyWith(color: colors.ink),
           ),
           Wrap(
-            spacing: 8,
-            runSpacing: 8,
+            spacing: AppSpacing.sm,
+            runSpacing: AppSpacing.sm,
             children: [
               ScheduleSelectorInfoChip(
                 label: LessonCard.getLessonTypeName(l10n, lesson.lessonType),
@@ -62,7 +62,7 @@ class ScheduleSelectorLessonPreview extends StatelessWidget {
               ),
               ScheduleSelectorInfoChip(
                 label: timeRange,
-                color: colors.brand,
+                color: colors.accent,
                 icon: AppLineIcon.clock,
               ),
             ],

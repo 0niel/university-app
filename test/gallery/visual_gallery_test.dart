@@ -3,24 +3,16 @@ library;
 
 import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:rtu_mirea_app/profile/widgets/settings_row.dart';
 import 'package:rtu_mirea_app/profile/widgets/settings_section.dart';
 import 'package:rtu_mirea_app/profile/widgets/settings_toggle_row.dart';
 
+import 'gallery_fonts.dart';
+
 void main() {
-  setUpAll(() async {
-    TestWidgetsFlutterBinding.ensureInitialized();
-    final loader = FontLoader('Inter');
-    for (final weight in const ['Regular', 'Medium', 'SemiBold', 'Bold']) {
-      loader.addFont(
-        rootBundle.load('packages/app_ui/assets/fonts/Inter/Inter-$weight.ttf'),
-      );
-    }
-    await loader.load();
-  });
+  setUpAll(loadGalleryFonts);
 
   testWidgets('settings rows align their trailing edge', (tester) async {
     await _shot(
@@ -103,7 +95,9 @@ void main() {
                     ),
                   ),
                   const SizedBox(width: 10),
-                  AppRowTrailing(child: NinjaChip(label: 'Все', onTap: () {})),
+                  AppRowTrailing(
+                    child: NinjaChip(label: 'Все', onTap: () {}),
+                  ),
                 ],
               ),
             ),

@@ -1090,7 +1090,7 @@ as String,
 /// @nodoc
 mixin _$TopTopicsResponse {
 
- List<DiscourseTopic> get topics; List<DiscourseUser> get users;
+ List<DiscourseTopic> get topics; List<DiscourseUser> get users; bool get hasMore;
 /// Create a copy of TopTopicsResponse
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -1101,16 +1101,16 @@ $TopTopicsResponseCopyWith<TopTopicsResponse> get copyWith => _$TopTopicsRespons
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is TopTopicsResponse&&const DeepCollectionEquality().equals(other.topics, topics)&&const DeepCollectionEquality().equals(other.users, users));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is TopTopicsResponse&&const DeepCollectionEquality().equals(other.topics, topics)&&const DeepCollectionEquality().equals(other.users, users)&&(identical(other.hasMore, hasMore) || other.hasMore == hasMore));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(topics),const DeepCollectionEquality().hash(users));
+int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(topics),const DeepCollectionEquality().hash(users),hasMore);
 
 @override
 String toString() {
-  return 'TopTopicsResponse(topics: $topics, users: $users)';
+  return 'TopTopicsResponse(topics: $topics, users: $users, hasMore: $hasMore)';
 }
 
 
@@ -1121,7 +1121,7 @@ abstract mixin class $TopTopicsResponseCopyWith<$Res>  {
   factory $TopTopicsResponseCopyWith(TopTopicsResponse value, $Res Function(TopTopicsResponse) _then) = _$TopTopicsResponseCopyWithImpl;
 @useResult
 $Res call({
- List<DiscourseTopic> topics, List<DiscourseUser> users
+ List<DiscourseTopic> topics, List<DiscourseUser> users, bool hasMore
 });
 
 
@@ -1138,11 +1138,12 @@ class _$TopTopicsResponseCopyWithImpl<$Res>
 
 /// Create a copy of TopTopicsResponse
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? topics = null,Object? users = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? topics = null,Object? users = null,Object? hasMore = null,}) {
   return _then(_self.copyWith(
 topics: null == topics ? _self.topics : topics // ignore: cast_nullable_to_non_nullable
 as List<DiscourseTopic>,users: null == users ? _self.users : users // ignore: cast_nullable_to_non_nullable
-as List<DiscourseUser>,
+as List<DiscourseUser>,hasMore: null == hasMore ? _self.hasMore : hasMore // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 
@@ -1227,10 +1228,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( List<DiscourseTopic> topics,  List<DiscourseUser> users)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( List<DiscourseTopic> topics,  List<DiscourseUser> users,  bool hasMore)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _TopTopicsResponse() when $default != null:
-return $default(_that.topics,_that.users);case _:
+return $default(_that.topics,_that.users,_that.hasMore);case _:
   return orElse();
 
 }
@@ -1248,10 +1249,10 @@ return $default(_that.topics,_that.users);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( List<DiscourseTopic> topics,  List<DiscourseUser> users)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( List<DiscourseTopic> topics,  List<DiscourseUser> users,  bool hasMore)  $default,) {final _that = this;
 switch (_that) {
 case _TopTopicsResponse():
-return $default(_that.topics,_that.users);case _:
+return $default(_that.topics,_that.users,_that.hasMore);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -1268,10 +1269,10 @@ return $default(_that.topics,_that.users);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( List<DiscourseTopic> topics,  List<DiscourseUser> users)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( List<DiscourseTopic> topics,  List<DiscourseUser> users,  bool hasMore)?  $default,) {final _that = this;
 switch (_that) {
 case _TopTopicsResponse() when $default != null:
-return $default(_that.topics,_that.users);case _:
+return $default(_that.topics,_that.users,_that.hasMore);case _:
   return null;
 
 }
@@ -1283,7 +1284,7 @@ return $default(_that.topics,_that.users);case _:
 
 
 class _TopTopicsResponse implements TopTopicsResponse {
-  const _TopTopicsResponse({required final  List<DiscourseTopic> topics, required final  List<DiscourseUser> users}): _topics = topics,_users = users;
+  const _TopTopicsResponse({required final  List<DiscourseTopic> topics, required final  List<DiscourseUser> users, this.hasMore = false}): _topics = topics,_users = users;
 
 
  final  List<DiscourseTopic> _topics;
@@ -1300,6 +1301,7 @@ class _TopTopicsResponse implements TopTopicsResponse {
   return EqualUnmodifiableListView(_users);
 }
 
+@override@JsonKey() final  bool hasMore;
 
 /// Create a copy of TopTopicsResponse
 /// with the given fields replaced by the non-null parameter values.
@@ -1311,16 +1313,16 @@ _$TopTopicsResponseCopyWith<_TopTopicsResponse> get copyWith => __$TopTopicsResp
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _TopTopicsResponse&&const DeepCollectionEquality().equals(other._topics, _topics)&&const DeepCollectionEquality().equals(other._users, _users));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _TopTopicsResponse&&const DeepCollectionEquality().equals(other._topics, _topics)&&const DeepCollectionEquality().equals(other._users, _users)&&(identical(other.hasMore, hasMore) || other.hasMore == hasMore));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_topics),const DeepCollectionEquality().hash(_users));
+int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_topics),const DeepCollectionEquality().hash(_users),hasMore);
 
 @override
 String toString() {
-  return 'TopTopicsResponse(topics: $topics, users: $users)';
+  return 'TopTopicsResponse(topics: $topics, users: $users, hasMore: $hasMore)';
 }
 
 
@@ -1331,7 +1333,7 @@ abstract mixin class _$TopTopicsResponseCopyWith<$Res> implements $TopTopicsResp
   factory _$TopTopicsResponseCopyWith(_TopTopicsResponse value, $Res Function(_TopTopicsResponse) _then) = __$TopTopicsResponseCopyWithImpl;
 @override @useResult
 $Res call({
- List<DiscourseTopic> topics, List<DiscourseUser> users
+ List<DiscourseTopic> topics, List<DiscourseUser> users, bool hasMore
 });
 
 
@@ -1348,11 +1350,12 @@ class __$TopTopicsResponseCopyWithImpl<$Res>
 
 /// Create a copy of TopTopicsResponse
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? topics = null,Object? users = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? topics = null,Object? users = null,Object? hasMore = null,}) {
   return _then(_TopTopicsResponse(
 topics: null == topics ? _self._topics : topics // ignore: cast_nullable_to_non_nullable
 as List<DiscourseTopic>,users: null == users ? _self._users : users // ignore: cast_nullable_to_non_nullable
-as List<DiscourseUser>,
+as List<DiscourseUser>,hasMore: null == hasMore ? _self.hasMore : hasMore // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 

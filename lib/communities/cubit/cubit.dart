@@ -1,2 +1,2 @@
 export 'community_catalog_cubit.dart';
-export 'community_catalog_status.dart';
+export 'joined_communities_cubit.dart';

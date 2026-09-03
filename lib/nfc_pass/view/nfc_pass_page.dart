@@ -85,14 +85,20 @@ class _NfcPassPageState extends State<NfcPassPage> {
     }
   }
 
-  void _openSettings() {
-    unawaited(
-      showAppSheet<void>(
-        context,
-        title: context.l10n.settingsNfcTitle,
-        child: const NfcCardSettingsSheet(),
+  Future<void> _openSettings() async {
+    final shouldUnbind = await showAppSheet<bool>(
+      context,
+      title: context.l10n.settingsNfcTitle,
+      child: BlocProvider.value(
+        value: _nfcPassCubit,
+        child: NfcCardSettingsSheet(
+          deviceName: _deviceName,
+          onUnbind: () => Navigator.of(context, rootNavigator: true).pop(true),
+        ),
       ),
     );
+    if (!mounted || shouldUnbind != true) return;
+    await _confirmUnbind();
   }
 
   void _showCodeSheet() {
@@ -103,7 +109,7 @@ class _NfcPassPageState extends State<NfcPassPage> {
         title: context.l10n.nfcPassCodeSheetTitle,
         subtitle: context.l10n.nfcPassCodeSheetDescription,
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 10),
+          padding: const EdgeInsets.symmetric(vertical: AppSpacing.gap),
           child: NinjaCodeInput(
             autofocus: true,
             onCompleted: (code) {
@@ -132,7 +138,7 @@ class _NfcPassPageState extends State<NfcPassPage> {
       cancelLabel: l10n.cancel,
       destructive: true,
     );
-    if (!confirmed) return;
+    if (!confirmed || !mounted) return;
     await cubit.unbindPass();
   }
 
@@ -144,8 +150,9 @@ class _NfcPassPageState extends State<NfcPassPage> {
         (cubit) => cubit.state.kind,
       );
       return Scaffold(
-        backgroundColor: context.ninja.canvas,
+        backgroundColor: context.colors.canvas,
         body: SafeArea(
+          top: false,
           bottom: false,
           child: Column(
             children: [
@@ -185,8 +192,9 @@ class _NfcPassPageState extends State<NfcPassPage> {
         final hce = context.watch<NfcHceCubit>().state;
         final bound = state.status == .bound;
         return Scaffold(
-          backgroundColor: context.ninja.canvas,
+          backgroundColor: context.colors.canvas,
           body: SafeArea(
+            top: false,
             bottom: false,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -198,17 +206,15 @@ class _NfcPassPageState extends State<NfcPassPage> {
                       ? Navigator.of(context).pop
                       : null,
                   backTooltip: l10n.back,
-                  onSettings: bound ? _openSettings : null,
+                  onSettings: bound ? () => unawaited(_openSettings()) : null,
                   settingsTooltip: l10n.settingsNfcTitle,
                 ),
                 Expanded(
                   child: NfcPassView(
                     state: state,
-                    deviceName: _deviceName,
                     turnstileEmulationOff:
                         hce.loaded && hce.available && !hce.enabled,
                     onConnect: () => unawaited(cubit.bindPass()),
-                    onUnbind: () => unawaited(_confirmUnbind()),
                     onEnterCode: _showCodeSheet,
                     onRetry: () => unawaited(cubit.checkBound()),
                   ),

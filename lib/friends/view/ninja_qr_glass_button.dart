@@ -24,8 +24,8 @@ class NinjaQrGlassButton extends StatelessWidget {
       semanticsButton: true,
       semanticsSelected: active,
       child: Container(
-        width: NinjaMetrics.minTouchTarget,
-        height: NinjaMetrics.minTouchTarget,
+        width: AppControlSize.iconButton,
+        height: AppControlSize.iconButton,
         alignment: .center,
         decoration: BoxDecoration(
           color: active ? Colors.white : Colors.white.withValues(alpha: 0.14),

@@ -18,12 +18,14 @@ class SvgInteractiveMap extends StatefulWidget {
     required this.svgAssetPath,
     this.controller,
     this.viewportPadding = EdgeInsets.zero,
+    this.onRoomTap,
     super.key,
   });
 
   final String svgAssetPath;
   final SvgInteractiveMapController? controller;
   final EdgeInsets viewportPadding;
+  final ValueChanged<RoomModel>? onRoomTap;
 
   @override
   State<SvgInteractiveMap> createState() => _SvgInteractiveMapState();
@@ -72,7 +74,20 @@ class _SvgInteractiveMapState extends State<SvgInteractiveMap>
       _hasFittedView = false;
     } else if (oldWidget.viewportPadding != widget.viewportPadding) {
       _hasFittedView = false;
-      WidgetsBinding.instance.addPostFrameCallback((_) => fit());
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        final selected = context
+            .read<MapBloc>()
+            .state
+            .rooms
+            .where((room) => room.roomId == _selectedRoomId)
+            .firstOrNull;
+        if (selected == null) {
+          fit();
+        } else {
+          focusRoom(selected);
+        }
+      });
     }
   }
 
@@ -98,7 +113,8 @@ class _SvgInteractiveMapState extends State<SvgInteractiveMap>
     );
     if (bounds == null || bounds.width <= 0 || bounds.height <= 0) {
       return ColoredBox(
-        color: context.ninja.canvas,
+        key: const ValueKey('map-canvas-surface'),
+        color: context.colors.surface2,
         child: const Center(child: NinjaSpinner()),
       );
     }
@@ -134,7 +150,8 @@ class _SvgInteractiveMapState extends State<SvgInteractiveMap>
           label: l10n.mapInteractiveLabel,
           hint: l10n.mapInteractiveHint,
           child: ColoredBox(
-            color: context.ninja.canvas,
+            key: const ValueKey('map-canvas-surface'),
+            color: context.colors.surface2,
             child: GestureDetector(
               behavior: HitTestBehavior.opaque,
               onTapUp: interactive
@@ -188,13 +205,13 @@ class _SvgInteractiveMapState extends State<SvgInteractiveMap>
     setState(() => _selectedRoomId = room.roomId);
     context.read<MapBloc>().add(MapEvent.roomTapped(room.roomId));
     unawaited(HapticFeedback.selectionClick());
+    if (widget.onRoomTap case final onRoomTap?) {
+      onRoomTap(room);
+      return;
+    }
     final shouldSearch = await showAppSheet<bool>(
       context,
-      backgroundColor: context.ninja.canvas,
-      title: context.l10n.mapRoomTitle(
-        room.name.isEmpty ? room.roomId : room.name,
-      ),
-      subtitle: context.l10n.findScheduleForClassroom,
+      backgroundColor: context.colors.canvas,
       child: MapRoomSheet(room: room),
     );
     if (shouldSearch == true && mounted) {

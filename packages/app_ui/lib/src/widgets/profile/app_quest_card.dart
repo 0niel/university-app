@@ -1,5 +1,10 @@
-import 'package:app_ui/app_ui.dart';
-import 'package:flutter/material.dart';
+import 'package:app_ui/src/colors/colors.dart';
+import 'package:app_ui/src/spacing/app_spacing.dart';
+import 'package:app_ui/src/typography/typography.dart';
+import 'package:app_ui/src/widgets/app_card.dart';
+import 'package:app_ui/src/widgets/app_line_icon.dart';
+import 'package:app_ui/src/widgets/app_progress_ring.dart';
+import 'package:flutter/widgets.dart';
 
 class AppQuestCard extends StatelessWidget {
   const AppQuestCard({
@@ -21,65 +26,61 @@ class AppQuestCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
     final fraction = target > 0 ? (progress / target).clamp(0.0, 1.0) : 0.0;
-    final accent = isDone ? colors.success : colors.primary;
+    final tone = isDone ? colors.success : colors.accent;
 
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: isDone ? colors.success.withValues(alpha: 0.12) : colors.surface,
-        borderRadius: BorderRadius.circular(AppRadius.md),
-      ),
+    return AppCard(
+      color: isDone ? colors.successTint : colors.surface,
+      padding: const EdgeInsets.all(AppSpacing.sectionGap),
       child: Row(
         children: [
           SizedBox(
-            width: 34,
-            height: 34,
+            width: 36,
+            height: 36,
             child: isDone
-                ? Container(
+                ? DecoratedBox(
                     decoration: BoxDecoration(
                       color: colors.success,
                       shape: BoxShape.circle,
                     ),
-                    alignment: Alignment.center,
-                    child: Icon(
-                      Icons.check_rounded,
-                      size: 18,
-                      color: colors.onAccent,
+                    child: Center(
+                      child: AppLineIconWidget(
+                        AppLineIcon.check,
+                        size: AppIconSize.compact,
+                        color: colors.onAccent,
+                        strokeWidth: 2.4,
+                      ),
                     ),
                   )
-                : AppProgressRing(value: fraction, size: 34, strokeWidth: 3),
+                : AppProgressRing(value: fraction, size: 36, strokeWidth: 3),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: AppSpacing.md),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
                   title,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: AppText.body.copyWith(
-                    color: isDone ? colors.success : colors.active,
-                    fontWeight: FontWeight.w600,
+                  style: AppText.bodyStrong.copyWith(
+                    color: isDone ? colors.success : colors.ink,
                   ),
                 ),
-                const SizedBox(height: 2),
+                const SizedBox(height: AppSpacing.xxs),
                 Text(
                   '$progress / $target',
-                  style: AppText.tabular(AppText.captionSmall).copyWith(
-                    color: colors.deactiveDarker,
+                  style: AppText.tabular(AppText.caption).copyWith(
+                    color: colors.muted,
                   ),
                 ),
               ],
             ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: AppSpacing.md),
           Text(
             '+$xpReward XP',
-            style: AppText.tabular(AppText.caption).copyWith(
-              color: accent,
-              fontWeight: FontWeight.w700,
-            ),
+            style: AppText.tabular(AppText.captionBold).copyWith(color: tone),
           ),
         ],
       ),

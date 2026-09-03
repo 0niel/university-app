@@ -20,17 +20,17 @@ class _ReportedCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final l10n = context.l10n;
     final cubit = context.read<MiniAppsModerationCubit>();
     final app = reported.app;
     final suspended = app.status == .suspended;
     return Padding(
       padding: const EdgeInsets.fromLTRB(
-        NinjaMetrics.screenPadding,
+        AppSpacing.screen,
         0,
-        NinjaMetrics.screenPadding,
-        10,
+        AppSpacing.screen,
+        AppSpacing.gap,
       ),
       child: Column(
         crossAxisAlignment: .start,
@@ -57,7 +57,7 @@ class _ReportedCard extends StatelessWidget {
                     '${report.details.isEmpty ? '' : ' — ${report.details}'}',
                     maxLines: 2,
                     overflow: .ellipsis,
-                    style: NinjaText.helper.copyWith(color: colors.muted),
+                    style: AppText.captionSmall.copyWith(color: colors.muted),
                   ),
                 Row(
                   spacing: 8,

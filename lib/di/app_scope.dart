@@ -138,6 +138,25 @@ class AppScopeContainer extends ScopeContainer implements AppScope {
       packageInfoClient: _packageInfoClientDep.get,
       deepLinkService: _deepLinkServiceDep.get,
       storage: _userStorageDep.get,
+      initializeUser: (userId) async {
+        if (_supabaseClientDep.get.auth.currentUser?.id != userId) return;
+        await _gamificationRepositoryDep.get.ensureAcademicProfile(
+          _universityConfigDep.get.organizationId,
+        );
+      },
+      onInitializationError: (error, stackTrace) {
+        logger.e(
+          'Academic profile initialization failed (${error.runtimeType}).',
+        );
+        unawaited(
+          Sentry.captureException(
+            StateError(
+              'Academic profile initialization failed (${error.runtimeType}).',
+            ),
+            stackTrace: stackTrace,
+          ),
+        );
+      },
     ),
   );
   late final Dep<ScheduleRepository> _scheduleRepositoryDep = dep(

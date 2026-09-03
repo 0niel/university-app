@@ -1,6 +1,5 @@
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/widgets.dart';
 
-/// Widget to make content always be above keyboard
 class KeyboardPositioned extends StatelessWidget {
   const KeyboardPositioned({required this.child, super.key});
 

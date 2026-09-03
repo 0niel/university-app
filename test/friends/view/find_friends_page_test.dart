@@ -10,7 +10,6 @@ import 'package:rtu_mirea_app/friends/view/find_friends_page.dart';
 import 'package:rtu_mirea_app/friends/view/ninja_find_friend_card.dart';
 import 'package:rtu_mirea_app/friends/view/ninja_find_friends_discovery_action.dart';
 import 'package:rtu_mirea_app/friends/view/ninja_find_friends_results_skeleton.dart';
-import 'package:rtu_mirea_app/friends/widgets/friends_circle_button.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:user_repository/user_repository.dart';
 
@@ -81,11 +80,11 @@ void main() {
     await tester.pump(const Duration(milliseconds: 400));
 
     expect(find.text('Добавить друзей'), findsOneWidget);
-    final close = tester.widget<FriendsCircleButton>(
-      find.byType(FriendsCircleButton),
+    final close = tester.widget<AppHeaderCircleButton>(
+      find.byType(AppHeaderCircleButton),
     );
-    expect(close.label, 'Закрыть');
-    expect(close.icon, AppLineIcon.close);
+    expect(close.action.semanticsLabel, 'Закрыть');
+    expect(close.action.icon, AppLineIcon.close);
     expect(find.text('Мой QR-код'), findsOneWidget);
     expect(find.text('Сканировать'), findsOneWidget);
   });
@@ -127,7 +126,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 400));
 
-    expect(find.byType(NinjaErrorCard), findsOneWidget);
+    expect(find.byType(AppErrorState), findsOneWidget);
     expect(find.text('Ошибка загрузки'), findsOneWidget);
 
     when(() => repository.getGroupMembers()).thenAnswer((_) async => roster);
@@ -136,7 +135,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 400));
 
-    expect(find.byType(NinjaErrorCard), findsNothing);
+    expect(find.byType(AppErrorState), findsNothing);
     expect(find.text('Олег Титов'), findsOneWidget);
   });
 
@@ -150,7 +149,7 @@ void main() {
 
     expect(find.text('Из твоей группы ИКБО-09'), findsOneWidget);
     expect(find.text('Олег Титов'), findsOneWidget);
-    expect(find.text('Добавить всю группу · 3 чел.'), findsOneWidget);
+    expect(find.text('Добавить всю группу · 1 чел.'), findsOneWidget);
     expect(find.text('Возможно, вы знакомы'), findsOneWidget);
     expect(find.text('Вера Лис'), findsOneWidget);
     expect(find.text('Позвать из Telegram'), findsOneWidget);
@@ -171,7 +170,7 @@ void main() {
 
     verify(() => repository.sendFriendRequest('g1')).called(1);
     expect(find.text('заявка отправлена'), findsOneWidget);
-    expect(find.byType(NinjaChip), findsWidgets);
+    expect(find.byType(AppTag), findsWidgets);
   });
 
   testWidgets('an empty search shows the ninja empty state', (tester) async {
@@ -180,8 +179,34 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 400));
 
-    expect(find.byType(NinjaEmptyState), findsOneWidget);
+    expect(find.byType(AppEmptyState), findsOneWidget);
     expect(find.text('Никого не нашли'), findsOneWidget);
+  });
+
+  testWidgets('search failure stays distinct from no matches and retries', (
+    tester,
+  ) async {
+    when(() => repository.searchUsers('Анна')).thenThrow(Exception('offline'));
+    await tester.pumpWidget(wrap(initialQuery: 'Анна'));
+    await tester.pumpAndSettle();
+    expect(find.byType(AppErrorState), findsOneWidget);
+    expect(find.text('Никого не нашли'), findsNothing);
+    when(
+      () => repository.searchUsers('Анна'),
+    ).thenAnswer((_) async => const []);
+    await tester.tap(find.text('Повторить'));
+    await tester.pumpAndSettle();
+    expect(find.text('Никого не нашли'), findsOneWidget);
+  });
+
+  testWidgets('clearing a deep-linked query loads discovery', (tester) async {
+    await tester.pumpWidget(wrap(initialQuery: 'Анна'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField), '');
+    await tester.pump(const Duration(milliseconds: 400));
+    await tester.pumpAndSettle();
+    expect(find.text('Олег Титов'), findsOneWidget);
+    verify(repository.getGroupMembers).called(1);
   });
 
   testWidgets('opens with and highlights the exact global-search person', (

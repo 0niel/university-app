@@ -35,9 +35,8 @@ class _AppTimePickerSheetState extends State<AppTimePickerSheet> {
 
   void _done() {
     if (widget.isRange && _minutesOf(_end) <= _minutesOf(_start)) {
-      showNinjaToast(
+      ToastManager.showWarning(
         context,
-        showCheck: false,
         message: context.l10n.lessonEditorEndAfterStart,
       );
       return;
@@ -51,31 +50,26 @@ class _AppTimePickerSheetState extends State<AppTimePickerSheet> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final colors = context.ninja;
+    final colors = context.colors;
     return Column(
       mainAxisSize: .min,
       crossAxisAlignment: .stretch,
       children: [
-        Padding(
-          padding: const .symmetric(horizontal: 20),
-          child: Center(
-            child: Text(
-              widget.isRange
-                  ? '${formatPickedTime(_start)} – ${formatPickedTime(_end)}'
-                  : formatPickedTime(_start),
-              style: NinjaText.tabular(
-                NinjaText.title.copyWith(
-                  fontSize: 28,
-                  color: colors.ink,
-                  fontWeight: .w800,
-                ),
-              ),
-            ),
+        Center(
+          child: Text(
+            widget.isRange
+                ? '${formatPickedTime(_start)} – ${formatPickedTime(_end)}'
+                : formatPickedTime(_start),
+            style: AppText.sans(
+              28,
+              .w800,
+              tabular: true,
+            ).copyWith(color: colors.ink),
           ),
         ),
         const SizedBox(height: 16),
         Padding(
-          padding: const .symmetric(horizontal: 20),
+          padding: const .symmetric(horizontal: AppSpacing.screen),
           child: widget.isRange
               ? Row(
                   spacing: 12,
@@ -106,33 +100,22 @@ class _AppTimePickerSheetState extends State<AppTimePickerSheet> {
         ),
         if (widget.quickSlots.isNotEmpty) ...[
           const SizedBox(height: 16),
-          SizedBox(
-            height: 44,
-            child: ListView.separated(
-              scrollDirection: .horizontal,
-              padding: const .symmetric(horizontal: 20),
-              itemCount: widget.quickSlots.length,
-              separatorBuilder: (_, _) => const SizedBox(width: 8),
-              itemBuilder: (context, index) {
-                final slot = widget.quickSlots[index];
-                final selected = slot.start == _start && slot.end == _end;
-                return AppSlotChip(
-                  label: slot.label,
-                  selected: selected,
-                  onTap: () => _applySlot(slot),
-                );
-              },
+          AppChipRow<int>(
+            padding: const .symmetric(horizontal: AppSpacing.screen),
+            value: widget.quickSlots.indexWhere(
+              (slot) => slot.start == _start && slot.end == _end,
             ),
+            items: [
+              for (final (index, slot) in widget.quickSlots.indexed)
+                AppChipRowItem(value: index, label: slot.label),
+            ],
+            onChanged: (index) => _applySlot(widget.quickSlots[index]),
           ),
         ],
         const SizedBox(height: 20),
         Padding(
-          padding: const .symmetric(horizontal: 20),
-          child: NinjaButton.primary(
-            label: l10n.done,
-            expanded: true,
-            onPressed: _done,
-          ),
+          padding: const .symmetric(horizontal: AppSpacing.screen),
+          child: AppSheetAction(label: l10n.done, onTap: _done),
         ),
       ],
     );

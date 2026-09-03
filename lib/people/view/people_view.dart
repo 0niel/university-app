@@ -50,8 +50,9 @@ class PeopleView extends StatelessWidget {
         message: context.l10n.peoplePartialLoadError,
       ),
       builder: (context, state) => Scaffold(
-        backgroundColor: context.ninja.canvas,
+        backgroundColor: context.colors.canvas,
         body: SafeArea(
+          top: false,
           bottom: false,
           child: Column(
             spacing: 4,
@@ -64,7 +65,7 @@ class PeopleView extends StatelessWidget {
               ),
               Padding(
                 padding: const .symmetric(
-                  horizontal: NinjaMetrics.screenPadding,
+                  horizontal: AppSpacing.screen,
                   vertical: 8,
                 ),
                 child: NinjaTabs<PeopleTab>(
@@ -90,7 +91,7 @@ class PeopleView extends StatelessWidget {
               ),
               Expanded(
                 child: RefreshIndicator(
-                  color: context.ninja.ink,
+                  color: context.colors.ink,
                   onRefresh: onRefresh,
                   child: NinjaStateSwitcher(
                     child: NinjaPeopleBody(

@@ -12,15 +12,15 @@ class TeamListSkeleton extends StatelessWidget {
         itemCount: 3,
         itemBuilder: (itemContext, _) => Padding(
           padding: const EdgeInsets.fromLTRB(
-            NinjaMetrics.screenPadding,
+            AppSpacing.screen,
             0,
-            NinjaMetrics.screenPadding,
+            AppSpacing.screen,
             10,
           ),
           child: DecoratedBox(
             decoration: BoxDecoration(
               color: itemContext.ninja.surface,
-              borderRadius: BorderRadius.circular(NinjaRadius.card),
+              borderRadius: BorderRadius.circular(AppRadius.card),
             ),
             child: const Padding(
               padding: EdgeInsets.all(16),
@@ -32,7 +32,7 @@ class TeamListSkeleton extends StatelessWidget {
                   NinjaSkeleton.bar(height: 20, widthFactor: 0.75),
                   NinjaSkeleton.bar(height: 11),
                   NinjaSkeleton.bar(height: 11, widthFactor: 0.6),
-                  NinjaSkeleton(height: 48, radius: NinjaRadius.control),
+                  NinjaSkeleton(height: 48, radius: AppRadius.field),
                 ],
               ),
             ),

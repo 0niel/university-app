@@ -1,7 +1,8 @@
 import 'dart:math' as math;
 
-import 'package:app_ui/src/ninja/ninja_colors.dart';
-import 'package:app_ui/src/ninja/ninja_text.dart';
+import 'package:app_ui/src/colors/colors.dart';
+import 'package:app_ui/src/spacing/app_spacing.dart';
+import 'package:app_ui/src/typography/typography.dart';
 import 'package:app_ui/src/widgets/app_pressable.dart';
 import 'package:flutter/widgets.dart';
 
@@ -21,45 +22,70 @@ class NinjaBottomBar extends StatelessWidget {
   final int currentIndex;
   final ValueChanged<int> onSelected;
 
+  static const double topPadding = 14;
+  static const double bottomPadding = 24;
+
   static double extentOf(BuildContext context) {
+    final viewport = _NinjaBottomBarViewportData.maybeOf(context);
+    if (viewport != null) return viewport.bottomInset;
     final textScale = MediaQuery.textScalerOf(context).scale(1);
-    final pillHeight = textScale >= 1.6 ? 76.0 : 64.0;
-    return pillHeight + 24 + MediaQuery.paddingOf(context).bottom;
+    final pillHeight = textScale >= 1.6 ? 76.0 : AppControlSize.bottomBar;
+    return pillHeight +
+        topPadding +
+        bottomPadding +
+        MediaQuery.paddingOf(context).bottom;
   }
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final textScale = MediaQuery.textScalerOf(context).scale(1);
     final expanded = textScale >= 1.6;
-    final pillHeight = expanded ? 76.0 : 64.0;
-    final circleSize = expanded ? 52.0 : 46.0;
+    final pillHeight = expanded ? 76.0 : AppControlSize.bottomBar;
+    final circleSize = expanded ? 52.0 : AppControlSize.navCircle;
     final bottomInset = MediaQuery.paddingOf(context).bottom;
+
     return Semantics(
       container: true,
       explicitChildNodes: true,
       child: SizedBox(
-        height: pillHeight + 24 + bottomInset,
-        child: Padding(
-          padding: EdgeInsets.fromLTRB(12, 12, 12, 12 + bottomInset),
-          child: Container(
-            height: pillHeight,
-            decoration: BoxDecoration(
-              color: colors.surfaceAlt,
-              borderRadius: BorderRadius.circular(NinjaRadius.pill),
+        height: pillHeight + topPadding + bottomPadding + bottomInset,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.bottomCenter,
+              end: Alignment.topCenter,
+              colors: [colors.canvas, colors.canvas.withValues(alpha: 0)],
+              stops: const [0.6, 1],
             ),
-            child: Row(
-              children: [
-                for (var index = 0; index < items.length; index++)
-                  Expanded(
-                    child: _BottomBarItem(
-                      item: items[index],
-                      selected: index == currentIndex,
-                      circleSize: circleSize,
-                      onTap: () => onSelected(index),
+          ),
+          child: Padding(
+            padding: EdgeInsets.fromLTRB(
+              AppSpacing.md,
+              topPadding,
+              AppSpacing.md,
+              bottomPadding + bottomInset,
+            ),
+            child: Container(
+              height: pillHeight,
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+              decoration: BoxDecoration(
+                color: colors.surface,
+                borderRadius: BorderRadius.circular(AppRadius.full),
+              ),
+              child: Row(
+                children: [
+                  for (var index = 0; index < items.length; index++)
+                    Expanded(
+                      child: _BottomBarItem(
+                        item: items[index],
+                        selected: index == currentIndex,
+                        circleSize: circleSize,
+                        onTap: () => onSelected(index),
+                      ),
                     ),
-                  ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
@@ -81,18 +107,37 @@ class NinjaBottomBarViewport extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final mediaQuery = MediaQuery.of(context);
-    return MediaQuery(
-      data: mediaQuery.copyWith(
-        padding: mediaQuery.padding.copyWith(
-          bottom: math.max(mediaQuery.padding.bottom, bottomInset),
+    return _NinjaBottomBarViewportData(
+      bottomInset: bottomInset,
+      child: MediaQuery(
+        data: mediaQuery.copyWith(
+          padding: mediaQuery.padding.copyWith(
+            bottom: math.max(mediaQuery.padding.bottom, bottomInset),
+          ),
+          viewPadding: mediaQuery.viewPadding.copyWith(
+            bottom: math.max(mediaQuery.viewPadding.bottom, bottomInset),
+          ),
         ),
-        viewPadding: mediaQuery.viewPadding.copyWith(
-          bottom: math.max(mediaQuery.viewPadding.bottom, bottomInset),
-        ),
+        child: child,
       ),
-      child: child,
     );
   }
+}
+
+class _NinjaBottomBarViewportData extends InheritedWidget {
+  const _NinjaBottomBarViewportData({
+    required this.bottomInset,
+    required super.child,
+  });
+
+  final double bottomInset;
+
+  static _NinjaBottomBarViewportData? maybeOf(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<_NinjaBottomBarViewportData>();
+
+  @override
+  bool updateShouldNotify(_NinjaBottomBarViewportData oldWidget) =>
+      oldWidget.bottomInset != bottomInset;
 }
 
 class NinjaNavigationRail extends StatelessWidget {
@@ -113,10 +158,10 @@ class NinjaNavigationRail extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final expanded = MediaQuery.textScalerOf(context).scale(1) >= 1.6;
     final width = expanded ? 176.0 : 116.0;
-    final reduceMotion = _reduceMotion(context);
+
     return Semantics(
       container: true,
       explicitChildNodes: true,
@@ -131,46 +176,20 @@ class NinjaNavigationRail extends StatelessWidget {
                 final itemHeight = (constraints.maxHeight / items.length)
                     .clamp(48, 64)
                     .toDouble();
-                final groupHeight = itemHeight * items.length;
                 return Center(
                   child: SizedBox(
-                    height: groupHeight,
-                    child: Stack(
+                    height: itemHeight * items.length,
+                    child: Column(
                       children: [
-                        AnimatedPositionedDirectional(
-                          duration: reduceMotion
-                              ? Duration.zero
-                              : const Duration(milliseconds: 220),
-                          curve: Curves.easeOutCubic,
-                          start: 0,
-                          top:
-                              currentIndex * itemHeight + (itemHeight - 30) / 2,
-                          child: DecoratedBox(
-                            decoration: BoxDecoration(
-                              color: colors.brand,
-                              borderRadius:
-                                  const BorderRadiusDirectional.horizontal(
-                                end: Radius.circular(3),
-                              ),
+                        for (var index = 0; index < items.length; index++)
+                          SizedBox(
+                            height: itemHeight,
+                            child: _RailItem(
+                              item: items[index],
+                              selected: index == currentIndex,
+                              onTap: () => onSelected(index),
                             ),
-                            child: const SizedBox(width: 3, height: 30),
                           ),
-                        ),
-                        Positioned.fill(
-                          child: Column(
-                            children: [
-                              for (var index = 0; index < items.length; index++)
-                                SizedBox(
-                                  height: itemHeight,
-                                  child: _RailItem(
-                                    item: items[index],
-                                    selected: index == currentIndex,
-                                    onTap: () => onSelected(index),
-                                  ),
-                                ),
-                            ],
-                          ),
-                        ),
                       ],
                     ),
                   ),
@@ -190,12 +209,14 @@ class NinjaBottomBarItem {
     required this.label,
     this.activeIcon,
     this.hasBadge = false,
+    this.badgeColor,
   });
 
   final Widget icon;
   final Widget? activeIcon;
   final String label;
   final bool hasBadge;
+  final Color? badgeColor;
 }
 
 class _BottomBarItem extends StatelessWidget {
@@ -213,9 +234,10 @@ class _BottomBarItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final reduceMotion = _reduceMotion(context);
     final icon = selected ? (item.activeIcon ?? item.icon) : item.icon;
+
     return Semantics(
       button: true,
       selected: selected,
@@ -230,10 +252,10 @@ class _BottomBarItem extends StatelessWidget {
               height: circleSize,
               duration: reduceMotion
                   ? Duration.zero
-                  : const Duration(milliseconds: 180),
+                  : const Duration(milliseconds: 200),
               curve: Curves.easeOutCubic,
               decoration: BoxDecoration(
-                color: selected ? colors.brand : const Color(0x00000000),
+                color: selected ? colors.accent : const Color(0x00000000),
                 shape: BoxShape.circle,
               ),
               child: Stack(
@@ -241,24 +263,23 @@ class _BottomBarItem extends StatelessWidget {
                 children: [
                   IconTheme(
                     data: IconThemeData(
-                      color: selected ? colors.onBrand : colors.mutedDark,
-                      size: 23,
+                      color: selected ? colors.onAccent : colors.muted,
+                      size: AppIconSize.navigation,
                     ),
                     child: icon,
                   ),
                   if (item.hasBadge)
                     PositionedDirectional(
-                      end: 8,
-                      top: 8,
-                      child: Container(
-                        constraints: const BoxConstraints.tightFor(
-                          width: 7,
-                          height: 7,
-                        ),
+                      end: 9,
+                      top: 9,
+                      child: DecoratedBox(
                         decoration: BoxDecoration(
-                          color: selected ? colors.onBrand : colors.brand,
+                          color: selected
+                              ? colors.onAccent
+                              : (item.badgeColor ?? colors.accent),
                           shape: BoxShape.circle,
                         ),
+                        child: const SizedBox.square(dimension: 7),
                       ),
                     ),
                 ],
@@ -284,9 +305,10 @@ class _RailItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final icon = selected ? (item.activeIcon ?? item.icon) : item.icon;
-    final tint = selected ? colors.brandInk : colors.mutedDark;
+    final tint = selected ? colors.accent : colors.muted;
+
     return Semantics(
       button: true,
       selected: selected,
@@ -296,7 +318,8 @@ class _RailItem extends StatelessWidget {
         child: AppPressable(
           onTap: onTap,
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 18),
+            padding:
+                const EdgeInsets.symmetric(horizontal: AppSpacing.fieldGap),
             child: Row(
               children: [
                 SizedBox.square(
@@ -306,39 +329,35 @@ class _RailItem extends StatelessWidget {
                     alignment: Alignment.center,
                     children: [
                       IconTheme(
-                        data: IconThemeData(color: tint, size: 23),
+                        data: IconThemeData(
+                          color: tint,
+                          size: AppIconSize.navigation,
+                        ),
                         child: icon,
                       ),
                       if (item.hasBadge)
                         PositionedDirectional(
                           end: -2,
                           top: -2,
-                          child: Container(
-                            constraints: const BoxConstraints.tightFor(
-                              width: 7,
-                              height: 7,
-                            ),
+                          child: DecoratedBox(
                             decoration: BoxDecoration(
-                              color: colors.brand,
+                              color: item.badgeColor ?? colors.accent,
                               shape: BoxShape.circle,
                             ),
+                            child: const SizedBox.square(dimension: 7),
                           ),
                         ),
                     ],
                   ),
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: AppSpacing.md),
                 Expanded(
                   child: Text(
                     item.label,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      color: tint,
-                      fontSize: 12,
-                      fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-                      height: 1.08,
-                    ),
+                    style: (selected ? AppText.captionBold : AppText.caption)
+                        .copyWith(color: tint, height: 1.08),
                   ),
                 ),
               ],
@@ -353,3 +372,9 @@ class _RailItem extends StatelessWidget {
 bool _reduceMotion(BuildContext context) =>
     MediaQuery.disableAnimationsOf(context) ||
     MediaQuery.accessibleNavigationOf(context);
+
+typedef AppBottomBar = NinjaBottomBar;
+
+typedef AppBottomBarItem = NinjaBottomBarItem;
+
+typedef AppBottomBarViewport = NinjaBottomBarViewport;

@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$DiscourseState {
 
- TopTopicsResponse? get topTopics; DiscourseStatus get status;
+ TopTopicsResponse? get topTopics; DiscourseStatus get status; bool get isLoadingMore; bool get loadMoreFailed; int get page;
 /// Create a copy of DiscourseState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +25,16 @@ $DiscourseStateCopyWith<DiscourseState> get copyWith => _$DiscourseStateCopyWith
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is DiscourseState&&(identical(other.topTopics, topTopics) || other.topTopics == topTopics)&&(identical(other.status, status) || other.status == status));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is DiscourseState&&(identical(other.topTopics, topTopics) || other.topTopics == topTopics)&&(identical(other.status, status) || other.status == status)&&(identical(other.isLoadingMore, isLoadingMore) || other.isLoadingMore == isLoadingMore)&&(identical(other.loadMoreFailed, loadMoreFailed) || other.loadMoreFailed == loadMoreFailed)&&(identical(other.page, page) || other.page == page));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,topTopics,status);
+int get hashCode => Object.hash(runtimeType,topTopics,status,isLoadingMore,loadMoreFailed,page);
 
 @override
 String toString() {
-  return 'DiscourseState(topTopics: $topTopics, status: $status)';
+  return 'DiscourseState(topTopics: $topTopics, status: $status, isLoadingMore: $isLoadingMore, loadMoreFailed: $loadMoreFailed, page: $page)';
 }
 
 
@@ -45,7 +45,7 @@ abstract mixin class $DiscourseStateCopyWith<$Res>  {
   factory $DiscourseStateCopyWith(DiscourseState value, $Res Function(DiscourseState) _then) = _$DiscourseStateCopyWithImpl;
 @useResult
 $Res call({
- TopTopicsResponse? topTopics, DiscourseStatus status
+ TopTopicsResponse? topTopics, DiscourseStatus status, bool isLoadingMore, bool loadMoreFailed, int page
 });
 
 
@@ -62,11 +62,14 @@ class _$DiscourseStateCopyWithImpl<$Res>
 
 /// Create a copy of DiscourseState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? topTopics = freezed,Object? status = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? topTopics = freezed,Object? status = null,Object? isLoadingMore = null,Object? loadMoreFailed = null,Object? page = null,}) {
   return _then(_self.copyWith(
 topTopics: freezed == topTopics ? _self.topTopics : topTopics // ignore: cast_nullable_to_non_nullable
 as TopTopicsResponse?,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
-as DiscourseStatus,
+as DiscourseStatus,isLoadingMore: null == isLoadingMore ? _self.isLoadingMore : isLoadingMore // ignore: cast_nullable_to_non_nullable
+as bool,loadMoreFailed: null == loadMoreFailed ? _self.loadMoreFailed : loadMoreFailed // ignore: cast_nullable_to_non_nullable
+as bool,page: null == page ? _self.page : page // ignore: cast_nullable_to_non_nullable
+as int,
   ));
 }
 /// Create a copy of DiscourseState
@@ -163,10 +166,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( TopTopicsResponse? topTopics,  DiscourseStatus status)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( TopTopicsResponse? topTopics,  DiscourseStatus status,  bool isLoadingMore,  bool loadMoreFailed,  int page)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _DiscourseState() when $default != null:
-return $default(_that.topTopics,_that.status);case _:
+return $default(_that.topTopics,_that.status,_that.isLoadingMore,_that.loadMoreFailed,_that.page);case _:
   return orElse();
 
 }
@@ -184,10 +187,10 @@ return $default(_that.topTopics,_that.status);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( TopTopicsResponse? topTopics,  DiscourseStatus status)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( TopTopicsResponse? topTopics,  DiscourseStatus status,  bool isLoadingMore,  bool loadMoreFailed,  int page)  $default,) {final _that = this;
 switch (_that) {
 case _DiscourseState():
-return $default(_that.topTopics,_that.status);case _:
+return $default(_that.topTopics,_that.status,_that.isLoadingMore,_that.loadMoreFailed,_that.page);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -204,10 +207,10 @@ return $default(_that.topTopics,_that.status);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( TopTopicsResponse? topTopics,  DiscourseStatus status)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( TopTopicsResponse? topTopics,  DiscourseStatus status,  bool isLoadingMore,  bool loadMoreFailed,  int page)?  $default,) {final _that = this;
 switch (_that) {
 case _DiscourseState() when $default != null:
-return $default(_that.topTopics,_that.status);case _:
+return $default(_that.topTopics,_that.status,_that.isLoadingMore,_that.loadMoreFailed,_that.page);case _:
   return null;
 
 }
@@ -219,11 +222,14 @@ return $default(_that.topTopics,_that.status);case _:
 
 
 class _DiscourseState extends DiscourseState {
-  const _DiscourseState({this.topTopics, this.status = DiscourseStatus.initial}): super._();
+  const _DiscourseState({this.topTopics, this.status = DiscourseStatus.initial, this.isLoadingMore = false, this.loadMoreFailed = false, this.page = 0}): super._();
 
 
 @override final  TopTopicsResponse? topTopics;
 @override@JsonKey() final  DiscourseStatus status;
+@override@JsonKey() final  bool isLoadingMore;
+@override@JsonKey() final  bool loadMoreFailed;
+@override@JsonKey() final  int page;
 
 /// Create a copy of DiscourseState
 /// with the given fields replaced by the non-null parameter values.
@@ -235,16 +241,16 @@ _$DiscourseStateCopyWith<_DiscourseState> get copyWith => __$DiscourseStateCopyW
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _DiscourseState&&(identical(other.topTopics, topTopics) || other.topTopics == topTopics)&&(identical(other.status, status) || other.status == status));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _DiscourseState&&(identical(other.topTopics, topTopics) || other.topTopics == topTopics)&&(identical(other.status, status) || other.status == status)&&(identical(other.isLoadingMore, isLoadingMore) || other.isLoadingMore == isLoadingMore)&&(identical(other.loadMoreFailed, loadMoreFailed) || other.loadMoreFailed == loadMoreFailed)&&(identical(other.page, page) || other.page == page));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,topTopics,status);
+int get hashCode => Object.hash(runtimeType,topTopics,status,isLoadingMore,loadMoreFailed,page);
 
 @override
 String toString() {
-  return 'DiscourseState(topTopics: $topTopics, status: $status)';
+  return 'DiscourseState(topTopics: $topTopics, status: $status, isLoadingMore: $isLoadingMore, loadMoreFailed: $loadMoreFailed, page: $page)';
 }
 
 
@@ -255,7 +261,7 @@ abstract mixin class _$DiscourseStateCopyWith<$Res> implements $DiscourseStateCo
   factory _$DiscourseStateCopyWith(_DiscourseState value, $Res Function(_DiscourseState) _then) = __$DiscourseStateCopyWithImpl;
 @override @useResult
 $Res call({
- TopTopicsResponse? topTopics, DiscourseStatus status
+ TopTopicsResponse? topTopics, DiscourseStatus status, bool isLoadingMore, bool loadMoreFailed, int page
 });
 
 
@@ -272,11 +278,14 @@ class __$DiscourseStateCopyWithImpl<$Res>
 
 /// Create a copy of DiscourseState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? topTopics = freezed,Object? status = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? topTopics = freezed,Object? status = null,Object? isLoadingMore = null,Object? loadMoreFailed = null,Object? page = null,}) {
   return _then(_DiscourseState(
 topTopics: freezed == topTopics ? _self.topTopics : topTopics // ignore: cast_nullable_to_non_nullable
 as TopTopicsResponse?,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
-as DiscourseStatus,
+as DiscourseStatus,isLoadingMore: null == isLoadingMore ? _self.isLoadingMore : isLoadingMore // ignore: cast_nullable_to_non_nullable
+as bool,loadMoreFailed: null == loadMoreFailed ? _self.loadMoreFailed : loadMoreFailed // ignore: cast_nullable_to_non_nullable
+as bool,page: null == page ? _self.page : page // ignore: cast_nullable_to_non_nullable
+as int,
   ));
 }
 

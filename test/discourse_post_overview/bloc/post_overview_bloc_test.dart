@@ -74,7 +74,8 @@ void main() {
       );
 
       blocTest<PostOverviewBloc, PostOverviewState>(
-        'still loads the post with empty comments when getPostComments throws',
+        'loads the post with an explicit comment failure '
+        'when comments cannot load',
         setUp: () {
           when(
             () => communityRepository.getPost(any()),
@@ -93,7 +94,41 @@ void main() {
           ),
           PostOverviewState(
             post: post,
-            status: PostOverviewStatus.loaded,
+            status: PostOverviewStatus.commentsFailure,
+          ),
+        ],
+        errors: () => [isA<Exception>()],
+      );
+
+      blocTest<PostOverviewBloc, PostOverviewState>(
+        'keeps previously loaded comments when the same topic refresh fails',
+        setUp: () {
+          when(
+            () => communityRepository.getPost(any()),
+          ).thenAnswer((_) async => post);
+          when(
+            () => communityRepository.getPostComments(
+              topicId: any(named: 'topicId'),
+            ),
+          ).thenThrow(Exception('offline'));
+        },
+        build: buildBloc,
+        seed: () => PostOverviewState(
+          post: post,
+          comments: comments,
+          status: PostOverviewStatus.loaded,
+        ),
+        act: (bloc) => bloc.add(const PostRequested(postId: 40148)),
+        expect: () => [
+          PostOverviewState(
+            post: post,
+            comments: comments,
+            status: PostOverviewStatus.loading,
+          ),
+          PostOverviewState(
+            post: post,
+            comments: comments,
+            status: PostOverviewStatus.commentsFailure,
           ),
         ],
         errors: () => [isA<Exception>()],

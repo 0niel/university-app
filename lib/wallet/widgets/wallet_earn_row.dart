@@ -9,7 +9,7 @@ class WalletEarnRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final l10n = context.l10n;
     final titleColor = muted ? colors.muted : colors.ink;
     final details = Column(
@@ -23,31 +23,31 @@ class WalletEarnRow extends StatelessWidget {
           children: [
             Text(
               way.title,
-              style: NinjaText.headline.copyWith(color: titleColor),
+              style: AppText.headline.copyWith(color: titleColor),
             ),
             if (way.live)
               DecoratedBox(
                 decoration: BoxDecoration(
-                  color: colors.brandTint,
-                  borderRadius: BorderRadius.circular(NinjaRadius.pill),
+                  color: colors.tint,
+                  borderRadius: BorderRadius.circular(AppRadius.full),
                 ),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 9,
-                    vertical: 4,
+                    vertical: AppSpacing.xs,
                   ),
                   child: Text(
                     l10n.walletEarnLiveTag,
-                    style: NinjaText.badge.copyWith(color: colors.brandInk),
+                    style: AppText.badge.copyWith(color: colors.accent),
                   ),
                 ),
               ),
           ],
         ),
-        const SizedBox(height: 2),
+        const SizedBox(height: AppSpacing.xxs),
         Text(
           way.description,
-          style: NinjaText.subtext.copyWith(color: colors.muted),
+          style: AppText.subtext.copyWith(color: colors.muted),
         ),
       ],
     );
@@ -57,14 +57,14 @@ class WalletEarnRow extends StatelessWidget {
       children: [
         Text(
           way.value,
-          style: NinjaText.tabular(
-            NinjaText.headline.copyWith(color: titleColor),
+          style: AppText.tabular(
+            AppText.headline.copyWith(color: titleColor),
           ),
         ),
-        const SizedBox(height: 2),
+        const SizedBox(height: AppSpacing.xxs),
         Text(
           way.per,
-          style: NinjaText.helper.copyWith(color: colors.muted),
+          style: AppText.captionSmall.copyWith(color: colors.muted),
         ),
       ],
     );
@@ -72,11 +72,11 @@ class WalletEarnRow extends StatelessWidget {
       container: true,
       label: '${way.title}, ${way.value}, ${way.per}',
       child: Container(
-        margin: const EdgeInsets.only(bottom: 10),
-        padding: const EdgeInsets.all(16),
+        margin: const EdgeInsets.only(bottom: AppSpacing.gap),
+        padding: const EdgeInsets.all(AppSpacing.lg),
         decoration: BoxDecoration(
           color: colors.surface,
-          borderRadius: BorderRadius.circular(NinjaRadius.card),
+          borderRadius: BorderRadius.circular(AppRadius.card),
         ),
         child: LayoutBuilder(
           builder: (context, constraints) {
@@ -88,7 +88,7 @@ class WalletEarnRow extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   details,
-                  const SizedBox(height: 12),
+                  const SizedBox(height: AppSpacing.md),
                   Align(alignment: Alignment.centerRight, child: reward),
                 ],
               );
@@ -97,7 +97,7 @@ class WalletEarnRow extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Expanded(child: details),
-                const SizedBox(width: 12),
+                const SizedBox(width: AppSpacing.md),
                 reward,
               ],
             );

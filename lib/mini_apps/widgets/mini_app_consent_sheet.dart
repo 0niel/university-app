@@ -22,7 +22,7 @@ class _MiniAppConsentSheetState extends State<MiniAppConsentSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final l10n = context.l10n;
     return Column(
       mainAxisSize: .min,
@@ -30,9 +30,9 @@ class _MiniAppConsentSheetState extends State<MiniAppConsentSheet> {
       children: [
         Text(
           l10n.miniAppsConsentBody,
-          style: NinjaText.subtext.copyWith(color: colors.muted, height: 1.5),
+          style: AppText.subtext.copyWith(color: colors.muted, height: 1.5),
         ),
-        const SizedBox(height: 14),
+        const SizedBox(height: AppSpacing.sectionGap),
         for (final permission in widget.app.requestedPermissions)
           MiniAppPermissionRow(
             permission: permission,
@@ -45,18 +45,18 @@ class _MiniAppConsentSheetState extends State<MiniAppConsentSheet> {
               }
             }),
           ),
-        const SizedBox(height: 12),
+        const SizedBox(height: AppSpacing.md),
         Text(
           l10n.miniAppsConsentFootnote,
-          style: NinjaText.helper.copyWith(color: colors.muted),
+          style: AppText.captionSmall.copyWith(color: colors.muted),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: AppSpacing.lg),
         NinjaButton.primary(
           label: l10n.miniAppsConsentAllow,
           expanded: true,
           onPressed: () => Navigator.of(context).pop(_granted.toList()),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: AppSpacing.sm),
         NinjaButton.secondary(
           label: l10n.miniAppsConsentDenyAll,
           expanded: true,

@@ -7,17 +7,17 @@ class _ReviewPreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     return Container(
-      padding: const .all(16),
+      padding: const .all(AppSpacing.lg),
       decoration: BoxDecoration(
         color: colors.surface,
-        borderRadius: .circular(NinjaRadius.card),
+        borderRadius: .circular(AppRadius.card),
       ),
       child: Row(
         children: [
-          NinjaAvatar(initials: _initialsOf(review.authorName), size: 32),
-          const SizedBox(width: 10),
+          AppAvatar(name: review.authorName, size: 32),
+          const SizedBox(width: AppSpacing.gap),
           Expanded(
             child: Text.rich(
               TextSpan(
@@ -34,14 +34,14 @@ class _ReviewPreview extends StatelessWidget {
               ),
               maxLines: 2,
               overflow: .ellipsis,
-              style: NinjaText.subtext.copyWith(color: colors.muted),
+              style: AppText.subtext.copyWith(color: colors.muted),
             ),
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: AppSpacing.sm),
           Text(
             '${review.likeCount}',
-            style: NinjaText.tabular(
-              NinjaText.subtext.copyWith(color: colors.muted),
+            style: AppText.tabular(
+              AppText.subtext.copyWith(color: colors.muted),
             ),
           ),
         ],

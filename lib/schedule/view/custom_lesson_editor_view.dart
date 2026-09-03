@@ -4,6 +4,7 @@ import 'package:app_ui/app_ui.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart' hide TimeOfDay;
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:local_notifications_repository/local_notifications_repository.dart';
 import 'package:rtu_mirea_app/common/widgets/app_date_picker.dart';
 import 'package:rtu_mirea_app/common/widgets/app_time_picker.dart';
 import 'package:rtu_mirea_app/common/widgets/searchable_entity_picker.dart';
@@ -41,6 +42,7 @@ class CustomLessonEditorView extends StatefulWidget {
 
 class _CustomLessonEditorViewState extends State<CustomLessonEditorView> {
   late final TextEditingController _subjectController;
+  bool _saving = false;
 
   @override
   void initState() {
@@ -59,7 +61,7 @@ class _CustomLessonEditorViewState extends State<CustomLessonEditorView> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final colors = context.ninja;
+    final colors = context.colors;
     return Scaffold(
       backgroundColor: colors.canvas,
       body: BlocBuilder<CustomLessonEditorCubit, CustomLessonEditorState>(
@@ -68,38 +70,29 @@ class _CustomLessonEditorViewState extends State<CustomLessonEditorView> {
             parent: AlwaysScrollableScrollPhysics(),
           ),
           slivers: [
-            SliverAppBar(
-              pinned: true,
-              elevation: 0,
-              scrolledUnderElevation: 0,
-              backgroundColor: colors.canvas,
-              surfaceTintColor: Colors.transparent,
-              title: Text(
-                widget.isEditing
+            SliverToBoxAdapter(
+              child: AppInnerHeader(
+                title: widget.isEditing
                     ? l10n.lessonEditorEditTitle
                     : l10n.lessonEditorCreateTitle,
-                style: NinjaText.headline.copyWith(color: colors.ink),
-              ),
-              actions: [
-                NinjaIconButton(
-                  icon: const AppLineIconWidget(
-                    .check,
-                    size: 20,
+                onBack: () => Navigator.of(context).maybePop(),
+                actions: [
+                  AppHeaderAction(
+                    icon: AppLineIcon.check,
+                    semanticsLabel: l10n.save,
+                    onTap: _saving ? null : _save,
                   ),
-                  tooltip: l10n.save,
-                  onPressed: _save,
-                ),
-                const SizedBox(width: 8),
-              ],
+                ],
+              ),
             ),
             SliverSafeArea(
               top: false,
               sliver: SliverPadding(
                 padding: const EdgeInsets.fromLTRB(
-                  NinjaMetrics.screenPadding,
-                  8,
-                  NinjaMetrics.screenPadding,
-                  32,
+                  AppSpacing.screen,
+                  AppSpacing.sm,
+                  AppSpacing.screen,
+                  AppSpacing.xxl,
                 ),
                 sliver: SliverList.list(
                   children: [
@@ -111,12 +104,12 @@ class _CustomLessonEditorViewState extends State<CustomLessonEditorView> {
                           .read<CustomLessonEditorCubit>()
                           .subjectChanged,
                     ),
-                    const SizedBox(height: 28),
+                    const SizedBox(height: AppSpacing.sheetBottom),
                     LessonEditorSectionLabel(l10n.lessonEditorTypeLabel),
-                    const SizedBox(height: 10),
+                    const SizedBox(height: AppSpacing.gap),
                     Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
+                      spacing: AppSpacing.sm,
+                      runSpacing: AppSpacing.sm,
                       children: [
                         for (final type in kLessonTypes)
                           LessonEditorTypeChip(
@@ -128,9 +121,9 @@ class _CustomLessonEditorViewState extends State<CustomLessonEditorView> {
                           ),
                       ],
                     ),
-                    const SizedBox(height: 28),
+                    const SizedBox(height: AppSpacing.sheetBottom),
                     LessonEditorSectionLabel(l10n.lessonEditorColorLabel),
-                    const SizedBox(height: 10),
+                    const SizedBox(height: AppSpacing.gap),
                     LessonEditorColorPicker(
                       colors: widget.colors,
                       selected: state.color,
@@ -140,7 +133,7 @@ class _CustomLessonEditorViewState extends State<CustomLessonEditorView> {
                           .read<CustomLessonEditorCubit>()
                           .colorChanged,
                     ),
-                    const SizedBox(height: 28),
+                    const SizedBox(height: AppSpacing.sheetBottom),
                     LessonEditorFieldCard(
                       children: [
                         LessonEditorFieldRow(
@@ -183,7 +176,7 @@ class _CustomLessonEditorViewState extends State<CustomLessonEditorView> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 10),
+                    const SizedBox(height: AppSpacing.gap),
                     LessonEditorReminderCard(
                       title: l10n.lessonEditorReminderTitle,
                       enabled: state.reminderMinutes != null,
@@ -349,8 +342,45 @@ class _CustomLessonEditorViewState extends State<CustomLessonEditorView> {
     }
   }
 
-  void _save() {
-    final result = context.read<CustomLessonEditorCubit>().save();
+  Future<void> _save() async {
+    if (_saving) return;
+    final editor = context.read<CustomLessonEditorCubit>();
+    final state = editor.state;
+    final valid =
+        state.subject.trim().isNotEmpty &&
+        state.selectedDates.isNotEmpty &&
+        state.endTime.hour * 60 + state.endTime.minute >
+            state.startTime.hour * 60 + state.startTime.minute;
+    if (valid && state.reminderMinutes != null) {
+      setState(() => _saving = true);
+      try {
+        final allowed = await context
+            .read<LocalNotificationsRepository>()
+            .ensurePermission();
+        if (!mounted) return;
+        if (!allowed) {
+          showNinjaToast(
+            context,
+            showCheck: false,
+            message: context.l10n.onboardingPushDenied,
+          );
+          return;
+        }
+      } on Exception {
+        if (mounted) {
+          showNinjaToast(
+            context,
+            showCheck: false,
+            message: context.l10n.scheduleActionFailed,
+          );
+        }
+        return;
+      } finally {
+        if (mounted) setState(() => _saving = false);
+      }
+    }
+    if (!mounted) return;
+    final result = editor.save();
     if (result == .success) {
       Navigator.of(context).pop();
       return;

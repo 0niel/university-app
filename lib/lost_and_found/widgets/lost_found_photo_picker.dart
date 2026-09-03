@@ -26,7 +26,7 @@ class LostFoundPhotoPicker extends StatelessWidget {
       children: [
         Text(
           context.l10n.lostFoundPhotosLabel,
-          style: NinjaText.microLabel.copyWith(color: context.ninja.muted),
+          style: AppText.captionSmall.copyWith(color: context.colors.muted),
         ),
         const SizedBox(height: AppSpacing.gap),
         SizedBox(

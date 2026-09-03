@@ -6,6 +6,6 @@ class NinjaStudyGroupSectionHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Text(
     text,
-    style: NinjaText.title.copyWith(color: context.ninja.ink),
+    style: AppText.title.copyWith(color: context.colors.ink),
   );
 }

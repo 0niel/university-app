@@ -93,14 +93,14 @@ class _MiniAppSubmitViewState extends State<MiniAppSubmitView> {
       child: SizedBox(
         height: MediaQuery.heightOf(context) * 0.6,
         child: ClipRRect(
-          borderRadius: .circular(NinjaRadius.card),
+          borderRadius: .circular(AppRadius.card),
           child:
               StacBridge.render(json, context) ??
               NinjaEmptyState(
                 icon: AppLineIconWidget(
                   AppLineIcon.grid,
-                  size: 20,
-                  color: context.ninja.muted,
+                  size: AppIconSize.md,
+                  color: context.colors.muted,
                 ),
                 title: context.l10n.miniAppsRunnerError,
               ),
@@ -187,32 +187,27 @@ class _MiniAppSubmitViewState extends State<MiniAppSubmitView> {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final l10n = context.l10n;
     return BlocConsumer<MiniAppSubmitCubit, MiniAppSubmitState>(
       listener: _onStatus,
       builder: (context, state) {
         final submitting = state.status == .submitting;
-        return Scaffold(
-          backgroundColor: colors.canvas,
-          appBar: NinjaAppBar.inner(
-            title: l10n.miniAppsSubmitTitle,
-            onBack: () => Navigator.of(context).maybePop(),
-            backSemanticLabel: l10n.back,
-          ),
+        return MiniAppScaffold(
+          title: l10n.miniAppsSubmitTitle,
           body: ListView(
             padding: const .fromLTRB(
-              NinjaMetrics.screenPadding,
-              18,
-              NinjaMetrics.screenPadding,
+              AppSpacing.screen,
+              0,
+              AppSpacing.screen,
               40,
             ),
             children: [
               Text(
                 l10n.miniAppsSubmitSubtitle,
-                style: NinjaText.body.copyWith(color: colors.muted),
+                style: AppText.body.copyWith(color: colors.muted),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: AppSpacing.screen),
               _MetadataSection(
                 nameController: _nameController,
                 slugController: _slugController,
@@ -266,7 +261,7 @@ class _MiniAppSubmitViewState extends State<MiniAppSubmitView> {
                   }),
                 ),
               ],
-              const SizedBox(height: 24),
+              const SizedBox(height: AppSpacing.xlg),
               NinjaButton.primary(
                 label: submitting
                     ? l10n.miniAppsSubmitSending
@@ -277,7 +272,7 @@ class _MiniAppSubmitViewState extends State<MiniAppSubmitView> {
                     ? null
                     : () => unawaited(_submit(asDraft: false)),
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: AppSpacing.gap),
               NinjaButton.outline(
                 label: l10n.miniAppsSubmitDraft,
                 expanded: true,

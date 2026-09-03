@@ -13,9 +13,7 @@ part 'nfc_pass_scrollable.dart';
 class NfcPassView extends StatefulWidget {
   const NfcPassView({
     required this.state,
-    required this.deviceName,
     required this.onConnect,
-    required this.onUnbind,
     required this.onEnterCode,
     required this.onRetry,
     super.key,
@@ -23,9 +21,7 @@ class NfcPassView extends StatefulWidget {
   });
 
   final NfcPassState state;
-  final String deviceName;
   final VoidCallback onConnect;
-  final VoidCallback onUnbind;
   final VoidCallback onEnterCode;
   final VoidCallback onRetry;
 
@@ -80,11 +76,9 @@ class _NfcPassViewState extends State<NfcPassView> {
         return _NfcPassScrollable(
           child: _NfcPassBoundBody(
             passId: state.passId?.toString() ?? '—',
-            deviceName: widget.deviceName,
             localFilePath: state.localFilePath,
             isVideo: state.isVideo,
             emulationOff: widget.turnstileEmulationOff,
-            onUnbind: widget.onUnbind,
           ),
         );
       case .error:

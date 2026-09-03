@@ -35,4 +35,11 @@ void main() {
       expect(LessonCard.getColorByType(type).a, 1);
     }
   });
+
+  test('uses different colors for lectures and practices', () {
+    expect(
+      LessonCard.getColorByType(LessonType.lecture),
+      isNot(LessonCard.getColorByType(LessonType.practice)),
+    );
+  });
 }

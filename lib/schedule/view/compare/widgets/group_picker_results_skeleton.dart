@@ -8,14 +8,14 @@ class _GroupPickerResultsSkeleton extends StatelessWidget {
     return Column(
       mainAxisSize: .min,
       crossAxisAlignment: .stretch,
-      spacing: 16,
+      spacing: AppSpacing.lg,
       children: [
         for (var index = 0; index < 4; index++)
           const Row(
-            spacing: 12,
+            spacing: AppSpacing.md,
             children: [
-              NinjaSkeleton(width: 24, height: 24, radius: 12),
-              Expanded(child: NinjaSkeleton.bar(widthFactor: 0.6)),
+              AppSkeleton(width: 24, height: 24, radius: AppRadius.iconTile),
+              Expanded(child: AppSkeleton.bar(widthFactor: 0.6)),
             ],
           ),
       ],

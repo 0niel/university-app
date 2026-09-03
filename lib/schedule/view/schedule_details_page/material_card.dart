@@ -6,17 +6,17 @@ class _MaterialCard extends StatelessWidget {
   final VoidCallback onDownload;
   @override
   Widget build(BuildContext context) => Container(
-    padding: const .all(16),
+    padding: const .all(AppSpacing.lg),
     decoration: BoxDecoration(
-      color: context.ninja.surface,
-      borderRadius: .circular(NinjaRadius.card),
+      color: context.colors.surface,
+      borderRadius: .circular(AppRadius.card),
     ),
     child: Row(
       children: [
         _FileBadge(material: material, size: 46),
-        const SizedBox(width: 14),
+        const SizedBox(width: AppSpacing.sectionGap),
         Expanded(child: _MaterialText(material: material)),
-        const SizedBox(width: 10),
+        const SizedBox(width: AppSpacing.gap),
         _RoundIconButton(icon: .download, size: 34, onTap: onDownload),
       ],
     ),

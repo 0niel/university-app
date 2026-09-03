@@ -13,16 +13,12 @@ class _ListingMedia extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(NinjaRadius.control),
+    return ClipRect(
       child: ColoredBox(
-        color: colors.surfaceAlt,
+        color: context.colors.surface2,
         child: Stack(
           children: [
-            Center(
-              child: Text(item.emoji, style: const TextStyle(fontSize: 36)),
-            ),
+            const Positioned.fill(child: AppStripePlaceholder()),
             if (item.isSold)
               PositionedDirectional(
                 start: 8,
@@ -34,7 +30,7 @@ class _ListingMedia extends StatelessWidget {
               ),
             if (item.isMine)
               PositionedDirectional(
-                end: 6,
+                start: 2,
                 top: 6,
                 child: Opacity(
                   opacity: isBusy ? 0.4 : 1,

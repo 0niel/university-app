@@ -8,11 +8,11 @@ class BestMatchSkeletonCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final scale = MediaQuery.textScalerOf(context).scale(1);
     final height = 156 + (scale - 1).clamp(0, 1).toDouble() * 68;
-    final colors = context.ninja;
+    final colors = context.colors;
     return DecoratedBox(
       decoration: BoxDecoration(
         color: colors.surface,
-        borderRadius: BorderRadius.circular(NinjaRadius.card),
+        borderRadius: BorderRadius.circular(AppRadius.card),
       ),
       child: SizedBox(
         height: height,
@@ -26,7 +26,7 @@ class BestMatchSkeletonCard extends StatelessWidget {
                   NinjaSkeleton(
                     width: 44,
                     height: 44,
-                    radius: NinjaRadius.control,
+                    radius: AppRadius.field,
                   ),
                   SizedBox(width: AppSpacing.md),
                   Expanded(

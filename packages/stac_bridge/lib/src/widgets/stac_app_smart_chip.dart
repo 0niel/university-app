@@ -36,7 +36,7 @@ class StacAppSmartChipParser extends StacParser<StacAppSmartChip> {
       emoji: model.emoji,
       label: model.label,
       value: model.value,
-      tone: parseHexColor(model.tone) ?? context.colors.primary,
+      tone: parseAppColor(context, model.tone) ?? context.colors.accent,
     );
   }
 }

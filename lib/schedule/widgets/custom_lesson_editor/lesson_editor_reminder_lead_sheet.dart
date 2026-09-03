@@ -13,14 +13,13 @@ class LessonEditorReminderLeadSheet extends StatelessWidget {
   final List<int> options;
 
   @override
-  Widget build(BuildContext context) => NinjaSegmented<int>(
+  Widget build(BuildContext context) => AppSegmented<int>(
     value: options.contains(current)
         ? current
         : (options.firstOrNull ?? current),
-    expanded: true,
     segments: [
       for (final minutes in options)
-        NinjaSegment(value: minutes, label: '$minutes'),
+        AppSegment(value: minutes, label: '$minutes'),
     ],
     onChanged: (value) => Navigator.of(context, rootNavigator: true).pop(value),
   );

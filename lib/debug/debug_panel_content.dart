@@ -8,12 +8,12 @@ class _DebugPanelContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final padding = MediaQuery.paddingOf(context);
 
     return Material(
       color: colors.canvas,
-      borderRadius: const .vertical(top: .circular(NinjaRadius.sheet)),
+      borderRadius: const .vertical(top: .circular(AppRadius.sheet)),
       child: Column(
         mainAxisSize: .min,
         crossAxisAlignment: .stretch,
@@ -28,7 +28,7 @@ class _DebugPanelContent extends StatelessWidget {
                   height: 4,
                   decoration: BoxDecoration(
                     color: colors.surface,
-                    borderRadius: .circular(2),
+                    borderRadius: .circular(AppRadius.xxs),
                   ),
                 ),
                 Row(
@@ -37,7 +37,7 @@ class _DebugPanelContent extends StatelessWidget {
                     AppNinjaMark(size: 18, color: colors.ink),
                     Text(
                       'Debug Panel',
-                      style: NinjaText.headline.copyWith(color: colors.ink),
+                      style: AppText.headline.copyWith(color: colors.ink),
                     ),
                     const Spacer(),
                     Semantics(
@@ -46,7 +46,7 @@ class _DebugPanelContent extends StatelessWidget {
                       child: AppPressable(
                         onTap: onClose,
                         child: SizedBox.square(
-                          dimension: NinjaMetrics.minTouchTarget,
+                          dimension: AppControlSize.touchTarget,
                           child: Center(
                             child: AppLineIconWidget(
                               AppLineIcon.close,

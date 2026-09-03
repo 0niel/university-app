@@ -18,10 +18,10 @@ class EditorHeader extends StatelessWidget {
         : context.l10n.collabNotesPresenceEditing(editors.length);
     return Padding(
       padding: const EdgeInsets.fromLTRB(
-        NinjaMetrics.screenPadding,
-        8,
-        NinjaMetrics.screenPadding,
-        8,
+        AppSpacing.screen,
+        AppSpacing.sm,
+        AppSpacing.screen,
+        AppSpacing.sm,
       ),
       child: Row(
         children: [
@@ -30,7 +30,7 @@ class EditorHeader extends StatelessWidget {
             tooltip: context.l10n.back,
             onPressed: onBack,
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: AppSpacing.md),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -39,7 +39,7 @@ class EditorHeader extends StatelessWidget {
                   context.l10n.collabNotesEditorHeader(state.title),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: NinjaText.headline.copyWith(color: context.ninja.ink),
+                  style: AppText.headline.copyWith(color: context.colors.ink),
                 ),
                 Semantics(
                   liveRegion: true,
@@ -50,7 +50,7 @@ class EditorHeader extends StatelessWidget {
                         width: 6,
                         height: 6,
                         decoration: BoxDecoration(
-                          color: context.ninja.brand,
+                          color: context.colors.accent,
                           shape: BoxShape.circle,
                         ),
                       ),
@@ -59,8 +59,8 @@ class EditorHeader extends StatelessWidget {
                         child: Text(
                           presenceLabel,
                           overflow: TextOverflow.ellipsis,
-                          style: NinjaText.helper.copyWith(
-                            color: context.ninja.brandInk,
+                          style: AppText.captionSmall.copyWith(
+                            color: context.colors.accent,
                           ),
                         ),
                       ),
@@ -75,8 +75,8 @@ class EditorHeader extends StatelessWidget {
           if (editors.length > 3)
             Text(
               '+${editors.length - 3}',
-              style: NinjaText.helper.copyWith(
-                color: context.ninja.muted,
+              style: AppText.captionSmall.copyWith(
+                color: context.colors.muted,
               ),
             ),
         ],

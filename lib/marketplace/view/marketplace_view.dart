@@ -10,7 +10,14 @@ import 'package:rtu_mirea_app/marketplace/widgets/widgets.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class MarketplaceView extends StatelessWidget {
-  const MarketplaceView({super.key});
+  const MarketplaceView({
+    super.key,
+    this.favoriteIds = const {},
+    this.onToggleFavorite,
+  });
+
+  final Set<String> favoriteIds;
+  final ValueChanged<String>? onToggleFavorite;
 
   Future<void> _sell(BuildContext context) async {
     final cubit = context.read<MarketplaceCubit>();
@@ -18,7 +25,7 @@ class MarketplaceView extends StatelessWidget {
       context,
       title: context.l10n.marketSellTitle,
       subtitle: context.l10n.marketSellSubtitle,
-      backgroundColor: context.ninja.canvas,
+      backgroundColor: context.colors.canvas,
       child: BlocProvider.value(value: cubit, child: const MarketSellSheet()),
     );
   }
@@ -28,7 +35,7 @@ class MarketplaceView extends StatelessWidget {
       context,
       title: context.l10n.marketDetailsTitle,
       subtitle: item.title,
-      backgroundColor: context.ninja.canvas,
+      backgroundColor: context.colors.canvas,
       child: MarketListingDetailsSheet(
         item: item,
         onContact: () => unawaited(_contact(context, item)),
@@ -43,10 +50,15 @@ class MarketplaceView extends StatelessWidget {
       _showError(context, context.l10n.marketContactUnavailable);
       return;
     }
-    final opened = await launchUrl(
-      Uri.https('t.me', '/$handle'),
-      mode: .externalApplication,
-    );
+    var opened = false;
+    try {
+      opened = await launchUrl(
+        Uri.https('t.me', '/$handle'),
+        mode: .externalApplication,
+      );
+    } on Exception catch (_) {
+      opened = false;
+    }
     if (!opened && context.mounted) {
       _showError(context, context.l10n.marketTelegramOpenError);
     }
@@ -83,7 +95,7 @@ class MarketplaceView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     return BlocConsumer<MarketplaceCubit, MarketplaceState>(
       listenWhen: (previous, current) =>
           previous.status != current.status &&
@@ -93,19 +105,14 @@ class MarketplaceView extends StatelessWidget {
           _showError(context, context.l10n.marketRefreshError),
       builder: (context, state) => Scaffold(
         backgroundColor: colors.canvas,
-        floatingActionButton: AppFab.extended(
-          icon: AppLineIcon.plus,
-          label: context.l10n.marketSell,
-          onPressed: state.isCreating ? null : () => unawaited(_sell(context)),
-        ),
-        body: SafeArea(
-          bottom: false,
-          child: MarketplaceBody(
-            onSell: state.isCreating ? null : () => unawaited(_sell(context)),
-            onOpen: (item) => unawaited(_details(context, item)),
-            onToggleSold: (item) => unawaited(_toggle(context, item)),
-            onDelete: (item) => unawaited(_delete(context, item)),
-          ),
+        body: MarketplaceBody(
+          onSell: state.isCreating ? null : () => unawaited(_sell(context)),
+          onOpen: (item) => unawaited(_details(context, item)),
+          onToggleSold: (item) => unawaited(_toggle(context, item)),
+          onDelete: (item) => unawaited(_delete(context, item)),
+          onContact: (item) => unawaited(_contact(context, item)),
+          favoriteIds: favoriteIds,
+          onToggleFavorite: onToggleFavorite,
         ),
       ),
     );

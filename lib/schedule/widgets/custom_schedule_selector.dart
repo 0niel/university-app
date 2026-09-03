@@ -36,11 +36,11 @@ class _CustomScheduleSelectorState extends State<CustomScheduleSelector> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const .symmetric(horizontal: 16),
+      padding: const .symmetric(horizontal: AppSpacing.lg),
       child: Column(
         mainAxisSize: .min,
         crossAxisAlignment: .start,
-        spacing: 18,
+        spacing: AppSpacing.fieldGap,
         children: [
           ScheduleSelectorLessonPreview(lesson: widget.lesson),
           AppSegmentedControl<bool>(
@@ -57,7 +57,7 @@ class _CustomScheduleSelectorState extends State<CustomScheduleSelector> {
               ),
             ],
           ),
-          NinjaStateSwitcher(child: _buildMode()),
+          AppStateSwitcher(child: _buildMode()),
         ],
       ),
     );

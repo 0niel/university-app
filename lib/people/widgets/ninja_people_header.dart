@@ -16,41 +16,19 @@ class NinjaPeopleHeader extends StatelessWidget {
   final VoidCallback onAdd;
 
   @override
-  Widget build(BuildContext context) {
-    final colors = context.ninja;
-    final compact = MediaQuery.textScalerOf(context).scale(1) >= 1.6;
-    return Padding(
-      padding: const .fromLTRB(
-        NinjaMetrics.screenPadding,
-        10,
-        NinjaMetrics.screenPadding,
-        2,
+  Widget build(BuildContext context) => AppInnerHeader(
+    title: title,
+    onBack: Navigator.of(context).canPop()
+        ? () => Navigator.of(context).pop()
+        : null,
+    backSemanticsLabel: MaterialLocalizations.of(context).backButtonTooltip,
+    actions: [
+      AppHeaderAction(child: search),
+      AppHeaderAction(
+        icon: AppLineIcon.plus,
+        semanticsLabel: addLabel,
+        onTap: onAdd,
       ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Text(
-              title,
-              maxLines: 1,
-              overflow: .ellipsis,
-              style: (compact ? NinjaText.title : NinjaText.display).copyWith(
-                color: colors.ink,
-              ),
-            ),
-          ),
-          search,
-          const SizedBox(width: 8),
-          Semantics(
-            button: true,
-            label: addLabel,
-            child: NinjaIconButton(
-              icon: const AppLineIconWidget(.plus, size: 20),
-              tooltip: addLabel,
-              onPressed: onAdd,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+    ],
+  );
 }

@@ -177,6 +177,7 @@ workflows:
         key_id: $APP_STORE_CONNECT_KEY_IDENTIFIER
         issuer_id: $APP_STORE_CONNECT_ISSUER_ID
         submit_to_testflight: true
+        submit_to_app_store: false
 
   ios-patch:
     name: iOS patch
@@ -203,6 +204,7 @@ workflows:
       - name: Patch iOS
         script: |
           shorebird patch ios \
+            --track=staging \
             --release-version=${{ inputs.release_version }} \
             --export-options-plist="$HOME/export_options.plist" \
             --target=lib/main/main_production.dart \

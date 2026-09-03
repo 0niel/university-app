@@ -28,6 +28,7 @@ class FakeIngest:
         self.checkpoint = checkpoint
         self.finishes: list[tuple[str, dict[str, object] | None]] = []
         self.ingested: list[list[str]] = []
+        self.sources = []
         self._run = 0
 
     async def start_sync(self, *_: object, **__: object) -> SyncRun:
@@ -39,6 +40,7 @@ class FakeIngest:
 
     async def ingest_news(self, _organization: str, _source: object, items, **_):
         self.ingested.append([item.external_id for item in items])
+        self.sources.append(_source)
 
     async def finish_sync(
         self,
@@ -61,6 +63,13 @@ class FakeFetcher:
     def __init__(self, messages: list[dict[str, object]]) -> None:
         self.messages = messages
         self.incremental_pages: list[list[int]] = []
+
+    async def get_source_info(self, _channel: str) -> dict[str, object]:
+        return {
+            "name": "Actual source name",
+            "photo_url": "https://cdn.example/avatar.jpg",
+            "subscribers_count": 114,
+        }
 
     async def fetch_raw_data(
         self,
@@ -136,6 +145,24 @@ async def test_fetch_failure_records_failure_without_advancing_checkpoint() -> N
 
     assert ingest.checkpoint == checkpoint
     assert ingest.finishes == [("failed", None)]
+
+
+async def test_empty_batches_refresh_real_source_metadata() -> None:
+    ingest = FakeIngest(
+        {"version": 1, "cursor_type": "telegram_message_id", "last_message_id": 42}
+    )
+    await _drain_message_source(
+        settings=Settings(_env_file=None, APP_ORGANIZATION_ID="university"),
+        ingest=ingest,
+        fetcher=FakeFetcher([]),
+        channel="news",
+    )
+    assert ingest.sources
+    assert all(source.source_name == "Actual source name" for source in ingest.sources)
+    assert all(
+        source.metadata["avatar_url"] == "https://cdn.example/avatar.jpg"
+        for source in ingest.sources
+    )
 
 
 def test_album_checkpoint_uses_the_highest_message_id() -> None:

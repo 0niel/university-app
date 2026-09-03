@@ -1,9 +1,13 @@
 import 'dart:async';
 
 import 'package:app_ui/app_ui.dart';
+import 'package:community_catalog_repository/community_catalog_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:rtu_mirea_app/communities/communities.dart';
+import 'package:rtu_mirea_app/community/widgets/accent_header_action.dart';
+import 'package:rtu_mirea_app/l10n/l10n.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class AllCommunitiesView extends StatefulWidget {
   const AllCommunitiesView({super.key});
@@ -32,64 +36,110 @@ class _AllCommunitiesViewState extends State<AllCommunitiesView> {
       ..sectionSelected(null);
   }
 
+  Future<void> _search() => showAppSheet<void>(
+    context,
+    title: context.l10n.search,
+    child: AppSearchBar(
+      controller: _searchController,
+      hintText: context.l10n.communitiesSearchHintInline,
+      autofocus: true,
+      onChanged: context.read<CommunityCatalogCubit>().queryChanged,
+      onSubmitted: (_) => Navigator.of(context, rootNavigator: true).pop(),
+    ),
+  );
+
+  Future<void> _suggest(String url) async {
+    final uri = safeCommunityUri(url);
+    var opened = false;
+    try {
+      if (uri != null) {
+        opened = await launchUrl(uri, mode: .externalApplication);
+      }
+    } on Exception catch (_) {
+      opened = false;
+    }
+    if (!opened && mounted) {
+      showNinjaToast(context, message: context.l10n.error, showCheck: false);
+    }
+  }
+
+  Future<void> _open(CommunityCatalogEntry entry, String category) =>
+      Navigator.of(context).push<void>(
+        MaterialPageRoute<void>(
+          builder: (_) => BlocProvider.value(
+            value: context.read<JoinedCommunitiesCubit>(),
+            child: CommunityDetailPage(entry: entry, categoryTitle: category),
+          ),
+        ),
+      );
+
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
+    final l10n = context.l10n;
+    final state = context.watch<CommunityCatalogCubit>().state;
+    final cubit = context.read<CommunityCatalogCubit>();
+    final suggestion = state.catalog?.suggestionUrl;
     return Scaffold(
       backgroundColor: colors.canvas,
-      body: SafeArea(
-        child: Stack(
-          children: [
-            RefreshIndicator(
-              color: colors.ink,
-              backgroundColor: colors.canvas,
-              onRefresh: _refresh,
-              child: CustomScrollView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                slivers: [
-                  const NinjaCommunityCatalogHeader(),
-                  NinjaCommunityCatalogSearchHeader(
-                    searchController: _searchController,
-                    onChanged: context
-                        .read<CommunityCatalogCubit>()
-                        .queryChanged,
-                  ),
-                  BlocBuilder<CommunityCatalogCubit, CommunityCatalogState>(
-                    builder: (context, state) => switch (state.status) {
-                      .initial || .loading => const SliverFillRemaining(
-                        child: NinjaCommunityCatalogSkeleton(
-                          key: ValueKey('catalog-loading'),
-                        ),
-                      ),
-                      .failure => SliverFillRemaining(
-                        hasScrollBody: false,
-                        child: NinjaCommunityCatalogError(
-                          key: const ValueKey('catalog-failure'),
-                          onRetry: () => unawaited(_refresh()),
-                        ),
-                      ),
-                      .success => NinjaCommunityCatalogContent(
-                        key: ValueKey(
-                          'catalog-${state.selectedSectionKey ?? 'all'}',
-                        ),
-                        state: state,
-                        onReset: _resetFilters,
-                      ),
-                    },
-                  ),
+      body: RefreshIndicator(
+        color: colors.accent,
+        backgroundColor: colors.surface,
+        onRefresh: _refresh,
+        child: CustomScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          slivers: [
+            SliverToBoxAdapter(
+              child: AppInnerHeader(
+                title: l10n.communitiesTitle,
+                backSemanticsLabel: l10n.back,
+                onBack: () => Navigator.of(context).maybePop(),
+                actions: [
+                  if (safeCommunityUri(suggestion) != null)
+                    accentHeaderAction(
+                      semanticsLabel: l10n.communitiesSuggest,
+                      onTap: () => unawaited(_suggest(suggestion!)),
+                    ),
                 ],
               ),
             ),
-            BlocSelector<CommunityCatalogCubit, CommunityCatalogState, bool>(
-              selector: (state) => state.isRefreshing,
-              builder: (context, isRefreshing) => isRefreshing
-                  ? const Positioned(
-                      top: 0,
-                      left: 0,
-                      right: 0,
-                      child: NinjaProgressBar(value: 1, tone: .ink, height: 2),
-                    )
-                  : const SizedBox.shrink(),
+            const SliverToBoxAdapter(
+              child: SizedBox(height: AppSpacing.screen),
+            ),
+            if (state.catalog != null)
+              SliverToBoxAdapter(
+                child: AppChipRow<String?>(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.screen,
+                  ),
+                  items: [
+                    AppChipRowItem(value: null, label: l10n.communitiesAll),
+                    for (final section in state.catalog!.sections)
+                      AppChipRowItem(value: section.key, label: section.title),
+                    AppChipRowItem(value: '__search', label: l10n.search),
+                  ],
+                  value: state.selectedSectionKey,
+                  onChanged: (value) => value == '__search'
+                      ? unawaited(_search())
+                      : cubit.sectionSelected(value),
+                ),
+              ),
+            SliverPadding(
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.screen,
+                AppSpacing.zero,
+                AppSpacing.screen,
+                AppSpacing.xxlg,
+              ),
+              sliver: SliverToBoxAdapter(
+                child: CommunityCatalogContent(
+                  state: state,
+                  onRetry: () => unawaited(_refresh()),
+                  onReset: _resetFilters,
+                  onOpen: (entry, category) =>
+                      unawaited(_open(entry, category)),
+                ),
+              ),
             ),
           ],
         ),

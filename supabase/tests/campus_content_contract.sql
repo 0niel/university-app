@@ -102,8 +102,22 @@ begin
   );
   if position('''isPersonal''' in v_definition) = 0
     or position('note.visibility' in v_definition) = 0
-    or position('note.group_id = v_group_id' in v_definition) = 0 then
+    or position('note.organization_id = p_organization_id' in v_definition) = 0
+    or position('core.can_edit_group_note(note.id, v_user_id)' in v_definition) = 0 then
     raise exception 'Group-notes RPC does not preserve visibility scope';
+  end if;
+
+  v_definition := pg_get_functiondef(
+    to_regprocedure('core.can_edit_group_note(uuid,uuid)')
+  );
+  if v_definition is null
+    or position('note.visibility = ''personal''' in v_definition) = 0
+    or position('note.owner_id = p_user_id' in v_definition) = 0
+    or position('membership.group_id = note.group_id' in v_definition) = 0
+    or position('group_row.organization_id = note.organization_id' in v_definition) = 0
+    or position('profile.organization_id = note.organization_id' in v_definition) = 0
+    or position('profile.academic_group = note.academic_group' in v_definition) = 0 then
+    raise exception 'Group-note helper does not preserve ownership and group scope';
   end if;
 
   v_definition := pg_get_functiondef(

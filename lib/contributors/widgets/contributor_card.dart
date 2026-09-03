@@ -14,7 +14,7 @@ class ContributorCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final avatarUrl = contributor.avatarUrl;
     final profileUrl = contributor.htmlUrl;
 
@@ -27,7 +27,7 @@ class ContributorCard extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: colors.surface,
-          borderRadius: BorderRadius.circular(NinjaRadius.card),
+          borderRadius: BorderRadius.circular(AppRadius.card),
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -36,7 +36,7 @@ class ContributorCard extends StatelessWidget {
               child: Container(
                 width: 64,
                 height: 64,
-                color: colors.surfaceAlt,
+                color: colors.surface2,
                 child: avatarUrl.isEmpty
                     ? null
                     : Image.network(
@@ -52,14 +52,14 @@ class ContributorCard extends StatelessWidget {
               contributor.login,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: NinjaText.body.copyWith(color: colors.ink),
+              style: AppText.body.copyWith(color: colors.ink),
             ),
             const SizedBox(height: 2),
             Text(
               context.l10n.contributorCommitsCount(contributor.contributions),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: NinjaText.helper.copyWith(color: colors.muted),
+              style: AppText.captionSmall.copyWith(color: colors.muted),
             ),
           ],
         ),

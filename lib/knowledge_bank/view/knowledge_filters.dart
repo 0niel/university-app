@@ -16,13 +16,14 @@ class _KnowledgeFilters extends StatelessWidget {
       ('task', l10n.knowledgeChipSolutions),
       ('cheat', l10n.knowledgeChipCheats),
     ];
-    return NinjaChipRow(
-      children: [
+    return AppChipRow<String>(
+      value: value,
+      onChanged: onChanged,
+      items: [
         for (final filter in filters)
-          NinjaChip(
+          AppChipRowItem(
+            value: filter.$1,
             label: filter.$2,
-            selected: filter.$1 == value,
-            onTap: () => onChanged(filter.$1),
           ),
       ],
     );

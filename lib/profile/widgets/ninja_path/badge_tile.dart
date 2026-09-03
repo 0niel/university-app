@@ -11,7 +11,7 @@ class BadgeTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final l10n = context.l10n;
     final isEarned = badge.isEarned;
     final percent = (badge.progress * 100).round().clamp(0, 99);
@@ -24,7 +24,7 @@ class BadgeTile extends StatelessWidget {
       child: Container(
         decoration: BoxDecoration(
           color: colors.surface,
-          borderRadius: .circular(NinjaRadius.card),
+          borderRadius: .circular(AppRadius.card),
         ),
         clipBehavior: .antiAlias,
         child: Padding(
@@ -38,7 +38,7 @@ class BadgeTile extends StatelessWidget {
                   height: 40,
                   alignment: .center,
                   decoration: BoxDecoration(
-                    color: isEarned ? colors.brandTint : colors.surfaceAlt,
+                    color: isEarned ? colors.tint : colors.surface2,
                     shape: .circle,
                   ),
                   child: Opacity(
@@ -50,14 +50,14 @@ class BadgeTile extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: AppSpacing.sm),
               Text(
                 badge.name,
                 textAlign: .center,
                 maxLines: 2,
                 overflow: .ellipsis,
-                style: NinjaText.helper.copyWith(
-                  color: isEarned ? colors.ink : colors.mutedDark,
+                style: AppText.caption.copyWith(
+                  color: isEarned ? colors.ink : colors.muted,
                   fontWeight: .w700,
                 ),
               ),
@@ -68,18 +68,18 @@ class BadgeTile extends StatelessWidget {
                   textAlign: .center,
                   maxLines: 2,
                   overflow: .ellipsis,
-                  style: NinjaText.helper.copyWith(color: colors.muted),
+                  style: AppText.caption.copyWith(color: colors.muted),
                 ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: AppSpacing.sm),
               if (isEarned)
                 Text(
                   l10n.profileBadgeEarned,
                   textAlign: .center,
                   maxLines: 1,
                   overflow: .ellipsis,
-                  style: NinjaText.helper.copyWith(
-                    color: colors.brandInk,
+                  style: AppText.caption.copyWith(
+                    color: colors.accent,
                     fontWeight: .w700,
                   ),
                 )

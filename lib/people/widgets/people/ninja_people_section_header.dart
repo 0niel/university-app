@@ -10,16 +10,16 @@ class NinjaPeopleSectionHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: .fromLTRB(
-        NinjaMetrics.screenPadding,
+        AppSpacing.screen,
         topPadding,
-        NinjaMetrics.screenPadding,
+        AppSpacing.screen,
         8,
       ),
       child: Text(
         text,
         maxLines: 2,
         overflow: .ellipsis,
-        style: NinjaText.title.copyWith(color: context.ninja.ink),
+        style: AppText.title.copyWith(color: context.colors.ink),
       ),
     );
   }

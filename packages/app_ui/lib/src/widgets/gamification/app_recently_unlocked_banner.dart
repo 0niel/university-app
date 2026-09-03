@@ -1,5 +1,8 @@
-import 'package:app_ui/app_ui.dart';
-import 'package:flutter/material.dart';
+import 'package:app_ui/src/colors/colors.dart';
+import 'package:app_ui/src/spacing/app_spacing.dart';
+import 'package:app_ui/src/typography/typography.dart';
+import 'package:app_ui/src/widgets/app_pressable.dart';
+import 'package:flutter/widgets.dart';
 
 class AppRecentlyUnlockedBanner extends StatelessWidget {
   const AppRecentlyUnlockedBanner({
@@ -9,6 +12,8 @@ class AppRecentlyUnlockedBanner extends StatelessWidget {
     required this.shurikenReward,
     super.key,
     this.onShare,
+    this.title = 'Только что открыто',
+    this.shareLabel = 'Поделиться',
   });
 
   final String emoji;
@@ -16,64 +21,68 @@ class AppRecentlyUnlockedBanner extends StatelessWidget {
   final String rarityLabel;
   final int shurikenReward;
   final VoidCallback? onShare;
+  final String title;
+  final String shareLabel;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final share = onShare;
+
     return Container(
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.symmetric(
+        vertical: AppSpacing.md,
+        horizontal: AppSpacing.sectionGap,
+      ),
       decoration: BoxDecoration(
-        color: colors.primary.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(AppRadius.md + 4),
+        color: colors.tint,
+        borderRadius: BorderRadius.circular(AppRadius.banner),
       ),
       child: Row(
         children: [
-          Text(emoji, style: const TextStyle(fontSize: 32)),
-          const SizedBox(width: 12),
+          Text(emoji, style: const TextStyle(fontSize: 28, height: 1)),
+          const SizedBox(width: AppSpacing.md),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  'Только что открыто',
-                  style: AppText.overline.copyWith(color: colors.primary),
+                  title.toUpperCase(),
+                  style: AppText.overline.copyWith(color: colors.accent),
                 ),
-                const SizedBox(height: 2),
+                const SizedBox(height: AppSpacing.xxs),
                 Text(
                   name,
-                  style: AppText.bodyStrong.copyWith(
-                    color: colors.active,
-                    fontSize: 15,
-                  ),
+                  style: AppText.bodyStrong.copyWith(color: colors.ink),
                 ),
                 Text(
                   '$rarityLabel · +$shurikenReward сюрикенов',
-                  style: AppText.captionSmall.copyWith(
-                    color: colors.deactiveDarker,
-                  ),
+                  style: AppText.caption.copyWith(color: colors.muted),
                 ),
               ],
             ),
           ),
-          if (onShare != null)
+          if (share != null) ...[
+            const SizedBox(width: AppSpacing.md),
             AppPressable(
-              onTap: onShare,
-              child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                decoration: BoxDecoration(
-                  color: colors.primary,
-                  borderRadius: BorderRadius.circular(AppRadius.full),
+              onTap: share,
+              semanticsLabel: shareLabel,
+              semanticsButton: true,
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(
+                  minHeight: AppControlSize.touchTarget,
                 ),
-                child: Text(
-                  'Поделиться',
-                  style: AppText.caption.copyWith(
-                    color: colors.onAccent,
-                    fontWeight: FontWeight.w700,
+                child: Center(
+                  widthFactor: 1,
+                  child: Text(
+                    shareLabel,
+                    style: AppText.subtextBold.copyWith(color: colors.accent),
                   ),
                 ),
               ),
             ),
+          ],
         ],
       ),
     );

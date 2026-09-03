@@ -1,41 +1,43 @@
 part of 'app_date_picker.dart';
 
+enum AppDatePickerDayState { normal, today, selected, disabled }
+
 class AppDatePickerDayCell extends StatelessWidget {
   const AppDatePickerDayCell({
     required this.day,
-    required this.color,
-    this.background,
-    this.bold = false,
+    this.state = AppDatePickerDayState.normal,
     super.key,
   });
 
   final DateTime day;
-  final Color color;
-  final Color? background;
-  final bool bold;
+  final AppDatePickerDayState state;
+
+  static const double height = 46;
 
   @override
   Widget build(BuildContext context) {
-    return Center(
+    final colors = context.colors;
+    final selected = state == AppDatePickerDayState.selected;
+    final color = switch (state) {
+      AppDatePickerDayState.selected => colors.onAccent,
+      AppDatePickerDayState.disabled => colors.muted2,
+      _ => colors.ink,
+    };
+    return Padding(
+      padding: const EdgeInsets.all(2),
       child: Container(
-        width: 38,
-        height: 38,
+        height: height,
         alignment: Alignment.center,
-        decoration: background != null
-            ? BoxDecoration(
-                color: background,
-                borderRadius: .circular(NinjaRadius.control),
-              )
-            : null,
+        decoration: BoxDecoration(
+          color: selected ? colors.accent : colors.surface,
+          borderRadius: BorderRadius.circular(AppRadius.iconTile),
+          border: state == AppDatePickerDayState.today
+              ? Border.all(color: colors.accent, width: 2)
+              : null,
+        ),
         child: Text(
           '${day.day}',
-          style: NinjaText.tabular(
-            NinjaText.body.copyWith(
-              fontSize: 15,
-              color: color,
-              fontWeight: bold ? .w700 : .w500,
-            ),
-          ),
+          style: AppText.sans(14, .w700, tabular: true).copyWith(color: color),
         ),
       ),
     );

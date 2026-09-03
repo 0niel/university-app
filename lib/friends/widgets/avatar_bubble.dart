@@ -7,11 +7,13 @@ class _AvatarBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
     return Container(
-      padding: const .all(4),
-      decoration: BoxDecoration(color: colors.surface, shape: .circle),
-      child: NinjaAvatar(initials: ninjaInitials(name), size: 42, tone: .ink),
+      padding: const .all(friendMarkerRingWidth),
+      decoration: BoxDecoration(
+        color: context.colors.surface,
+        shape: .circle,
+      ),
+      child: AppAvatar(name: name, size: friendMarkerAvatarSize),
     );
   }
 }

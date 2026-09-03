@@ -21,14 +21,14 @@ class NoteSaveStatus extends StatelessWidget {
       ),
     };
     final color = state.status == .failure
-        ? context.ninja.scarlet
-        : context.ninja.muted;
+        ? context.colors.exam
+        : context.colors.muted;
     return Semantics(
       liveRegion: true,
       label: label,
       child: Padding(
-        padding: const .only(top: 6),
-        child: Text(label, style: NinjaText.helper.copyWith(color: color)),
+        padding: const .only(top: AppSpacing.xsm),
+        child: Text(label, style: AppText.captionSmall.copyWith(color: color)),
       ),
     );
   }

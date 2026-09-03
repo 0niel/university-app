@@ -1,15 +1,14 @@
 import 'package:app_ui/app_ui.dart';
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:flutter/material.dart';
-
-part 'cover.dart';
-part 'hero_action.dart';
+import 'package:flutter/widgets.dart';
+import 'package:rtu_mirea_app/feed/widgets/feed_image.dart';
 
 class FeedHeroPost extends StatelessWidget {
   const FeedHeroPost({
     required this.title,
     required this.meta,
     super.key,
+    this.source,
+    this.lead,
     this.imageUrl,
     this.badgeLabel,
     this.actionLabel,
@@ -22,6 +21,8 @@ class FeedHeroPost extends StatelessWidget {
 
   final String title;
   final String meta;
+  final String? source;
+  final String? lead;
   final String? imageUrl;
   final String? badgeLabel;
   final String? actionLabel;
@@ -33,108 +34,118 @@ class FeedHeroPost extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
-    final badge = badgeLabel;
+    final colors = context.colors;
+    final sourceLabel = source ?? badgeLabel;
+    final hasSource = sourceLabel != null && sourceLabel.isNotEmpty;
+    final lead = this.lead;
     final action = actionLabel;
     final secondary = secondaryActionLabel;
-    final accessible = MediaQuery.textScalerOf(context).scale(1) >= 1.6;
+    final metaStyle = AppText.captionStrong.copyWith(color: colors.muted);
 
-    Widget content = ClipRRect(
-      borderRadius: BorderRadius.circular(NinjaRadius.card),
-      child: ColoredBox(
-        color: colors.accentSoft,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _Cover(imageUrl: imageUrl),
-            Padding(
-              padding: const EdgeInsets.all(AppSpacing.lg),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  if (badge != null && badge.isNotEmpty) ...[
-                    Text(
-                      badge,
+    return Padding(
+      padding: EdgeInsets.only(
+        bottom: isLast ? AppSpacing.zero : AppSpacing.gap,
+      ),
+      child: AppCard(
+        radius: AppRadius.hero,
+        padding: EdgeInsets.zero,
+        onTap: onTap,
+        semanticsLabel: title,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(AppRadius.hero),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              FeedImage(
+                imageUrl: imageUrl,
+                radius: AppRadius.none,
+                height: 190,
+                width: double.infinity,
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.fieldGap,
+                  AppSpacing.lg,
+                  AppSpacing.fieldGap,
+                  AppSpacing.fieldGap,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text.rich(
+                      TextSpan(
+                        children: [
+                          if (hasSource)
+                            TextSpan(
+                              text: sourceLabel,
+                              style: metaStyle.copyWith(color: colors.accent),
+                            ),
+                          if (hasSource && meta.isNotEmpty)
+                            const TextSpan(text: ' · '),
+                          TextSpan(text: meta),
+                        ],
+                      ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: NinjaText.microLabel.copyWith(
-                        color: colors.onAccentSoftMuted,
+                      style: metaStyle,
+                    ),
+                    const SizedBox(height: AppSpacing.sm),
+                    AppBalancedText(
+                      title,
+                      style: AppText.section.copyWith(
+                        color: colors.ink,
+                        height: 1.2,
                       ),
                     ),
-                    const SizedBox(height: 6),
-                  ],
-                  Text(
-                    title,
-                    maxLines: accessible ? 5 : 4,
-                    overflow: TextOverflow.ellipsis,
-                    style: NinjaText.title.copyWith(color: colors.onAccentSoft),
-                  ),
-                  if (meta.isNotEmpty) ...[
-                    const SizedBox(height: 6),
-                    Text(
-                      meta,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: NinjaText.subtext.copyWith(
-                        color: colors.onAccentSoftMuted,
+                    if (lead != null && lead.isNotEmpty) ...[
+                      const SizedBox(height: AppSpacing.sm),
+                      Text(
+                        lead,
+                        maxLines: 3,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppText.sans(
+                          13.5,
+                          FontWeight.w400,
+                          height: 1.45,
+                        ).copyWith(color: colors.muted),
                       ),
-                    ),
-                  ],
-                  if (action != null || secondary != null) ...[
-                    const SizedBox(height: AppSpacing.lg),
-                    Row(
-                      children: [
-                        if (action != null)
-                          Expanded(
-                            child: _HeroAction(
-                              label: action,
-                              onPressed: onAction,
-                              solid: true,
+                    ],
+                    if (action != null || secondary != null) ...[
+                      const SizedBox(height: AppSpacing.lg),
+                      Row(
+                        children: [
+                          if (action != null)
+                            Expanded(
+                              child: AppButton.primary(
+                                label: action,
+                                onPressed: onAction,
+                                size: AppButtonSize.small,
+                                expanded: true,
+                              ),
                             ),
-                          ),
-                        if (action != null && secondary != null)
-                          const SizedBox(width: AppSpacing.sm),
-                        if (secondary != null)
-                          Expanded(
-                            child: _HeroAction(
-                              label: secondary,
-                              onPressed: onSecondaryAction,
+                          if (action != null && secondary != null)
+                            const SizedBox(width: AppSpacing.sm),
+                          if (secondary != null)
+                            Expanded(
+                              child: AppButton.secondary(
+                                label: secondary,
+                                onPressed: onSecondaryAction,
+                                size: AppButtonSize.small,
+                                expanded: true,
+                              ),
                             ),
-                          ),
-                      ],
-                    ),
+                        ],
+                      ),
+                    ],
                   ],
-                ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
-    );
-
-    if (onTap != null) {
-      final hasNestedActions = action != null || secondary != null;
-      final pressable = AppPressable(onTap: onTap, child: content);
-      content = Semantics(
-        container: true,
-        button: true,
-        label: title,
-        explicitChildNodes: hasNestedActions,
-        excludeSemantics: !hasNestedActions,
-        onTap: hasNestedActions ? null : onTap,
-        child: pressable,
-      );
-    }
-    return Padding(
-      padding: EdgeInsets.fromLTRB(
-        NinjaMetrics.screenPadding,
-        0,
-        NinjaMetrics.screenPadding,
-        isLast ? 0 : AppSpacing.gap,
-      ),
-      child: content,
     );
   }
 }

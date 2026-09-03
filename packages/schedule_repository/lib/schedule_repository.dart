@@ -23,3 +23,4 @@ export 'src/schedule_responses.dart';
 export 'src/schedule_target_type.dart';
 export 'src/user_activity.dart';
 export 'src/user_activity_type.dart';
+export 'src/util/normalize_schedule_search.dart';

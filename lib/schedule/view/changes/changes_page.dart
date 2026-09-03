@@ -8,8 +8,8 @@ import 'package:intl/intl.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:rtu_mirea_app/schedule/bloc/schedule_bloc.dart';
 import 'package:rtu_mirea_app/schedule/cubit/cubit.dart';
-import 'package:rtu_mirea_app/schedule/models/models.dart';
-import 'package:rtu_mirea_app/schedule/widgets/ninja_schedule_surface.dart';
+import 'package:rtu_mirea_app/schedule/view/schedule_page/lesson_status.dart';
+import 'package:rtu_mirea_app/schedule/widgets/schedule_metrics.dart';
 import 'package:schedule_repository/schedule_repository.dart';
 
 part 'widgets/change_timeline_row.dart';
@@ -26,6 +26,8 @@ class ChangesPage extends StatefulWidget {
 
 class _ChangesPageState extends State<ChangesPage> {
   UserSettings? _settings;
+  bool _savingSettings = false;
+  bool _settingsError = false;
 
   @override
   void initState() {
@@ -39,47 +41,51 @@ class _ChangesPageState extends State<ChangesPage> {
 
   Future<void> _loadChanges() {
     final selected = context.read<ScheduleBloc>().state.selectedSchedule;
-    final request = switch (selected) {
-      SelectedGroupSchedule(:final group) => (
-        ScheduleTargetType.group,
-        group.name,
-      ),
-      SelectedTeacherSchedule(:final teacher) => (
-        ScheduleTargetType.teacher,
-        teacher.name,
-      ),
-      SelectedClassroomSchedule(:final classroom) => (
-        ScheduleTargetType.classroom,
-        classroom.name,
-      ),
-      SelectedCustomSchedule() || null => null,
-    };
-    if (request == null) return Future.value();
-    return context.read<ScheduleChangesCubit>().load(
+    final request = changesRequestFor(selected);
+    final cubit = context.read<ScheduleChangesCubit>();
+    if (request == null) {
+      cubit.clear();
+      return Future.value();
+    }
+    return cubit.load(
       targetType: request.$1,
       target: request.$2,
     );
   }
 
   Future<void> _loadSettings() async {
+    if (_settingsError && mounted) setState(() => _settingsError = false);
     try {
       final settings = await context
           .read<GamificationRepository>()
           .getSettings();
       if (mounted) setState(() => _settings = settings);
-    } on Exception catch (_) {}
+    } on Exception catch (_) {
+      if (mounted) setState(() => _settingsError = true);
+    }
   }
 
   Future<void> _toggleAlerts(bool value) async {
     final current = _settings;
-    if (current == null) return;
-    setState(() => _settings = current.copyWith(scheduleChangeAlerts: value));
+    if (current == null || _savingSettings) return;
+    setState(() {
+      _settings = current.copyWith(scheduleChangeAlerts: value);
+      _savingSettings = true;
+    });
     try {
       await context.read<GamificationRepository>().updateSettings(
         current.copyWith(scheduleChangeAlerts: value),
       );
     } on Exception catch (_) {
-      if (mounted) setState(() => _settings = current);
+      if (mounted) {
+        setState(() => _settings = current);
+        ToastManager.showError(
+          context,
+          message: context.l10n.scheduleActionFailed,
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _savingSettings = false);
     }
   }
 
@@ -89,21 +95,22 @@ class _ChangesPageState extends State<ChangesPage> {
       return const _ChangesSkeleton(key: ValueKey('changes_skeleton'));
     }
     if (state.status == .failure && state.changes.isEmpty) {
-      return NinjaErrorState(
+      return AppErrorState(
         title: l10n.errorLoadingSchedule,
         message: l10n.lessonDetailsCheckConnection,
-        retryLabel: l10n.retry,
-        onRetry: () => unawaited(_loadChanges()),
+        primaryLabel: l10n.retry,
+        footnote: null,
+        onPrimary: () => unawaited(_loadChanges()),
       ).animateEmptyState(key: const ValueKey('changes_error'));
     }
     if (state.changes.isEmpty) {
-      return NinjaEmptyState(
+      return AppEmptyState(
         title: l10n.changesEmptyTitle,
-        message: l10n.changesEmptySubtitle,
+        subtitle: l10n.changesEmptySubtitle,
         icon: AppLineIconWidget(
           AppLineIcon.bell,
           size: 20,
-          color: context.ninja.muted,
+          color: context.colors.muted,
         ),
         actionLabel: l10n.retry,
         onAction: () => unawaited(_loadChanges()),
@@ -124,40 +131,39 @@ class _ChangesPageState extends State<ChangesPage> {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final l10n = context.l10n;
-    final state = context.watch<ScheduleChangesCubit>().state;
+    final cubit = context.watch<ScheduleChangesCubit>();
+    final selected = context.watch<ScheduleBloc>().state.selectedSchedule;
+    final request = changesRequestFor(selected);
+    final state = request != null && cubit.matchesTarget(request.$1, request.$2)
+        ? cubit.state
+        : const ScheduleChangesState();
 
     return Scaffold(
       backgroundColor: colors.canvas,
-      body: RefreshIndicator(
-        color: colors.ink,
-        onRefresh: _loadChanges,
-        child: CustomScrollView(
-          physics: const BouncingScrollPhysics(
-            parent: AlwaysScrollableScrollPhysics(),
-          ),
-          slivers: [
-            SliverAppBar(
-              elevation: 0,
-              scrolledUnderElevation: 0,
-              backgroundColor: colors.canvas,
-              surfaceTintColor: Colors.transparent,
-              title: Text(
-                l10n.changesTitle,
-                style: NinjaText.headline.copyWith(color: colors.ink),
-              ),
-              actions: [
-                Stack(
-                  clipBehavior: .none,
-                  children: [
-                    NinjaIconButton(
-                      icon: const AppLineIconWidget(
-                        .bell,
-                        size: 20,
-                      ),
-                      tooltip: l10n.notifications,
-                      onPressed: _settings == null
+      body: BlocListener<ScheduleBloc, ScheduleState>(
+        listenWhen: (before, after) =>
+            before.selectedSchedule != after.selectedSchedule,
+        listener: (_, _) => unawaited(_loadChanges()),
+        child: RefreshIndicator(
+          color: colors.ink,
+          onRefresh: _loadChanges,
+          child: CustomScrollView(
+            physics: const BouncingScrollPhysics(
+              parent: AlwaysScrollableScrollPhysics(),
+            ),
+            slivers: [
+              SliverToBoxAdapter(
+                child: AppInnerHeader(
+                  title: l10n.changesTitle,
+                  onBack: () => Navigator.of(context).maybePop(),
+                  actions: [
+                    AppHeaderAction(
+                      icon: AppLineIcon.bell,
+                      semanticsLabel: l10n.notifications,
+                      badge: state.changes.isNotEmpty,
+                      onTap: _settings == null || _savingSettings
                           ? null
                           : () => unawaited(
                               _toggleAlerts(
@@ -165,48 +171,44 @@ class _ChangesPageState extends State<ChangesPage> {
                               ),
                             ),
                     ),
-                    if (state.changes.isNotEmpty)
-                      Positioned(
-                        top: 2,
-                        right: 2,
-                        child: Container(
-                          width: 8,
-                          height: 8,
-                          decoration: BoxDecoration(
-                            color: colors.brand,
-                            shape: .circle,
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
-                const SizedBox(width: 8),
-              ],
-            ),
-            SliverSafeArea(
-              top: false,
-              sliver: SliverPadding(
-                padding: const EdgeInsets.fromLTRB(
-                  NinjaMetrics.screenPadding,
-                  6,
-                  NinjaMetrics.screenPadding,
-                  32,
-                ),
-                sliver: SliverList.list(
-                  children: [
-                    _SubscribeBanner(
-                      enabled: _settings?.scheduleChangeAlerts ?? true,
-                      onChanged: _settings == null
-                          ? null
-                          : (value) => unawaited(_toggleAlerts(value)),
-                    ),
-                    const SizedBox(height: 28),
-                    NinjaStateSwitcher(child: _buildChanges(context, state)),
                   ],
                 ),
               ),
-            ),
-          ],
+              SliverSafeArea(
+                top: false,
+                sliver: SliverPadding(
+                  padding: const EdgeInsets.fromLTRB(
+                    AppSpacing.screen,
+                    AppSpacing.xsm,
+                    AppSpacing.screen,
+                    AppSpacing.xxl,
+                  ),
+                  sliver: SliverList.list(
+                    children: [
+                      if (_settingsError)
+                        AppBanner(
+                          tone: AppBannerTone.warn,
+                          message: l10n.loadingError,
+                          actionLabel: l10n.retry,
+                          onAction: () => unawaited(_loadSettings()),
+                        )
+                      else if (_settings == null)
+                        const AppSkeletonRow()
+                      else
+                        _SubscribeBanner(
+                          enabled: _settings!.scheduleChangeAlerts,
+                          onChanged: _savingSettings
+                              ? null
+                              : (value) => unawaited(_toggleAlerts(value)),
+                        ),
+                      const SizedBox(height: AppSpacing.sheetBottom),
+                      AppStateSwitcher(child: _buildChanges(context, state)),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
