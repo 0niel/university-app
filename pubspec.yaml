@@ -286,7 +286,7 @@ dev_dependencies:
     sdk: flutter
   freezed: 3.2.5
   go_router_builder: ^4.1.1
-  json_serializable: 6.14.0
+  json_serializable: 6.14.1
   mocktail: ^1.0.5
   very_good_analysis: 10.3.0
   yaml: 3.1.3

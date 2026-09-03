@@ -19,5 +19,5 @@ dev_dependencies:
     sdk: flutter
   freezed: 3.2.5
   http: ^1.6.0
-  json_serializable: 6.14.0
+  json_serializable: 6.14.1
   very_good_analysis: 10.3.0
