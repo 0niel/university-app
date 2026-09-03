@@ -1,3 +1,5 @@
+begin;
+
 create or replace function public.save_group_note_document(
   p_note_id uuid, p_document jsonb, p_revision bigint
 )
@@ -1250,3 +1252,5 @@ end;
 $$;
 
 notify pgrst, 'reload schema';
+
+commit;
