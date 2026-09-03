@@ -55,6 +55,16 @@ void main() {
     expect(test['run'], contains('flutter test --no-pub'));
   });
 
+  test('edge job validates ingestion and mini-app notifications', () {
+    final edgeJob = jobs['edge-functions'] as YamlMap;
+    final steps = (edgeJob['steps'] as YamlList).cast<YamlMap>();
+    for (final name in ['Check formatting', 'Type-check', 'Lint', 'Test']) {
+      final command = steps.singleWhere((step) => step['name'] == name)['run'];
+      expect(command, contains('supabase/functions/ingest'));
+      expect(command, contains('supabase/functions/miniapp-notify'));
+    }
+  });
+
   group('package test runtime', () {
     Map<String, Object?> graph(List<Map<String, Object?>> packages) => {
       'packages': packages,

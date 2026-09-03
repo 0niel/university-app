@@ -250,20 +250,22 @@ jobs:
           cache: true
 
       - name: Check formatting
-        run: deno fmt --check supabase/functions/ingest
+        run: deno fmt --check supabase/functions/ingest supabase/functions/miniapp-notify
 
       - name: Type-check
         run: >-
           deno check --frozen --config=supabase/functions/deno.json
           supabase/functions/ingest/index.ts
+          supabase/functions/miniapp-notify/index.ts
 
       - name: Lint
-        run: deno lint supabase/functions/ingest
+        run: deno lint supabase/functions/ingest supabase/functions/miniapp-notify
 
       - name: Test
         run: >-
           deno test --frozen --config=supabase/functions/deno.json
           supabase/functions/ingest
+          supabase/functions/miniapp-notify
 
   supabase-migrations:
     name: Supabase migration replay

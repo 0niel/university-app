@@ -45,9 +45,20 @@ begin
   if not (
     select prosecdef
     from pg_proc
-    where oid = 'app_api_v1.create_public_material_v2(text,text,text[],text,integer,integer,boolean,text,text,text,bigint)'::regprocedure
+    where oid = 'app_api_v1.create_public_material_v3(text,text,text[],text,integer,integer,boolean,text,text,text,bigint,text,integer,integer,integer,uuid)'::regprocedure
   ) then
     raise exception 'Material publishing cannot apply its server reward';
+  end if;
+
+  v_definition := pg_get_functiondef(
+    'app_api_v1.create_public_material_v2(text,text,text[],text,integer,integer,boolean,text,text,text,bigint)'::regprocedure
+  );
+  if position('app_api_v1.create_public_material_v3(' in v_definition) = 0
+    or (
+      select prosecdef from pg_proc
+      where oid = 'app_api_v1.create_public_material_v2(text,text,text[],text,integer,integer,boolean,text,text,text,bigint)'::regprocedure
+    ) then
+    raise exception 'Legacy material publishing does not delegate safely';
   end if;
 
   v_definition := pg_get_functiondef(
@@ -131,7 +142,10 @@ begin
       'app_api_v1.create_lesson_material(text,text,date,integer,text,text,text,text,text,text,bigint,boolean,boolean)'::regprocedure
     ),
     pg_get_functiondef(
-      'app_api_v1.create_public_material_v2(text,text,text[],text,integer,integer,boolean,text,text,text,bigint)'::regprocedure
+      'app_api_v1.create_public_material_v3(text,text,text[],text,integer,integer,boolean,text,text,text,bigint,text,integer,integer,integer,uuid)'::regprocedure
+    ),
+    pg_get_functiondef(
+      'app_api_v1.create_lesson_material_v2(text,text,date,integer,text,text,text,text,text,text,bigint,boolean,boolean,text,integer,integer,integer,uuid)'::regprocedure
     )
   ]
   loop
@@ -151,13 +165,29 @@ begin
 
   if to_regprocedure('public.finalize_mini_app_push(uuid,uuid,uuid[])')
       is null
-    or to_regprocedure('public.log_mini_app_push(uuid,uuid[])') is not null
     or has_function_privilege(
       'authenticated',
       'public.finalize_mini_app_push(uuid,uuid,uuid[])',
       'EXECUTE'
+    )
+    or has_function_privilege(
+      'anon',
+      'public.finalize_mini_app_push(uuid,uuid,uuid[])',
+      'EXECUTE'
     ) then
     raise exception 'Mini-app notification finalizer has unsafe privileges';
+  end if;
+
+  v_definition := pg_get_functiondef(
+    'public.log_mini_app_push(uuid,uuid[])'::regprocedure
+  );
+  if has_function_privilege('anon', 'public.log_mini_app_push(uuid,uuid[])', 'EXECUTE')
+    or has_function_privilege('authenticated', 'public.log_mini_app_push(uuid,uuid[])', 'EXECUTE')
+    or not has_function_privilege('service_role', 'public.log_mini_app_push(uuid,uuid[])', 'EXECUTE')
+    or position('pg_advisory_xact_lock' in v_definition) = 0
+    or position('sent_at' in v_definition) = 0
+    or position('now()' in v_definition) = 0 then
+    raise exception 'Legacy mini-app notification bridge is unsafe';
   end if;
 
   v_definition := pg_get_functiondef(
