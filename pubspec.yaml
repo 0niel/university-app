@@ -158,7 +158,7 @@ dependencies:
     path: packages/gamification_repository
   geolocator: ^14.0.2
   go_router: ^17.1.0
-  home_widget: 0.9.1
+  home_widget: 0.9.4
   http: ^1.2.2
   hugeicons: ^1.1.5
   hydrated_bloc: ^11.0.0
