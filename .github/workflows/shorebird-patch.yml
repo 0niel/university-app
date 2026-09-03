@@ -1,0 +1,499 @@
+name: Shorebird Staging Patch
+
+on:
+  workflow_dispatch:
+    inputs:
+      source_sha:
+        description: Full hotfix commit SHA
+        required: true
+        type: string
+      platform:
+        description: Release platform
+        required: true
+        type: choice
+        options:
+          - android
+          - ios
+      release_version:
+        description: Existing release version
+        required: true
+        type: choice
+        options:
+          - 5.2.0+1002401
+          - 5.2.0+1002601
+          - 5.2.0+2435.13.10
+      target_track:
+        description: Patch destination
+        required: true
+        type: choice
+        default: staging
+        options:
+          - staging
+
+permissions:
+  contents: read
+
+concurrency:
+  group: shorebird-patch-${{ inputs.platform }}-${{ inputs.release_version }}
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    defaults:
+      run:
+        shell: bash
+    outputs:
+      source_sha: ${{ steps.inputs.outputs.source_sha }}
+      platform: ${{ steps.inputs.outputs.platform }}
+      release_version: ${{ steps.inputs.outputs.release_version }}
+      app_id: ${{ steps.inputs.outputs.app_id }}
+    steps:
+      - name: Validate requested target
+        id: inputs
+        env:
+          SOURCE_SHA: ${{ inputs.source_sha }}
+          PLATFORM: ${{ inputs.platform }}
+          RELEASE_VERSION: ${{ inputs.release_version }}
+          TARGET_TRACK: ${{ inputs.target_track }}
+          WORKFLOW_REF: ${{ github.ref }}
+        run: |
+          test "$WORKFLOW_REF" = refs/heads/master
+          [[ "$SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]
+          test "$TARGET_TRACK" = staging
+          case "$PLATFORM:$RELEASE_VERSION" in
+            android:5.2.0+1002401|android:5.2.0+1002601)
+              app_id=c55a7a80-2fcb-4565-833e-fb442dbe4e34
+              ;;
+            ios:5.2.0+2435.13.10)
+              app_id=21c47e68-a64f-49c1-af6e-4a406dfe266f
+              ;;
+            *)
+              printf 'Unsupported platform and release combination\n' >&2
+              exit 1
+              ;;
+          esac
+          {
+            printf 'source_sha=%s\n' "$SOURCE_SHA"
+            printf 'platform=%s\n' "$PLATFORM"
+            printf 'release_version=%s\n' "$RELEASE_VERSION"
+            printf 'app_id=%s\n' "$app_id"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Check out hotfix
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ steps.inputs.outputs.source_sha }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Verify hotfix boundary
+        env:
+          SOURCE_SHA: ${{ steps.inputs.outputs.source_sha }}
+        run: |
+          python3 - <<'PY'
+          import os
+          import subprocess
+
+          baseline = "4aa0e01a5a9fc58cfc83288610b3c4f88943ef72"
+          source = os.environ["SOURCE_SHA"]
+          allowed = {
+              "lib/di/app_scope.dart",
+              "packages/user_repository/lib/src/user_repository.dart",
+              "packages/gamification_repository/lib/src/gamification_repository.dart",
+              "packages/user_repository/test/src/user_repository_test.dart",
+              "packages/gamification_repository/test/src/gamification_repository_test.dart",
+          }
+          def git(*args):
+              return subprocess.check_output(["git", *args]).decode().strip()
+
+          if git("rev-parse", "HEAD") != source:
+              raise SystemExit("Checked-out commit does not match source_sha")
+          subprocess.run(["git", "merge-base", "--is-ancestor", baseline, source], check=True)
+          changed = set(filter(None, git("diff", "--name-only", "--no-renames", "-z", baseline, source).split("\0")))
+          if changed != allowed:
+              raise SystemExit("Hotfix must change exactly the five approved Dart files")
+          for revision in (baseline, source):
+              for path in sorted(allowed):
+                  entry = git("ls-tree", revision, "--", path)
+                  if not entry.startswith("100644 blob "):
+                      raise SystemExit("Hotfix paths must remain regular source files")
+          subprocess.run(["git", "diff", "--check", baseline, source], check=True)
+          PY
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          channel: stable
+          flutter-version: 3.44.2
+          cache: true
+
+      - name: Resolve locked workspace
+        run: flutter pub get --enforce-lockfile --no-example
+
+      - name: Generate code
+        run: |
+          dart run build_runner build
+          git diff --exit-code
+
+      - name: Analyze hotfix
+        run: |
+          flutter analyze --no-pub \
+            lib/di/app_scope.dart \
+            packages/user_repository/lib/src/user_repository.dart \
+            packages/gamification_repository/lib/src/gamification_repository.dart \
+            packages/user_repository/test/src/user_repository_test.dart \
+            packages/gamification_repository/test/src/gamification_repository_test.dart
+
+      - name: Test user initialization
+        working-directory: packages/user_repository
+        run: flutter test --no-pub test/src/user_repository_test.dart
+
+      - name: Test academic profile initialization
+        working-directory: packages/gamification_repository
+        run: dart test test/src/gamification_repository_test.dart
+
+  patch:
+    needs: validate
+    runs-on: ${{ needs.validate.outputs.platform == 'ios' && 'macos-15' || 'ubuntu-latest' }}
+    timeout-minutes: 75
+    environment: beta
+    defaults:
+      run:
+        shell: bash
+    env:
+      CI: "true"
+      PLATFORM: ${{ needs.validate.outputs.platform }}
+      RELEASE_VERSION: ${{ needs.validate.outputs.release_version }}
+      SOURCE_SHA: ${{ needs.validate.outputs.source_sha }}
+      APP_ID: ${{ needs.validate.outputs.app_id }}
+      APPLE_TEAM_ID: J935XAGDUL
+      IOS_APP_BUNDLE_ID: pro.oniel.it.university
+      IOS_WIDGET_BUNDLE_ID: pro.oniel.it.university.homewidget
+    steps:
+      - name: Check out verified hotfix
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ needs.validate.outputs.source_sha }}
+          persist-credentials: false
+
+      - name: Verify patch configuration
+        env:
+          SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
+          UNIVERSITY_CONFIG_JSON: ${{ vars.UNIVERSITY_CONFIG_JSON }}
+          FIREBASE_CONFIG_JSON: ${{ vars.FIREBASE_CONFIG_JSON }}
+          SUPABASE_URL: ${{ vars.SUPABASE_URL }}
+          SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
+        run: |
+          for name in SHOREBIRD_TOKEN UNIVERSITY_CONFIG_JSON FIREBASE_CONFIG_JSON SUPABASE_URL SUPABASE_PUBLISHABLE_KEY; do
+            if [[ -z "${!name:-}" ]]; then
+              printf 'Missing beta patch configuration: %s\n' "$name" >&2
+              exit 1
+            fi
+          done
+          test "$(git rev-parse HEAD)" = "$SOURCE_SHA"
+
+      - name: Check out private NFC module
+        if: needs.validate.outputs.platform == 'android'
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: 0niel/university-app-nfc-private
+          ref: 6226b9b4c3f2ed2c4a0727ae062f8a5239e5aba5
+          ssh-key: ${{ secrets.NFC_MODULE_DEPLOY_KEY }}
+          path: android/private/nfc-pass-android
+          persist-credentials: false
+
+      - name: Set up Java
+        if: needs.validate.outputs.platform == 'android'
+        uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: gradle
+
+      - name: Select Xcode
+        if: needs.validate.outputs.platform == 'ios'
+        run: |
+          test -d /Applications/Xcode_26.3.app/Contents/Developer
+          printf 'DEVELOPER_DIR=/Applications/Xcode_26.3.app/Contents/Developer\n' >> "$GITHUB_ENV"
+          test "$(/Applications/Xcode_26.3.app/Contents/Developer/usr/bin/xcodebuild -version | head -n 1)" = "Xcode 26.3"
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          channel: stable
+          flutter-version: 3.44.2
+          cache: true
+
+      - name: Install pinned Shorebird
+        run: |
+          shorebird_dir="$RUNNER_TEMP/shorebird-sdk"
+          shorebird_revision=5ac7f9a9a5c4a5e66a958e608da0f73e34a3d6bb
+          mkdir "$shorebird_dir"
+          git -C "$shorebird_dir" init
+          git -C "$shorebird_dir" remote add origin https://github.com/shorebirdtech/shorebird.git
+          git -C "$shorebird_dir" fetch --depth 1 origin "$shorebird_revision"
+          git -C "$shorebird_dir" checkout --detach FETCH_HEAD
+          test "$(git -C "$shorebird_dir" rev-parse HEAD)" = "$shorebird_revision"
+          printf '%s\n' "$shorebird_dir/bin" >> "$GITHUB_PATH"
+
+      - name: Enforce strict iOS native diff rejection
+        if: needs.validate.outputs.platform == 'ios'
+        run: |
+          python3 - <<'PY'
+          import os
+          import subprocess
+          from pathlib import Path
+
+          root = Path(os.environ["RUNNER_TEMP"]) / "shorebird-sdk"
+          relative = "packages/shorebird_cli/lib/src/commands/patch/apple_patcher_mixin.dart"
+          path = root / relative
+          original = subprocess.check_output(["git", "-C", str(root), "show", f"HEAD:{relative}"]).decode()
+          before = "confirmNativeChanges: false,"
+          after = "confirmNativeChanges: true,"
+          if original.count(before) != 1 or path.read_text() != original:
+              raise SystemExit("Unexpected pinned native diff guard")
+          expected = original.replace(before, after, 1)
+          path.write_text(expected)
+          changed = subprocess.check_output(["git", "-C", str(root), "diff", "--name-only"]).decode().splitlines()
+          if changed != [relative] or path.read_text() != expected:
+              raise SystemExit("Unexpected Shorebird safety overlay")
+          stat = subprocess.check_output(["git", "-C", str(root), "diff", "--numstat"]).decode().strip()
+          if stat != f"1\t1\t{relative}":
+              raise SystemExit("Native diff guard must be the only CLI change")
+          subprocess.run(["git", "-C", str(root), "diff", "--check"], check=True)
+          PY
+
+      - name: Resolve locked workspace
+        run: flutter pub get --enforce-lockfile --no-example
+
+      - name: Generate code
+        run: |
+          dart run build_runner build
+          git diff --exit-code
+
+      - name: Configure Android signing
+        if: needs.validate.outputs.platform == 'android'
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          python3 - <<'PY'
+          import base64
+          import os
+          from pathlib import Path
+
+          names = ["ANDROID_KEYSTORE_BASE64", "ANDROID_KEYSTORE_PASSWORD", "ANDROID_KEY_ALIAS", "ANDROID_KEY_PASSWORD"]
+          if any(not os.environ.get(name) for name in names):
+              raise SystemExit("Android signing configuration is incomplete")
+          Path("android/app/release.jks").write_bytes(base64.b64decode(os.environ["ANDROID_KEYSTORE_BASE64"], validate=True))
+          Path("android/key.properties").write_text("\n".join((
+              f"storePassword={os.environ['ANDROID_KEYSTORE_PASSWORD']}",
+              f"keyPassword={os.environ['ANDROID_KEY_PASSWORD']}",
+              f"keyAlias={os.environ['ANDROID_KEY_ALIAS']}",
+              "storeFile=release.jks",
+          )) + "\n")
+          PY
+
+      - name: Configure iOS signing
+        if: needs.validate.outputs.platform == 'ios'
+        env:
+          BUILD_CERTIFICATE_BASE64: ${{ secrets.BUILD_CERTIFICATE_BASE64 }}
+          BUILD_PROVISION_PROFILE_BASE64: ${{ secrets.BUILD_PROVISION_PROFILE_BASE64 }}
+          BUILD_WIDGET_PROVISION_PROFILE_BASE64: ${{ secrets.BUILD_WIDGET_PROVISION_PROFILE_BASE64 }}
+          P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
+          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+        run: |
+          for name in BUILD_CERTIFICATE_BASE64 BUILD_PROVISION_PROFILE_BASE64 BUILD_WIDGET_PROVISION_PROFILE_BASE64 P12_PASSWORD KEYCHAIN_PASSWORD; do
+            if [[ -z "${!name:-}" ]]; then
+              printf 'Missing iOS signing configuration: %s\n' "$name" >&2
+              exit 1
+            fi
+          done
+          keychain_path="$RUNNER_TEMP/patch-signing.keychain-db"
+          profiles_directory="$HOME/Library/MobileDevice/Provisioning Profiles"
+          mkdir -p "$profiles_directory"
+          python3 - <<'PY'
+          import base64
+          import os
+          from pathlib import Path
+
+          root = Path(os.environ["RUNNER_TEMP"])
+          for name, filename in (
+              ("BUILD_CERTIFICATE_BASE64", "patch_certificate.p12"),
+              ("BUILD_PROVISION_PROFILE_BASE64", "patch-app.mobileprovision"),
+              ("BUILD_WIDGET_PROVISION_PROFILE_BASE64", "patch-widget.mobileprovision"),
+          ):
+              (root / filename).write_bytes(base64.b64decode(os.environ[name].strip(), validate=True))
+          PY
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$keychain_path"
+          security set-keychain-settings -lut 21600 "$keychain_path"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$keychain_path"
+          security import "$RUNNER_TEMP/patch_certificate.p12" -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k "$keychain_path"
+          security set-key-partition-list -S apple-tool:,apple: -k "$KEYCHAIN_PASSWORD" "$keychain_path"
+          security list-keychain -d user -s "$keychain_path"
+          security find-identity -v -p codesigning "$keychain_path" | grep -q 'Apple Distribution'
+          security cms -D -i "$RUNNER_TEMP/patch-app.mobileprovision" > "$RUNNER_TEMP/patch-app-profile.plist"
+          security cms -D -i "$RUNNER_TEMP/patch-widget.mobileprovision" > "$RUNNER_TEMP/patch-widget-profile.plist"
+          python3 - <<'PY'
+          import datetime
+          import os
+          import plistlib
+          from pathlib import Path
+
+          root = Path(os.environ["RUNNER_TEMP"])
+          team = os.environ["APPLE_TEAM_ID"]
+          profiles = {}
+          for filename, bundle_id in (
+              ("patch-app-profile.plist", os.environ["IOS_APP_BUNDLE_ID"]),
+              ("patch-widget-profile.plist", os.environ["IOS_WIDGET_BUNDLE_ID"]),
+          ):
+              with (root / filename).open("rb") as source:
+                  profile = plistlib.load(source)
+              expiration = profile["ExpirationDate"].replace(tzinfo=datetime.timezone.utc)
+              if expiration <= datetime.datetime.now(datetime.timezone.utc):
+                  raise SystemExit("Provisioning profile has expired")
+              if team not in profile.get("TeamIdentifier", []):
+                  raise SystemExit("Provisioning profile team mismatch")
+              if profile["Entitlements"]["application-identifier"] != f"{team}.{bundle_id}":
+                  raise SystemExit("Provisioning profile bundle mismatch")
+              profiles[bundle_id] = profile["Name"]
+          with (root / "PatchExportOptions.plist").open("wb") as target:
+              plistlib.dump({
+                  "manageAppVersionAndBuildNumber": False,
+                  "method": "app-store",
+                  "provisioningProfiles": profiles,
+                  "signingCertificate": "Apple Distribution",
+                  "signingStyle": "manual",
+                  "teamID": team,
+              }, target)
+          PY
+          cp "$RUNNER_TEMP/patch-app.mobileprovision" "$profiles_directory/patch-app.mobileprovision"
+          cp "$RUNNER_TEMP/patch-widget.mobileprovision" "$profiles_directory/patch-widget.mobileprovision"
+
+      - name: Configure release parameters
+        env:
+          UNIVERSITY_CONFIG_JSON: ${{ vars.UNIVERSITY_CONFIG_JSON }}
+          FIREBASE_CONFIG_JSON: ${{ vars.FIREBASE_CONFIG_JSON }}
+        run: |
+          printf '%s\n' "$UNIVERSITY_CONFIG_JSON" > "$RUNNER_TEMP/university.json"
+          printf '%s\n' "$FIREBASE_CONFIG_JSON" > "$RUNNER_TEMP/firebase.json"
+          dart run tool/configure_university.dart --config "$RUNNER_TEMP/university.json"
+          git diff --exit-code -- android ios assets pubspec.yaml pubspec.lock .fvmrc shorebird.yaml
+          python3 - <<'PY'
+          import os
+          import re
+          from pathlib import Path
+
+          content = Path("shorebird.yaml").read_text()
+          pattern = r"^  production:\s*(\S+)\s*$" if os.environ["PLATFORM"] == "android" else r"^app_id:\s*(\S+)\s*$"
+          if re.findall(pattern, content, re.MULTILINE) != [os.environ["APP_ID"]]:
+              raise SystemExit("Shorebird app ID does not match the selected base")
+          PY
+
+      - name: Record existing patches
+        env:
+          SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
+        run: |
+          shorebird patches list \
+            --release-version "$RELEASE_VERSION" \
+            --app-id "$APP_ID" \
+            --json < /dev/null > "$RUNNER_TEMP/patches-before.json"
+
+      - name: Publish staging patch
+        env:
+          SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
+          SUPABASE_URL: ${{ vars.SUPABASE_URL }}
+          SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
+          ORG_GRADLE_PROJECT_requirePrivateNfcModule: "true"
+        run: |
+          args=(
+            patch "$PLATFORM"
+            --release-version "$RELEASE_VERSION"
+            --track staging
+            --target lib/main/main_production.dart
+            --no-confirm
+          )
+          if [[ "$PLATFORM" = android ]]; then
+            args+=(--flavor production)
+          else
+            args+=(--export-options-plist "$RUNNER_TEMP/PatchExportOptions.plist")
+          fi
+          shorebird "${args[@]}" -- \
+            --dart-define-from-file="$RUNNER_TEMP/university.json" \
+            --dart-define-from-file="$RUNNER_TEMP/firebase.json" \
+            --dart-define="SUPABASE_URL=$SUPABASE_URL" \
+            --dart-define="SUPABASE_PUBLISHABLE_KEY=$SUPABASE_PUBLISHABLE_KEY" < /dev/null
+
+      - name: Verify staging metadata
+        env:
+          SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
+        run: |
+          shorebird patches list \
+            --release-version "$RELEASE_VERSION" \
+            --app-id "$APP_ID" \
+            --json < /dev/null > "$RUNNER_TEMP/patches-after.json"
+          python3 - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          root = Path(os.environ["RUNNER_TEMP"])
+          def read_patches(filename):
+              result = json.loads((root / filename).read_text())
+              if result["status"] != "success":
+                  raise SystemExit("Unable to verify release patches")
+              return result["data"]["patches"]
+
+          existing_ids = {patch["id"] for patch in read_patches("patches-before.json")}
+          created = [patch for patch in read_patches("patches-after.json") if patch["id"] not in existing_ids]
+          if len(created) != 1:
+              raise SystemExit("Expected exactly one new patch")
+          patch = created[0]
+          if patch["channel"] != "staging" or patch["is_rolled_back"] or not patch["artifacts"]:
+              raise SystemExit("The new patch is not active on staging")
+          if any(item["platform"] != os.environ["PLATFORM"] or item["patch_id"] != patch["id"] for item in patch["artifacts"]):
+              raise SystemExit("Patch artifacts do not match the selected platform")
+          receipt = {
+              "source_sha": os.environ["SOURCE_SHA"],
+              "app_id": os.environ["APP_ID"],
+              "platform": os.environ["PLATFORM"],
+              "release_version": os.environ["RELEASE_VERSION"],
+              "patch_id": patch["id"],
+              "patch_number": patch["number"],
+              "track": patch["channel"],
+              "staging_run_id": os.environ["GITHUB_RUN_ID"],
+          }
+          print(json.dumps(receipt, sort_keys=True))
+          receipt["artifacts"] = sorted(
+              [{key: item[key] for key in ("arch", "platform", "hash", "size", "patch_id")} for item in patch["artifacts"]],
+              key=lambda item: item["arch"],
+          )
+          (root / "shorebird-patch-receipt.json").write_text(json.dumps(receipt, sort_keys=True) + "\n")
+          PY
+
+      - name: Save staging receipt
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: shorebird-patch-${{ inputs.platform }}-${{ inputs.release_version }}
+          path: ${{ runner.temp }}/shorebird-patch-receipt.json
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Remove signing material
+        if: always()
+        run: |
+          if [[ "$PLATFORM" = ios ]]; then
+            security delete-keychain "$RUNNER_TEMP/patch-signing.keychain-db" || true
+            rm -f "$HOME/Library/MobileDevice/Provisioning Profiles/patch-app.mobileprovision"
+            rm -f "$HOME/Library/MobileDevice/Provisioning Profiles/patch-widget.mobileprovision"
+          fi
+          rm -f android/key.properties android/app/release.jks
+          rm -f "$RUNNER_TEMP/patch_certificate.p12" "$RUNNER_TEMP/patch-app.mobileprovision"
+          rm -f "$RUNNER_TEMP/patch-widget.mobileprovision" "$RUNNER_TEMP/patch-app-profile.plist"
+          rm -f "$RUNNER_TEMP/patch-widget-profile.plist" "$RUNNER_TEMP/PatchExportOptions.plist"
+          rm -f "$RUNNER_TEMP/university.json" "$RUNNER_TEMP/firebase.json"
+          rm -f "$RUNNER_TEMP/patches-before.json" "$RUNNER_TEMP/patches-after.json"
