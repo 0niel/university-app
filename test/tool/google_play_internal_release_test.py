@@ -2,7 +2,9 @@ import importlib.util
 import json
 import sys
 import unittest
+import urllib.parse
 from pathlib import Path
+from unittest.mock import patch
 
 
 def load_module():
@@ -81,7 +83,7 @@ class GooglePlayInternalReleaseTest(unittest.TestCase):
 
         self.assertEqual(client.deleted, ["edit-1"])
 
-    def test_commit_request_is_fail_closed_and_holds_review(self):
+    def test_commit_request_is_fail_closed(self):
         client = self.module.GooglePlayReleaseClient("token", "package.name")
         requests = []
 
@@ -96,9 +98,28 @@ class GooglePlayInternalReleaseTest(unittest.TestCase):
         self.assertEqual(
             requests[0][1],
             "/applications/package.name/edits/edit-id:commit"
-            "?changesInReviewBehavior=ERROR_IF_IN_REVIEW"
-            "&changesNotSentForReview=true",
+            "?changesInReviewBehavior=ERROR_IF_IN_REVIEW",
         )
+
+    def test_commit_omits_changes_not_sent_for_review(self):
+        client = self.module.GooglePlayReleaseClient("token", "package.name")
+
+        with patch("google_play_store_icon.request_json", return_value={}) as send:
+            client.commit_release_edit("edit-id")
+
+        send.assert_called_once()
+        request = send.call_args.args[0]
+        query = urllib.parse.parse_qs(
+            urllib.parse.urlsplit(request.full_url).query,
+            keep_blank_values=True,
+        )
+        self.assertNotIn("changesNotSentForReview", query)
+        self.assertEqual(
+            query["changesInReviewBehavior"],
+            ["ERROR_IF_IN_REVIEW"],
+        )
+        self.assertEqual(request.get_method(), "POST")
+        self.assertEqual(request.data, b"")
 
     def test_track_payload_replaces_internal_release(self):
         client = self.module.GooglePlayReleaseClient("token", "package.name")
