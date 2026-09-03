@@ -272,11 +272,18 @@ jobs:
       - name: Verify database security contracts
         shell: bash
         run: |
+          failed_contracts=()
           for contract in supabase/tests/*_contract.sql; do
-            psql postgresql://postgres:postgres@127.0.0.1:54322/postgres \
+            if ! psql postgresql://postgres:postgres@127.0.0.1:54322/postgres \
               --set ON_ERROR_STOP=1 \
-              --file "$contract"
+              --file "$contract"; then
+              failed_contracts+=("$contract")
+            fi
           done
+          if (( ${#failed_contracts[@]} > 0 )); then
+            printf 'Failed contract: %s\n' "${failed_contracts[@]}"
+            exit 1
+          fi
 
       - name: Lint database
         run: supabase db lint --local --level warning

@@ -66,9 +66,11 @@ do $$
 declare
   v_owner uuid := extensions.gen_random_uuid();
   v_member uuid := extensions.gen_random_uuid();
+  v_outsider uuid := extensions.gen_random_uuid();
   v_foreign uuid := extensions.gen_random_uuid();
   v_group_id uuid := extensions.gen_random_uuid();
   v_note_id uuid;
+  v_private_note_id uuid;
   v_result jsonb;
   v_rows jsonb;
 begin
@@ -78,7 +80,7 @@ begin
     ('collab-test-b', 'Collab Test B');
 
   insert into auth.users (id)
-  values (v_owner), (v_member), (v_foreign);
+  values (v_owner), (v_member), (v_outsider), (v_foreign);
 
   insert into core.user_academic_profiles (
     user_id,
@@ -88,6 +90,7 @@ begin
   values
     (v_owner, 'collab-test-a', 'IKBO-01'),
     (v_member, 'collab-test-a', 'IKBO-01'),
+    (v_outsider, 'collab-test-a', 'IKBO-01'),
     (v_foreign, 'collab-test-b', 'IKBO-01');
 
   insert into core.study_groups (
@@ -116,6 +119,19 @@ begin
     'Shared note',
     'group'
   );
+  v_private_note_id := app_api_v1.create_group_note(
+    'collab-test-a',
+    'Personal note',
+    'personal'
+  );
+  v_rows := public.get_group_notes('collab-test-a');
+  if not exists (
+    select 1 from jsonb_array_elements(v_rows) note
+    where (note->>'id')::uuid = v_private_note_id
+      and (note->>'isPersonal')::boolean
+  ) then
+    raise exception 'Owner cannot read their personal note';
+  end if;
 
   v_result := app_api_v1.save_group_note(
     v_note_id,
@@ -148,6 +164,16 @@ begin
   end if;
 
   perform set_config('request.jwt.claim.sub', v_member::text, true);
+  v_rows := public.get_group_notes('collab-test-a');
+  if not exists (
+    select 1 from jsonb_array_elements(v_rows) note
+    where (note->>'id')::uuid = v_note_id
+  ) or exists (
+    select 1 from jsonb_array_elements(v_rows) note
+    where (note->>'id')::uuid = v_private_note_id
+  ) then
+    raise exception 'Group note reads do not preserve personal visibility';
+  end if;
   v_result := app_api_v1.save_group_note(
     v_note_id,
     'Shared note',
@@ -164,6 +190,12 @@ begin
   exception
     when insufficient_privilege then null;
   end;
+
+  perform set_config('request.jwt.claim.sub', v_outsider::text, true);
+  v_rows := public.get_group_notes('collab-test-a');
+  if jsonb_array_length(v_rows) <> 0 then
+    raise exception 'Same-organization non-member can read study-group notes';
+  end if;
 
   perform set_config('request.jwt.claim.sub', v_foreign::text, true);
   begin

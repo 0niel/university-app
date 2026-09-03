@@ -228,6 +228,10 @@ void main() {
     );
     expect(command, contains('--set ON_ERROR_STOP=1'));
     expect(command, contains(r'--file "$contract"'));
+    expect(command, contains('failed_contracts=()'));
+    expect(command, contains(r'failed_contracts+=("$contract")'));
+    expect(command, contains(r'${#failed_contracts[@]} > 0'));
+    expect(command, contains('exit 1'));
     expect(command, isNot(contains('--linked')));
   });
 
